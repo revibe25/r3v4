@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAudioEngine } from '@/hooks/use-audio-engine';
 import { useTheme } from '@/components/theme-provider';
 import { DrumPads } from '@/components/drum-pads';
@@ -69,6 +69,14 @@ export default function InstrumentPage() {
     handleSave();
   };
 
+  const getSessionData = useCallback(() => ({
+    bpm: state.bpm,
+    fx: state.fx,
+    filterVal: state.filterVal,
+    pitchSemitones: state.pitchSemitones,
+    recordedEvents: state.recordedEvents,
+  }), [state.bpm, state.fx, state.filterVal, state.pitchSemitones, state.recordedEvents]);
+
   return (
     <div className="min-h-screen studio-bg p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
@@ -89,6 +97,7 @@ export default function InstrumentPage() {
               onMetronomeToggle={toggleMetronome}
               onSave={handleSave}
               onLoad={importSession}
+              getSessionData={getSessionData}
             />
           </header>
 
