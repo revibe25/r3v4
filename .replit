@@ -1,6 +1,6 @@
 modules = ["nodejs-20", "web", "postgresql-16"]
 run = "npm run dev"
-hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist", "uploads", ".env"]
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
@@ -14,15 +14,8 @@ run = ["npm", "run", "start"]
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 5173
-externalPort = 5173
-
 [env]
 PORT = "5000"
-VITE_API_URL = "http://localhost:5000"
-DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/r3vibe"
-NODE_ENV = "development"
 
 [workflows]
 runButton = "Project"
@@ -34,48 +27,13 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Start Server"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start Client"
+args = "Start application"
 
 [[workflows.workflow]]
-name = "Start Server"
+name = "Start application"
 author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd server && npm install && npm run dev"
+args = "npm run dev"
 waitForPort = 5000
-
-[[workflows.workflow]]
-name = "Start Client"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd client && npm install && npm run dev"
-waitForPort = 5173
-
-[[workflows.workflow]]
-name = "Build All"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run build"
-
-[[workflows.workflow]]
-name = "Database Setup"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd server && npm run db:push"
