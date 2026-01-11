@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import { MicrophoneInput } from '@/components/microphone-input';
 import { useAudioEngine } from '@/hooks/use-audio-engine';
 import { useTheme } from '@/components/theme-provider';
 import { DrumPads } from '@/components/drum-pads';
@@ -156,7 +157,9 @@ export default function InstrumentPage() {
                   />
                 </div>
               </div>
-
+              <div className="p-4 rounded-xl bg-muted/20 border border-border/30">
+                <MicrophoneInput />
+              </div>
               <FXPanel fx={state.fx} onToggle={toggleFX} />
 
               <DJControls

@@ -203,7 +203,7 @@ class AudioEngine {
     return rb;
   }
 
-  playBuffer(buffer: AudioBuffer | null, vol = 1) {
+  playBuffer(buffer: AudioBuffer | null, vol = 1, octaveShift: number = 0) {
     if (!this.ctx || !buffer) return;
 
     let bufToUse = buffer;
@@ -217,7 +217,9 @@ class AudioEngine {
 
     const src = this.ctx.createBufferSource();
     src.buffer = bufToUse;
-    src.playbackRate.value = Math.pow(2, this.state.pitchSemitones / 12);
+    // Combine pitch shift and octave shift (each octave = 12 semitones)
+    const totalShift = this.state.pitchSemitones + (octaveShift * 12);
+    src.playbackRate.value = Math.pow(2, totalShift / 12);
     src.onended = () => {
       voice.inUse = false;
       voice.lastUsed = performance.now();
@@ -249,7 +251,7 @@ class AudioEngine {
     }
   }
 
-  triggerKey(index: number) {
+  triggerKey(index: number, octaveShift: number = 0) {
     const key = this.state.keys[index];
     if (!key) return;
 
@@ -260,7 +262,7 @@ class AudioEngine {
       this.notify();
     }, 150);
 
-    this.playBuffer(key.sample);
+    this.playBuffer(key.sample, 1, octaveShift);
 
     if (this.state.isRecording) {
       if (!this.state.recordStart) this.state.recordStart = performance.now();

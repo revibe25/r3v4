@@ -2,11 +2,11 @@ import { useRef, useState } from 'react';
 import { PIANO_KEYS, PIANO_NOTES } from '@/lib/audio-engine';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload } from 'lucide-react';
+import { Upload, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface PianoKeysProps {
   keys: { sample: AudioBuffer | null; name: string; note: string; isActive: boolean }[];
-  onTrigger: (index: number) => void;
+  onTrigger: (index: number, octaveShift: number) => void;
   onAssignSample: (keyIndex: number, buffer: AudioBuffer, name: string) => void;
   loadSample: (file: File) => Promise<AudioBuffer | null>;
 }
@@ -15,6 +15,7 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedKey, setSelectedKey] = useState<string>('0');
   const [uploadedFile, setUploadedFile] = useState<{ buffer: AudioBuffer; name: string } | null>(null);
+  const [octaveShift, setOctaveShift] = useState<number>(0);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,19 +34,37 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
     }
   };
 
-  const renderOctave = (startIdx: number, octaveLabel: string, keyLabels: string[]) => {
+  const handleOctaveUp = () => {
+    if (octaveShift < 3) {
+      setOctaveShift(octaveShift + 1);
+    }
+  };
+
+  const handleOctaveDown = () => {
+    if (octaveShift > -3) {
+      setOctaveShift(octaveShift - 1);
+    }
+  };
+
+  const getOctaveLabel = (baseOctave: number) => {
+    const shiftedOctave = baseOctave + octaveShift;
+    return `C${shiftedOctave}–B${shiftedOctave}`;
+  };
+
+  const renderOctave = (startIdx: number, baseOctave: number, keyLabels: string[]) => {
     const whiteKeyIndices = [0, 2, 4, 5, 7, 9, 11].map(i => i + startIdx);
     const blackKeyIndices = [1, 3, 6, 8, 10].map(i => i + startIdx);
     const blackKeyPositions = [1, 2, 4, 5, 6];
 
-    // Check if this octave exists in the keys array
     if (!keys[startIdx]) {
       return null;
     }
 
     return (
-      <div className="mb-4">
-        <h4 className="text-xs font-medium text-muted-foreground mb-2">{octaveLabel}</h4>
+      <div className="flex-1">
+        <h4 className="text-xs font-medium text-muted-foreground mb-2 text-center">
+          {getOctaveLabel(baseOctave)}
+        </h4>
         <div className="relative flex justify-center py-4">
           <div className="relative flex">
             {whiteKeyIndices.map((keyIdx, i) => {
@@ -56,11 +75,11 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
                 <button
                   key={keyIdx}
                   data-testid={`piano-key-${keyIdx}`}
-                  onClick={() => onTrigger(keyIdx)}
+                  onClick={() => onTrigger(keyIdx, octaveShift)}
                   className={`
-                    relative w-9 md:w-11 h-28 md:h-32 rounded-b-lg
+                    relative w-8 md:w-10 h-24 md:h-28 rounded-b-lg
                     flex flex-col items-center justify-end pb-2
-                    text-[10px] font-bold z-10 border-x border-b
+                    text-[9px] font-bold z-10 border-x border-b
                     transition-all duration-100
                     ${key.isActive
                       ? 'bg-gradient-to-b from-primary to-white text-primary shadow-inner shadow-primary/40'
@@ -69,8 +88,8 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
                     ${i > 0 ? '-ml-px' : ''}
                   `}
                 >
-                  <span>{key.note.replace('#', '')}</span>
-                  <span className="text-[8px] opacity-50">{keyLabel}</span>
+                  <span>{key.note.replace('#', '').charAt(0)}{baseOctave + octaveShift}</span>
+                  <span className="text-[7px] opacity-50">{keyLabel}</span>
                 </button>
               );
             })}
@@ -78,18 +97,18 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
             {blackKeyIndices.map((keyIdx, i) => {
               const key = keys[keyIdx];
               if (!key) return null;
-              const leftOffset = blackKeyPositions[i] * 36 - 11;
+              const leftOffset = blackKeyPositions[i] * 32 - 10;
               const keyLabel = keyLabels[blackKeyIndices.indexOf(keyIdx) + 7];
               return (
                 <button
                   key={keyIdx}
                   data-testid={`piano-key-${keyIdx}`}
-                  onClick={() => onTrigger(keyIdx)}
+                  onClick={() => onTrigger(keyIdx, octaveShift)}
                   style={{ left: `${leftOffset}px` }}
                   className={`
-                    absolute w-6 md:w-7 h-16 md:h-20 rounded-b-md
+                    absolute w-5 md:w-6 h-14 md:h-16 rounded-b-md
                     flex flex-col items-center justify-end pb-1
-                    text-[8px] font-bold z-20
+                    text-[7px] font-bold z-20
                     transition-all duration-100
                     ${key.isActive
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
@@ -97,8 +116,8 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
                     }
                   `}
                 >
-                  <span>{key.note}</span>
-                  <span className="text-[7px] opacity-50">{keyLabel}</span>
+                  <span>{key.note.replace('4', `${baseOctave + octaveShift}`)}</span>
+                  <span className="text-[6px] opacity-50">{keyLabel}</span>
                 </button>
               );
             })}
@@ -108,18 +127,50 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
     );
   };
 
-  // Key labels for both octaves
   const lowerOctaveLabels = ['Z', 'S', 'X', 'D', 'C', 'V', 'G', 'B', 'H', 'N', 'M', ','];
   const upperOctaveLabels = ['1', '!', '2', '@', '3', '4', '$', '5', '%', '6', '^', '7'];
 
   return (
     <section aria-label="Piano" className="space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground">
-        Piano Keyboard (2 Octaves: C4–B5)
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Piano Keyboard (2 Octaves)
+        </h3>
 
-      {renderOctave(0, 'Lower Octave (C4–B4)', lowerOctaveLabels)}
-      {renderOctave(12, 'Upper Octave (C5–B5)', upperOctaveLabels)}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Octave Shift:</span>
+          <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleOctaveDown}
+              disabled={octaveShift <= -3}
+              className="h-7 w-7 p-0"
+              title="Shift down one octave"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            <span className="text-sm font-medium w-8 text-center">
+              {octaveShift > 0 ? `+${octaveShift}` : octaveShift}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleOctaveUp}
+              disabled={octaveShift >= 3}
+              className="h-7 w-7 p-0"
+              title="Shift up one octave"
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto pb-2">
+        {renderOctave(0, 4, lowerOctaveLabels)}
+        {renderOctave(12, 5, upperOctaveLabels)}
+      </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <input
