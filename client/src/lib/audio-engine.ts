@@ -42,8 +42,16 @@ export interface RecordedEvent {
 }
 
 const PAD_KEYS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k'];
-const PIANO_KEYS = ['z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'm', ','];
-const PIANO_NOTES = ['C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4'];
+
+const PIANO_KEYS = [
+  'z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'm', ',',
+  '1', '!', '2', '@', '3', '4', '$', '5', '%', '6', '^', '7'
+];
+
+const PIANO_NOTES = [
+  'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4',
+  'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5'
+];
 
 export { PAD_KEYS, PIANO_KEYS, PIANO_NOTES };
 
@@ -117,7 +125,7 @@ class AudioEngine {
       this.state.pads[i].sample = buffer;
     }
 
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 24; i++) {
       const buffer = this.generatePianoSample(i);
       this.state.keys[i].sample = buffer;
     }
@@ -197,7 +205,7 @@ class AudioEngine {
 
   playBuffer(buffer: AudioBuffer | null, vol = 1) {
     if (!this.ctx || !buffer) return;
-    
+
     let bufToUse = buffer;
     if (this.state.fx.reverse) {
       bufToUse = this.applyReverse(buffer);

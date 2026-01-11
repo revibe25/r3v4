@@ -83,9 +83,9 @@ export default function InstrumentPage() {
         <Card className="bg-card/90 backdrop-blur-sm border-border/40 shadow-2xl shadow-black/30 p-4 md:p-6">
           <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <h1 className="text-xl md:text-2xl font-bold text-primary tracking-tight" data-testid="text-title">
-              R3VIBE Native
+              R3 Native Instrument - Designed By Ernesto
               <span className="text-sm md:text-base font-normal text-muted-foreground ml-2">
-                16 Pad + Piano Octave
+                Virtual VSTs
               </span>
             </h1>
             <HeaderControls
@@ -180,7 +180,7 @@ export default function InstrumentPage() {
               Polyphony / Accessible / Mobile-friendly / Offline-first
             </div>
             <div className="opacity-70" data-testid="text-tech">
-              Made with Web Audio API, Web MIDI API & IndexedDB
+              Made with Web Audio API, Web MIDI API & IndexedDB BY Ernesto
             </div>
           </footer>
         </Card>

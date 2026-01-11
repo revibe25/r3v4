@@ -33,70 +33,93 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
     }
   };
 
-  const whiteKeyIndices = [0, 2, 4, 5, 7, 9, 11];
-  const blackKeyIndices = [1, 3, 6, 8, 10];
-  const blackKeyPositions = [1, 2, 4, 5, 6];
+  const renderOctave = (startIdx: number, octaveLabel: string, keyLabels: string[]) => {
+    const whiteKeyIndices = [0, 2, 4, 5, 7, 9, 11].map(i => i + startIdx);
+    const blackKeyIndices = [1, 3, 6, 8, 10].map(i => i + startIdx);
+    const blackKeyPositions = [1, 2, 4, 5, 6];
+
+    // Check if this octave exists in the keys array
+    if (!keys[startIdx]) {
+      return null;
+    }
+
+    return (
+      <div className="mb-4">
+        <h4 className="text-xs font-medium text-muted-foreground mb-2">{octaveLabel}</h4>
+        <div className="relative flex justify-center py-4">
+          <div className="relative flex">
+            {whiteKeyIndices.map((keyIdx, i) => {
+              const key = keys[keyIdx];
+              if (!key) return null;
+              const keyLabel = keyLabels[whiteKeyIndices.indexOf(keyIdx)];
+              return (
+                <button
+                  key={keyIdx}
+                  data-testid={`piano-key-${keyIdx}`}
+                  onClick={() => onTrigger(keyIdx)}
+                  className={`
+                    relative w-9 md:w-11 h-28 md:h-32 rounded-b-lg
+                    flex flex-col items-center justify-end pb-2
+                    text-[10px] font-bold z-10 border-x border-b
+                    transition-all duration-100
+                    ${key.isActive
+                      ? 'bg-gradient-to-b from-primary to-white text-primary shadow-inner shadow-primary/40'
+                      : 'bg-gradient-to-b from-gray-100 to-white text-gray-600 border-gray-200 hover:from-gray-50'
+                    }
+                    ${i > 0 ? '-ml-px' : ''}
+                  `}
+                >
+                  <span>{key.note.replace('#', '')}</span>
+                  <span className="text-[8px] opacity-50">{keyLabel}</span>
+                </button>
+              );
+            })}
+
+            {blackKeyIndices.map((keyIdx, i) => {
+              const key = keys[keyIdx];
+              if (!key) return null;
+              const leftOffset = blackKeyPositions[i] * 36 - 11;
+              const keyLabel = keyLabels[blackKeyIndices.indexOf(keyIdx) + 7];
+              return (
+                <button
+                  key={keyIdx}
+                  data-testid={`piano-key-${keyIdx}`}
+                  onClick={() => onTrigger(keyIdx)}
+                  style={{ left: `${leftOffset}px` }}
+                  className={`
+                    absolute w-6 md:w-7 h-16 md:h-20 rounded-b-md
+                    flex flex-col items-center justify-end pb-1
+                    text-[8px] font-bold z-20
+                    transition-all duration-100
+                    ${key.isActive
+                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
+                      : 'bg-gray-900 text-gray-300 border border-gray-700 hover:bg-gray-800'
+                    }
+                  `}
+                >
+                  <span>{key.note}</span>
+                  <span className="text-[7px] opacity-50">{keyLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Key labels for both octaves
+  const lowerOctaveLabels = ['Z', 'S', 'X', 'D', 'C', 'V', 'G', 'B', 'H', 'N', 'M', ','];
+  const upperOctaveLabels = ['1', '!', '2', '@', '3', '4', '$', '5', '%', '6', '^', '7'];
 
   return (
     <section aria-label="Piano" className="space-y-4">
       <h3 className="text-sm font-medium text-muted-foreground">
-        Piano Octave (C4–B4, Z S X D C V G B H N M ,)
+        Piano Keyboard (2 Octaves: C4–B5)
       </h3>
 
-      <div className="relative flex justify-center py-4">
-        <div className="relative flex">
-          {whiteKeyIndices.map((keyIdx, i) => {
-            const key = keys[keyIdx];
-            return (
-              <button
-                key={keyIdx}
-                data-testid={`piano-key-${keyIdx}`}
-                onClick={() => onTrigger(keyIdx)}
-                className={`
-                  relative w-9 md:w-11 h-28 md:h-32 rounded-b-lg
-                  flex flex-col items-center justify-end pb-2
-                  text-[10px] font-bold z-10 border-x border-b
-                  transition-all duration-100
-                  ${key.isActive
-                    ? 'bg-gradient-to-b from-primary to-white text-primary shadow-inner shadow-primary/40'
-                    : 'bg-gradient-to-b from-gray-100 to-white text-gray-600 border-gray-200 hover:from-gray-50'
-                  }
-                  ${i > 0 ? '-ml-px' : ''}
-                `}
-              >
-                <span>{key.note.replace('#', '')}</span>
-                <span className="text-[8px] opacity-50">{PIANO_KEYS[keyIdx]?.toUpperCase()}</span>
-              </button>
-            );
-          })}
-
-          {blackKeyIndices.map((keyIdx, i) => {
-            const key = keys[keyIdx];
-            const leftOffset = blackKeyPositions[i] * 36 - 11;
-            return (
-              <button
-                key={keyIdx}
-                data-testid={`piano-key-${keyIdx}`}
-                onClick={() => onTrigger(keyIdx)}
-                style={{ left: `${leftOffset}px` }}
-                className={`
-                  absolute w-6 md:w-7 h-16 md:h-20 rounded-b-md
-                  flex flex-col items-center justify-end pb-1
-                  text-[8px] font-bold z-20
-                  transition-all duration-100
-                  ${key.isActive
-                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                    : 'bg-gray-900 text-gray-300 border border-gray-700 hover:bg-gray-800'
-                  }
-                `}
-              >
-                <span>{key.note}</span>
-                <span className="text-[7px] opacity-50">{PIANO_KEYS[keyIdx]?.toUpperCase()}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {renderOctave(0, 'Lower Octave (C4–B4)', lowerOctaveLabels)}
+      {renderOctave(12, 'Upper Octave (C5–B5)', upperOctaveLabels)}
 
       <div className="flex flex-wrap items-center gap-2">
         <input
@@ -118,7 +141,7 @@ export function PianoKeys({ keys, onTrigger, onAssignSample, loadSample }: Piano
         </Button>
 
         <Select value={selectedKey} onValueChange={setSelectedKey}>
-          <SelectTrigger className="w-32" data-testid="select-key-target">
+          <SelectTrigger className="w-40" data-testid="select-key-target">
             <SelectValue placeholder="Select key" />
           </SelectTrigger>
           <SelectContent>
