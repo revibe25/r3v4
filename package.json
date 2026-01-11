@@ -1,18 +1,33 @@
 {
-  "name": "rest-express",
+  "name": "r3vibe-native",
   "version": "1.0.0",
   "type": "module",
   "license": "R3n",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "tsx script/build.ts",
-    "start": "NODE_ENV=production node dist/index.cjs",
-    "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "build": "npm run build:shared && npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "build:shared": "cd shared && npm run build",
+    "start": "cd server && npm run start",
+    "check": "tsc --noEmit",
+    "check:all": "npm run check && cd client && npm run check && cd ../server && npm run check",
+    "db:push": "cd server && npm run db:push",
+    "db:generate": "cd server && npm run db:generate",
+    "db:studio": "cd server && npm run db:studio",
+    "clean": "rm -rf node_modules client/node_modules server/node_modules shared/node_modules client/dist server/dist",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install && cd ../shared && npm install"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
-    "@jridgewell/trace-mapping": "^0.3.25",
     "@radix-ui/react-accordion": "^1.2.4",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-aspect-ratio": "^1.1.3",
@@ -73,7 +88,12 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.24.2",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "^3.4.0",
+    "tone": "^14.8.49",
+    "webmidi": "^3.1.11",
+    "zustand": "^4.5.0",
+    "lamejs": "^1.2.1",
+    "audiobuffer-to-wav": "^1.0.0"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^0.4.4",
@@ -92,6 +112,7 @@
     "@types/ws": "^8.5.13",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.20",
+    "concurrently": "^8.2.2",
     "drizzle-kit": "^0.31.4",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.47",
@@ -102,5 +123,9 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   }
 }
