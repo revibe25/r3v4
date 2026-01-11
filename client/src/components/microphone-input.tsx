@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, AlertCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 interface MicrophoneInputProps {
   onAudioData?: (data: Float32Array) => void;
@@ -16,6 +17,7 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
   const [inputGain, setInputGain] = useState([75]);
   const [level, setLevel] = useState(0);
   const [peakLevel, setPeakLevel] = useState(0);
+  const [error, setError] = useState<string>('');
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -29,14 +31,22 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
   useEffect(() => {
     const getDevices = async () => {
       try {
+        // Request permission first to get device labels
+        await navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+        });
+
         const deviceList = await navigator.mediaDevices.enumerateDevices();
         const audioInputs = deviceList.filter(device => device.kind === 'audioinput');
         setDevices(audioInputs);
+
         if (audioInputs.length > 0 && !selectedDevice) {
           setSelectedDevice(audioInputs[0].deviceId);
         }
-      } catch (error) {
-        console.error('Error getting audio devices:', error);
+        setError('');
+      } catch (err) {
+        console.error('Error getting audio devices:', err);
+        setError('Microphone access denied. Please grant permissions.');
       }
     };
 
@@ -84,6 +94,15 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
         }, 2000);
       }
 
+      // Call callback with audio data if provided
+      if (onAudioData) {
+        const floatArray = new Float32Array(dataArray.length);
+        for (let i = 0; i < dataArray.length; i++) {
+          floatArray[i] = (dataArray[i] - 128) / 128;
+        }
+        onAudioData(floatArray);
+      }
+
       animationFrameRef.current = requestAnimationFrame(updateLevel);
     };
 
@@ -97,10 +116,12 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
         clearTimeout(peakTimeoutRef.current);
       }
     };
-  }, [isActive, peakLevel]);
+  }, [isActive, peakLevel, onAudioData]);
 
   const startMicrophone = async () => {
     try {
+      setError('');
+
       // Create audio context
       if (!audioContextRef.current) {
         audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -108,7 +129,18 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
 
       // Get microphone stream
       const constraints = {
-        audio: selectedDevice ? { deviceId: { exact: selectedDevice } } : true,
+        audio: selectedDevice 
+          ? { 
+              deviceId: { exact: selectedDevice },
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: false
+            } 
+          : { 
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: false
+            },
       };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
@@ -137,9 +169,10 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
       analyserRef.current = analyser;
 
       setIsActive(true);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
-      alert('Could not access microphone. Please check permissions.');
+    } catch (err) {
+      console.error('Error accessing microphone:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Could not access microphone: ${errorMessage}`);
     }
   };
 
@@ -176,7 +209,11 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
     setIsMuted(newMutedState);
 
     if (newMutedState) {
-      gainNodeRef.current.disconnect(audioContextRef.current.destination);
+      try {
+        gainNodeRef.current.disconnect(audioContextRef.current.destination);
+      } catch (e) {
+        // Already disconnected
+      }
     } else {
       gainNodeRef.current.connect(audioContextRef.current.destination);
     }
@@ -237,6 +274,13 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
         </div>
       </div>
 
+      {error && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+          <AlertCircle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-destructive">{error}</p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <label className="text-xs text-muted-foreground">Input Device</label>
         <Select value={selectedDevice} onValueChange={handleDeviceChange} disabled={isActive}>
@@ -244,11 +288,17 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
             <SelectValue placeholder="Select microphone" />
           </SelectTrigger>
           <SelectContent>
-            {devices.map(device => (
-              <SelectItem key={device.deviceId} value={device.deviceId}>
-                {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+            {devices.length > 0 ? (
+              devices.map(device => (
+                <SelectItem key={device.deviceId} value={device.deviceId}>
+                  {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="none" disabled>
+                No devices found
               </SelectItem>
-            ))}
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -302,17 +352,21 @@ export function MicrophoneInput({ onAudioData }: MicrophoneInputProps) {
         </div>
 
         {level > 85 && (
-          <p className="text-xs text-red-500 font-medium">⚠ Input clipping - reduce gain</p>
+          <p className="text-xs text-red-500 font-medium animate-pulse">
+            ⚠ Input clipping - reduce gain
+          </p>
         )}
       </div>
 
-      {!isActive && (
+      {!isActive && !error && (
         <div className="text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg">
           <p className="font-medium mb-1">💡 Quick Start:</p>
-          <p>1. Select your microphone device</p>
-          <p>2. Click "Start" to enable input</p>
-          <p>3. Adjust gain to reach green/yellow levels</p>
-          <p>4. Avoid red levels to prevent distortion</p>
+          <ul className="space-y-0.5 ml-4 list-disc">
+            <li>Select your microphone device</li>
+            <li>Click "Start" to enable input</li>
+            <li>Adjust gain to reach green/yellow levels</li>
+            <li>Avoid red levels to prevent distortion</li>
+          </ul>
         </div>
       )}
     </div>

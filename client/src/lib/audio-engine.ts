@@ -39,17 +39,23 @@ export interface RecordedEvent {
   type: 'pad' | 'key';
   idx: number;
   when: number;
+  octaveShift?: number;
 }
 
 const PAD_KEYS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k'];
 
+// Extended to 2 octaves: C4-B4 (lower octave) + C5-B5 (upper octave)
 const PIANO_KEYS = [
+  // Lower octave (C4-B4)
   'z', 's', 'x', 'd', 'c', 'v', 'g', 'b', 'h', 'n', 'm', ',',
+  // Upper octave (C5-B5)
   '1', '!', '2', '@', '3', '4', '$', '5', '%', '6', '^', '7'
 ];
 
 const PIANO_NOTES = [
+  // Lower octave
   'C4', 'C#4', 'D4', 'D#4', 'E4', 'F4', 'F#4', 'G4', 'G#4', 'A4', 'A#4', 'B4',
+  // Upper octave
   'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5'
 ];
 
@@ -59,10 +65,18 @@ class AudioEngine {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
-  private voicePool: { gain: GainNode; inUse: boolean; lastUsed: number }[] = [];
+  private voicePool: { 
+    gain: GainNode; 
+    inUse: boolean; 
+    lastUsed: number;
+    source: AudioBufferSourceNode | null;
+  }[] = [];
   private filterNode: BiquadFilterNode | null = null;
   private metronomeInterval: number | null = null;
   private playbackTimeout: number | null = null;
+
+  // Audio buffer cache for reversed samples
+  private reverseCache: WeakMap<AudioBuffer, AudioBuffer> = new WeakMap();
 
   state: AudioState = {
     pads: PAD_KEYS.map((_, i) => ({ sample: null, name: `Pad ${i + 1}`, isActive: false })),
@@ -93,25 +107,33 @@ class AudioEngine {
 
   async init() {
     if (this.ctx) return;
+
     this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Set up master gain
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.value = 0.95;
     this.masterGain.connect(this.ctx.destination);
 
+    // Set up analyser
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = 2048;
+    this.analyser.smoothingTimeConstant = 0.85;
     this.analyser.connect(this.masterGain);
 
+    // Set up filter
     this.filterNode = this.ctx.createBiquadFilter();
     this.filterNode.type = 'lowpass';
     this.filterNode.frequency.value = 20000;
+    this.filterNode.Q.value = 1;
     this.filterNode.connect(this.analyser);
 
+    // Create optimized voice pool with 32 voices
     for (let i = 0; i < 32; i++) {
       const g = this.ctx.createGain();
       g.gain.value = 1;
       g.connect(this.filterNode);
-      this.voicePool.push({ gain: g, inUse: false, lastUsed: 0 });
+      this.voicePool.push({ gain: g, inUse: false, lastUsed: 0, source: null });
     }
 
     await this.generateDefaultSamples();
@@ -120,11 +142,13 @@ class AudioEngine {
   private async generateDefaultSamples() {
     if (!this.ctx) return;
 
+    // Generate drum samples
     for (let i = 0; i < 16; i++) {
       const buffer = this.generateDrumSample(i);
       this.state.pads[i].sample = buffer;
     }
 
+    // Generate piano samples for both octaves (24 keys total)
     for (let i = 0; i < 24; i++) {
       const buffer = this.generatePianoSample(i);
       this.state.keys[i].sample = buffer;
@@ -135,6 +159,7 @@ class AudioEngine {
 
   private generateDrumSample(padIndex: number): AudioBuffer {
     if (!this.ctx) throw new Error('Audio context not initialized');
+
     const sampleRate = this.ctx.sampleRate;
     const duration = padIndex < 4 ? 0.5 : 0.2;
     const length = Math.floor(sampleRate * duration);
@@ -142,37 +167,50 @@ class AudioEngine {
     const data = buffer.getChannelData(0);
 
     const baseFreq = 60 + padIndex * 20;
+    const decayRate = padIndex < 4 ? 4 : 15;
+
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
-      const envelope = Math.exp(-t * (padIndex < 4 ? 4 : 15));
+      const envelope = Math.exp(-t * decayRate);
       const noise = (Math.random() * 2 - 1) * 0.3;
       const tone = Math.sin(2 * Math.PI * baseFreq * t * Math.exp(-t * 2));
-      data[i] = (tone * 0.7 + noise * (padIndex > 7 ? 0.5 : 0.2)) * envelope;
+      const noiseAmount = padIndex > 7 ? 0.5 : 0.2;
+      data[i] = (tone * 0.7 + noise * noiseAmount) * envelope;
     }
+
     return buffer;
   }
 
   private generatePianoSample(keyIndex: number): AudioBuffer {
     if (!this.ctx) throw new Error('Audio context not initialized');
+
     const sampleRate = this.ctx.sampleRate;
     const duration = 1.5;
     const length = Math.floor(sampleRate * duration);
     const buffer = this.ctx.createBuffer(1, length, sampleRate);
     const data = buffer.getChannelData(0);
 
+    // C4 = 261.63 Hz, each semitone is 2^(1/12) higher
     const freq = 261.63 * Math.pow(2, keyIndex / 12);
+
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
       const envelope = Math.exp(-t * 2);
-      const wave = Math.sin(2 * Math.PI * freq * t) * 0.5 +
-                   Math.sin(4 * Math.PI * freq * t) * 0.25 +
-                   Math.sin(6 * Math.PI * freq * t) * 0.125;
-      data[i] = wave * envelope;
+
+      // Add harmonics for richer piano sound
+      const fundamental = Math.sin(2 * Math.PI * freq * t) * 0.5;
+      const harmonic2 = Math.sin(4 * Math.PI * freq * t) * 0.25;
+      const harmonic3 = Math.sin(6 * Math.PI * freq * t) * 0.125;
+      const harmonic4 = Math.sin(8 * Math.PI * freq * t) * 0.0625;
+
+      data[i] = (fundamental + harmonic2 + harmonic3 + harmonic4) * envelope;
     }
+
     return buffer;
   }
 
   private getFreeVoice() {
+    // First, try to find a truly free voice
     for (const v of this.voicePool) {
       if (!v.inUse) {
         v.inUse = true;
@@ -180,10 +218,26 @@ class AudioEngine {
         return v;
       }
     }
+
+    // If all voices are in use, steal the least recently used one
     let lru = this.voicePool[0];
     for (const v of this.voicePool) {
-      if (v.lastUsed < lru.lastUsed) lru = v;
+      if (v.lastUsed < lru.lastUsed) {
+        lru = v;
+      }
     }
+
+    // Stop the current source if it exists
+    if (lru.source) {
+      try {
+        lru.source.stop();
+        lru.source.disconnect();
+      } catch (e) {
+        // Ignore errors if already stopped
+      }
+      lru.source = null;
+    }
+
     lru.inUse = true;
     lru.lastUsed = performance.now();
     return lru;
@@ -191,15 +245,27 @@ class AudioEngine {
 
   private applyReverse(buffer: AudioBuffer): AudioBuffer {
     if (!this.ctx) return buffer;
+
+    // Check cache first
+    const cached = this.reverseCache.get(buffer);
+    if (cached) return cached;
+
+    // Create reversed buffer
     const n = buffer.numberOfChannels;
     const len = buffer.length;
     const rate = buffer.sampleRate;
     const rb = this.ctx.createBuffer(n, len, rate);
+
     for (let ch = 0; ch < n; ch++) {
       const src = buffer.getChannelData(ch);
       const dst = rb.getChannelData(ch);
-      for (let i = 0; i < len; i++) dst[i] = src[len - 1 - i];
+      for (let i = 0; i < len; i++) {
+        dst[i] = src[len - 1 - i];
+      }
     }
+
+    // Cache the result
+    this.reverseCache.set(buffer, rb);
     return rb;
   }
 
@@ -213,19 +279,33 @@ class AudioEngine {
 
     const voice = this.getFreeVoice();
     const now = this.ctx.currentTime;
-    voice.gain.gain.setValueAtTime(vol, now);
+
+    // Set volume with slight ramp to avoid clicks
+    voice.gain.gain.setValueAtTime(0, now);
+    voice.gain.gain.linearRampToValueAtTime(vol, now + 0.001);
 
     const src = this.ctx.createBufferSource();
     src.buffer = bufToUse;
+
     // Combine pitch shift and octave shift (each octave = 12 semitones)
     const totalShift = this.state.pitchSemitones + (octaveShift * 12);
     src.playbackRate.value = Math.pow(2, totalShift / 12);
+
     src.onended = () => {
       voice.inUse = false;
       voice.lastUsed = performance.now();
+      voice.source = null;
     };
+
+    voice.source = src;
     src.connect(voice.gain);
     src.start(now);
+
+    // Add fade out at the end to prevent clicks
+    const fadeOutTime = 0.01;
+    const endTime = now + buffer.duration / src.playbackRate.value;
+    voice.gain.gain.setValueAtTime(vol, endTime - fadeOutTime);
+    voice.gain.gain.linearRampToValueAtTime(0, endTime);
   }
 
   triggerPad(index: number) {
@@ -234,6 +314,7 @@ class AudioEngine {
 
     pad.isActive = true;
     this.notify();
+
     setTimeout(() => {
       pad.isActive = false;
       this.notify();
@@ -257,6 +338,7 @@ class AudioEngine {
 
     key.isActive = true;
     this.notify();
+
     setTimeout(() => {
       key.isActive = false;
       this.notify();
@@ -270,12 +352,19 @@ class AudioEngine {
         type: 'key',
         idx: index,
         when: performance.now() - this.state.recordStart,
+        octaveShift,
       });
     }
   }
 
   toggleFX(fx: keyof FXState) {
     this.state.fx[fx] = !this.state.fx[fx];
+
+    // Clear reverse cache when reverse is toggled off
+    if (fx === 'reverse' && !this.state.fx[fx]) {
+      this.reverseCache = new WeakMap();
+    }
+
     this.notify();
   }
 
@@ -284,7 +373,13 @@ class AudioEngine {
     if (this.filterNode && this.ctx) {
       const minFreq = 100;
       const maxFreq = 20000;
-      this.filterNode.frequency.value = minFreq + (maxFreq - minFreq) * value;
+      const freq = minFreq + (maxFreq - minFreq) * value;
+
+      // Smooth filter changes to avoid clicks
+      const now = this.ctx.currentTime;
+      this.filterNode.frequency.cancelScheduledValues(now);
+      this.filterNode.frequency.setValueAtTime(this.filterNode.frequency.value, now);
+      this.filterNode.frequency.linearRampToValueAtTime(freq, now + 0.05);
     }
     this.notify();
   }
@@ -320,15 +415,23 @@ class AudioEngine {
 
   private startMetronome() {
     if (!this.ctx) return;
+
     const interval = (60 / this.state.bpm) * 1000;
+
     const click = () => {
-      const buffer = this.ctx!.createBuffer(1, this.ctx!.sampleRate * 0.05, this.ctx!.sampleRate);
+      if (!this.ctx) return;
+
+      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
       const data = buffer.getChannelData(0);
+
       for (let i = 0; i < data.length; i++) {
-        data[i] = Math.sin(2 * Math.PI * 880 * (i / this.ctx!.sampleRate)) * Math.exp(-i / data.length * 5);
+        const t = i / this.ctx.sampleRate;
+        data[i] = Math.sin(2 * Math.PI * 880 * t) * Math.exp(-t * 50);
       }
+
       this.playBuffer(buffer, 0.3);
     };
+
     click();
     this.metronomeInterval = window.setInterval(click, interval);
   }
@@ -356,19 +459,23 @@ class AudioEngine {
   stop() {
     this.state.isRecording = false;
     this.state.isPlaying = false;
+
     if (this.playbackTimeout) {
       clearTimeout(this.playbackTimeout);
       this.playbackTimeout = null;
     }
+
     this.notify();
   }
 
   play() {
     if (this.state.recordedEvents.length === 0) return;
+
     this.state.isPlaying = true;
     this.notify();
 
     const startTime = performance.now();
+
     const playEvent = (index: number) => {
       if (!this.state.isPlaying || index >= this.state.recordedEvents.length) {
         this.state.isPlaying = false;
@@ -384,7 +491,7 @@ class AudioEngine {
         if (event.type === 'pad') {
           this.triggerPad(event.idx);
         } else {
-          this.triggerKey(event.idx);
+          this.triggerKey(event.idx, event.octaveShift || 0);
         }
         playEvent(index + 1);
       }, Math.max(0, delay));
@@ -401,6 +508,7 @@ class AudioEngine {
   }
 
   redo() {
+    // Placeholder for redo functionality
     this.notify();
   }
 
@@ -420,9 +528,11 @@ class AudioEngine {
 
   async loadSample(file: File): Promise<AudioBuffer | null> {
     if (!this.ctx) return null;
+
     try {
       const arrayBuffer = await file.arrayBuffer();
-      return await this.ctx.decodeAudioData(arrayBuffer);
+      const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+      return audioBuffer;
     } catch (e) {
       console.error('Failed to decode audio file:', e);
       return null;
@@ -466,6 +576,28 @@ class AudioEngine {
       this.notify();
     } catch (e) {
       console.error('Failed to import session:', e);
+    }
+  }
+
+  // Cleanup method
+  destroy() {
+    this.stopMetronome();
+    this.stop();
+
+    // Stop all active voices
+    for (const voice of this.voicePool) {
+      if (voice.source) {
+        try {
+          voice.source.stop();
+          voice.source.disconnect();
+        } catch (e) {
+          // Ignore
+        }
+      }
+    }
+
+    if (this.ctx) {
+      this.ctx.close();
     }
   }
 }
