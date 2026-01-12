@@ -11,18 +11,21 @@ const uploadDir = path.join(process.cwd(), "uploads");
 const samplesDir = path.join(uploadDir, "samples");
 const projectsDir = path.join(uploadDir, "projects");
 
-// Ensure upload directories exist
-await fs.mkdir(samplesDir, { recursive: true });
-await fs.mkdir(projectsDir, { recursive: true });
-
 const storage_config = multer.diskStorage({
   destination: async (req, file, cb) => {
-    if (file.fieldname === "sample") {
-      cb(null, samplesDir);
-    } else if (file.fieldname === "project") {
-      cb(null, projectsDir);
-    } else {
-      cb(null, uploadDir);
+    try {
+      await fs.mkdir(samplesDir, { recursive: true });
+      await fs.mkdir(projectsDir, { recursive: true });
+      
+      if (file.fieldname === "sample") {
+        cb(null, samplesDir);
+      } else if (file.fieldname === "project") {
+        cb(null, projectsDir);
+      } else {
+        cb(null, uploadDir);
+      }
+    } catch (error) {
+      cb(error as Error, uploadDir);
     }
   },
   filename: (req, file, cb) => {
