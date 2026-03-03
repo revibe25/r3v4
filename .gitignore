@@ -13,3 +13,4 @@ logs/
 server/.env
 .local/
 node
+_dev/legacy/
