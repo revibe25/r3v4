@@ -1,0 +1,763 @@
+R3 CONTRACT MAP
+Generated: Mon Feb 23 04:27:27 PM CST 2026
+==================================================
+client/src/audio/automation/automation-engine.ts:7:export class AutomationEngine {
+client/src/audio/automation/automation-lane.ts:5:export class AutomationLane {
+client/src/audio/clips/audio-clip-loader.ts:2:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/clips/audio-clip-loader.ts:6:export interface LoadedClip {
+client/src/audio/clips/audio-clip-loader.ts:24:export type LoadSource =
+client/src/audio/clips/audio-clip-loader.ts:29:export type LoadProgress = {
+client/src/audio/clips/audio-clip-loader.ts:37:export type ClipLoaderEventMap = {
+client/src/audio/clips/audio-clip-loader.ts:44:type EventListener<K extends keyof ClipLoaderEventMap> = (
+client/src/audio/clips/audio-clip-loader.ts:48:export interface AudioClipLoaderOptions {
+client/src/audio/clips/audio-clip-loader.ts:71:export class AudioClipLoader {
+client/src/audio/clips/audio-clip-loader.ts:72:  private context: AudioContext;
+client/src/audio/clips/audio-clip-loader.ts:87:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/clips/audio-clip-loader.ts:202:  on<K extends keyof ClipLoaderEventMap>(
+client/src/audio/clips/audio-clip-loader.ts:214:  off<K extends keyof ClipLoaderEventMap>(
+client/src/audio/clips/audio-clip-loader.ts:222:  once<K extends keyof ClipLoaderEventMap>(
+client/src/audio/clips/audio-clip-loader.ts:233:  private emit<K extends keyof ClipLoaderEventMap>(
+client/src/audio/clips/audio-clip.ts:3:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/clips/audio-clip.ts:8:export type AudioClipState = 'idle' | 'scheduled' | 'playing' | 'paused' | 'stopped' | 'disposed';
+client/src/audio/clips/audio-clip.ts:10:export interface AudioClipConfig {
+client/src/audio/clips/audio-clip.ts:32:export type AudioClipEventMap = {
+client/src/audio/clips/audio-clip.ts:33:  /** Fires when playback actually starts at the AudioContext level */
+client/src/audio/clips/audio-clip.ts:47:type EventListener<K extends keyof AudioClipEventMap> = (
+client/src/audio/clips/audio-clip.ts:55: * absolute AudioContext time at which that moment will occur.
+client/src/audio/clips/audio-clip.ts:57:function transportToContextTime(transportTime: number, ctx: AudioContext): number {
+client/src/audio/clips/audio-clip.ts:63:export class AudioClip {
+client/src/audio/clips/audio-clip.ts:67:  private context: AudioContext;
+client/src/audio/clips/audio-clip.ts:80:  /** Time (AudioContext seconds) at which playback started — set in start() */
+client/src/audio/clips/audio-clip.ts:95:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/clips/audio-clip.ts:295:  on<K extends keyof AudioClipEventMap>(
+client/src/audio/clips/audio-clip.ts:307:  off<K extends keyof AudioClipEventMap>(
+client/src/audio/clips/audio-clip.ts:315:  once<K extends keyof AudioClipEventMap>(
+client/src/audio/clips/audio-clip.ts:326:  private emit<K extends keyof AudioClipEventMap>(
+client/src/audio/clips/clip-track.ts:8:export type ClipTrackState = 'idle' | 'playing' | 'recording' | 'disposed';
+client/src/audio/clips/clip-track.ts:10:export interface ClipTrackConfig {
+client/src/audio/clips/clip-track.ts:17:export type ClipTrackEventMap = {
+client/src/audio/clips/clip-track.ts:39:type EventListener<K extends keyof ClipTrackEventMap> = (
+client/src/audio/clips/clip-track.ts:45:export class ClipTrack {
+client/src/audio/clips/clip-track.ts:282:  on<K extends keyof ClipTrackEventMap>(event: K, listener: EventListener<K>): this {
+client/src/audio/clips/clip-track.ts:291:  off<K extends keyof ClipTrackEventMap>(event: K, listener: EventListener<K>): this {
+client/src/audio/clips/clip-track.ts:296:  once<K extends keyof ClipTrackEventMap>(event: K, listener: EventListener<K>): this {
+client/src/audio/clips/clip-track.ts:304:  private emit<K extends keyof ClipTrackEventMap>(
+client/src/audio/core/analysis-engine.ts:5:import { AutomationEngine } from '@/audio/automation/automation-engine';
+client/src/audio/core/analysis-engine.ts:15:export interface InstrumentBandState {
+client/src/audio/core/analysis-engine.ts:22:export interface TrackState {
+client/src/audio/core/analysis-engine.ts:46:export interface TrackVisual {
+client/src/audio/core/analysis-engine.ts:62:export class AudioEngine {
+client/src/audio/core/analysis-engine.ts:63:  context: AudioContext | null = null;
+client/src/audio/core/analysis-engine.ts:73:  automationEngine: AutomationEngine | null = null;
+client/src/audio/core/analysis-engine.ts:80:  constructor(automationEngine?: AutomationEngine) {
+client/src/audio/core/analysis-engine.ts:92:  async initialize(): Promise<AudioContext> {
+client/src/audio/core/analysis-engine.ts:94:    this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/analysis-engine.ts:103:    if (!this.context) throw new Error('AudioContext not initialized');
+client/src/audio/core/audio-context.ts:3:// SINGLETON AudioContext — use this everywhere instead of new AudioContext()
+client/src/audio/core/audio-context.ts:5:// WHY: Browsers cap AudioContext instances (~6). Creating one per component
+client/src/audio/core/audio-context.ts:9://   import { getAudioContext } from '@/audio/core/audio-context';
+client/src/audio/core/audio-context.ts:10://   const ctx = await getAudioContext();
+client/src/audio/core/audio-context.ts:13:let _audioContext: AudioContext | null = null;
+client/src/audio/core/audio-context.ts:16: * Returns the shared singleton AudioContext.
+client/src/audio/core/audio-context.ts:19:export async function getAudioContext(): Promise<AudioContext> {
+client/src/audio/core/audio-context.ts:21:    _audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/audio-context.ts:24:  // Browsers suspend AudioContext until user gesture — resume if needed
+client/src/audio/core/audio-context.ts:34: * Use getAudioContext() for first access.
+client/src/audio/core/audio-context.ts:36:export function getAudioContextSync(): AudioContext | null {
+client/src/audio/core/audio-context.ts:44:export async function destroyAudioContext(): Promise<void> {
+client/src/audio/core/audio-context.ts:51:/** @deprecated Use getAudioContext() */
+client/src/audio/core/audio-context.ts:52:export const resumeAudioContext = getAudioContext;
+client/src/audio/core/audio-context.ts:54:/** @deprecated Use destroyAudioContext() */
+client/src/audio/core/audio-context.ts:55:export const closeAudioContext = destroyAudioContext;
+client/src/audio/core/audio-context.ts:57:/** Calls cb once the AudioContext is ready */
+client/src/audio/core/audio-context.ts:58:export function onAudioContext(eventOrCb: string | ((ctx: AudioContext) => void), cb?: (ctx: AudioContext) => void): void {
+client/src/audio/core/audio-context.ts:60:  if (fn) getAudioContext().then(fn).catch(console.error);
+client/src/audio/core/instrument-engine.ts:1:export interface AudioState {
+client/src/audio/core/instrument-engine.ts:17:export interface PadState {
+client/src/audio/core/instrument-engine.ts:23:export interface KeyState {
+client/src/audio/core/instrument-engine.ts:30:export interface FXState {
+client/src/audio/core/instrument-engine.ts:38:export interface RecordedEvent {
+client/src/audio/core/instrument-engine.ts:65:  private ctx: AudioContext | null = null;
+client/src/audio/core/instrument-engine.ts:111:    this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/audio-graph.ts:3:  getAudioContext,
+client/src/audio/core/audio-graph.ts:4:  resumeAudioContext,
+client/src/audio/core/audio-graph.ts:5:  onAudioContext,
+client/src/audio/core/audio-graph.ts:6:  closeAudioContext,
+client/src/audio/core/audio-graph.ts:11:export interface SendBus {
+client/src/audio/core/audio-graph.ts:19:export interface MeterReading {
+client/src/audio/core/audio-graph.ts:25:export type AudioGraphEventMap = {
+client/src/audio/core/audio-graph.ts:33:type Listener<K extends keyof AudioGraphEventMap> = (
+client/src/audio/core/audio-graph.ts:39:export class AudioGraph {
+client/src/audio/core/audio-graph.ts:40:  readonly context: AudioContext;
+client/src/audio/core/audio-graph.ts:59:  // Clean up when the AudioContext singleton is closed externally
+client/src/audio/core/audio-graph.ts:65:    this.context     = getAudioContext();
+client/src/audio/core/audio-graph.ts:92:    this.removeContextListener = onAudioContext('created', () => {
+client/src/audio/core/audio-graph.ts:95:      console.warn('[AudioGraph] AudioContext was re-created. Instantiate a new AudioGraph.');
+client/src/audio/core/audio-graph.ts:240:    await resumeAudioContext();
+client/src/audio/core/audio-graph.ts:248:  /** Current AudioContext time in seconds */
+client/src/audio/core/audio-graph.ts:280:   * Dispose the graph AND close the underlying AudioContext singleton.
+client/src/audio/core/audio-graph.ts:281:   * After this, calling `getAudioContext()` will create a fresh one.
+client/src/audio/core/audio-graph.ts:285:    await closeAudioContext();
+client/src/audio/core/audio-graph.ts:304:  on<K extends keyof AudioGraphEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/core/audio-graph.ts:313:  off<K extends keyof AudioGraphEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/core/audio-graph.ts:318:  once<K extends keyof AudioGraphEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/core/audio-graph.ts:326:  private emit<K extends keyof AudioGraphEventMap>(
+client/src/audio/core/audio-graph.ts:344:// Lazily created so tests can import without triggering AudioContext construction
+client/src/audio/core/beat-detector.ts:3:export interface AudioState {
+client/src/audio/core/beat-detector.ts:27:export class AudioEngine {
+client/src/audio/core/beat-detector.ts:28:  private ctx!: AudioContext;
+client/src/audio/core/beat-detector.ts:64:    this.ctx = new AudioContext();
+client/src/audio/dj-controls/beat-sync.ts:4:export class BeatSync {
+client/src/audio/dj-controls/crossfader.ts:5:export class Crossfader {
+client/src/audio/dj-controls/cue-management.ts:5:export class CueManager {
+client/src/audio/dj-controls/tempo-controls.ts:5:export class TempoControl {
+client/src/audio/dj-controls/tempo-control.ts:2:export class TempoControl {
+client/src/audio/drum-classifier.ts:5:export interface DrumClassification {
+client/src/audio/drum-classifier.ts:14:export class DrumClassifier {
+client/src/audio/effects/compressor.ts:3:import { CompressorParams } from '@shared/effects.types';
+client/src/audio/effects/compressor.ts:5:export class CompressorEffect {
+client/src/audio/effects/compressor.ts:11:  private params: CompressorParams;
+client/src/audio/effects/compressor.ts:51:  setParams(params: Partial<CompressorParams>): void {
+client/src/audio/effects/compressor.ts:116:  getParams(): CompressorParams {
+client/src/audio/effects/delay.ts:2:import { DelayParams } from '@shared/effects.types';
+client/src/audio/effects/delay.ts:4:export class DelayEffect {
+client/src/audio/effects/delay.ts:9:  private params: DelayParams;
+client/src/audio/effects/delay.ts:29:  setParams(params: Partial<DelayParams>): void {
+client/src/audio/effects/delay.ts:58:  getParams(): DelayParams { return { ...this.params }; }
+client/src/audio/effects/distortion.ts:2:import { DistortionParams } from '@shared/effects.types';
+client/src/audio/effects/distortion.ts:4:export class DistortionEffect {
+client/src/audio/effects/distortion.ts:9:  private params: DistortionParams;
+client/src/audio/effects/distortion.ts:28:  setParams(params: Partial<DistortionParams>): void {
+client/src/audio/effects/distortion.ts:56:  getParams(): DistortionParams { return { ...this.params }; }
+client/src/audio/effects/eq.ts:2:import { EQParams } from '@shared/effects.types';
+client/src/audio/effects/eq.ts:4:export class EQEffect {
+client/src/audio/effects/eq.ts:6:  private params: EQParams;
+client/src/audio/effects/eq.ts:14:  setParams(params: Partial<EQParams>): void {
+client/src/audio/effects/eq.ts:32:  getParams(): EQParams { return { ...this.params }; }
+client/src/audio/effects/filter.ts:2:import { FilterParams } from '@shared/effects.types';
+client/src/audio/effects/filter.ts:4:export class FilterEffect {
+client/src/audio/effects/filter.ts:6:  private params: FilterParams;
+client/src/audio/effects/filter.ts:19:  setParams(params: Partial<FilterParams>): void {
+client/src/audio/effects/filter.ts:39:  getParams(): FilterParams { return { ...this.params }; }
+client/src/audio/effects/reverb.ts:2:import { ReverbParams } from '@shared/effects.types';
+client/src/audio/effects/reverb.ts:4:export class ReverbEffect {
+client/src/audio/effects/reverb.ts:9:  private params: ReverbParams;
+client/src/audio/effects/reverb.ts:29:  setParams(params: Partial<ReverbParams>): void {
+client/src/audio/effects/reverb.ts:59:  getParams(): ReverbParams { return { ...this.params }; }
+client/src/audio/fx/compressor.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/compressor.ts:7:export interface CompressorParams {
+client/src/audio/fx/compressor.ts:24:export type CompressorPresetName =
+client/src/audio/fx/compressor.ts:32:export type CompressorEventMap = {
+client/src/audio/fx/compressor.ts:33:  paramsChanged: { compressor: Compressor; params: CompressorParams };
+client/src/audio/fx/compressor.ts:38:type Listener<K extends keyof CompressorEventMap> = (
+client/src/audio/fx/compressor.ts:44:export const COMPRESSOR_PRESETS: Record<CompressorPresetName, CompressorParams> = {
+client/src/audio/fx/compressor.ts:73:export class Compressor extends FXNodeBase {
+client/src/audio/fx/compressor.ts:79:  private _params: CompressorParams = {
+client/src/audio/fx/compressor.ts:95:  constructor(id: string, initialParams?: Partial<CompressorParams>) {
+client/src/audio/fx/compressor.ts:108:    if (initialParams) {
+client/src/audio/fx/compressor.ts:109:      this._params = { ...this._params, ...initialParams };
+client/src/audio/fx/compressor.ts:112:    this.applyAllParams(false); // apply without ramping on init
+client/src/audio/fx/compressor.ts:121:   * input ────────── dryGain ────────────┘  (handled by FXNodeBase mix)
+client/src/audio/fx/compressor.ts:131:  // ─── Params ──────────────────────────────────────────────────────────────────
+client/src/audio/fx/compressor.ts:133:  get params(): Readonly<CompressorParams> { return { ...this._params }; }
+client/src/audio/fx/compressor.ts:138:  setParams(updates: Partial<CompressorParams>): this {
+client/src/audio/fx/compressor.ts:140:    this.applyAllParams(true);
+client/src/audio/fx/compressor.ts:147:    return this.setParams(COMPRESSOR_PRESETS[name]);
+client/src/audio/fx/compressor.ts:153:    return this.setParams({ threshold: db });
+client/src/audio/fx/compressor.ts:157:    return this.setParams({ knee: db });
+client/src/audio/fx/compressor.ts:161:    return this.setParams({ ratio: value });
+client/src/audio/fx/compressor.ts:165:    return this.setParams({ attack: seconds });
+client/src/audio/fx/compressor.ts:169:    return this.setParams({ release: seconds });
+client/src/audio/fx/compressor.ts:174:    return this.setParams({ makeupGain: db });
+client/src/audio/fx/compressor.ts:179:    return this.setParams({ mix: clamp(value, 0, 1) });
+client/src/audio/fx/compressor.ts:203:  /** Override FXNodeBase.setBypass to also emit our own event. */
+client/src/audio/fx/compressor.ts:238:  on<K extends keyof CompressorEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/compressor.ts:247:  off<K extends keyof CompressorEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/compressor.ts:252:  once<K extends keyof CompressorEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/compressor.ts:260:  private emit<K extends keyof CompressorEventMap>(
+client/src/audio/fx/compressor.ts:275:  private applyAllParams(ramp: boolean): void {
+client/src/audio/fx/compressor.ts:297:    // Mix — FXNodeBase exposes wetGain/dryGain
+client/src/audio/fx/delay.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/delay.ts:7:export type DelayMode = 'mono' | 'stereo' | 'ping-pong';
+client/src/audio/fx/delay.ts:9:export type DelaySync =
+client/src/audio/fx/delay.ts:15:export interface DelayParams {
+client/src/audio/fx/delay.ts:36:export type DelayPreset = keyof typeof PRESETS;
+client/src/audio/fx/delay.ts:81:} as const satisfies Record<string, DelayParams>;
+client/src/audio/fx/delay.ts:85:export class Delay extends FXNodeBase {
+client/src/audio/fx/delay.ts:99:  // Current params (source of truth for getParams / toJSON)
+client/src/audio/fx/delay.ts:100:  private _params: Required<DelayParams> = {
+client/src/audio/fx/delay.ts:114:  constructor(id: string, initialParams?: DelayParams) {
+client/src/audio/fx/delay.ts:129:    this.setParams({ ...this._params, ...initialParams });
+client/src/audio/fx/delay.ts:218:  setParams(params: DelayParams): void {
+client/src/audio/fx/delay.ts:342:    this.setParams(PRESETS[name] as DelayParams);
+client/src/audio/fx/delay.ts:351:  getParams(): Readonly<Required<DelayParams>> {
+client/src/audio/fx/delay.ts:365:      params: this.getParams(),
+client/src/audio/fx/fx-nodebase.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/fx/fx-nodebase.ts:5:export abstract class FXNodeBase {
+client/src/audio/fx/fx-nodebase.ts:7:  readonly context: AudioContext;
+client/src/audio/fx/fx-nodebase.ts:20:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/fx/fx-nodebase.ts:79:  getParams(): Record<string, number> { return {}; }
+client/src/audio/fx/vst-automation-engine.ts:3:  AutomationEngine,
+client/src/audio/fx/vst-automation-engine.ts:8:  AutomationEngineState,
+client/src/audio/fx/vst-automation-engine.ts:12:export interface LFOConfig {
+client/src/audio/fx/vst-automation-engine.ts:20:export interface EnvelopeConfig {
+client/src/audio/fx/vst-automation-engine.ts:27:export class VSTAutomationEngine implements AutomationEngine {
+client/src/audio/fx/vst-automation-engine.ts:28:  // ── AutomationEngine interface implementation ──────────────
+client/src/audio/fx/vst-automation-engine.ts:46:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:53:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:123:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:125:  constructor(id: string, paramId: number, points: AutomationPoint[], audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:183:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:187:  constructor(id: string, paramId: number, config: LFOConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:235:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:240:  constructor(id: string, paramId: number, config: EnvelopeConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-fx-node.ts:3:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/vst-fx-node.ts:7:export interface VSTPreset {
+client/src/audio/fx/vst-fx-node.ts:13:export interface VSTFXConfig {
+client/src/audio/fx/vst-fx-node.ts:23:export interface AutomationPoint {
+client/src/audio/fx/vst-fx-node.ts:28:export interface AutomationLane {
+client/src/audio/fx/vst-fx-node.ts:34:export class VSTFXNode extends FXNodeBase {
+client/src/audio/fx/vst-fx-node.ts:53:  constructor(audioContext: AudioContext, config: VSTFXConfig) {
+client/src/audio/fx/vst-fx-node.ts:519:  static async deserialize(data: any, audioContext: AudioContext): Promise<VSTFXNode> {
+client/src/audio/fx/vst-fx-node.ts:520:    const node = new VSTFXNode(audioContext, data.config);
+client/src/audio/fx/vst-loader.ts:3:interface VSTExports extends WebAssembly.Exports {
+client/src/audio/fx/vst-loader.ts:24:export interface VSTParameterInfo {
+client/src/audio/fx/vst-loader.ts:34:export interface VSTLoadOptions {
+client/src/audio/fx/vst-loader.ts:36:  audioCtx: AudioContext;
+client/src/audio/fx/vst-loader.ts:46:export interface VSTModule {
+client/src/audio/fx/vst-loader.ts:57:export interface VSTMetadata {
+client/src/audio/fx/vst-loader.ts:65:export class VSTLoader {
+client/src/audio/fx/vst-loader.ts:69:  static async ensureWorkletRegistered(audioCtx: AudioContext): Promise<void> {
+client/src/audio/fx/vst-loader.ts:96:      throw new Error('AudioContext is required');
+client/src/audio/fx/vst-loader.ts:204:    maxParams: number
+client/src/audio/fx/vst-loader.ts:208:    const paramCount = exports.getParameterCount ? exports.getParameterCount() : maxParams;
+client/src/audio/fx/vst-processor.worklet.ts:29:class VSTProcessor extends AudioWorkletProcessor {
+client/src/audio/fx/vst-project-serializer.ts:4:import { VSTFXNode } from './vst-fx-node';
+client/src/audio/fx/vst-project-serializer.ts:8:export interface SerializedVSTChain {
+client/src/audio/fx/vst-project-serializer.ts:19:export interface SerializedChain {
+client/src/audio/fx/vst-project-serializer.ts:24:export interface SerializedEffect {
+client/src/audio/fx/vst-project-serializer.ts:36:export interface SerializedAutomation {
+client/src/audio/fx/vst-project-serializer.ts:42:export class VSTProjectSerializer {
+client/src/audio/fx/vst-project-serializer.ts:52:      if (fx instanceof VSTFXNode) {
+client/src/audio/fx/vst-project-serializer.ts:91:    audioContext: AudioContext
+client/src/audio/fx/vst-project-serializer.ts:120:    audioContext: AudioContext
+client/src/audio/fx/vst-project-serializer.ts:134:            const vstNode = await VSTFXNode.deserialize(effectData, audioContext);
+client/src/audio/fx/vst-project-serializer.ts:135:            chain.addFX(vstNode as unknown as import("../fx/fx-chain").FXNode);
+client/src/audio/fx/vst-scanner.ts:5:export interface VSTPluginInfo {
+client/src/audio/fx/vst-scanner.ts:19:export interface VSTScanResult {
+client/src/audio/fx/vst-scanner.ts:25:export class VSTScanner {
+client/src/audio/fx/vst-scanner.ts:34:    audioCtx: AudioContext
+client/src/audio/fx/vst-scanner.ts:78:    audioCtx: AudioContext
+client/src/audio/fx/eq.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/eq.ts:7:export type EQBandType =
+client/src/audio/fx/eq.ts:15:export interface EQBandConfig {
+client/src/audio/fx/eq.ts:23:export interface EQConfig {
+client/src/audio/fx/eq.ts:31:export type EQBand = keyof EQConfig;
+client/src/audio/fx/eq.ts:33:export type EQEventMap = {
+client/src/audio/fx/eq.ts:39:type Listener<K extends keyof EQEventMap> = (payload: EQEventMap[K]) => void;
+client/src/audio/fx/eq.ts:91:export class EQ extends FXNodeBase {
+client/src/audio/fx/eq.ts:300:  on<K extends keyof EQEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/eq.ts:309:  off<K extends keyof EQEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/eq.ts:314:  once<K extends keyof EQEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/eq.ts:322:  private emit<K extends keyof EQEventMap>(event: K, payload: EQEventMap[K]): void {
+client/src/audio/fx/fx-chain.ts:4:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/fx/fx-chain.ts:11:export interface FXNode {
+client/src/audio/fx/fx-chain.ts:22:export interface FXChainConfig {
+client/src/audio/fx/fx-chain.ts:29:export interface FXChainEventPayload {
+client/src/audio/fx/fx-chain.ts:30:  added?: FXNode;
+client/src/audio/fx/fx-chain.ts:37:export interface SerializedFXChain {
+client/src/audio/fx/fx-chain.ts:42:export class FXChain {
+client/src/audio/fx/fx-chain.ts:43:  protected effects: FXNode[] = [];
+client/src/audio/fx/fx-chain.ts:64:    const context = getAudioContext();
+client/src/audio/fx/fx-chain.ts:84:  addEffect(type: string, node: AudioNode, config?: Partial<FXNode>): string {
+client/src/audio/fx/fx-chain.ts:90:    const fxNode: FXNode = {
+client/src/audio/fx/fx-chain.ts:199:  getEffect(id: string): FXNode | undefined { return this.effects.find(fx => fx.id === id); }
+client/src/audio/fx/fx-chain.ts:200:  getAllEffects(): FXNode[] { return [...this.effects]; }
+client/src/audio/fx/fx-chain.ts:221:  addFXNode(fx: { id: string; input: AudioNode; constructor: { name: string } }, index?: number): string {
+client/src/audio/fx/fx-chain.ts:228:  addFX(fx: FXNode): void { this.addEffect(fx); }
+client/src/audio/fx/vst-sidechain.ts:2:import { VSTFXNode } from './vst-fx-node';
+client/src/audio/fx/vst-sidechain.ts:12:  targetVST: VSTFXNode;
+client/src/audio/fx/vst-sidechain.ts:15:export class SidechainRouterState {
+client/src/audio/fx/vst-sidechain.ts:16:  private audioContext: AudioContext;
+client/src/audio/fx/vst-sidechain.ts:19:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-sidechain.ts:26:    targetVST: VSTFXNode
+client/src/audio/fx/loader.ts:2:import { VSTFXNode, VSTFXConfig } from './vst-fx-node';
+client/src/audio/fx/loader.ts:3:import { getAudioContext } from '../core/audio-context';
+client/src/audio/fx/loader.ts:7:export interface VSTLoadOptions {
+client/src/audio/fx/loader.ts:8:  /** AudioContext to use — falls back to the shared singleton */
+client/src/audio/fx/loader.ts:9:  audioContext?: AudioContext;
+client/src/audio/fx/loader.ts:12:  /** Extra config forwarded to VSTFXNode */
+client/src/audio/fx/loader.ts:25:export type VSTLoadStatus =
+client/src/audio/fx/loader.ts:32:export interface VSTRegistryEntry {
+client/src/audio/fx/loader.ts:35:  node:      VSTFXNode;
+client/src/audio/fx/loader.ts:41:export type VSTLoaderEventMap = {
+client/src/audio/fx/loader.ts:54:type Listener<K extends keyof VSTLoaderEventMap> = (
+client/src/audio/fx/loader.ts:79: * Manages loading, caching, and lifecycle of VSTFXNode instances.
+client/src/audio/fx/loader.ts:93:export class VSTLoader {
+client/src/audio/fx/loader.ts:97:  private inFlight = new Map<string, Promise<VSTFXNode>>();
+client/src/audio/fx/loader.ts:111:  async load(vstUrl: string, options: VSTLoadOptions = {}): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:156:    opts: Required<Omit<VSTLoadOptions, 'audioContext'>> & { audioContext?: AudioContext },
+client/src/audio/fx/loader.ts:157:  ): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:164:      node: undefined as unknown as VSTFXNode, // filled on success
+client/src/audio/fx/loader.ts:176:        const ctx  = opts.audioContext ?? getAudioContext();
+client/src/audio/fx/loader.ts:177:        const node = new VSTFXNode(ctx, {
+client/src/audio/fx/loader.ts:226:  get(vstUrl: string, workletName?: string): VSTFXNode | undefined {
+client/src/audio/fx/loader.ts:298:  on<K extends keyof VSTLoaderEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/loader.ts:307:  off<K extends keyof VSTLoaderEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/loader.ts:312:  once<K extends keyof VSTLoaderEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/fx/loader.ts:320:  private emit<K extends keyof VSTLoaderEventMap>(
+client/src/audio/fx/loader.ts:366:): Promise<VSTFXNode>;
+client/src/audio/fx/loader.ts:372:  audioContext: AudioContext,
+client/src/audio/fx/loader.ts:376:): Promise<VSTFXNode>;
+client/src/audio/fx/loader.ts:379:  vstUrlOrCtx: string | AudioContext,
+client/src/audio/fx/loader.ts:383:): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:398:export { VSTFXNode };
+client/src/audio/fx/vst-automation-engine.ts.bak:3:  AutomationEngine,
+client/src/audio/fx/vst-automation-engine.ts.bak:8:  AutomationEngineState,
+client/src/audio/fx/vst-automation-engine.ts.bak:14:export interface LFOConfig {
+client/src/audio/fx/vst-automation-engine.ts.bak:22:export interface EnvelopeConfig {
+client/src/audio/fx/vst-automation-engine.ts.bak:29:export class VSTAutomationEngine implements AutomationEngine {
+client/src/audio/fx/vst-automation-engine.ts.bak:30:  // ── AutomationEngine interface stubs ─────────────────────
+client/src/audio/fx/vst-automation-engine.ts.bak:48:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:55:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts.bak:175:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:181:    audioContext: AudioContext
+client/src/audio/fx/vst-automation-engine.ts.bak:269:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:277:    audioContext: AudioContext
+client/src/audio/fx/vst-automation-engine.ts.bak:361:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:370:    audioContext: AudioContext
+client/src/audio/fx/vst-performance-monitor.ts:3:  PerformanceMonitor,
+client/src/audio/fx/vst-performance-monitor.ts:13:export interface PerformanceMetrics {
+client/src/audio/fx/vst-performance-monitor.ts:22:export class VSTPerformanceMonitor implements PerformanceMonitor {
+client/src/audio/fx/vst-performance-monitor.ts:23:  // ── PerformanceMonitor interface stubs ────────────────────
+client/src/audio/fx/vst-performance-monitor.ts:38:  private audioContext: AudioContext;
+client/src/audio/fx/vst-performance-monitor.ts:41:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-performance-monitor.ts:192:export function wrapWithPerformanceMonitoring(
+client/src/audio/fx/vst-performance-monitor.ts:194:  monitor: VSTPerformanceMonitor,
+client/src/audio/indicators/meter-node.ts:3:import { MeterData } from "../../../shared/types/meter.types";
+client/src/audio/indicators/meter-node.ts:4:import { getAudioContext } from "../core/audio-context";
+client/src/audio/indicators/meter-node.ts:6:export class MeterNode {
+client/src/audio/indicators/meter-node.ts:15:    const context = getAudioContext();
+client/src/audio/indicators/meter-node.ts:32:  getMeterData(): MeterData {
+client/src/audio/mixer/effect-chain.ts:10:export type EffectChainStatus = 'active' | 'disposed';
+client/src/audio/mixer/effect-chain.ts:13:export interface EffectSlot {
+client/src/audio/mixer/effect-chain.ts:21:export type EffectChainEventMap = {
+client/src/audio/mixer/effect-chain.ts:34:type Listener<K extends keyof EffectChainEventMap> = (
+client/src/audio/mixer/effect-chain.ts:42:export type EffectFactory = (state: ReturnType<AudioEffect['getState']>) => AudioEffect;
+client/src/audio/mixer/effect-chain.ts:46:export class EffectChain implements IEffectChain {
+client/src/audio/mixer/effect-chain.ts:50:  private readonly audioContext: AudioContext;
+client/src/audio/mixer/effect-chain.ts:72:    audioContext: AudioContext,
+client/src/audio/mixer/effect-chain.ts:388:  on<K extends keyof EffectChainEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/effect-chain.ts:397:  off<K extends keyof EffectChainEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/effect-chain.ts:402:  once<K extends keyof EffectChainEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/effect-chain.ts:410:  private emit<K extends keyof EffectChainEventMap>(
+client/src/audio/mixer/master-bus.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/mixer/master-bus.ts:6:export class MasterBus {
+client/src/audio/mixer/master-bus.ts:7:  readonly context: AudioContext;
+client/src/audio/mixer/master-bus.ts:11:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/mixer/mixer-channel.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/mixer/mixer-channel.ts:6:import { FXNodeBase } from "../fx/fx-nodebase";
+client/src/audio/mixer/mixer-channel.ts:7:import { VSTFXNode } from "../fx/vst-fx-node";
+client/src/audio/mixer/mixer-channel.ts:20:export class MixerChannel implements MixerChannel {
+client/src/audio/mixer/mixer-channel.ts:22:  readonly context: AudioContext;
+client/src/audio/mixer/mixer-channel.ts:50:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/mixer/mixer-channel.ts:213:  addFX(fx: FXNodeBase, index?: number): void {
+client/src/audio/mixer/mixer-channel.ts:214:    this.fxChain.addFXNode(fx, index);
+client/src/audio/mixer/mixer-channel.ts:244:  ): Promise<VSTFXNode> {
+client/src/audio/mixer/mixer-channel.ts:248:      // Type assertion since we know addVSTEffect returns VSTFXNode
+client/src/audio/mixer/mixer-channel.ts:249:      if (!(vstNode instanceof VSTFXNode)) {
+client/src/audio/mixer/mixer-channel.ts:250:        throw new Error('Expected VSTFXNode but got different type');
+client/src/audio/mixer/mixer-channel.ts:253:      return vstNode as VSTFXNode;
+client/src/audio/mixer/mixer-channel.ts:263:  getEffects(): FXNode[] {
+client/src/audio/mixer/mixer-channel.ts:270:  getEffect(fxId: string): FXNodeBase | undefined {
+client/src/audio/mixer/mixer-channel.ts:277:  getVSTPlugins(): VSTFXNode[] {
+client/src/audio/mixer/mixer-channel.ts:278:    return this.fxChain.getAllEffects().filter(fx => fx instanceof VSTFXNode) as VSTFXNode[];
+client/src/audio/mixer/mixer-channel.ts:479:export type MixerChannelState = ReturnType<MixerChannel['getState']>;
+client/src/audio/mixer/mixer-channel.ts:480:export type SerializedMixerChannel = ReturnType<MixerChannel['serialize']>;
+client/src/audio/mixer/solo-manager.ts:10:export type SoloMode = 'exclusive' | 'additive';
+client/src/audio/mixer/solo-manager.ts:12:export interface ChannelEntry {
+client/src/audio/mixer/solo-manager.ts:20:export type SoloManagerEventMap = {
+client/src/audio/mixer/solo-manager.ts:35:type Listener<K extends keyof SoloManagerEventMap> = (
+client/src/audio/mixer/solo-manager.ts:41:export class SoloManager {
+client/src/audio/mixer/solo-manager.ts:363:  on<K extends keyof SoloManagerEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/solo-manager.ts:372:  off<K extends keyof SoloManagerEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/solo-manager.ts:377:  once<K extends keyof SoloManagerEventMap>(event: K, listener: Listener<K>): this {
+client/src/audio/mixer/solo-manager.ts:385:  private emit<K extends keyof SoloManagerEventMap>(
+client/src/audio/recorder/recorder-engine.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/recorder/recorder-engine.ts:6:export class RecorderEngine {
+client/src/audio/recorder/recorder-engine.ts:7:  private context: AudioContext;
+client/src/audio/recorder/recorder-engine.ts:12:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/recorder/recorder-worklet.ts:3:class RecorderWorklet extends AudioWorkletProcessor {
+client/src/audio/transport/transport-engine.ts:4:import { resumeAudioContext } from "../core/audio-context";
+client/src/audio/transport/transport-engine.ts:6:import { AutomationEngine } from "../automation/automation-engine";
+client/src/audio/transport/transport-engine.ts:8:export class TransportEngine {
+client/src/audio/transport/transport-engine.ts:9:  private automation?: AutomationEngine;
+client/src/audio/transport/transport-engine.ts:18:  attachAutomation(engine: AutomationEngine) {
+client/src/audio/transport/transport-engine.ts:23:    await resumeAudioContext();
+client/src/audio/transport/transport-engine.ts:43:    await resumeAudioContext();
+client/src/components/ErrorBoundary.tsx:4:export class ErrorBoundary extends React.Component<
+client/src/components/audio-visualizer.tsx:4:export type VisualizationMode = 'bars' | 'wave' | 'circular' | 'particles' | 'oscilloscope' | 'spectrogram' | 'terrain' | 'galaxy' | 'dna' | 'flame' | 'matrix' | 'aurora';
+client/src/components/audio-visualizer.tsx:153:  const audioCtxRef = useRef<AudioContext | null>(null);
+client/src/components/audio-visualizer.tsx:184:      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/drum-pads.tsx:131:  const audioContextRef = useRef<AudioContext | null>(null);
+client/src/components/drum-pads.tsx:191:      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/fx-chain.ts:5:import { FXNodeBase } from '../audio/fx/fx-nodebase';
+client/src/components/fx-chain.ts:6:import { getAudioContext } from '../audio/core/audio-context';
+client/src/components/fx-chain.ts:7:import { VSTFXNode } from '../audio/fx/vst-fx-node';
+client/src/components/fx-chain.ts:11:export type FXChainEvent =
+client/src/components/fx-chain.ts:21:export interface FXChainEventPayload {
+client/src/components/fx-chain.ts:29:export type FXChainListener = (payload: FXChainEventPayload) => void;
+client/src/components/fx-chain.ts:31:export interface FXSlot {
+client/src/components/fx-chain.ts:32:  fx:       FXNodeBase;
+client/src/components/fx-chain.ts:41:export interface SerializedFXChain {
+client/src/components/fx-chain.ts:50:export class FXChain {
+client/src/components/fx-chain.ts:51:  readonly context:   AudioContext;
+client/src/components/fx-chain.ts:63:    this.context   = getAudioContext();
+client/src/components/fx-chain.ts:78:  get effects(): readonly FXNodeBase[] {
+client/src/components/fx-chain.ts:104:  addFX(fx: FXNodeBase, index?: number, options: { bypass?: boolean; wet?: number } = {}) {
+client/src/components/fx-chain.ts:125:  ): Promise<FXNodeBase> {
+client/src/components/fx-chain.ts:128:    const vstNode = new VSTFXNode(this.context, { vstUrl, workletName, ...config });
+client/src/components/fx-chain.ts:251:  static async deserialize(data: SerializedFXChain, _context?: AudioContext): Promise<FXChain> {
+client/src/components/fx-chain.ts:260:          const vstNode = await VSTFXNode.deserialize(fx.data, chain.context);
+client/src/components/fx-chain.ts:292:  private _createSlot(fx: FXNodeBase, bypass: boolean, wet: number): FXSlot {
+client/src/components/fx-chain.ts:364:      if (s.fx instanceof VSTFXNode) {
+client/src/components/microphone-input.tsx:288:  const audioContextRef = useRef<AudioContext | null>(null);
+client/src/components/microphone-input.tsx:376:  const createEQ = useCallback((ctx: AudioContext, preset: EQPreset): BiquadFilterNode[] => {
+client/src/components/microphone-input.tsx:388:      if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/multi-track-panel/audio-engine.tsx:3:// Uses the singleton AudioContext instead of creating its own.
+client/src/components/multi-track-panel/audio-engine.tsx:5:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/components/multi-track-panel/audio-engine.tsx:7:export class AudioEngine {
+client/src/components/multi-track-panel/audio-engine.tsx:8:  context: AudioContext | null = null;
+client/src/components/multi-track-panel/audio-engine.tsx:11:  async initialize(): Promise<AudioContext> {
+client/src/components/multi-track-panel/audio-engine.tsx:12:    // Use singleton — NOT new AudioContext()
+client/src/components/multi-track-panel/audio-engine.tsx:13:    this.context = await getAudioContext();
+client/src/components/multi-track-panel/audio-engine.tsx:51:  // ── Call destroyAudioContext() only on full app teardown.
+client/src/components/multi-track-panel/components/preferences-modal.tsx:12:  const handleChange = <K extends keyof typeof preferences>(
+client/src/components/multi-track-panel/index.ts:6:export type {
+client/src/components/multi-track-panel/multi-track-panel.tsx:100:  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+client/src/components/multi-track-panel/multi-track-panel.tsx:469:            onClick={() => setShowPerformanceMonitor(!showPerformanceMonitor)}
+client/src/components/multi-track-panel/multi-track-panel.tsx:471:              showPerformanceMonitor ? 'bg-blue-600' : themeConfig.bgHover
+client/src/components/multi-track-panel/multi-track-panel.tsx:616:      {showPerformanceMonitor && (
+client/src/components/multi-track-panel/multi-track-panel.tsx:622:                onClick={() => setShowPerformanceMonitor(false)}
+client/src/components/multi-track-panel/types.ts:3:export type TrackType = 'audio' | 'midi' | 'aux' | 'master';
+client/src/components/multi-track-panel/types.ts:4:export type FXType = 'EQ' | 'Compressor' | 'Reverb' | 'Delay' | 'Limiter' | 'Saturation' | 'Gate' | 'DeEsser' | 'VST';
+client/src/components/multi-track-panel/types.ts:5:export type MixerView = 'narrow' | 'medium' | 'wide' | 'extended';
+client/src/components/multi-track-panel/types.ts:6:export type TimeFormat = 'bars' | 'seconds' | 'samples' | 'smpte';
+client/src/components/multi-track-panel/types.ts:7:export type ViewMode = 'mixer' | 'timeline' | 'split';
+client/src/components/multi-track-panel/types.ts:8:export type AutomationMode = 'off' | 'read' | 'write' | 'touch' | 'latch';
+client/src/components/multi-track-panel/types.ts:10:export interface AudioClip {
+client/src/components/multi-track-panel/types.ts:21:export interface AutomationPoint {
+client/src/components/multi-track-panel/types.ts:26:export interface TrackAutomation {
+client/src/components/multi-track-panel/types.ts:32:export interface AdvancedTrack {
+client/src/components/multi-track-panel/types.ts:54:export interface TransportState {
+client/src/components/multi-track-panel/types.ts:65:export interface Preferences {
+client/src/components/multi-track-panel/types.ts:77:export interface ProjectState {
+client/src/components/multi-track-panel/types.ts:87:export interface MixerViewProps {
+client/src/components/multi-track-panel/types.ts:98:export interface TimelineViewProps {
+client/src/components/multi-track-panel/types.ts:106:export interface WaveformDisplayProps {
+client/src/components/multi-track-panel/types.ts:112:export interface AdvancedMeterProps {
+client/src/components/multi-track-panel/types.ts:118:export interface PreferencesModalProps {
+client/src/components/multi-track-panel/types.ts:124:export interface VSTPanelModalProps {
+client/src/components/multi-track-panel/index.ts.bak:6:export type {
+client/src/components/multi-track-view.tsx:17:export type Track = {
+client/src/components/piano-keys.tsx:732:  const audioContextRef = useRef<AudioContext>();
+client/src/components/piano-keys.tsx:743:      audioContextRef.current = new AudioContext();
+client/src/components/tracks/clip-block.tsx:4:export interface ClipData {
+client/src/components/types.ts:1:export interface DJControlsProps {
+client/src/components/types.ts:10:export interface KnobProps {
+client/src/components/types.ts:22:export interface ChannelState {
+client/src/components/types.ts:65:export interface MasterState {
+client/src/components/ui/badge.tsx:28:export interface BadgeProps
+client/src/components/ui/badge.tsx:29:  extends React.HTMLAttributes<HTMLDivElement>,
+client/src/components/ui/button.tsx:122:export interface ButtonProps
+client/src/components/ui/button.tsx:123:  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+client/src/components/ui/calendar.tsx:8:export type CalendarProps = React.ComponentProps<typeof DayPicker>
+client/src/components/ui/chart.tsx:11:export type ChartConfig = {
+client/src/components/ui/collapsible-card.tsx:7:interface CollapsibleCardProps extends React.HTMLAttributes<HTMLDivElement> {
+client/src/components/ui/form.tsx:21:  TFieldValues extends FieldValues = FieldValues,
+client/src/components/ui/form.tsx:22:  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+client/src/components/ui/form.tsx:32:  TFieldValues extends FieldValues = FieldValues,
+client/src/components/ui/form.tsx:33:  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+client/src/components/ui/fx-chain-panel.tsx:6:export interface FXUnit {
+client/src/components/ui/sheet.tsx:53:  extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
+client/src/components/ui/slider.tsx:5:interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+client/src/components/dj-controls/hot-cues.tsx:8:import { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
+client/src/components/dj-controls/hot-cues.tsx:16:  onEffectChange: (nodeId: string, params: AnyEffectParams) => void;
+client/src/components/dj-controls/hot-cues.tsx:44:  onChange: (params: AnyEffectParams) => void;
+client/src/components/dj-controls/index.ts:7:export type { DJControlsProps, PanelMode } from './types';
+client/src/components/dj-controls/types.ts:5:export type PanelMode = 'compact' | 'normal' | 'professional';
+client/src/components/dj-controls/types.ts:7:export interface DJControlsProps {
+client/src/components/vst-automation-ui.tsx:7:import { VSTAutomationEngine, AutomationPoint, AutomationCurve } from '@/types/audio';
+client/src/components/vst-automation-ui.tsx:11:interface AutomationUIProps { automationEngine: VSTAutomationEngine; paramId: number; paramName: string; minValue: number; maxValue: number; currentValue: number; }
+client/src/components/vst-automation-ui.tsx:86:function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }: { automationEngine: VSTAutomationEngine; paramId: number; minValue: number; maxValue: number }) {
+client/src/components/vst-automation-ui.tsx:162:function LFOEditor({ automationEngine, paramId }: { automationEngine: VSTAutomationEngine; paramId: number }) {
+client/src/components/vst-automation-ui.tsx:176:function EnvelopeEditor({ automationEngine, paramId }: { automationEngine: VSTAutomationEngine; paramId: number }) {
+client/src/components/vst-browser.tsx:12:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/components/vst-browser.tsx:37:      const audioCtx = getAudioContext();
+client/src/components/vst-performance-monitor-ui.tsx:5:import type { VSTPerformanceMonitor } from '@/types/audio';
+client/src/components/vst-performance-monitor-ui.tsx:8:interface VSTPerformanceUIProps { monitor:VSTPerformanceMonitor; vstIds:string[]; }
+client/src/components/vst-performance-monitor-ui.tsx:100:function OptimizationPanel({ monitor, vstIds, metrics }: { monitor:VSTPerformanceMonitor; vstIds:string[]; metrics:Map<string,PerformanceMetrics> }) {
+client/src/components/vst-sidechain-ui.tsx:6:import { VSTFXNode } from '@/audio/fx/vst-fx-node';
+client/src/components/vst-sidechain-ui.tsx:110:  const vstPlugins=targetCh?.getEffects().filter(fx=>fx instanceof VSTFXNode)??[];
+client/src/components/vst-sidechain-ui.tsx:118:    router.createSidechain({sourceChannelId:sourceId,targetVSTId,sidechainInput:1,gain} as any,sourceCh.output,targetVST as VSTFXNode);
+client/src/components/vst-master-panel.tsx:11:  VSTPerformanceMonitor,
+client/src/components/vst-master-panel.tsx:12:  VSTAutomationEngine,
+client/src/components/vst-master-panel.tsx:22:  performanceMonitor: VSTPerformanceMonitor;
+client/src/components/vst-master-panel.tsx:24:  automationEngine: VSTAutomationEngine;
+client/src/components/vst-master-panel.tsx:265:export type { VSTMasterPanelProps, ProjectData, ChannelChain, EffectConfig };
+client/src/components/multi-track-panel.tsx:707:  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+client/src/components/multi-track-panel.tsx:1108:              <button onClick={() => setShowPerformanceMonitor(!showPerformanceMonitor)} style={{ background: showPerformanceMonitor ? 'rgba(163,230,53,.15)' : 'var(--ag-ink)', border:`1px solid ${showPerformanceMonitor ? 'var(--ag-acid)' : 'var(--ag-border)'}`, color: showPerformanceMonitor ? 'var(--ag-acid)' : 'var(--ag-white)', padding:'5px 8px', cursor:'pointer' }}><Activity size={13} /></button>
+client/src/components/multi-track-panel.tsx:1396:      {showPerformanceMonitor && (
+client/src/components/multi-track-panel.tsx:1404:              <button onClick={() => setShowPerformanceMonitor(false)} className="text-muted-foreground hover:text-foreground">
+client/src/components/vst-automation-ui.tsx.bak:11:  VSTAutomationEngine,
+client/src/components/vst-automation-ui.tsx.bak:32:  automationEngine: VSTAutomationEngine;
+client/src/components/vst-automation-ui.tsx.bak:208:  automationEngine: VSTAutomationEngine; paramId: number; minValue: number; maxValue: number;
+client/src/components/vst-automation-ui.tsx.bak:347:function LFOEditor({ automationEngine, paramId }: { automationEngine: VSTAutomationEngine; paramId: number }) {
+client/src/components/vst-automation-ui.tsx.bak:388:function EnvelopeEditor({ automationEngine, paramId }: { automationEngine: VSTAutomationEngine; paramId: number }) {
+client/src/components/vst-sidechain-ui.tsx.bak:7:import { VSTFXNode } from '@/audio/fx/vst-fx-node';
+client/src/components/vst-sidechain-ui.tsx.bak:226:  const vstPlugins = targetCh?.getEffects().filter(fx => fx instanceof VSTFXNode) ?? [];
+client/src/components/vst-sidechain-ui.tsx.bak:244:    router.createSidechain(config, sourceCh.output, targetVST as VSTFXNode);
+client/src/components/vst-performance-monitor-ui.tsx.bak:7:import type { VSTPerformanceMonitor } from '@/types/audio';
+client/src/components/vst-performance-monitor-ui.tsx.bak:19:  monitor: VSTPerformanceMonitor;
+client/src/components/vst-performance-monitor-ui.tsx.bak:224:  monitor: VSTPerformanceMonitor; vstIds: string[];
+client/src/config/performance.config.ts:79:export type QualityPreset = 'low' | 'medium' | 'high' | 'ultra';
+client/src/db/clipDB.ts:5:export class ClipDB extends Dexie {
+client/src/engine/link-engine.ts:5:export type LinkCallback = (beat: number, phase: number, bpm: number) => void;
+client/src/engine/link-engine.ts:7:export class LinkEngine {
+client/src/engine/midi-engine.ts:3:export interface MidiMapping {
+client/src/engine/midi-engine.ts:9:export interface MidiState {
+client/src/engine/midi-engine.ts:23:export class MidiEngine {
+client/src/engine/preset-engine.ts:3:export interface Preset {
+client/src/engine/preset-engine.ts:15:export class PresetEngine {
+client/src/engine/transport-engine.ts:7:export type TransportCallback = (state: TransportState) => void;
+client/src/engine/transport-engine.ts:9:export interface TransportState {
+client/src/engine/transport-engine.ts:19:export class TransportEngine {
+client/src/features/DAW/DAWpro.jsx:346:      const AudioContext = window.AudioContext || window.webkitAudioContext;
+client/src/features/DAW/DAWpro.jsx:347:      audioContextRef.current = new AudioContext();
+client/src/hooks/use-multi-track.ts:6:export type Track = {
+client/src/hooks/use-multi-track.ts:142:export interface TransportState {
+client/src/hooks/use-transport-state.ts:3:export interface TransportState {
+client/src/hooks/use-waveform-audio-engine.ts:8:  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+client/src/hooks/use-waveform-audio-engine.ts:11:    // Try to use existing AudioContext from your AudioEngine
+client/src/hooks/use-waveform-audio-engine.ts:13:    const initAudioContext = async () => {
+client/src/hooks/use-waveform-audio-engine.ts:15:        // Check if AudioContext already exists globally (from your AudioEngine)
+client/src/hooks/use-waveform-audio-engine.ts:19:          setAudioContext(existingContext);
+client/src/hooks/use-waveform-audio-engine.ts:21:          // Create new AudioContext for standalone usage
+client/src/hooks/use-waveform-audio-engine.ts:22:          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/hooks/use-waveform-audio-engine.ts:23:          setAudioContext(ctx);
+client/src/hooks/use-waveform-audio-engine.ts:33:    initAudioContext();
+client/src/hooks/use-waveform-audio-engine.ts:38:      console.error('AudioContext not initialized');
+client/src/hooks/useeffectchain.ts:17:export interface UseEffectChainOptions {
+client/src/hooks/useeffectchain.ts:25:export interface UseEffectChainReturn {
+client/src/hooks/usemixerchannel.ts:17:export interface UseMixerChannelOptions {
+client/src/hooks/usemixerchannel.ts:26:export interface UseMixerChannelReturn {
+client/src/hooks/usemixerchannel.ts:253:  audioContext: AudioContext
+client/src/hooks/useAudioUpload.ts:4:export interface UploadState { uploading: boolean; progress: number; loaded: number; total: number; error: string | null; result: UploadResult | null; }
+client/src/hooks/useFXChain.ts:6:import { FXNodeBase } from '../audio/fx/fx-nodebase';
+client/src/hooks/useFXChain.ts:8:export interface FXChainState {
+client/src/hooks/useFXChain.ts:9:  effects:   readonly FXNodeBase[];
+client/src/hooks/useFXChain.ts:16:export interface UseFXChainReturn extends FXChainState {
+client/src/hooks/useFXChain.ts:18:  addFX:        (fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => void;
+client/src/hooks/useFXChain.ts:110:  const addFX = useCallback((fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => {
+client/src/hooks/use-analysis-engine.ts:7:  VSTPerformanceMonitor,
+client/src/hooks/use-analysis-engine.ts:8:  VSTAutomationEngine,
+client/src/hooks/use-analysis-engine.ts:34:export interface Track {
+client/src/hooks/use-analysis-engine.ts:47:export interface AudioEngineState {
+client/src/lib/midi.ts:3:export type MIDIMessageType = 'noteOn' | 'noteOff' | 'cc' | 'pitchBend' | 'aftertouch' | 'clock' | 'unknown';
+client/src/lib/midi.ts:5:export interface MIDIEvent {
+client/src/lib/midi.ts:19:export interface MIDIDevice {
+client/src/lib/midi.ts:27:export interface MIDIOptions {
+client/src/lib/midi.ts:50:export interface MIDIController {
+client/src/lib/theme-config.ts:3:export type Theme =
+client/src/lib/theme-config.ts:16:export type ThemeCategory = 'light' | 'dark';
+client/src/lib/theme-config.ts:18:export interface Gradient {
+client/src/lib/theme-config.ts:24:export interface AudioProfile {
+client/src/lib/theme-config.ts:31:export interface ThemeMetadata {
+client/src/lib/utils.ts:21:type VariantProps<V extends VariantRecord> = {
+client/src/lib/utils.ts:25:interface VariantConfig<V extends VariantRecord> {
+client/src/lib/utils.ts:47:export function variants<V extends VariantRecord>(config: VariantConfig<V>) {
+client/src/lib/utils.ts:100:export function cmap<T extends string>(
+client/src/lib/utils.ts:126:export type TransitionPreset = keyof typeof TRANSITIONS;
+client/src/lib/utils.ts:151:export type { ClassValue };
+client/src/pages/collaborative-daw-pro.jsx:346:      const AudioContext = window.AudioContext || window.webkitAudioContext;
+client/src/pages/collaborative-daw-pro.jsx:347:      audioContextRef.current = new AudioContext();
+client/src/pages/instrument.tsx:1443:export type { SessionData, InstrumentPageProps };
+client/src/store/audio-store.ts:26:  audioContext: AudioContext | null;
+client/src/store/audio-store.ts:50:  initAudioContext: () => Promise<void>;
+client/src/store/audio-store.ts:129:        initAudioContext: async () => {
+client/src/store/audio-store.ts:136:            const context = new AudioContext();
+client/src/store/clip-store.ts:9:export interface Clip {
+client/src/store/index.ts:12:// Re-export types
+client/src/store/index.ts:13:export type { Clip } from './clip-store';
+client/src/store/meter-store.ts:2:import { MeterData } from '@shared/types/meter.types';
+client/src/store/meter-store.ts:5:  meters: Record<string, MeterData>;
+client/src/store/meter-store.ts:6:  updateMeter: (id: string, meter: MeterData) => void;
+client/src/store/meter-store.ts:7:  getMeter: (id: string) => MeterData | undefined;
+client/src/store/meter-store.ts:15:  updateMeter: (id: string, meter: MeterData) => {
+client/src/store/mixer-store.ts:1:export interface ChannelState {
+client/src/store/tone-store.ts:13:import { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
+client/src/store/tone-store.ts:20:  updateEffect: (id: string, params: AnyEffectParams) => void;
+client/src/store/tone-store.ts:79:  updateEffect: (id: string, params: AnyEffectParams) => {
+client/src/store/tone-store.ts:83:      effect.setParams(params);
+client/src/store/vst-store.ts:13:  VSTPerformanceMonitor,
+client/src/store/vst-store.ts:14:  VSTAutomationEngine,
+client/src/store/vst-store.ts:25:  performanceMonitor: VSTPerformanceMonitor | null;
+client/src/store/vst-store.ts:27:  automationEngine: VSTAutomationEngine | null;
+client/src/store/vst-store.ts:45:  initialize: (audioContext: AudioContext) => Promise<void>;
+client/src/store/vst-store.ts:102:      initialize: async (audioContext: AudioContext) => {
+client/src/store/vst-store.ts:111:            { VSTPerformanceMonitor },
+client/src/store/vst-store.ts:113:            { VSTAutomationEngine },
+client/src/store/vst-store.ts:120:          const performanceMonitor = new VSTPerformanceMonitor(audioContext);
+client/src/store/vst-store.ts:122:          const automationEngine = new VSTAutomationEngine(audioContext);
+client/src/store/fx-store.ts:34:import { FXNodeBase }   from "@/audio/fx/fx-nodebase";
+client/src/store/fx-store.ts:40:export type VSTStatus = "idle" | "loading" | "ready" | "error";
+client/src/store/fx-store.ts:42:export interface VSTStatusEntry {
+client/src/store/fx-store.ts:49:export interface FXPreset {
+client/src/store/fx-store.ts:56:export interface FXSnapshot {
+client/src/store/fx-store.ts:63:export interface ChannelHistory {
+client/src/store/fx-store.ts:68:export type FXAddedCallback   = (channel: MixerChannel, fx: FXNodeBase) => void;
+client/src/store/fx-store.ts:69:export type FXRemovedCallback = (channel: MixerChannel, fxId: string)   => void;
+client/src/store/fx-store.ts:77:  //    keyed by channel.id → current array of FXNodeBase refs
+client/src/store/fx-store.ts:81:  channelFX: Record<string, FXNodeBase[]>;
+client/src/store/fx-store.ts:108:    fx:       FXNodeBase,
+client/src/store/fx-store.ts:118:    fx:     FXNodeBase,
+client/src/store/fx-store.ts:126:  ) => Promise<FXNodeBase>;
+client/src/store/fx-store.ts:136:  ) => readonly FXNodeBase[];
+client/src/store/fx-store.ts:163:  setFXParam:  (fx: FXNodeBase, paramName: string, value: number | string | boolean) => void;
+client/src/store/fx-store.ts:164:  getFXParam:  (fx: FXNodeBase, paramName: string) => number | string | boolean | undefined;
+client/src/store/fx-store.ts:165:  getFXParams: (fx: FXNodeBase) => Record<string, number | string | boolean>;
+client/src/store/fx-store.ts:185:  duplicateFX:        (channel: MixerChannel, fxId: string) => Promise<FXNodeBase | null>;
+client/src/store/fx-store.ts:213:    params:   (fx as any).getParams ? { ...(fx as any).getParams() } : {},
+client/src/store/fx-store.ts:257:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:270:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:279:          for (const [cid, fxArr] of Object.entries((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>))) {
+client/src/store/fx-store.ts:281:              (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...fxArr];
+client/src/store/fx-store.ts:301:            (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]  = [...channel.getEffects()];
+client/src/store/fx-store.ts:327:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:354:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:372:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:397:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:444:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:469:          for (const [cid, fxArr] of Object.entries((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>))) {
+client/src/store/fx-store.ts:471:              (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...fxArr];
+client/src/store/fx-store.ts:482:      getFXParams(fx) {
+client/src/store/fx-store.ts:483:        if (typeof (fx as any).getParams === "function") return (fx as any).getParams();
+client/src/store/fx-store.ts:540:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[channelKey(channel)] = [...channel.getEffects()];
+client/src/store/fx-store.ts:579:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [];
+client/src/store/fx-store.ts:596:          if ((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]) {
+client/src/store/fx-store.ts:597:            (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...(state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]];
+client/src/store/fx-store.ts:613:export function useChannelFX(channel: MixerChannel | null | undefined): readonly FXNodeBase[] {
+client/src/store/fx-store.ts:662:  callback: (fx: FXNodeBase[]) => void
+client/src/types/audio-engine.types.ts:9:export interface Track {
+client/src/types/audio-engine.types.ts:24:export interface AudioEngineState {
+client/src/types/audio-engine.types.ts:30:  metering?: MeterData;
+client/src/types/audio-engine.types.ts:36:export interface MeterData {
+client/src/types/audio-engine.types.ts:45:export type FXType = 
+client/src/types/audio-engine.types.ts:58:export interface FXParams {
+client/src/types/audio-engine.types.ts:69:export interface Sample {
+client/src/types/audio-engine.types.ts:80:export interface SessionData {
+client/src/types/audio-engine.types.ts:115:export interface UseAudioEngineReturn {
+client/src/types/audio.ts:19:export interface AudioContextInfo {
+client/src/types/audio.ts:20:  context: AudioContext;
+client/src/types/audio.ts:24:  state: AudioContextState;
+client/src/types/audio.ts:30:export interface AudioBufferInfo {
+client/src/types/audio.ts:41:export interface AudioNodeConnection {
+client/src/types/audio.ts:55:export interface AudioEffect {
+client/src/types/audio.ts:101:export interface EffectParameter {
+client/src/types/audio.ts:127:export interface EffectState {
+client/src/types/audio.ts:140:export interface EffectChain {
+client/src/types/audio.ts:167:export interface EffectChainState {
+client/src/types/audio.ts:181:export interface MixerChannelConfig {
+client/src/types/audio.ts:198:export interface MasterBus {
+client/src/types/audio.ts:227:export interface SidechainConfig {
+client/src/types/audio.ts:245:export interface SidechainConnection {
+client/src/types/audio.ts:265:export interface SidechainRouterState {
+client/src/types/audio.ts:277:export interface AutomationTarget {
+client/src/types/audio.ts:290:export interface AutomationPoint {
+client/src/types/audio.ts:310:export interface AutomationLane {
+client/src/types/audio.ts:333:export interface AutomationLaneState {
+client/src/types/audio.ts:343:export interface AutomationEngine {
+client/src/types/audio.ts:344:  audioContext: AudioContext;
+client/src/types/audio.ts:367:  serialize(): AutomationEngineState;
+client/src/types/audio.ts:368:  deserialize(state: AutomationEngineState): void;
+client/src/types/audio.ts:377:export interface AutomationEngineState {
+client/src/types/audio.ts:389:export interface CPUMetrics {
+client/src/types/audio.ts:399:export interface MemoryMetrics {
+client/src/types/audio.ts:410:export interface LatencyMetrics {
+client/src/types/audio.ts:421:export interface EffectPerformance {
+client/src/types/audio.ts:433:export interface ChannelPerformance {
+client/src/types/audio.ts:444:export interface PerformanceSnapshot {
+client/src/types/audio.ts:459:export interface PerformanceMonitor {
+client/src/types/audio.ts:460:  audioContext: AudioContext;
+client/src/types/audio.ts:497:export interface ProjectState {
+client/src/types/audio.ts:517:  automation: AutomationEngineState;
+client/src/types/audio.ts:526:export interface ProjectMetadata {
+client/src/types/audio.ts:540:export interface MixerChannelState {
+client/src/types/audio.ts:554:export interface MasterBusState {
+client/src/types/audio.ts:563:export interface PerformanceSettings {
+client/src/types/audio.ts:578:export interface MIDINoteEvent {
+client/src/types/audio.ts:589:export interface MIDIControlEvent {
+client/src/types/audio.ts:600:export type MIDIMessage = MIDINoteEvent | MIDIControlEvent;
+client/src/types/audio.ts:605:export interface MIDIMapping {
+client/src/types/audio.ts:632:export interface TransportPosition {
+client/src/types/audio.ts:646:export interface Transport {
+client/src/types/audio.ts:683:export interface AudioFileMetadata {
+client/src/types/audio.ts:696:export interface WaveformData {
+client/src/types/audio.ts:706:export interface SpectrumData {
+client/src/types/audio.ts:717:export interface Disposable {
+client/src/types/audio.ts:724:export interface Serializable<T = any> {
+client/src/types/audio.ts:734:export type { VSTPerformanceMonitor } from '@/audio/fx/vst-performance-monitor';
+client/src/types/audio.ts:735:export type { VSTAutomationEngine } from '@/audio/fx/vst-automation-engine';
+client/src/types/audio.ts:804:export interface DelayParams {
+client/src/types/audio.ts:812:export interface DistortionParams {
+client/src/types/audio.ts:818:export interface EQParams {
+client/src/types/audio.ts:829:export interface FilterParams {
+client/src/types/audio.ts:837:export interface ReverbParams {
+client/src/types/audio.ts:844:export interface AutomationLaneData {
+client/src/types/audio.ts:848:export interface FXNode {
+client/src/types/daw.types.ts:1:export type ClipType = 'audio' | 'midi';
+client/src/types/daw.types.ts:3:export interface Clip {
+client/src/types/daw.types.ts:13:export interface Track {
+client/src/types/daw.types.ts:22:export interface FXUnit {
+client/src/types/globals.d.ts:34:  interface MIDIPort extends EventTarget {
+client/src/types/globals.d.ts:44:  interface MIDIInput extends MIDIPort {
+client/src/types/globals.d.ts:48:  interface MIDIOutput extends MIDIPort {
+client/src/types/globals.d.ts:53:  interface MIDIMessageEvent extends Event {
+client/src/types/globals.d.ts:56:  interface MIDIConnectionEvent extends Event {
+client/src/utils/audioHelpers.ts:107:  audioContext: AudioContext,
+client/src/utils/performance-monitor.ts:23:export class PerformanceMonitor {
+client/src/utils/performance-monitor.ts:49:      console.warn('[PerformanceMonitor] Already running');
+client/src/utils/performance-monitor.ts:61:    console.log('[PerformanceMonitor] Started');
+client/src/utils/performance-monitor.ts:75:    console.log('[PerformanceMonitor] Stopped');
+client/src/utils/performance-monitor.ts:337:let monitorInstance: PerformanceMonitor | null = null;
+client/src/utils/performance-monitor.ts:339:export function getPerformanceMonitor(): PerformanceMonitor {
+client/src/utils/performance-monitor.ts:341:    monitorInstance = new PerformanceMonitor();
+client/src/utils/performance-monitor.ts:346:export function resetPerformanceMonitor(): void {
+client/src/utils/performance-monitor.ts:354:export function usePerformanceMonitor() {
+client/src/utils/performance-monitor.ts:355:  const monitor = getPerformanceMonitor();
+client/src/utils/projectSerializer.ts:15:  AutomationEngineState
+client/src/services/upload.ts:1:export interface UploadServerConfig { maxUploadSize: number; multipartThreshold: number; allowedMimeTypes: string[]; }
+client/src/services/upload.ts:2:export interface UploadOptions { onProgress?: (percent: number, loaded: number, total: number) => void; onError?: (error: string) => void; }
+client/src/services/upload.ts:3:export interface UploadResult { fileKey: string; publicUrl: string; size: number; filename: string; }
+client/src/App.tsx:15:import { VSTPerformanceMonitor } from '@/audio/fx/vst-performance-monitor';
+client/src/App.tsx:17:import { VSTAutomationEngine } from '@/audio/fx/vst-automation-engine';
+client/src/App.tsx:18:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/App.tsx:45:class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+client/src/App.tsx:91:  performanceMonitor: VSTPerformanceMonitor;
+client/src/App.tsx:93:  automationEngine: VSTAutomationEngine;
+client/src/App.tsx:94:  audioContext: AudioContext;
+client/src/App.tsx:123:      const audioContext = await getAudioContext();
+client/src/App.tsx:126:        performanceMonitor: new VSTPerformanceMonitor(audioContext),
+client/src/App.tsx:128:        automationEngine: new VSTAutomationEngine(audioContext),
+client/src/App.tsx:304:    // createSidechain() needs live AudioNode + VSTFXNode refs, so we look
+client/src/App.tsx.bak:15:import { VSTPerformanceMonitor } from '@/audio/fx/vst-performance-monitor';
+client/src/App.tsx.bak:17:import { VSTAutomationEngine } from '@/audio/fx/vst-automation-engine';
+client/src/App.tsx.bak:18:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/App.tsx.bak:45:class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+client/src/App.tsx.bak:91:  performanceMonitor: VSTPerformanceMonitor;
+client/src/App.tsx.bak:93:  automationEngine: VSTAutomationEngine;
+client/src/App.tsx.bak:94:  audioContext: AudioContext;
+client/src/App.tsx.bak:122:    const audioContext = getAudioContext();
+client/src/App.tsx.bak:126:      performanceMonitor: new VSTPerformanceMonitor(audioContext),
+client/src/App.tsx.bak:128:      automationEngine: new VSTAutomationEngine(audioContext),
+client/src/App.tsx.bak:303:    // createSidechain() needs live AudioNode + VSTFXNode refs, so we look

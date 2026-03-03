@@ -1,0 +1,134 @@
+client/src/audio/core/instrument-engine.ts:30:export interface FXState {
+client/src/audio/fx/compressor.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/compressor.ts:73:export class Compressor extends FXNodeBase {
+client/src/audio/fx/compressor.ts:121:   * input ────────── dryGain ────────────┘  (handled by FXNodeBase mix)
+client/src/audio/fx/compressor.ts:203:  /** Override FXNodeBase.setBypass to also emit our own event. */
+client/src/audio/fx/compressor.ts:297:    // Mix — FXNodeBase exposes wetGain/dryGain
+client/src/audio/fx/delay.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/delay.ts:85:export class Delay extends FXNodeBase {
+client/src/audio/fx/fx-nodebase.ts:5:export abstract class FXNodeBase {
+client/src/audio/fx/vst-fx-node.ts:3:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/vst-fx-node.ts:13:export interface VSTFXConfig {
+client/src/audio/fx/vst-fx-node.ts:34:export class VSTFXNode extends FXNodeBase {
+client/src/audio/fx/vst-fx-node.ts:519:  static async deserialize(data: any, audioContext: AudioContext): Promise<VSTFXNode> {
+client/src/audio/fx/vst-fx-node.ts:520:    const node = new VSTFXNode(audioContext, data.config);
+client/src/audio/fx/vst-project-serializer.ts:4:import { VSTFXNode } from './vst-fx-node';
+client/src/audio/fx/vst-project-serializer.ts:52:      if (fx instanceof VSTFXNode) {
+client/src/audio/fx/vst-project-serializer.ts:134:            const vstNode = await VSTFXNode.deserialize(effectData, audioContext);
+client/src/audio/fx/vst-project-serializer.ts:135:            chain.addFX(vstNode as unknown as import("../fx/fx-chain").FXNode);
+client/src/audio/fx/eq.ts:2:import { FXNodeBase } from './fx-nodebase';
+client/src/audio/fx/eq.ts:91:export class EQ extends FXNodeBase {
+client/src/audio/fx/fx-chain.ts:11:export interface FXNode {
+client/src/audio/fx/fx-chain.ts:22:export interface FXChainConfig {
+client/src/audio/fx/fx-chain.ts:29:export interface FXChainEventPayload {
+client/src/audio/fx/fx-chain.ts:30:  added?: FXNode;
+client/src/audio/fx/fx-chain.ts:37:export interface SerializedFXChain {
+client/src/audio/fx/fx-chain.ts:42:export class FXChain {
+client/src/audio/fx/fx-chain.ts:43:  protected effects: FXNode[] = [];
+client/src/audio/fx/fx-chain.ts:84:  addEffect(type: string, node: AudioNode, config?: Partial<FXNode>): string {
+client/src/audio/fx/fx-chain.ts:90:    const fxNode: FXNode = {
+client/src/audio/fx/fx-chain.ts:199:  getEffect(id: string): FXNode | undefined { return this.effects.find(fx => fx.id === id); }
+client/src/audio/fx/fx-chain.ts:200:  getAllEffects(): FXNode[] { return [...this.effects]; }
+client/src/audio/fx/fx-chain.ts:221:  addFXNode(fx: { id: string; input: AudioNode; constructor: { name: string } }, index?: number): string {
+client/src/audio/fx/fx-chain.ts:228:  addFX(fx: FXNode): void { this.addEffect(fx); }
+client/src/audio/fx/vst-sidechain.ts:2:import { VSTFXNode } from './vst-fx-node';
+client/src/audio/fx/vst-sidechain.ts:12:  targetVST: VSTFXNode;
+client/src/audio/fx/vst-sidechain.ts:26:    targetVST: VSTFXNode
+client/src/audio/fx/loader.ts:2:import { VSTFXNode, VSTFXConfig } from './vst-fx-node';
+client/src/audio/fx/loader.ts:12:  /** Extra config forwarded to VSTFXNode */
+client/src/audio/fx/loader.ts:35:  node:      VSTFXNode;
+client/src/audio/fx/loader.ts:79: * Manages loading, caching, and lifecycle of VSTFXNode instances.
+client/src/audio/fx/loader.ts:97:  private inFlight = new Map<string, Promise<VSTFXNode>>();
+client/src/audio/fx/loader.ts:111:  async load(vstUrl: string, options: VSTLoadOptions = {}): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:157:  ): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:164:      node: undefined as unknown as VSTFXNode, // filled on success
+client/src/audio/fx/loader.ts:177:        const node = new VSTFXNode(ctx, {
+client/src/audio/fx/loader.ts:226:  get(vstUrl: string, workletName?: string): VSTFXNode | undefined {
+client/src/audio/fx/loader.ts:366:): Promise<VSTFXNode>;
+client/src/audio/fx/loader.ts:376:): Promise<VSTFXNode>;
+client/src/audio/fx/loader.ts:383:): Promise<VSTFXNode> {
+client/src/audio/fx/loader.ts:398:export { VSTFXNode };
+client/src/audio/mixer/mixer-channel.ts:6:import { FXNodeBase } from "../fx/fx-nodebase";
+client/src/audio/mixer/mixer-channel.ts:7:import { VSTFXNode } from "../fx/vst-fx-node";
+client/src/audio/mixer/mixer-channel.ts:213:  addFX(fx: FXNodeBase, index?: number): void {
+client/src/audio/mixer/mixer-channel.ts:214:    this.fxChain.addFXNode(fx, index);
+client/src/audio/mixer/mixer-channel.ts:244:  ): Promise<VSTFXNode> {
+client/src/audio/mixer/mixer-channel.ts:248:      // Type assertion since we know addVSTEffect returns VSTFXNode
+client/src/audio/mixer/mixer-channel.ts:249:      if (!(vstNode instanceof VSTFXNode)) {
+client/src/audio/mixer/mixer-channel.ts:250:        throw new Error('Expected VSTFXNode but got different type');
+client/src/audio/mixer/mixer-channel.ts:253:      return vstNode as VSTFXNode;
+client/src/audio/mixer/mixer-channel.ts:263:  getEffects(): FXNode[] {
+client/src/audio/mixer/mixer-channel.ts:270:  getEffect(fxId: string): FXNodeBase | undefined {
+client/src/audio/mixer/mixer-channel.ts:277:  getVSTPlugins(): VSTFXNode[] {
+client/src/audio/mixer/mixer-channel.ts:278:    return this.fxChain.getAllEffects().filter(fx => fx instanceof VSTFXNode) as VSTFXNode[];
+client/src/components/collapsible-fx-panel.tsx:20:interface CollapsibleFXPanelProps {
+client/src/components/collapsible-fx-panel.tsx:175:interface FXSectionProps {
+client/src/components/fx-chain.ts:5:import { FXNodeBase } from '../audio/fx/fx-nodebase';
+client/src/components/fx-chain.ts:7:import { VSTFXNode } from '../audio/fx/vst-fx-node';
+client/src/components/fx-chain.ts:21:export interface FXChainEventPayload {
+client/src/components/fx-chain.ts:31:export interface FXSlot {
+client/src/components/fx-chain.ts:32:  fx:       FXNodeBase;
+client/src/components/fx-chain.ts:41:export interface SerializedFXChain {
+client/src/components/fx-chain.ts:50:export class FXChain {
+client/src/components/fx-chain.ts:78:  get effects(): readonly FXNodeBase[] {
+client/src/components/fx-chain.ts:104:  addFX(fx: FXNodeBase, index?: number, options: { bypass?: boolean; wet?: number } = {}) {
+client/src/components/fx-chain.ts:125:  ): Promise<FXNodeBase> {
+client/src/components/fx-chain.ts:128:    const vstNode = new VSTFXNode(this.context, { vstUrl, workletName, ...config });
+client/src/components/fx-chain.ts:260:          const vstNode = await VSTFXNode.deserialize(fx.data, chain.context);
+client/src/components/fx-chain.ts:292:  private _createSlot(fx: FXNodeBase, bypass: boolean, wet: number): FXSlot {
+client/src/components/fx-chain.ts:364:      if (s.fx instanceof VSTFXNode) {
+client/src/components/fx-panel.tsx:9:interface FXState {
+client/src/components/fx-panel.tsx:28:interface FXPanelProps {
+client/src/components/fx-panel.tsx:33:interface FXConfig {
+client/src/components/ui/fx-chain-panel.tsx:6:export interface FXUnit {
+client/src/components/ui/fx-chain-panel.tsx:13:interface FXChainPanelProps {
+client/src/components/vst-sidechain-ui.tsx:6:import { VSTFXNode } from '@/audio/fx/vst-fx-node';
+client/src/components/vst-sidechain-ui.tsx:110:  const vstPlugins=targetCh?.getEffects().filter(fx=>fx instanceof VSTFXNode)??[];
+client/src/components/vst-sidechain-ui.tsx:118:    router.createSidechain({sourceChannelId:sourceId,targetVSTId,sidechainInput:1,gain} as any,sourceCh.output,targetVST as VSTFXNode);
+client/src/components/vst-sidechain-ui.tsx.bak:7:import { VSTFXNode } from '@/audio/fx/vst-fx-node';
+client/src/components/vst-sidechain-ui.tsx.bak:226:  const vstPlugins = targetCh?.getEffects().filter(fx => fx instanceof VSTFXNode) ?? [];
+client/src/components/vst-sidechain-ui.tsx.bak:244:    router.createSidechain(config, sourceCh.output, targetVST as VSTFXNode);
+client/src/hooks/useFXChain.ts:6:import { FXNodeBase } from '../audio/fx/fx-nodebase';
+client/src/hooks/useFXChain.ts:8:export interface FXChainState {
+client/src/hooks/useFXChain.ts:9:  effects:   readonly FXNodeBase[];
+client/src/hooks/useFXChain.ts:16:export interface UseFXChainReturn extends FXChainState {
+client/src/hooks/useFXChain.ts:18:  addFX:        (fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => void;
+client/src/hooks/useFXChain.ts:110:  const addFX = useCallback((fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => {
+client/src/store/fx-store.ts:34:import { FXNodeBase }   from "@/audio/fx/fx-nodebase";
+client/src/store/fx-store.ts:49:export interface FXPreset {
+client/src/store/fx-store.ts:56:export interface FXSnapshot {
+client/src/store/fx-store.ts:68:export type FXAddedCallback   = (channel: MixerChannel, fx: FXNodeBase) => void;
+client/src/store/fx-store.ts:73:interface FXState {
+client/src/store/fx-store.ts:77:  //    keyed by channel.id → current array of FXNodeBase refs
+client/src/store/fx-store.ts:81:  channelFX: Record<string, FXNodeBase[]>;
+client/src/store/fx-store.ts:108:    fx:       FXNodeBase,
+client/src/store/fx-store.ts:118:    fx:     FXNodeBase,
+client/src/store/fx-store.ts:126:  ) => Promise<FXNodeBase>;
+client/src/store/fx-store.ts:136:  ) => readonly FXNodeBase[];
+client/src/store/fx-store.ts:163:  setFXParam:  (fx: FXNodeBase, paramName: string, value: number | string | boolean) => void;
+client/src/store/fx-store.ts:164:  getFXParam:  (fx: FXNodeBase, paramName: string) => number | string | boolean | undefined;
+client/src/store/fx-store.ts:165:  getFXParams: (fx: FXNodeBase) => Record<string, number | string | boolean>;
+client/src/store/fx-store.ts:185:  duplicateFX:        (channel: MixerChannel, fxId: string) => Promise<FXNodeBase | null>;
+client/src/store/fx-store.ts:257:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:270:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:279:          for (const [cid, fxArr] of Object.entries((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>))) {
+client/src/store/fx-store.ts:281:              (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...fxArr];
+client/src/store/fx-store.ts:301:            (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]  = [...channel.getEffects()];
+client/src/store/fx-store.ts:327:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:354:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:372:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:397:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:444:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
+client/src/store/fx-store.ts:469:          for (const [cid, fxArr] of Object.entries((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>))) {
+client/src/store/fx-store.ts:471:              (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...fxArr];
+client/src/store/fx-store.ts:540:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[channelKey(channel)] = [...channel.getEffects()];
+client/src/store/fx-store.ts:579:          (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [];
+client/src/store/fx-store.ts:596:          if ((state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]) {
+client/src/store/fx-store.ts:597:            (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...(state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]];
+client/src/store/fx-store.ts:613:export function useChannelFX(channel: MixerChannel | null | undefined): readonly FXNodeBase[] {
+client/src/store/fx-store.ts:662:  callback: (fx: FXNodeBase[]) => void
+client/src/types/audio-engine.types.ts:58:export interface FXParams {
+client/src/types/audio.ts:848:export interface FXNode {
+client/src/types/daw.types.ts:22:export interface FXUnit {
+client/src/App.tsx:304:    // createSidechain() needs live AudioNode + VSTFXNode refs, so we look
+client/src/App.tsx.bak:303:    // createSidechain() needs live AudioNode + VSTFXNode refs, so we look

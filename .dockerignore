@@ -1,0 +1,35 @@
+# Dependencies
+node_modules
+**/node_modules
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Version control
+.git
+.gitignore
+
+# Build artifacts
+dist
+build
+*.tsbuildinfo
+
+# Dev / OS clutter
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test & coverage
+coverage
+__tests__
+*.test.ts
+*.spec.ts
+
+# Editor
+.vscode
+.idea
+*.swp

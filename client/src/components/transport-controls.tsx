@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Circle, Square, Play, Undo, Redo, Download, Target } from 'lucide-react';
 
@@ -15,7 +16,7 @@ interface TransportControlsProps {
   onExport: () => void;
 }
 
-export function TransportControls({
+export const TransportControls = memo(function TransportControls({
   isArmed,
   isRecording,
   isPlaying,
@@ -28,6 +29,18 @@ export function TransportControls({
   onRedo,
   onExport,
 }: TransportControlsProps) {
+  // Guard: only fire onRecord if not already recording
+  const handleRecord = useCallback(() => {
+    if (!isRecording) onRecord();
+  }, [isRecording, onRecord]);
+
+  // Guard: only fire onPlay if not already playing
+  const handlePlay = useCallback(() => {
+    if (!isPlaying) onPlay();
+  }, [isPlaying, onPlay]);
+
+  const hasEvents = recordedEventsCount > 0;
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">
       <Button
@@ -44,8 +57,9 @@ export function TransportControls({
       <Button
         variant={isRecording ? 'destructive' : 'outline'}
         size="sm"
-        onClick={onRecord}
-        disabled={!isArmed}
+        onClick={handleRecord}
+        // Disabled if not armed, or if currently playing (can't record during playback)
+        disabled={!isArmed || isPlaying}
         className={isRecording ? 'animate-pulse' : ''}
         data-testid="button-record"
       >
@@ -66,21 +80,22 @@ export function TransportControls({
       <Button
         variant={isPlaying ? 'default' : 'outline'}
         size="sm"
-        onClick={onPlay}
-        disabled={recordedEventsCount === 0}
+        onClick={handlePlay}
+        // Disabled if no events to play, or if currently recording
+        disabled={!hasEvents || isRecording}
         data-testid="button-play"
       >
         <Play className="w-4 h-4 mr-1 fill-current" />
         Play
       </Button>
 
-      <div className="w-px h-6 bg-border mx-1" />
+      <div className="w-px h-6 bg-border mx-1" aria-hidden />
 
       <Button
         variant="ghost"
         size="sm"
         onClick={onUndo}
-        disabled={recordedEventsCount === 0}
+        disabled={!hasEvents}
         data-testid="button-undo"
       >
         <Undo className="w-4 h-4" />
@@ -95,7 +110,7 @@ export function TransportControls({
         <Redo className="w-4 h-4" />
       </Button>
 
-      <div className="w-px h-6 bg-border mx-1" />
+      <div className="w-px h-6 bg-border mx-1" aria-hidden />
 
       <Button
         variant="outline"
@@ -107,11 +122,11 @@ export function TransportControls({
         Export
       </Button>
 
-      {recordedEventsCount > 0 && (
+      {hasEvents && (
         <span className="text-xs text-muted-foreground ml-2">
           {recordedEventsCount} events
         </span>
       )}
     </div>
   );
-}
+});

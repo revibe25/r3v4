@@ -1,24 +1,26 @@
+// client/src/hooks/use-audio-engine.ts (add these methods)
+
 import { useState, useEffect, useCallback } from 'react';
-import { audioEngine, type AudioState, PAD_KEYS, PIANO_KEYS } from '@/lib/audio-engine';
+import { instrumentEngine, type AudioState, PAD_KEYS, PIANO_KEYS } from '@/audio/core/instrument-engine';
+import { MixerChannel } from '@/audio/mixer/mixer-channel';
 
 export function useAudioEngine() {
-  const [state, setState] = useState<AudioState>(audioEngine.state);
+  const [state, setState] = useState<AudioState>(instrumentEngine.state);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = audioEngine.subscribe(() => {
-      setState({ ...audioEngine.state });
+    const unsubscribe = instrumentEngine.subscribe(() => {
+      setState({ ...instrumentEngine.state });
     });
-
     return () => {
       unsubscribe();
     };
   }, []);
 
   const init = useCallback(async () => {
-    await audioEngine.init();
+    await instrumentEngine.init();
     setIsInitialized(true);
-    setState({ ...audioEngine.state });
+    setState({ ...instrumentEngine.state });
   }, []);
 
   useEffect(() => {
@@ -33,10 +35,10 @@ export function useAudioEngine() {
 
       if (padIndex !== -1) {
         e.preventDefault();
-        audioEngine.triggerPad(padIndex);
+        instrumentEngine.triggerPad(padIndex);
       } else if (keyIndex !== -1) {
         e.preventDefault();
-        audioEngine.triggerKey(keyIndex);
+        instrumentEngine.triggerKey(keyIndex);
       }
     };
 
@@ -44,30 +46,49 @@ export function useAudioEngine() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // VST loading helper for channels
+  const loadChannelVST = useCallback(async (
+    channel: MixerChannel,
+    vstUrl: string,
+    workletName?: string
+  ) => {
+    try {
+      const vstNode = await channel.addVST(vstUrl, workletName);
+      setState({ ...instrumentEngine.state });
+      return vstNode;
+    } catch (error) {
+      console.error('Failed to load VST to channel:', error);
+      throw error;
+    }
+  }, []);
+
   return {
     state,
     isInitialized,
     init,
-    triggerPad: audioEngine.triggerPad.bind(audioEngine),
-    triggerKey: audioEngine.triggerKey.bind(audioEngine),
-    toggleFX: audioEngine.toggleFX.bind(audioEngine),
-    setFilter: audioEngine.setFilter.bind(audioEngine),
-    setPitch: audioEngine.setPitch.bind(audioEngine),
-    setCrossfade: audioEngine.setCrossfade.bind(audioEngine),
-    setBpm: audioEngine.setBpm.bind(audioEngine),
-    toggleMetronome: audioEngine.toggleMetronome.bind(audioEngine),
-    arm: audioEngine.arm.bind(audioEngine),
-    record: audioEngine.record.bind(audioEngine),
-    stop: audioEngine.stop.bind(audioEngine),
-    play: audioEngine.play.bind(audioEngine),
-    undo: audioEngine.undo.bind(audioEngine),
-    redo: audioEngine.redo.bind(audioEngine),
-    getAnalyserData: audioEngine.getAnalyserData.bind(audioEngine),
-    getWaveformData: audioEngine.getWaveformData.bind(audioEngine),
-    loadSample: audioEngine.loadSample.bind(audioEngine),
-    assignPadSample: audioEngine.assignPadSample.bind(audioEngine),
-    assignKeySample: audioEngine.assignKeySample.bind(audioEngine),
-    exportSession: audioEngine.exportSession.bind(audioEngine),
-    importSession: audioEngine.importSession.bind(audioEngine),
+    triggerPad: instrumentEngine.triggerPad.bind(instrumentEngine),
+    triggerKey: instrumentEngine.triggerKey.bind(instrumentEngine),
+    toggleFX: instrumentEngine.toggleFX.bind(instrumentEngine),
+    setFilter: instrumentEngine.setFilter.bind(instrumentEngine),
+    setPitch: instrumentEngine.setPitch.bind(instrumentEngine),
+    setCrossfade: instrumentEngine.setCrossfade.bind(instrumentEngine),
+    setBpm: instrumentEngine.setBpm.bind(instrumentEngine),
+    toggleMetronome: instrumentEngine.toggleMetronome.bind(instrumentEngine),
+    arm: instrumentEngine.arm.bind(instrumentEngine),
+    record: instrumentEngine.record.bind(instrumentEngine),
+    stop: instrumentEngine.stop.bind(instrumentEngine),
+    play: instrumentEngine.play.bind(instrumentEngine),
+    undo: instrumentEngine.undo.bind(instrumentEngine),
+    redo: instrumentEngine.redo.bind(instrumentEngine),
+    getAnalyserData: instrumentEngine.getAnalyserData.bind(instrumentEngine),
+    getWaveformData: instrumentEngine.getWaveformData.bind(instrumentEngine),
+    loadSample: instrumentEngine.loadSample.bind(instrumentEngine),
+    assignPadSample: instrumentEngine.assignPadSample.bind(instrumentEngine),
+    assignKeySample: instrumentEngine.assignKeySample.bind(instrumentEngine),
+    exportSession: instrumentEngine.exportSession.bind(instrumentEngine),
+    importSession: instrumentEngine.importSession.bind(instrumentEngine),
+    
+    // VST helper
+    loadChannelVST,
   };
 }

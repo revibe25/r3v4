@@ -1,0 +1,164 @@
+client/src/audio/clips/audio-clip-loader.ts:2:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/clips/audio-clip-loader.ts:72:  private context: AudioContext;
+client/src/audio/clips/audio-clip-loader.ts:87:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/clips/audio-clip.ts:3:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/clips/audio-clip.ts:33:  /** Fires when playback actually starts at the AudioContext level */
+client/src/audio/clips/audio-clip.ts:55: * absolute AudioContext time at which that moment will occur.
+client/src/audio/clips/audio-clip.ts:57:function transportToContextTime(transportTime: number, ctx: AudioContext): number {
+client/src/audio/clips/audio-clip.ts:67:  private context: AudioContext;
+client/src/audio/clips/audio-clip.ts:80:  /** Time (AudioContext seconds) at which playback started — set in start() */
+client/src/audio/clips/audio-clip.ts:95:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/analysis-engine.ts:63:  context: AudioContext | null = null;
+client/src/audio/core/analysis-engine.ts:92:  async initialize(): Promise<AudioContext> {
+client/src/audio/core/analysis-engine.ts:94:    this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/analysis-engine.ts:103:    if (!this.context) throw new Error('AudioContext not initialized');
+client/src/audio/core/audio-context.ts:3:// SINGLETON AudioContext — use this everywhere instead of new AudioContext()
+client/src/audio/core/audio-context.ts:5:// WHY: Browsers cap AudioContext instances (~6). Creating one per component
+client/src/audio/core/audio-context.ts:9://   import { getAudioContext } from '@/audio/core/audio-context';
+client/src/audio/core/audio-context.ts:10://   const ctx = await getAudioContext();
+client/src/audio/core/audio-context.ts:13:let _audioContext: AudioContext | null = null;
+client/src/audio/core/audio-context.ts:16: * Returns the shared singleton AudioContext.
+client/src/audio/core/audio-context.ts:19:export async function getAudioContext(): Promise<AudioContext> {
+client/src/audio/core/audio-context.ts:21:    _audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/audio-context.ts:24:  // Browsers suspend AudioContext until user gesture — resume if needed
+client/src/audio/core/audio-context.ts:34: * Use getAudioContext() for first access.
+client/src/audio/core/audio-context.ts:36:export function getAudioContextSync(): AudioContext | null {
+client/src/audio/core/audio-context.ts:44:export async function destroyAudioContext(): Promise<void> {
+client/src/audio/core/audio-context.ts:51:/** @deprecated Use getAudioContext() */
+client/src/audio/core/audio-context.ts:52:export const resumeAudioContext = getAudioContext;
+client/src/audio/core/audio-context.ts:54:/** @deprecated Use destroyAudioContext() */
+client/src/audio/core/audio-context.ts:55:export const closeAudioContext = destroyAudioContext;
+client/src/audio/core/audio-context.ts:57:/** Calls cb once the AudioContext is ready */
+client/src/audio/core/audio-context.ts:58:export function onAudioContext(eventOrCb: string | ((ctx: AudioContext) => void), cb?: (ctx: AudioContext) => void): void {
+client/src/audio/core/audio-context.ts:60:  if (fn) getAudioContext().then(fn).catch(console.error);
+client/src/audio/core/instrument-engine.ts:65:  private ctx: AudioContext | null = null;
+client/src/audio/core/instrument-engine.ts:111:    this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/core/audio-graph.ts:3:  getAudioContext,
+client/src/audio/core/audio-graph.ts:4:  resumeAudioContext,
+client/src/audio/core/audio-graph.ts:5:  onAudioContext,
+client/src/audio/core/audio-graph.ts:6:  closeAudioContext,
+client/src/audio/core/audio-graph.ts:40:  readonly context: AudioContext;
+client/src/audio/core/audio-graph.ts:59:  // Clean up when the AudioContext singleton is closed externally
+client/src/audio/core/audio-graph.ts:65:    this.context     = getAudioContext();
+client/src/audio/core/audio-graph.ts:92:    this.removeContextListener = onAudioContext('created', () => {
+client/src/audio/core/audio-graph.ts:95:      console.warn('[AudioGraph] AudioContext was re-created. Instantiate a new AudioGraph.');
+client/src/audio/core/audio-graph.ts:240:    await resumeAudioContext();
+client/src/audio/core/audio-graph.ts:248:  /** Current AudioContext time in seconds */
+client/src/audio/core/audio-graph.ts:280:   * Dispose the graph AND close the underlying AudioContext singleton.
+client/src/audio/core/audio-graph.ts:281:   * After this, calling `getAudioContext()` will create a fresh one.
+client/src/audio/core/audio-graph.ts:285:    await closeAudioContext();
+client/src/audio/core/audio-graph.ts:344:// Lazily created so tests can import without triggering AudioContext construction
+client/src/audio/core/beat-detector.ts:28:  private ctx!: AudioContext;
+client/src/audio/core/beat-detector.ts:64:    this.ctx = new AudioContext();
+client/src/audio/fx/fx-nodebase.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/fx/fx-nodebase.ts:7:  readonly context: AudioContext;
+client/src/audio/fx/fx-nodebase.ts:20:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/fx/vst-automation-engine.ts:46:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:53:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:123:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:125:  constructor(id: string, paramId: number, points: AutomationPoint[], audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:183:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:187:  constructor(id: string, paramId: number, config: LFOConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:235:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:240:  constructor(id: string, paramId: number, config: EnvelopeConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-fx-node.ts:53:  constructor(audioContext: AudioContext, config: VSTFXConfig) {
+client/src/audio/fx/vst-fx-node.ts:519:  static async deserialize(data: any, audioContext: AudioContext): Promise<VSTFXNode> {
+client/src/audio/fx/vst-loader.ts:36:  audioCtx: AudioContext;
+client/src/audio/fx/vst-loader.ts:69:  static async ensureWorkletRegistered(audioCtx: AudioContext): Promise<void> {
+client/src/audio/fx/vst-loader.ts:96:      throw new Error('AudioContext is required');
+client/src/audio/fx/vst-project-serializer.ts:91:    audioContext: AudioContext
+client/src/audio/fx/vst-project-serializer.ts:120:    audioContext: AudioContext
+client/src/audio/fx/vst-scanner.ts:34:    audioCtx: AudioContext
+client/src/audio/fx/vst-scanner.ts:78:    audioCtx: AudioContext
+client/src/audio/fx/fx-chain.ts:4:import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+client/src/audio/fx/fx-chain.ts:64:    const context = getAudioContext();
+client/src/audio/fx/vst-sidechain.ts:16:  private audioContext: AudioContext;
+client/src/audio/fx/vst-sidechain.ts:19:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/loader.ts:3:import { getAudioContext } from '../core/audio-context';
+client/src/audio/fx/loader.ts:8:  /** AudioContext to use — falls back to the shared singleton */
+client/src/audio/fx/loader.ts:9:  audioContext?: AudioContext;
+client/src/audio/fx/loader.ts:156:    opts: Required<Omit<VSTLoadOptions, 'audioContext'>> & { audioContext?: AudioContext },
+client/src/audio/fx/loader.ts:176:        const ctx  = opts.audioContext ?? getAudioContext();
+client/src/audio/fx/loader.ts:372:  audioContext: AudioContext,
+client/src/audio/fx/loader.ts:379:  vstUrlOrCtx: string | AudioContext,
+client/src/audio/fx/vst-automation-engine.ts.bak:48:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:55:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts.bak:175:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:181:    audioContext: AudioContext
+client/src/audio/fx/vst-automation-engine.ts.bak:269:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:277:    audioContext: AudioContext
+client/src/audio/fx/vst-automation-engine.ts.bak:361:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts.bak:370:    audioContext: AudioContext
+client/src/audio/fx/vst-performance-monitor.ts:38:  private audioContext: AudioContext;
+client/src/audio/fx/vst-performance-monitor.ts:41:  constructor(audioContext: AudioContext) {
+client/src/audio/indicators/meter-node.ts:4:import { getAudioContext } from "../core/audio-context";
+client/src/audio/indicators/meter-node.ts:15:    const context = getAudioContext();
+client/src/audio/mixer/effect-chain.ts:50:  private readonly audioContext: AudioContext;
+client/src/audio/mixer/effect-chain.ts:72:    audioContext: AudioContext,
+client/src/audio/mixer/master-bus.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/mixer/master-bus.ts:7:  readonly context: AudioContext;
+client/src/audio/mixer/master-bus.ts:11:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/mixer/mixer-channel.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/mixer/mixer-channel.ts:22:  readonly context: AudioContext;
+client/src/audio/mixer/mixer-channel.ts:50:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/recorder/recorder-engine.ts:3:import { getAudioContext, getAudioContextSync } from "../core/audio-context";
+client/src/audio/recorder/recorder-engine.ts:7:  private context: AudioContext;
+client/src/audio/recorder/recorder-engine.ts:12:    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/audio/transport/transport-engine.ts:4:import { resumeAudioContext } from "../core/audio-context";
+client/src/audio/transport/transport-engine.ts:23:    await resumeAudioContext();
+client/src/audio/transport/transport-engine.ts:43:    await resumeAudioContext();
+client/src/components/audio-visualizer.tsx:153:  const audioCtxRef = useRef<AudioContext | null>(null);
+client/src/components/audio-visualizer.tsx:184:      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/drum-pads.tsx:131:  const audioContextRef = useRef<AudioContext | null>(null);
+client/src/components/drum-pads.tsx:191:      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/fx-chain.ts:6:import { getAudioContext } from '../audio/core/audio-context';
+client/src/components/fx-chain.ts:51:  readonly context:   AudioContext;
+client/src/components/fx-chain.ts:63:    this.context   = getAudioContext();
+client/src/components/fx-chain.ts:251:  static async deserialize(data: SerializedFXChain, _context?: AudioContext): Promise<FXChain> {
+client/src/components/microphone-input.tsx:288:  const audioContextRef = useRef<AudioContext | null>(null);
+client/src/components/microphone-input.tsx:376:  const createEQ = useCallback((ctx: AudioContext, preset: EQPreset): BiquadFilterNode[] => {
+client/src/components/microphone-input.tsx:388:      if (!audioContextRef.current) audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/components/multi-track-panel/audio-engine.tsx:3:// Uses the singleton AudioContext instead of creating its own.
+client/src/components/multi-track-panel/audio-engine.tsx:5:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/components/multi-track-panel/audio-engine.tsx:8:  context: AudioContext | null = null;
+client/src/components/multi-track-panel/audio-engine.tsx:11:  async initialize(): Promise<AudioContext> {
+client/src/components/multi-track-panel/audio-engine.tsx:12:    // Use singleton — NOT new AudioContext()
+client/src/components/multi-track-panel/audio-engine.tsx:13:    this.context = await getAudioContext();
+client/src/components/multi-track-panel/audio-engine.tsx:51:  // ── Call destroyAudioContext() only on full app teardown.
+client/src/components/piano-keys.tsx:732:  const audioContextRef = useRef<AudioContext>();
+client/src/components/piano-keys.tsx:743:      audioContextRef.current = new AudioContext();
+client/src/components/vst-browser.tsx:12:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/components/vst-browser.tsx:37:      const audioCtx = getAudioContext();
+client/src/features/DAW/DAWpro.jsx:346:      const AudioContext = window.AudioContext || window.webkitAudioContext;
+client/src/features/DAW/DAWpro.jsx:347:      audioContextRef.current = new AudioContext();
+client/src/hooks/use-waveform-audio-engine.ts:8:  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+client/src/hooks/use-waveform-audio-engine.ts:11:    // Try to use existing AudioContext from your AudioEngine
+client/src/hooks/use-waveform-audio-engine.ts:13:    const initAudioContext = async () => {
+client/src/hooks/use-waveform-audio-engine.ts:15:        // Check if AudioContext already exists globally (from your AudioEngine)
+client/src/hooks/use-waveform-audio-engine.ts:19:          setAudioContext(existingContext);
+client/src/hooks/use-waveform-audio-engine.ts:21:          // Create new AudioContext for standalone usage
+client/src/hooks/use-waveform-audio-engine.ts:22:          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/hooks/use-waveform-audio-engine.ts:23:          setAudioContext(ctx);
+client/src/hooks/use-waveform-audio-engine.ts:33:    initAudioContext();
+client/src/hooks/use-waveform-audio-engine.ts:38:      console.error('AudioContext not initialized');
+client/src/hooks/usemixerchannel.ts:253:  audioContext: AudioContext
+client/src/pages/collaborative-daw-pro.jsx:346:      const AudioContext = window.AudioContext || window.webkitAudioContext;
+client/src/pages/collaborative-daw-pro.jsx:347:      audioContextRef.current = new AudioContext();
+client/src/store/audio-store.ts:26:  audioContext: AudioContext | null;
+client/src/store/audio-store.ts:50:  initAudioContext: () => Promise<void>;
+client/src/store/audio-store.ts:129:        initAudioContext: async () => {
+client/src/store/audio-store.ts:136:            const context = new AudioContext();
+client/src/store/vst-store.ts:45:  initialize: (audioContext: AudioContext) => Promise<void>;
+client/src/store/vst-store.ts:102:      initialize: async (audioContext: AudioContext) => {
+client/src/types/audio.ts:19:export interface AudioContextInfo {
+client/src/types/audio.ts:20:  context: AudioContext;
+client/src/types/audio.ts:24:  state: AudioContextState;
+client/src/types/audio.ts:344:  audioContext: AudioContext;
+client/src/types/audio.ts:460:  audioContext: AudioContext;
+client/src/utils/audioHelpers.ts:107:  audioContext: AudioContext,
+client/src/App.tsx:18:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/App.tsx:94:  audioContext: AudioContext;
+client/src/App.tsx:123:      const audioContext = await getAudioContext();
+client/src/App.tsx.bak:18:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/App.tsx.bak:94:  audioContext: AudioContext;
+client/src/App.tsx.bak:122:    const audioContext = getAudioContext();

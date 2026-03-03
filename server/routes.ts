@@ -1,10 +1,11 @@
-import type { Express } from "express";
+import { logger } from './lib/logger';
+import type { Express, RequestHandler } from "express";
 import type { Server } from "http";
 import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
+import { insertSessionSchema, insertProjectSchema, insertSampleSchema, insertPresetSchema } from "./db/schema";
 import { storage } from "./storage";
-import { insertSessionSchema, insertProjectSchema, insertSampleSchema, insertPresetSchema } from "@shared/schema";
 
 // Configure multer for audio file uploads
 const uploadDir = path.join(process.cwd(), "uploads");
@@ -71,7 +72,7 @@ export async function registerRoutes(
       const sessions = await storage.getSessions();
       res.json(sessions);
     } catch (error) {
-      console.error("Error fetching sessions:", error);
+      logger.error("Error fetching sessions:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch sessions" });
     }
   });
@@ -84,7 +85,7 @@ export async function registerRoutes(
       }
       res.json(session);
     } catch (error) {
-      console.error("Error fetching session:", error);
+      logger.error("Error fetching session:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch session" });
     }
   });
@@ -95,13 +96,13 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ 
           error: "Invalid session data", 
-          details: parsed.error.errors 
+          details: parsed.error.issues  // was: .errors — Zod v3 uses .issues
         });
       }
-      const session = await storage.createSession(parsed.data);
+      const session = await storage.createSession(parsed.data as any);
       res.status(201).json(session);
     } catch (error) {
-      console.error("Error creating session:", error);
+      logger.error("Error creating session:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to create session" });
     }
   });
@@ -114,7 +115,7 @@ export async function registerRoutes(
       }
       res.json(session);
     } catch (error) {
-      console.error("Error updating session:", error);
+      logger.error("Error updating session:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to update session" });
     }
   });
@@ -127,7 +128,7 @@ export async function registerRoutes(
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting session:", error);
+      logger.error("Error deleting session:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to delete session" });
     }
   });
@@ -139,7 +140,7 @@ export async function registerRoutes(
       const projects = await storage.getProjects();
       res.json(projects);
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      logger.error("Error fetching projects:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch projects" });
     }
   });
@@ -152,7 +153,7 @@ export async function registerRoutes(
       }
       res.json(project);
     } catch (error) {
-      console.error("Error fetching project:", error);
+      logger.error("Error fetching project:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch project" });
     }
   });
@@ -163,13 +164,13 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ 
           error: "Invalid project data", 
-          details: parsed.error.errors 
+          details: parsed.error.issues  // was: .errors
         });
       }
-      const project = await storage.createProject(parsed.data);
+      const project = await storage.createProject(parsed.data as any);
       res.status(201).json(project);
     } catch (error) {
-      console.error("Error creating project:", error);
+      logger.error("Error creating project:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to create project" });
     }
   });
@@ -182,7 +183,7 @@ export async function registerRoutes(
       }
       res.json(project);
     } catch (error) {
-      console.error("Error updating project:", error);
+      logger.error("Error updating project:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to update project" });
     }
   });
@@ -195,7 +196,7 @@ export async function registerRoutes(
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting project:", error);
+      logger.error("Error deleting project:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to delete project" });
     }
   });
@@ -207,7 +208,7 @@ export async function registerRoutes(
       const samples = await storage.getSamples();
       res.json(samples);
     } catch (error) {
-      console.error("Error fetching samples:", error);
+      logger.error("Error fetching samples:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch samples" });
     }
   });
@@ -220,49 +221,53 @@ export async function registerRoutes(
       }
       res.json(sample);
     } catch (error) {
-      console.error("Error fetching sample:", error);
+      logger.error("Error fetching sample:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch sample" });
     }
   });
 
-  app.post("/api/samples/upload", upload.single("sample"), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
+  // Cast upload.single() to RequestHandler to satisfy Express overload resolution
+  app.post(
+    "/api/samples/upload",
+    upload.single("sample") as unknown as RequestHandler,
+    async (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No file uploaded" });
+        }
 
-      const sampleData = {
-        name: req.body.name || req.file.originalname,
-        filePath: req.file.path,
-        fileName: req.file.filename,
-        fileSize: req.file.size,
-        mimeType: req.file.mimetype,
-        duration: parseFloat(req.body.duration) || 0,
-        bpm: req.body.bpm ? parseFloat(req.body.bpm) : null,
-        key: req.body.key || null,
-        tags: req.body.tags ? JSON.parse(req.body.tags) : [],
-      };
+        const sampleData = {
+          name: req.body.name || req.file.originalname,
+          filePath: req.file.path,
+          fileName: req.file.filename,
+          fileSize: req.file.size,
+          mimeType: req.file.mimetype,
+          duration: parseFloat(req.body.duration) || 0,
+          bpm: req.body.bpm ? parseFloat(req.body.bpm) : null,
+          key: req.body.key || null,
+          tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+        };
 
-      const parsed = insertSampleSchema.safeParse(sampleData);
-      if (!parsed.success) {
-        // Delete uploaded file if validation fails
-        await fs.unlink(req.file.path);
-        return res.status(400).json({ 
-          error: "Invalid sample data", 
-          details: parsed.error.errors 
-        });
-      }
+        const parsed = insertSampleSchema.safeParse(sampleData);
+        if (!parsed.success) {
+          await fs.unlink(req.file.path);
+          return res.status(400).json({ 
+            error: "Invalid sample data", 
+            details: parsed.error.issues  // was: .errors
+          });
+        }
 
-      const sample = await storage.createSample(parsed.data);
-      res.status(201).json(sample);
-    } catch (error) {
-      console.error("Error uploading sample:", error);
-      if (req.file) {
-        await fs.unlink(req.file.path).catch(console.error);
+        const sample = await storage.createSample(parsed.data as any);
+        res.status(201).json(sample);
+      } catch (error) {
+        logger.error("Error uploading sample:", error as Record<string, unknown>);
+        if (req.file) {
+          await fs.unlink(req.file.path).catch(console.error);
+        }
+        res.status(500).json({ error: "Failed to upload sample" });
       }
-      res.status(500).json({ error: "Failed to upload sample" });
     }
-  });
+  );
 
   app.get("/api/samples/:id/download", async (req, res) => {
     try {
@@ -274,7 +279,7 @@ export async function registerRoutes(
       const filePath = path.join(process.cwd(), sample.filePath);
       res.download(filePath, sample.fileName);
     } catch (error) {
-      console.error("Error downloading sample:", error);
+      logger.error("Error downloading sample:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to download sample" });
     }
   });
@@ -286,11 +291,9 @@ export async function registerRoutes(
         return res.status(404).json({ error: "Sample not found" });
       }
 
-      // Delete file from disk
       const filePath = path.join(process.cwd(), sample.filePath);
       await fs.unlink(filePath).catch(console.error);
 
-      // Delete from database
       const deleted = await storage.deleteSample(req.params.id);
       if (!deleted) {
         return res.status(404).json({ error: "Sample not found" });
@@ -298,7 +301,7 @@ export async function registerRoutes(
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting sample:", error);
+      logger.error("Error deleting sample:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to delete sample" });
     }
   });
@@ -311,7 +314,7 @@ export async function registerRoutes(
       const presets = await storage.getPresets(type);
       res.json(presets);
     } catch (error) {
-      console.error("Error fetching presets:", error);
+      logger.error("Error fetching presets:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch presets" });
     }
   });
@@ -324,7 +327,7 @@ export async function registerRoutes(
       }
       res.json(preset);
     } catch (error) {
-      console.error("Error fetching preset:", error);
+      logger.error("Error fetching preset:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch preset" });
     }
   });
@@ -335,13 +338,13 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ 
           error: "Invalid preset data", 
-          details: parsed.error.errors 
+          details: parsed.error.issues  // was: .errors
         });
       }
-      const preset = await storage.createPreset(parsed.data);
+      const preset = await storage.createPreset(parsed.data as any);
       res.status(201).json(preset);
     } catch (error) {
-      console.error("Error creating preset:", error);
+      logger.error("Error creating preset:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to create preset" });
     }
   });
@@ -354,7 +357,7 @@ export async function registerRoutes(
       }
       res.json(preset);
     } catch (error) {
-      console.error("Error updating preset:", error);
+      logger.error("Error updating preset:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to update preset" });
     }
   });
@@ -367,7 +370,7 @@ export async function registerRoutes(
       }
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting preset:", error);
+      logger.error("Error deleting preset:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to delete preset" });
     }
   });
@@ -379,7 +382,7 @@ export async function registerRoutes(
       const settings = await storage.getSettings();
       res.json(settings);
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      logger.error("Error fetching settings:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to fetch settings" });
     }
   });
@@ -389,36 +392,37 @@ export async function registerRoutes(
       const settings = await storage.updateSettings(req.body);
       res.json(settings);
     } catch (error) {
-      console.error("Error updating settings:", error);
+      logger.error("Error updating settings:", error as Record<string, unknown>);
       res.status(500).json({ error: "Failed to update settings" });
     }
   });
 
   // ==================== AUDIO PROCESSING ROUTES ====================
 
-  app.post("/api/audio/analyze", upload.single("audio"), async (req, res) => {
-    try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No audio file provided" });
+  app.post(
+    "/api/audio/analyze",
+    upload.single("audio") as unknown as RequestHandler,  // cast for overload resolution
+    async (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({ error: "No audio file provided" });
+        }
+
+        // Audio analysis (BPM detection, key detection, etc.) — implement with music-metadata or essentia.js
+        res.json({
+          duration: 0,
+          bpm: null,
+          key: null,
+          peaks: [],
+        });
+
+        await fs.unlink(req.file.path);
+      } catch (error) {
+        logger.error("Error analyzing audio:", error as Record<string, unknown>);
+        res.status(500).json({ error: "Failed to analyze audio" });
       }
-
-      // TODO: Implement audio analysis (BPM detection, key detection, etc.)
-      // This would use a library like music-metadata or essentia.js
-
-      res.json({
-        duration: 0, // Placeholder
-        bpm: null,
-        key: null,
-        peaks: [],
-      });
-
-      // Clean up temporary file
-      await fs.unlink(req.file.path);
-    } catch (error) {
-      console.error("Error analyzing audio:", error);
-      res.status(500).json({ error: "Failed to analyze audio" });
     }
-  });
+  );
 
   return httpServer;
 }

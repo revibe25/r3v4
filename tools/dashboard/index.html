@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Project Doctor Dashboard</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px }
+    h2 { margin-top: 30px }
+    pre { background: #111; color: #0f0; padding: 12px }
+  </style>
+</head>
+<body>
+  <h1>🩺 Project Doctor Dashboard</h1>
+
+  <h2>Missing Files</h2>
+  <pre id="missing"></pre>
+
+  <h2>Unused Components</h2>
+  <pre id="unused"></pre>
+
+  <h2>Dependencies</h2>
+  <pre id="deps"></pre>
+
+  <script>
+    fetch("../project-doctor-report.json")
+      .then(r => r.json())
+      .then(d => {
+        missing.textContent =
+          d.missingFiles.map(m => m.raw).join("\n");
+        unused.textContent =
+          d.unusedComponents.join("\n");
+        deps.textContent =
+          d.dependencies.missing.join("\n");
+      });
+  </script>
+</body>
+</html>

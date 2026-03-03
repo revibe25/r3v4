@@ -1,0 +1,84 @@
+client/src/audio/effects/compressor.ts:3:import { CompressorParams } from '@shared/effects.types';
+client/src/audio/effects/compressor.ts:11:  private params: CompressorParams;
+client/src/audio/effects/compressor.ts:51:  setParams(params: Partial<CompressorParams>): void {
+client/src/audio/effects/compressor.ts:116:  getParams(): CompressorParams {
+client/src/audio/effects/delay.ts:2:import { DelayParams } from '@shared/effects.types';
+client/src/audio/effects/delay.ts:9:  private params: DelayParams;
+client/src/audio/effects/delay.ts:29:  setParams(params: Partial<DelayParams>): void {
+client/src/audio/effects/delay.ts:58:  getParams(): DelayParams { return { ...this.params }; }
+client/src/audio/effects/distortion.ts:2:import { DistortionParams } from '@shared/effects.types';
+client/src/audio/effects/distortion.ts:9:  private params: DistortionParams;
+client/src/audio/effects/distortion.ts:28:  setParams(params: Partial<DistortionParams>): void {
+client/src/audio/effects/distortion.ts:56:  getParams(): DistortionParams { return { ...this.params }; }
+client/src/audio/effects/eq.ts:2:import { EQParams } from '@shared/effects.types';
+client/src/audio/effects/eq.ts:6:  private params: EQParams;
+client/src/audio/effects/eq.ts:14:  setParams(params: Partial<EQParams>): void {
+client/src/audio/effects/eq.ts:32:  getParams(): EQParams { return { ...this.params }; }
+client/src/audio/effects/filter.ts:2:import { FilterParams } from '@shared/effects.types';
+client/src/audio/effects/filter.ts:6:  private params: FilterParams;
+client/src/audio/effects/filter.ts:19:  setParams(params: Partial<FilterParams>): void {
+client/src/audio/effects/filter.ts:39:  getParams(): FilterParams { return { ...this.params }; }
+client/src/audio/effects/reverb.ts:2:import { ReverbParams } from '@shared/effects.types';
+client/src/audio/effects/reverb.ts:9:  private params: ReverbParams;
+client/src/audio/effects/reverb.ts:29:  setParams(params: Partial<ReverbParams>): void {
+client/src/audio/effects/reverb.ts:59:  getParams(): ReverbParams { return { ...this.params }; }
+client/src/audio/fx/compressor.ts:7:export interface CompressorParams {
+client/src/audio/fx/compressor.ts:33:  paramsChanged: { compressor: Compressor; params: CompressorParams };
+client/src/audio/fx/compressor.ts:44:export const COMPRESSOR_PRESETS: Record<CompressorPresetName, CompressorParams> = {
+client/src/audio/fx/compressor.ts:79:  private _params: CompressorParams = {
+client/src/audio/fx/compressor.ts:95:  constructor(id: string, initialParams?: Partial<CompressorParams>) {
+client/src/audio/fx/compressor.ts:108:    if (initialParams) {
+client/src/audio/fx/compressor.ts:109:      this._params = { ...this._params, ...initialParams };
+client/src/audio/fx/compressor.ts:112:    this.applyAllParams(false); // apply without ramping on init
+client/src/audio/fx/compressor.ts:131:  // ─── Params ──────────────────────────────────────────────────────────────────
+client/src/audio/fx/compressor.ts:133:  get params(): Readonly<CompressorParams> { return { ...this._params }; }
+client/src/audio/fx/compressor.ts:138:  setParams(updates: Partial<CompressorParams>): this {
+client/src/audio/fx/compressor.ts:140:    this.applyAllParams(true);
+client/src/audio/fx/compressor.ts:147:    return this.setParams(COMPRESSOR_PRESETS[name]);
+client/src/audio/fx/compressor.ts:153:    return this.setParams({ threshold: db });
+client/src/audio/fx/compressor.ts:157:    return this.setParams({ knee: db });
+client/src/audio/fx/compressor.ts:161:    return this.setParams({ ratio: value });
+client/src/audio/fx/compressor.ts:165:    return this.setParams({ attack: seconds });
+client/src/audio/fx/compressor.ts:169:    return this.setParams({ release: seconds });
+client/src/audio/fx/compressor.ts:174:    return this.setParams({ makeupGain: db });
+client/src/audio/fx/compressor.ts:179:    return this.setParams({ mix: clamp(value, 0, 1) });
+client/src/audio/fx/compressor.ts:275:  private applyAllParams(ramp: boolean): void {
+client/src/audio/fx/delay.ts:15:export interface DelayParams {
+client/src/audio/fx/delay.ts:81:} as const satisfies Record<string, DelayParams>;
+client/src/audio/fx/delay.ts:99:  // Current params (source of truth for getParams / toJSON)
+client/src/audio/fx/delay.ts:100:  private _params: Required<DelayParams> = {
+client/src/audio/fx/delay.ts:114:  constructor(id: string, initialParams?: DelayParams) {
+client/src/audio/fx/delay.ts:129:    this.setParams({ ...this._params, ...initialParams });
+client/src/audio/fx/delay.ts:218:  setParams(params: DelayParams): void {
+client/src/audio/fx/delay.ts:342:    this.setParams(PRESETS[name] as DelayParams);
+client/src/audio/fx/delay.ts:351:  getParams(): Readonly<Required<DelayParams>> {
+client/src/audio/fx/delay.ts:365:      params: this.getParams(),
+client/src/audio/fx/fx-nodebase.ts:79:  getParams(): Record<string, number> { return {}; }
+client/src/audio/fx/vst-loader.ts:204:    maxParams: number
+client/src/audio/fx/vst-loader.ts:208:    const paramCount = exports.getParameterCount ? exports.getParameterCount() : maxParams;
+client/src/audio/indicators/meter-node.ts:3:import { MeterData } from "../../../shared/types/meter.types";
+client/src/audio/indicators/meter-node.ts:32:  getMeterData(): MeterData {
+client/src/components/dj-controls/hot-cues.tsx:8:import { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
+client/src/components/dj-controls/hot-cues.tsx:16:  onEffectChange: (nodeId: string, params: AnyEffectParams) => void;
+client/src/components/dj-controls/hot-cues.tsx:44:  onChange: (params: AnyEffectParams) => void;
+client/src/store/meter-store.ts:2:import { MeterData } from '@shared/types/meter.types';
+client/src/store/meter-store.ts:5:  meters: Record<string, MeterData>;
+client/src/store/meter-store.ts:6:  updateMeter: (id: string, meter: MeterData) => void;
+client/src/store/meter-store.ts:7:  getMeter: (id: string) => MeterData | undefined;
+client/src/store/meter-store.ts:15:  updateMeter: (id: string, meter: MeterData) => {
+client/src/store/tone-store.ts:13:import { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
+client/src/store/tone-store.ts:20:  updateEffect: (id: string, params: AnyEffectParams) => void;
+client/src/store/tone-store.ts:79:  updateEffect: (id: string, params: AnyEffectParams) => {
+client/src/store/tone-store.ts:83:      effect.setParams(params);
+client/src/store/fx-store.ts:165:  getFXParams: (fx: FXNodeBase) => Record<string, number | string | boolean>;
+client/src/store/fx-store.ts:213:    params:   (fx as any).getParams ? { ...(fx as any).getParams() } : {},
+client/src/store/fx-store.ts:482:      getFXParams(fx) {
+client/src/store/fx-store.ts:483:        if (typeof (fx as any).getParams === "function") return (fx as any).getParams();
+client/src/types/audio-engine.types.ts:30:  metering?: MeterData;
+client/src/types/audio-engine.types.ts:36:export interface MeterData {
+client/src/types/audio-engine.types.ts:58:export interface FXParams {
+client/src/types/audio.ts:804:export interface DelayParams {
+client/src/types/audio.ts:812:export interface DistortionParams {
+client/src/types/audio.ts:818:export interface EQParams {
+client/src/types/audio.ts:829:export interface FilterParams {
+client/src/types/audio.ts:837:export interface ReverbParams {

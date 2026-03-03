@@ -2,324 +2,824 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LIGHT MODE */
-:root {
-  --button-outline: rgba(0,0,0, .10);
-  --badge-outline: rgba(0,0,0, .05);
-  --opaque-button-border-intensity: -8;
-  --elevate-1: rgba(0,0,0, .03);
-  --elevate-2: rgba(0,0,0, .08);
-  --background: 220 14% 96%;
-  --foreground: 220 20% 12%;
-  --border: 220 14% 88%;
-  --card: 220 14% 98%;
-  --card-foreground: 220 20% 12%;
-  --card-border: 220 14% 94%;
-  --sidebar: 220 14% 94%;
-  --sidebar-foreground: 220 20% 12%;
-  --sidebar-border: 220 14% 88%;
-  --sidebar-primary: 217 91% 60%;
-  --sidebar-primary-foreground: 217 91% 98%;
-  --sidebar-accent: 220 14% 88%;
-  --sidebar-accent-foreground: 220 20% 12%;
-  --sidebar-ring: 217 91% 60%;
-  --popover: 220 14% 92%;
-  --popover-foreground: 220 20% 12%;
-  --popover-border: 220 14% 86%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 217 91% 98%;
-  --secondary: 220 14% 86%;
-  --secondary-foreground: 220 20% 12%;
-  --muted: 220 14% 90%;
-  --muted-foreground: 220 15% 35%;
-  --accent: 220 14% 88%;
-  --accent-foreground: 220 20% 12%;
-  --destructive: 0 84% 48%;
-  --destructive-foreground: 0 84% 98%;
-  --input: 220 20% 28%;
-  --ring: 217 91% 60%;
-  --chart-1: 217 91% 45%;
-  --chart-2: 193 82% 45%;
-  --chart-3: 142 76% 36%;
-  --chart-4: 280 65% 45%;
-  --chart-5: 30 80% 48%;
-  --font-sans: Open Sans, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
-  --radius: .5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(220 14% 88% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(220 14% 88% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(220 14% 88% / 0.00), 0px 1px 2px -1px hsl(220 14% 88% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(220 14% 88% / 0.00), 0px 1px 2px -1px hsl(220 14% 88% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(220 14% 88% / 0.00), 0px 2px 4px -1px hsl(220 14% 88% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(220 14% 88% / 0.00), 0px 4px 6px -1px hsl(220 14% 88% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(220 14% 88% / 0.00), 0px 8px 10px -1px hsl(220 14% 88% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(220 14% 88% / 0.00);
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
+/* ============================================================================
+   3D METAL DAW THEME - GLOBAL STYLES
+   ============================================================================ */
 
-/* Fallback for older browsers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+@layer base {
+  :root {
+    /* Base Colors */
+    --background: 210 20% 8%;
+    --foreground: 210 10% 90%;
+    
+    --card: 210 20% 12%;
+    --card-foreground: 210 10% 90%;
+    
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 10% 90%;
+    
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 10% 100%;
+    
+    --secondary: 210 15% 25%;
+    --secondary-foreground: 210 10% 95%;
+    
+    --muted: 210 15% 20%;
+    --muted-foreground: 210 10% 65%;
+    
+    --accent: 210 15% 22%;
+    --accent-foreground: 210 10% 95%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 10% 100%;
+    
+    --border: 210 15% 25%;
+    --input: 210 15% 25%;
+    --ring: 217 91% 60%;
+    
+    --radius: 0.5rem;
+    
+    /* Metal-specific variables */
+    
+    
+    
+    
+  }
 
-  /* Fallback for older browsers */
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-}
-
-.dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
-  --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
-  --background: 224 50% 5%;
-  --foreground: 210 20% 85%;
-  --border: 220 30% 14%;
-  --card: 224 40% 7%;
-  --card-foreground: 210 20% 85%;
-  --card-border: 220 30% 12%;
-  --sidebar: 224 45% 9%;
-  --sidebar-foreground: 210 20% 85%;
-  --sidebar-border: 220 30% 14%;
-  --sidebar-primary: 217 91% 60%;
-  --sidebar-primary-foreground: 217 91% 98%;
-  --sidebar-accent: 224 40% 14%;
-  --sidebar-accent-foreground: 210 20% 85%;
-  --sidebar-ring: 217 91% 60%;
-  --popover: 224 40% 10%;
-  --popover-foreground: 210 20% 85%;
-  --popover-border: 220 30% 16%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 224 35% 14%;
-  --secondary-foreground: 210 20% 85%;
-  --muted: 224 35% 12%;
-  --muted-foreground: 210 15% 55%;
-  --accent: 217 91% 60%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 48%;
-  --destructive-foreground: 0 84% 98%;
-  --input: 210 15% 55%;
-  --ring: 217 91% 60%;
-  --chart-1: 217 91% 70%;
-  --chart-2: 174 84% 50%;
-  --chart-3: 142 76% 65%;
-  --chart-4: 280 65% 70%;
-  --chart-5: 30 80% 68%;
-  --glass: 224 40% 8%;
-  --glass-border: 220 30% 16%;
-  --shadow-2xs: 0px 2px 0px 0px hsl(220 18% 16% / 0.00);
-  --shadow-xs: 0px 2px 0px 0px hsl(220 18% 16% / 0.00);
-  --shadow-sm: 0px 2px 0px 0px hsl(220 18% 16% / 0.00), 0px 1px 2px -1px hsl(220 18% 16% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(220 18% 16% / 0.00), 0px 1px 2px -1px hsl(220 18% 16% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(220 18% 16% / 0.00), 0px 2px 4px -1px hsl(220 18% 16% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(220 18% 16% / 0.00), 0px 4px 6px -1px hsl(220 18% 16% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(220 18% 16% / 0.00), 0px 8px 10px -1px hsl(220 18% 16% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(220 18% 16% / 0.00);
-
-/* Fallback for older browsers */
-  --sidebar-primary-border: hsl(var(--sidebar-primary));
-  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --sidebar-accent-border: hsl(var(--sidebar-accent));
-  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --primary-border: hsl(var(--primary));
-  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --secondary-border: hsl(var(--secondary));
-  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --muted-border: hsl(var(--muted));
-  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --accent-border: hsl(var(--accent));
-  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
-  --destructive-border: hsl(var(--destructive));
-  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-}
-
-/* Neon theme variant */
-.neon {
-  --button-outline: rgba(0,255,231, .15);
-  --badge-outline: rgba(0,255,231, .08);
-  --opaque-button-border-intensity: 12;
-  --elevate-1: rgba(0,255,231, .05);
-  --elevate-2: rgba(0,255,231, .12);
-  --background: 240 60% 8%;
-  --foreground: 174 80% 92%;
-  --border: 240 50% 18%;
-  --card: 240 55% 10%;
-  --card-foreground: 174 80% 92%;
-  --card-border: 240 50% 16%;
-  --primary: 174 84% 50%;
-  --primary-foreground: 240 60% 8%;
-  --secondary: 240 50% 16%;
-  --secondary-foreground: 174 80% 92%;
-  --muted: 240 50% 14%;
-  --muted-foreground: 174 50% 65%;
-  --accent: 174 84% 50%;
-  --accent-foreground: 240 60% 8%;
-  --ring: 174 84% 50%;
-  --glass: 240 55% 9%;
-  --glass-border: 240 50% 20%;
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 210 10% 90%;
+  }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-
-  /* Studio gradient backgrounds */
-  .studio-bg {
-    background: linear-gradient(180deg, hsl(224 50% 5%) 0%, hsl(228 55% 4%) 100%);
+  
+  /* Selection */
+  ::selection {
+    @apply bg-primary/30;
   }
-
-  .neon .studio-bg {
-    background: linear-gradient(180deg, hsl(240 60% 8%) 0%, hsl(174 84% 50% / 0.1) 100%);
+  
+  /* Scrollbars */
+  ::-webkit-scrollbar {
+    @apply w-3 h-3;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-metal-900 rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800 rounded border border-metal-900 shadow-metal;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply from-metal-500 via-metal-600 to-metal-700;
+  }
+  
+  ::-webkit-scrollbar-corner {
+    @apply bg-metal-900;
   }
 }
 
-/**
- * Using the elevate system.
- * Automatic contrast adjustment.
- *
- * <element className="hover-elevate" />
- * <element className="active-elevate-2" />
- *
- * // Using the tailwind utility when a data attribute is "on"
- * <element className="toggle-elevate data-[state=on]:toggle-elevated" />
- * // Or manually controlling the toggle state
- * <element className="toggle-elevate toggle-elevated" />
- *
- * Elevation systems have to handle many states.
- * - not-hovered, vs. hovered vs. active  (three mutually exclusive states)
- * - toggled or not
- * - focused or not (this is not handled with these utilities)
- *
- * Even without handling focused or not, this is six possible combinations that
- * need to be distinguished from eachother visually.
- */
-@layer utilities {
-
-  /* Hide ugly search cancel button in Chrome until we can style it properly */
-  input[type="search"]::-webkit-search-cancel-button {
-    @apply hidden;
-  }
-
-  /* Placeholder styling for contentEditable div */
-  [contenteditable][data-placeholder]:empty::before {
-    content: attr(data-placeholder);
-    color: hsl(var(--muted-foreground));
-    pointer-events: none;
-  }
-
-  /* .no-default-hover-elevate/no-default-active-elevate is an escape hatch so consumers of
-   * buttons/badges can remove the automatic brightness adjustment on interactions
-   * and program their own. */
-  .no-default-hover-elevate {}
-
-  .no-default-active-elevate {}
-
-
-  /**
-   * Toggleable backgrounds go behind the content. Hoverable/active goes on top.
-   * This way they can stack/compound. Both will overlap the parent's borders!
-   * So borders will be automatically adjusted both on toggle, and hover/active,
-   * and they will be compounded.
-   */
-  .toggle-elevate::before,
-  .toggle-elevate-2::before {
-    content: "";
-    pointer-events: none;
-    position: absolute;
-    inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
-    border-radius: inherit;
-    z-index: -1;
-    /* sits behind content but above backdrop */
-  }
-
-  .toggle-elevate.toggle-elevated::before {
-    background-color: var(--elevate-2);
-  }
-
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
-  .border.toggle-elevate::before {
-    inset: -1px;
-  }
-
-  /* Does not work on elements with overflow:hidden! */
-  .hover-elevate:not(.no-default-hover-elevate),
-  .active-elevate:not(.no-default-active-elevate),
-  .hover-elevate-2:not(.no-default-hover-elevate),
-  .active-elevate-2:not(.no-default-active-elevate) {
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL PANELS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-panel {
+    @apply relative;
+    @apply bg-gradient-to-b from-metal-800 via-metal-900 to-metal-950;
+    @apply border border-metal-700 rounded-lg;
+    @apply shadow-metal-lg;
     position: relative;
-    z-index: 0;
   }
-
-  .hover-elevate:not(.no-default-hover-elevate)::after,
-  .active-elevate:not(.no-default-active-elevate)::after,
-  .hover-elevate-2:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:not(.no-default-active-elevate)::after {
-    content: "";
-    pointer-events: none;
+  
+  .metal-panel::before {
+    content: '';
     position: absolute;
-    inset: 0px;
-    /*border-radius: inherit;   match rounded corners */
-    border-radius: inherit;
-    z-index: 999;
-    /* sits in front of content */
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+    pointer-events: none;
   }
+  
+  .metal-panel-inset {
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded;
+    @apply shadow-metal-inner-lg;
+  }
+  
+  .metal-panel-raised {
+    @apply bg-gradient-to-b from-metal-700 via-metal-800 to-metal-900;
+    @apply border-t border-l border-metal-600;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL BUTTONS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-button {
+    @apply relative inline-flex items-center justify-center;
+    @apply px-4 py-2 rounded-md;
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800;
+    @apply border-t border-l border-metal-500;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+    @apply text-metal-100 font-semibold text-sm;
+    @apply transition-all duration-150;
+    @apply select-none cursor-pointer;
+  }
+  
+  .metal-button:hover {
+    @apply from-metal-500 via-metal-600 to-metal-700;
+    @apply shadow-metal-lg;
+    transform: translateY(-1px);
+  }
+  
+  .metal-button:active {
+    @apply from-metal-700 via-metal-800 to-metal-900;
+    @apply shadow-metal-pressed;
+    transform: translateY(1px);
+  }
+  
+  .metal-button:disabled {
+    @apply from-metal-800 via-metal-900 to-metal-950;
+    @apply text-metal-600 cursor-not-allowed;
+    @apply opacity-50;
+  }
+  
+  .metal-button-primary {
+    @apply bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800;
+    @apply border-t border-l border-blue-500;
+    @apply border-r border-b border-blue-900;
+    @apply shadow-glow-blue;
+  }
+  
+  .metal-button-primary:hover {
+    @apply from-blue-500 via-blue-600 to-blue-700;
+  }
+  
+  .metal-button-danger {
+    @apply bg-gradient-to-b from-red-600 via-red-700 to-red-800;
+    @apply border-t border-l border-red-500;
+    @apply border-r border-b border-red-900;
+    @apply shadow-glow-red;
+  }
+  
+  .metal-button-success {
+    @apply bg-gradient-to-b from-green-600 via-green-700 to-green-800;
+    @apply border-t border-l border-green-500;
+    @apply border-r border-b border-green-900;
+    @apply shadow-glow-green;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL KNOBS & SLIDERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-knob {
+    @apply relative inline-block;
+    @apply w-16 h-16 rounded-full;
+    @apply bg-gradient-to-br from-metal-600 via-metal-700 to-metal-900;
+    @apply border-4 border-metal-950;
+    @apply shadow-metal-lg;
+    position: relative;
+    cursor: grab;
+  }
+  
+  .metal-knob:active {
+    cursor: grabbing;
+  }
+  
+  .metal-knob::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    right: 40%;
+    bottom: 40%;
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(255, 255, 255, 0.4), 
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .metal-knob-indicator {
+    @apply absolute top-1 left-1/2 -translate-x-1/2;
+    @apply w-1 h-5 rounded-full;
+    @apply bg-gradient-to-b from-blue-400 to-blue-600;
+    @apply shadow-glow-blue;
+  }
+  
+  .metal-slider-track {
+    @apply relative w-full h-2 rounded-full;
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800;
+    @apply shadow-metal-inner;
+  }
+  
+  .metal-slider-thumb {
+    @apply relative w-5 h-5 rounded-full;
+    @apply bg-gradient-to-br from-metal-500 via-metal-600 to-metal-800;
+    @apply border-2 border-metal-900;
+    @apply shadow-metal-raised;
+    @apply cursor-grab;
+    @apply transition-all duration-150;
+  }
+  
+  .metal-slider-thumb:hover {
+    @apply from-metal-400 via-metal-500 to-metal-700;
+    @apply shadow-metal-lg;
+  }
+  
+  .metal-slider-thumb:active {
+    @apply cursor-grabbing shadow-metal-pressed;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     LED INDICATORS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .led-indicator {
+    @apply inline-block w-3 h-3 rounded-full;
+    @apply border border-metal-900;
+    @apply transition-all duration-150;
+  }
+  
+  .led-off {
+    @apply bg-metal-900 shadow-led-off;
+  }
+  
+  .led-red {
+    @apply bg-red-500 shadow-glow-red;
+    box-shadow: 
+      0 0 10px rgba(239, 68, 68, 0.8),
+      0 0 20px rgba(239, 68, 68, 0.4),
+      inset 0 0 5px rgba(239, 68, 68, 0.6);
+  }
+  
+  .led-green {
+    @apply bg-green-500 shadow-glow-green;
+    box-shadow: 
+      0 0 10px rgba(34, 197, 94, 0.8),
+      0 0 20px rgba(34, 197, 94, 0.4),
+      inset 0 0 5px rgba(34, 197, 94, 0.6);
+  }
+  
+  .led-blue {
+    @apply bg-blue-500 shadow-glow-blue;
+    box-shadow: 
+      0 0 10px rgba(59, 130, 246, 0.8),
+      0 0 20px rgba(59, 130, 246, 0.4),
+      inset 0 0 5px rgba(59, 130, 246, 0.6);
+  }
+  
+  .led-orange {
+    @apply bg-orange-500 shadow-glow-orange;
+    box-shadow: 
+      0 0 10px rgba(249, 115, 22, 0.8),
+      0 0 20px rgba(249, 115, 22, 0.4),
+      inset 0 0 5px rgba(249, 115, 22, 0.6);
+  }
+  
+  .led-yellow {
+    @apply bg-yellow-500;
+    box-shadow: 
+      0 0 10px rgba(234, 179, 8, 0.8),
+      0 0 20px rgba(234, 179, 8, 0.4),
+      inset 0 0 5px rgba(234, 179, 8, 0.6);
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     VU METERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .vu-meter {
+    @apply relative w-full h-4;
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded;
+    @apply shadow-metal-inner;
+    @apply overflow-hidden;
+  }
+  
+  .vu-meter-bar {
+    @apply absolute left-0 top-0 bottom-0;
+    @apply transition-all duration-100;
+    background: linear-gradient(90deg, 
+      #22c55e 0%, 
+      #22c55e 60%, 
+      #eab308 75%, 
+      #ef4444 90%,
+      #ef4444 100%
+    );
+  }
+  
+  .vu-meter-vertical {
+    @apply w-4 h-full;
+    @apply bg-gradient-to-r from-metal-950 via-metal-900 to-metal-800;
+  }
+  
+  .vu-meter-bar-vertical {
+    @apply absolute left-0 right-0 bottom-0;
+    background: linear-gradient(0deg, 
+      #22c55e 0%, 
+      #22c55e 60%, 
+      #eab308 75%, 
+      #ef4444 90%,
+      #ef4444 100%
+    );
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     FADERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-fader-track {
+    @apply relative w-2 h-full;
+    @apply bg-gradient-to-r from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded-full;
+    @apply shadow-metal-inner;
+  }
+  
+  .metal-fader-handle {
+    @apply absolute left-1/2 -translate-x-1/2;
+    @apply w-8 h-6 rounded;
+    @apply bg-gradient-to-b from-metal-500 via-metal-600 to-metal-800;
+    @apply border-t border-l border-metal-400;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+    @apply cursor-grab;
+    @apply transition-shadow duration-150;
+  }
+  
+  .metal-fader-handle:hover {
+    @apply shadow-metal-lg;
+  }
+  
+  .metal-fader-handle:active {
+    @apply cursor-grabbing shadow-metal-pressed;
+  }
+  
+  .metal-fader-handle::before {
+    content: '';
+    @apply absolute inset-x-2 top-1/2 -translate-y-1/2;
+    @apply h-0.5 rounded-full;
+    @apply bg-metal-900;
+  }
+  
+  .metal-fader-handle::after {
+    content: '';
+    @apply absolute inset-x-2 top-1/2 -translate-y-1/2 translate-y-1;
+    @apply h-0.5 rounded-full;
+    @apply bg-metal-400;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     DISPLAYS & SCREENS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-display {
+    @apply relative;
+    @apply bg-gradient-to-b from-slate-950 to-slate-900;
+    @apply border-2 border-metal-900 rounded;
+    @apply shadow-metal-inner-lg;
+    @apply font-mono text-green-400;
+    @apply p-2;
+  }
+  
+  .metal-display::before {
+    content: '';
+    @apply absolute inset-0 rounded;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+    pointer-events: none;
+  }
+  
+  .lcd-display {
+    @apply metal-display;
+    @apply bg-gradient-to-b from-blue-950 to-blue-900;
+    @apply text-blue-300;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     RACK UNITS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .rack-unit {
+    @apply relative;
+    @apply bg-gradient-to-b from-metal-800 via-metal-900 to-metal-950;
+    @apply border-l-4 border-r-4 border-metal-700;
+    @apply shadow-metal-xl;
+  }
+  
+  .rack-unit::before,
+  .rack-unit::after {
+    content: '';
+    @apply absolute top-4 w-2 h-2 rounded-full;
+    @apply bg-metal-950 border border-metal-600;
+    @apply shadow-metal-inner;
+  }
+  
+  .rack-unit::before {
+    @apply left-2;
+  }
+  
+  .rack-unit::after {
+    @apply right-2;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     CHANNEL STRIPS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .channel-strip {
+    @apply metal-panel;
+    @apply flex flex-col gap-2 p-2;
+    @apply min-w-[80px];
+  }
+  
+  .channel-strip-header {
+    @apply text-xs font-bold text-center;
+    @apply text-metal-200 text-shadow-metal;
+    @apply py-1;
+    @apply bg-gradient-to-b from-metal-700 to-metal-800;
+    @apply border border-metal-600 rounded;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     TRANSPORT CONTROLS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .transport-button {
+    @apply metal-button;
+    @apply w-12 h-12 rounded-full p-0;
+  }
+  
+  .transport-button-play {
+    @apply metal-button-success;
+  }
+  
+  .transport-button-record {
+    @apply metal-button-danger;
+  }
+  
+  .transport-button-stop {
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     WAVEFORM DISPLAYS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .waveform-container {
+    @apply relative;
+    @apply bg-gradient-to-b from-slate-950 to-slate-900;
+    @apply border-2 border-metal-800 rounded;
+    @apply shadow-metal-inner-lg;
+    @apply overflow-hidden;
+  }
+  
+  .waveform-grid {
+    @apply absolute inset-0;
+    background-image: 
+      linear-gradient(rgba(71, 85, 105, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(71, 85, 105, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     EFFECTS RACKS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .fx-rack {
+    @apply rack-unit;
+    @apply p-4 space-y-3;
+  }
+  
+  .fx-slot {
+    @apply metal-panel-inset;
+    @apply p-3 rounded;
+    @apply hover:bg-metal-800/50;
+    @apply transition-all duration-200;
+    @apply cursor-pointer;
+  }
+  
+  .fx-slot:hover {
+    @apply shadow-metal;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     UTILITIES
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-text-engraved {
+    @apply text-shadow-engraved;
+    @apply text-metal-300;
+  }
+  
+  .metal-text-embossed {
+    @apply text-shadow-embossed;
+    @apply text-metal-100;
+  }
+  
+  .metal-separator {
+    @apply h-px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+  }
+  
+  .metal-divider-vertical {
+    @apply w-px h-full;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+  }
+  
+  /* Brushed metal effect */
+  .brushed-metal {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .brushed-metal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+  
+  /* Screw details */
+  .screw {
+    @apply inline-block w-3 h-3 rounded-full;
+    @apply bg-gradient-to-br from-metal-600 to-metal-800;
+    @apply border border-metal-900;
+    @apply shadow-metal-inner;
+    position: relative;
+  }
+  
+  .screw::before {
+    content: '';
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply w-2 h-0.5 bg-metal-950 rounded-full;
+    transform-origin: center;
+  }
+  
+  .screw::after {
+    content: '';
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply w-0.5 h-2 bg-metal-950 rounded-full;
+  }
+}
 
-  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-1);
+@layer utilities {
+  /* Glass morphism for overlays */
+  .glass-metal {
+    @apply backdrop-blur-md bg-metal-900/80;
+    @apply border border-metal-700/50;
+    @apply shadow-metal-xl;
   }
+  
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-transform duration-200;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Active press effect */
+  .active-press:active {
+    transform: translateY(1px);
+  }
+  
+  /* Glow pulse animation */
+  .glow-pulse {
+    @apply animate-pulse-glow;
+  }
+}
 
-  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after {
-    background-color: var(--elevate-2);
-  }
+/* ============================================================================
+   CUSTOM COMPONENT OVERRIDES
+   ============================================================================ */
 
-  /* If there's a 1px border, adjust the inset so that it covers that parent's border */
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
-  .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
-    inset: -1px;
-  }
+/* Tabs */
+[role="tablist"] {
+  @apply bg-gradient-to-b from-metal-800 to-metal-900;
+  @apply border border-metal-700 rounded-lg;
+  @apply p-1;
+}
+
+[role="tab"] {
+  @apply metal-button;
+  @apply text-xs px-3 py-1.5;
+}
+
+[role="tab"][data-state="active"] {
+  @apply metal-button-primary;
+}
+
+/* Dialogs / Modals */
+[role="dialog"] {
+  @apply metal-panel;
+  @apply backdrop-blur-xl;
+}
+
+/* Tooltips */
+[role="tooltip"] {
+  @apply metal-panel;
+  @apply text-xs;
+  @apply px-3 py-1.5;
+}
+
+/* Select dropdowns */
+[role="listbox"] {
+  @apply metal-panel;
+  @apply max-h-64 overflow-auto;
+}
+
+[role="option"] {
+  @apply px-3 py-2 text-sm;
+  @apply hover:bg-metal-700/50;
+  @apply cursor-pointer;
+  @apply transition-colors duration-150;
+}
+
+[role="option"][data-state="checked"] {
+  @apply bg-blue-600/20 text-blue-400;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea {
+  @apply metal-panel-inset;
+  @apply px-3 py-2 text-sm;
+  @apply text-metal-100;
+  @apply placeholder:text-metal-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  @apply transition-all duration-150;
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+  @apply w-4 h-4 rounded;
+  @apply bg-metal-900 border-2 border-metal-700;
+  @apply checked:bg-blue-600 checked:border-blue-600;
+  @apply shadow-metal-inner;
+  @apply cursor-pointer;
+  @apply transition-all duration-150;
+}
+
+/* Radio */
+input[type="radio"] {
+  @apply w-4 h-4 rounded-full;
+  @apply bg-metal-900 border-2 border-metal-700;
+  @apply checked:bg-blue-600 checked:border-blue-600;
+  @apply shadow-metal-inner;
+  @apply cursor-pointer;
+  @apply transition-all duration-150;
+}
+/* ============================================================================
+   METAL THEME OVERRIDES
+   ============================================================================ */
+
+.chrome {
+  --background: 210 10% 12%;
+  --foreground: 210 5% 92%;
+  --card: 210 10% 16%;
+  --card-foreground: 210 5% 92%;
+  --popover: 210 10% 14%;
+  --popover-foreground: 210 5% 92%;
+  --primary: 210 8% 78%;
+  --primary-foreground: 210 10% 10%;
+  --secondary: 210 8% 25%;
+  --secondary-foreground: 210 5% 90%;
+  --muted: 210 8% 20%;
+  --muted-foreground: 210 5% 60%;
+  --accent: 210 8% 30%;
+  --accent-foreground: 210 5% 92%;
+  --border: 210 8% 28%;
+  --input: 210 8% 28%;
+  --ring: 210 8% 78%;
+}
+
+.steel {
+  --background: 213 15% 9%;
+  --foreground: 213 8% 88%;
+  --card: 213 15% 13%;
+  --card-foreground: 213 8% 88%;
+  --popover: 213 15% 11%;
+  --popover-foreground: 213 8% 88%;
+  --primary: 213 15% 58%;
+  --primary-foreground: 213 15% 8%;
+  --secondary: 213 12% 22%;
+  --secondary-foreground: 213 8% 85%;
+  --muted: 213 12% 17%;
+  --muted-foreground: 213 8% 55%;
+  --accent: 213 12% 25%;
+  --accent-foreground: 213 8% 88%;
+  --border: 213 12% 24%;
+  --input: 213 12% 24%;
+  --ring: 213 15% 58%;
+}
+
+.bronze {
+  --background: 25 20% 8%;
+  --foreground: 30 15% 88%;
+  --card: 25 20% 12%;
+  --card-foreground: 30 15% 88%;
+  --popover: 25 20% 10%;
+  --popover-foreground: 30 15% 88%;
+  --primary: 30 60% 50%;
+  --primary-foreground: 25 20% 6%;
+  --secondary: 25 15% 20%;
+  --secondary-foreground: 30 15% 85%;
+  --muted: 25 15% 16%;
+  --muted-foreground: 30 10% 55%;
+  --accent: 25 15% 22%;
+  --accent-foreground: 30 15% 88%;
+  --border: 25 15% 22%;
+  --input: 25 15% 22%;
+  --ring: 30 60% 50%;
+}
+
+.copper {
+  --background: 20 22% 8%;
+  --foreground: 25 12% 88%;
+  --card: 20 22% 12%;
+  --card-foreground: 25 12% 88%;
+  --popover: 20 22% 10%;
+  --popover-foreground: 25 12% 88%;
+  --primary: 22 52% 48%;
+  --primary-foreground: 20 22% 6%;
+  --secondary: 20 15% 20%;
+  --secondary-foreground: 25 12% 85%;
+  --muted: 20 15% 16%;
+  --muted-foreground: 25 8% 55%;
+  --accent: 20 15% 22%;
+  --accent-foreground: 25 12% 88%;
+  --border: 20 15% 22%;
+  --input: 20 15% 22%;
+  --ring: 22 52% 48%;
+}
+
+.gold {
+  --background: 42 20% 8%;
+  --foreground: 45 15% 90%;
+  --card: 42 20% 12%;
+  --card-foreground: 45 15% 90%;
+  --popover: 42 20% 10%;
+  --popover-foreground: 45 15% 90%;
+  --primary: 43 65% 52%;
+  --primary-foreground: 42 20% 6%;
+  --secondary: 42 15% 20%;
+  --secondary-foreground: 45 15% 87%;
+  --muted: 42 15% 16%;
+  --muted-foreground: 45 10% 55%;
+  --accent: 42 15% 22%;
+  --accent-foreground: 45 15% 90%;
+  --border: 42 15% 22%;
+  --input: 42 15% 22%;
+  --ring: 43 65% 52%;
 }

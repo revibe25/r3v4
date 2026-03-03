@@ -1,4 +1,4 @@
-import { eq, sql, and, inArray, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { db } from "./db";
 import { 
   users, 
@@ -8,20 +8,22 @@ import {
   presets, 
   settings 
 } from "./db/schema";
-import { 
-  type User, 
-  type InsertUser, 
-  type Session, 
-  type InsertSession,
-  type Project,
-  type InsertProject,
-  type Sample,
-  type InsertSample,
-  type Preset,
-  type InsertPreset,
-  type Settings,
-  type InsertSettings
-} from "@shared/schema";
+
+// ── Derive types directly from Drizzle table definitions ──────────────────────
+// These replace the missing type exports from @shared/schema.
+// If @shared/schema adds them later, you can switch back to importing them.
+export type User          = typeof users.$inferSelect;
+export type InsertUser    = typeof users.$inferInsert;
+export type Session       = typeof sessions.$inferSelect;
+export type InsertSession = typeof sessions.$inferInsert;
+export type Project       = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+export type Sample        = typeof samples.$inferSelect;
+export type InsertSample  = typeof samples.$inferInsert;
+export type Preset        = typeof presets.$inferSelect;
+export type InsertPreset  = typeof presets.$inferInsert;
+export type Settings      = typeof settings.$inferSelect;
+export type InsertSettings = typeof settings.$inferInsert;
 
 export interface IStorage {
   // User operations
@@ -80,7 +82,7 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values({
-      ...insertUser,
+      ...(insertUser as any),
       tier: "free",
     }).returning();
     return result[0];
@@ -89,7 +91,7 @@ export class DatabaseStorage implements IStorage {
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
     const result = await db.update(users)
       .set({
-        ...updates,
+        ...(updates as any),
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
@@ -117,20 +119,20 @@ export class DatabaseStorage implements IStorage {
   async createSession(insertSession: InsertSession): Promise<Session> {
     const result = await db.insert(sessions).values({
       ...insertSession,
-      fx: insertSession.fx as any,
-      recordedEvents: insertSession.recordedEvents as any,
-    }).returning();
+      fx: (insertSession as any).fx as unknown,
+      recordedEvents: (insertSession as any).recordedEvents as unknown,
+    } as any).returning();
     return this.mapSessionFromDb(result[0]);
   }
 
   async updateSession(id: string, updates: Partial<InsertSession>): Promise<Session | undefined> {
     const result = await db.update(sessions)
       .set({
-        ...updates,
-        ...(updates.fx && { fx: updates.fx as any }),
-        ...(updates.recordedEvents && { recordedEvents: updates.recordedEvents as any }),
+        ...(updates as any),
+        ...((updates as any).fx ? { fx: (updates as any).fx as unknown } : {}),
+        ...((updates as any).recordedEvents ? { recordedEvents: (updates as any).recordedEvents as unknown } : {}),
         updatedAt: new Date(),
-      })
+      } as any)
       .where(eq(sessions.id, id))
       .returning();
     return result[0] ? this.mapSessionFromDb(result[0]) : undefined;
@@ -156,18 +158,18 @@ export class DatabaseStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const result = await db.insert(projects).values({
       ...insertProject,
-      projectData: insertProject.projectData as any,
-    }).returning();
+      projectData: (insertProject as any).projectData as unknown,
+    } as any).returning();
     return this.mapProjectFromDb(result[0]);
   }
 
   async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
     const result = await db.update(projects)
       .set({
-        ...updates,
-        ...(updates.projectData && { projectData: updates.projectData as any }),
+        ...(updates as any),
+        ...((updates as any).projectData ? { projectData: (updates as any).projectData as unknown } : {}),
         updatedAt: new Date(),
-      })
+      } as any)
       .where(eq(projects.id, id))
       .returning();
     return result[0] ? this.mapProjectFromDb(result[0]) : undefined;
@@ -194,7 +196,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db.select().from(samples);
     return result
       .filter((sample) => {
-        const sampleTags = sample.tags as string[] || [];
+        const sampleTags = (sample.tags as string[]) || [];
         return searchTags.some((tag) => sampleTags.includes(tag));
       })
       .map(this.mapSampleFromDb);
@@ -203,20 +205,20 @@ export class DatabaseStorage implements IStorage {
   async createSample(insertSample: InsertSample): Promise<Sample> {
     const result = await db.insert(samples).values({
       ...insertSample,
-      tags: insertSample.tags as any,
-      waveformData: insertSample.waveformData as any,
-    }).returning();
+      tags: (insertSample as any).tags as unknown,
+      waveformData: (insertSample as any).waveformData as unknown,
+    } as any).returning();
     return this.mapSampleFromDb(result[0]);
   }
 
   async updateSample(id: string, updates: Partial<InsertSample>): Promise<Sample | undefined> {
     const result = await db.update(samples)
       .set({
-        ...updates,
-        ...(updates.tags && { tags: updates.tags as any }),
-        ...(updates.waveformData && { waveformData: updates.waveformData as any }),
+        ...(updates as any),
+        ...((updates as any).tags ? { tags: (updates as any).tags as unknown } : {}),
+        ...((updates as any).waveformData ? { waveformData: (updates as any).waveformData as unknown } : {}),
         updatedAt: new Date(),
-      })
+      } as any)
       .where(eq(samples.id, id))
       .returning();
     return result[0] ? this.mapSampleFromDb(result[0]) : undefined;
@@ -230,14 +232,14 @@ export class DatabaseStorage implements IStorage {
   // ==================== PRESET OPERATIONS ====================
 
   async getPresets(type?: string): Promise<Preset[]> {
-    let query = db.select().from(presets);
-
     if (type) {
-      const result = await query.where(eq(presets.type, type)).orderBy(desc(presets.updatedAt));
+      const result = await db.select().from(presets)
+        .where(eq(presets.type, type))
+        .orderBy(desc(presets.updatedAt));
       return result.map(this.mapPresetFromDb);
     }
 
-    const result = await query.orderBy(desc(presets.updatedAt));
+    const result = await db.select().from(presets).orderBy(desc(presets.updatedAt));
     return result.map(this.mapPresetFromDb);
   }
 
@@ -249,20 +251,20 @@ export class DatabaseStorage implements IStorage {
   async createPreset(insertPreset: InsertPreset): Promise<Preset> {
     const result = await db.insert(presets).values({
       ...insertPreset,
-      presetData: insertPreset.presetData as any,
-      tags: insertPreset.tags as any,
-    }).returning();
+      presetData: (insertPreset as any).presetData as unknown,
+      tags: (insertPreset as any).tags as unknown,
+    } as any).returning();
     return this.mapPresetFromDb(result[0]);
   }
 
   async updatePreset(id: string, updates: Partial<InsertPreset>): Promise<Preset | undefined> {
     const result = await db.update(presets)
       .set({
-        ...updates,
-        ...(updates.presetData && { presetData: updates.presetData as any }),
-        ...(updates.tags && { tags: updates.tags as any }),
+        ...(updates as any),
+        ...((updates as any).presetData ? { presetData: (updates as any).presetData as unknown } : {}),
+        ...((updates as any).tags ? { tags: (updates as any).tags as unknown } : {}),
         updatedAt: new Date(),
-      })
+      } as any)
       .where(eq(presets.id, id))
       .returning();
     return result[0] ? this.mapPresetFromDb(result[0]) : undefined;
@@ -276,19 +278,13 @@ export class DatabaseStorage implements IStorage {
   // ==================== SETTINGS OPERATIONS ====================
 
   async getSettings(userId?: string): Promise<Settings> {
-    let result;
+    const result = userId
+      ? await db.select().from(settings).where(eq(settings.userId, userId)).limit(1)
+      : await db.select().from(settings).limit(1);
 
-    if (userId) {
-      result = await db.select().from(settings).where(eq(settings.userId, userId)).limit(1);
-    } else {
-      result = await db.select().from(settings).limit(1);
-    }
-
-    // Return default settings if none exist
     if (result.length === 0) {
-      const defaultSettings: Settings = {
-        id: "default",
-        userId: userId,
+      const defaultSettings = {
+        userId: userId ?? null,
         audioBufferSize: 2048,
         sampleRate: 48000,
         bitDepth: 24,
@@ -302,16 +298,9 @@ export class DatabaseStorage implements IStorage {
         metronomeEnabled: false,
         metronomeBpm: 120,
         metronomeVolume: 0.5,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
 
-      // Create default settings in database
-      const created = await db.insert(settings).values({
-        userId: userId || null,
-        ...defaultSettings,
-      }).returning();
-
+      const created = await db.insert(settings).values(defaultSettings).returning();
       return this.mapSettingsFromDb(created[0]);
     }
 
@@ -319,28 +308,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSettings(updates: Partial<InsertSettings>, userId?: string): Promise<Settings> {
-    // First try to find existing settings
-    let existing;
-
-    if (userId) {
-      existing = await db.select().from(settings).where(eq(settings.userId, userId)).limit(1);
-    } else {
-      existing = await db.select().from(settings).limit(1);
-    }
+    const existing = userId
+      ? await db.select().from(settings).where(eq(settings.userId, userId)).limit(1)
+      : await db.select().from(settings).limit(1);
 
     let result;
 
     if (existing.length === 0) {
-      // Create new settings
       result = await db.insert(settings).values({
-        userId: userId || null,
-        ...updates,
+        userId: userId ?? null,
+        ...(updates as any),
       }).returning();
     } else {
-      // Update existing settings
       result = await db.update(settings)
         .set({
-          ...updates,
+          ...(updates as any),
           updatedAt: new Date(),
         })
         .where(eq(settings.id, existing[0].id))
@@ -352,22 +334,22 @@ export class DatabaseStorage implements IStorage {
 
   // ==================== HELPER METHODS ====================
 
-  private mapSessionFromDb(dbSession: any): Session {
+  private mapSessionFromDb(dbSession: Session): Session {
     return {
       ...dbSession,
-      fx: dbSession.fx as any,
-      recordedEvents: dbSession.recordedEvents as any,
+      fx: dbSession.fx,
+      recordedEvents: dbSession.recordedEvents,
     };
   }
 
-  private mapProjectFromDb(dbProject: any): Project {
+  private mapProjectFromDb(dbProject: Project): Project {
     return {
       ...dbProject,
-      projectData: dbProject.projectData as any,
+      projectData: dbProject.projectData,
     };
   }
 
-  private mapSampleFromDb(dbSample: any): Sample {
+  private mapSampleFromDb(dbSample: Sample): Sample {
     return {
       ...dbSample,
       tags: dbSample.tags as string[],
@@ -375,20 +357,18 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  private mapPresetFromDb(dbPreset: any): Preset {
+  private mapPresetFromDb(dbPreset: Preset): Preset {
     return {
       ...dbPreset,
-      presetData: dbPreset.presetData as any,
+      presetData: dbPreset.presetData,
       tags: dbPreset.tags as string[],
     };
   }
 
-  private mapSettingsFromDb(dbSettings: any): Settings {
-    return {
-      ...dbSettings,
-    };
+  private mapSettingsFromDb(dbSettings: Settings): Settings {
+    return { ...dbSettings };
   }
 }
 
-// Export singleton instance using database
+// Export singleton instance
 export const storage = new DatabaseStorage();

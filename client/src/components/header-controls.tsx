@@ -1,37 +1,112 @@
-import { useRef, useState } from 'react';
+// client/src/components/header-controls.tsx
+import React, { useRef, useState, useMemo, useCallback, memo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
+import { queryClient, getQueryFn, apiRequest } from '@/lib/queryClient';
+
 import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Moon, Sun, Zap, Music, Save, FolderOpen, Trash2, Download, Upload } from 'lucide-react';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+import { Moon, Sun, Music, Clock, Palette, Save, FolderOpen, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/components/theme-provider';
 import type { Session } from '@shared/schema';
 
-type Theme = 'dark' | 'light' | 'neon';
-
 interface HeaderControlsProps {
-  theme: Theme;
-  onThemeChange: (theme: Theme) => void;
   bpm: number;
   onBpmChange: (bpm: number) => void;
   metronomeOn: boolean;
   onMetronomeToggle: () => void;
   onSave: () => void;
   onLoad: (json: string) => void;
-  getSessionData: () => { bpm: number; fx: any; filterVal: number; pitchSemitones: number; recordedEvents: any[] };
+  getSessionData: () => any;
 }
 
-export function HeaderControls({
-  theme,
-  onThemeChange,
+// ─── Theme config ──────────────────────────────────────────────────────────────
+const THEME_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  dark: Moon, light: Sun, chrome: Palette, purple: Palette, blue: Palette, forest: Palette,
+};
+
+const THEMES: Record<string, { label: string; description: string }> = {
+  dark:   { label: 'Dark',   description: 'Classic dark theme'    },
+  light:  { label: 'Light',  description: 'Clean light theme'     },
+  chrome: { label: 'Chrome', description: 'Polished chrome finish' },
+  purple: { label: 'Purple', description: 'Rich purple tones'     },
+  blue:   { label: 'Blue',   description: 'Cool blue shades'      },
+  forest: { label: 'Forest', description: 'Natural forest green'  },
+};
+
+// ─── Design tokens — mirrors waveform-editor.tsx exactly ──────────────────────
+const S = {
+  bg:         '#000000',
+  bgPanel:    '#0c0c0c',
+  border:     '#222',
+  accent:     '#b8ff00',
+  textDim:    '#555',
+  textMuted:  '#444',
+  textActive: '#fff',
+  font:       "'IBM Plex Mono', 'JetBrains Mono', monospace",
+} as const;
+
+// Tiny reusable styled button (matches waveform-editor ghost button pattern)
+const BarButton = React.forwardRef<
+  HTMLButtonElement,
+  {
+    onClick: () => void;
+    active?: boolean;
+    children: React.ReactNode;
+    title?: string;
+  }
+>(function BarButton({ onClick, active = false, children, title }, ref) {
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      title={title}
+      className="flex items-center gap-1 h-7 px-2 transition-colors"
+      style={{
+        background:   active ? S.accent    : 'transparent',
+        color:        active ? '#000'       : S.textDim,
+        border:       `1px solid ${active ? S.accent : S.border}`,
+        borderRadius: 0,
+        fontFamily:   S.font,
+      }}
+      onMouseEnter={e => {
+        if (!active) (e.currentTarget as HTMLElement).style.color = S.textActive;
+      }}
+      onMouseLeave={e => {
+        if (!active) (e.currentTarget as HTMLElement).style.color = S.textDim;
+      }}
+    >
+      {children}
+    </button>
+  );
+});
+
+const tipStyle = {
+  background:   '#0c0c0c',
+  border:       '1px solid #222',
+  borderRadius: 0,
+  fontFamily:   "'IBM Plex Mono', 'JetBrains Mono', monospace",
+  fontSize:     10,
+  color:        '#fff',
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────────
+export const HeaderControls = memo(function HeaderControls({
   bpm,
   onBpmChange,
   metronomeOn,
@@ -40,224 +115,377 @@ export function HeaderControls({
   onLoad,
   getSessionData,
 }: HeaderControlsProps) {
+  const { theme, setTheme, themes, themeMetadata } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [loadDialogOpen, setLoadDialogOpen] = useState(false);
-  const [sessionName, setSessionName] = useState('');
+  const [saveDialogOpen, setSaveDialogOpen]         = useState(false);
+  const [loadDialogOpen, setLoadDialogOpen]         = useState(false);
+  const [sessionName, setSessionName]               = useState('');
+  const [sessionDescription, setSessionDescription] = useState('');
+  const [searchQuery, setSearchQuery]               = useState('');
   const { toast } = useToast();
 
-  const { data: sessions = [], isLoading: sessionsLoading } = useQuery<Session[]>({
+  const { data: sessions = [], isError: sessionsError } = useQuery<Session[]>({
+    queryFn: getQueryFn({ on401: 'returnNull' }),
     queryKey: ['/api/sessions'],
+    enabled: loadDialogOpen,
+    staleTime: 60_000,
+    retry: 1,
   });
 
+  // TanStack v5 — no onError in useQuery; handle via isError
+  const prevErr = useRef(false);
+  if (sessionsError && !prevErr.current) {
+    prevErr.current = true;
+    toast({ title: 'Sessions unavailable', variant: 'default' });
+  }
+  if (!sessionsError) prevErr.current = false;
+
   const createSessionMutation = useMutation({
-    mutationFn: async (data: { name: string; bpm: number; fx: any; filterVal: number; pitchSemitones: number; recordedEvents: any[] }) => {
-      const res = await apiRequest('POST', '/api/sessions', data);
-      return res.json();
-    },
+    mutationFn: async (data: any) =>
+      apiRequest('POST', '/api/sessions', data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/sessions'] });
       setSaveDialogOpen(false);
       setSessionName('');
-      toast({ title: 'Session saved', description: 'Your session has been saved to the cloud.' });
+      setSessionDescription('');
+      toast({ title: 'Session saved' });
     },
-    onError: () => {
-      toast({ title: 'Save failed', description: 'Could not save session. Please try again.', variant: 'destructive' });
-    },
+    onError: () => toast({ title: 'Save failed', variant: 'destructive' }),
   });
 
-  const deleteSessionMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await apiRequest('DELETE', `/api/sessions/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/sessions'] });
-      toast({ title: 'Session deleted' });
-    },
-    onError: () => {
-      toast({ title: 'Delete failed', description: 'Could not delete session.', variant: 'destructive' });
-    },
-  });
+  const filteredSessions = useMemo(
+    () => sessions.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())),
+    [sessions, searchQuery],
+  );
 
-  const cycleTheme = () => {
-    const themes: Theme[] = ['dark', 'light', 'neon'];
-    const currentIndex = themes.indexOf(theme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    onThemeChange(themes[nextIndex]);
-  };
+  const ThemeIcon  = THEME_ICONS[theme] ?? Moon;
+  const msPerBeat  = useMemo(() => (60_000 / bpm).toFixed(0), [bpm]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    onLoad(text);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const handleSaveToServer = () => {
-    if (!sessionName.trim()) return;
-    const data = getSessionData();
-    createSessionMutation.mutate({
-      name: sessionName.trim(),
-      ...data,
-    });
-  };
-
-  const handleLoadFromServer = (session: Session) => {
     try {
-      const json = JSON.stringify({
-        bpm: session.bpm,
-        fx: session.fx,
-        filterVal: session.filterVal,
-        pitchSemitones: session.pitchSemitones,
-        recordedEvents: session.recordedEvents,
-      });
-      onLoad(json);
-      setLoadDialogOpen(false);
-      toast({ title: 'Session loaded', description: `Loaded "${session.name}"` });
+      onLoad(await file.text());
+      toast({ title: `Loaded ${file.name}` });
     } catch {
-      toast({ title: 'Load failed', description: 'Could not load session data.', variant: 'destructive' });
+      toast({ title: 'Load failed', description: 'Invalid file format', variant: 'destructive' });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
-  };
+  }, [onLoad, toast]);
 
-  const ThemeIcon = theme === 'light' ? Sun : theme === 'neon' ? Zap : Moon;
+  const handleThemeChange = useCallback((t: string) => {
+    if (themes.includes(t as any)) setTheme(t as any);
+  }, [themes, setTheme]);
 
+  const handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
+
+  // ─── Render ──────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={cycleTheme}
-        data-testid="button-theme"
+    <TooltipProvider>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleFileChange}
+        aria-hidden
+      />
+
+      {/* ═══ HEADER BAR ══════════════════════════════════════════════════════ */}
+      <div
+        className="flex items-center flex-wrap gap-0 sticky top-0 z-50 flex-shrink-0"
+        style={{
+          background:   S.bgPanel,
+          borderBottom: `1px solid ${S.border}`,
+          fontFamily:   S.font,
+        }}
       >
-        <ThemeIcon className="w-4 h-4 mr-1" />
-        {theme.charAt(0).toUpperCase() + theme.slice(1)}
-      </Button>
-
-      <div className="flex items-center gap-2">
-        <Button
-          variant={metronomeOn ? 'default' : 'outline'}
-          size="sm"
-          onClick={onMetronomeToggle}
-          data-testid="button-metronome"
+        {/* ── Logo / identity ──────────────────────────────────────────────── */}
+        <div
+          className="flex items-center gap-2 px-3 py-2 border-r flex-shrink-0"
+          style={{ borderColor: S.border }}
         >
-          <Music className="w-4 h-4 mr-1" />
-          <span className="font-mono">{bpm}</span>
-        </Button>
-        <Slider
-          value={[bpm]}
-          min={40}
-          max={240}
-          step={1}
-          onValueChange={([v]) => onBpmChange(v)}
-          className="w-24"
-          data-testid="slider-bpm"
-        />
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="button-save-server">
-              <Save className="w-4 h-4 mr-1" />
-              Save
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Save Session</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <Input
-                placeholder="Session name..."
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
-                data-testid="input-session-name"
-              />
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveToServer}
-                  disabled={!sessionName.trim() || createSessionMutation.isPending}
-                  data-testid="button-save-confirm"
-                >
-                  {createSessionMutation.isPending ? 'Saving...' : 'Save to Cloud'}
-                </Button>
-                <Button variant="outline" onClick={onSave} data-testid="button-download">
-                  <Download className="w-4 h-4 mr-1" />
-                  Download File
-                </Button>
-              </div>
+          <div
+            className="flex items-center justify-center w-6 h-6"
+            style={{ background: S.accent, borderRadius: 0 }}
+          >
+            <Music className="w-3.5 h-3.5" style={{ color: '#000' }} />
+          </div>
+          <div>
+            <div
+              className="text-xs font-bold leading-none"
+              style={{ color: S.textActive, letterSpacing: 2, textTransform: 'uppercase' }}
+            >
+              R3
             </div>
-          </DialogContent>
-        </Dialog>
+            <div
+              className="text-[9px] leading-tight mt-0.5"
+              style={{ color: S.textMuted, letterSpacing: 1 }}
+            >
+              STUDIO · DAW
+            </div>
+          </div>
+        </div>
 
-        <Dialog open={loadDialogOpen} onOpenChange={setLoadDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="button-load-server">
-              <FolderOpen className="w-4 h-4 mr-1" />
-              Load
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Load Session</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 pt-4">
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {sessionsLoading ? (
-                  <p className="text-muted-foreground text-sm">Loading sessions...</p>
-                ) : sessions.length === 0 ? (
-                  <p className="text-muted-foreground text-sm">No saved sessions yet.</p>
-                ) : (
-                  sessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className="flex items-center justify-between p-3 rounded-md bg-muted/50 hover-elevate"
+        {/* ── BPM / Metronome ──────────────────────────────────────────────── */}
+        <div
+          className="flex items-center gap-2 px-3 py-2 border-r"
+          style={{ borderColor: S.border }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <BarButton onClick={onMetronomeToggle} active={metronomeOn}>
+                <Clock className="w-3 h-3" />
+                <span className="text-[10px] uppercase" style={{ letterSpacing: 1 }}>
+                  {metronomeOn ? 'CLICK ON' : 'CLICK'}
+                </span>
+              </BarButton>
+            </TooltipTrigger>
+            <TooltipContent style={tipStyle}>
+              {metronomeOn ? 'Disable' : 'Enable'} metronome
+            </TooltipContent>
+          </Tooltip>
+
+          {/* BPM readout */}
+          <div
+            className="flex items-center gap-1.5 px-2 h-7 border"
+            style={{ borderColor: S.border, background: S.bg }}
+          >
+            <span
+              className="text-xs font-bold tabular-nums"
+              style={{ color: S.accent, letterSpacing: 1 }}
+            >
+              {bpm}
+            </span>
+            <span className="text-[9px]" style={{ color: S.textDim, letterSpacing: 1 }}>
+              BPM
+            </span>
+          </div>
+
+          <Slider
+            value={[bpm]}
+            min={40}
+            max={240}
+            step={1}
+            onValueChange={handleBpmChange}
+            className="w-24"
+          />
+
+          <span
+            className="text-[10px] tabular-nums hidden lg:block"
+            style={{ color: S.textDim, letterSpacing: 1 }}
+          >
+            {msPerBeat}ms
+          </span>
+        </div>
+
+        {/* ── Theme selector ───────────────────────────────────────────────── */}
+        <div
+          className="flex items-center px-3 py-2 border-r"
+          style={{ borderColor: S.border }}
+        >
+          <DropdownMenu>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex items-center gap-1.5 h-7 px-2"
+                    style={{
+                      background:   'transparent',
+                      color:        S.textDim,
+                      border:       `1px solid ${S.border}`,
+                      borderRadius: 0,
+                      fontFamily:   S.font,
+                    }}
+                  >
+                    <ThemeIcon className="w-3 h-3" />
+                    <span
+                      className="text-[10px] uppercase hidden sm:inline"
+                      style={{ letterSpacing: 1 }}
                     >
-                      <button
-                        className="flex-1 text-left"
-                        onClick={() => handleLoadFromServer(session)}
-                        data-testid={`button-load-session-${session.id}`}
-                      >
-                        <span className="font-medium">{session.name}</span>
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {session.bpm} BPM
-                        </span>
-                      </button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => session.id && deleteSessionMutation.mutate(session.id)}
-                        disabled={deleteSessionMutation.isPending}
-                        data-testid={`button-delete-session-${session.id}`}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="border-t pt-4">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/json"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  data-testid="button-upload"
+                      {themeMetadata?.label ?? theme}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent style={tipStyle}>Change theme</TooltipContent>
+            </Tooltip>
+
+            <DropdownMenuContent
+              align="start"
+              className="w-52"
+              style={{
+                background:   S.bgPanel,
+                border:       `1px solid ${S.border}`,
+                borderRadius: 0,
+                fontFamily:   S.font,
+              }}
+            >
+              <DropdownMenuLabel
+                className="text-[10px] uppercase"
+                style={{ color: S.textDim, letterSpacing: 2 }}
+              >
+                Theme
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator style={{ background: S.border }} />
+              <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
+                {themes.map(t => {
+                  const Icon   = THEME_ICONS[t] ?? Moon;
+                  const meta   = THEMES[t] ?? {};
+                  const active = t === theme;
+                  return (
+                    <DropdownMenuRadioItem
+                      key={t}
+                      value={t}
+                      className="gap-2"
+                      style={{
+                        color:        active ? S.accent : S.textActive,
+                        background:   active ? '#111'   : 'transparent',
+                        borderRadius: 0,
+                      }}
+                    >
+                      <Icon className="w-3 h-3" />
+                      <div>
+                        <div className="text-xs font-medium">{meta?.label ?? t}</div>
+                        <div className="text-[10px]" style={{ color: S.textDim }}>
+                          {meta?.description ?? ''}
+                        </div>
+                      </div>
+                    </DropdownMenuRadioItem>
+                  );
+                })}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* ── Session controls (pushed to right) ───────────────────────────── */}
+        <div className="flex items-center gap-0.5 px-3 py-2 ml-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <BarButton onClick={onSave}>
+                <Save className="w-3 h-3" />
+                <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                  Save
+                </span>
+              </BarButton>
+            </TooltipTrigger>
+            <TooltipContent style={tipStyle}>Save session</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div style={{ marginLeft: 2 }}>
+                <BarButton
+                  onClick={() => setLoadDialogOpen(v => !v)}
+                  active={loadDialogOpen}
                 >
-                  <Upload className="w-4 h-4 mr-1" />
-                  Upload File
-                </Button>
+                  <FolderOpen className="w-3 h-3" />
+                  <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                    Sessions{loadDialogOpen && filteredSessions.length > 0
+                      ? ` (${filteredSessions.length})`
+                      : ''}
+                  </span>
+                </BarButton>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </TooltipTrigger>
+            <TooltipContent style={tipStyle}>Browse saved sessions</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div style={{ marginLeft: 2 }}>
+                <BarButton onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-3 h-3" />
+                  <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                    Load
+                  </span>
+                </BarButton>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent style={tipStyle}>Load session from file</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
-    </div>
+
+      {/* ═══ SESSION LIST PANEL (inline below header) ════════════════════════ */}
+      {loadDialogOpen && (
+        <div
+          className="border-b flex-shrink-0"
+          style={{ background: S.bg, borderColor: S.border, fontFamily: S.font }}
+        >
+          {/* Filter bar */}
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 border-b"
+            style={{ background: S.bgPanel, borderColor: S.border }}
+          >
+            <span
+              className="text-[10px] uppercase"
+              style={{ color: S.textDim, letterSpacing: 2 }}
+            >
+              Saved Sessions
+            </span>
+            <input
+              type="text"
+              placeholder="Filter…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="ml-auto h-5 px-2 text-[10px] bg-transparent outline-none"
+              style={{
+                border:       `1px solid ${S.border}`,
+                color:        S.textActive,
+                fontFamily:   S.font,
+                borderRadius: 0,
+                width:        120,
+              }}
+            />
+          </div>
+
+          {/* Session rows */}
+          <div className="max-h-40 overflow-y-auto">
+            {sessionsError ? (
+              <div className="px-3 py-2 text-[10px]" style={{ color: '#ef4444' }}>
+                Failed to load sessions
+              </div>
+            ) : filteredSessions.length === 0 ? (
+              <div className="px-3 py-2 text-[10px]" style={{ color: S.textDim }}>
+                {sessions.length === 0 ? 'No saved sessions' : 'No matches'}
+              </div>
+            ) : (
+              filteredSessions.map(session => (
+                <button
+                  key={session.id}
+                  className="w-full flex items-center gap-3 px-3 py-1.5 border-b text-left"
+                  style={{
+                    borderColor: `${S.border}55`,
+                    background:  'transparent',
+                    fontFamily:  S.font,
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#0f0f0f'; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  onClick={() => {
+                    onLoad(JSON.stringify(session));
+                    setLoadDialogOpen(false);
+                  }}
+                >
+                  <span className="text-xs flex-1" style={{ color: S.textActive }}>
+                    {session.name}
+                  </span>
+                  {session.bpm != null && (
+                    <span
+                      className="text-[9px] tabular-nums"
+                      style={{ color: S.accent, letterSpacing: 1 }}
+                    >
+                      {session.bpm} BPM
+                    </span>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </TooltipProvider>
   );
-}
+});

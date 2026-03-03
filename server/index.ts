@@ -1,5 +1,9 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import effectsRouter from './routes/effects';
+import waveformRouter from './routes/waveform';
+import presetsRouter from './routes/presets';
 import { serveStatic } from "./static";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
@@ -7,9 +11,38 @@ import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
 import morgan from "morgan";
+import Stripe from "stripe";
+import { logger } from "./lib/logger";
+// ─── LoopStation routes ───────────────────────────────────────────────────────
+import loopRoutes        from './routes/loops';
+import loopProjectRoutes from './routes/loopProjects';
+import midiRoutes        from './routes/midi';
+import { loopStationAuth }         from './middleware/auth';
+import { loopStationErrorHandler } from './middleware/errorHandler';
+import { loopStationLimiter }      from './middleware/rateLimit';
+import { ensureDir }               from './utils/fileUtils';
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Stripe is optional — only initialized if STRIPE_SECRET_KEY is set
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-01-28.clover" as const })
+  : null;
 
 const app = express();
 const httpServer = createServer(app);
+
+// Billing route — only active when Stripe is configured
+if (stripe) {
+  app.post("/billing/checkout", async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      line_items: [{ price: req.body.priceId, quantity: 1 }],
+      success_url: "https://r3vibe.com/success",
+      cancel_url: "https://r3vibe.com/cancel"
+    });
+    res.json({ url: session.url });
+  });
+}
 
 // WebSocket server for real-time audio communication
 const wss = new WebSocketServer({ 
@@ -39,8 +72,12 @@ if (process.env.NODE_ENV === "development") {
   }));
 }
 
-// Compression for responses
-app.use(compression());
+app.use('/api/effects', effectsRouter);
+app.use('/api/waveform', waveformRouter);
+app.use('/api/presets', presetsRouter);
+
+// Compression for responses — cast needed due to @types/compression / express types mismatch
+app.use(compression() as unknown as express.RequestHandler);
 
 // Request logging
 if (process.env.NODE_ENV === "development") {
@@ -50,7 +87,7 @@ if (process.env.NODE_ENV === "development") {
 // Body parsing with raw body preservation
 app.use(
   express.json({
-    limit: "50mb", // Increased for audio file uploads
+    limit: "50mb",
     verify: (req, _res, buf) => {
       req.rawBody = buf;
     },
@@ -62,27 +99,26 @@ app.use(express.urlencoded({
   limit: "50mb"
 }));
 
-// Custom logger utility
+// Internal log utility — wraps the structured logger with source tagging
 export function log(message: string, source = "express") {
-  const formattedTime = new Date().toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
+  logger.info(`[${source}] ${message}`);
+}
+
+// Log Stripe status
+if (!stripe) {
+  log("⚠️ STRIPE_SECRET_KEY not set — billing routes disabled", "stripe");
 }
 
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  let capturedJsonResponse: Record<string, unknown> | undefined = undefined;
 
-  const originalResJson = res.json;
+  const originalResJson = res.json.bind(res);
   res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+    capturedJsonResponse = bodyJson as Record<string, unknown>;
+    return originalResJson(bodyJson, ...args);
   };
 
   res.on("finish", () => {
@@ -106,30 +142,19 @@ wss.on("connection", (ws, req) => {
 
   ws.on("message", (data) => {
     try {
-      const message = JSON.parse(data.toString());
+      const message = JSON.parse(data.toString()) as { type: string };
 
-      // Handle different message types
       switch (message.type) {
         case "audio-sync":
-          // Broadcast to all other clients for live collaboration
-          wss.clients.forEach((client) => {
-            if (client !== ws && client.readyState === 1) {
-              client.send(JSON.stringify(message));
-            }
-          });
-          break;
-
         case "tempo-change":
         case "effect-update":
         case "recording-status":
-          // Broadcast real-time updates
           wss.clients.forEach((client) => {
             if (client !== ws && client.readyState === 1) {
               client.send(JSON.stringify(message));
             }
           });
           break;
-
         default:
           log(`Unknown message type: ${message.type}`, "websocket");
       }
@@ -146,14 +171,13 @@ wss.on("connection", (ws, req) => {
     log(`WebSocket error for client ${clientId}: ${error}`, "websocket");
   });
 
-  // Send welcome message
   ws.send(JSON.stringify({ 
     type: "connection-established",
     timestamp: Date.now()
   }));
 });
 
-// Health check endpoint
+// Health check endpoints
 app.get("/health", (_req, res) => {
   res.json({ 
     status: "ok",
@@ -166,15 +190,25 @@ app.get("/health", (_req, res) => {
   });
 });
 
+app.get("/ready", (_req, res) => {
+  res.status(200).json({ status: "ready" });
+});
+
 // Initialize server
 (async () => {
   try {
-    // Register API routes
+        // Ensure loop storage dirs
+    try {
+      const base = process.env.LOOP_STORAGE_BASE ?? './server/storage';
+      await ensureDir(`${base}/loops`);
+      await ensureDir(`${base}/projects`);
+    } catch(e) { log(`Loop storage init warning: ${e}`, 'loopstation'); }
+
     await registerRoutes(httpServer, app);
 
     // Error handling middleware
-    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-      const status = err.status || err.statusCode || 500;
+    app.use((err: Error & { status?: number; statusCode?: number }, _req: Request, res: Response, _next: NextFunction) => {
+      const status = (err as { status?: number }).status || (err as { statusCode?: number }).statusCode || 500;
       const message = err.message || "Internal Server Error";
 
       log(`Error ${status}: ${message}`, "error");
@@ -185,15 +219,13 @@ app.get("/health", (_req, res) => {
       });
     });
 
-    // Setup Vite in development or serve static in production
     if (process.env.NODE_ENV === "production") {
       serveStatic(app);
     } else {
-      const { setupVite } = await import("./vite");
+      const { setupVite } = await import("./vite-dev");
       await setupVite(httpServer, app);
     }
 
-    // Start server
     const port = parseInt(process.env.PORT || "5000", 10);
     httpServer.listen(
       {
@@ -207,6 +239,7 @@ app.get("/health", (_req, res) => {
         log(`🌐 Environment: ${process.env.NODE_ENV || "development"}`);
         log(`🔌 WebSocket server ready on ws://localhost:${port}/ws/audio`);
         log(`💾 Database: ${process.env.DATABASE_URL ? "Connected" : "Not configured"}`);
+        log(`💳 Stripe: ${stripe ? "Configured" : "Not configured (set STRIPE_SECRET_KEY to enable billing)"}`);
       },
     );
   } catch (error) {
@@ -232,5 +265,4 @@ process.on("SIGINT", () => {
   });
 });
 
-// Export for testing
 export { app, httpServer, wss };
