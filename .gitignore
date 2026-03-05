@@ -14,3 +14,8 @@ server/.env
 .local/
 node
 _dev/legacy/
+
+# LLPTE packages build output
+packages/*/dist/
+packages/*/*.tsbuildinfo
+internal/

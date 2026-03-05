@@ -1,51 +1,60 @@
-# R3 v4
+# LLPTE — Low-Latency Predictive Transition Engine
 
-> _One-line description of what this project does._
+> A modular, real-time transition intelligence layer that predicts, scores, and executes
+> optimal audio transitions under sub-10ms latency constraints for live performance systems.
 
-## Prerequisites
+## Architecture
 
-- Node.js 20+
-- PostgreSQL
-- Docker (optional)
+```
+packages/
+  llpte-core/              # Engine constants, performance targets
+  llpte-signal/            # BPM, key, energy, spectral analysis
+  llpte-transition-graph/  # Weighted multi-factor predictive scoring engine ← core IP
+  llpte-execution/         # Low-latency crossfade executor (<10ms target)
+  llpte-adapters/          # WebAudio, VST, MIDI, Mobile integration adapters
+  llpte-ai/                # AI inference HTTP adapter (Python bridge)
 
-## Setup
+client/                    # Reference implementation UI
+server/                    # API + transport layer (ai_mix.py lives here)
+shared/                    # Shared TypeScript types + Drizzle schema
+```
+
+## Performance Targets
+
+| Metric                      | Target   |
+|-----------------------------|----------|
+| Transition prediction time  | < 5ms    |
+| Crossfade execution latency | < 10ms   |
+| CPU usage (average)         | < 15%    |
+| Memory footprint            | < 50MB   |
+| Analysis time per track     | < 2,000ms|
+
+## Quick Start
 
 ```bash
-cp .env.example .env
-# Fill in values in .env
-
+# Install all workspaces
 npm install
-npm run db:migrate   # if applicable
-npm run dev
+
+# Run benchmarks
+cd packages/llpte-transition-graph
+npx tsx benchmarks/run.bench.ts
+
+# Run tests
+npm test --workspace=packages/llpte-transition-graph
 ```
 
-## Environment Variables
+## Documentation
 
-See [.env.example](./.env.example) for all required variables.
+| Document | Description |
+|----------|-------------|
+| [Whitepaper](docs/LLPTE/LLPTE_WHITEPAPER.md) | Full technical specification |
+| [Architecture](docs/LLPTE/ARCHITECTURE_DIAGRAM.md) | System diagram |
+| [Benchmarks](docs/LLPTE/BENCHMARKS.md) | Performance measurement log |
+| [IP Thesis](docs/LLPTE/IP_THESIS.md) | Defensibility analysis (confidential) |
 
-| Variable | Description |
-|---|---|
-| `PORT` | HTTP port (default: 3000) |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `STRIPE_SECRET_KEY` | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `APP_URL` | Public URL of the app |
-| `MAX_UPLOAD_SIZE_MB` | Max file upload size in MB |
-| `MULTIPART_THRESHOLD_MB` | Threshold to switch to multipart |
-| `SIGNED_URL_EXPIRES` | Signed URL TTL in seconds |
+## Licensing
 
-## Scripts
+Commercial licensing available.
+**Integration fee:** $200K · **Royalty:** 5–8% · **Maintenance retainer:** Optional
 
-```bash
-npm run dev      # Start dev server
-npm run build    # Compile TypeScript
-npm run start    # Start production server
-npm test         # Run tests
-```
-
-## Docker
-
-```bash
-docker build -t r3-v4 .
-docker run --env-file .env -p 3000:3000 r3-v4
-```
+Contact for integration and SDK documentation.

@@ -41,5 +41,11 @@
   "description": "A modern full-stack audio workstation with React, TypeScript, Express, and Web Audio API.",
   "dependencies": {
     "drizzle-zod": "^0.8.3"
-  }
+  },
+  "workspaces": [
+    "client",
+    "server",
+    "shared",
+    "packages/*"
+  ]
 }
