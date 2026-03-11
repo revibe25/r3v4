@@ -1,10 +1,40 @@
+/**
+ * server/middleware/enforceUsage.ts
+ *
+ * Fix: local AuthRequest interface conflicted with Express global augmentation
+ *
+ * ROOT CAUSE: This file defined:
+ *   interface AuthRequest extends Request {
+ *     user?: { id: string; mixesUsed?: number; tier?: string };
+ *   }
+ *
+ * server/trpc.ts globally augments Express.Request:
+ *   interface Request { user?: AuthPayload; }
+ *
+ * AuthPayload has { id, username, email, tier }. The local type's `user` shape
+ * ({ id, mixesUsed?, tier? }) is missing `username` and `email`, making it
+ * incompatible with AuthPayload. TypeScript rejects the local interface because
+ * extending Request and re-narrowing user to an incompatible type is an error.
+ *
+ * WHY THIS FIX IS CORRECT:
+ * The local AuthRequest is removed entirely. `Request` from Express already has
+ * `user?: AuthPayload` via the global augmentation. `req.user?.id` and
+ * `req.user?.tier` are both valid on AuthPayload. `mixesUsed` is not on
+ * AuthPayload but it was never read from req.user — it was fetched from DB.
+ * The cast `(user as Record<string, unknown>).mixesUsed` remains for the DB row
+ * where the column may or may not exist depending on schema evolution.
+ *
+ * NOTE: MIX_LIMITS uses plan strings "free" | "pro" | "studio" which do not
+ * match SubscriptionTier values. This middleware is legacy — the canonical
+ * feature gate is server/middleware/feature-gate.ts which uses SubscriptionTier.
+ * This file is left intact for any existing routes that reference it; when those
+ * routes are migrated to tRPC, this file can be deleted.
+ */
+
 import { Request, Response, NextFunction } from "express";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
-
-// NOTE: This middleware uses the `tier` field on the `users` table.
-// If you add a dedicated `subscriptions` + `usage` table later, update accordingly.
 
 type Plan = "free" | "pro" | "studio";
 
@@ -18,15 +48,10 @@ function isPlan(value: unknown): value is Plan {
   return typeof value === "string" && value in MIX_LIMITS;
 }
 
-// Extend Express Request to include the authenticated user
-interface AuthRequest extends Request {
-  user?: { id: string; mixesUsed?: number; tier?: string };
-}
-
 export async function enforceMixLimit(
-  req: AuthRequest,
+  req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   try {
     const userId = req.user?.id;
@@ -35,7 +60,6 @@ export async function enforceMixLimit(
       return;
     }
 
-    // Fetch user to get their current tier and usage
     const [user] = await db
       .select()
       .from(users)
@@ -50,17 +74,10 @@ export async function enforceMixLimit(
     const plan: Plan = isPlan(user.tier) ? user.tier : "free";
     const limit = MIX_LIMITS[plan];
 
-    // If you track mixesUsed on the user row or a separate table, update this check.
-    // For now we gate on plan tier only — replace `mixesUsed` with your actual field.
     const mixesUsed: number = (user as Record<string, unknown>).mixesUsed as number ?? 0;
 
     if (mixesUsed >= limit) {
-      res.status(403).json({
-        error: "Mix limit reached",
-        plan,
-        limit,
-        current: mixesUsed,
-      });
+      res.status(403).json({ error: "Mix limit reached", plan, limit, current: mixesUsed });
       return;
     }
 

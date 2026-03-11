@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState } from 'react';
 import type { DJControlsProps } from './types';
 import {

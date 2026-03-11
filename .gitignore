@@ -19,3 +19,16 @@ _dev/legacy/
 packages/*/dist/
 packages/*/*.tsbuildinfo
 internal/
+server/storage.js
+server/trpc.js
+server/db/index.js
+server/db/schema.js
+server/lib/logger.js
+server/routers/index.js
+shared/types/*.js
+*.bak
+*.bak.*
+.r3-sub-backup-*/
+
+# Launch prep additions
+uploads/

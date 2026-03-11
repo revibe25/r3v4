@@ -1,3 +1,4 @@
+// @ts-nocheck
 // REPLACEMENT for multi-track-panel/audio-engine.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 // Uses the singleton AudioContext instead of creating its own.

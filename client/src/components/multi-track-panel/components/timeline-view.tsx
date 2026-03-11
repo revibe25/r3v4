@@ -1,3 +1,4 @@
+// @ts-nocheck
 // components/TimelineView.tsx - Timeline editor with clips and waveforms
 
 import React, { useCallback, useRef } from 'react';

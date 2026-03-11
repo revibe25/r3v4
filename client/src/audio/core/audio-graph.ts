@@ -89,7 +89,7 @@ export class AudioGraph {
     this.analyser.connect(this.destination);
 
     // Re-create internal nodes if the context is closed/re-opened
-    this.removeContextListener = onAudioContext('created', () => {
+    this.removeContextListener = onAudioContext(() => {
       // If the singleton was closed and re-created, our graph nodes are stale.
       // Consumers should create a new AudioGraph instance in this case.
       console.warn('[AudioGraph] AudioContext was re-created. Instantiate a new AudioGraph.');

@@ -1,3 +1,22 @@
+/// <reference types="vite/client" />
+
+interface FXNode {
+  readonly id: string;
+  readonly context: AudioContext;
+  readonly input: AudioNode;
+  readonly output: AudioNode;
+  readonly bypassed: boolean;
+  connect(destination: AudioNode): void;
+  disconnect(): void;
+  setBypass(bypass: boolean): void;
+  dispose(): void;
+  bypass(enabled: boolean): void;
+  setWetDry(wet: number, dry?: number): void;
+  setParam(name: string, value: number): void;
+  getParam(name: string): number;
+  getParams(): Record<string, number>;
+}
+
 // Ambient declarations for missing modules and Web APIs
 
 // Ableton Link

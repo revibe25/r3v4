@@ -2337,9 +2337,12 @@ export function DrumPads({
       {/* ── Pad Controls tray — collapsible ─────────────────────────────── */}
       <div className="border-t border-border/40 shrink-0">
         {/* Tab header — always visible, click to collapse */}
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setShowPadControls(p => !p)}
-          className="w-full flex items-center justify-between px-3 py-1.5 group transition-colors hover:bg-white/[0.03]"
+          onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && setShowPadControls(p => !p)}
+          className="w-full flex items-center justify-between px-3 py-1.5 group transition-colors hover:bg-white/[0.03] cursor-pointer"
           style={{
             background: 'linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(0,0,0,0.04) 100%)',
           }}
@@ -2364,7 +2367,7 @@ export function DrumPads({
             )}
             {/* Mute / Solo toggles for selected pad */}
             <button
-              onClick={() => handleToggleMute(selectedPadIndex)}
+              onClick={(e) => { e.stopPropagation(); handleToggleMute(selectedPadIndex); }}
               title={padMutes.has(selectedPadIndex) ? 'Unmute pad' : 'Mute pad'}
               className="text-[7px] font-mono px-1.5 py-0.5 rounded-sm border transition-all"
               style={{
@@ -2374,7 +2377,7 @@ export function DrumPads({
               }}
             >M</button>
             <button
-              onClick={() => setSoloedPad(soloedPad === selectedPadIndex ? null : selectedPadIndex)}
+              onClick={(e) => { e.stopPropagation(); setSoloedPad(soloedPad === selectedPadIndex ? null : selectedPadIndex); }}
               title={soloedPad === selectedPadIndex ? 'Unsolo pad' : 'Solo pad'}
               className="text-[7px] font-mono px-1.5 py-0.5 rounded-sm border transition-all"
               style={{
@@ -2392,7 +2395,7 @@ export function DrumPads({
               style={{ transform: showPadControls ? 'rotate(0deg)' : 'rotate(-90deg)' }}
             />
           </div>
-        </button>
+        </div>
 
         {/* Collapsible body */}
         {showPadControls && (

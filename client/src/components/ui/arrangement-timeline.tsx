@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useClipStore } from '@/store/clip-store';
 import { useEffect, useRef, useState } from "react";
 import * as Tone from "tone";

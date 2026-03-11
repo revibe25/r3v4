@@ -320,7 +320,13 @@ const MasterBar: React.FC<{ isReady: boolean }> = ({ isReady }) => {
           return <div key={i} style={{ width: 5, height: '100%', background: bg, boxShadow: lit ? `0 0 4px ${bg}55` : 'none', transition: lit ? 'none' : 'background 80ms' }} />;
         })}
       </div>
-      <span style={{ fontSize: 6, color: T.t5, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em' }}>MASTER OUT</span>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontSize: 6, color: T.t5, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em' }}>MASTER OUT</span>
+        <span style={{ fontSize: 6, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.04em', width: 32, textAlign: 'right',
+          color: pk > 0.9 ? T.red : pk > 0.7 ? T.yellow : T.t4 }}>
+          {pk > 0.001 ? `${(20 * Math.log10(pk)).toFixed(1)}dB` : ' —∞ '}
+        </span>
+      </div>
     </div>
   );
 };
@@ -561,23 +567,28 @@ const ClipLauncher: React.FC<{
   };
 
   const launch = (row: number, col: number) => {
+    const engine = getLoopEngine();
     setClips(prev => {
       const n = prev.map(r => [...r]);
       if (n[row][col] === 'empty') {
         n[row][col] = 'recording';
       } else if (n[row][col] === 'loaded') {
         n[row][col] = 'queued';
+        if (engine.initialized) engine.launchClip(col, row);
         setTimeout(() => {
           setClips(p => { const m = p.map(r => [...r]); m[row][col] = 'playing'; return m; });
           setActiveRow(row);
         }, 200);
       } else if (n[row][col] === 'playing') {
+        if (engine.initialized) engine.stopClip(col, row);
         n[row][col] = 'loaded';
         setActiveRow(null);
       } else if (n[row][col] === 'queued') {
+        if (engine.initialized) engine.stopClip(col, row);
         n[row][col] = 'loaded';
       } else if (n[row][col] === 'recording') {
         n[row][col] = 'playing';
+        if (engine.initialized) engine.launchClip(col, row);
         setActiveRow(row);
       }
       return n;
@@ -585,9 +596,13 @@ const ClipLauncher: React.FC<{
   };
 
   const stopRow = (row: number) => {
+    const engine = getLoopEngine();
     setClips(prev => {
       const n = prev.map(r => [...r]);
-      n[row] = n[row].map(s => s === 'playing' ? 'loaded' : s);
+      n[row] = n[row].map((s, col) => {
+        if (s === 'playing') { if (engine.initialized) engine.stopClip(col, row); return 'loaded'; }
+        return s;
+      });
       return n;
     });
     if (activeRow === row) setActiveRow(null);
@@ -687,7 +702,25 @@ const MacroPanel: React.FC = () => {
   const [selected, setSelected] = useState(0);
 
   const upd = (idx: number, patch: Partial<MacroState>) =>
-    setMacros(prev => prev.map((m, i) => i === idx ? { ...m, ...patch } : m));
+    setMacros(prev => {
+      const next = prev.map((m, j) => j === idx ? { ...m, ...patch } : m);
+      const m = next[idx];
+      const engine = getLoopEngine();
+      if (engine.initialized) {
+        if ('value'  in patch) engine.setMacro(idx, m.value);
+        if ('target' in patch) engine.setMacroTarget(idx, m.target as any);
+        if ('lfoOn' in patch || 'lfoShape' in patch || 'lfoRate' in patch ||
+            'lfoDepth' in patch || 'lfoSync' in patch) {
+          engine.setLFO(idx, {
+            id: idx, enabled: m.lfoOn, shape: m.lfoShape as any,
+            rateHz: m.lfoRate * 16, rateSynced: m.lfoSync,
+            depth: m.lfoDepth, target: m.target as any,
+            trackIndex: null, phase: 0, rateNote: '4n', _lfo: null,
+          });
+        }
+      }
+      return next;
+    });
 
   const m = macros[selected];
 
@@ -804,6 +837,15 @@ const BeatRepeat: React.FC = () => {
   const [chance, setChance] = useState(0.5);
   const [len, setLen] = useState(0.5);
 
+  useEffect(() => {
+    const engine = getLoopEngine();
+    if (!engine.initialized) return;
+    engine.setBeatRepeat({
+      enabled, trackIndex: 0, division: div,
+      chance, length: len, pitch: 0, variation: 'none',
+    });
+  }, [enabled, div, chance, len]);
+
   const DIVS: Array<'1/4' | '1/8' | '1/16' | '1/32'> = ['1/4', '1/8', '1/16', '1/32'];
 
   return (
@@ -894,6 +936,7 @@ export const LoopStation505: React.FC = () => {
     setBpm, tapTempo, toggleMetronome,
     setFilter, setDelay, setReverb, setCompressor, setXY,
     saveScene, recallScene,
+    setSwing: setSwingEngine, setTimeSignature, setQuantMode, setPlaybackMode,
   } = useLoopStation505();
 
   // ── FX State ──────────────────────────────────────────────────────────────
@@ -919,7 +962,7 @@ export const LoopStation505: React.FC = () => {
   const [rDecay,  setRDec]  = useState(0.35);
   const [dFeed,   setDFeed] = useState(0.3);
   const [dTime,   setDTime] = useState(0.4);
-  const [swing,   setSwing] = useState(0);
+  const [swing,   setSwingLocal] = useState(0);
 
   // ── UI State ──────────────────────────────────────────────────────────────
   const [view,   setView]  = useState<View>('perform');
@@ -1055,7 +1098,7 @@ export const LoopStation505: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 2 }}>
               {(['4/4', '3/4', '5/4', '6/8', '7/8'] as TimeSig[]).map(s => (
-                <button key={s} onClick={() => setTimeSig(s)} style={{
+                <button key={s} onClick={() => { setTimeSig(s); setTimeSignature(s); }} style={{
                   padding: '2px 5px', fontSize: 6, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.08em',
                   background: timeSig === s ? 'rgba(57,255,20,.07)' : T.bg2,
                   border: `1px solid ${timeSig === s ? T.acid : T.b2}`,
@@ -1066,7 +1109,7 @@ export const LoopStation505: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ fontSize: 6, color: T.t5, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em', whiteSpace: 'nowrap' }}>SWING</span>
               <input type="range" min={0} max={100} value={Math.round(swing * 100)}
-                onChange={e => setSwing(Number(e.target.value) / 100)}
+                onChange={e => { const v = Number(e.target.value) / 100; setSwingLocal(v); setSwingEngine(v); }}
                 style={{ width: 60, accentColor: T.acid, cursor: 'pointer', height: 2 }} />
               <span style={{ fontSize: 6, color: swing > 0.05 ? T.acid : T.t5, fontFamily: 'IBM Plex Mono,monospace', width: 20 }}>
                 {Math.round(swing * 100)}%
@@ -1081,7 +1124,7 @@ export const LoopStation505: React.FC = () => {
             <span style={{ fontSize: 6, color: T.t5, letterSpacing: '.25em', textAlign: 'center', whiteSpace: 'nowrap' }}>QUANTIZE</span>
             <div style={{ display: 'flex', gap: 2 }}>
               {(['instant', '1/4', '1/2', '1m', '2m', 'free'] as Quant[]).map(q => (
-                <button key={q} onClick={() => setQuant(q)} style={{
+                <button key={q} onClick={() => { setQuant(q); setQuantMode(q); }} style={{
                   padding: '3px 6px', fontSize: 6, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.08em',
                   background: quant === q ? 'rgba(57,255,20,.07)' : T.bg2,
                   border: `1px solid ${quant === q ? T.acid : T.b2}`,
@@ -1347,11 +1390,11 @@ export const LoopStation505: React.FC = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 3 }}>
                     {'ABCDEFGHIJKLMNOP'.split('').map((lbl, i) => (
                       <SceneBtn key={lbl} label={lbl}
-                        hasData={!!scenes[i % 4]}
-                        isActive={activeScene === i % 4}
+                        hasData={!!scenes[i]}
+                        isActive={activeScene === i}
                         color={i < 4 ? T.acid : i < 8 ? T.cyan : i < 12 ? T.orange : T.purple}
-                        onSave={() => saveScene(i % 4)}
-                        onRecall={() => recallScene(i % 4)} />
+                        onSave={() => saveScene(i)}
+                        onRecall={() => recallScene(i)} />
                     ))}
                   </div>
                   <span style={{ fontSize: 6, color: T.t5, letterSpacing: '.1em', textAlign: 'center', fontFamily: 'IBM Plex Mono,monospace' }}>

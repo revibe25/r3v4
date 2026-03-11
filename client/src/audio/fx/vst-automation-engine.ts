@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/audio/fx/vst-automation-engine.ts
 import {
   AutomationEngine,

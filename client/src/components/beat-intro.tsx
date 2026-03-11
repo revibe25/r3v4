@@ -85,7 +85,7 @@ const STEP_MAP = Array.from({ length: STEPS }, (_, s) =>
 
 // ── Web Audio synthesis ────────────────────────────────────────────────────────
 
-function mkKick(ctx, dest, t, vel) {
+function mkKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(58, t);
@@ -103,7 +103,7 @@ function mkKick(ctx, dest, t, vel) {
   c.start(t); c.stop(t + 0.02);
 }
 
-function mkGhostKick(ctx, dest, t, vel) {
+function mkGhostKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(80, t);
@@ -113,7 +113,7 @@ function mkGhostKick(ctx, dest, t, vel) {
   osc.start(t); osc.stop(t + 0.35);
 }
 
-function mkSnare(ctx, dest, t, vel) {
+function mkSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   // Noise body
   const len = Math.floor(ctx.sampleRate * 0.22);
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
@@ -135,7 +135,7 @@ function mkSnare(ctx, dest, t, vel) {
   osc.start(t); osc.stop(t + 0.09);
 }
 
-function mkGhostSnare(ctx, dest, t, vel) {
+function mkGhostSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const len = Math.floor(ctx.sampleRate * 0.1);
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
   const d = buf.getChannelData(0);
@@ -149,7 +149,7 @@ function mkGhostSnare(ctx, dest, t, vel) {
   ns.start(t); ns.stop(t + 0.11);
 }
 
-function mkClosedHH(ctx, dest, t, vel) {
+function mkClosedHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const len = Math.floor(ctx.sampleRate * 0.055);
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
   const d = buf.getChannelData(0);
@@ -163,7 +163,7 @@ function mkClosedHH(ctx, dest, t, vel) {
   ns.start(t); ns.stop(t + 0.058);
 }
 
-function mkOpenHH(ctx, dest, t, vel) {
+function mkOpenHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const len = Math.floor(ctx.sampleRate * 0.32);
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
   const d = buf.getChannelData(0);
@@ -177,7 +177,7 @@ function mkOpenHH(ctx, dest, t, vel) {
   ns.start(t); ns.stop(t + 0.33);
 }
 
-function mkRim(ctx, dest, t, vel) {
+function mkRim(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.type = "triangle";
   osc.connect(g); g.connect(dest);
@@ -188,7 +188,7 @@ function mkRim(ctx, dest, t, vel) {
   osc.start(t); osc.stop(t + 0.07);
 }
 
-function mkCowbell(ctx, dest, t, vel) {
+function mkCowbell(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   [562, 845].forEach(freq => {
     const osc = ctx.createOscillator(), g = ctx.createGain();
     osc.type = "square"; osc.frequency.value = freq;
@@ -207,7 +207,7 @@ function mkCowbell(ctx, dest, t, vel) {
   });
 }
 
-function mkTexture(ctx, dest, t, vel) {
+function mkTexture(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const osc = ctx.createOscillator(), lpf = ctx.createBiquadFilter(), g = ctx.createGain();
   osc.type = "sawtooth";
   lpf.type = "lowpass"; lpf.frequency.value = 780;
@@ -219,7 +219,7 @@ function mkTexture(ctx, dest, t, vel) {
   osc.start(t); osc.stop(t + 0.22);
 }
 
-function mkAccent(ctx, dest, t, vel) {
+function mkAccent(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(900, t);
@@ -248,32 +248,32 @@ interface BeatIntroProps {
 export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   const [playing,    setPlaying]    = useState(false);
   const [step,       setStep]       = useState(-1);
-  const [activePads, setActivePads] = useState({});   // pad → vel
-  const [poppingPads,setPoppingPads]= useState(new Set());
-  const [lastHit,    setLastHit]    = useState(null); // { pad, vel, step }
-  const [hitLog,     setHitLog]     = useState([]);
+  const [activePads, setActivePads] = useState<Record<number,number>>({});   // pad → vel
+  const [poppingPads,setPoppingPads]= useState<Set<number>>(new Set());
+  const [lastHit,    setLastHit]    = useState<{pad:number;vel:number;step:number;id:number}|null>(null);
+  const [hitLog,     setHitLog]     = useState<{id:number;pad:number;vel:number;step:number}[]>([]);
   const [bars,       setBars]       = useState(0);
 
-  const ctxRef     = useRef(null);
-  const destRef    = useRef(null);
-  const schedRef   = useRef(null);
-  const rafRef     = useRef(null);
+  const ctxRef     = useRef<AudioContext|null>(null);
+  const destRef    = useRef<GainNode|null>(null);
+  const schedRef   = useRef<ReturnType<typeof setInterval>|null>(null);
+  const rafRef     = useRef<number|null>(null);
   const playingRef = useRef(false);
   const stepRef    = useRef(0);
   const nextTimeRef= useRef(0);
-  const pendingVis = useRef([]);  // { pad, vel, step, time }
+  const pendingVis = useRef<{pad:number;vel:number;step:number;time:number}[]>([]);
   const hitIdRef   = useRef(0);
 
   // Cleanup on unmount
   useEffect(() => () => {
-    clearInterval(schedRef.current);
-    cancelAnimationFrame(rafRef.current);
+    clearInterval(schedRef.current ?? undefined);
+    cancelAnimationFrame(rafRef.current ?? 0);
     ctxRef.current?.close();
   }, []);
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       ctxRef.current = new AudioCtx();
       const master = ctxRef.current.createGain();
       master.gain.value = 0.82;
@@ -285,10 +285,10 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   }, []);
 
   // Schedule one step's hits into Web Audio
-  const scheduleStep = useCallback((s, t) => {
+  const scheduleStep = useCallback((s: number, t: number) => {
     const { ctx, dest } = getCtx();
     STEP_MAP[s].forEach(({ pad, vel }) => {
-      SYNTHS[pad](ctx, dest, t, vel);
+      SYNTHS[pad](ctx, dest!, t, vel);
       pendingVis.current.push({ pad, vel, step: s, time: t });
     });
   }, [getCtx]);
@@ -367,8 +367,8 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
 
   const stop = useCallback(() => {
     playingRef.current = false;
-    clearInterval(schedRef.current); schedRef.current = null;
-    cancelAnimationFrame(rafRef.current); rafRef.current = null;
+    clearInterval(schedRef.current ?? undefined); schedRef.current = null;
+    cancelAnimationFrame(rafRef.current ?? 0); rafRef.current = null;
     pendingVis.current = [];
     setPlaying(false); setStep(-1); setActivePads({});
     setPoppingPads(new Set()); setBars(0);

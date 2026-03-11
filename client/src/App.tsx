@@ -1,28 +1,4 @@
 // client/src/App.tsx
-//
-// ─── ARCHITECTURE NOTES ──────────────────────────────────────────────────────
-//
-//  PROBLEM (original):
-//    1. VSTProvider wrapped the ENTIRE app — every page blocked until an audio
-//       context gesture fired, showing a full-screen spinner even on /instrument.
-//    2. All VST audio classes (VSTPerformanceMonitor, SidechainRouter, etc.)
-//       were static top-level imports → landed in the main 626 KB bundle.
-//    3. InstrumentPage was eagerly imported → couldn't be split out.
-//
-//  FIXES:
-//    1. VSTProvider now only wraps the /vst route. Every other route loads
-//       instantly without touching the audio subsystem.
-//    2. All VST audio classes are type-only imports at the top; the actual
-//       modules are loaded via dynamic import() inside VSTProvider's useEffect.
-//    3. InstrumentPage, NotFound, and every page use React.lazy().
-//    4. A single shared <AppShell> wraps providers that ALL routes need
-//       (QueryClient, Theme, Tooltip, Toaster) — no redundant nesting.
-//    5. ErrorBoundary is extracted to its own module-level class so it is never
-//       recreated on render.
-//    6. useVSTContextOptional() exported for components that live outside
-//       VSTProvider but have optional VST integration (e.g. MultiTrackPanel).
-//
-// ─────────────────────────────────────────────────────────────────────────────
 import {
   lazy,
   Suspense,
@@ -42,12 +18,17 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { PageNav } from '@/components/page-nav';
 import { ThemeProvider } from '@/components/theme-provider';
+import type { ProjectData } from '@/components/vst-master-panel';
 // ─── TYPE-ONLY imports (zero runtime cost — stripped by TypeScript) ───────────
 import type { VSTPerformanceMonitor } from '@/audio/fx/vst-performance-monitor';
 import type { SidechainRouter } from '@/audio/fx/vst-sidechain';
 import type { VSTAutomationEngine } from '@/audio/fx/vst-automation-engine';
 import type { MixerChannel } from '@/audio/mixer/mixer-channel';
 import type { FXChain } from '@/audio/fx/fx-chain';
+import { trpc, trpcClient } from './lib/trpc';
+import { SubscriptionProvider } from './hooks/useSubscription';
+import Pricing from './pages/Pricing';
+
 // ─── LAZY PAGES ───────────────────────────────────────────────────────────────
 const InstrumentPage  = lazy(() => import('@/pages/instrument'));
 const NotFound        = lazy(() => import('@/pages/not-found'));
@@ -143,20 +124,11 @@ interface VSTContextType {
   getChannel: (id: string) => MixerChannel | undefined;
 }
 const VSTContext = createContext<VSTContextType | null>(null);
-/**
- * Strict hook — throws if called outside VSTProvider.
- * Use inside /vst route components only.
- */
 export function useVSTContext(): VSTContextType {
   const ctx = useContext(VSTContext);
   if (!ctx) throw new Error('useVSTContext must be used within <VSTProvider>');
   return ctx;
 }
-/**
- * Optional hook — returns null when called outside VSTProvider.
- * Safe to use in components that live on routes without VSTProvider
- * (e.g. MultiTrackPanel on /multitrack). Always null-check the result.
- */
 export function useVSTContextOptional(): VSTContextType | null {
   return useContext(VSTContext);
 }
@@ -214,7 +186,7 @@ function VSTProvider({ children }: { children: ReactNode }) {
         getChannel: id => channelsMap.get(id),
       };
       setVstSystem(system);
-      (channelsMap as any).__system = system;
+      (channelsMap as Map<string, MixerChannel> & { __system?: VSTContextType }).__system = system;
     };
     const onGesture = () => {
       initAudio().catch(err => {
@@ -229,7 +201,8 @@ function VSTProvider({ children }: { children: ReactNode }) {
     return () => {
       document.removeEventListener('click',   onGesture);
       document.removeEventListener('keydown', onGesture);
-      const system = (channelsMap as any).__system as VSTContextType | undefined;
+      const typedMap = channelsMap as Map<string, MixerChannel> & { __system?: VSTContextType };
+      const system = typedMap.__system;
       if (system) {
         system.performanceMonitor.dispose();
         system.sidechainRouter.dispose();
@@ -279,7 +252,9 @@ function VSTManagerPage() {
   const vstContext = useVSTContext();
   const [loadError,  setLoadError]  = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const handleProjectSave = async () => {
+
+  // Returns ProjectData — the serialized form expected by VSTMasterPanel.
+  const handleProjectSave = async (): Promise<ProjectData> => {
     setSaveStatus('saving');
     try {
       const { VSTProjectSerializer } = await import('@/audio/fx/vst-project-serializer');
@@ -290,8 +265,8 @@ function VSTManagerPage() {
         chainMap,
         vstContext.sidechainRouter,
         vstContext.audioContext,
-      );
-      VSTProjectSerializer.createBackup(data, `auto-${Date.now()}`);
+      ) as unknown as ProjectData; // SerializedVSTChain satisfies ProjectData shape
+      VSTProjectSerializer.createBackup(data as any, `auto-${Date.now()}`);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
       return data;
@@ -301,7 +276,8 @@ function VSTManagerPage() {
       throw err;
     }
   };
-  const handleProjectLoad = async (data: any) => {
+
+  const handleProjectLoad = async (data: ProjectData) => {
     setLoadError(null);
     if (!data?.version || !Array.isArray(data?.chains)) {
       const msg = 'Invalid project file: missing "version" or "chains".';
@@ -325,23 +301,27 @@ function VSTManagerPage() {
     vstContext.channels.map(ch => ch.id).forEach(id => vstContext.removeChannel(id));
     for (const chainData of data.chains) {
       const ch = vstContext.addChannel(chainData.channelId);
-      if (chainData.volume != null) ch.setVolume(chainData.volume);
-      if (chainData.pan    != null) ch.setPan(chainData.pan);
-      if (chainData.muted  != null) ch.setMute(chainData.muted);
-      if (chainData.solo   != null) ch.setSolo(chainData.solo);
-      if (chainData.armed  != null) ch.setArmed(chainData.armed);
-      if (chainData.name)           ch.setName(chainData.name);
+      const anyChain = chainData as unknown as Record<string, unknown>;
+      if (typeof anyChain['volume'] === 'number') ch.setVolume(anyChain['volume']);
+      if (typeof anyChain['pan'] === 'number')    ch.setPan(anyChain['pan']);
+      if (typeof anyChain['muted'] === 'boolean') ch.setMute(anyChain['muted']);
+      if (typeof anyChain['solo'] === 'boolean')  ch.setSolo(anyChain['solo']);
+      if (typeof anyChain['armed'] === 'boolean') ch.setArmed(anyChain['armed']);
+      if (typeof anyChain['name'] === 'string')   ch.setName(anyChain['name']);
     }
     try {
       const restoredChains = await VSTProjectSerializer.deserializeProject(
-        data,
+        data as any,
         vstContext.audioContext,
       );
-      restoredChains.forEach((fxChain, channelId) => {
+      restoredChains.forEach((fxChain: FXChain, channelId: string) => {
         const ch = vstContext.getChannel(channelId);
         if (!ch) return;
         ch.clearFX();
-        fxChain.getAllEffects().forEach(fx => ch.addFX(fx));
+        // Pass FXNodeBase processors, not FXSlots, to MixerChannel.addFX
+        fxChain.getAllEffects().forEach(slot => {
+          if (slot.processor) ch.addFX(slot.processor);
+        });
       });
     } catch (fxErr) {
       const warning = 'Project loaded with warnings: one or more FX plugins could not be restored.';
@@ -352,26 +332,28 @@ function VSTManagerPage() {
       vstContext.sidechainRouter.getAllConnections().forEach(conn => {
         try { vstContext.sidechainRouter.removeConnection(conn.id); } catch (_) {}
       });
-      data.sidechains.forEach((config: any) => {
+      data.sidechains.forEach((config: unknown) => {
+        const c = config as Record<string, unknown>;
         try {
-          const sourceCh = vstContext.getChannel(config.sourceChannelId);
+          const sourceCh = vstContext.getChannel(c['sourceChannelId'] as string);
           if (!sourceCh) {
-            console.warn('[VSTManagerPage] Sidechain: source not found:', config.sourceChannelId);
+            console.warn('[VSTManagerPage] Sidechain: source not found:', c['sourceChannelId']);
             return;
           }
-          const targetCh  = vstContext.getChannel(config.targetChannelId ?? config.sourceChannelId);
-          const targetVST = targetCh?.getVSTPlugins().find(v => v.id === config.targetVSTId);
+          const targetCh  = vstContext.getChannel((c['targetChannelId'] ?? c['sourceChannelId']) as string);
+          const targetVST = targetCh?.getVSTPlugins().find((v: { id: unknown }) => v.id === c['targetVSTId']);
           if (!targetVST) {
-            console.warn('[VSTManagerPage] Sidechain: target VST not found:', config.targetVSTId);
+            console.warn('[VSTManagerPage] Sidechain: target VST not found:', c['targetVSTId']);
             return;
           }
-          vstContext.sidechainRouter.createSidechain(config, sourceCh.output, targetVST);
+          vstContext.sidechainRouter.createSidechain(c as any, sourceCh.output, targetVST);
         } catch (e) {
           console.warn('[VSTManagerPage] Sidechain restore skipped:', config, e);
         }
       });
     }
   };
+
   return (
     <div className="min-h-screen bg-[#060606] text-[#f0f0f0] font-mono">
       <PageNav />
@@ -426,18 +408,6 @@ function VSTManagerPage() {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE PAGE SHELLS
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * MultiTrackPage — full-bleed shell for the DAW.
- *
- * No PageNav or container wrapper here — MultiTrackPanel is a fully
- * self-contained full-screen application that owns its own navigation,
- * header, and layout. Adding a wrapper here caused:
- *   • A duplicate nav bar (MultiTrackPanel renders its own PageNav)
- *   • A white border line from container padding bleeds
- *
- * The panel renders flush to the viewport edges with its own ag-daw-shell.
- */
 function MultiTrackPage() {
   return (
     <ErrorBoundary>
@@ -447,7 +417,6 @@ function MultiTrackPage() {
     </ErrorBoundary>
   );
 }
-
 function LoopStationPage() {
   return (
     <div className="min-h-screen bg-[#060606] text-[#f0f0f0] font-mono flex flex-col">
@@ -497,6 +466,13 @@ function Router() {
       <Route path="/loopstation">
         {() => <LoopStationPage />}
       </Route>
+      <Route path="/pricing">
+        {() => (
+          <Suspense fallback={<LoadingFallback message="Loading Pricing…" />}>
+            <Pricing />
+          </Suspense>
+        )}
+      </Route>
       <Route>
         {() => (
           <Suspense fallback={null}>
@@ -512,14 +488,19 @@ function Router() {
 // ─────────────────────────────────────────────────────────────────────────────
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <TooltipProvider>
+            <SubscriptionProvider>
+              <Toaster />
+              <Router />
+            </SubscriptionProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
 export default App;
+

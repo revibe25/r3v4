@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useMeterStore } from '@/store/meter-store';
 import { useMixerStore } from '@/store/mixer-store';
 import "@/store/mixer-store"

@@ -3,18 +3,29 @@ import { type Server } from "http";
 import { createServer as createViteServer, createLogger } from "vite";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 import { nanoid } from "nanoid";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+const CLIENT_ROOT = path.resolve(__dirname, "..", "client");
 
 export async function setupVite(server: Server, app: Express) {
   const viteLogger = createLogger();
 
   const vite = await createViteServer({
-    configFile: path.resolve(process.cwd(), "vite.config.ts"),
+    root:       CLIENT_ROOT,
+    configFile: path.resolve(CLIENT_ROOT, "vite.config.ts"),
     customLogger: {
       ...viteLogger,
       error: (msg: string, options?: { error?: Error }) => {
-        viteLogger.error(msg, options);
-        process.exit(1);
+        if (options?.error) {
+          viteLogger.error(msg, options);
+          process.exit(1);
+        } else {
+          viteLogger.warn(msg);
+        }
       },
     },
     server: {
@@ -30,7 +41,7 @@ export async function setupVite(server: Server, app: Express) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path.resolve(process.cwd(), "client", "index.html");
+      const clientTemplate = path.resolve(CLIENT_ROOT, "index.html");
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,

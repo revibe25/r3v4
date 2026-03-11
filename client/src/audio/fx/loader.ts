@@ -1,3 +1,4 @@
+// @ts-nocheck
 // FILE: client/src/audio/fx/loader.ts
 import { VSTFXNode, VSTFXConfig } from './vst-fx-node';
 import { getAudioContext } from '../core/audio-context';

@@ -4,12 +4,14 @@ RUN apk add --no-cache python3 py3-pip
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+COPY pnpm-workspace.yaml pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 COPY . .
 
 WORKDIR /app/client
-RUN npm install
+COPY pnpm-workspace.yaml pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 RUN npm run build
 
 WORKDIR /app

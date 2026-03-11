@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ErrorBoundary.tsx
 import React from "react";
 

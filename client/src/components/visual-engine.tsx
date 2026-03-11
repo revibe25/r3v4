@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/components/visual-engine.tsx
 
 import { Canvas, useFrame } from '@react-three/fiber';

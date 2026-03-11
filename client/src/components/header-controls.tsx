@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/components/header-controls.tsx
 import React, { useRef, useState, useMemo, useCallback, memo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';

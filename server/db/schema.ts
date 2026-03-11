@@ -1,8 +1,41 @@
+/**
+ * server/db/schema.ts
+ *
+ * ROOT FIX — Bug 4 (two subscriptions tables):
+ * This file previously defined its own `subscriptions` table with a schema that
+ * diverged from shared/schema-subscription.ts on every important billing column:
+ *   - Old: `plan text`, no stripeCustomerId, stripeSubscriptionId NOT NULL UNIQUE
+ *   - New (canonical): `tier enum`, full Stripe billing columns, userId UNIQUE
+ * Both targeted the same DB table name "subscriptions", guaranteeing migration
+ * conflicts and runtime inconsistency.
+ *
+ * Fix: the local `subscriptions` table definition is removed entirely.
+ * stripe-subscription.ts already imports from shared/schema-subscription.ts
+ * (the authoritative definition). Callers that previously imported Subscription
+ * types from here now import from shared/schema-subscription.ts directly.
+ *
+ * ROOT FIX — Bug 3 (users.tier default mismatch):
+ * `users.tier` defaulted to "free", which is not a valid SubscriptionTier
+ * ("explorer" | "creator" | "pro_artist"). Changed to "explorer" for
+ * consistency. The canonical tier lives in the subscriptions table; users.tier
+ * is a denormalized cache — if you want to remove the duplication entirely,
+ * drop this column and always read from subscriptions.
+ */
+
 import { sql } from "drizzle-orm";
 import {
   pgTable, text, varchar, jsonb, integer, boolean,
-  timestamp, real, index, uuid, json
+  timestamp, real, index, uuid, json,
 } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+
+// ── Re-export canonical subscription types so existing imports keep working ───
+export type {
+  Subscription,
+  NewSubscription,
+  StripeEvent,
+  AiTransitionUsage,
+} from '../../shared/schema-subscription';
 
 // ==================== USERS ====================
 export const users = pgTable("users", {
@@ -10,26 +43,15 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
-  tier: text("tier").notNull().default("free"),
+  /**
+   * Denormalized tier cache. Canonical value lives in the `subscriptions` table
+   * (shared/schema-subscription.ts). Keep in sync via the Stripe webhook handler.
+   * Default changed from "free" → "explorer" to match SubscriptionTier enum.
+   */
+  tier: text("tier").notNull().default("explorer"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
-
-// ==================== SUBSCRIPTIONS ====================
-export const subscriptions = pgTable("subscriptions", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-  stripeSubscriptionId: text("stripe_subscription_id").notNull().unique(),
-  plan: text("plan").notNull().default("free"),
-  status: text("status").notNull(),
-  currentPeriodEnd: timestamp("current_period_end"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("subscriptions_user_id_idx").on(table.userId),
-}));
 
 // ==================== USAGE TRACKING ====================
 export const usage = pgTable("usage", {
@@ -193,8 +215,6 @@ export const waveformEditsTable = pgTable("waveform_edits", {
 // ==================== TYPESCRIPT TYPES ====================
 export type User               = typeof users.$inferSelect;
 export type InsertUser         = typeof users.$inferInsert;
-export type Subscription       = typeof subscriptions.$inferSelect;
-export type InsertSubscription = typeof subscriptions.$inferInsert;
 export type Usage              = typeof usage.$inferSelect;
 export type InsertUsage        = typeof usage.$inferInsert;
 export type Session            = typeof sessions.$inferSelect;
@@ -211,7 +231,6 @@ export type MidiMapping        = typeof midiMappings.$inferSelect;
 export type InsertMidiMapping  = typeof midiMappings.$inferInsert;
 
 // ==================== ZOD INSERT SCHEMAS ====================
-import { createInsertSchema } from "drizzle-zod";
 export const insertSessionSchema = createInsertSchema(sessions);
 export const insertProjectSchema = createInsertSchema(projects);
 export const insertSampleSchema  = createInsertSchema(samples);

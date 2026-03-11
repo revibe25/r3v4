@@ -10,13 +10,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { VSTScanner, VSTPluginInfo } from '@/audio/fx/vst-scanner';
 import { Search, Star, TrendingUp, Grid, List, RefreshCw } from 'lucide-react';
 import { getAudioContext } from '@/audio/core/audio-context';
+import { useVSTStore }     from '@/store/vst-store';
 
 interface VSTBrowserProps {
   onPluginSelect: (plugin: VSTPluginInfo) => void;
+  channelId?:    string;   // auto-insert plugin into this channel when selected
+  showFXChain?:  boolean;
 }
 
-export function VSTBrowser({ onPluginSelect }: VSTBrowserProps) {
-  const [plugins, setPlugins] = useState<VSTPluginInfo[]>([]);
+export function VSTBrowser({ onPluginSelect, channelId, showFXChain }: VSTBrowserProps) {
+  const addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
+  const [plugins,   setPlugins]   = useState<VSTPluginInfo[]>([]);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -51,8 +57,20 @@ export function VSTBrowser({ onPluginSelect }: VSTBrowserProps) {
     }
   };
 
+  const handlePluginSelect = (plugin: VSTPluginInfo) => {
+    setLoadingId(plugin.id);
+    setRecentIds(prev => [plugin.id, ...prev.filter(id => id !== plugin.id)].slice(0, 10));
+    if (channelId) addPluginToChannel(channelId, plugin.id, plugin.name);
+    onPluginSelect(plugin);
+    setTimeout(() => setLoadingId(null), 600);
+  };
+
   const filteredPlugins = useMemo(() => {
     return plugins.filter(plugin => {
+      // Special tabs first
+      if (selectedCategory === 'favorites') return !!plugin.isFavorite;
+      if (selectedCategory === 'recent')    return recentIds.includes(plugin.id);
+
       // Category filter
       if (selectedCategory !== 'all' && plugin.category !== selectedCategory) {
         return false;
@@ -67,10 +85,9 @@ export function VSTBrowser({ onPluginSelect }: VSTBrowserProps) {
           plugin.tags.some(tag => tag.includes(query))
         );
       }
-
       return true;
     });
-  }, [plugins, searchQuery, selectedCategory]);
+  }, [plugins, searchQuery, selectedCategory, recentIds]);
 
   const categories = useMemo(() => {
     const cats = new Set(plugins.map(p => p.category));
@@ -151,7 +168,8 @@ export function VSTBrowser({ onPluginSelect }: VSTBrowserProps) {
                     <PluginCard
                       key={plugin.id}
                       plugin={plugin}
-                      onSelect={() => onPluginSelect(plugin)}
+                      onSelect={() => handlePluginSelect(plugin)}
+                      loading={loadingId === plugin.id}
                       onToggleFavorite={() => toggleFavorite(plugin.id)}
                     />
                   ))}
@@ -162,7 +180,8 @@ export function VSTBrowser({ onPluginSelect }: VSTBrowserProps) {
                     <PluginListItem
                       key={plugin.id}
                       plugin={plugin}
-                      onSelect={() => onPluginSelect(plugin)}
+                      onSelect={() => handlePluginSelect(plugin)}
+                      loading={loadingId === plugin.id}
                       onToggleFavorite={() => toggleFavorite(plugin.id)}
                     />
                   ))}
@@ -186,14 +205,16 @@ function PluginCard({
   plugin,
   onSelect,
   onToggleFavorite,
+  loading,
 }: {
   plugin: VSTPluginInfo;
   onSelect: () => void;
   onToggleFavorite: () => void;
+  loading?: boolean;
 }) {
   return (
     <Card
-      className="cursor-pointer hover:bg-accent transition-colors"
+      className={`cursor-pointer hover:bg-accent transition-colors${loading ? ' opacity-60 pointer-events-none' : ''}`}
       onClick={onSelect}
     >
       <CardContent className="p-4">
@@ -229,14 +250,16 @@ function PluginListItem({
   plugin,
   onSelect,
   onToggleFavorite,
+  loading,
 }: {
   plugin: VSTPluginInfo;
   onSelect: () => void;
   onToggleFavorite: () => void;
+  loading?: boolean;
 }) {
   return (
     <div
-      className="flex items-center justify-between p-3 border rounded-none hover:bg-accent cursor-pointer"
+      className={`flex items-center justify-between p-3 border rounded-none hover:bg-accent cursor-pointer${loading ? ' opacity-60 pointer-events-none' : ''}`}
       onClick={onSelect}
     >
       <div className="flex items-center gap-4 flex-1">

@@ -1,0 +1,74 @@
+--- a/server/routes/effects.ts
++++ b/server/routes/effects.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+ 
+ // ... rest of code
+
+--- a/server/routes/loopProjects.ts
++++ b/server/routes/loopProjects.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/loops.ts
++++ b/server/routes/loops.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/midi.ts
++++ b/server/routes/midi.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/presets.ts
++++ b/server/routes/presets.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/uploads.ts
++++ b/server/routes/uploads.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/waveform.ts
++++ b/server/routes/waveform.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/routes/webhooks/stripe.ts
++++ b/server/routes/webhooks/stripe.ts
+@@ -1,5 +1,5 @@
+ import express, { type Router } from 'express';
+ 
+-const router = Router();
++const router: Router = Router();
+
+--- a/server/middleware/feature-gate.ts
++++ b/server/middleware/feature-gate.ts
+@@ -1,5 +1,5 @@
+-import express, { type Router } from 'express';
++import express, { type Router, type RequestHandler } from 'express';
+ 
+-export const attachSubscription = middleware(async ({ ctx, next }) => {
++export const attachSubscription: RequestHandler = middleware(async ({ ctx, next }) => {

@@ -845,3 +845,6 @@ export interface AutomationLaneData {
   paramPath: string;
 }
 
+
+
+export { MixerChannel } from '@/audio/mixer/mixer-channel';

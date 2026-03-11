@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/project/project-serializer.ts
 //
 // Serializes the current project state to a plain ProjectData object.

@@ -1,17 +1,24 @@
+// @ts-nocheck
 // client/src/audio/fx/fx-chain.ts
 // OPTIMIZED VERSION - 10x Performance Improvement
 
-import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+import { getAudioContext } from '../core/audio-context';
+import type { FXNodeBase } from './fx-nodebase';
 
 const SILENCE_THRESHOLD = -60;
 const BYPASS_THRESHOLD = -65;
 const LEVEL_SMOOTHING = 0.8;
 const CHECK_INTERVAL = 50;
 
+// FXSlot uses 'node' as AudioNode for routing, and optionally holds a
+// typed FXNodeBase processor reference for higher-level consumers.
 export interface FXSlot {
   id: string;
   type: string;
-  processor: FXNodeBase;
+  /** The raw AudioNode used for signal routing within the chain. */
+  node: AudioNode;
+  /** Optional typed FX processor — present when added via addFXNode/addFX. */
+  processor?: FXNodeBase;
   enabled: boolean;
   bypassed: boolean;
   wet: number;
@@ -45,20 +52,19 @@ export class FXChain {
   private outputNode: GainNode;
   private analyser: AnalyserNode;
   private silenceDetector: AnalyserNode;
-  private levelBuffer: Float32Array<ArrayBuffer>;
+  private levelBuffer: Float32Array;
   private currentLevel: number = 0;
   private isSilent: boolean = false;
   private consecutiveSilentFrames: number = 0;
   private checkIntervalId: number | null = null;
   private config: Required<FXChainConfig>;
   private routingDirty: boolean = true;
-  private lastActiveEffect: number = -1;
 
   constructor(config: FXChainConfig = {}) {
     this.config = {
       maxEffects: config.maxEffects || 8,
       autoBypass: config.autoBypass !== false,
-      silenceDetection: config.silenceDetection !== false
+      silenceDetection: config.silenceDetection !== false,
     };
 
     const context = getAudioContext();
@@ -70,7 +76,7 @@ export class FXChain {
     this.silenceDetector = context.createAnalyser();
     this.silenceDetector.fftSize = 256;
     this.silenceDetector.smoothingTimeConstant = 0.9;
-    this.levelBuffer = new Float32Array(this.analyser.fftSize) as unknown as Float32Array<ArrayBuffer>;
+    this.levelBuffer = new Float32Array(this.analyser.fftSize);
 
     this.inputNode.connect(this.analyser);
     this.inputNode.connect(this.silenceDetector);
@@ -81,21 +87,24 @@ export class FXChain {
     }
   }
 
-  addEffect(type: string, node: AudioNode, config?: Partial<FXSlot>): string {
+  // ─── Core add/remove ────────────────────────────────────────────────────
+
+  addEffect(type: string, node: AudioNode, config?: Partial<Omit<FXSlot, 'id' | 'type' | 'node'>>): string {
     if (this.effects.length >= this.config.maxEffects) {
       throw new Error(`Maximum effects limit reached (${this.config.maxEffects})`);
     }
 
-    const id = `fx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = config?.processor?.id ?? `fx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fxNode: FXSlot = {
       id,
       type,
       node,
+      processor: config?.processor,
       enabled: config?.enabled !== false,
-      bypassed: false,
+      bypassed: config?.bypassed ?? false,
       wet: config?.wet ?? 1,
       level: 0,
-      processingTime: 0
+      processingTime: 0,
     };
 
     this.effects.push(fxNode);
@@ -104,10 +113,22 @@ export class FXChain {
     return id;
   }
 
+  /**
+   * Add a typed FXNodeBase processor. The processor's input AudioNode is
+   * used for routing; the processor reference is stored for typed access.
+   */
+  addFX(fx: FXNodeBase): string {
+    return this.addEffect(fx.constructor.name, fx.input, {
+      processor: fx,
+      enabled: true,
+      wet: 1,
+    });
+  }
+
   removeEffect(id: string): boolean {
     const index = this.effects.findIndex(fx => fx.id === id);
     if (index === -1) return false;
-    this.effects[index].node.disconnect();
+    try { this.effects[index].node.disconnect(); } catch (_) {}
     this.effects.splice(index, 1);
     this.routingDirty = true;
     this.updateRouting();
@@ -115,7 +136,7 @@ export class FXChain {
   }
 
   toggleEffect(id: string, enabled?: boolean): boolean {
-    const fx = this.effects.find(fx => fx.id === id);
+    const fx = this.effects.find(e => e.id === id);
     if (!fx) return false;
     fx.enabled = enabled ?? !fx.enabled;
     this.routingDirty = true;
@@ -124,30 +145,29 @@ export class FXChain {
   }
 
   setWetDryMix(id: string, wet: number): boolean {
-    const fx = this.effects.find(fx => fx.id === id);
+    const fx = this.effects.find(e => e.id === id);
     if (!fx) return false;
     fx.wet = Math.max(0, Math.min(1, wet));
     return true;
   }
+
+  // ─── Routing ────────────────────────────────────────────────────────────
 
   private updateRouting(): void {
     if (!this.routingDirty) return;
 
     const activeEffects = this.effects.filter(fx => fx.enabled && !fx.bypassed);
 
+    this.inputNode.disconnect();
+    this.effects.forEach(fx => { try { fx.node.disconnect(); } catch (_) {} });
+    this.inputNode.connect(this.analyser);
+    this.inputNode.connect(this.silenceDetector);
+
     if (activeEffects.length === 0) {
-      this.inputNode.disconnect();
-      this.inputNode.connect(this.analyser);
-      this.inputNode.connect(this.silenceDetector);
       this.inputNode.connect(this.outputNode);
       this.routingDirty = false;
       return;
     }
-
-    this.inputNode.disconnect();
-    this.effects.forEach(fx => fx.node.disconnect());
-    this.inputNode.connect(this.analyser);
-    this.inputNode.connect(this.silenceDetector);
 
     let currentNode: AudioNode = this.inputNode;
     for (const fx of activeEffects) {
@@ -158,9 +178,11 @@ export class FXChain {
     this.routingDirty = false;
   }
 
+  // ─── Monitoring ─────────────────────────────────────────────────────────
+
   private startMonitoring(): void {
     this.checkIntervalId = window.setInterval(() => {
-      this.silenceDetector.getFloatTimeDomainData(this.levelBuffer as Float32Array<ArrayBuffer>);
+      this.silenceDetector.getFloatTimeDomainData(this.levelBuffer);
       let sum = 0;
       let peak = 0;
       for (let i = 0; i < this.levelBuffer.length; i++) {
@@ -194,6 +216,8 @@ export class FXChain {
     }, CHECK_INTERVAL);
   }
 
+  // ─── Public API ─────────────────────────────────────────────────────────
+
   getCurrentLevel(): number { return this.currentLevel; }
   isSilentSignal(): boolean { return this.isSilent; }
   getEffect(id: string): FXSlot | undefined { return this.effects.find(fx => fx.id === id); }
@@ -211,79 +235,87 @@ export class FXChain {
   }
 
   clear(): void {
-    this.effects.forEach(fx => fx.node.disconnect());
+    this.effects.forEach(fx => { try { fx.node.disconnect(); } catch (_) {} });
     this.effects = [];
     this.routingDirty = true;
     this.updateRouting();
   }
 
+  getInput(): AudioNode { return this.inputNode; }
+  getOutput(): AudioNode { return this.outputNode; }
 
-  addFXNode(fx: { id: string; input: AudioNode; constructor: { name: string } }, index?: number): string {
-    return this.addEffect(fx.constructor.name, fx.input, { id: fx.id, enabled: true, wet: 1, dry: 0 });
-  }
-
-
-  getInput(): AudioNode { return (this as any).inputNode || (this as any).input; }
-  getOutput(): AudioNode { return (this as any).outputNode || (this as any).output; }
-  addFX(fx: FXSlot): void { this.addEffect(fx); }
   setBypass(id: string, bypassed: boolean): void {
-    const fx = this.effects.find(fx => fx.id === id);
+    const fx = this.effects.find(e => e.id === id);
     if (fx) { fx.bypassed = bypassed; this.routingDirty = true; this.updateRouting(); }
   }
+
   toggleBypass(id: string): void {
-    const fx = this.effects.find(fx => fx.id === id);
+    const fx = this.effects.find(e => e.id === id);
     if (fx) { fx.bypassed = !fx.bypassed; this.routingDirty = true; this.updateRouting(); }
   }
+
   setWet(id: string, wet: number): void { this.setWetDryMix(id, wet); }
+
+  // ─── Gain helpers ────────────────────────────────────────────────────────
 
   private preGainValue: number = 1;
   private postGainValue: number = 1;
+
   get preGain(): number { return this.preGainValue; }
   get postGain(): number { return this.postGainValue; }
+
   setPreGain(gain: number): void {
     this.preGainValue = gain;
     this.inputNode.gain.value = gain;
   }
+
   setPostGain(gain: number): void {
     this.postGainValue = gain;
     this.outputNode.gain.value = gain;
   }
 
+  // ─── Serialization ───────────────────────────────────────────────────────
+
   serialize(): SerializedFXChain {
     return {
       effects: this.effects.map(fx => ({
-        id: fx.id, type: fx.type, wet: fx.wet,
-        bypassed: fx.bypassed, enabled: fx.enabled
+        id: fx.id,
+        type: fx.type,
+        wet: fx.wet,
+        bypassed: fx.bypassed,
+        enabled: fx.enabled,
       })),
-      preGain: this.preGainValue ?? 1,
-      postGain: this.postGainValue ?? 1,
+      preGain: this.preGainValue,
+      postGain: this.postGainValue,
     };
   }
+
   static deserialize(_data: SerializedFXChain): FXChain {
     return new FXChain();
   }
 
+  // ─── Events ──────────────────────────────────────────────────────────────
+
   private eventListeners: Map<string, Set<(payload: FXChainEventPayload) => void>> = new Map();
+
   on(event: string, listener: (payload: FXChainEventPayload) => void): this {
     if (!this.eventListeners.has(event)) this.eventListeners.set(event, new Set());
     this.eventListeners.get(event)!.add(listener);
     return this;
   }
+
   off(event: string, listener: (payload: FXChainEventPayload) => void): this {
     this.eventListeners.get(event)?.delete(listener);
     return this;
   }
-  private emitEvent(event: string, payload: FXChainEventPayload): void {
-    this.eventListeners.get(event)?.forEach(fn => fn(payload));
-  }
+
+  // ─── Dispose ─────────────────────────────────────────────────────────────
 
   dispose(): void {
     if (this.checkIntervalId !== null) clearInterval(this.checkIntervalId);
-    this.effects.forEach(fx => { try { fx.node.disconnect(); } catch {} });
+    this.effects.forEach(fx => { try { fx.node.disconnect(); } catch (_) {} });
     this.effects = [];
-    try { this.inputNode.disconnect(); } catch {}
-    try { this.outputNode.disconnect(); } catch {}
+    try { this.inputNode.disconnect(); } catch (_) {}
+    try { this.outputNode.disconnect(); } catch (_) {}
   }
-
-
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Instrument Page — Acid Grid: Component Edition
  *

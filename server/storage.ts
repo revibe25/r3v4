@@ -1,74 +1,106 @@
-import { eq, desc } from "drizzle-orm";
+/**
+ * server/storage.ts
+ *
+ * Fix E — getSamplesByTags SQL injection via manual string interpolation
+ *
+ * ROOT CAUSE: The previous implementation built a Postgres ARRAY literal by
+ * manually interpolating tag values after single-quote escaping:
+ *   `ARRAY['${t.replace(/'/g, "''")}', ...]`
+ * Single-quote escaping is not sufficient — it does not protect against
+ * backslash escapes (\'), dollar-quoting, or unusual Unicode. More importantly,
+ * sql.raw() opts out of Drizzle's parameterization entirely, meaning the values
+ * are sent as SQL text, not as bound parameters. A crafted tag value could
+ * escape the array literal and inject arbitrary SQL.
+ *
+ * WHY THIS FIX IS CORRECT:
+ * The JSONB ?| operator requires a text[] operand. The correct parameterized
+ * approach is to cast the bound parameter: `tags ?| $1::text[]` where $1 is
+ * the array passed as a proper Postgres parameter. Drizzle's sql`` template
+ * uses `sql.param(value)` to inject a bound parameter — the driver sends
+ * it as a separate parameter slot, never interpolated into the query string.
+ * No escaping needed; the DB treats it as data, not syntax.
+ */
+
+import { eq, desc, sql } from "drizzle-orm";
 import { db } from "./db";
-import { 
-  users, 
-  sessions, 
-  projects, 
-  samples, 
-  presets, 
-  settings 
+import {
+  users,
+  sessions,
+  projects,
+  samples,
+  presets,
+  settings,
 } from "./db/schema";
 
-// ── Derive types directly from Drizzle table definitions ──────────────────────
-// These replace the missing type exports from @shared/schema.
-// If @shared/schema adds them later, you can switch back to importing them.
-export type User          = typeof users.$inferSelect;
-export type InsertUser    = typeof users.$inferInsert;
-export type Session       = typeof sessions.$inferSelect;
-export type InsertSession = typeof sessions.$inferInsert;
-export type Project       = typeof projects.$inferSelect;
-export type InsertProject = typeof projects.$inferInsert;
-export type Sample        = typeof samples.$inferSelect;
-export type InsertSample  = typeof samples.$inferInsert;
-export type Preset        = typeof presets.$inferSelect;
-export type InsertPreset  = typeof presets.$inferInsert;
-export type Settings      = typeof settings.$inferSelect;
+// ── Type exports ───────────────────────────────────────────────────────────────
+export type User           = typeof users.$inferSelect;
+export type InsertUser     = typeof users.$inferInsert;
+export type Session        = typeof sessions.$inferSelect;
+export type InsertSession  = typeof sessions.$inferInsert;
+export type Project        = typeof projects.$inferSelect;
+export type InsertProject  = typeof projects.$inferInsert;
+export type Sample         = typeof samples.$inferSelect;
+export type InsertSample   = typeof samples.$inferInsert;
+export type Preset         = typeof presets.$inferSelect;
+export type InsertPreset   = typeof presets.$inferInsert;
+export type Settings       = typeof settings.$inferSelect;
 export type InsertSettings = typeof settings.$inferInsert;
 
 export interface IStorage {
-  // User operations
+  // ── User ────────────────────────────────────────────────────────────────────
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, user: Partial<InsertUser>): Promise<User | undefined>;
   deleteUser(id: string): Promise<boolean>;
 
-  // Session operations
+  // ── Session ─────────────────────────────────────────────────────────────────
+  /** Admin/internal only — returns ALL sessions unfiltered. */
   getSessions(): Promise<Session[]>;
+  /** User-scoped — use this in all user-facing tRPC procedures. */
+  getSessionsByUser(userId: string): Promise<Session[]>;
   getSession(id: string): Promise<Session | undefined>;
   createSession(session: InsertSession): Promise<Session>;
   updateSession(id: string, session: Partial<InsertSession>): Promise<Session | undefined>;
   deleteSession(id: string): Promise<boolean>;
 
-  // Project operations
+  // ── Project ─────────────────────────────────────────────────────────────────
+  /** Admin/internal only — returns ALL projects unfiltered. */
   getProjects(): Promise<Project[]>;
+  /** User-scoped — use this in all user-facing tRPC procedures. */
+  getProjectsByUser(userId: string): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: string): Promise<boolean>;
 
-  // Sample operations
+  // ── Sample ──────────────────────────────────────────────────────────────────
+  /** Admin/internal only — returns ALL samples unfiltered. */
   getSamples(): Promise<Sample[]>;
+  /** User-scoped — use this in all user-facing tRPC procedures. */
+  getSamplesByUser(userId: string): Promise<Sample[]>;
   getSample(id: string): Promise<Sample | undefined>;
   getSamplesByTags(tags: string[]): Promise<Sample[]>;
   createSample(sample: InsertSample): Promise<Sample>;
   updateSample(id: string, sample: Partial<InsertSample>): Promise<Sample | undefined>;
   deleteSample(id: string): Promise<boolean>;
 
-  // Preset operations
+  // ── Preset ──────────────────────────────────────────────────────────────────
   getPresets(type?: string): Promise<Preset[]>;
+  /** Returns user's own presets plus all factory presets (isFactory=true). */
+  getPresetsByUser(userId: string, type?: string): Promise<Preset[]>;
   getPreset(id: string): Promise<Preset | undefined>;
   createPreset(preset: InsertPreset): Promise<Preset>;
   updatePreset(id: string, preset: Partial<InsertPreset>): Promise<Preset | undefined>;
   deletePreset(id: string): Promise<boolean>;
 
-  // Settings operations
+  // ── Settings ────────────────────────────────────────────────────────────────
   getSettings(userId?: string): Promise<Settings>;
   updateSettings(updates: Partial<InsertSettings>, userId?: string): Promise<Settings>;
 }
 
 export class DatabaseStorage implements IStorage {
-  // ==================== USER OPERATIONS ====================
+  // ── USER ──────────────────────────────────────────────────────────────────
 
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -83,17 +115,14 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values({
       ...(insertUser as any),
-      tier: "free",
+      tier: "explorer",
     }).returning();
     return result[0];
   }
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
     const result = await db.update(users)
-      .set({
-        ...(updates as any),
-        updatedAt: new Date(),
-      })
+      .set({ ...(updates as any), updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return result[0];
@@ -104,16 +133,21 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // ==================== SESSION OPERATIONS ====================
+  // ── SESSION ───────────────────────────────────────────────────────────────
 
   async getSessions(): Promise<Session[]> {
-    const result = await db.select().from(sessions).orderBy(desc(sessions.createdAt));
-    return result.map(this.mapSessionFromDb);
+    return db.select().from(sessions).orderBy(desc(sessions.createdAt));
+  }
+
+  async getSessionsByUser(userId: string): Promise<Session[]> {
+    return db.select().from(sessions)
+      .where(eq(sessions.userId, userId))
+      .orderBy(desc(sessions.createdAt));
   }
 
   async getSession(id: string): Promise<Session | undefined> {
     const result = await db.select().from(sessions).where(eq(sessions.id, id)).limit(1);
-    return result[0] ? this.mapSessionFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async createSession(insertSession: InsertSession): Promise<Session> {
@@ -122,7 +156,7 @@ export class DatabaseStorage implements IStorage {
       fx: (insertSession as any).fx as unknown,
       recordedEvents: (insertSession as any).recordedEvents as unknown,
     } as any).returning();
-    return this.mapSessionFromDb(result[0]);
+    return result[0];
   }
 
   async updateSession(id: string, updates: Partial<InsertSession>): Promise<Session | undefined> {
@@ -135,7 +169,7 @@ export class DatabaseStorage implements IStorage {
       } as any)
       .where(eq(sessions.id, id))
       .returning();
-    return result[0] ? this.mapSessionFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async deleteSession(id: string): Promise<boolean> {
@@ -143,16 +177,21 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // ==================== PROJECT OPERATIONS ====================
+  // ── PROJECT ───────────────────────────────────────────────────────────────
 
   async getProjects(): Promise<Project[]> {
-    const result = await db.select().from(projects).orderBy(desc(projects.updatedAt));
-    return result.map(this.mapProjectFromDb);
+    return db.select().from(projects).orderBy(desc(projects.updatedAt));
+  }
+
+  async getProjectsByUser(userId: string): Promise<Project[]> {
+    return db.select().from(projects)
+      .where(eq(projects.userId, userId))
+      .orderBy(desc(projects.updatedAt));
   }
 
   async getProject(id: string): Promise<Project | undefined> {
     const result = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
-    return result[0] ? this.mapProjectFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
@@ -160,7 +199,7 @@ export class DatabaseStorage implements IStorage {
       ...insertProject,
       projectData: (insertProject as any).projectData as unknown,
     } as any).returning();
-    return this.mapProjectFromDb(result[0]);
+    return result[0];
   }
 
   async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
@@ -172,7 +211,7 @@ export class DatabaseStorage implements IStorage {
       } as any)
       .where(eq(projects.id, id))
       .returning();
-    return result[0] ? this.mapProjectFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async deleteProject(id: string): Promise<boolean> {
@@ -180,26 +219,33 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // ==================== SAMPLE OPERATIONS ====================
+  // ── SAMPLE ────────────────────────────────────────────────────────────────
 
   async getSamples(): Promise<Sample[]> {
-    const result = await db.select().from(samples).orderBy(desc(samples.createdAt));
-    return result.map(this.mapSampleFromDb);
+    return db.select().from(samples).orderBy(desc(samples.createdAt));
+  }
+
+  async getSamplesByUser(userId: string): Promise<Sample[]> {
+    return db.select().from(samples)
+      .where(eq(samples.userId, userId))
+      .orderBy(desc(samples.createdAt));
   }
 
   async getSample(id: string): Promise<Sample | undefined> {
     const result = await db.select().from(samples).where(eq(samples.id, id)).limit(1);
-    return result[0] ? this.mapSampleFromDb(result[0]) : undefined;
+    return result[0];
   }
 
+  /**
+   * Fix E: parameterized JSONB overlap query — no string interpolation.
+   * sql.param(value) sends the array as a bound parameter ($1), never as SQL text.
+   * The ::text[] cast converts the Postgres array parameter to the type ?| expects.
+   */
   async getSamplesByTags(searchTags: string[]): Promise<Sample[]> {
-    const result = await db.select().from(samples);
-    return result
-      .filter((sample) => {
-        const sampleTags = (sample.tags as string[]) || [];
-        return searchTags.some((tag) => sampleTags.includes(tag));
-      })
-      .map(this.mapSampleFromDb);
+    if (searchTags.length === 0) return [];
+    return db.select().from(samples)
+      .where(sql`${samples.tags} ?| ${sql.param(searchTags)}::text[]`)
+      .orderBy(desc(samples.createdAt));
   }
 
   async createSample(insertSample: InsertSample): Promise<Sample> {
@@ -208,7 +254,7 @@ export class DatabaseStorage implements IStorage {
       tags: (insertSample as any).tags as unknown,
       waveformData: (insertSample as any).waveformData as unknown,
     } as any).returning();
-    return this.mapSampleFromDb(result[0]);
+    return result[0];
   }
 
   async updateSample(id: string, updates: Partial<InsertSample>): Promise<Sample | undefined> {
@@ -221,7 +267,7 @@ export class DatabaseStorage implements IStorage {
       } as any)
       .where(eq(samples.id, id))
       .returning();
-    return result[0] ? this.mapSampleFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async deleteSample(id: string): Promise<boolean> {
@@ -229,23 +275,30 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // ==================== PRESET OPERATIONS ====================
+  // ── PRESET ────────────────────────────────────────────────────────────────
 
   async getPresets(type?: string): Promise<Preset[]> {
     if (type) {
-      const result = await db.select().from(presets)
+      return db.select().from(presets)
         .where(eq(presets.type, type))
         .orderBy(desc(presets.updatedAt));
-      return result.map(this.mapPresetFromDb);
     }
+    return db.select().from(presets).orderBy(desc(presets.updatedAt));
+  }
 
-    const result = await db.select().from(presets).orderBy(desc(presets.updatedAt));
-    return result.map(this.mapPresetFromDb);
+  async getPresetsByUser(userId: string, type?: string): Promise<Preset[]> {
+    return db.select().from(presets)
+      .where(
+        type
+          ? sql`(${presets.userId} = ${userId} OR ${presets.isFactory} = true) AND ${presets.type} = ${type}`
+          : sql`${presets.userId} = ${userId} OR ${presets.isFactory} = true`,
+      )
+      .orderBy(desc(presets.updatedAt));
   }
 
   async getPreset(id: string): Promise<Preset | undefined> {
     const result = await db.select().from(presets).where(eq(presets.id, id)).limit(1);
-    return result[0] ? this.mapPresetFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async createPreset(insertPreset: InsertPreset): Promise<Preset> {
@@ -254,7 +307,7 @@ export class DatabaseStorage implements IStorage {
       presetData: (insertPreset as any).presetData as unknown,
       tags: (insertPreset as any).tags as unknown,
     } as any).returning();
-    return this.mapPresetFromDb(result[0]);
+    return result[0];
   }
 
   async updatePreset(id: string, updates: Partial<InsertPreset>): Promise<Preset | undefined> {
@@ -267,7 +320,7 @@ export class DatabaseStorage implements IStorage {
       } as any)
       .where(eq(presets.id, id))
       .returning();
-    return result[0] ? this.mapPresetFromDb(result[0]) : undefined;
+    return result[0];
   }
 
   async deletePreset(id: string): Promise<boolean> {
@@ -275,7 +328,7 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // ==================== SETTINGS OPERATIONS ====================
+  // ── SETTINGS ──────────────────────────────────────────────────────────────
 
   async getSettings(userId?: string): Promise<Settings> {
     const result = userId
@@ -283,7 +336,7 @@ export class DatabaseStorage implements IStorage {
       : await db.select().from(settings).limit(1);
 
     if (result.length === 0) {
-      const defaultSettings = {
+      const created = await db.insert(settings).values({
         userId: userId ?? null,
         audioBufferSize: 2048,
         sampleRate: 48000,
@@ -298,13 +351,11 @@ export class DatabaseStorage implements IStorage {
         metronomeEnabled: false,
         metronomeBpm: 120,
         metronomeVolume: 0.5,
-      };
-
-      const created = await db.insert(settings).values(defaultSettings).returning();
-      return this.mapSettingsFromDb(created[0]);
+      }).returning();
+      return created[0];
     }
 
-    return this.mapSettingsFromDb(result[0]);
+    return result[0];
   }
 
   async updateSettings(updates: Partial<InsertSettings>, userId?: string): Promise<Settings> {
@@ -312,63 +363,20 @@ export class DatabaseStorage implements IStorage {
       ? await db.select().from(settings).where(eq(settings.userId, userId)).limit(1)
       : await db.select().from(settings).limit(1);
 
-    let result;
-
     if (existing.length === 0) {
-      result = await db.insert(settings).values({
+      const result = await db.insert(settings).values({
         userId: userId ?? null,
         ...(updates as any),
       }).returning();
-    } else {
-      result = await db.update(settings)
-        .set({
-          ...(updates as any),
-          updatedAt: new Date(),
-        })
-        .where(eq(settings.id, existing[0].id))
-        .returning();
+      return result[0];
     }
 
-    return this.mapSettingsFromDb(result[0]);
-  }
-
-  // ==================== HELPER METHODS ====================
-
-  private mapSessionFromDb(dbSession: Session): Session {
-    return {
-      ...dbSession,
-      fx: dbSession.fx,
-      recordedEvents: dbSession.recordedEvents,
-    };
-  }
-
-  private mapProjectFromDb(dbProject: Project): Project {
-    return {
-      ...dbProject,
-      projectData: dbProject.projectData,
-    };
-  }
-
-  private mapSampleFromDb(dbSample: Sample): Sample {
-    return {
-      ...dbSample,
-      tags: dbSample.tags as string[],
-      waveformData: dbSample.waveformData as number[] | undefined,
-    };
-  }
-
-  private mapPresetFromDb(dbPreset: Preset): Preset {
-    return {
-      ...dbPreset,
-      presetData: dbPreset.presetData,
-      tags: dbPreset.tags as string[],
-    };
-  }
-
-  private mapSettingsFromDb(dbSettings: Settings): Settings {
-    return { ...dbSettings };
+    const result = await db.update(settings)
+      .set({ ...(updates as any), updatedAt: new Date() })
+      .where(eq(settings.id, existing[0].id))
+      .returning();
+    return result[0];
   }
 }
 
-// Export singleton instance
 export const storage = new DatabaseStorage();

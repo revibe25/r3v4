@@ -57,3 +57,6 @@ export { useFXStore } from './fx-store';
 
 // ── Meters ────────────────────────────────────────────────────────────────────
 export { useMeterStore } from './meter-store';
+// ── Auth ──────────────────────────────────────────────────────────────────────
+export { useAuthStore } from './auth-store';
+export type { AuthUser, AuthStore } from './auth-store';

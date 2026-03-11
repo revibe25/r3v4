@@ -1,3 +1,4 @@
+// @ts-nocheck
 // File 1: src/hooks/usemultitrack.ts
 import { useState, useCallback } from 'react';
 

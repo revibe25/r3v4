@@ -22,3 +22,20 @@ services:
     depends_on:
       - server
     restart: unless-stopped
+
+  # ── Python AI Mix sidecar (added by migration) ───────────────────────────
+  ai-mix:
+    build:
+      context: ./services/ai-mix
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped

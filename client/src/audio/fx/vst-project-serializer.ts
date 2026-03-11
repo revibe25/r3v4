@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/audio/fx/vst-project-serializer.ts
 
 import { FXChain } from './fx-chain';

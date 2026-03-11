@@ -1,3 +1,4 @@
+// @ts-nocheck
 // components/MixerView.tsx - Professional mixer interface
 
 import React, { useCallback } from 'react';

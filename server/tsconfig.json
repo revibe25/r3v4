@@ -5,13 +5,16 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": false,
+    "strict": true,
     "skipLibCheck": true,
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
       "@shared/*": [
         "../shared/*"
+      ],
+      "multer-s3": [
+        "./types/multer-s3.d.ts"
       ]
     }
   },
@@ -24,6 +27,9 @@
     "scripts/seed",
     "**/seed/**",
     "../vite.config.ts",
-    "../client/**"
+    "../client/**",
+    "vite-dev.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

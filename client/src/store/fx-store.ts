@@ -208,8 +208,8 @@ function vstKey(channel: MixerChannel, vstUrl: string): string {
 function takeSnapshot(channel: MixerChannel): FXSnapshot[] {
   return [...channel.getEffects()].map(fx => ({
     fxId:     fx.id,
-    fxType:   fx.type ?? "unknown",
-    bypassed: fx.bypassed ?? false,
+    fxType:   (fx as any).type ?? "unknown",
+    bypassed: (fx as any).bypassed ?? false,
     params:   (fx as any).getParams ? { ...(fx as any).getParams() } : {},
   }));
 }
@@ -252,7 +252,7 @@ export const useFXStore = create<FXState>()(
 
         set(state => {
           const cid  = channelKey(channel);
-          const hist = ensureHistory(state as unknown as typeof state)(state, cid);
+          const hist = ensureHistory(state as unknown as FXState, cid);
           pushHistory(hist, takeSnapshot(channel));
           (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
         });
@@ -265,7 +265,7 @@ export const useFXStore = create<FXState>()(
 
         set(state => {
           const cid  = channelKey(channel);
-          const hist = ensureHistory(state as unknown as typeof state)(state, cid);
+          const hist = ensureHistory(state as unknown as FXState, cid);
           pushHistory(hist, takeSnapshot(channel));
           (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
         });
@@ -296,7 +296,7 @@ export const useFXStore = create<FXState>()(
 
           set(state => {
             const cid  = channelKey(channel);
-            const hist = ensureHistory(state as unknown as typeof state)(state, cid);
+            const hist = ensureHistory(state as unknown as FXState, cid);
             pushHistory(hist, takeSnapshot(channel));
             (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid]  = [...channel.getEffects()];
             state.vstStatus[key]  = { status: "ready", url: vstUrl, loadedAt: Date.now() };
@@ -322,7 +322,7 @@ export const useFXStore = create<FXState>()(
 
         set(state => {
           const cid  = channelKey(channel);
-          const hist = ensureHistory(state as unknown as typeof state)(state, cid);
+          const hist = ensureHistory(state as unknown as FXState, cid);
           pushHistory(hist, takeSnapshot(channel));
           (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [...channel.getEffects()];
         });
@@ -569,11 +569,11 @@ export const useFXStore = create<FXState>()(
 
         set(state => {
           const cid  = channelKey(channel);
-          const hist = ensureHistory(state as unknown as typeof state)(state, cid);
+          const hist = ensureHistory(state as unknown as FXState, cid);
           pushHistory(hist, effects.map(fx => ({
             fxId:     fx.id,
-            fxType:   fx.type ?? "unknown",
-            bypassed: fx.bypassed ?? false,
+            fxType:   (fx as any).type ?? "unknown",
+            bypassed: (fx as any).bypassed ?? false,
             params:   {},
           })));
           (state.channelFX as Record<string, import("../audio/fx/fx-nodebase").FXNodeBase[]>)[cid] = [];

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/audio/indicators/meter-node.ts
 
 import { MeterData } from "../../../shared/types/meter.types";

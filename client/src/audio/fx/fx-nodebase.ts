@@ -12,7 +12,7 @@ export abstract class FXNodeBase implements FXNode {
   protected readonly wetGain: GainNode;
   protected readonly dryGain: GainNode;
 
-  protected bypassed = false;
+  bypassed = false;
   get isBypassed(): boolean { return this.bypassed; }
 
   constructor(id: string) {

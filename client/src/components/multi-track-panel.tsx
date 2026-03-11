@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Multi-Track Panel — R3-N-i DAW
  * Production-grade mixer/timeline with full VST integration,

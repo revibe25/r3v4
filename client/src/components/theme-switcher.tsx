@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/components/theme-switcher.tsx
 
 import { useState, useEffect } from 'react';

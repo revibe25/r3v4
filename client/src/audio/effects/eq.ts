@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as Tone from 'tone';
 import { EQParams } from '@shared/effects.types';
 

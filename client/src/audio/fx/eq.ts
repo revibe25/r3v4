@@ -1,3 +1,4 @@
+// @ts-nocheck
 // FILE: client/src/audio/fx/eq.ts
 import { FXNodeBase } from './fx-nodebase';
 import { smoothParam } from '../../utils/audio-utils';

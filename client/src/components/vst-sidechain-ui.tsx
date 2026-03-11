@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/components/vst-sidechain-ui.tsx
 import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';

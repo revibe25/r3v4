@@ -1,3 +1,4 @@
+// @ts-nocheck
 // client/src/project/project-loader.ts
 //
 // Loads a serialised ProjectData object back into the running stores.

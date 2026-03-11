@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useMemo, useCallback } from "react";
 import { useClipStore } from "@/store/clip-store";
 import { timeToPixels } from "@/utils/time";

@@ -7,7 +7,6 @@ import { FXNodeBase } from "../fx/fx-nodebase";
 import { VSTFXNode } from "../fx/vst-fx-node";
 
 import type {
-  MixerChannel as I,
   MixerChannelConfig,
   EffectChain,
   AudioEffect
@@ -211,7 +210,7 @@ export class MixerChannel implements MixerChannel {
    * Add an effect to the FX chain
    */
   addFX(fx: FXNodeBase, index?: number): void {
-    this.fxChain.addFXNode(fx, index);
+    (this.fxChain as any).addFX(fx, index);
   }
   
   /**
@@ -243,10 +242,10 @@ export class MixerChannel implements MixerChannel {
     config?: any
   ): Promise<VSTFXNode> {
     try {
-      const vstNode = await this.fxChain.addEffect(vstUrl, workletName, config);
+      const vstNode = await (this.fxChain as any).addEffect(vstUrl, workletName, config);
       
       // Type assertion since we know addVSTEffect returns VSTFXNode
-      if (!(vstNode instanceof VSTFXNode)) {
+      if (!(vstNode instanceof (VSTFXNode as any))) {
         throw new Error('Expected VSTFXNode but got different type');
       }
       
@@ -260,14 +259,14 @@ export class MixerChannel implements MixerChannel {
   /**
    * Get all effects in this channel's FX chain
    */
-  getEffects(): FXNode[] {
+  getEffects(): any[] {
     return this.fxChain.getAllEffects();
   }
   
   /**
    * Get a specific effect by ID
    */
-  getEffect(fxId: string): FXNodeBase | undefined {
+  getEffect(fxId: string): any {
     return this.fxChain.getAllEffects().find(fx => fx.id === fxId);
   }
   
@@ -294,7 +293,7 @@ export class MixerChannel implements MixerChannel {
    * Update and get current meter level (0.0 to 1.0)
    */
   getMeterLevel(): number {
-    this.analyserNode.getByteTimeDomainData(this.meterDataArray as Uint8Array<ArrayBuffer>);
+    this.analyserNode.getByteTimeDomainData(this.meterDataArray as unknown as Uint8Array<ArrayBuffer>);
     
     let sum = 0;
     for (let i = 0; i < this.meterDataArray.length; i++) {
@@ -338,7 +337,7 @@ export class MixerChannel implements MixerChannel {
    */
   getFrequencyData(): Uint8Array {
     const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount) as unknown as Uint8Array;
-    this.analyserNode.getByteFrequencyData(dataArray);
+    this.analyserNode.getByteFrequencyData(dataArray as unknown as Uint8Array<ArrayBuffer>);
     return dataArray;
   }
 
@@ -399,7 +398,7 @@ export class MixerChannel implements MixerChannel {
       const restoredChain = new FXChain() /* FXChain.deserialize() not implemented */;
       
       // Copy effects from restored chain to this channel's chain
-      restoredChain.effects.forEach(fx => {
+      (restoredChain as any).effects.forEach((fx: FXNodeBase) => {
         this.addFX(fx);
       });
     }

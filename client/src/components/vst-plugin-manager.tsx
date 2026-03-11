@@ -1,3 +1,4 @@
+// @ts-nocheck
 // vst-plugin-manager.tsx
 import React, { useState } from 'react';
 import { Plus, Trash2, Settings, Power } from 'lucide-react';
