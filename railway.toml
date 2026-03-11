@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install && pnpm --filter server build"
+buildCommand = "pnpm install"
 
 [deploy]
-startCommand = "node dist/index.js"
+startCommand = "npx tsx index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 

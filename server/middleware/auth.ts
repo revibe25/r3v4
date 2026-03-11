@@ -23,25 +23,25 @@ export interface AuthPayload {
   tier: string;
 }
 
-const RAW_SECRET = process.env.AUTH_TOKEN_SECRET ?? '';
+const RAW_SECRET = process.env.JWT_SECRET ?? '';
 
 if (process.env.NODE_ENV === 'production') {
   if (!RAW_SECRET) {
-    logger.error('[auth] FATAL: AUTH_TOKEN_SECRET is not set. Refusing to start.');
+    logger.error('[auth] FATAL: JWT_SECRET is not set. Refusing to start.');
     process.exit(1);
   }
   if (RAW_SECRET.length < 32) {
-    logger.error('[auth] FATAL: AUTH_TOKEN_SECRET must be at least 32 characters.');
+    logger.error('[auth] FATAL: JWT_SECRET must be at least 32 characters.');
     process.exit(1);
   }
 }
 
 const SECRET = RAW_SECRET || 'dev_secret_do_not_use_in_production_32x';
 
-const RAW_EXPIRY = process.env.AUTH_TOKEN_EXPIRY ?? '7d';
+const RAW_EXPIRY = process.env.JWT_EXPIRES_IN ?? '7d';
 const EXPIRY_PATTERN = /^\d+$|^\d+[smhdwy]$/i;
 if (!EXPIRY_PATTERN.test(RAW_EXPIRY)) {
-  logger.error(`[auth] FATAL: AUTH_TOKEN_EXPIRY="${RAW_EXPIRY}" is not a valid duration.`);
+  logger.error(`[auth] FATAL: JWT_EXPIRES_IN="${RAW_EXPIRY}" is not a valid duration.`);
   process.exit(1);
 }
 const TOKEN_EXPIRY = RAW_EXPIRY;

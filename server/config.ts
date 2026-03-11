@@ -8,9 +8,9 @@ export const UPLOAD_CONFIG = {
     'audio/mp4','audio/aac','audio/ogg','audio/flac','audio/x-flac',
     'audio/aiff','audio/x-aiff',
   ],
-  R2_ENDPOINT:          process.env.R2_ENDPOINT          || '',
-  R2_ACCESS_KEY_ID:     process.env.R2_ACCESS_KEY_ID     || '',
-  R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || '',
-  R2_BUCKET_NAME:       process.env.R2_BUCKET_NAME       || 'r3-samples',
+  STORAGE_ENDPOINT:          process.env.STORAGE_ENDPOINT     || '',
+  STORAGE_ACCESS_KEY_ID:     process.env.STORAGE_ACCESS_KEY_ID || '',
+  STORAGE_SECRET_ACCESS_KEY: process.env.STORAGE_SECRET_ACCESS_KEY || '',
+  STORAGE_BUCKET:            process.env.STORAGE_BUCKET        || 'r3-uploads',
   SIGNED_URL_EXPIRES:   parseInt(process.env.SIGNED_URL_EXPIRES || '900', 10),
 };

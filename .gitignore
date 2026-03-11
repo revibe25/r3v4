@@ -32,3 +32,7 @@ shared/types/*.js
 
 # Launch prep additions
 uploads/
+
+# Env files
+.env.*
+!.env.example

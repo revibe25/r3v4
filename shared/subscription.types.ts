@@ -19,10 +19,10 @@
  * the real Stripe price IDs.
  *
  * REQUIRED ENV VARS (add to .env and production secrets):
- *   STRIPE_PRICE_CREATOR_MONTHLY=price_xxx
- *   STRIPE_PRICE_CREATOR_ANNUAL=price_xxx
- *   STRIPE_PRICE_PRO_ARTIST_MONTHLY=price_xxx
- *   STRIPE_PRICE_PRO_ARTIST_ANNUAL=price_xxx
+ *   STRIPE_CREATOR_MONTHLY_PRICE_ID=price_xxx
+ *   STRIPE_CREATOR_YEARLY_PRICE_ID=price_xxx
+ *   STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID=price_xxx
+ *   STRIPE_PRO_ARTIST_YEARLY_PRICE_ID=price_xxx
  *
  * STARTUP GUARD: server/services/stripe-subscription.ts validates these are
  * set at startup — see the getPriceId() check there.
@@ -143,8 +143,8 @@ export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
     monthlyPriceCents: 1000,
     annualPriceCents: 800,
     // ROOT FIX: was hardcoded '' — now loaded from env vars
-    stripePriceIdMonthly: env.STRIPE_PRICE_CREATOR_MONTHLY ?? null,
-    stripePriceIdAnnual: env.STRIPE_PRICE_CREATOR_ANNUAL ?? null,
+    stripePriceIdMonthly: env.STRIPE_CREATOR_MONTHLY_PRICE_ID ?? null,
+    stripePriceIdAnnual: env.STRIPE_CREATOR_YEARLY_PRICE_ID ?? null,
     color: '#1A3C5E',
     badge: 'Most Popular',
     limits: {
@@ -182,8 +182,8 @@ export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
     monthlyPriceCents: 2500,
     annualPriceCents: 2000,
     // ROOT FIX: was hardcoded '' — now loaded from env vars
-    stripePriceIdMonthly: env.STRIPE_PRICE_PRO_ARTIST_MONTHLY ?? null,
-    stripePriceIdAnnual: env.STRIPE_PRICE_PRO_ARTIST_ANNUAL ?? null,
+    stripePriceIdMonthly: env.STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID ?? null,
+    stripePriceIdAnnual: env.STRIPE_PRO_ARTIST_YEARLY_PRICE_ID ?? null,
     color: '#B35A00',
     limits: {
       trackUploads: 'unlimited',
