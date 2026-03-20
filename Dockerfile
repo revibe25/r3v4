@@ -1,23 +1,31 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache python3 py3-pip
+# Install build dependencies + pnpm
+RUN apk add --no-cache python3 py3-pip && \
+    npm install -g pnpm
 
 WORKDIR /app
-COPY package*.json ./
-COPY pnpm-workspace.yaml pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
-COPY . .
+# Copy workspace config first (better layer caching)
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY server/package.json ./server/
+COPY shared/package.json ./shared/
 
-WORKDIR /app/client
-COPY pnpm-workspace.yaml pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
-RUN npm run build
+# Install server + shared dependencies only (skip client)
+RUN pnpm install --frozen-lockfile --filter @r3vibe/server --filter @r3vibe/shared
 
-WORKDIR /app
-EXPOSE 5000
+# Copy source
+COPY server/ ./server/
+COPY shared/ ./shared/
+COPY index.ts ./
+COPY tsconfig.json ./
+COPY drizzle.config.ts ./
+COPY drizzle/ ./drizzle/
+
+EXPOSE 3000
+
 # Run as non-root
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser
 
-CMD ["npm", "start"]
+CMD ["pnpm", "exec", "tsx", "index.ts"]
