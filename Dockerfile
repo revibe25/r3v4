@@ -6,13 +6,16 @@ RUN apk add --no-cache python3 py3-pip && \
 
 WORKDIR /app
 
-# Copy workspace config first (better layer caching)
+# Copy entire workspace config
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY server/package.json ./server/
 COPY shared/package.json ./shared/
 
-# Install server + shared dependencies only (skip client)
-RUN pnpm install --frozen-lockfile --filter @r3vibe/server --filter @r3vibe/shared
+# Install ALL workspace deps from root (resolves cross-package imports correctly)
+RUN pnpm install --frozen-lockfile --filter @r3vibe/server... 
+
+# The ... suffix means: install server AND all its workspace dependencies
+# This includes shared/ and any root-level packages server/ imports from
 
 # Copy source
 COPY server/ ./server/
