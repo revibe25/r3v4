@@ -25,6 +25,20 @@ export default [
             "@llpte/*/src/*",
             "@llpte/*/dist/internal/*",
           ],
+          paths: [
+            // Transport store: deprecated aliases blocked at import time
+            {
+              name: "@/store/transport-store",
+              importNames: ["useTransportFlat", "usetransportstore", "useTransportstore"],
+              message: "Use useTransportStore directly — flat props are first-class members.",
+            },
+            // Clip store: lowercase alias blocked at import time
+            {
+              name: "@/store/clip-store",
+              importNames: ["useClipstore", "useclipstore"],
+              message: "Use useClipStore (capital S).",
+            },
+          ],
         },
       ],
 

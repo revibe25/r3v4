@@ -36,3 +36,26 @@ uploads/
 # Env files
 .env.*
 !.env.example
+
+# ── Coverage output ──────────────────────────────────────────────────────────
+coverage/
+lcov.info
+
+# ── Backup artifacts ─────────────────────────────────────────────────────────
+*.ls-new
+*.landscape-bak
+*.pricing-backup
+R3_v4_full_backup.zip
+.patch-backup-*/
+.upgrade-backup-*/
+.upgrade-backup-followup-*/
+
+# ── Ad-hoc utilities (not deployable) ───────────────────────────────────────
+r3.sh
+r3-cleanup.sh
+r3-postclean.sh
+r3v4-upgrade.sh
+coverage.py
+
+# ── Shadow server src ────────────────────────────────────────────────────────
+server/src/

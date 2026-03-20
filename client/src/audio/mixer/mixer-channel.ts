@@ -466,6 +466,15 @@ export class MixerChannel implements MixerChannel {
     this._currentLevel = 0;
     this._peakLevel = 0;
   }
+  // ── Public read-only state getters ────────────────────────────────────────
+  // Used by audio-store.ts snapshot loop and saveProject() serialization.
+  // Mirrors the private backing fields without exposing setters directly
+  // (mutations go through setVolume / setPan / setMute / setSolo).
+  get volume(): number  { return this._volume; }
+  get pan():    number  { return this._pan; }
+  get mute():   boolean { return this._muted; }
+  get solo():   boolean { return this._solo; }
+
   setDryWet(_dry: number, _wet: number): void {}
 
   private _name: string = '';

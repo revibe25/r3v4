@@ -101,4 +101,71 @@ describe('getAIMixSuggestion', () => {
       expect(url as string).toContain('localhost:8001');
     });
   });
+
+  describe('externalSignal support', () => {
+    it('accepts an external AbortSignal — covers AbortSignal.any() merge path', async () => {
+      // Line 42: externalSignal ? AbortSignal.any([...]) : timeoutController.signal
+      // Passing any AbortSignal forces the ternary true branch.
+      vi.mocked(fetch).mockResolvedValue({
+        ok:   true,
+        json: () => Promise.resolve(MOCK_SUGGESTION),
+      } as Response);
+      const controller = new AbortController();
+      const result = await getAIMixSuggestion(BASE_REQUEST, controller.signal);
+      expect(result).toEqual(MOCK_SUGGESTION);
+    });
+  });
+});
+
+describe('URL resolution — window and bare fallback', () => {
+  beforeEach(() => { vi.stubGlobal('fetch', vi.fn()); });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  // lines 20-21: window.__LLPTE_AI_URL path in getAIServiceUrl()
+  it('uses window.__LLPTE_AI_URL when process.env is absent', async () => {
+    const origEnv = (process as any).env;
+    try {
+      (process as any).env = undefined;
+      vi.stubGlobal('window', { __LLPTE_AI_URL: 'http://custom-ai:9000' });
+      vi.mocked(fetch).mockResolvedValue(
+        { ok: true, json: () => Promise.resolve(MOCK_SUGGESTION) } as Response);
+      await getAIMixSuggestion(BASE_REQUEST);
+      const [url] = vi.mocked(fetch).mock.calls[0];
+      expect(url as string).toContain('custom-ai:9000');
+    } finally {
+      (process as any).env = origEnv;
+    }
+  });
+
+  // line 22: window defined but __LLPTE_AI_URL absent → ?? fallback
+  it('falls back to localhost:8001 when window has no __LLPTE_AI_URL', async () => {
+    const origEnv = (process as any).env;
+    try {
+      (process as any).env = undefined;
+      vi.stubGlobal('window', {});
+      vi.mocked(fetch).mockResolvedValue(
+        { ok: true, json: () => Promise.resolve(MOCK_SUGGESTION) } as Response);
+      await getAIMixSuggestion(BASE_REQUEST);
+      const [url] = vi.mocked(fetch).mock.calls[0];
+      expect(url as string).toContain('localhost:8001');
+    } finally {
+      (process as any).env = origEnv;
+    }
+  });
+
+  // lines 24-25: both process.env and window absent → bare return
+  it('falls back to localhost:8001 when both process.env and window are absent', async () => {
+    const origEnv = (process as any).env;
+    try {
+      (process as any).env = undefined;
+      vi.stubGlobal('window', undefined);
+      vi.mocked(fetch).mockResolvedValue(
+        { ok: true, json: () => Promise.resolve(MOCK_SUGGESTION) } as Response);
+      await getAIMixSuggestion(BASE_REQUEST);
+      const [url] = vi.mocked(fetch).mock.calls[0];
+      expect(url as string).toContain('localhost:8001');
+    } finally {
+      (process as any).env = origEnv;
+    }
+  });
 });

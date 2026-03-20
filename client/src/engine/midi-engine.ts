@@ -313,7 +313,8 @@ export class MidiEngine {
 
       if (intervals.length > 0) {
         const median      = medianOf(intervals);
-        this.state.bpm    = 60_000 / (median * CLOCKS_PER_BEAT);
+        const rawBpm = 60_000 / (median * CLOCKS_PER_BEAT);
+        this.state.bpm    = Math.min(999, Math.max(20, rawBpm));
       }
     }
 

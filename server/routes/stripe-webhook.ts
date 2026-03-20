@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Request, Response } from 'express';
+import { logger } from '../lib/logger';
 import { handleStripeWebhook } from '../services/stripe-subscription';
 
 export async function stripeWebhookHandler(req: Request, res: Response): Promise<void> {
@@ -22,7 +23,7 @@ export async function stripeWebhookHandler(req: Request, res: Response): Promise
     res.json({ received: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[stripe webhook]', message);
+    logger.error('Stripe webhook processing failed', { message, path: req.path });
     res.status(400).json({ error: message });
   }
 }

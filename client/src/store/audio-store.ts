@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Audio Store
  * 
@@ -18,6 +17,7 @@ import type {
   TransportPosition
 } from '@/types/audio';
 import { getAudioContext } from "@/audio/core/audio-context";
+import { MixerChannel as MixerChannelImpl } from "@/audio/mixer/mixer-channel";
 
 // ============================================
 // TYPES
@@ -45,6 +45,7 @@ interface AudioStoreState {
   // UI State
   selectedChannelId: string | null;
   soloChannels: Set<string>;
+  preSoloMutes: Map<string, boolean>;
 }
 
 interface AudioStoreActions {
@@ -112,6 +113,7 @@ const initialState: AudioStoreState = {
   projectModified: false,
   selectedChannelId: null,
   soloChannels: new Set(),
+  preSoloMutes: new Map(),
 };
 
 // ============================================
@@ -159,32 +161,25 @@ export const useAudioStore = create<AudioStore>()(
 
         addChannel: (id: string, name?: string) => {
           const { audioContext, channels } = get();
-          
+
           if (!audioContext) {
             console.error('[AudioStore] Cannot add channel: Audio context not initialized');
             return;
           }
-
           if (channels.has(id)) {
             console.warn(`[AudioStore] Channel ${id} already exists`);
             return;
           }
-
-          // Dynamically import MixerChannel to avoid circular dependencies
-          import('@/audio/mixer/mixer-channel').then(({ MixerChannel }) => {
-            const channel = new MixerChannel(id);
-            if (name) channel.id = name;
-
-            const newChannels = new Map(channels);
-            newChannels.set(id, channel);
-
-            set({ 
-              channels: newChannels,
-              projectModified: true,
-            });
-
-            console.log(`[AudioStore] Added channel: ${id}`);
+          // Static import — channel is available synchronously after addChannel() returns
+          const channel = new MixerChannelImpl(id);
+          // name is metadata only; id is readonly on MixerChannel
+          const newChannels = new Map(channels);
+          newChannels.set(id, channel);
+          set({
+            channels: newChannels,
+            projectModified: true,
           });
+          console.log(`[AudioStore] Added channel: ${id}`);
         },
 
         removeChannel: (id: string) => {
@@ -241,29 +236,44 @@ export const useAudioStore = create<AudioStore>()(
         setChannelSolo: (id: string, solo: boolean) => {
           const channel = get().channels.get(id);
           if (!channel) return;
-
           channel.setSolo(solo);
 
           const soloChannels = new Set(get().soloChannels);
+          const preSoloMutes = new Map(get().preSoloMutes);
+
           if (solo) {
+            // Snapshot every channel's current mute state the moment the
+            // first solo is engaged, so we can restore it precisely later.
+            if (soloChannels.size === 0) {
+              get().channels.forEach((ch, channelId) => {
+                preSoloMutes.set(channelId, ch.mute);
+              });
+            }
             soloChannels.add(id);
+            // Mute all channels that are not in the solo set
+            get().channels.forEach((ch, channelId) => {
+              if (!soloChannels.has(channelId)) {
+                ch.setMute(true);
+              }
+            });
           } else {
             soloChannels.delete(id);
+            if (soloChannels.size === 0) {
+              // Last solo cleared — restore every channel to its pre-solo mute state
+              get().channels.forEach((ch, channelId) => {
+                const wasMuted = preSoloMutes.get(channelId) ?? false;
+                ch.setMute(wasMuted);
+              });
+              preSoloMutes.clear();
+            } else {
+              // Still other solos active — un-mute this channel, leave others alone
+              channel.setMute(false);
+            }
           }
 
-          // Mute all non-solo channels if any channel is soloed
-          const hasSolo = soloChannels.size > 0;
-          get().channels.forEach((ch, channelId) => {
-            if (channelId !== id && hasSolo && !soloChannels.has(channelId)) {
-              ch.setMute(true);
-            } else if (!hasSolo) {
-              // Restore original mute state
-              // This would need to be tracked separately
-            }
-          });
-
-          set({ 
+          set({
             soloChannels,
+            preSoloMutes,
             projectModified: true,
           });
         },
@@ -469,7 +479,7 @@ export const useAudioStore = create<AudioStore>()(
       }),
       {
         name: 'audio-store',
-        partialize: (state) => ({
+        partialize: (state): { masterVolume: number; selectedChannelId: string | null } => ({
           // Only persist UI preferences, not audio state
           masterVolume: state.masterVolume,
           selectedChannelId: state.selectedChannelId,

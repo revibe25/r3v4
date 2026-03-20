@@ -107,3 +107,20 @@ export const requireAuth = middleware(({ ctx, next }) => {
   // This propagates the narrowed type through the entire subsequent middleware chain.
   return next({ ctx: ctx as unknown as AuthenticatedContext });
 });
+
+/**
+ * protectedProcedure — base procedure for authenticated routes.
+ *
+ * Composes publicProc with requireAuth middleware so that:
+ *   1. Unauthenticated callers receive UNAUTHORIZED before any handler runs.
+ *   2. Handlers receive ctx typed as AuthenticatedContext (ctx.user: AuthPayload,
+ *      not AuthPayload | undefined) — no `!` assertions required downstream.
+ *
+ * Usage:
+ *   export const myRouter = router({
+ *     myRoute: protectedProcedure.input(z.object({...})).query(({ ctx, input }) => {
+ *       // ctx.user.id is string, not string | undefined
+ *     }),
+ *   });
+ */
+export const protectedProcedure = publicProc.use(requireAuth);

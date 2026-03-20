@@ -26,6 +26,14 @@ interface Props {
   onHarmonyChange: (id: string, mode: HarmonyMode) => void;
   onReverbSend: (id: string, v: number) => void;
   onDelaySend: (id: string, v: number) => void;
+  // FX knob callbacks (M-1)
+  onPitchChange:  (id: string, semitones: number) => void;
+  onFineChange:   (id: string, cents: number) => void;
+  onChorusChange: (id: string, wet: number) => void;
+  onGateChange:   (id: string, threshold: number) => void;
+  onCompChange:   (id: string, amount: number) => void;
+  onSatChange:    (id: string, amount: number) => void;
+  onTrimChange:   (id: string, gain: number) => void;
 }
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -294,12 +302,14 @@ const SendStrip: React.FC<{
 // ═══════════════════════════════════════════════════════════════════════════════
 // TRACKPAD MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
-export const TrackPad: React.FC<Props> = ({
+const TrackPadInner: React.FC<Props> = ({
   track, bpm, isReady, beat,
   onPress, onStop, onClear,
   onVolumeChange, onPanChange, onEQChange,
   onMuteToggle, onSoloToggle, onCueToggle,
   onHarmonyChange, onReverbSend, onDelaySend,
+  onPitchChange, onFineChange, onChorusChange,
+  onGateChange, onCompChange, onSatChange, onTrimChange,
 }) => {
   const ctrl = useAnimation();
   const pulse = useQPulse(isReady);
@@ -479,6 +489,11 @@ export const TrackPad: React.FC<Props> = ({
             <span style={{ fontSize: 7, color: '#1e1e1e', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em' }}>
               {track.hasContent ? 'PLAY / OVERDUB' : 'TAP TO RECORD'}
             </span>
+            <span style={{
+              fontSize: 5, color: '#141414',
+              fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.3em',
+              marginTop: 2,
+            }}>KEY {track.index + 1}</span>
           </div>
         )}
 
@@ -612,9 +627,9 @@ export const TrackPad: React.FC<Props> = ({
           {tab === 'fx' && (
             <div style={{ padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="PTCH" value={0.5} color="#c084fc" size="xs" bipolar onChange={() => {}} />
-                <FXKnob label="FINE" value={0.5} color="#818cf8" size="xs" bipolar onChange={() => {}} />
-                <FXKnob label="CHO"  value={0}   color="#f472b6" size="xs" onChange={() => {}} />
+                <FXKnob label="PTCH" value={0.5} color="#c084fc" size="xs" bipolar onChange={v => onPitchChange(track.id, Math.round(v * 24 - 12))} />
+                <FXKnob label="FINE" value={0.5} color="#818cf8" size="xs" bipolar onChange={v => onFineChange(track.id, Math.round(v * 200 - 100))} />
+                <FXKnob label="CHO"  value={0}   color="#f472b6" size="xs" onChange={v => onChorusChange(track.id, v)} />
               </div>
               <div>
                 <div style={{ fontSize: 6, color: '#1c1c1c', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em', marginBottom: 3, textAlign: 'center' }}>HARMONY</div>
@@ -669,13 +684,13 @@ export const TrackPad: React.FC<Props> = ({
           {tab === 'dyn' && (
             <div style={{ padding: '8px 6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="GATE" value={0}    color="#eab308" size="xs" onChange={() => {}} />
-                <FXKnob label="COMP" value={0.35} color="#eab308" size="xs" onChange={() => {}} />
-                <FXKnob label="SAT"  value={0}    color="#f97316" size="xs" onChange={() => {}} />
+                <FXKnob label="GATE" value={0}    color="#eab308" size="xs" onChange={v => onGateChange(track.id, v)} />
+                <FXKnob label="COMP" value={0.35} color="#eab308" size="xs" onChange={v => onCompChange(track.id, v)} />
+                <FXKnob label="SAT"  value={0}    color="#f97316" size="xs" onChange={v => onSatChange(track.id, v)} />
               </div>
               <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="TRIM" value={0.5}  color="#94a3b8" size="xs" onChange={() => {}} />
-                <FXKnob label="XFAD" value={0.5}  color="#94a3b8" size="xs" bipolar onChange={() => {}} />
+                <FXKnob label="TRIM" value={0.5}  color="#94a3b8" size="xs" onChange={v => onTrimChange(track.id, v)} />
+                <FXKnob label="XFAD" value={0.5}  color="#94a3b8" size="xs" bipolar onChange={v => { console.warn('XFAD stub', v); }} />
               </div>
             </div>
           )}
@@ -704,3 +719,5 @@ export const TrackPad: React.FC<Props> = ({
     </div>
   );
 };
+
+export const TrackPad = React.memo(TrackPadInner);

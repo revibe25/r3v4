@@ -33,6 +33,34 @@ describe('executeCrossfade', () => {
   it('linear uses linearRamp', () => { const a=mockGainNode(),b=mockGainNode(); executeCrossfade(mockCtx(),a,b,buildFullCrossfade(4000,'linear')); expect(a.gain.linearRampToValueAtTime).toHaveBeenCalled(); });
   it('correct start gains scheduled', () => { const a=mockGainNode(),b=mockGainNode(); executeCrossfade(mockCtx(),a,b,buildFullCrossfade(4000)); expect(a.gain.setValueAtTime).toHaveBeenCalledWith(1,expect.any(Number)); expect(b.gain.setValueAtTime).toHaveBeenCalledWith(0,expect.any(Number)); });
   it('returns error on throw', () => { const b={gain:{...mockAudioParam(),setValueAtTime:vi.fn().mockImplementation(()=>{throw new Error('closed')})}} as unknown as GainNode; const r=executeCrossfade(mockCtx(),mockGainNode(),b,buildFullCrossfade(4000)); expect(r.success).toBe(false); expect(r.error).toContain('closed'); });
+
+  // line 88: e instanceof Error false arm — String(e) path
+  // Throwing a raw string literal makes instanceof Error false → String(e) is called
+  it('error field uses String(e) when a non-Error value is thrown', () => {
+    const b = { gain: { ...mockAudioParam(), setValueAtTime: vi.fn().mockImplementation(
+      () => { throw 'raw-string-error'; }
+    ) } } as unknown as GainNode;
+    const r = executeCrossfade(mockCtx(), mockGainNode(), b, buildFullCrossfade(4000));
+    expect(r.success).toBe(false);
+    expect(r.error).toBe('raw-string-error');
+  });
   it('handles zero durationMs', () => { const p:CrossfadeParams={durationMs:0,curveType:'linear',startGainA:1,endGainA:0,startGainB:0,endGainB:1}; expect(executeCrossfade(mockCtx(),mockGainNode(),mockGainNode(),p).success).toBe(true); });
   it('handles partial crossfade gains', () => { const a=mockGainNode(),b=mockGainNode(); const p:CrossfadeParams={durationMs:6000,curveType:'equal-power',startGainA:0.7,endGainA:0,startGainB:0.3,endGainB:1}; executeCrossfade(mockCtx(),a,b,p); expect(a.gain.setValueAtTime).toHaveBeenCalledWith(0.7,expect.any(Number)); });
+
+  // lines 79-80: latencyMs > 10ms warn branch
+  it('warns and returns success when scheduling latency exceeds 10ms', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // Stub performance so the second now() call returns 15ms
+    let nowCall = 0;
+    vi.stubGlobal('performance', { now: vi.fn().mockImplementation(() => nowCall++ === 0 ? 0 : 15) });
+    try {
+      const result = executeCrossfade(mockCtx(), mockGainNode(), mockGainNode(), buildFullCrossfade(4000));
+      expect(result.success).toBe(true);
+      expect(result.actualLatencyMs).toBeGreaterThan(10);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('exceeded 10ms'));
+    } finally {
+      warnSpy.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
 });

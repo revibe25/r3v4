@@ -1,6 +1,9 @@
 // @ts-nocheck
 // client/src/components/vst-master-panel.tsx
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useRef } from 'react';
+import { VSTProjectSerializer } from '@/audio/fx/vst-project-serializer';
+import type { SerializedVSTChain } from '@/audio/fx/vst-project-serializer';
+import type { FXChain } from '@/audio/fx/fx-chain';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { VSTProjectManagerUI } from './vst-project-manager-ui';
@@ -110,6 +113,13 @@ function VSTMasterPanel({
   const [loadingProject, setLoadingProject] = useState(false);
   const [activeTab, setActiveTab] = useState('project');
 
+  // Lazy AudioContext for serializer (only needed for sampleRate)
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const getAudioCtx = () => {
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+    return audioCtxRef.current;
+  };
+
   const handleSaveProject = async () => {
     try {
       const projectData = await onProjectSave();
@@ -191,8 +201,40 @@ function VSTMasterPanel({
               sub="Save, load, and back up your VST project state"
             />
             <VSTProjectManagerUI
-              onSave={handleSaveProject}
-              onLoad={handleLoadProject}
+              onSave={() => {
+                // Build chains Map directly from channel fxChains
+                const chains = new Map<string, FXChain>();
+                channels.forEach(ch => chains.set(ch.id, ch.fxChain));
+                return VSTProjectSerializer.serializeProject(
+                  chains,
+                  sidechainRouter,
+                  getAudioCtx()
+                );
+              }}
+              onLoad={async (data: SerializedVSTChain) => {
+                const audioCtx = getAudioCtx();
+                const restoredChains = await VSTProjectSerializer.deserializeProject(
+                  data,
+                  audioCtx
+                );
+                // Convert SerializedVSTChain → ProjectData for onProjectLoad
+                await onProjectLoad({
+                  version: data.version,
+                  timestamp: data.timestamp,
+                  chains: Array.from(restoredChains.entries()).map(
+                    ([channelId, chain]) => ({
+                      channelId,
+                      effects: chain.getAllEffects().map(fx => ({
+                        id: fx.id,
+                        type: (fx as any).type ?? 'vst',
+                        bypassed: fx.bypassed ?? false,
+                      })),
+                    })
+                  ),
+                  sidechains: data.sidechains,
+                  globalSettings: data.globalSettings,
+                });
+              }}
             />
           </TabsContent>
 

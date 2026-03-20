@@ -136,7 +136,8 @@ export class LinkEngine {
 
     this._bpmDebounceTimer = setTimeout(() => {
       if (this._link && this._pendingBpm !== null) {
-        try { this._link.bpm = this._pendingBpm; } catch { /* guard */ }
+        const clamped = Math.min(999, Math.max(20, this._pendingBpm));
+        try { this._link.bpm = clamped; } catch { /* guard */ }
       }
       this._pendingBpm       = null;
       this._bpmDebounceTimer = null;

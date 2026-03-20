@@ -1,5 +1,8 @@
 // FILE: client/src/components/ThreeStage.tsx
 import React, { useRef, memo } from 'react';
+import { AudioReactiveScene, N8AOBeatController } from './three/AudioReactiveScene';
+import { WaveformMesh } from './three/WaveformMesh';
+import { useLoopEngineFFTRef } from '../hooks/use-loop-engine-fft';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
@@ -10,9 +13,19 @@ const BASE_POSITION = new THREE.Vector3(0, 5.5, 11);
 interface ThreeStageProps {
   children: React.ReactNode;
   shake: number;
+  /** Mount AudioReactiveScene + WaveformMesh driven by loopEngine FFT */
+  audioReactive?: boolean;
+  colorBase?:    string;
+  colorAccent?:  string;
 }
 
-export const ThreeStage = memo(function ThreeStage({ children, shake }: ThreeStageProps) {
+export const ThreeStage = memo(function ThreeStage({
+  children,
+  shake,
+  audioReactive = false,
+  colorBase     = '#1a0066',
+  colorAccent   = '#00ff88',
+}: ThreeStageProps) {
   return (
     <Canvas
       shadows
@@ -35,6 +48,30 @@ export const ThreeStage = memo(function ThreeStage({ children, shake }: ThreeSta
       />
 
       <CameraRig shake={shake} />
+
+      {/* ── Audio-reactive scene (opt-in via audioReactive prop) ── */}
+      {audioReactive && (
+        <AudioReactiveScene
+          colorBase={colorBase}
+          colorAccent={colorAccent}
+          animateCamera={false}  // CameraRig already controls the camera
+        />
+      )}
+
+      {/* ── InstancedMesh waveform bar display ── */}
+      {audioReactive && (
+        <WaveformMesh
+          trackIndex={-1}
+          useFft
+          binCount={128}
+          width={8}
+          height={0.8}
+          depth={0.03}
+          colorLow={colorAccent}
+          colorHigh="#ffffff"
+          position={[0, -2.5, 0]}
+        />
+      )}
 
       {children}
 

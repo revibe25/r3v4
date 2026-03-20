@@ -72,6 +72,7 @@ class AudioEngine {
     source: AudioBufferSourceNode | null;
   }[] = [];
   private filterNode: BiquadFilterNode | null = null;
+  private procNode: AudioWorkletNode | null = null;
   private metronomeInterval: number | null = null;
   private playbackTimeout: number | null = null;
 
@@ -113,7 +114,7 @@ class AudioEngine {
     // Set up master gain
     this.masterGain = this.ctx.createGain();
     this.masterGain.gain.value = 0.95;
-    this.masterGain.connect(this.ctx.destination);
+    // masterGain is connected after AudioWorklet registration below
 
     // Set up analyser
     this.analyser = this.ctx.createAnalyser();
@@ -134,6 +135,27 @@ class AudioEngine {
       g.gain.value = 1;
       g.connect(this.filterNode);
       this.voicePool.push({ gain: g, inUse: false, lastUsed: 0, source: null });
+    }
+
+    // ── AudioWorklet — sample-accurate gain + soft-knee compression ──────────
+    // Inserted between masterGain and destination.
+    // Registration name 'instrument-processor' is safe — worklets/ directory
+    // was created by the expert patch and contained no prior registrations.
+    // Falls back to direct connection if worklet loading fails (test env,
+    // bundler without worklet support, or HTTP context without HTTPS).
+    try {
+      const workletUrl = new URL(
+        '../../worklets/instrument-processor.worklet.ts',
+        import.meta.url,
+      );
+      await this.ctx.audioWorklet.addModule(workletUrl);
+      this.procNode = new AudioWorkletNode(this.ctx, 'instrument-processor');
+      this.masterGain.connect(this.procNode);
+      this.procNode.connect(this.ctx.destination);
+    } catch {
+      // Worklet unavailable — bypass with direct connection (no quality loss
+      // to samples; only the worklet-side compression is skipped)
+      this.masterGain.connect(this.ctx.destination);
     }
 
     await this.generateDefaultSamples();
@@ -308,7 +330,7 @@ class AudioEngine {
     voice.gain.gain.linearRampToValueAtTime(0, endTime);
   }
 
-  triggerPad(index: number) {
+  triggerPad(index: number, velocity = 1) {
     const pad = this.state.pads[index];
     if (!pad) return;
 
@@ -320,7 +342,7 @@ class AudioEngine {
       this.notify();
     }, 150);
 
-    this.playBuffer(pad.sample);
+    this.playBuffer(pad.sample, Math.min(1, Math.max(0, velocity)));
 
     if (this.state.isRecording) {
       if (!this.state.recordStart) this.state.recordStart = performance.now();
@@ -332,7 +354,7 @@ class AudioEngine {
     }
   }
 
-  triggerKey(index: number, octaveShift: number = 0) {
+  triggerKey(index: number, octaveShift = 0, velocity = 1) {
     const key = this.state.keys[index];
     if (!key) return;
 
@@ -344,7 +366,7 @@ class AudioEngine {
       this.notify();
     }, 150);
 
-    this.playBuffer(key.sample, 1, octaveShift);
+    this.playBuffer(key.sample, Math.min(1, Math.max(0, velocity)), octaveShift);
 
     if (this.state.isRecording) {
       if (!this.state.recordStart) this.state.recordStart = performance.now();
@@ -555,6 +577,80 @@ class AudioEngine {
     }
   }
 
+  // ── M/S Worklet parameter setters ────────────────────────────────────────────
+  // These write to AudioWorkletNode a-rate parameters on the instrument-processor.
+  // Safe no-ops if worklet failed to load (procNode will be null).
+
+  /**
+   * Set stereo width via the M/S worklet.
+   * 0 = full mono collapse, 1.0 = unity (default), 2.0 = extra wide.
+   * Values above 1.4 may introduce phase artifacts on summed mono playback.
+   */
+  setMSWidth(width: number): void {
+    const param = this.procNode?.parameters.get('msWidth');
+    if (!param || !this.ctx) return;
+    const clamped = Math.max(0, Math.min(2, width));
+    param.setValueAtTime(clamped, this.ctx.currentTime);
+  }
+
+  /**
+   * Set independent Mid channel gain (0–2).
+   * Mid = (L+R)/2 — affects mono-compatible centre content.
+   */
+  setMidGain(gain: number): void {
+    const param = this.procNode?.parameters.get('midGain');
+    if (!param || !this.ctx) return;
+    param.setValueAtTime(Math.max(0, Math.min(2, gain)), this.ctx.currentTime);
+  }
+
+  /**
+   * Set independent Side channel gain (0–2).
+   * Side = (L-R)/2 — stacks with msWidth. Use for fine stereo trim.
+   */
+  setSideGain(gain: number): void {
+    const param = this.procNode?.parameters.get('sideGain');
+    if (!param || !this.ctx) return;
+    param.setValueAtTime(Math.max(0, Math.min(2, gain)), this.ctx.currentTime);
+  }
+
+  /**
+   * Set Mid-channel compressor threshold (dBFS, -60 to 0).
+   * Default: -24. Lower values = more compression on centre content.
+   */
+  setMidThreshold(threshDB: number): void {
+    const param = this.procNode?.parameters.get('midThreshold');
+    if (!param || !this.ctx) return;
+    param.setValueAtTime(Math.max(-60, Math.min(0, threshDB)), this.ctx.currentTime);
+  }
+
+  /**
+   * Set Side-channel compressor threshold (dBFS, -60 to 0).
+   * Default: -30. Tighter side compression → tighter stereo field.
+   */
+  setSideThreshold(threshDB: number): void {
+    const param = this.procNode?.parameters.get('sideThreshold');
+    if (!param || !this.ctx) return;
+    param.setValueAtTime(Math.max(-60, Math.min(0, threshDB)), this.ctx.currentTime);
+  }
+
+  /**
+   * Convenience: set all M/S parameters at once.
+   * Any omitted field retains its current value.
+   */
+  setMSParams(opts: {
+    width?:         number;
+    midGain?:       number;
+    sideGain?:      number;
+    midThreshold?:  number;
+    sideThreshold?: number;
+  }): void {
+    if (opts.width         !== undefined) this.setMSWidth(opts.width);
+    if (opts.midGain       !== undefined) this.setMidGain(opts.midGain);
+    if (opts.sideGain      !== undefined) this.setSideGain(opts.sideGain);
+    if (opts.midThreshold  !== undefined) this.setMidThreshold(opts.midThreshold);
+    if (opts.sideThreshold !== undefined) this.setSideThreshold(opts.sideThreshold);
+  }
+
   exportSession(): string {
     return JSON.stringify({
       bpm: this.state.bpm,
@@ -594,6 +690,11 @@ class AudioEngine {
           // Ignore
         }
       }
+    }
+
+    if (this.procNode) {
+      try { this.procNode.disconnect(); } catch {}
+      this.procNode = null;
     }
 
     if (this.ctx) {

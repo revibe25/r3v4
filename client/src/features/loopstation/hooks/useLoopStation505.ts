@@ -513,6 +513,63 @@ export function useLoopStation505() {
 
   // ── Transport ─────────────────────────────────────────────────────────────
 
+
+  // ── Per-track FX callbacks (M-1) ──────────────────────────────────────────
+  // pitchFXRef tracks semitones + cents per track so PTCH and FINE knobs
+  // combine correctly into a single setTrackPitch(semitones, cents) call.
+  const pitchFXRef = useRef<Map<string, { semitones: number; cents: number }>>(new Map());
+
+  const setTrackPitchFX = useCallback((trackId: string, semitones: number) => {
+    if (!isReady) return;
+    const idx = idxFromId(trackId);
+    const fx = pitchFXRef.current.get(trackId) ?? { semitones: 0, cents: 0 };
+    fx.semitones = semitones;
+    pitchFXRef.current.set(trackId, fx);
+    getLoopEngine().setTrackPitch(idx, fx.semitones, fx.cents);
+  }, [isReady]);
+
+  const setTrackFineTune = useCallback((trackId: string, cents: number) => {
+    if (!isReady) return;
+    const idx = idxFromId(trackId);
+    const fx = pitchFXRef.current.get(trackId) ?? { semitones: 0, cents: 0 };
+    fx.cents = cents;
+    pitchFXRef.current.set(trackId, fx);
+    getLoopEngine().setTrackPitch(idx, fx.semitones, fx.cents);
+  }, [isReady]);
+
+  const setTrackChorusFX = useCallback((trackId: string, wet: number) => {
+    if (!isReady) return;
+    // depth=0.5 and freq=1.5 are fixed defaults; wet is the user-controllable param
+    getLoopEngine().setTrackChorus(idxFromId(trackId), 0.5, 1.5, wet);
+  }, [isReady]);
+
+  const setTrackGateFX = useCallback((trackId: string, amount: number) => {
+    if (!isReady) return;
+    // knob 0..1 → threshold 0..-80 dB (open at 0, fully gated at 1)
+    getLoopEngine().setTrackGate(idxFromId(trackId), amount * -80);
+  }, [isReady]);
+
+  const setTrackCompFX = useCallback((trackId: string, amount: number) => {
+    if (!isReady) return;
+    const threshold = -40 * amount;      // 0 dB (off) → -40 dB (heavy)
+    const ratio     = 1 + amount * 19;   // 1:1 → 20:1
+    getLoopEngine().setTrackCompressor(idxFromId(trackId), threshold, ratio);
+  }, [isReady]);
+
+  const setTrackSatFX = useCallback((trackId: string, amount: number) => {
+    if (!isReady) return;
+    getLoopEngine().setTrackSaturation(idxFromId(trackId), amount);
+  }, [isReady]);
+
+  const setTrackTrimFX = useCallback((trackId: string, gain: number) => {
+    if (!isReady) return;
+    // knob 0..1 → gain 0..2 (knob centre = 0.5 = unity gain)
+    const eng = getLoopEngine() as any;
+    if (typeof eng.setTrackInputGain === 'function') {
+      eng.setTrackInputGain(idxFromId(trackId), gain * 2);
+    }
+  }, [isReady]);
+
   const togglePlayback = useCallback(async () => {
     if (!isReady) return;
     // FIX: keep AudioContext alive on every transport gesture
@@ -521,6 +578,21 @@ export function useLoopStation505() {
     getLoopEngine().toggleTransport();
     setState(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
   }, [isReady]);
+
+  const stopPlayback = useCallback(async () => {
+    if (!isReady) return;
+    const { start: toneStart } = await import('tone');
+    await toneStart();
+    getLoopEngine().stopTransport();
+    setState(prev => ({ ...prev, isPlaying: false }));
+  }, [isReady]);
+
+  // RC-505 REC behavior: press the first idle track to start recording
+  const recordNextTrack = useCallback(async () => {
+    if (!isReady) return;
+    const idle = state.tracks.find(t => t.state === 'idle');
+    if (idle) await pressTrack(idle.id);
+  }, [isReady, state.tracks, pressTrack]);
 
   // ── Scenes ────────────────────────────────────────────────────────────────
 
@@ -562,6 +634,11 @@ export function useLoopStation505() {
     // Lifecycle
     init,
     togglePlayback,
+    stopPlayback,
+    recordNextTrack,
+    // FX knobs
+    setTrackPitchFX, setTrackFineTune, setTrackChorusFX,
+    setTrackGateFX, setTrackCompFX, setTrackSatFX, setTrackTrimFX,
 
     // Track actions
     pressTrack,

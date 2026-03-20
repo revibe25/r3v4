@@ -2,7 +2,7 @@
  * @llpte/llpte-signal — Analyzer Tests
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { analyzeAudio, clearAnalysisCache } from '../src/analyzer';
 import type { RawAudioBuffer } from '../src/types';
 
@@ -152,5 +152,45 @@ describe('analyzeAudio', () => {
     const buf    = mkBuffer([kickPulseTrain(128, 44100, 4)]);
     const result = await analyzeAudio(buf);
     expect(result.analysisTimeMs).toBeLessThan(2000);
+  });
+});
+
+describe('analyzeAudio — edge case branches', () => {
+  beforeEach(() => clearAnalysisCache());
+
+  // line 65: estimateBPM envLen < 8 early-return
+  // 2048 samples @ 44100 Hz → envLen = floor(2048/512) = 4 < 8
+  it('returns bpm=128 confidence=0 for a very short buffer (envLen < 8)', async () => {
+    const buf    = mkBuffer([sineWave(440, 44100, 2048 / 44100)]);
+    const result = await analyzeAudio(buf);
+    expect(result.bpm).toBe(128);
+    expect(result.bpmConfidence).toBe(0);
+  });
+
+  // line 98: acCount === 0 arm in estimateBPM
+  // 6144 samples @ 44100 Hz → envLen = 12; lagMin = 26 > lagMax = min(11, 87) = 11
+  // The autocorrelation loop never runs → acCount stays 0 → ternary false arm fires
+  it('handles medium-length buffer where BPM lag range is empty (acCount=0)', async () => {
+    const buf    = mkBuffer([sineWave(440, 44100, 6144 / 44100)]);
+    const result = await analyzeAudio(buf);
+    expect(result.bpm).toBeGreaterThanOrEqual(60);
+    expect(result.bpm).toBeLessThanOrEqual(200);
+    expect(result.bpmConfidence).toBeGreaterThanOrEqual(0);
+    expect(result.bpmConfidence).toBeLessThanOrEqual(1);
+  });
+
+  // line 197: analysisTimeMs > 2000 console.warn path
+  it('warns when analysis exceeds the 2000ms target', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // First now() call = start; second = result time → 2500ms elapsed
+    let nowCall = 0;
+    vi.stubGlobal('performance', { now: vi.fn().mockImplementation(() => nowCall++ === 0 ? 0 : 2500) });
+    try {
+      await analyzeAudio(mkBuffer([sineWave(440, 44100, 1)]));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('exceeded 2000ms'));
+    } finally {
+      warnSpy.mockRestore();
+      vi.unstubAllGlobals();
+    }
   });
 });

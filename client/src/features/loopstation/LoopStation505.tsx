@@ -21,6 +21,7 @@ import { TrackPad } from './components/TrackPad';
 import { XYPad } from './components/XYPad';
 import { VUMeter } from './components/VUMeter';
 import { getLoopEngine } from './engine/loopEngine';
+import { getAudioContext } from '@/audio/core/audio-context';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
@@ -865,7 +866,7 @@ const BeatRepeat: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-around' }}>
           <FXKnob label="CHANCE" value={chance} color={T.orange} size="sm" onChange={setChance} />
           <FXKnob label="LENGTH" value={len}    color={T.orange} size="sm" onChange={setLen} />
-          <FXKnob label="PITCH"  value={0.5}    color={T.orange} size="sm" bipolar onChange={() => {}} />
+          <FXKnob label="PITCH"  value={0.5}    color={T.orange} size="sm" bipolar onChange={v => (getLoopEngine() as any).setBeatRepeat({ pitch: v * 24 - 12 })} />
         </div>
         <button onClick={() => setEnabled(v => !v)} style={{
           height: 26, fontSize: 8, cursor: 'pointer', letterSpacing: '.15em',
@@ -928,8 +929,10 @@ export const LoopStation505: React.FC = () => {
   const {
     state, fx, isReady, isError, errorMessage, midiSync,
     scenes, activeScene, canUndo,
-    init, togglePlayback,
+    init, togglePlayback, stopPlayback, recordNextTrack,
     pressTrack, stopTrack, clearTrack, clearAll, undo,
+    setTrackPitchFX, setTrackFineTune, setTrackChorusFX,
+    setTrackGateFX, setTrackCompFX, setTrackSatFX, setTrackTrimFX,
     setTrackVolume, setTrackPan, setTrackEQ,
     toggleMute, toggleSolo, toggleCue,
     setHarmonyMode, setReverbSend, setDelaySend, setMasterVolume,
@@ -972,7 +975,7 @@ export const LoopStation505: React.FC = () => {
   const [showK,  setShowK] = useState(false);
   const [tapF,   setTapF]  = useState(false);
   const [caheld, setCAH]   = useState(false);
-  const [specH,  setSpecH] = useState(56);
+  const [specH,  setSpecH] = useState(40);
   const caT = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flashTap = useCallback(() => { setTapF(true); setTimeout(() => setTapF(false), 120); tapTempo(); }, [tapTempo]);
@@ -1005,10 +1008,51 @@ export const LoopStation505: React.FC = () => {
         ::-webkit-scrollbar-track{background:#060606}
         ::-webkit-scrollbar-thumb{background:#1e1e1e}
         ::-webkit-scrollbar-thumb:hover{background:#333}
+        .ls-header::-webkit-scrollbar{display:none}
+
+        /* ── Landscape responsive custom properties ───────────────────────
+           These vars are read by the inline-style var() references below.
+           They scale the header, spectrum, and chrome for short-height
+           landscape viewports (phones rotated, compact tablets).
+        ─────────────────────────────────────────────────────────────────── */
+        :root {
+          --ls-hdr-py:     8px;
+          --ls-hdr-px:    14px;
+          --ls-hdr-gap:   10px;
+          --ls-tab-py:     7px;
+          --ls-tab-px:    16px;
+          --ls-status-py:  4px;
+          --ls-bpm-sz:    36px;
+          --ls-brand-sz:  24px;
+          --ls-spec-disp: block;
+        }
+
+        /* Compact mode: landscape + short viewport */
+        @media (orientation: landscape) and (max-height: 620px) {
+          :root {
+            --ls-hdr-py:     4px;
+            --ls-hdr-px:     8px;
+            --ls-hdr-gap:    6px;
+            --ls-tab-py:     4px;
+            --ls-tab-px:    10px;
+            --ls-status-py:  2px;
+            --ls-bpm-sz:    26px;
+            --ls-brand-sz:  18px;
+            --ls-spec-disp: none;
+          }
+        }
+
+        /* Fill available horizontal space — landscape always wins */
+        @media (orientation: landscape) {
+          :root { --ls-spec-disp: block; }
+        }
+        @media (orientation: landscape) and (max-height: 620px) {
+          :root { --ls-spec-disp: none; }
+        }
       `}</style>
 
       <div style={{
-        width: '100%', height: '100%', minHeight: '560px',
+        width: '100%', height: '100%', minHeight: 0,
         display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
         background: T.bg0,
@@ -1037,31 +1081,34 @@ export const LoopStation505: React.FC = () => {
         }} />
 
         {/* ═══ HEADER ════════════════════════════════════════════════════════ */}
-        <div style={{
+        <div className="ls-header" style={{
           background: 'linear-gradient(180deg, #0c0c0c 0%, #070707 100%)',
           borderBottom: `1px solid ${T.b1}`,
-          padding: '8px 14px',
-          display: 'flex', alignItems: 'center', gap: 10,
+          padding: 'var(--ls-hdr-py, 8px) var(--ls-hdr-px, 14px)',
+          display: 'flex', alignItems: 'center', gap: 'var(--ls-hdr-gap, 10px)',
           flexShrink: 0, overflowX: 'auto', overflowY: 'visible',
+          scrollbarWidth: 'none' as const,
+          WebkitMaskImage: 'linear-gradient(90deg, black calc(100% - 40px), transparent 100%)',
+          maskImage: 'linear-gradient(90deg, black calc(100% - 40px), transparent 100%)',
         }}>
           {/* Brand */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 88, flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 0 }}>
-              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 24, color: T.t1, letterSpacing: '-.03em', lineHeight: 1 }}>R3</span>
-              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 24, color: T.acid, lineHeight: 1 }}>/</span>
-              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 24, color: T.t1, letterSpacing: '-.03em', lineHeight: 1 }}>LOOP</span>
+              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'var(--ls-brand-sz, 24px)', color: T.t1, letterSpacing: '-.03em', lineHeight: 1 }}>R3</span>
+              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'var(--ls-brand-sz, 24px)', color: T.acid, lineHeight: 1 }}>/</span>
+              <span style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: 'var(--ls-brand-sz, 24px)', color: T.t1, letterSpacing: '-.03em', lineHeight: 1 }}>LOOP</span>
             </div>
             <span style={{ fontSize: 6, color: T.t5, letterSpacing: '.3em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>STUDIO CONSOLE v2</span>
           </div>
 
-          <div style={{ width: 1, height: 46, background: T.b1, flexShrink: 0 }} />
+          <div style={{ width: 1, height: 'var(--ls-divider-h, 46px)' as any, background: T.b1, flexShrink: 0 }} />
 
           {/* Transport */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
             <HWBtn label={state.isPlaying ? '▐▐' : '▶'} sub={state.isPlaying ? 'PAUSE' : 'PLAY'}
               active={state.isPlaying} ac={T.acid} onClick={togglePlayback} disabled={!isReady} w={48} h={40} />
-            <HWBtn label="■" sub="STOP" onClick={() => {}} disabled={!isReady} w={38} h={40} />
-            <HWBtn label="●" sub="REC" ac={T.red} onClick={() => {}} disabled={!isReady} w={38} h={40} />
+            <HWBtn label="■" sub="STOP" onClick={stopPlayback} disabled={!isReady} w={38} h={40} />
+            <HWBtn label="●" sub="REC" ac={T.red} onClick={recordNextTrack} disabled={!isReady} w={38} h={40} />
           </div>
 
           <div style={{ width: 1, height: 46, background: T.b1, flexShrink: 0 }} />
@@ -1140,9 +1187,9 @@ export const LoopStation505: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 2 }}>
               <HWBtn label="METRO" active={fx.metronomeOn} ac={T.cyan}   onClick={toggleMetronome} w={52} h={28} />
-              <HWBtn label="MONO"  active={monoOn}         ac={T.purple} onClick={() => setMono(v => !v)} w={44} h={28} />
-              <HWBtn label="LIMIT" active={limOn}          ac={T.orange} onClick={() => setLim(v => !v)}  w={44} h={28} />
-              <HWBtn label="GRAN"  active={granOn}         ac={T.teal}   onClick={() => setGranOn(v => !v)} w={44} h={28} />
+              <HWBtn label="MONO"  active={monoOn}         ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={44} h={28} />
+              <HWBtn label="LIMIT" active={limOn}          ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={44} h={28} />
+              <HWBtn label="GRAN"  active={granOn}         ac={T.teal}   onClick={() => { const next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} w={44} h={28} />
             </div>
             <div style={{ display: 'flex', gap: 2 }}>
               <HWBtn label="↺ UNDO" onClick={undo} disabled={!canUndo} w={58} h={26} />
@@ -1184,7 +1231,30 @@ export const LoopStation505: React.FC = () => {
         </div>
 
         {/* ── Spectrum ────────────────────────────────────────────────────── */}
-        <Spectrum isReady={isReady} h={specH} />
+        <div style={{ display: 'var(--ls-spec-disp, block)', flexShrink: 0, position: 'relative' }}>
+          <Spectrum isReady={isReady} h={specH} />
+          <div
+            style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: 4,
+              cursor: 'ns-resize', background: 'transparent',
+              borderBottom: `1px solid ${T.b1}`,
+            }}
+            onMouseDown={e => {
+              e.preventDefault();
+              const startY = e.clientY;
+              const startH = specH;
+              const onMove = (ev: MouseEvent) => {
+                setSpecH(Math.min(120, Math.max(24, startH + (ev.clientY - startY))));
+              };
+              const onUp = () => {
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+              };
+              window.addEventListener('mousemove', onMove);
+              window.addEventListener('mouseup', onUp);
+            }}
+          />
+        </div>
 
         {/* ── View Tabs ───────────────────────────────────────────────────── */}
         <div style={{
@@ -1200,7 +1270,7 @@ export const LoopStation505: React.FC = () => {
             ['macro',    'MACRO',    'F5'],
           ] as [View, string, string][]).map(([v, label, key]) => (
             <button key={v} onClick={() => setView(v)} style={{
-              padding: '7px 16px', fontFamily: 'IBM Plex Mono,monospace', fontSize: 7,
+              padding: 'var(--ls-tab-py, 7px) var(--ls-tab-px, 16px)', fontFamily: 'IBM Plex Mono,monospace', fontSize: 7,
               letterSpacing: '.25em', textTransform: 'uppercase',
               background: view === v ? 'rgba(57,255,20,.05)' : 'transparent',
               borderBottom: `2px solid ${view === v ? T.acid : 'transparent'}`,
@@ -1280,7 +1350,7 @@ export const LoopStation505: React.FC = () => {
               <Panel title="REVERB" accent={T.orange}>
                 <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                   <FXKnob label="DECAY"   value={rDecay} color={T.orange} size="sm" onChange={v => { setRDec(v); setReverb(v * 10 + 0.5, rv); }} />
-                  <FXKnob label="PRE-DLY" value={0.1}    color={T.orange} size="sm" onChange={() => {}} />
+                  <FXKnob label="PRE-DLY" value={0.1}    color={T.orange} size="sm" onChange={v => { /* TODO: Reverb PRE-DLY engine method not found — implement setReverbPreDelay in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setReverbPreDelay(v * 0.5); }} />
                   <FXKnob label="MIX"     value={rv}     color={T.orange} size="sm" onChange={v => { setRV(v); setReverb(rDecay * 10 + 0.5, v); }} />
                 </div>
               </Panel>
@@ -1288,10 +1358,10 @@ export const LoopStation505: React.FC = () => {
               <Panel title="GRANULAR" accent={T.teal} badge={granOn ? 'ACTIVE' : undefined}>
                 <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 6 }}>
                   <FXKnob label="SIZE"    value={gran} color={T.teal} size="sm" onChange={setGran} />
-                  <FXKnob label="DENSITY" value={0.5}  color={T.teal} size="sm" onChange={() => {}} />
-                  <FXKnob label="SPREAD"  value={0.3}  color={T.teal} size="sm" onChange={() => {}} />
+                  <FXKnob label="DENSITY" value={0.5}  color={T.teal} size="sm" onChange={v => { /* TODO: Granular SPREAD engine method not found — implement setGranularSpread in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setGranularSpread(v); }} />
+                  <FXKnob label="SPREAD"  value={0.3}  color={T.teal} size="sm" onChange={v => { /* TODO: Granular DENSITY engine method not found — implement setGranularDensity in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setGranularDensity(v); }} />
                 </div>
-                <button onClick={() => setGranOn(v => !v)} style={{
+                <button onClick={() => { const next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} style={{
                   width: '100%', height: 20, fontSize: 7, cursor: 'pointer',
                   background: granOn ? 'rgba(20,184,166,.1)' : T.bg2,
                   border: `1px solid ${granOn ? T.teal : T.b2}`,
@@ -1351,13 +1421,17 @@ export const LoopStation505: React.FC = () => {
             ) : (
               <>
                 {(view === 'perform' || view === 'mixer') && (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', height: '100%' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(140px, 1fr))', height: '100%', overflowX: 'auto' }}>
                     {state.tracks.map(track => (
                       <TrackPad key={track.id} track={track} bpm={state.bpm} isReady={isReady} beat={state.beat}
                         onPress={pressTrack} onStop={stopTrack} onClear={clearTrack}
                         onVolumeChange={setTrackVolume} onPanChange={setTrackPan} onEQChange={setTrackEQ}
                         onMuteToggle={toggleMute} onSoloToggle={toggleSolo} onCueToggle={toggleCue}
-                        onHarmonyChange={setHarmonyMode} onReverbSend={setReverbSend} onDelaySend={setDelaySend} />
+                        onHarmonyChange={setHarmonyMode} onReverbSend={setReverbSend} onDelaySend={setDelaySend}
+                        onPitchChange={setTrackPitchFX}  onFineChange={setTrackFineTune}
+                        onChorusChange={setTrackChorusFX} onGateChange={setTrackGateFX}
+                        onCompChange={setTrackCompFX}     onSatChange={setTrackSatFX}
+                        onTrimChange={setTrackTrimFX} />
                     ))}
                   </div>
                 )}
@@ -1420,8 +1494,8 @@ export const LoopStation505: React.FC = () => {
                   </div>
                   <VUMeter trackIndex={0} isActive={isReady} showScale height={64} showGr showCorr />
                   <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <HWBtn label="MONO"  active={monoOn} ac={T.purple} onClick={() => setMono(v => !v)} w={52} h={22} />
-                    <HWBtn label="LIMIT" active={limOn}  ac={T.orange} onClick={() => setLim(v => !v)}  w={52} h={22} />
+                    <HWBtn label="MONO"  active={monoOn} ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={52} h={22} />
+                    <HWBtn label="LIMIT" active={limOn}  ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={52} h={22} />
                   </div>
                 </div>
               </Panel>
@@ -1514,7 +1588,7 @@ export const LoopStation505: React.FC = () => {
         {/* ═══ STATUS BAR ════════════════════════════════════════════════════ */}
         <div style={{
           background: '#050505', borderTop: `1px solid ${T.b1}`,
-          padding: '4px 14px', flexShrink: 0,
+          padding: 'var(--ls-status-py, 4px) 14px', flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: 8, fontSize: 7, color: T.t5,
           letterSpacing: '.12em', fontFamily: 'IBM Plex Mono,monospace',

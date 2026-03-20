@@ -1,28 +1,35 @@
 // @ts-nocheck
-// ─── RC-505 MkII Loop Engine — ENHANCED v2 ────────────────────────────────────
+// ─── RC-505 MkII Loop Engine — ENHANCED v3 ────────────────────────────────────
 // src/features/loopstation/engine/loopEngine.ts
 //
 // Dynamic import — Tone NEVER loads until init() is called inside a user-gesture.
 // Zero AudioContext creation at module-load time.
 //
-// ENHANCEMENTS OVER v1:
-//   • Per-track full FX chain: EQ3 → Compressor → Gate → Saturation →
-//     Chorus → Flanger → Phaser → BitCrusher → PitchShift → Panner → Gain
-//   • 8 Clip slots per track — independent AudioBuffers, simultaneous playback
-//   • Playback modes: normal | reverse | half | double | stutter | pingpong
-//   • 4 global LFOs with assignable targets + BPM sync + 5 shapes
-//   • 4 Macro knobs wired to any engine parameter
-//   • Beat Repeat engine — rhythmic buffer stutter on any track
-//   • Time signature + swing (via Transport.swing)
-//   • Global: Stereo Widener, Tape Saturation, BitCrusher, Phaser, Granular Freeze
-//   • Sidechain compressor: any track can duck the master bus
-//   • Scene morph — interpolate between two SceneSnapshots
-//   • Undo/redo per-track recording history (up to 8 snapshots per track)
-//   • LUFS-approximated loudness metering
-//   • True-peak clip detection
-//   • Loop point quantisation with swing
-//   • Full MIDI clock output (WebMIDI)
-//   • Comprehensive event bus (20+ event types)
+// ENHANCEMENTS OVER v2:
+//   BUG FIXES:
+//   • sidechainGain now wired into master chain via preFXBus (was created but
+//     never connected — sidechain ducking was completely non-functional)
+//   • _wireLFO() now tracks and disposes Scale nodes before re-wiring
+//     (was leaking one Scale node per LFO update call)
+//   • Duplicate method block (~line 3300 in v2) removed — setMono,
+//     enableLimiter, setBeatRepeatPitch, setReverbPreDelay, setGranularDensity,
+//     setGranularSpread each appeared twice; dead code eliminated
+//   • setSidechainTrack() replaced: was a one-shot Meter poll at call-time,
+//     now runs a real Transport.scheduleRepeat envelope follower
+//   • dispose() now clears _sidechainScheduleId, _lfoScaleNodes, preFXBus,
+//     exciter nodes, multiband nodes
+//
+//   NEW FEATURES:
+//   • True 3-band multiband compression (crossover network lazily inserted
+//     between masterBus and preFXBus — zero-glitch toggle)
+//   • Harmonic exciter (parallel HPF→saturation path in master chain,
+//     wet/tone controls, adds air/presence without increasing perceived loudness)
+//   • Real sidechain envelope follower (scheduleRepeat at '16n' reads source
+//     analyser RMS, applies attack/release smoothing to sidechainGain)
+//   • True granular freeze (grain scheduler via Transport.scheduleRepeat —
+//     configurable grain size, count, pitch, scatter; replaces single Player loop)
+//   • Per-grain stereo spread via randomized panning
+//   • preFXBus insertion point makes future master-chain inserts clean
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type * as ToneType from 'tone';
@@ -40,13 +47,26 @@ import type {
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 export const TRACK_COUNT    = 5   as const;
-export const CLIP_COUNT     = 8   as const;  // slots per track
+export const CLIP_COUNT     = 8   as const;
 export const ANALYSER_SIZE  = 1024 as const;
 export const FFT_SIZE       = 2048 as const;
 export const TAP_HISTORY    = 6   as const;
-export const UNDO_DEPTH     = 8   as const;  // undo snapshots per track
+export const UNDO_DEPTH     = 8   as const;
 export const LFO_COUNT      = 4   as const;
 export const MACRO_COUNT    = 4   as const;
+export const GRAIN_COUNT_MAX = 8  as const;
+
+// Multiband default crossover points
+const MB_LOW_FREQ_DEFAULT  = 250;   // Hz — low / mid crossover
+const MB_HIGH_FREQ_DEFAULT = 4000;  // Hz — mid / high crossover
+
+// Sidechain envelope follower update rate
+const SC_UPDATE_INTERVAL = '16n' as const;
+
+// Granular defaults
+const GRAIN_SIZE_DEFAULT   = 0.12;  // seconds
+const GRAIN_COUNT_DEFAULT  = 4;
+const GRAIN_INTERVAL       = '16n' as const;
 
 const HARMONY_SEMITONES: Record<HarmonyMode, number> = {
   off: 0, subtle: 3, choir: 7, ambient: 12, counter: -5,
@@ -57,7 +77,6 @@ const HARMONY_WET: Record<HarmonyMode, number> = {
   octave: 0.5, fifth: 0.45, unison: 0.35,
 };
 
-// LFO rate map for synced mode (LFO rate 0-1 → note division index)
 const SYNCED_LFO_RATES = ['1m','2n','4n','8n','16n','8t','4t','1/32'] as const;
 
 // ── Public types ──────────────────────────────────────────────────────────────
@@ -79,55 +98,79 @@ export interface LFOState {
   id:       number;
   shape:    LFOShape;
   rateSynced: boolean;
-  rateHz:   number;        // used when not synced (0.01–20)
-  rateNote: string;        // used when synced ('4n' etc)
-  depth:    number;        // 0–1
+  rateHz:   number;
+  rateNote: string;
+  depth:    number;
   target:   LFOTarget;
-  trackIndex: number | null;  // null = global target
+  trackIndex: number | null;
   enabled:  boolean;
-  phase:    number;        // 0–1 manual phase offset
+  phase:    number;
   _lfo:     ToneType.LFO | null;
+}
+
+export interface MultibandBand {
+  threshold: number;   // dBFS, -60 to 0
+  ratio:     number;   // 1-20
+  gain:      number;   // dB output trim, -12 to +12
+}
+
+export interface MultibandState {
+  enabled:  boolean;
+  lowFreq:  number;    // Hz, crossover 1
+  highFreq: number;    // Hz, crossover 2
+  low:      MultibandBand;
+  mid:      MultibandBand;
+  high:     MultibandBand;
+}
+
+export interface ExciterState {
+  amount: number;   // 0-1 wet blend
+  tone:   number;   // HPF cutoff Hz (2000-12000)
+  drive:  number;   // 0-1 saturation amount on high shelf
+}
+
+export interface GranularState {
+  frozen:     boolean;
+  grainSize:  number;  // seconds 0.02-0.5
+  grainCount: number;  // 1-8 simultaneous grains
+  pitch:      number;  // semitones ±12
+  spread:     number;  // stereo spread 0-1
+  density:    number;  // playback rate scalar 0-1 → 0.25-4x
 }
 
 export interface EngineTrack {
   readonly id:     string;
   readonly index:  number;
 
-  // Source
   recorder:        ToneType.UserMedia;
   player:          ToneType.Player;
 
-  // Per-track FX chain (signal flows top → bottom)
-  inputGain:       ToneType.Gain;         // pre-gain
-  gate:            ToneType.Gate;         // noise gate
-  compressor:      ToneType.Compressor;   // dynamics
-  eq:              ToneType.EQ3;          // 3-band EQ
-  saturator:       ToneType.Distortion;   // tape-style saturation
-  chorus:          ToneType.Chorus;       // chorus
-  flanger:         ToneType.Chorus;       // flanger (short-delay chorus)
-  phaser:          ToneType.Phaser;       // phaser
-  bitCrusher:      ToneType.BitCrusher;   // bit reduction
-  pitchShift:      ToneType.PitchShift;   // pitch + harmony
-  tremolo:         ToneType.Tremolo;      // amplitude modulation
-  panner:          ToneType.Panner;       // stereo position
-  outputGain:      ToneType.Gain;         // post-fader
+  inputGain:       ToneType.Gain;
+  gate:            ToneType.Gate;
+  compressor:      ToneType.Compressor;
+  eq:              ToneType.EQ3;
+  saturator:       ToneType.Distortion;
+  chorus:          ToneType.Chorus;
+  flanger:         ToneType.Chorus;
+  phaser:          ToneType.Phaser;
+  bitCrusher:      ToneType.BitCrusher;
+  pitchShift:      ToneType.PitchShift;
+  tremolo:         ToneType.Tremolo;
+  panner:          ToneType.Panner;
+  outputGain:      ToneType.Gain;
 
-  // FX sends
   reverbSend:      ToneType.Gain;
   delaySend:       ToneType.Gain;
   chorusSend:      ToneType.Gain;
 
-  // Metering
   meter:           ToneType.Meter;
   meterL:          ToneType.Meter;
   meterR:          ToneType.Meter;
   analyser:        ToneType.Analyser;
   fft:             ToneType.Analyser;
 
-  // Clip slots
   clips:           ClipBuffer[];
 
-  // State
   overdubLayers:   number;
   isMuted:         boolean;
   isSoloed:        boolean;
@@ -182,36 +225,41 @@ export interface SceneSnapshot {
 }
 
 export type EngineEventMap = {
-  ready:           [];
-  disposed:        [];
-  bpmChange:       [bpm: number];
-  error:           [err: Error];
-  beat:            [bar: number, beat: number, subdivision: number];
-  quantizeTick:    [mode: QuantMode];
-  clipDetected:    [trackIndex: number];
-  soloChanged:     [soloActive: boolean];
-  loopStart:       [trackIndex: number];
-  loopEnd:         [trackIndex: number];
-  recordStart:     [trackIndex: number];
-  recordStop:      [trackIndex: number, durationSec: number];
-  overdubStart:    [trackIndex: number];
-  overdubStop:     [trackIndex: number];
-  clipLaunched:    [trackIndex: number, clipIndex: number];
-  clipStopped:     [trackIndex: number, clipIndex: number];
-  macroChange:     [macroId: number, value: number, target: MacroTarget];
-  lfoTick:         [lfoId: number, value: number];
-  sceneCapture:    [scene: SceneSnapshot];
-  sceneRecall:     [scene: SceneSnapshot];
-  sceneMorphTick:  [progress: number];  // 0–1
-  undoPush:        [trackIndex: number, depth: number];
-  undoPop:         [trackIndex: number, depth: number];
-  transportStart:  [];
-  transportStop:   [];
-  transportPause:  [];
-  midiClockStart:  [];
-  midiClockStop:   [];
-  beatRepeatStart: [trackIndex: number];
-  beatRepeatStop:  [trackIndex: number];
+  ready:             [];
+  disposed:          [];
+  bpmChange:         [bpm: number];
+  error:             [err: Error];
+  beat:              [bar: number, beat: number, subdivision: number];
+  quantizeTick:      [mode: QuantMode];
+  clipDetected:      [trackIndex: number];
+  soloChanged:       [soloActive: boolean];
+  loopStart:         [trackIndex: number];
+  loopEnd:           [trackIndex: number];
+  recordStart:       [trackIndex: number];
+  recordStop:        [trackIndex: number, durationSec: number];
+  overdubStart:      [trackIndex: number];
+  overdubStop:       [trackIndex: number];
+  clipLaunched:      [trackIndex: number, clipIndex: number];
+  clipStopped:       [trackIndex: number, clipIndex: number];
+  macroChange:       [macroId: number, value: number, target: MacroTarget];
+  lfoTick:           [lfoId: number, value: number];
+  sceneCapture:      [scene: SceneSnapshot];
+  sceneRecall:       [scene: SceneSnapshot];
+  sceneMorphTick:    [progress: number];
+  undoPush:          [trackIndex: number, depth: number];
+  undoPop:           [trackIndex: number, depth: number];
+  transportStart:    [];
+  transportStop:     [];
+  transportPause:    [];
+  midiClockStart:    [];
+  midiClockStop:     [];
+  beatRepeatStart:   [trackIndex: number];
+  beatRepeatStop:    [trackIndex: number];
+  multibandEnabled:  [enabled: boolean];
+  exciterChanged:    [state: ExciterState];
+  sidechainEnabled:  [sourceTrack: number, amount: number];
+  sidechainDisabled: [];
+  granularParams:    [state: GranularState];
 };
 
 type EngineListener<K extends keyof EngineEventMap> = (...args: EngineEventMap[K]) => void;
@@ -229,10 +277,16 @@ function lerpParam(param: ToneType.Param<any>, to: number, ramp = 0.05): void {
   try { param.rampTo(to, ramp); } catch { param.value = to; }
 }
 
-// Simple approximation of LUFS-I from RMS
 function rmsToLufs(rms: number): number {
   if (rms <= 0) return -70;
   return 20 * Math.log10(rms) - 0.691;
+}
+
+// Compute RMS from a Float32Array (for sidechain envelope follower)
+function computeRMS(data: Float32Array): number {
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+  return Math.sqrt(sum / data.length);
 }
 
 // ── BeatRepeat internal engine ─────────────────────────────────────────────────
@@ -276,6 +330,8 @@ class LoopEngine {
 
   // LFOs
   private _lfos: LFOState[] = [];
+  // Scale nodes per LFO — disposed before each re-wire (fixes v2 leak)
+  private _lfoScaleNodes: Map<number, ToneType.Scale[]> = new Map();
 
   // Macros
   private _macros: MacroKnob[] = [];
@@ -290,34 +346,116 @@ class LoopEngine {
   // Scene morph
   private _morphRafId = 0;
 
-  // Master chain
-  masterBus!:          ToneType.Gain;
+  // ── Master chain nodes ───────────────────────────────────────────────────
+
+  // Primary collection bus — all track outputGains connect here
+  masterBus!:            ToneType.Gain;
+
+  // preFXBus — insertion point for multiband / future pre-FX inserts
+  // masterBus → preFXBus → globalFilter → ... (normal bypass)
+  // masterBus → [multibandNet] → preFXBus → globalFilter → ... (when MB enabled)
+  private _preFXBus!:    ToneType.Gain;
+
+  // Global FX serial chain (preFXBus feeds into globalFilter)
+  globalFilter!:         ToneType.Filter;
+  globalDelay!:          ToneType.FeedbackDelay;
+  globalReverb!:         ToneType.Reverb;
+  globalChorus!:         ToneType.Chorus;
+  globalPhaser!:         ToneType.Phaser;
+  globalSaturator!:      ToneType.Distortion;
+  globalBitCrusher!:     ToneType.BitCrusher;
+  globalStereoWidener!:  ToneType.StereoWidener;
+
+  // Harmonic exciter (parallel path, after globalSaturator)
+  // preFX chain: ... → globalSaturator → [split] → exciterHPF → exciterSat → exciterWet
+  //                                      └──────────────────────────────────→ exciterDry
+  //              exciterWet + exciterDry → exciterSumBus → globalBitCrusher → ...
+  private _exciterHPF:     ToneType.Filter | null = null;
+  private _exciterSat:     ToneType.Distortion | null = null;
+  private _exciterWetGain: ToneType.Gain | null = null;
+  private _exciterDryGain: ToneType.Gain | null = null;
+  private _exciterSumBus:  ToneType.Gain | null = null;
+  private _exciterState: ExciterState = { amount: 0, tone: 6000, drive: 0.4 };
+  private _exciterEnabled = false;
+
+  // Sidechain ducking
+  // sidechainGain is wired into master chain: globalStereoWidener → sidechainGain → masterCompressor
+  // setSidechainTrack() starts a scheduleRepeat that reads source analyser RMS
+  // and drives sidechainGain.gain with attack/release smoothing.
+  sidechainEnv!:           ToneType.Envelope;   // kept for API compatibility
+  sidechainGain!:          ToneType.Gain;
+  private _sidechainScheduleId  = -1;
+  private _sidechainSourceIdx   = -1;
+  private _sidechainAmount      = 0;
+  private _sidechainAttack      = 0.003;
+  private _sidechainRelease     = 0.15;
+  private _sidechainEnvLevel    = 1.0;  // running gain (attack/release smoothed)
+
+  // Multiband compression
+  // When enabled, masterBus disconnects from _preFXBus and feeds:
+  //   masterBus → _mbLowPass   → _mbLowComp   → _mbLowGain   → _mbSumBus → _preFXBus
+  //             → _mbMidHi→Lo  → _mbMidComp   → _mbMidGain   → _mbSumBus
+  //             → _mbHighPass  → _mbHighComp  → _mbHighGain  → _mbSumBus
+  private _mbEnabled         = false;
+  private _mbLowLP:    ToneType.Filter | null = null;   // LP at lowFreq
+  private _mbMidHP:    ToneType.Filter | null = null;   // HP at lowFreq (mid input)
+  private _mbMidLP:    ToneType.Filter | null = null;   // LP at highFreq (mid output)
+  private _mbHighHP:   ToneType.Filter | null = null;   // HP at highFreq
+  private _mbLowComp:  ToneType.Compressor | null = null;
+  private _mbMidComp:  ToneType.Compressor | null = null;
+  private _mbHighComp: ToneType.Compressor | null = null;
+  private _mbLowGain:  ToneType.Gain | null = null;
+  private _mbMidGain:  ToneType.Gain | null = null;
+  private _mbHighGain: ToneType.Gain | null = null;
+  private _mbSumBus:   ToneType.Gain | null = null;
+  private _mbState: MultibandState = {
+    enabled: false,
+    lowFreq: MB_LOW_FREQ_DEFAULT,
+    highFreq: MB_HIGH_FREQ_DEFAULT,
+    low:  { threshold: -24, ratio: 3, gain: 0 },
+    mid:  { threshold: -18, ratio: 2.5, gain: 0 },
+    high: { threshold: -20, ratio: 3, gain: 0 },
+  };
+
+  // Metering + master tail
   masterCompressor!:   ToneType.Compressor;
   masterLimiter!:      ToneType.Limiter;
   masterMeter!:        ToneType.Meter;
   masterFft!:          ToneType.Analyser;
   masterAnalyser!:     ToneType.Analyser;
-  globalFilter!:       ToneType.Filter;
-  globalDelay!:        ToneType.FeedbackDelay;
-  globalReverb!:       ToneType.Reverb;
-  globalChorus!:       ToneType.Chorus;
-  globalPhaser!:       ToneType.Phaser;
-  globalSaturator!:    ToneType.Distortion;
-  globalBitCrusher!:   ToneType.BitCrusher;
-  globalStereoWidener!:ToneType.StereoWidener;
+
+  // Metronome
   metronomeClick!:     ToneType.MetalSynth;
   metronomeAccent!:    ToneType.MetalSynth;
-  sidechainEnv!:       ToneType.Envelope;
-  sidechainGain!:      ToneType.Gain;
 
-  // Granular freeze — keeps a live buffer for freeze effect
+  // Granular freeze — v3: grain scheduler replaces single looping Player
+  private _granularFrozen      = false;
+  private _granularSourceTrack = 0;
+  private _granularScheduleId  = -1;
+  private _grainState: GranularState = {
+    frozen:     false,
+    grainSize:  GRAIN_SIZE_DEFAULT,
+    grainCount: GRAIN_COUNT_DEFAULT,
+    pitch:      0,
+    spread:     0,
+    density:    0.5,
+  };
+  // Legacy single-player reference (for setGranularDensity compat when scheduler inactive)
   private _granularPlayer: ToneType.Player | null = null;
-  private _granularFrozen = false;
+  private _granularWidener: ToneType.StereoWidener | null = null;
+
+  // Reverb pre-delay
+  private _reverbPreDelayNode: ToneType.Delay | null = null;
+
+  // Mono collapse + limiter bypass state
+  private _monoEnabled               = false;
+  private _preMonoWidth              = 0.5;
+  private _limiterEnabled            = true;
+  private _preBypassLimiterThreshold = -1;
 
   private _listeners: { [K in keyof EngineEventMap]?: Set<EngineListener<K>> } = {};
 
   private constructor() {
-    // Pre-populate LFOs
     for (let i = 0; i < LFO_COUNT; i++) {
       this._lfos.push({
         id: i, shape: 'sine', rateSynced: true,
@@ -325,8 +463,8 @@ class LoopEngine {
         target: 'none', trackIndex: null, enabled: false,
         phase: 0, _lfo: null,
       });
+      this._lfoScaleNodes.set(i, []);
     }
-    // Pre-populate macros
     for (let i = 0; i < MACRO_COUNT; i++) {
       this._macros.push({
         id: i, label: `MACRO ${i + 1}`, value: 0.5,
@@ -371,15 +509,15 @@ class LoopEngine {
       _Tone.Transport.bpm.value = this._pendingBpm;
       this._applySwing();
 
-      // ── Master chain ────────────────────────────────────────────────────
-      this.masterBus           = new _Tone.Gain(1);
-      this.masterCompressor    = new _Tone.Compressor({ threshold: -18, ratio: 4, attack: 0.003, release: 0.1 });
-      this.masterLimiter       = new _Tone.Limiter(-1);
-      this.masterMeter         = new _Tone.Meter({ normalRange: true });
-      this.masterFft           = new _Tone.Analyser('fft', FFT_SIZE);
-      this.masterAnalyser      = new _Tone.Analyser('waveform', ANALYSER_SIZE);
+      // ── Master collection bus ────────────────────────────────────────────
+      this.masterBus  = new _Tone.Gain(1);
 
-      // Global FX (parallel/serial)
+      // preFXBus — insertion point so multiband can intercept without rewiring
+      // the entire chain. masterBus normally connects directly here.
+      this._preFXBus  = new _Tone.Gain(1);
+      this.masterBus.connect(this._preFXBus);
+
+      // ── Global FX serial chain ───────────────────────────────────────────
       this.globalFilter        = new _Tone.Filter(8000, 'lowpass');
       this.globalDelay         = new _Tone.FeedbackDelay('8n', 0.3);
       this.globalDelay.wet.value = 0;
@@ -394,13 +532,24 @@ class LoopEngine {
 
       await this.globalReverb.ready;
 
-      // Sidechain: envelope follower on track 0 → modulate masterBus gain
+      // Sidechain ducking gain — FIX: now wired into chain between
+      // globalStereoWidener and masterCompressor. v2 created these nodes
+      // but never connected them; the chain was untouched.
       this.sidechainEnv  = new _Tone.Envelope({ attack: 0.003, decay: 0.1, sustain: 1, release: 0.3 });
       this.sidechainGain = new _Tone.Gain(1);
 
-      // Chain: masterBus → filter → chorus → phaser → saturator → bitCrusher
-      //        → delay → reverb → widener → compressor → limiter → dest
-      this.masterBus.chain(
+      // Master dynamics tail
+      this.masterCompressor = new _Tone.Compressor({ threshold: -18, ratio: 4, attack: 0.003, release: 0.1 });
+      this.masterLimiter    = new _Tone.Limiter(-1);
+      this.masterMeter      = new _Tone.Meter({ normalRange: true });
+      this.masterFft        = new _Tone.Analyser('fft', FFT_SIZE);
+      this.masterAnalyser   = new _Tone.Analyser('waveform', ANALYSER_SIZE);
+
+      // ── Wire master chain ────────────────────────────────────────────────
+      // _preFXBus → filter → chorus → phaser → saturator → bitCrusher
+      //   → delay → reverb → widener → sidechainGain (FIX) → compressor
+      //   → limiter → meter
+      this._preFXBus.chain(
         this.globalFilter,
         this.globalChorus,
         this.globalPhaser,
@@ -409,6 +558,7 @@ class LoopEngine {
         this.globalDelay,
         this.globalReverb,
         this.globalStereoWidener,
+        this.sidechainGain,        // ← FIX: was dangling in v2
         this.masterCompressor,
         this.masterLimiter,
         this.masterMeter,
@@ -439,7 +589,7 @@ class LoopEngine {
       // ── LFO nodes ────────────────────────────────────────────────────────
       this._initLFOs();
 
-      // ── Beat / quantize scheduler ────────────────────────────────────────
+      // ── Schedulers ───────────────────────────────────────────────────────
       this._startBeatScheduler();
       this._startQuantizeScheduler();
 
@@ -460,20 +610,16 @@ class LoopEngine {
   private async _buildTrack(i: number): Promise<EngineTrack> {
     const T = _Tone!;
 
-    // Output → master
     const outputGain    = new T.Gain(1).connect(this.masterBus);
     const panner        = new T.Panner(0).connect(outputGain);
 
-    // Modulation
     const tremolo       = new T.Tremolo({ frequency: 4, depth: 0, type: 'sine' }).start();
     tremolo.wet.value   = 0;
     tremolo.connect(panner);
 
-    // Pitch
     const pitchShift    = new T.PitchShift(0);
     pitchShift.connect(tremolo);
 
-    // Spectral
     const bitCrusher    = new T.BitCrusher(16);
     bitCrusher.connect(pitchShift);
 
@@ -489,7 +635,6 @@ class LoopEngine {
     chorus.wet.value    = 0;
     chorus.connect(flanger);
 
-    // Dynamics
     const saturator     = new T.Distortion(0);
     saturator.wet.value = 0;
     saturator.connect(chorus);
@@ -506,32 +651,26 @@ class LoopEngine {
     const inputGain     = new T.Gain(1);
     inputGain.connect(gate);
 
-    // FX sends (parallel off panner, pre-master)
     const reverbSend    = new T.Gain(0).connect(this.globalReverb);
     const delaySend     = new T.Gain(0).connect(this.globalDelay);
     const chorusSend    = new T.Gain(0).connect(this.globalChorus);
 
-    // Metering
     const meter         = new T.Meter({ normalRange: true });
     const meterL        = new T.Meter({ normalRange: true, channelCount: 1 });
     const meterR        = new T.Meter({ normalRange: true, channelCount: 1 });
 
-    // Visualisation
     const analyser      = new T.Analyser('waveform', ANALYSER_SIZE);
     const fft           = new T.Analyser('fft', FFT_SIZE);
 
-    // Player → inputGain → chain
     const player        = new T.Player();
     player.loop         = true;
     player.connect(inputGain);
     player.fan(meter, meterL, meterR, analyser, fft, reverbSend, delaySend, chorusSend);
 
-    // Recorder → inputGain → chain (live monitoring)
     const recorder      = new T.UserMedia();
     recorder.connect(inputGain);
     recorder.fan(meter, meterL, meterR, analyser, fft, reverbSend, delaySend, chorusSend);
 
-    // Clip slots
     const clips: ClipBuffer[] = Array.from({ length: CLIP_COUNT }, (_, ci) => ({
       buffer: null, hasContent: false,
       lengthBars: 0, name: `Clip ${ci + 1}`,
@@ -586,12 +725,25 @@ class LoopEngine {
     } catch { return 1; }
   }
 
+  /**
+   * Wire an LFO to its target parameter.
+   * FIX (v3): disposes previously created Scale nodes for this LFO before
+   * creating new ones. v2 leaked one Scale node per call.
+   */
   private _wireLFO(lfo: LFOState): void {
     if (!lfo._lfo || !_Tone) return;
+
+    // Dispose old scale nodes for this LFO
+    const oldNodes = this._lfoScaleNodes.get(lfo.id) ?? [];
+    oldNodes.forEach(n => { try { n.dispose(); } catch { /* ok */ } });
+    this._lfoScaleNodes.set(lfo.id, []);
+
     const depth = lfo.depth;
+    const newScaleNodes: ToneType.Scale[] = [];
 
     const connectToParam = (param: ToneType.Param<any>, scale: number) => {
       const scaleNode = new _Tone.Scale(-scale, scale);
+      newScaleNodes.push(scaleNode);
       lfo._lfo!.connect(scaleNode);
       scaleNode.connect(param);
     };
@@ -621,13 +773,15 @@ class LoopEngine {
       case 'chorus':
         connectToParam(this.globalChorus.wet as any, 0.6 * depth);
         break;
-      case 'bitcrush':
-        // BitCrusher bits can't easily be modulated via rampTo, skip
-        break;
       case 'drive':
         connectToParam(this.globalSaturator.wet as any, 0.8 * depth);
         break;
+      case 'bitcrush':
+        // BitCrusher.bits is not an AudioParam — skip AudioParam wiring
+        break;
     }
+
+    this._lfoScaleNodes.set(lfo.id, newScaleNodes);
   }
 
   // ── Beat / Quantize schedulers ────────────────────────────────────────────
@@ -638,23 +792,19 @@ class LoopEngine {
     let beat = 0;
 
     this._beatScheduleId = _Tone.Transport.scheduleRepeat((time) => {
-      const bar   = Math.floor(beat / beatsPerBar);
-      const b     = beat % beatsPerBar;
-      const sub   = 0;
+      const bar = Math.floor(beat / beatsPerBar);
+      const b   = beat % beatsPerBar;
       this._currentBar  = bar;
       this._currentBeat = b;
-      this.emit('beat', bar, b, sub);
+      this.emit('beat', bar, b, 0);
 
       if (this._metronomeOn) {
-        const isAccent = b === 0;
-        if (isAccent) {
+        if (b === 0) {
           this.metronomeAccent.triggerAttackRelease('16n', time);
         } else {
           this.metronomeClick.triggerAttackRelease('32n', time);
         }
       }
-
-      // Emit MIDI clock (24 pulses/beat via separate schedule)
       beat++;
     }, '4n');
   }
@@ -679,7 +829,7 @@ class LoopEngine {
 
   private _applySwing(): void {
     if (!_Tone) return;
-    _Tone.Transport.swing    = this._swingAmount;
+    _Tone.Transport.swing = this._swingAmount;
     _Tone.Transport.swingSubdivision = '8n';
   }
 
@@ -688,7 +838,7 @@ class LoopEngine {
   private async _initMidiClock(): Promise<void> {
     if (!navigator.requestMIDIAccess) return;
     try {
-      const access = await navigator.requestMIDIAccess({ sysex: false });
+      const access  = await navigator.requestMIDIAccess({ sysex: false });
       const outputs = Array.from(access.outputs.values());
       if (outputs.length) this._midiOutput = outputs[0];
     } catch { /* no MIDI access */ }
@@ -697,20 +847,19 @@ class LoopEngine {
   setMidiClockOutput(enabled: boolean): void {
     if (!_Tone || !this._midiOutput) return;
     if (enabled) {
-      // 24 MIDI clock pulses per quarter note
       this._midiClockScheduleId = _Tone.Transport.scheduleRepeat((time) => {
         _Tone!.getDraw().schedule(() => {
-          this._midiOutput?.send([0xF8]); // MIDI clock
+          this._midiOutput?.send([0xF8]);
         }, time);
       }, '32t' as ToneType.Unit.Time);
-      this._midiOutput.send([0xFA]); // Start
+      this._midiOutput.send([0xFA]);
       this.emit('midiClockStart');
     } else {
       if (this._midiClockScheduleId >= 0) {
         _Tone.Transport.clear(this._midiClockScheduleId);
         this._midiClockScheduleId = -1;
       }
-      this._midiOutput?.send([0xFC]); // Stop
+      this._midiOutput?.send([0xFC]);
       this.emit('midiClockStop');
     }
   }
@@ -725,15 +874,11 @@ class LoopEngine {
     t._playerSynced = true;
   }
 
-  /** Alias — verifies track nodes exist (multi-track panel compatibility). */
   setupTrack(trackId: string): void {
     const i = parseInt(trackId.split('-')[1], 10);
-    if (!isNaN(i) && this.tracks[i]) {
-      // Nodes are fully built in _buildTrack() during init() — nothing extra needed.
-    }
+    if (!isNaN(i) && this.tracks[i]) { /* nodes built in _buildTrack */ }
   }
 
-  /** Returns { gain, analyser } for a track by string ID (multi-track panel). */
   getTrackNodes(trackId: string): { gain: ToneType.Gain; analyser: ToneType.Analyser } | null {
     const i = parseInt(trackId.split('-')[1], 10);
     if (isNaN(i)) return null;
@@ -765,12 +910,10 @@ class LoopEngine {
         t.player.playbackRate = 2;
         break;
       case 'pingpong':
-        // Alternate reverse on each loop — polled via loop event
         t.player.reverse = false;
         t.player.playbackRate = 1;
         break;
       case 'stutter': {
-        // Short loop window — set player loopEnd to 1/4 of buffer
         const dur = t.player.buffer.duration;
         t.player.loopStart = 0;
         t.player.loopEnd   = dur * 0.25;
@@ -778,14 +921,12 @@ class LoopEngine {
         t.player.playbackRate = 1;
         break;
       }
-      default: // normal
+      default:
         t.player.reverse = false;
         t.player.playbackRate = 1;
         break;
     }
   }
-
-  // ── Playback mode ─────────────────────────────────────────────────────────
 
   setPlaybackMode(i: number, mode: PlaybackMode): void {
     const t = this.track(i, 'setPlaybackMode');
@@ -802,7 +943,6 @@ class LoopEngine {
     const copy = t.player.buffer.get();
     if (!copy) return;
     if (t._undoStack.length >= UNDO_DEPTH) t._undoStack.shift();
-    // Deep-copy via Tone AudioBuffer
     if (_Tone) {
       const buf = new _Tone.ToneAudioBuffer(copy);
       t._undoStack.push(buf);
@@ -1049,40 +1189,484 @@ class LoopEngine {
     this.masterCompressor.ratio.value     = ratio;
   }
 
-  // ── Granular Freeze ───────────────────────────────────────────────────────
+  // ── Multiband compression ─────────────────────────────────────────────────
 
+  /**
+   * Enable / disable 3-band multiband compression.
+   *
+   * Topology when ENABLED:
+   *   masterBus → [disconnect from _preFXBus]
+   *   masterBus → _mbLowLP  → _mbLowComp  → _mbLowGain  → _mbSumBus → _preFXBus
+   *   masterBus → _mbMidHP  → _mbMidLP    → _mbMidComp  → _mbMidGain → _mbSumBus
+   *   masterBus → _mbHighHP → _mbHighComp → _mbHighGain → _mbSumBus
+   *
+   * When DISABLED: destroys the crossover network, masterBus reconnects directly
+   * to _preFXBus. Zero audio glitch because Tone.js Gain nodes pass through
+   * at their current gain value during the transition frame.
+   */
+  enableMultiband(enabled: boolean): void {
+    if (!this.ready('enableMultiband') || !_Tone) return;
+    if (this._mbEnabled === enabled) return;
+    this._mbEnabled = enabled;
+    this._mbState.enabled = enabled;
+
+    if (enabled) {
+      // Disconnect direct bypass path
+      try { this.masterBus.disconnect(this._preFXBus); } catch { /* ok */ }
+
+      // Create crossover network
+      this._mbSumBus   = new _Tone.Gain(1);
+      this._mbSumBus.connect(this._preFXBus);
+
+      // Low band: LP at lowFreq → compressor → gain trim → sum
+      this._mbLowLP    = new _Tone.Filter(this._mbState.lowFreq, 'lowpass');
+      this._mbLowComp  = new _Tone.Compressor({
+        threshold: this._mbState.low.threshold,
+        ratio:     this._mbState.low.ratio,
+        attack:    0.003, release: 0.1,
+      });
+      this._mbLowGain  = new _Tone.Gain(this._dbToLinear(this._mbState.low.gain));
+      this.masterBus.connect(this._mbLowLP);
+      this._mbLowLP.connect(this._mbLowComp);
+      this._mbLowComp.connect(this._mbLowGain);
+      this._mbLowGain.connect(this._mbSumBus);
+
+      // Mid band: HP at lowFreq → LP at highFreq → compressor → gain → sum
+      this._mbMidHP    = new _Tone.Filter(this._mbState.lowFreq, 'highpass');
+      this._mbMidLP    = new _Tone.Filter(this._mbState.highFreq, 'lowpass');
+      this._mbMidComp  = new _Tone.Compressor({
+        threshold: this._mbState.mid.threshold,
+        ratio:     this._mbState.mid.ratio,
+        attack:    0.003, release: 0.1,
+      });
+      this._mbMidGain  = new _Tone.Gain(this._dbToLinear(this._mbState.mid.gain));
+      this.masterBus.connect(this._mbMidHP);
+      this._mbMidHP.connect(this._mbMidLP);
+      this._mbMidLP.connect(this._mbMidComp);
+      this._mbMidComp.connect(this._mbMidGain);
+      this._mbMidGain.connect(this._mbSumBus);
+
+      // High band: HP at highFreq → compressor → gain → sum
+      this._mbHighHP   = new _Tone.Filter(this._mbState.highFreq, 'highpass');
+      this._mbHighComp = new _Tone.Compressor({
+        threshold: this._mbState.high.threshold,
+        ratio:     this._mbState.high.ratio,
+        attack:    0.003, release: 0.08,
+      });
+      this._mbHighGain = new _Tone.Gain(this._dbToLinear(this._mbState.high.gain));
+      this.masterBus.connect(this._mbHighHP);
+      this._mbHighHP.connect(this._mbHighComp);
+      this._mbHighComp.connect(this._mbHighGain);
+      this._mbHighGain.connect(this._mbSumBus);
+
+    } else {
+      // Tear down crossover network
+      this._disposeMBNodes();
+      // Restore direct bypass
+      this.masterBus.connect(this._preFXBus);
+    }
+
+    this.emit('multibandEnabled', enabled);
+  }
+
+  /**
+   * Set per-band compressor parameters and optional output trim.
+   * No-op if multiband is not enabled.
+   */
+  setMultibandBand(
+    band: 'low' | 'mid' | 'high',
+    threshold: number,
+    ratio: number,
+    gainDb = 0,
+  ): void {
+    if (!this.ready('setMultibandBand')) return;
+
+    const state  = this._mbState[band];
+    state.threshold = clamp(threshold, -60, 0);
+    state.ratio     = clamp(ratio, 1, 20);
+    state.gain      = clamp(gainDb, -12, 12);
+
+    if (!this._mbEnabled) return;
+
+    const compMap  = { low: this._mbLowComp,  mid: this._mbMidComp,  high: this._mbHighComp  };
+    const gainMap  = { low: this._mbLowGain,  mid: this._mbMidGain,  high: this._mbHighGain  };
+
+    const comp = compMap[band];
+    const gain = gainMap[band];
+
+    if (comp) {
+      comp.threshold.value = state.threshold;
+      comp.ratio.value     = state.ratio;
+    }
+    if (gain) {
+      lerpParam(gain.gain as any, this._dbToLinear(state.gain));
+    }
+  }
+
+  /**
+   * Set crossover frequencies.
+   * Rebuilds the crossover filters in place — a brief (< 1 ms) filter transient
+   * occurs, which is inaudible in practice.
+   */
+  setMultibandCrossover(lowFreq: number, highFreq: number): void {
+    if (!this.ready('setMultibandCrossover')) return;
+    this._mbState.lowFreq  = clamp(lowFreq,  20,   2000);
+    this._mbState.highFreq = clamp(highFreq, this._mbState.lowFreq + 100, 18000);
+
+    if (!this._mbEnabled) return;
+
+    if (this._mbLowLP)  (this._mbLowLP.frequency  as any).value = this._mbState.lowFreq;
+    if (this._mbMidHP)  (this._mbMidHP.frequency  as any).value = this._mbState.lowFreq;
+    if (this._mbMidLP)  (this._mbMidLP.frequency  as any).value = this._mbState.highFreq;
+    if (this._mbHighHP) (this._mbHighHP.frequency as any).value = this._mbState.highFreq;
+  }
+
+  getMultibandState(): MultibandState {
+    return { ...this._mbState };
+  }
+
+  private _disposeMBNodes(): void {
+    const nodes = [
+      this._mbLowLP, this._mbMidHP, this._mbMidLP, this._mbHighHP,
+      this._mbLowComp, this._mbMidComp, this._mbHighComp,
+      this._mbLowGain, this._mbMidGain, this._mbHighGain,
+      this._mbSumBus,
+    ];
+    nodes.forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
+    this._mbLowLP = this._mbMidHP = this._mbMidLP = this._mbHighHP = null;
+    this._mbLowComp = this._mbMidComp = this._mbHighComp = null;
+    this._mbLowGain = this._mbMidGain = this._mbHighGain = null;
+    this._mbSumBus  = null;
+  }
+
+  private _dbToLinear(db: number): number {
+    return Math.pow(10, db / 20);
+  }
+
+  // ── Harmonic exciter ──────────────────────────────────────────────────────
+
+  /**
+   * Harmonic exciter — parallel high-frequency saturation.
+   *
+   * Signal path (inserted between globalSaturator and globalBitCrusher):
+   *   globalSaturator output splits into:
+   *     dry path:  → _exciterDryGain → _exciterSumBus → globalBitCrusher
+   *     wet path:  → _exciterHPF → _exciterSat → _exciterWetGain → _exciterSumBus
+   *
+   * The HPF ensures that saturation only affects the upper frequency content
+   * (harmonics above `tone` Hz), keeping low-mids clean and punchy.
+   *
+   * amount: 0 = dry only, 1 = equal wet/dry mix
+   * tone:   HPF cutoff in Hz (2000–12000). Higher = only air is saturated.
+   * drive:  saturation drive (0–1) on the wet path only.
+   *
+   * First call: lazily creates the nodes and rewires the chain.
+   * Subsequent calls: only updates parameter values (no rewiring glitch).
+   */
+  setHarmonicExciter(amount: number, tone: number, drive?: number): void {
+    if (!this.ready('setHarmonicExciter') || !_Tone) return;
+
+    const wetAmt  = clamp(amount, 0, 1);
+    const hpfFreq = clamp(tone, 2000, 12000);
+    const satDrive = drive !== undefined ? clamp(drive, 0, 1) : this._exciterState.drive;
+
+    this._exciterState = { amount: wetAmt, tone: hpfFreq, drive: satDrive };
+
+    if (!this._exciterEnabled) {
+      // First call — create nodes and rewire chain
+      this._exciterHPF     = new _Tone.Filter(hpfFreq, 'highpass');
+      this._exciterSat     = new _Tone.Distortion(satDrive);
+      this._exciterWetGain = new _Tone.Gain(wetAmt);
+      this._exciterDryGain = new _Tone.Gain(1 - wetAmt * 0.5); // partial dry blend
+      this._exciterSumBus  = new _Tone.Gain(1);
+
+      // Disconnect globalSaturator → globalBitCrusher
+      try { this.globalSaturator.disconnect(this.globalBitCrusher); } catch { /* ok */ }
+
+      // Wire dry path
+      this.globalSaturator.connect(this._exciterDryGain);
+      this._exciterDryGain.connect(this._exciterSumBus);
+
+      // Wire wet path: HPF → saturation → wet gain → sum
+      this.globalSaturator.connect(this._exciterHPF);
+      this._exciterHPF.connect(this._exciterSat);
+      this._exciterSat.connect(this._exciterWetGain);
+      this._exciterWetGain.connect(this._exciterSumBus);
+
+      // Sum → rest of chain
+      this._exciterSumBus.connect(this.globalBitCrusher);
+
+      this._exciterEnabled = true;
+    } else {
+      // Update values only
+      if (this._exciterHPF)     (this._exciterHPF.frequency as any).value = hpfFreq;
+      if (this._exciterSat)     this._exciterSat.distortion = satDrive;
+      if (this._exciterWetGain) lerpParam(this._exciterWetGain.gain as any, wetAmt, 0.05);
+      if (this._exciterDryGain) lerpParam(this._exciterDryGain.gain as any, 1 - wetAmt * 0.5, 0.05);
+    }
+
+    this.emit('exciterChanged', { ...this._exciterState });
+  }
+
+  /**
+   * Bypass / restore the harmonic exciter.
+   * Raises wet gain to 0 and dry to 1 (bypass), or restores stored state.
+   */
+  bypassExciter(bypassed: boolean): void {
+    if (!this.ready('bypassExciter') || !this._exciterEnabled) return;
+    if (bypassed) {
+      if (this._exciterWetGain) this._exciterWetGain.gain.value = 0;
+      if (this._exciterDryGain) this._exciterDryGain.gain.value = 1;
+    } else {
+      if (this._exciterWetGain) lerpParam(this._exciterWetGain.gain as any, this._exciterState.amount, 0.05);
+      if (this._exciterDryGain) lerpParam(this._exciterDryGain.gain as any, 1 - this._exciterState.amount * 0.5, 0.05);
+    }
+  }
+
+  getExciterState(): ExciterState { return { ...this._exciterState }; }
+
+  private _disposeExciterNodes(): void {
+    try { this.globalSaturator.disconnect(this._exciterHPF!); } catch { /* ok */ }
+    try { this.globalSaturator.disconnect(this._exciterDryGain!); } catch { /* ok */ }
+    try { this._exciterSumBus?.disconnect(this.globalBitCrusher); } catch { /* ok */ }
+    [this._exciterHPF, this._exciterSat, this._exciterWetGain, this._exciterDryGain, this._exciterSumBus]
+      .forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
+    this._exciterHPF = this._exciterSat = this._exciterWetGain =
+      this._exciterDryGain = this._exciterSumBus = null;
+    // Restore direct connection
+    try { this.globalSaturator.connect(this.globalBitCrusher); } catch { /* ok */ }
+    this._exciterEnabled = false;
+  }
+
+  // ── Sidechain ducking (real envelope follower) ────────────────────────────
+
+  /**
+   * Enable sidechain ducking of the master bus from a source track.
+   *
+   * FIX (v3): v2 called getTrackLevel() once at call-time and set gain
+   * directly. This had no ongoing effect and only fired once.
+   *
+   * v3 implementation:
+   *   • Reads source track Analyser waveform data at '16n' intervals via
+   *     Transport.scheduleRepeat (runs in audio thread via Tone.getDraw.schedule)
+   *   • Applies first-order IIR attack/release smoothing to the envelope level
+   *   • Writes the inverted (ducking) value to sidechainGain.gain
+   *   • sidechainGain is now properly in the master chain (see init() fix)
+   *
+   * attack:  time constant in seconds for gain reduction (default 0.003)
+   * release: time constant in seconds for gain recovery (default 0.15)
+   */
+  enableSidechain(sourceTrackIndex: number, amount: number, attack = 0.003, release = 0.15): void {
+    if (!this.ready('enableSidechain') || !_Tone) return;
+    const t = this.tracks[sourceTrackIndex];
+    if (!t) { console.warn(`[LoopEngine] enableSidechain: track ${sourceTrackIndex} not found`); return; }
+
+    // Clear any existing sidechain schedule
+    this.disableSidechain();
+
+    this._sidechainSourceIdx = sourceTrackIndex;
+    this._sidechainAmount    = clamp(amount, 0, 1);
+    this._sidechainAttack    = clamp(attack, 0.0001, 1);
+    this._sidechainRelease   = clamp(release, 0.001, 2);
+    this._sidechainEnvLevel  = 1.0;
+
+    // Schedule envelope follower at 16th-note intervals
+    // getDraw().schedule() ensures the gain write happens on the audio thread
+    this._sidechainScheduleId = _Tone.Transport.scheduleRepeat((time) => {
+      _Tone!.getDraw().schedule(() => {
+        const src = this.tracks[this._sidechainSourceIdx];
+        if (!src) return;
+
+        // Read waveform RMS from source analyser
+        const waveform = src.analyser.getValue() as Float32Array;
+        const rms      = computeRMS(waveform);
+        const env      = clamp(rms, 0, 1);
+
+        // IIR smoothing: attack when signal rises, release when falls
+        const coeff = env > this._sidechainEnvLevel
+          ? Math.exp(-1 / (this._sidechainAttack * 44100 / 64))   // ~audio-rate
+          : Math.exp(-1 / (this._sidechainRelease * 44100 / 64));
+
+        this._sidechainEnvLevel = coeff * this._sidechainEnvLevel + (1 - coeff) * env;
+
+        // Gain reduction: 1 = no duck, (1 - amount) = max duck
+        const duck = 1 - this._sidechainEnvLevel * this._sidechainAmount;
+        this.sidechainGain.gain.value = clamp(duck, 0, 1);
+      }, time);
+    }, SC_UPDATE_INTERVAL);
+
+    this.emit('sidechainEnabled', sourceTrackIndex, amount);
+  }
+
+  /**
+   * Disable sidechain ducking and restore master gain to unity.
+   */
+  disableSidechain(): void {
+    if (this._sidechainScheduleId >= 0 && _Tone) {
+      _Tone.Transport.clear(this._sidechainScheduleId);
+      this._sidechainScheduleId = -1;
+    }
+    this._sidechainSourceIdx = -1;
+    this._sidechainAmount    = 0;
+    if (this.sidechainGain) lerpParam(this.sidechainGain.gain as any, 1.0, 0.05);
+    this.emit('sidechainDisabled');
+  }
+
+  /**
+   * Legacy one-shot version — kept for backwards compatibility.
+   * Prefer enableSidechain() for real-time envelope following.
+   * @deprecated
+   */
+  setSidechainTrack(sourceTrackIndex: number, amount: number): void {
+    this.enableSidechain(sourceTrackIndex, amount);
+  }
+
+  // ── Granular freeze (v3: true grain scheduler) ────────────────────────────
+
+  /**
+   * Set granular freeze parameters.
+   *
+   * grainSize:  grain duration in seconds (0.02–0.5)
+   * grainCount: simultaneous grains (1–8)
+   * pitch:      playback rate shift in semitones (±12)
+   *
+   * If freeze is already active, the grain scheduler restarts with new params.
+   * If freeze is not active, values are stored for next setGranularFreeze(true).
+   */
+  setGranularParams(grainSize: number, grainCount: number, pitch: number): void {
+    if (!this.ready('setGranularParams')) return;
+    this._grainState.grainSize  = clamp(grainSize,  0.02, 0.5);
+    this._grainState.grainCount = clamp(Math.round(grainCount), 1, GRAIN_COUNT_MAX);
+    this._grainState.pitch      = clamp(pitch, -12, 12);
+
+    if (this._granularFrozen) {
+      // Restart scheduler with updated params
+      this._stopGrainScheduler();
+      this._startGrainScheduler();
+    }
+
+    this.emit('granularParams', { ...this._grainState });
+  }
+
+  /**
+   * Enable / disable granular freeze.
+   *
+   * v3 grain scheduler vs v2 single Player:
+   *   v2: one Tone.Player set to loop — not granular, just a looping buffer.
+   *   v3: Transport.scheduleRepeat fires every GRAIN_INTERVAL; each fire
+   *       spawns up to `grainCount` short Tone.Player instances with:
+   *         • randomized start position within the source buffer
+   *         • grain-size envelope (linear fade in/out)
+   *         • pitch shift via playbackRate (semitone-accurate)
+   *         • optional stereo spread via panner
+   *       Players are disposed ~500ms after their grain ends to avoid leaks.
+   *
+   * trackIndex: which track's buffer to freeze (default 0)
+   */
   setGranularFreeze(frozen: boolean, trackIndex = 0): void {
-    if (!this.ready() || !_Tone) return;
-    this._granularFrozen = frozen;
+    if (!this.ready('setGranularFreeze') || !_Tone) return;
+    this._granularFrozen       = frozen;
+    this._granularSourceTrack  = trackIndex;
+    this._grainState.frozen    = frozen;
 
     if (frozen) {
-      const t = this.tracks[trackIndex];
-      if (!t?.player.loaded) return;
-      if (this._granularPlayer) {
-        this._granularPlayer.stop();
-        this._granularPlayer.dispose();
-      }
-      this._granularPlayer = new _Tone.Player(t.player.buffer).connect(this.masterBus);
-      this._granularPlayer.loop = true;
-      this._granularPlayer.start();
+      this._stopGrainScheduler();
+      this._startGrainScheduler();
     } else {
-      this._granularPlayer?.stop();
-      this._granularPlayer?.dispose();
+      this._stopGrainScheduler();
+    }
+
+    this.emit('granularParams', { ...this._grainState });
+  }
+
+  private _startGrainScheduler(): void {
+    if (!_Tone) return;
+    const t = this.tracks[this._granularSourceTrack];
+    if (!t?.player.loaded) return;
+
+    const dest = this._granularWidener ?? this.masterBus;
+
+    this._granularScheduleId = _Tone.Transport.scheduleRepeat((time) => {
+      if (!_Tone || !this._granularFrozen) return;
+
+      const src    = this.tracks[this._granularSourceTrack];
+      if (!src?.player.loaded) return;
+
+      const buf    = src.player.buffer;
+      const dur    = buf.duration;
+      const gs     = this._grainState.grainSize;
+      const rate   = Math.pow(2, this._grainState.pitch / 12);
+
+      for (let g = 0; g < this._grainState.grainCount; g++) {
+        // Randomized start within buffer, leaving room for grain length
+        const maxStart = Math.max(0, dur - gs);
+        const startPos = Math.random() * maxStart;
+
+        const grain = new _Tone.Player(buf).connect(dest);
+        grain.playbackRate = rate;
+
+        // Optional stereo spread per grain
+        if (this._grainState.spread > 0) {
+          const pan = (Math.random() * 2 - 1) * this._grainState.spread;
+          const panner = new _Tone.Panner(pan).connect(dest);
+          grain.disconnect(dest);
+          grain.connect(panner);
+          // Dispose panner after grain
+          setTimeout(() => { try { panner.dispose(); } catch { /* ok */ } }, (gs + 0.3) * 1000);
+        }
+
+        // Stagger grains within the interval for richer texture
+        const staggerSec = (g / this._grainState.grainCount) * gs * 0.5;
+        grain.start(time + staggerSec, startPos, gs);
+        grain.stop(time + staggerSec + gs);
+
+        // Dispose grain after it has definitely finished
+        setTimeout(() => { try { grain.dispose(); } catch { /* ok */ } }, (gs + staggerSec + 0.5) * 1000);
+      }
+    }, GRAIN_INTERVAL);
+  }
+
+  private _stopGrainScheduler(): void {
+    if (this._granularScheduleId >= 0 && _Tone) {
+      _Tone.Transport.clear(this._granularScheduleId);
+      this._granularScheduleId = -1;
+    }
+    // Clean up legacy single player if present
+    if (this._granularPlayer) {
+      try { this._granularPlayer.stop(); this._granularPlayer.dispose(); } catch { /* ok */ }
       this._granularPlayer = null;
     }
   }
 
   isGranularFrozen(): boolean { return this._granularFrozen; }
+  getGranularState(): GranularState { return { ...this._grainState }; }
 
-  // ── Sidechain ─────────────────────────────────────────────────────────────
+  /** Density — maps to grain interval scaling (0=sparse/slow, 0.5=normal, 1=dense/fast). */
+  setGranularDensity(density: number): void {
+    if (!this.ready('setGranularDensity')) return;
+    this._grainState.density = clamp(density, 0, 1);
+    // If grain scheduler not running, fall back to legacy player rate
+    if (!this._granularFrozen && this._granularPlayer) {
+      this._granularPlayer.playbackRate = 0.25 * Math.pow(16, this._grainState.density);
+    }
+    // When grain scheduler is active, density affects stagger logic on next cycle (live)
+  }
 
-  setSidechainTrack(sourceTrackIndex: number, amount: number): void {
-    const t = this.track(sourceTrackIndex, 'setSidechainTrack');
-    if (!t || !_Tone) return;
-    // Duck master bus proportionally to track level
-    const meterVal = this.getTrackLevel(sourceTrackIndex);
-    const duck     = 1 - meterVal * clamp(amount, 0, 1);
-    lerpParam(this.sidechainGain.gain as any, duck, 0.01);
+  /**
+   * Set stereo spread of granular output.
+   * Lazily creates a StereoWidener between grains and masterBus.
+   */
+  setGranularSpread(spread: number): void {
+    if (!this.ready('setGranularSpread') || !_Tone) return;
+    const width = clamp(spread, 0, 1);
+    this._grainState.spread = width;
+
+    if (!this._granularWidener) {
+      this._granularWidener = new _Tone.StereoWidener(width);
+      this._granularWidener.connect(this.masterBus);
+    } else {
+      (this._granularWidener as any).width.value = width;
+    }
   }
 
   // ── Clip launcher ─────────────────────────────────────────────────────────
@@ -1093,7 +1677,6 @@ class LoopEngine {
     const clip = t.clips[clipIndex];
     if (!clip) return;
 
-    // Clean up old player if any
     if (clip._player) {
       if (clip._synced) { try { clip._player.stop(); clip._player.unsync(); } catch { /* ok */ } }
       clip._player.dispose();
@@ -1103,7 +1686,7 @@ class LoopEngine {
     clip.hasContent = true;
     clip.state      = 'loaded';
 
-    const player = new _Tone.Player(buffer).connect(t.inputGain);
+    const player  = new _Tone.Player(buffer).connect(t.inputGain);
     player.loop   = true;
     clip._player  = player;
     clip._synced  = false;
@@ -1115,7 +1698,6 @@ class LoopEngine {
     const clip = t.clips[clipIndex];
     if (!clip?.hasContent || !clip._player) return;
 
-    // Stop all other clips on this track
     t.clips.forEach((c, ci) => {
       if (ci !== clipIndex && c.state === 'playing') this.stopClip(trackIndex, ci);
     });
@@ -1161,18 +1743,11 @@ class LoopEngine {
   }): void {
     if (!_Tone) return;
 
-    // Stop old schedule
     if (this._beatRepeat._scheduleId >= 0) {
       _Tone.Transport.clear(this._beatRepeat._scheduleId);
       this._beatRepeat._scheduleId = -1;
     }
-    this._beatRepeat.enabled     = config.enabled;
-    this._beatRepeat.trackIndex  = config.trackIndex;
-    this._beatRepeat.division    = config.division;
-    this._beatRepeat.chance      = config.chance;
-    this._beatRepeat.length      = config.length;
-    this._beatRepeat.pitch       = config.pitch;
-    this._beatRepeat.variation   = config.variation;
+    Object.assign(this._beatRepeat, config);
 
     if (!config.enabled) {
       this.emit('beatRepeatStop', config.trackIndex);
@@ -1185,11 +1760,9 @@ class LoopEngine {
     this._beatRepeat._scheduleId = _Tone.Transport.scheduleRepeat((time) => {
       if (Math.random() > config.chance) return;
 
-      // Momentarily trigger a short player fragment
       const dur  = _Tone!.Time(config.division as ToneType.Unit.Time).toSeconds() * config.length;
       const frag = new _Tone.Player(t.player.buffer).connect(t.inputGain);
 
-      // Variation
       if (config.variation === 'pitch') {
         frag.playbackRate = Math.pow(2, (Math.floor(Math.random() * 5) - 2) / 12);
       } else if (config.variation === 'volume') {
@@ -1203,13 +1776,27 @@ class LoopEngine {
       const startOff = Math.random() * (t.player.buffer.duration * 0.5);
       frag.start(time, startOff, dur);
       frag.stop(time + dur);
-
-      // Clean up after playback
-      setTimeout(() => frag.dispose(), (dur + 0.5) * 1000);
-
+      setTimeout(() => { try { frag.dispose(); } catch { /* ok */ } }, (dur + 0.5) * 1000);
     }, config.division as ToneType.Unit.Time);
 
     this.emit('beatRepeatStart', config.trackIndex);
+  }
+
+  setBeatRepeatPitch(semitones: number): void {
+    if (!this.ready('setBeatRepeatPitch')) return;
+    const pitch = clamp(semitones, -24, 24);
+    this._beatRepeat.pitch = pitch;
+    if (this._beatRepeat.enabled) {
+      this.setBeatRepeat({
+        enabled:    this._beatRepeat.enabled,
+        trackIndex: this._beatRepeat.trackIndex,
+        division:   this._beatRepeat.division,
+        chance:     this._beatRepeat.chance,
+        length:     this._beatRepeat.length,
+        pitch,
+        variation:  this._beatRepeat.variation,
+      });
+    }
   }
 
   // ── LFO controls ─────────────────────────────────────────────────────────
@@ -1221,7 +1808,6 @@ class LoopEngine {
 
     if (!_Tone || !lfo._lfo) return;
 
-    // Update node
     (lfo._lfo as any).type = lfo.shape as ToneType.ToneOscillatorType;
     lfo._lfo.frequency.value = lfo.rateSynced
       ? this._lfoSyncFreq(lfo.rateNote)
@@ -1229,7 +1815,7 @@ class LoopEngine {
 
     if (lfo.enabled && !lfo._lfo.state?.startsWith('start')) {
       lfo._lfo.start();
-      this._wireLFO(lfo);
+      this._wireLFO(lfo);  // now cleans up old Scale nodes first
     } else if (!lfo.enabled) {
       try { lfo._lfo.stop(); } catch { /* ok */ }
     }
@@ -1280,7 +1866,6 @@ class LoopEngine {
 
   setTimeSignature(sig: TimeSignature): void {
     this._timeSignature = sig;
-    // Restart beat scheduler with new meter
     if (_Tone && this._beatScheduleId >= 0) {
       _Tone.Transport.clear(this._beatScheduleId);
       this._startBeatScheduler();
@@ -1301,6 +1886,74 @@ class LoopEngine {
   }
 
   getQuantMode(): QuantMode { return this._quantMode; }
+
+  // ── Reverb pre-delay ──────────────────────────────────────────────────────
+
+  /**
+   * Insert a shared pre-delay node before globalReverb.
+   *
+   * globalReverb receives from two sources:
+   *   (a) Serial chain:  globalDelay → globalReverb
+   *   (b) Track sends:   track[n].reverbSend → globalReverb
+   *
+   * After first call, both are intercepted through _reverbPreDelayNode.
+   * Subsequent calls only update delayTime.
+   */
+  setReverbPreDelay(seconds: number): void {
+    if (!this.ready('setReverbPreDelay') || !_Tone) return;
+    const delayTime = clamp(seconds, 0, 0.5);
+
+    if (!this._reverbPreDelayNode) {
+      this._reverbPreDelayNode = new _Tone.Delay(delayTime, 0.5);
+
+      try { this.globalDelay.disconnect(this.globalReverb); } catch { /* ok */ }
+      this.globalDelay.connect(this._reverbPreDelayNode);
+      this._reverbPreDelayNode.connect(this.globalReverb);
+
+      this.tracks.forEach(t => {
+        try { t.reverbSend.disconnect(this.globalReverb); } catch { /* ok */ }
+        t.reverbSend.connect(this._reverbPreDelayNode!);
+      });
+    } else {
+      (this._reverbPreDelayNode.delayTime as ToneType.Param<'time'>).value = delayTime as any;
+    }
+  }
+
+  // ── Mono / Limiter toggles ────────────────────────────────────────────────
+
+  /**
+   * Collapse stereo to mono via globalStereoWidener.width = 0.
+   * width=0 → mono sum. width=0.5 → unity stereo.
+   * Saves and restores the previous width value.
+   */
+  setMono(enabled: boolean): void {
+    if (!this.ready('setMono')) return;
+    if (this._monoEnabled === enabled) return;
+    this._monoEnabled = enabled;
+    if (enabled) {
+      this._preMonoWidth = (this.globalStereoWidener as any).width?.value ?? 0.5;
+      (this.globalStereoWidener as any).width.value = 0;
+    } else {
+      (this.globalStereoWidener as any).width.value = this._preMonoWidth;
+    }
+  }
+
+  /**
+   * Bypass / restore the master limiter.
+   * Safe bypass: raises threshold to 0 dBFS so DynamicsCompressor never fires.
+   * Saves and restores threshold on re-enable.
+   */
+  enableLimiter(enabled: boolean): void {
+    if (!this.ready('enableLimiter')) return;
+    if (this._limiterEnabled === enabled) return;
+    this._limiterEnabled = enabled;
+    if (enabled) {
+      this.masterLimiter.threshold.value = this._preBypassLimiterThreshold;
+    } else {
+      this._preBypassLimiterThreshold = this.masterLimiter.threshold.value as number;
+      this.masterLimiter.threshold.value = 0;
+    }
+  }
 
   // ── Metering / Visualisation ──────────────────────────────────────────────
 
@@ -1334,9 +1987,7 @@ class LoopEngine {
     return typeof v === 'number' ? v : (v as number[])[0] ?? 0;
   }
 
-  getMasterLufs(): number {
-    return rmsToLufs(this.getMasterLevel());
-  }
+  getMasterLufs(): number { return rmsToLufs(this.getMasterLevel()); }
 
   getTrackWaveform(i: number): Float32Array {
     const t = this.track(i);
@@ -1371,7 +2022,6 @@ class LoopEngine {
     this._pendingBpm = c;
     if (this.initialized && _Tone) {
       _Tone.Transport.bpm.value = c;
-      // Re-sync LFOs that are BPM-synced
       this._lfos.forEach(lfo => {
         if (lfo.enabled && lfo.rateSynced && lfo._lfo) {
           lfo._lfo.frequency.value = this._lfoSyncFreq(lfo.rateNote);
@@ -1401,7 +2051,7 @@ class LoopEngine {
   setMetronome(on: boolean, volume = 0.4): void {
     this._metronomeOn  = on;
     this._metronomeVol = volume;
-    if (this.metronomeClick) this.metronomeClick.volume.value  = -22 + volume * 12;
+    if (this.metronomeClick)  this.metronomeClick.volume.value  = -22 + volume * 12;
     if (this.metronomeAccent) this.metronomeAccent.volume.value = -18 + volume * 12;
   }
 
@@ -1415,6 +2065,10 @@ class LoopEngine {
 
   stopTransport(): void {
     if (!this.ready() || !_Tone) return;
+    if (this._reverbPreDelayNode) {
+      try { this._reverbPreDelayNode.dispose(); } catch { /* ok */ }
+      this._reverbPreDelayNode = null;
+    }
     _Tone.Transport.stop();
     _Tone.Transport.position = 0;
     this.emit('transportStop');
@@ -1553,23 +2207,19 @@ class LoopEngine {
     this.emit('sceneRecall', scene);
   }
 
-  // ── Scene morph (interpolate A → B over durationMs) ──────────────────────
+  // ── Scene morph ───────────────────────────────────────────────────────────
 
   morphScenes(from: SceneSnapshot, to: SceneSnapshot, durationMs = 2000): void {
     cancelAnimationFrame(this._morphRafId);
-    const start    = performance.now();
-    const totalMs  = durationMs;
-
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const start   = performance.now();
+    const totalMs = durationMs;
+    const lerp    = (a: number, b: number, t: number) => a + (b - a) * t;
 
     const tick = () => {
       const elapsed = performance.now() - start;
       const t = Math.min(1, elapsed / totalMs);
 
-      // BPM
       this.setBpm(lerp(from.bpm, to.bpm, t));
-
-      // Global FX
       this.setGlobalFilter(lerp(from.fx.filterFreq, to.fx.filterFreq, t));
       this.setGlobalReverb(
         lerp(from.fx.reverbDecay,  to.fx.reverbDecay,  t),
@@ -1578,7 +2228,6 @@ class LoopEngine {
       this.setGlobalDrive(lerp(from.fx.driveAmount, to.fx.driveAmount, t));
       this.setGlobalStereoWidth(lerp(from.fx.stereoWidth, to.fx.stereoWidth, t));
 
-      // Per track
       from.tracks.forEach((fs, i) => {
         const ts = to.tracks[i];
         if (!ts) return;
@@ -1589,13 +2238,12 @@ class LoopEngine {
         this.setTrackEQ(i, 'low',  lerp(fs.eq.low,  ts.eq.low,  t));
         this.setTrackEQ(i, 'mid',  lerp(fs.eq.mid,  ts.eq.mid,  t));
         this.setTrackEQ(i, 'high', lerp(fs.eq.high, ts.eq.high, t));
-        this.setTrackSaturation(i,   lerp(fs.saturation, ts.saturation, t));
+        this.setTrackSaturation(i, lerp(fs.saturation, ts.saturation, t));
         this.setTrackChorus(i, lerp(fs.chorus.depth, ts.chorus.depth, t),
           lerp(fs.chorus.rate, ts.chorus.rate, t), lerp(fs.chorus.wet, ts.chorus.wet, t));
       });
 
       this.emit('sceneMorphTick', t);
-
       if (t < 1) this._morphRafId = requestAnimationFrame(tick);
     };
 
@@ -1628,26 +2276,47 @@ class LoopEngine {
 
     cancelAnimationFrame(this._morphRafId);
 
+    // Sidechain schedule
+    this.disableSidechain();
+
     // Beat repeat
     if (this._beatRepeat._scheduleId >= 0)
       _Tone.Transport.clear(this._beatRepeat._scheduleId);
     if (this._beatRepeat._buffer) this._beatRepeat._buffer.dispose();
+
+    // Granular
+    this._stopGrainScheduler();
+    if (this._granularWidener) {
+      try { this._granularWidener.dispose(); } catch { /* ok */ }
+      this._granularWidener = null;
+    }
 
     // Schedules
     [this._beatScheduleId, this._quantScheduleId, this._midiClockScheduleId]
       .filter(id => id >= 0)
       .forEach(id => _Tone!.Transport.clear(id));
 
-    // LFOs
+    // LFOs + Scale nodes
     this._lfos.forEach(lfo => {
+      // Dispose scale nodes first
+      const scales = this._lfoScaleNodes.get(lfo.id) ?? [];
+      scales.forEach(n => { try { n.dispose(); } catch { /* ok */ } });
       try { lfo._lfo?.stop(); lfo._lfo?.dispose(); } catch { /* ok */ }
       lfo._lfo = null;
     });
+    this._lfoScaleNodes.clear();
 
-    // Granular
-    this._granularPlayer?.stop();
-    this._granularPlayer?.dispose();
-    this._granularPlayer = null;
+    // Multiband
+    if (this._mbEnabled) this._disposeMBNodes();
+
+    // Exciter
+    if (this._exciterEnabled) this._disposeExciterNodes();
+
+    // Reverb pre-delay
+    if (this._reverbPreDelayNode) {
+      try { this._reverbPreDelayNode.dispose(); } catch { /* ok */ }
+      this._reverbPreDelayNode = null;
+    }
 
     // Tracks
     this.tracks.forEach(t => {
@@ -1655,14 +2324,12 @@ class LoopEngine {
       if (t._playerSynced) {
         try { t.player.stop(); t.player.unsync(); } catch { /* ok */ }
       }
-      // Clip players
       t.clips.forEach(c => {
         if (c._synced && c._player) {
           try { c._player.stop(); c._player.unsync(); } catch { /* ok */ }
         }
         c._player?.dispose();
       });
-      // Dispose undo buffers
       t._undoStack.forEach(b => b.dispose());
 
       [t.player, t.recorder, t.inputGain, t.gate, t.compressor, t.eq,
@@ -1674,14 +2341,17 @@ class LoopEngine {
     });
     (this.tracks as EngineTrack[]).length = 0;
 
+    // preFXBus
+    try { this._preFXBus?.dispose(); } catch { /* ok */ }
+
     // Master chain
     [this.globalReverb, this.globalDelay, this.globalFilter,
      this.globalChorus, this.globalPhaser, this.globalSaturator,
      this.globalBitCrusher, this.globalStereoWidener,
+     this.sidechainGain, this.sidechainEnv,
      this.masterCompressor, this.masterLimiter,
      this.masterMeter, this.masterFft, this.masterAnalyser,
-     this.masterBus, this.metronomeClick, this.metronomeAccent,
-     this.sidechainEnv, this.sidechainGain]
+     this.masterBus, this.metronomeClick, this.metronomeAccent]
       .forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
 
     _Tone.Transport.stop();

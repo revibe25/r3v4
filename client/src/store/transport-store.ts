@@ -143,27 +143,3 @@ export const useTransportStore = create<TransportStore>()(
     { name: 'TransportStore' }
   )
 );
-
-// ── Legacy aliases ────────────────────────────────────────────────────────────
-
-export const usetransportstore = useTransportStore;
-export const useTransportstore = useTransportStore;
-
-/**
- * @deprecated Destructure from useTransportStore directly — flat props are now
- * first-class members of the store.
- */
-export const useTransportFlat = () =>
-  useTransportStore((s) => ({
-    playing:      s.playing,
-    recording:    s.recording,
-    bpm:          s.bpm,
-    position:     s.currentPosition,
-    play:         s.play,
-    stop:         s.stop,
-    record:       s.record,
-    setBpm:       s.setBpm,
-    setPosition:  s.setPosition,
-    togglePlay:   s.togglePlay,
-    toggleRecord: s.toggleRecord,
-  }));

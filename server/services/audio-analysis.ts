@@ -20,7 +20,8 @@ import { analyzeAudio } from '@llpte/llpte-signal';
 // node-web-audio-api provides a Node.js AudioContext compatible with
 // the Web Audio API spec. It can decode audio files to PCM buffers.
 // If this import fails, run: cd server && pnpm add node-web-audio-api
-let AudioContext: typeof globalThis.AudioContext;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let AudioContext: any = null;  // typed any: node-web-audio-api ships no .d.ts
 try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   ({ AudioContext } = require('node-web-audio-api'));

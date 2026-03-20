@@ -15,6 +15,13 @@
       "when": 1771867545139,
       "tag": "0001_dapper_argent",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771867545140,
+      "tag": "0002_subscription_tables",
+      "breakpoints": true
     }
   ]
 }

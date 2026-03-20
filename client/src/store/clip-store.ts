@@ -95,7 +95,3 @@ export const useClipStore = create<ClipStore>()(
     { name: 'ClipStore' }
   )
 );
-
-// Alias exports for backwards compatibility
-export const useClipstore = useClipStore;
-export const useclipstore = useClipStore;

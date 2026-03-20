@@ -5,7 +5,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { createContext, useContext, useMemo } from 'react';
-import { trpc } from '../lib/trpc';                      // adjust to your trpc client path
+import { trpc } from '../lib/trpc';
+import { useAuthStore } from '../store/auth-store';                      // adjust to your trpc client path
 import {
   UserSubscription,
   SubscriptionTier,
@@ -50,9 +51,18 @@ const SubscriptionContext = createContext<SubscriptionContextValue | null>(null)
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
+  // Gate query on Zustand auth store token — avoids a guaranteed 401
+  // on every page load for unauthenticated visitors.
+  const hasToken = Boolean(useAuthStore.getState().token);
+
   const { data, isLoading } = trpc.subscription.getMySubscription.useQuery(undefined, {
-    staleTime: 1000 * 60 * 5,   // 5 minutes — subscription data doesn't change often
-    retry: 1,
+    enabled: hasToken,
+    staleTime: 1000 * 60 * 5,
+    // Never retry on UNAUTHORIZED — user is not logged in, retrying just spams the server
+    retry: (count, error: any) => {
+      if (error?.data?.code === 'UNAUTHORIZED') return false;
+      return count < 1;
+    },
   });
 
   const checkoutMutation = trpc.subscription.createCheckout.useMutation();
@@ -63,7 +73,11 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const value = useMemo<SubscriptionContextValue>(
     () => ({
       subscription: data
-        ? { ...data, currentPeriodEnd: data.currentPeriodEnd ? new Date(data.currentPeriodEnd) : null }
+        ? {
+            ...data,
+            currentPeriodEnd: data.currentPeriodEnd ? new Date(data.currentPeriodEnd) : null,
+            trialEnd: data.trialEnd ? new Date(data.trialEnd) : null,
+          }
         : null,
       tier,
       isLoading,

@@ -27,18 +27,21 @@ import type { MixerChannel } from '@/audio/mixer/mixer-channel';
 import type { FXChain } from '@/audio/fx/fx-chain';
 import { trpc, trpcClient } from './lib/trpc';
 import { SubscriptionProvider } from './hooks/useSubscription';
-import Pricing from './pages/Pricing';
 
 // ─── LAZY PAGES ───────────────────────────────────────────────────────────────
 const InstrumentPage  = lazy(() => import('@/pages/instrument'));
+const LoginPage       = lazy(() => import('@/pages/login'));
 const NotFound        = lazy(() => import('@/pages/not-found'));
 const MultiTrackPanel = lazy(() => import('@/components/multi-track-panel'));
+const PricingPage     = lazy(() => import('./pages/pricing/PricingPage'));
 const VSTMasterPanel  = lazy(() => import('@/components/vst-master-panel'));
 const LoopStation505  = lazy(() =>
   import('@/features/loopstation/LoopStation505').then(m => ({
     default: m.LoopStation505 as ComponentType,
   }))
 );
+const VisualsPage = lazy(() => import('@/pages/visuals'));
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ERROR BOUNDARY
 // ─────────────────────────────────────────────────────────────────────────────
@@ -87,6 +90,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     return this.props.children;
   }
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // LOADING FALLBACKS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -110,6 +114,7 @@ function PanelFallback({ message }: { message: string }) {
     </div>
   );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // VST CONTEXT
 // ─────────────────────────────────────────────────────────────────────────────
@@ -132,6 +137,7 @@ export function useVSTContext(): VSTContextType {
 export function useVSTContextOptional(): VSTContextType | null {
   return useContext(VSTContext);
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // VST PROVIDER
 // ─────────────────────────────────────────────────────────────────────────────
@@ -245,6 +251,7 @@ function VSTProvider({ children }: { children: ReactNode }) {
   }
   return <VSTContext.Provider value={vstSystem}>{children}</VSTContext.Provider>;
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // VST MANAGER PAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -253,7 +260,6 @@ function VSTManagerPage() {
   const [loadError,  setLoadError]  = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Returns ProjectData — the serialized form expected by VSTMasterPanel.
   const handleProjectSave = async (): Promise<ProjectData> => {
     setSaveStatus('saving');
     try {
@@ -265,7 +271,7 @@ function VSTManagerPage() {
         chainMap,
         vstContext.sidechainRouter,
         vstContext.audioContext,
-      ) as unknown as ProjectData; // SerializedVSTChain satisfies ProjectData shape
+      ) as unknown as ProjectData;
       VSTProjectSerializer.createBackup(data as any, `auto-${Date.now()}`);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
@@ -303,11 +309,11 @@ function VSTManagerPage() {
       const ch = vstContext.addChannel(chainData.channelId);
       const anyChain = chainData as unknown as Record<string, unknown>;
       if (typeof anyChain['volume'] === 'number') ch.setVolume(anyChain['volume']);
-      if (typeof anyChain['pan'] === 'number')    ch.setPan(anyChain['pan']);
-      if (typeof anyChain['muted'] === 'boolean') ch.setMute(anyChain['muted']);
-      if (typeof anyChain['solo'] === 'boolean')  ch.setSolo(anyChain['solo']);
-      if (typeof anyChain['armed'] === 'boolean') ch.setArmed(anyChain['armed']);
-      if (typeof anyChain['name'] === 'string')   ch.setName(anyChain['name']);
+      if (typeof anyChain['pan']    === 'number') ch.setPan(anyChain['pan']);
+      if (typeof anyChain['muted']  === 'boolean') ch.setMute(anyChain['muted']);
+      if (typeof anyChain['solo']   === 'boolean') ch.setSolo(anyChain['solo']);
+      if (typeof anyChain['armed']  === 'boolean') ch.setArmed(anyChain['armed']);
+      if (typeof anyChain['name']   === 'string')  ch.setName(anyChain['name']);
     }
     try {
       const restoredChains = await VSTProjectSerializer.deserializeProject(
@@ -318,7 +324,6 @@ function VSTManagerPage() {
         const ch = vstContext.getChannel(channelId);
         if (!ch) return;
         ch.clearFX();
-        // Pass FXNodeBase processors, not FXSlots, to MixerChannel.addFX
         fxChain.getAllEffects().forEach(slot => {
           if (slot.processor) ch.addFX(slot.processor);
         });
@@ -405,9 +410,44 @@ function VSTManagerPage() {
     </div>
   );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTE PAGE SHELLS
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Pricing — now the root route; PageNav wraps it since PricingPage is bare
+function PricingRoute() {
+  return (
+    <div className="min-h-screen bg-[#060606] flex flex-col">
+      <PageNav />
+      <div className="flex-1">
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback message="Loading Pricing…" />}>
+            <PricingPage />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
+}
+
+// Login — second nav slot
+function LoginRoute() {
+  return (
+    <div className="min-h-screen bg-[#060606] flex flex-col">
+      <PageNav />
+      <div className="flex-1">
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback message="Loading…" />}>
+            <LoginPage />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
+}
+
+// MultiTrack — no PageNav (component manages its own chrome)
 function MultiTrackPage() {
   return (
     <ErrorBoundary>
@@ -417,6 +457,8 @@ function MultiTrackPage() {
     </ErrorBoundary>
   );
 }
+
+// Loop Station
 function LoopStationPage() {
   return (
     <div className="min-h-screen bg-[#060606] text-[#f0f0f0] font-mono flex flex-col">
@@ -433,6 +475,8 @@ function LoopStationPage() {
     </div>
   );
 }
+
+// VST — wrapped in VSTProvider
 function VSTRoute() {
   return (
     <ErrorBoundary>
@@ -442,13 +486,25 @@ function VSTRoute() {
     </ErrorBoundary>
   );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ROUTER
 // ─────────────────────────────────────────────────────────────────────────────
 function Router() {
   return (
     <Switch>
+      {/* ── / → Pricing (first visible nav button) ── */}
       <Route path="/">
+        {() => <PricingRoute />}
+      </Route>
+
+      {/* ── /login → Login (second nav button) ── */}
+      <Route path="/login">
+        {() => <LoginRoute />}
+      </Route>
+
+      {/* ── /instrument → InstrumentPage (moved from /) ── */}
+      <Route path="/instrument">
         {() => (
           <ErrorBoundary>
             <Suspense fallback={<LoadingFallback message="Loading Instrument…" />}>
@@ -457,22 +513,39 @@ function Router() {
           </ErrorBoundary>
         )}
       </Route>
+
+      {/* ── /multitrack ── */}
       <Route path="/multitrack">
         {() => <MultiTrackPage />}
       </Route>
+
+      {/* ── /vst ── */}
       <Route path="/vst">
         {() => <VSTRoute />}
       </Route>
+
+      {/* ── /loopstation ── */}
       <Route path="/loopstation">
         {() => <LoopStationPage />}
       </Route>
+
+      {/* ── /pricing → canonical alias so any existing link still resolves ── */}
       <Route path="/pricing">
+        {() => <PricingRoute />}
+      </Route>
+
+      {/* ── /visuals → full-screen audio reactive Three.js scene ── */}
+      <Route path="/visuals">
         {() => (
-          <Suspense fallback={<LoadingFallback message="Loading Pricing…" />}>
-            <Pricing />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingFallback message="Loading Visuals…" />}>
+              <VisualsPage />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </Route>
+
+      {/* ── 404 ── */}
       <Route>
         {() => (
           <Suspense fallback={null}>
@@ -483,6 +556,7 @@ function Router() {
     </Switch>
   );
 }
+
 // ─────────────────────────────────────────────────────────────────────────────
 // APP SHELL
 // ─────────────────────────────────────────────────────────────────────────────
@@ -502,5 +576,5 @@ function App() {
     </trpc.Provider>
   );
 }
-export default App;
 
+export default App;

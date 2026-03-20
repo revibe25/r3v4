@@ -1,3 +1,20 @@
+// =============================================================================
+// DEPRECATED — DO NOT EDIT OR IMPORT
+// =============================================================================
+// This is the original monolithic MultiTrackPanel (~1600 lines).
+// It has been superseded by the modular refactor at:
+//
+//   components/multi-track-panel/multi-track-panel.tsx
+//   components/multi-track-panel/index.ts    ← App.tsx imports from here
+//
+// This file is unreferenced dead code. It remains in the repository for
+// reference only and should be deleted once the modular version is confirmed
+// stable in production.
+//
+// Tracked: Bug M-4 (R3 v4 Advanced Audit)
+// =============================================================================
+// @deprecated Use components/multi-track-panel/ instead
+
 // @ts-nocheck
 /**
  * Multi-Track Panel — R3-N-i DAW

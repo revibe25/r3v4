@@ -3,7 +3,7 @@ builder = "nixpacks"
 buildCommand = "pnpm install"
 
 [deploy]
-startCommand = "npx tsx index.ts"
+startCommand = "pnpm exec tsx index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 

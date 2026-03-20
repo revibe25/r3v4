@@ -11,7 +11,7 @@
  * @module pages/instrument
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef, lazy, Suspense } from 'react';
 import {
   Mic, AlertCircle, Activity, SlidersHorizontal,
   Headphones, Music, Music2, Repeat2
@@ -26,13 +26,15 @@ import { FXPanel } from '@/components/fx-panel';
 import { DJControls } from '@/components/dj-controls';
 import { TransportControls } from '@/components/transport-controls';
 import { AudioVisualizer } from '@/components/audio-visualizer';
-import { WaveformEditor } from '@/components/waveform-editor';
+
 import { VSTBrowser } from '@/components/vst-browser';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 import { HeaderControls } from '@/components/header-controls';
 import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
-import { LoopStation505 } from '@/features/loopstation/LoopStation505';
+
 import { useToast } from '@/hooks/use-toast';
+import { useMidi } from '@/hooks/use-midi';
+import { saveSession } from '@/lib/session-store';
 
 interface SessionData {
   bpm: number;
@@ -47,6 +49,13 @@ interface InstrumentPageProps {
   defaultBpm?: number;
 }
 
+// ── Lazy panels (code-split: only loaded when the FX panel opens) ─────────
+const WaveformEditor = lazy(() =>
+  import('@/components/waveform-editor').then(m => ({ default: m.WaveformEditor })));
+const LoopStation505 = lazy(() =>
+  import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
+
+// ── Lazy panels (code-split: only loaded when the FX panel opens) ─────────
 const KEYBOARD_SHORTCUTS = {
   pads: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']'],
   keys: ['Z', 'S', 'X', 'D', 'C', 'V', 'G', 'B', 'H', 'N', 'J', 'M'],
@@ -95,14 +104,13 @@ const STYLES = `
 
 /* ── Frame ─────────────────────────────────────────────────────────────── */
 .ag-frame {
-  max-width: 1300px;
-  margin: 0 auto;
+  width: 100%;
   border-left: 3px solid var(--ag-border);
   border-right: 3px solid var(--ag-border);
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 .ag-frame::before {
@@ -203,8 +211,10 @@ const STYLES = `
 .ag-nav-btn:hover { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black); }
 
 /* ── Content grid ──────────────────────────────────────────────────────── */
-.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; align-items: start; }
-@media(min-width:1024px){ .ag-content { grid-template-columns: 1fr 490px; } }
+.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; min-height: 0; }
+@media(min-width:1024px)                       { .ag-content { grid-template-columns: 1fr 490px; } }
+@media(min-width:1600px)                       { .ag-content { grid-template-columns: 1fr 580px; } }
+@media(min-width:1920px)                       { .ag-content { grid-template-columns: 1fr 680px; } }
 
 .ag-left { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
 @media(min-width:1024px){ .ag-left { border-right: 3px solid var(--ag-border); } }
@@ -1041,6 +1051,39 @@ const STYLES = `
   padding: 2px 8px; font-size: 8px; letter-spacing: .2em; color: var(--ag-acid-d); margin-left: 10px;
 }
 
+/* ── Responsive Viewport Scaling ──────────────────────────────── */
+
+/* Ensure columns constrain correctly at every breakpoint */
+.ag-left  { min-height: 0; }
+.ag-right { min-height: 0; }
+
+/* Single-column stacked layout on viewport < 1024 px */
+@media (max-width: 1023px) {
+  .ag-left  { height: auto; border-right: none !important; }
+  .ag-right { height: auto; }
+  .ag-content { overflow-y: auto; }
+}
+
+/* Compact header on landscape-short devices (phones rotated, short tablets) */
+@media (max-height: 600px) and (orientation: landscape) {
+  .ag-bpm-number    { font-size: clamp(22px, 4.5vw, 36px) !important; }
+  .ag-wordmark      { font-size: clamp(16px, 2.5vw, 24px) !important; }
+  .ag-wordmark-block { padding: 6px 14px 4px !important; min-width: 160px !important; }
+  .ag-bpm-block     { padding: 0 10px !important; }
+  .ag-status-block  { padding: 6px 14px !important; }
+  .ag-controls-block { padding: 6px 12px !important; }
+  .ag-ticker-row    { padding: 3px 0 !important; }
+  .ag-guide         { padding: 8px 14px !important; }
+  .ag-footer        { padding: 6px 14px !important; }
+  .ag-guide-row     { padding: 5px 0 !important; }
+}
+
+/* Prevent horizontal bleeding on very narrow screens */
+@media (max-width: 400px) {
+  .ag-frame { border-left-width: 2px !important; border-right-width: 2px !important; }
+  .ag-wordmark-block { min-width: 140px !important; padding: 10px 12px !important; }
+}
+
 /* error strip */
 .ag-error {
   background: rgba(255,59,59,.06); border-left: 3px solid var(--ag-err);
@@ -1112,11 +1155,11 @@ export default function InstrumentPage({
   autoInitialize = false,
   defaultBpm = 120,
 }: InstrumentPageProps = {}) {
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [initError, setInitError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [isLoading,  setIsLoading]  = useState(false);
+  const tapTimesRef = useRef<number[]>([]);
+  const [tapFlash,   setTapFlash]   = useState(false);
   const {
     state, isInitialized, init,
     triggerPad, triggerKey, toggleFX, setFilter, setPitch, setCrossfade,
@@ -1124,6 +1167,21 @@ export default function InstrumentPage({
     getAnalyserData, getWaveformData, loadSample,
     assignPadSample, assignKeySample, exportSession, importSession,
   } = useAudioEngine();
+
+  const handleTapTempo = useCallback(() => {
+    const now   = performance.now();
+    const fresh = tapTimesRef.current.filter(t => now - t < 3000);
+    fresh.push(now);
+    tapTimesRef.current = fresh.slice(-8);
+    if (fresh.length >= 2) {
+      const intervals = fresh.slice(1).map((t, i) => t - fresh[i]);
+      const avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
+      const bpm = Math.round(60000 / avg);
+      if (bpm >= 20 && bpm <= 999) setBpm(bpm);
+    }
+    setTapFlash(true);
+    setTimeout(() => setTapFlash(false), 120);
+  }, [setBpm]);
 
   // ── Init ────────────────────────────────────────────────────────────────
 
@@ -1170,6 +1228,32 @@ export default function InstrumentPage({
     return () => window.removeEventListener('keydown', h);
   }, [isInitialized, state.pads, state.keys, triggerPad, triggerKey, arm, record, stop, play]);
 
+  // ────────────────────────────────────────────────────────────
+  // ── MIDI Input
+  //    onPad is intentionally NOT wired: drum-pads.tsx owns its own
+  //    midiAccessRef. Passing onPad here too would double-trigger every
+  //    pad hit (playPadWithFx fires once from drum-pads MIDI handler,
+  //    once from triggerPad here).
+  // ────────────────────────────────────────────────────────────
+  const handleMidiKey = useCallback(
+    (index: number, octaveShift: number, velocity: number) => {
+      // triggerKey(index, octaveShift, velocity) — 3 params confirmed on engine.
+      // index   : MIDI note - 60 (0-based key index into state.keys[])
+      // octaveShift: 0 from use-midi (piano-keys adds its own internal offset)
+      // velocity: normalized 0–1 from MIDI note velocity / 127
+      if (isInitialized && state.keys[index]) {
+        triggerKey(index, octaveShift, velocity);
+      }
+    },
+    [isInitialized, state.keys, triggerKey],
+  );
+
+  const { midiStatus, midiInputCount } = useMidi({
+    // No onPad — see comment above
+    onKey:   handleMidiKey,
+    enabled: isInitialized,
+  });
+
   // ── Session ──────────────────────────────────────────────────────────────
 
   const handleSave = useCallback(() => {
@@ -1203,6 +1287,20 @@ export default function InstrumentPage({
 
   const handleExport = useCallback(() => handleSave(), [handleSave]);
 
+  // ── handleLoadJson — accepts the JSON string HeaderControls passes ────────
+  //    HeaderControls reads the file itself and calls onLoad(jsonString).
+  //    handleLoad(file: File) is kept for the direct file-input path.
+  const handleLoadJson = useCallback(async (json: string) => {
+    try {
+      setIsLoading(true);
+      try { JSON.parse(json); } catch { throw new Error('Invalid JSON'); }
+      await importSession(json);
+      toast({ title: 'Session Loaded', description: 'Session restored.' });
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Load Failed', description: err instanceof Error ? err.message : 'Unknown error' });
+    } finally { setIsLoading(false); }
+  }, [importSession, toast]);
+
   const getSessionData = useCallback((): SessionData => ({
     bpm: state.bpm,
     fx:  state.fx as unknown as Record<string, boolean>,
@@ -1210,6 +1308,24 @@ export default function InstrumentPage({
     pitchSemitones: state.pitchSemitones,
     recordedEvents: state.recordedEvents,
   }), [state.bpm, state.fx, state.filterVal, state.pitchSemitones, state.recordedEvents]);
+
+  // ────────────────────────────────────────────────────────────
+  // ── IndexedDB Auto-Save (2 s debounce)
+  //    exportSession() confirmed on useAudioEngine hook.
+  // ────────────────────────────────────────────────────────────
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      // exportSession() is bound to instrumentEngine.exportSession
+      saveSession(exportSession()).catch(() => { /* non-critical */ });
+    }, 2000);
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialized, state]);
 
   // ── Mic / Samples ─────────────────────────────────────────────────────────
 
@@ -1278,11 +1394,35 @@ export default function InstrumentPage({
                   {isInitialized ? 'LIVE' : 'STANDBY'}
                 </div>
                 <div className="ag-status-line" style={{ color: 'var(--ag-white)' }}>ERNESTO · R3VIBE</div>
+                <div className="ag-status-line" style={{
+                  color: midiStatus === 'active' ? 'var(--ag-acid)'
+                       : midiStatus === 'denied' ? 'var(--ag-err)'
+                       : 'var(--ag-mid)',
+                }}>
+                  MIDI {(midiStatus ?? 'idle').toUpperCase()}{midiInputCount > 0 ? ` (${midiInputCount})` : ''}
+                </div>
               </div>
 
               <div className="ag-bpm-block">
                 <span className="ag-bpm-label">BPM</span>
                 <span className="ag-bpm-number">{isInitialized ? state.bpm : '120'}</span>
+                <button
+                  onClick={handleTapTempo}
+                  style={{
+                    background: tapFlash ? 'var(--ag-acid)' : 'transparent',
+                    border: '1px solid var(--ag-border)',
+                    color: tapFlash ? 'var(--ag-black)' : 'var(--ag-white)',
+                    fontFamily: "'IBM Plex Mono',monospace",
+                    fontSize: 8,
+                    letterSpacing: '.2em',
+                    padding: '4px 10px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    transition: 'background .06s, color .06s',
+                    flexShrink: 0,
+                  }}
+                  title="Tap Tempo (tap 2–8× to set BPM)"
+                >TAP</button>
               </div>
 
               <span className="ag-ghost-bpm" aria-hidden="true">
@@ -1298,7 +1438,7 @@ export default function InstrumentPage({
             <HeaderControls
               bpm={state.bpm} onBpmChange={setBpm}
               metronomeOn={state.metronomeOn} onMetronomeToggle={toggleMetronome}
-              onSave={handleSave} onLoad={handleLoad}
+              onSave={handleSave} onLoad={handleLoadJson}
               getSessionData={getSessionData}
             />
 
@@ -1330,7 +1470,7 @@ export default function InstrumentPage({
                 { num: '02', title: 'Piano Keys',     icon: <Music2 className="h-4 w-4" />,   open: true,
                   body: <PianoKeys keys={state.keys} onTrigger={triggerKey} onAssignSample={assignKeySample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
                 { num: '03', title: 'Waveform Editor',icon: <Activity className="h-4 w-4" />, open: false,
-                  body: <WaveformEditor getWaveformData={getWaveformData} isInitialized={isInitialized} /> },
+                  body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><WaveformEditor getWaveformData={getWaveformData} isInitialized={isInitialized} /></Suspense> },
                 { num: '03B', title: 'VST Browser',   icon: <Music2 className="h-4 w-4" />,  open: false,
                   body: (
                     <VSTBrowser
@@ -1340,7 +1480,7 @@ export default function InstrumentPage({
                     />
                   )},
                 { num: '04', title: 'Loop Station',   icon: <Repeat2 className="h-4 w-4" />,  open: false,
-                  body: <LoopStation505 /> },
+                  body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><LoopStation505 /></Suspense> },
               ].map(({ num, title, icon, open, body }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
@@ -1362,7 +1502,7 @@ export default function InstrumentPage({
                 { num: '05', title: 'Visualizer & Transport', icon: <Activity className="h-4 w-4" />, open: true,
                   body: (
                     <>
-                      <AudioVisualizer getAnalyserData={getAnalyserData} isInitialized={isInitialized} />
+                      <AudioVisualizer getAnalyserData={getAnalyserData} isInitialized={isInitialized} isActive={isInitialized} />
                       <div className="mt-4">
                         <TransportControls
                           isArmed={state.isArmed} isRecording={state.isRecording} isPlaying={state.isPlaying}
@@ -1373,11 +1513,11 @@ export default function InstrumentPage({
                     </>
                   )},
                 { num: '06', title: 'Microphone Input', icon: <Mic className="h-4 w-4" />, open: false,
-                  body: <MicrophoneInput onAudioData={handleMicrophoneData} onError={handleMicrophoneError} disabled={!isInitialized} /> },
+                  body: <MicrophoneInput onAudioData={handleMicrophoneData} /> },
                 { num: '07', title: 'FX Chain',         icon: <SlidersHorizontal className="h-4 w-4" />, open: false,
-                  body: <FXPanel fx={state.fx} onToggle={toggleFX} disabled={!isInitialized} /> },
+                  body: <FXPanel fx={state.fx} onToggle={toggleFX} /> },
                 { num: '08', title: 'DJ Controls',      icon: <Headphones className="h-4 w-4" />, open: false,
-                  body: <DJControls filterVal={state.filterVal} pitchSemitones={state.pitchSemitones} crossfade={state.crossfade} onFilterChange={setFilter} onPitchChange={setPitch} onCrossfadeChange={setCrossfade} disabled={!isInitialized} /> },
+                  body: <DJControls filterVal={state.filterVal} pitchSemitones={state.pitchSemitones} crossfade={state.crossfade} onFilterChange={setFilter} onPitchChange={setPitch} onCrossfadeChange={setCrossfade} /> },
               ].map(({ num, title, icon, open, body }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>

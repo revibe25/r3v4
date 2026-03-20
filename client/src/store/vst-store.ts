@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * VST Store
  * 
@@ -103,6 +102,9 @@ const PERFORMANCE_UPDATE_INTERVAL = 33; // ~30fps
 // STORE
 // ============================================
 
+// Module-level ref — not Zustand state (not serializable, not reactive)
+let _monitoringIntervalId: ReturnType<typeof setInterval> | null = null;
+
 export const useVSTStore = create<VSTStore>()(
   devtools(
     (set, get) => ({
@@ -135,20 +137,14 @@ export const useVSTStore = create<VSTStore>()(
           const automationEngine = new VSTAutomationEngine(audioContext);
 
           // Set up performance callbacks
-          performanceMonitor.onOverload = (usage) => {
-            console.warn('[VSTStore] CPU overload:', usage);
+          performanceMonitor.onOverload(() => {
+            console.warn('[VSTStore] CPU overload detected');
             get().setCPUOverload(true);
-          };
+          });
 
-          performanceMonitor.onMemoryWarning = (usage) => {
-            console.warn('[VSTStore] Memory warning:', usage);
-            get().setMemoryWarning(true);
-          };
+          // onMemoryWarning: not available on VSTPerformanceMonitor
 
-          performanceMonitor.onDropout = (channelId, effectId) => {
-            console.error('[VSTStore] Audio dropout:', { channelId, effectId });
-            get().incrementDropoutCount();
-          };
+          // onDropout: not available on VSTPerformanceMonitor
 
           set({
             performanceMonitor,
@@ -190,7 +186,7 @@ export const useVSTStore = create<VSTStore>()(
         }, PERFORMANCE_UPDATE_INTERVAL);
 
         // Store interval ID for cleanup
-        (get as any)._monitoringIntervalId = intervalId;
+        _monitoringIntervalId = intervalId;
 
         set({ isMonitoring: true });
         console.log('[VSTStore] Performance monitoring started');
@@ -206,10 +202,9 @@ export const useVSTStore = create<VSTStore>()(
         performanceMonitor.stop();
 
         // Clear interval
-        const intervalId = (get as any)._monitoringIntervalId;
-        if (intervalId) {
-          clearInterval(intervalId);
-          delete (get as any)._monitoringIntervalId;
+        if (_monitoringIntervalId !== null) {
+          clearInterval(_monitoringIntervalId);
+          _monitoringIntervalId = null;
         }
 
         set({ isMonitoring: false });

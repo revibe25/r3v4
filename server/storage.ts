@@ -21,7 +21,7 @@
  * No escaping needed; the DB treats it as data, not syntax.
  */
 
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, or, and } from "drizzle-orm";
 import { db } from "./db";
 import {
   users,
@@ -151,22 +151,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSession(insertSession: InsertSession): Promise<Session> {
-    const result = await db.insert(sessions).values({
-      ...insertSession,
-      fx: (insertSession as any).fx as unknown,
-      recordedEvents: (insertSession as any).recordedEvents as unknown,
-    } as any).returning();
+    const result = await db.insert(sessions).values(insertSession).returning();
     return result[0];
   }
 
   async updateSession(id: string, updates: Partial<InsertSession>): Promise<Session | undefined> {
     const result = await db.update(sessions)
-      .set({
-        ...(updates as any),
-        ...((updates as any).fx ? { fx: (updates as any).fx as unknown } : {}),
-        ...((updates as any).recordedEvents ? { recordedEvents: (updates as any).recordedEvents as unknown } : {}),
-        updatedAt: new Date(),
-      } as any)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(sessions.id, id))
       .returning();
     return result[0];
@@ -195,20 +186,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
-    const result = await db.insert(projects).values({
-      ...insertProject,
-      projectData: (insertProject as any).projectData as unknown,
-    } as any).returning();
+    const result = await db.insert(projects).values(insertProject).returning();
     return result[0];
   }
 
   async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
     const result = await db.update(projects)
-      .set({
-        ...(updates as any),
-        ...((updates as any).projectData ? { projectData: (updates as any).projectData as unknown } : {}),
-        updatedAt: new Date(),
-      } as any)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(projects.id, id))
       .returning();
     return result[0];
@@ -249,22 +233,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSample(insertSample: InsertSample): Promise<Sample> {
-    const result = await db.insert(samples).values({
-      ...insertSample,
-      tags: (insertSample as any).tags as unknown,
-      waveformData: (insertSample as any).waveformData as unknown,
-    } as any).returning();
+    const result = await db.insert(samples).values(insertSample).returning();
     return result[0];
   }
 
   async updateSample(id: string, updates: Partial<InsertSample>): Promise<Sample | undefined> {
     const result = await db.update(samples)
-      .set({
-        ...(updates as any),
-        ...((updates as any).tags ? { tags: (updates as any).tags as unknown } : {}),
-        ...((updates as any).waveformData ? { waveformData: (updates as any).waveformData as unknown } : {}),
-        updatedAt: new Date(),
-      } as any)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(samples.id, id))
       .returning();
     return result[0];
@@ -287,11 +262,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPresetsByUser(userId: string, type?: string): Promise<Preset[]> {
+    const ownerOrFactory = or(
+      eq(presets.userId, userId),
+      eq(presets.isFactory, true),
+    );
+
     return db.select().from(presets)
       .where(
         type
-          ? sql`(${presets.userId} = ${userId} OR ${presets.isFactory} = true) AND ${presets.type} = ${type}`
-          : sql`${presets.userId} = ${userId} OR ${presets.isFactory} = true`,
+          ? and(ownerOrFactory, eq(presets.type, type))
+          : ownerOrFactory,
       )
       .orderBy(desc(presets.updatedAt));
   }
@@ -302,22 +282,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPreset(insertPreset: InsertPreset): Promise<Preset> {
-    const result = await db.insert(presets).values({
-      ...insertPreset,
-      presetData: (insertPreset as any).presetData as unknown,
-      tags: (insertPreset as any).tags as unknown,
-    } as any).returning();
+    const result = await db.insert(presets).values(insertPreset).returning();
     return result[0];
   }
 
   async updatePreset(id: string, updates: Partial<InsertPreset>): Promise<Preset | undefined> {
     const result = await db.update(presets)
-      .set({
-        ...(updates as any),
-        ...((updates as any).presetData ? { presetData: (updates as any).presetData as unknown } : {}),
-        ...((updates as any).tags ? { tags: (updates as any).tags as unknown } : {}),
-        updatedAt: new Date(),
-      } as any)
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(presets.id, id))
       .returning();
     return result[0];
