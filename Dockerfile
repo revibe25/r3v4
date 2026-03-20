@@ -5,7 +5,7 @@ RUN apk add --no-cache python3 py3-pip
 WORKDIR /app
 COPY package*.json ./
 COPY pnpm-workspace.yaml pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 COPY . .
 
