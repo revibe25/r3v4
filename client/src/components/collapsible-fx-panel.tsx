@@ -30,6 +30,10 @@ interface CollapsibleFXPanelProps {
   variant?: 'default' | 'compact' | 'minimal';
   /** Additional CSS classes */
   className?: string;
+  /** Max height before panel content scrolls independently */
+  maxHeight?: number | string;
+  /** Enable independent scrollbar on this panel's content */
+  scrollable?: boolean;
 }
 
 export const CollapsibleFXPanel = ({
@@ -39,6 +43,8 @@ export const CollapsibleFXPanel = ({
   defaultOpen = false,
   variant = 'default',
   className,
+  maxHeight,
+  scrollable = false,
 }: CollapsibleFXPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const uid = useId();
@@ -163,7 +169,23 @@ export const CollapsibleFXPanel = ({
            * This avoids mounting audio nodes (AudioVisualizer, etc.) until needed,
            * but keeps them mounted once they exist so audio state is preserved.
            */}
-          {hasBeenOpenedRef.current ? children : null}
+          {hasBeenOpenedRef.current
+            ? scrollable
+              ? (
+                <div
+                  className="ag-panel-scroll"
+                  style={{
+                    maxHeight:    typeof maxHeight === 'number' ? `${maxHeight}px` : (maxHeight ?? '320px'),
+                    overflowY:    'auto',
+                    overflowX:    'hidden',
+                    paddingRight: 2,
+                  }}
+                >
+                  {children}
+                </div>
+              )
+              : children
+            : null}
         </div>
       </div>
     </div>

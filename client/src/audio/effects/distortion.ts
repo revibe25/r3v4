@@ -17,7 +17,13 @@ export class DistortionEffect {
     this.distortion.connect(this.wetGain);
     this.dryGain.connect(this.output);
     this.wetGain.connect(this.output);
-    this.output.toDestination();
+    // DO NOT call toDestination() here.
+    // DistortionEffect is an insert effect — callers connect it into their
+    // signal chain via connect(). Calling toDestination() here caused the
+    // distorted signal to route DIRECTLY to speakers at full gain, bypassing
+    // the master bus, MixerChannel volume, and any downstream limiting.
+    // This was the primary source of uncontrolled loud distortion in the app.
+    // Callers must explicitly connect: source.connect(dist); dist.output → dest
 
     this.params = {
       enabled: true, type: 'distortion',

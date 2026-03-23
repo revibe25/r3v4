@@ -953,6 +953,16 @@ const STYLES = `
 .ag-frame [class*="rounded-t"] { border-radius: 0 !important; }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
+/* ── Independent panel scrollbars ──────────────────────────────────────────── */
+.ag-panel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ag-acid) var(--ag-ink);
+}
+.ag-panel-scroll::-webkit-scrollbar       { width: 4px; }
+.ag-panel-scroll::-webkit-scrollbar-track { background: var(--ag-ink); }
+.ag-panel-scroll::-webkit-scrollbar-thumb { background: var(--ag-acid); border-radius: 0; }
+.ag-panel-scroll::-webkit-scrollbar-thumb:hover { background: #84cc16; box-shadow: 0 0 6px rgba(184,255,0,.5); }
+
 /* GLOBAL OVERRIDES (input, scrollbars, focus rings)                     */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
@@ -1465,13 +1475,13 @@ export default function InstrumentPage({
               </div>
 
               {[
-                { num: '01', title: 'Drum Pads',      icon: <Music className="h-4 w-4" />,    open: true,
+                { num: '01', title: 'Drum Pads', maxHeight: 400,      icon: <Music className="h-4 w-4" />,    open: true,
                   body: <DrumPads pads={state.pads} onTrigger={triggerPad} onAssignSample={assignPadSample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
-                { num: '02', title: 'Piano Keys',     icon: <Music2 className="h-4 w-4" />,   open: true,
+                { num: '02', title: 'Piano Keys', maxHeight: 280,     icon: <Music2 className="h-4 w-4" />,   open: true,
                   body: <PianoKeys keys={state.keys} onTrigger={triggerKey} onAssignSample={assignKeySample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
-                { num: '03', title: 'Waveform Editor',icon: <Activity className="h-4 w-4" />, open: false,
+                { num: '03', title: 'Waveform Editor', maxHeight: 360,icon: <Activity className="h-4 w-4" />, open: false,
                   body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><WaveformEditor getWaveformData={getWaveformData} isInitialized={isInitialized} /></Suspense> },
-                { num: '03B', title: 'VST Browser',   icon: <Music2 className="h-4 w-4" />,  open: false,
+                { num: '03B', title: 'VST Browser', maxHeight: 400,   icon: <Music2 className="h-4 w-4" />,  open: false,
                   body: (
                     <VSTBrowser
                       onPluginSelect={(plugin: VSTPluginInfo) => {
@@ -1479,12 +1489,12 @@ export default function InstrumentPage({
                       }}
                     />
                   )},
-                { num: '04', title: 'Loop Station',   icon: <Repeat2 className="h-4 w-4" />,  open: false,
+                { num: '04', title: 'Loop Station', maxHeight: 440,   icon: <Repeat2 className="h-4 w-4" />,  open: false,
                   body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><LoopStation505 /></Suspense> },
-              ].map(({ num, title, icon, open, body }) => (
+              ].map(({ num, title, icon, open, body, maxHeight }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
-                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default">
+                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
                     {body}
                   </CollapsibleFXPanel>
                 </div>
@@ -1499,7 +1509,7 @@ export default function InstrumentPage({
               </div>
 
               {[
-                { num: '05', title: 'Visualizer & Transport', icon: <Activity className="h-4 w-4" />, open: true,
+                { num: '05', title: 'Visualizer & Transport', maxHeight: 340, icon: <Activity className="h-4 w-4" />, open: true,
                   body: (
                     <>
                       <AudioVisualizer getAnalyserData={getAnalyserData} isInitialized={isInitialized} isActive={isInitialized} />
@@ -1512,16 +1522,16 @@ export default function InstrumentPage({
                       </div>
                     </>
                   )},
-                { num: '06', title: 'Microphone Input', icon: <Mic className="h-4 w-4" />, open: false,
+                { num: '06', title: 'Microphone Input', maxHeight: 260, icon: <Mic className="h-4 w-4" />, open: false,
                   body: <MicrophoneInput onAudioData={handleMicrophoneData} /> },
-                { num: '07', title: 'FX Chain',         icon: <SlidersHorizontal className="h-4 w-4" />, open: false,
+                { num: '07', title: 'FX Chain', maxHeight: 320,         icon: <SlidersHorizontal className="h-4 w-4" />, open: false,
                   body: <FXPanel fx={state.fx} onToggle={toggleFX} /> },
-                { num: '08', title: 'DJ Controls',      icon: <Headphones className="h-4 w-4" />, open: false,
+                { num: '08', title: 'DJ Controls', maxHeight: 400,      icon: <Headphones className="h-4 w-4" />, open: false,
                   body: <DJControls filterVal={state.filterVal} pitchSemitones={state.pitchSemitones} crossfade={state.crossfade} onFilterChange={setFilter} onPitchChange={setPitch} onCrossfadeChange={setCrossfade} /> },
-              ].map(({ num, title, icon, open, body }) => (
+              ].map(({ num, title, icon, open, body, maxHeight }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
-                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default">
+                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
                     {body}
                   </CollapsibleFXPanel>
                 </div>

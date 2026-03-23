@@ -1,3 +1,33 @@
+// R3 Engine Context — injected by implement-r3.ts Phase 14
+import { MixerEngine } from "@r3/llpte-core/mixer";
+import { DJEngine }    from "@r3/llpte-core/dj";
+import type { MixerState, DJSession } from "@r3/llpte-core/types";
+
+const EMPTY_MIXER_STATE: MixerState = {
+  channels: new Map(), buses: new Map(),
+  masterFader: 0 as any, soloExclusive: true,
+};
+const DEFAULT_DJ_SESSION: DJSession = {
+  decks: {
+    A: { id: "A", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
+         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
+         cuePoints: [], beatGrid: null, waveformData: null },
+    B: { id: "B", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
+         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
+         cuePoints: [], beatGrid: null, waveformData: null },
+    C: { id: "C", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
+         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
+         cuePoints: [], beatGrid: null, waveformData: null },
+    D: { id: "D", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
+         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
+         cuePoints: [], beatGrid: null, waveformData: null },
+  },
+  crossfader: 0, masterBpm: 120, syncEnabled: false, tempoRange: 0.10,
+};
+export const mixerEngine = new MixerEngine(EMPTY_MIXER_STATE);
+export const djEngine    = new DJEngine(DEFAULT_DJ_SESSION);
+// END R3 Engine Context
+
 /**
  * server/trpc.ts
  *
@@ -124,3 +154,5 @@ export const requireAuth = middleware(({ ctx, next }) => {
  *   });
  */
 export const protectedProcedure = publicProc.use(requireAuth);
+// R3: add engines to context — update your createContext() return value:
+// export function createContext() { return { ...yourExistingCtx, mixerEngine, djEngine }; }

@@ -70,7 +70,7 @@ const registerSchema = z.object({
 });
 
 const loginSchema = z.object({
-  username: z.string().min(1),
+  email: z.string().email('Invalid email address'),
   password: z.string().min(1),
 });
 
@@ -128,13 +128,13 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Username and password are required' });
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  const { username, password } = parsed.data;
+  const { email, password } = parsed.data;
 
   try {
-    const user = await storage.getUserByUsername(username);
+    const user = await storage.getUserByEmail(email);
 
     // Always run bcrypt.compare to prevent timing-based user enumeration.
     // If user doesn't exist, compare against dummy hash — result will be
@@ -143,7 +143,7 @@ router.post('/login', async (req, res) => {
     const valid = await bcrypt.compare(password, hashToCompare);
 
     if (!user || !valid) {
-      return res.status(401).json({ error: 'Invalid username or password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const token = signToken({

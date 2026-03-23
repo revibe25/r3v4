@@ -1,4 +1,8 @@
 import "dotenv/config";
+import { SessionBroadcaster } from "./ws/SessionBroadcaster";
+import { appRouter } from "./routers/index";
+import { createContext, mixerEngine, djEngine } from "./trpc";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import effectsRouter from './routes/effects';

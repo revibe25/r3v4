@@ -113,7 +113,11 @@ class AudioEngine {
 
     // Set up master gain
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 0.95;
+    // 0.72 = -2.8 dBFS — headroom for voice summing.
+    // With 32 voices at gain=1.0 and masterGain=0.95, any 2+ simultaneous
+    // note-ons sum to >0 dBFS and clip. 0.72 gives ~4 voices of headroom
+    // before the downstream limiter fires.
+    this.masterGain.gain.value = 0.72;
     // masterGain is connected after AudioWorklet registration below
 
     // Set up analyser
@@ -137,8 +141,25 @@ class AudioEngine {
       this.voicePool.push({ gain: g, inUse: false, lastUsed: 0, source: null });
     }
 
+    // ── Soft limiter — catches summing peaks before worklet/destination ────────
+    // DynamicsCompressorNode configured as a transparent limiter:
+    //   threshold: -3 dBFS  — only fires on actual peaks, not normal material
+    //   knee:       0 dB    — hard knee for limiting (not compression)
+    //   ratio:      20:1    — effectively a limiter above threshold
+    //   attack:     0.003s  — fast enough to catch transients
+    //   release:    0.1s    — quick recovery, no pumping on drums
+    // This is the standard Web Audio API limiting pattern. It adds ~0.5ms
+    // of lookahead latency which is inaudible in a DAW context.
+    const limiter = this.ctx.createDynamicsCompressor();
+    limiter.threshold.value = -3;
+    limiter.knee.value      = 0;
+    limiter.ratio.value     = 20;
+    limiter.attack.value    = 0.003;
+    limiter.release.value   = 0.1;
+    this.masterGain.connect(limiter);
+
     // ── AudioWorklet — sample-accurate gain + soft-knee compression ──────────
-    // Inserted between masterGain and destination.
+    // Inserted between limiter and destination.
     // Registration name 'instrument-processor' is safe — worklets/ directory
     // was created by the expert patch and contained no prior registrations.
     // Falls back to direct connection if worklet loading fails (test env,
@@ -150,12 +171,12 @@ class AudioEngine {
       );
       await this.ctx.audioWorklet.addModule(workletUrl);
       this.procNode = new AudioWorkletNode(this.ctx, 'instrument-processor');
-      this.masterGain.connect(this.procNode);
+      limiter.connect(this.procNode);
       this.procNode.connect(this.ctx.destination);
     } catch {
       // Worklet unavailable — bypass with direct connection (no quality loss
       // to samples; only the worklet-side compression is skipped)
-      this.masterGain.connect(this.ctx.destination);
+      limiter.connect(this.ctx.destination);
     }
 
     await this.generateDefaultSamples();
@@ -194,7 +215,7 @@ class AudioEngine {
     for (let i = 0; i < length; i++) {
       const t = i / sampleRate;
       const envelope = Math.exp(-t * decayRate);
-      const noise = (Math.random() * 2 - 1) * 0.3;
+      const noise = (Math.random() * 2 - 1) * 0.12;  // was 0.3: broadband noise was too loud
       const tone = Math.sin(2 * Math.PI * baseFreq * t * Math.exp(-t * 2));
       const noiseAmount = padIndex > 7 ? 0.5 : 0.2;
       data[i] = (tone * 0.7 + noise * noiseAmount) * envelope;
@@ -220,10 +241,13 @@ class AudioEngine {
       const envelope = Math.exp(-t * 2);
 
       // Add harmonics for richer piano sound
-      const fundamental = Math.sin(2 * Math.PI * freq * t) * 0.5;
-      const harmonic2 = Math.sin(4 * Math.PI * freq * t) * 0.25;
-      const harmonic3 = Math.sin(6 * Math.PI * freq * t) * 0.125;
-      const harmonic4 = Math.sin(8 * Math.PI * freq * t) * 0.0625;
+      // Rebalanced harmonic series — total peak < 0.85 (was up to 0.9375).
+      // Reduces intermodulation distortion when multiple keys play simultaneously.
+      // Ratios follow a natural harmonic decay (0.45, 0.18, 0.08, 0.04).
+      const fundamental = Math.sin(2 * Math.PI * freq * t) * 0.45;
+      const harmonic2   = Math.sin(4 * Math.PI * freq * t) * 0.18;
+      const harmonic3   = Math.sin(6 * Math.PI * freq * t) * 0.08;
+      const harmonic4   = Math.sin(8 * Math.PI * freq * t) * 0.04;
 
       data[i] = (fundamental + harmonic2 + harmonic3 + harmonic4) * envelope;
     }

@@ -1,6 +1,8 @@
 // client/src/components/page-nav.tsx
 import { Link, useLocation } from 'wouter';
 import { Tag, LogIn, Music, LayoutGrid, Plug, Repeat2, Settings } from 'lucide-react';
+import { LogoutButton } from '@/components/logout-button';
+import { useAuthStore } from '@/stores/authStore';
 
 const S = {
   bg:     '#0c0c0c',
@@ -20,6 +22,7 @@ const PAGES = [
 ] as const;
 
 export function PageNav() {
+  const { isAuthenticated } = useAuthStore();
   const [location] = useLocation();
 
   return (
@@ -85,6 +88,11 @@ export function PageNav() {
       >
         <Settings size={11} />
       </button>
+      {isAuthenticated && (
+        <div style={{ marginLeft: 6 }}>
+          <LogoutButton variant="full" />
+        </div>
+      )}
     </nav>
   );
 }

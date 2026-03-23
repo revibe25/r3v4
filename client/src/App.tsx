@@ -11,7 +11,7 @@ import {
   type ReactNode,
   type ComponentType,
 } from 'react';
-import { Switch, Route } from 'wouter';
+import { Switch, Route, Redirect, useLocation } from 'wouter';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { Toaster } from '@/components/ui/toaster';
@@ -27,10 +27,12 @@ import type { MixerChannel } from '@/audio/mixer/mixer-channel';
 import type { FXChain } from '@/audio/fx/fx-chain';
 import { trpc, trpcClient } from './lib/trpc';
 import { SubscriptionProvider } from './hooks/useSubscription';
+import { useAuthStore } from '@/stores/authStore';
 
 // ─── LAZY PAGES ───────────────────────────────────────────────────────────────
 const InstrumentPage  = lazy(() => import('@/pages/instrument'));
-const LoginPage       = lazy(() => import('@/pages/login'));
+// AuthPage replaces the old LoginPage stub — full-screen, no PageNav wrapper
+const AuthPage        = lazy(() => import('@/components/auth/AuthPage'));
 const NotFound        = lazy(() => import('@/pages/not-found'));
 const MultiTrackPanel = lazy(() => import('@/components/multi-track-panel'));
 const PricingPage     = lazy(() => import('./pages/pricing/PricingPage'));
@@ -412,10 +414,30 @@ function VSTManagerPage() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// PROTECTED ROUTE — wouter-native guard
+// Reads persisted auth state; redirects unauthenticated visitors to /login.
+// Re-validates JWT against /api/auth/me on every protected mount so revoked
+// tokens are ejected without a manual logout.
+// ─────────────────────────────────────────────────────────────────────────────
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, token, hydrateFromToken } = useAuthStore();
+
+  useEffect(() => {
+    if (token) hydrateFromToken();
+  }, [token, hydrateFromToken]);
+
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+
+  return <>{children}</>;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ROUTE PAGE SHELLS
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Pricing — now the root route; PageNav wraps it since PricingPage is bare
+// Pricing — root route
 function PricingRoute() {
   return (
     <div className="min-h-screen bg-[#060606] flex flex-col">
@@ -431,59 +453,78 @@ function PricingRoute() {
   );
 }
 
-// Login — second nav slot
-function LoginRoute() {
+// Auth — full-screen; AuthPage provides its own layout, no PageNav
+// Authenticated users visiting /login are bounced straight to /instrument
+
+// ── AuthPageWrapper — uses wouter navigate, avoids full reload on login ──────
+function AuthPageWrapper() {
+  const [, navigate] = useLocation();
   return (
-    <div className="min-h-screen bg-[#060606] flex flex-col">
-      <PageNav />
-      <div className="flex-1">
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingFallback message="Loading…" />}>
-            <LoginPage />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
-    </div>
+    <AuthPage
+      onSuccess={() => navigate('/instrument')}
+    />
+  );
+}
+
+function AuthRoute() {
+  const { isAuthenticated } = useAuthStore();
+
+  if (isAuthenticated) {
+    return <Redirect to="/instrument" />;
+  }
+
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingFallback message="Loading…" />}>
+        <AuthPageWrapper />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
 // MultiTrack — no PageNav (component manages its own chrome)
 function MultiTrackPage() {
   return (
-    <ErrorBoundary>
-      <Suspense fallback={<LoadingFallback message="Loading MultiTrack DAW…" />}>
-        <MultiTrackPanel />
-      </Suspense>
-    </ErrorBoundary>
+    <ProtectedRoute>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback message="Loading MultiTrack DAW…" />}>
+          <MultiTrackPanel />
+        </Suspense>
+      </ErrorBoundary>
+    </ProtectedRoute>
   );
 }
 
 // Loop Station
 function LoopStationPage() {
   return (
-    <div className="min-h-screen bg-[#060606] text-[#f0f0f0] font-mono flex flex-col">
-      <PageNav />
-      <div className="flex-1 flex items-start justify-center p-6 overflow-auto">
-        <div className="w-full max-w-5xl">
-          <ErrorBoundary>
-            <Suspense fallback={<PanelFallback message="Loading Loop Station…" />}>
-              <LoopStation505 />
-            </Suspense>
-          </ErrorBoundary>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#060606] text-[#f0f0f0] font-mono flex flex-col">
+        <PageNav />
+        <div className="flex-1 flex items-start justify-center p-6 overflow-auto">
+          <div className="w-full max-w-5xl">
+            <ErrorBoundary>
+              <Suspense fallback={<PanelFallback message="Loading Loop Station…" />}>
+                <LoopStation505 />
+              </Suspense>
+            </ErrorBoundary>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
 
-// VST — wrapped in VSTProvider
+// VST — wrapped in VSTProvider, requires auth
 function VSTRoute() {
   return (
-    <ErrorBoundary>
-      <VSTProvider>
-        <VSTManagerPage />
-      </VSTProvider>
-    </ErrorBoundary>
+    <ProtectedRoute>
+      <ErrorBoundary>
+        <VSTProvider>
+          <VSTManagerPage />
+        </VSTProvider>
+      </ErrorBoundary>
+    </ProtectedRoute>
   );
 }
 
@@ -491,57 +532,70 @@ function VSTRoute() {
 // ROUTER
 // ─────────────────────────────────────────────────────────────────────────────
 function Router() {
+  // Boot-time token re-validation: runs once on app mount.
+  // If localStorage has a token from a previous session, verify it against
+  // /api/auth/me before rendering any protected content.
+  const { hydrateFromToken, token } = useAuthStore();
+  useEffect(() => {
+    if (token) hydrateFromToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Switch>
-      {/* ── / → Pricing (first visible nav button) ── */}
+      {/* ── / → Pricing (public) ── */}
       <Route path="/">
         {() => <PricingRoute />}
       </Route>
 
-      {/* ── /login → Login (second nav button) ── */}
+      {/* ── /login → Auth (public; bounces authenticated users) ── */}
       <Route path="/login">
-        {() => <LoginRoute />}
+        {() => <AuthRoute />}
       </Route>
 
-      {/* ── /instrument → InstrumentPage (moved from /) ── */}
+      {/* ── /instrument → InstrumentPage (protected) ── */}
       <Route path="/instrument">
         {() => (
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback message="Loading Instrument…" />}>
-              <InstrumentPage />
-            </Suspense>
-          </ErrorBoundary>
+          <ProtectedRoute>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback message="Loading Instrument…" />}>
+                <InstrumentPage autoInitialize={true} />
+              </Suspense>
+            </ErrorBoundary>
+          </ProtectedRoute>
         )}
       </Route>
 
-      {/* ── /multitrack ── */}
+      {/* ── /multitrack (protected) ── */}
       <Route path="/multitrack">
         {() => <MultiTrackPage />}
       </Route>
 
-      {/* ── /vst ── */}
+      {/* ── /vst (protected) ── */}
       <Route path="/vst">
         {() => <VSTRoute />}
       </Route>
 
-      {/* ── /loopstation ── */}
+      {/* ── /loopstation (protected) ── */}
       <Route path="/loopstation">
         {() => <LoopStationPage />}
       </Route>
 
-      {/* ── /pricing → canonical alias so any existing link still resolves ── */}
+      {/* ── /pricing → canonical alias (public) ── */}
       <Route path="/pricing">
         {() => <PricingRoute />}
       </Route>
 
-      {/* ── /visuals → full-screen audio reactive Three.js scene ── */}
+      {/* ── /visuals (protected) ── */}
       <Route path="/visuals">
         {() => (
-          <ErrorBoundary>
-            <Suspense fallback={<LoadingFallback message="Loading Visuals…" />}>
-              <VisualsPage />
-            </Suspense>
-          </ErrorBoundary>
+          <ProtectedRoute>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback message="Loading Visuals…" />}>
+                <VisualsPage />
+              </Suspense>
+            </ErrorBoundary>
+          </ProtectedRoute>
         )}
       </Route>
 

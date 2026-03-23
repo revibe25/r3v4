@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { trpc } from '../lib/trpc';
-import { useAuthStore } from '../store/auth-store';                      // adjust to your trpc client path
+import { useAuthStore } from '../stores/authStore';                      // adjust to your trpc client path
 import {
   UserSubscription,
   SubscriptionTier,

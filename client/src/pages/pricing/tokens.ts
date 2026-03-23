@@ -1,51 +1,63 @@
 /**
  * tokens.ts — Canonical R3 v4 pricing UI token source
  *
+ * Lime-green palette aligned with instrument panel (--ag-acid: #b8ff00).
  * PlanId is a type alias for SubscriptionTier — the canonical definition
  * lives in shared/subscription.types.ts. Any new tier added there will
  * surface here as a compile error, forcing this map to stay current.
- *
- * Color values match the instrument panel palette, not TierDefinition.color
- * (which is used for server-side badge rendering, not the DAW UI shell).
  */
-
 export type {
   SubscriptionTier as PlanId,
   BillingCycle,
 } from '../../../../shared/subscription.types';
 
 export const COLOR = {
-  bgBase:    "#0a0a0c",
-  bgSurface: "#111115",
-  bgElevate: "#17171d",
-  bgHover:   "#1e1e26",
-  borderSub:  "#2a2a35",
-  borderMid:  "#3a3a48",
-  textPrimary: "#e8e8f0",
-  textBody:    "#c8c8d4",
-  textMuted:   "#8f8fa0",
-  textDim:     "#6b6b7a",
-  textGhost:   "#3a3a48",
-  cyan:   "#00e5ff",
-  amber:  "#ffb300",
-  purple: "#b57bff",
-  slate:  "#6b6b7a",
+  // ── Backgrounds — matches instrument shell exactly ──────────────────────
+  bgBase:    "#060606",
+  bgSurface: "#0a0a0a",
+  bgElevate: "#0d0d0d",
+  bgHover:   "#111111",
+
+  // ── Borders ─────────────────────────────────────────────────────────────
+  borderSub: "#1c1c1c",
+  borderMid: "#2a2a2a",
+
+  // ── Text ────────────────────────────────────────────────────────────────
+  textPrimary: "#f0f0f0",
+  textBody:    "#d4d4d4",
+  textMuted:   "#888888",
+  textDim:     "#555555",
+  textGhost:   "#333333",
+
+  // ── Lime-green accent cascade ────────────────────────────────────────────
+  // Primary:  #b8ff00  — acid lime  (instrument --ag-acid)
+  // Mid:      #84cc16  — lime-500   (hover state, creator)
+  // Deep:     #4ade80  — green-400  (pro_artist complement)
+  // Muted:    #3d7c00  — deep lime  (explorer/free, dim glow)
+  cyan:   "#b8ff00",   // renamed token — now acid lime primary
+  amber:  "#84cc16",   // pro_artist accent — lime-500
+  purple: "#4ade80",   // creator accent — green complement
+  slate:  "#444444",   // explorer/free — neutral
 } as const;
 
 export type ColorToken = keyof typeof COLOR;
 
 import type { SubscriptionTier } from '../../../../shared/subscription.types';
 
-/** Instrument-panel accent per tier. Explorer = slate (free), Creator = cyan
- *  (featured), pro_artist = amber (premium). */
+/**
+ * Per-tier accent colors.
+ * Explorer = neutral slate (free tier, no emphasis)
+ * Creator  = lime-500 (#84cc16) — featured/popular
+ * Pro      = acid lime (#b8ff00) — premium, matches instrument accent
+ */
 export const PLAN_ACCENT: Record<SubscriptionTier, string> = {
   explorer:   COLOR.slate,
-  creator:    COLOR.cyan,
-  pro_artist: COLOR.amber,
+  creator:    COLOR.amber,
+  pro_artist: COLOR.cyan,
 };
 
 export const PLAN_GLOW: Record<SubscriptionTier, string> = {
-  explorer:   "rgba(107,107,122,0.12)",
-  creator:    "rgba(0,229,255,0.10)",
-  pro_artist: "rgba(255,179,0,0.08)",
+  explorer:   "rgba(68,68,68,0.10)",
+  creator:    "rgba(132,204,22,0.10)",
+  pro_artist: "rgba(184,255,0,0.12)",
 };

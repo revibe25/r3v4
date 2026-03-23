@@ -14,3 +14,12 @@ export const UPLOAD_CONFIG = {
   STORAGE_BUCKET:            process.env.STORAGE_BUCKET        || 'r3-uploads',
   SIGNED_URL_EXPIRES:   parseInt(process.env.SIGNED_URL_EXPIRES || '900', 10),
 };
+
+// ── Startup Env Validation ────────────────────────────────────────────────────
+const REQUIRED_VARS = ['JWT_SECRET', 'DATABASE_URL', 'SESSION_SECRET'] as const;
+for (const key of REQUIRED_VARS) {
+  if (!process.env[key]) {
+    throw new Error(`[config] Missing required env var: ${key}. Check server/.env`);
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,9 @@
+{
+  "name": "@r3/ai-mix",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@r3/llpte-core": "workspace:*"
+  }
+}

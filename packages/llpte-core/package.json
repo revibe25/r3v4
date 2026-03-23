@@ -22,8 +22,32 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./types": {
+      "types": "./src/types/index.ts",
+      "default": "./src/types/index.ts"
+    },
+    "./engine": {
+      "types": "./src/engine/index.ts",
+      "default": "./src/engine/index.ts"
+    },
+    "./mixer": {
+      "types": "./src/mixer/index.ts",
+      "default": "./src/mixer/index.ts"
+    },
+    "./dj": {
+      "types": "./src/dj/index.ts",
+      "default": "./src/dj/index.ts"
+    },
+    "./effects": {
+      "types": "./src/effects/index.ts",
+      "default": "./src/effects/index.ts"
+    },
+    "./arrangement": {
+      "types": "./src/arrangement/index.ts",
+      "default": "./src/arrangement/index.ts"
     }
   }
 }

@@ -23,7 +23,10 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { subscriptionRouter } from './subscription';
-import { router } from '../trpc';
+import { router }
+import { mixerRouter }  from "./mixer.router";
+import { djRouter }     from "./dj.router";
+import { aiMixRouter }  from "./aiMix.router"; from '../trpc';
 import { protectedProcedure } from '../procedures';
 import { storage } from '../storage';
 import {
@@ -165,6 +168,9 @@ const settingsRouter = router({
 
 // ── Root router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
+  mixer:  mixerRouter,
+  dj:     djRouter,
+  aiMix:  aiMixRouter,
   sessions:     sessionsRouter,
   projects:     projectsRouter,
   presets:      presetsRouter,

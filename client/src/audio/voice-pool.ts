@@ -44,7 +44,13 @@ export class VoicePool {
     }
 
     const gain   = this.ctx.createGain();
-    gain.gain.setValueAtTime(Math.min(1, Math.max(0, velocity)), this.ctx.currentTime);
+    // 8ms attack ramp eliminates click artefact on note-on.
+    // An instant step change (setValueAtTime) creates a discontinuity in the
+    // waveform that the ear hears as a click, especially at low frequencies.
+    // 8ms is inaudible as an attack but eliminates the discontinuity entirely.
+    const clamped = Math.min(1, Math.max(0, velocity));
+    gain.gain.setValueAtTime(0, this.ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(clamped, this.ctx.currentTime + 0.008);
     gain.connect(this.dest);
 
     const source  = this.ctx.createBufferSource();

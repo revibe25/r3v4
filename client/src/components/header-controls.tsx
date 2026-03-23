@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Moon, Sun, Music, Clock, Palette, Save, FolderOpen, Upload } from 'lucide-react';
+import { LogoutButton } from '@/components/logout-button';
 import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/components/theme-provider';
 import type { Session } from '@shared/schema';
@@ -407,6 +408,9 @@ export const HeaderControls = memo(function HeaderControls({
             </TooltipTrigger>
             <TooltipContent style={tipStyle}>Load session from file</TooltipContent>
           </Tooltip>
+        </div>
+        <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
+          <LogoutButton variant="compact" />
         </div>
       </div>
 

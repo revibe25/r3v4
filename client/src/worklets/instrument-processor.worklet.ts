@@ -23,14 +23,14 @@
 class InstrumentProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      { name: "masterGain",    defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
-      { name: "compThreshold", defaultValue: -24, minValue: -60, maxValue: 0   },
-      { name: "compRatio",     defaultValue: 4,   minValue: 1,   maxValue: 20  },
+      { name: "masterGain",    defaultValue: 1.15, minValue: 0,  maxValue: 2.0 }, // makeup gain for compression
+      { name: "compThreshold", defaultValue: -18, minValue: -60, maxValue: 0   }, // was -24: too aggressive
+      { name: "compRatio",     defaultValue: 2.5, minValue: 1,   maxValue: 20  }, // was 4: too much squash
       { name: "msWidth",       defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
       { name: "midGain",       defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
       { name: "sideGain",      defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
       { name: "midThreshold",  defaultValue: -24, minValue: -60, maxValue: 0   },
-      { name: "sideThreshold", defaultValue: -30, minValue: -60, maxValue: 0   },
+      { name: "sideThreshold", defaultValue: -24, minValue: -60, maxValue: 0   }, // was -30: over-compressed stereo
     ];
   }
 

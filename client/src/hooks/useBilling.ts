@@ -15,7 +15,7 @@ export function useBilling() {
         typeof window !== "undefined" &&
         (() => {
           try {
-            const { useAuthStore } = require("../store/auth-store");
+            const { useAuthStore } = require("../stores/authStore");
             return Boolean(useAuthStore.getState().token);
           } catch { return false; }
         })()

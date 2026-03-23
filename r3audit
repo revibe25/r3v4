@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+set -euo pipefail
+RED=$'\033[0;31m'; GRN=$'\033[0;32m'; YLW=$'\033[0;33m'
+MAG=$'\033[0;35m'; CYN=$'\033[0;36m'; WHT=$'\033[1;37m'
+DIM=$'\033[2m'; BLD=$'\033[1m'; RST=$'\033[0m'
+
+MODEL="claude-sonnet-4-6"; MAX_TOKENS=8192
+DRY_RUN=false; GATE_ONLY=false; OUT_FILE=""; EXTRA_FILES=(); TASK=""
+PROJECT_ROOT="$HOME/Stable/R3 v4"
+AUDIT_FILE="$PROJECT_ROOT/Advanced-level-audit-v3.md"
+[[ ! -f "$AUDIT_FILE" ]] && AUDIT_FILE="$PROJECT_ROOT/Advanced-level-audit-v2.md"
+[[ ! -f "$AUDIT_FILE" ]] && AUDIT_FILE="$PROJECT_ROOT/Advanced-level-audit.md"
+ENV_FILE="$HOME/.r3audit.env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
+[[ -z "${ANTHROPIC_API_KEY:-}" ]] && { echo "${RED}✗ ANTHROPIC_API_KEY not set. Add to ~/.r3audit.env${RST}"; exit 1; }
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry)   DRY_RUN=true; shift ;;
+    --gate)  GATE_ONLY=true; shift ;;
+    --files) shift ;;
+    --model) shift
+      case "$1" in opus) MODEL="claude-opus-4-6" ;; sonnet) MODEL="claude-sonnet-4-6" ;; haiku) MODEL="claude-haiku-4-5-20251001" ;; *) MODEL="$1" ;; esac; shift ;;
+    --out)   shift; OUT_FILE="$1"; shift ;;
+    --edit)  shift; EXTRA_FILES+=("$1"); shift ;;
+    --help|-h) sed -n '2,8p' "$0" | sed 's/^# \?//'; exit 0 ;;
+    --)      shift; TASK="$*"; break ;;
+    *)       TASK="${TASK:+$TASK }$1"; shift ;;
+  esac
+done
+[[ -z "$TASK" && "$GATE_ONLY" == "false" ]] && { echo "${YLW}Usage: r3audit [options] \"task\"  |  r3audit --help${RST}"; exit 1; }
+ok()   { echo "${GRN}✓${RST} $*"; }
+warn() { echo "${YLW}⚠${RST}  $*"; }
+err()  { echo "${RED}✗${RST} $*" >&2; }
+file_content_block() {
+  local fpath="$1" label="${1#$PROJECT_ROOT/}"
+  [[ ! -f "$fpath" ]] && return
+  local size; size=$(wc -c < "$fpath")
+  echo "### FILE: $label"
+  if (( size > 122880 )); then
+    echo "<!-- TRUNCATED: ${size} bytes — first 120KB only -->"
+    head -c 122880 "$fpath"; echo ""; echo "<!-- END TRUNCATED -->"
+  else cat "$fpath"; fi
+  echo ""; echo "---"; echo ""
+}
+echo ""
+echo "${BLD}${MAG}╔══════════════════════════════════════════════════════╗${RST}"
+echo "${BLD}${MAG}║  R3 v4  ·  Advanced-Level Audit CLI  · v3          ║${RST}"
+echo "${BLD}${MAG}╚══════════════════════════════════════════════════════╝${RST}"
+echo "${DIM}  Model  : $MODEL${RST}"
+echo "${DIM}  Root   : $PROJECT_ROOT${RST}"
+echo "${DIM}  Task   : ${TASK:-<gate only>}${RST}"
+echo "${DIM}  Directive: $(basename "$AUDIT_FILE")${RST}"; echo ""
+[[ ! -f "$AUDIT_FILE" ]] && { err "Audit directive not found: $AUDIT_FILE"; exit 1; }
+SYSTEM_PROMPT=$(cat "$AUDIT_FILE")
+ok "Directive loaded — $(wc -l < "$AUDIT_FILE") lines, $(wc -c < "$AUDIT_FILE") bytes"
+echo ""
+echo "${CYN}${BLD}── Collecting files (§1.2 read order) ──────────────────${RST}"
+declare -a READ_ORDER=(
+  "shared/schema.ts" "shared/schema-subscription.ts" "shared/types.ts"
+  "server/trpc.ts" "server/procedures.ts"
+  "server/routes/auth.ts" "server/routes.ts"
+  "client/src/store/auth-store.ts" "client/src/store/audio-store.ts" "client/src/store/transport-store.ts"
+  "packages/llpte-core/package.json" "packages/llpte-signal/package.json"
+  "packages/llpte-transition-graph/package.json" "packages/llpte-execution/package.json"
+  "packages/llpte-ai/package.json" "packages/llpte-adapters/package.json"
+  "client/src/engine/transport-engine.ts" "client/src/engine/master-engine.ts" "client/src/engine/midi-engine.ts"
+  "client/src/audio/core/default-kit.ts" "client/src/hooks/use-default-drum-kit.ts"
+  "client/src/components/padmesh.tsx"
+  "server/config.ts" "client/vercel.json" "railway.toml" "pnpm-workspace.yaml" "turbo.json"
+)
+COLLECTED_FILES=(); MISSING_FILES=()
+for rel in "${READ_ORDER[@]}"; do
+  full="$PROJECT_ROOT/$rel"
+  if [[ -f "$full" ]]; then COLLECTED_FILES+=("$full"); ok "$rel"
+  else MISSING_FILES+=("$rel"); warn "MISSING  $rel"; fi
+done
+for ef in "${EXTRA_FILES[@]}"; do
+  if   [[ -f "$ef" ]];               then COLLECTED_FILES+=("$ef"); ok "EXTRA $ef"
+  elif [[ -f "$PROJECT_ROOT/$ef" ]]; then COLLECTED_FILES+=("$PROJECT_ROOT/$ef"); ok "EXTRA $ef"
+  else err "Extra file not found: $ef"; exit 1; fi
+done
+echo ""; echo "${DIM}  Collected : ${#COLLECTED_FILES[@]} files${RST}"
+echo "${DIM}  Missing   : ${#MISSING_FILES[@]} files (BLOCKED in gate)${RST}"
+echo ""; echo "${CYN}${BLD}── Building prompt ───────────────────────────────────────${RST}"
+MISSING_LIST=""
+for m in "${MISSING_FILES[@]}"; do MISSING_LIST+="- $m"$'\n'; done
+if [[ "$GATE_ONLY" == "true" ]]; then
+  TASK_BLOCK="Run the §1.3 Completion Gate against the files provided. Output the full checklist marking each file CONFIRMED, BLOCKED (not on disk), or UNREAD. Then list every HARD STOP triggered."
+else
+  TASK_BLOCK="$TASK"
+fi
+FILE_CONTENTS=""
+for fpath in "${COLLECTED_FILES[@]}"; do FILE_CONTENTS+="$(file_content_block "$fpath")"; done
+USER_MESSAGE="## TASK
+$TASK_BLOCK
+
+## §1.3 COMPLETION GATE STATUS
+Files found and attached:
+$(for f in "${COLLECTED_FILES[@]}"; do echo "- ${f#$PROJECT_ROOT/}"; done)
+
+Files BLOCKED (not on disk):
+${MISSING_LIST:-(none)}
+
+## PROJECT FILES (§1.2 read order)
+$FILE_CONTENTS"
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo ""; echo "${YLW}${BLD}── DRY RUN ─────────────────────────────────────────────────${RST}"
+  echo "${DIM}System  : $(echo "$SYSTEM_PROMPT" | wc -c) bytes${RST}"
+  echo "${DIM}User msg: $(echo "$USER_MESSAGE"  | wc -c) bytes${RST}"
+  echo "${DIM}Files   : ${#COLLECTED_FILES[@]}${RST}"; echo ""
+  echo "$USER_MESSAGE" | head -c 2000
+  echo ""; echo "${YLW}(dry run — no API call)${RST}"; exit 0
+fi
+
+# Build JSON via Python — no shell arg size limits
+WORK_DIR=$(mktemp -d /tmp/r3audit_XXXXXX)
+trap 'rm -rf "$WORK_DIR"' EXIT
+RESPONSE_FILE="$WORK_DIR/response.md"
+printf '%s' "$SYSTEM_PROMPT"     > "$WORK_DIR/system.txt"
+printf '%s' "$USER_MESSAGE"      > "$WORK_DIR/user.txt"
+printf '%s' "$ANTHROPIC_API_KEY" > "$WORK_DIR/key.txt"
+printf '%s' "$MODEL"             > "$WORK_DIR/model.txt"
+printf '%s' "$MAX_TOKENS"        > "$WORK_DIR/maxtok.txt"
+[[ -n "$OUT_FILE" ]] && printf '%s' "$OUT_FILE" > "$WORK_DIR/outfile.txt"
+
+echo ""
+echo "${CYN}${BLD}-- Streaming response ------------------------------------${RST}"
+echo "${WHT}${BLD}==========================================================${RST}"; echo ""
+
+python3 /usr/local/lib/r3audit_stream.py "$WORK_DIR"
+echo ""
