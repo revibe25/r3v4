@@ -124,7 +124,7 @@ function ControlsOverlay() {
       <button
         onClick={() => setOpen(p => !p)}
         className="fixed bottom-4 right-4 z-20 w-10 h-10 flex items-center justify-center
-                   bg-black/70 border border-[#333] text-[#b8ff00] font-mono text-xs
+                   bg-black/70 border border-[#333] text-[#a3e635] font-mono text-xs
                    hover:bg-[#111] transition-colors"
         title="Toggle controls"
       >
@@ -136,7 +136,7 @@ function ControlsOverlay() {
           className="fixed bottom-16 right-4 z-20 w-72 p-4 space-y-4
                      bg-black/85 border border-[#222] font-mono text-xs text-[#aaa]"
         >
-          <p className="text-[#b8ff00] font-bold tracking-widest uppercase text-[10px]">
+          <p className="text-[#a3e635] font-bold tracking-widest uppercase text-[10px]">
             Visuals Controls
           </p>
 
@@ -156,7 +156,7 @@ function ControlsOverlay() {
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-[10px]">M/S Width</span>
-              <span className="text-[#b8ff00]">{msWidth.toFixed(2)}</span>
+              <span className="text-[#a3e635]">{msWidth.toFixed(2)}</span>
             </div>
             <input type="range" min="0" max="2" step="0.01"
               value={msWidth} onChange={e => handleMSWidth(parseFloat(e.target.value))}
@@ -177,7 +177,7 @@ function ControlsOverlay() {
                 }
                 className={`px-2 py-0.5 text-[10px] border transition-colors ${
                   sc.enabled
-                    ? 'bg-[#b8ff00] text-black border-[#b8ff00]'
+                    ? 'bg-[#a3e635] text-black border-[#a3e635]'
                     : 'bg-transparent text-[#555] border-[#333] hover:border-[#555]'
                 }`}
               >
@@ -188,7 +188,7 @@ function ControlsOverlay() {
               <div>
                 <div className="flex justify-between text-[9px] mb-1">
                   <span>Amount</span>
-                  <span className="text-[#b8ff00]">{sc.config.amount.toFixed(2)}</span>
+                  <span className="text-[#a3e635]">{sc.config.amount.toFixed(2)}</span>
                 </div>
                 <input type="range" min="0" max="1" step="0.01"
                   value={sc.config.amount}
@@ -204,7 +204,7 @@ function ControlsOverlay() {
               <span className="text-[10px]">IR Reverb</span>
               {ir.loading && <span className="text-[9px] text-[#555] animate-pulse">loading…</span>}
               {ir.error   && <span className="text-[9px] text-red-400" title={ir.error}>error</span>}
-              {ir.loaded  && <span className="text-[9px] text-[#b8ff00]">✓ loaded</span>}
+              {ir.loaded  && <span className="text-[9px] text-[#a3e635]">✓ loaded</span>}
             </div>
 
             {/* Preset selector */}
@@ -214,7 +214,7 @@ function ControlsOverlay() {
                   onClick={() => ir.loadPreset(p)}
                   className={`px-1 py-0.5 text-[9px] border transition-colors text-left truncate ${
                     ir.currentPreset === p
-                      ? 'bg-[#b8ff00]/10 border-[#b8ff00] text-[#b8ff00]'
+                      ? 'bg-[#a3e635]/10 border-[#a3e635] text-[#a3e635]'
                       : 'bg-transparent border-[#333] text-[#555] hover:border-[#555] hover:text-[#888]'
                   }`}
                   title={p}
@@ -228,7 +228,7 @@ function ControlsOverlay() {
               <div>
                 <div className="flex justify-between text-[9px] mb-1">
                   <span>Wet</span>
-                  <span className="text-[#b8ff00]">{ir.wet.toFixed(2)}</span>
+                  <span className="text-[#a3e635]">{ir.wet.toFixed(2)}</span>
                 </div>
                 <input type="range" min="0" max="1" step="0.01"
                   value={ir.wet}

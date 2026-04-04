@@ -1,7 +1,7 @@
 /**
  * tokens.ts — Canonical R3 v4 pricing UI token source
  *
- * Lime-green palette aligned with instrument panel (--ag-acid: #b8ff00).
+ * Acid-lime palette aligned with instrument panel (--ag-acid: #a3e635).
  * PlanId is a type alias for SubscriptionTier — the canonical definition
  * lives in shared/subscription.types.ts. Any new tier added there will
  * surface here as a compile error, forcing this map to stay current.
@@ -30,11 +30,11 @@ export const COLOR = {
   textGhost:   "#333333",
 
   // ── Lime-green accent cascade ────────────────────────────────────────────
-  // Primary:  #b8ff00  — acid lime  (instrument --ag-acid)
+  // Primary:  #a3e635  — acid lime  (instrument --ag-acid)
   // Mid:      #84cc16  — lime-500   (hover state, creator)
   // Deep:     #4ade80  — green-400  (pro_artist complement)
   // Muted:    #3d7c00  — deep lime  (explorer/free, dim glow)
-  cyan:   "#b8ff00",   // renamed token — now acid lime primary
+  cyan:   "#a3e635",   // renamed token — now acid lime primary
   amber:  "#84cc16",   // pro_artist accent — lime-500
   purple: "#4ade80",   // creator accent — green complement
   slate:  "#444444",   // explorer/free — neutral
@@ -48,7 +48,7 @@ import type { SubscriptionTier } from '../../../../shared/subscription.types';
  * Per-tier accent colors.
  * Explorer = neutral slate (free tier, no emphasis)
  * Creator  = lime-500 (#84cc16) — featured/popular
- * Pro      = acid lime (#b8ff00) — premium, matches instrument accent
+ * Pro      = acid lime (#a3e635) — premium, matches instrument accent
  */
 export const PLAN_ACCENT: Record<SubscriptionTier, string> = {
   explorer:   COLOR.slate,
@@ -59,5 +59,5 @@ export const PLAN_ACCENT: Record<SubscriptionTier, string> = {
 export const PLAN_GLOW: Record<SubscriptionTier, string> = {
   explorer:   "rgba(68,68,68,0.10)",
   creator:    "rgba(132,204,22,0.10)",
-  pro_artist: "rgba(184,255,0,0.12)",
+  pro_artist: "rgba(163,230,53,0.12)",
 };
