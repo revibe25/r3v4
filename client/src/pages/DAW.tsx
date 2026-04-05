@@ -29,6 +29,7 @@ import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
 } from 'react';
 
+import { useLocation }      from 'wouter';
 import { useDAWStore }      from '../hooks/useDAWStore';
 import { useDAWEngine }     from '../hooks/useDAWEngine';
 import { useCollabSocket }  from '../hooks/useCollabSocket';
@@ -357,6 +358,8 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
   const collabRoom = useDAWStore(s => s.collabRoom);
   const [joining, setJoining] = useState(false);
   const [roomInput, setRoomInput] = useState('');
+  const [, navigate]  = useLocation();
+  const uploadRef     = useRef<HTMLInputElement>(null);
 
   const FILES = [
     { name: 'KICKS/', type: 'folder' },
@@ -402,7 +405,18 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
               </div>
             ))}
             <div className="pt-2 border-t border-[#1c1c1c] mt-2">
-              <Btn className="w-full justify-center text-[9px]" onClick={() => {}}>
+              <input
+                ref={uploadRef}
+                type="file"
+                accept="audio/*,.wav,.mp3,.aiff,.flac,.ogg"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) console.info('[DAW] upload queued:', file.name);
+                  e.target.value = '';
+                }}
+              />
+              <Btn className="w-full justify-center text-[9px]" onClick={() => uploadRef.current?.click()}>
                 + UPLOAD
               </Btn>
             </div>
@@ -480,7 +494,7 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
               </div>
             ))}
             <div className="pt-2 border-t border-[#1c1c1c] mt-2">
-              <Btn className="w-full justify-center text-[9px]" onClick={() => {}}>
+              <Btn className="w-full justify-center text-[9px]" onClick={() => navigate('/vst')}>
                 LOAD VST/AU
               </Btn>
             </div>

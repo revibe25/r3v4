@@ -15,6 +15,10 @@ export interface DJControlsProps {
   onPause?: () => void;
   onStop?: () => void;
   onCue?: () => void;
+  onPrev?: () => void;
+  onNext?: () => void;
+  onLoop?: () => void;
+  onShuffle?: () => void;
   isPlaying?: boolean;
 }
 
@@ -22,7 +26,7 @@ export interface DJControlsProps {
 // DESIGN TOKENS
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const ACID       = '#b8ff00';
+export const ACID       = '#a3e635';
 export const DJ_BLACK   = '#000000';
 export const DJ_SURFACE = '#0c0c0c';
 export const DJ_SURFACE2 = '#111111';

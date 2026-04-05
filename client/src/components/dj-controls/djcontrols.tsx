@@ -15,7 +15,7 @@ type PanelMode = 'compact' | 'normal' | 'professional';
 export function DJControls({
   filterVal: filterProp, pitchSemitones: pitchProp, crossfade: crossfadeProp,
   onFilterChange, onPitchChange, onCrossfadeChange,
-  onPlay, onPause, onStop, onCue, isPlaying = false,
+  onPlay, onPause, onStop, onCue, onPrev, onNext, onLoop, onShuffle, isPlaying = false,
 }: DJControlsProps) {
   const [mode, setMode]           = useState<PanelMode>('normal');
   const [collapsed, setCollapsed] = useState(false);
@@ -31,7 +31,9 @@ export function DJControls({
   const [quantize, setQuantize]         = useState(true);
   const [sync, setSync]                 = useState(true);
   const [hotCue, setHotCue]             = useState<number | null>(null);
-  const [playing, setPlaying]           = useState(true);
+  const [playing, setPlaying]             = useState(true);
+  const [loopEnabled, setLoopEnabled]     = useState(false);
+  const [shuffleEnabled, setShuffleEnabled] = useState(false);
 
   const filter      = filterProp    ?? filterInt;
   const pitch       = pitchProp     ?? pitchInt;
@@ -145,7 +147,7 @@ export function DJControls({
             {mode !== 'compact' && (
               <TransBtn
                 icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>}
-                label="Prev" onClick={() => {}} compact={mode === 'compact'} />
+                label="Prev" onClick={() => onPrev?.()} compact={mode === 'compact'} />
             )}
             <TransBtn
               icon={isActivePlay
@@ -167,15 +169,15 @@ export function DJControls({
             {mode !== 'compact' && (
               <TransBtn
                 icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>}
-                label="Next" onClick={() => {}} compact={mode === 'compact'} />
+                label="Next" onClick={() => onNext?.()} compact={mode === 'compact'} />
             )}
             <TransBtn
               icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>}
-              label="Loop" onClick={() => {}} compact={mode === 'compact'}
+              label="Loop" onClick={() => { setLoopEnabled(v => !v); onLoop?.(); }} active={loopEnabled} color={ACID} compact={mode === 'compact'}
             />
             <TransBtn
               icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>}
-              label="Shuffle" onClick={() => {}} compact={mode === 'compact'}
+              label="Shuffle" onClick={() => { setShuffleEnabled(v => !v); onShuffle?.(); }} active={shuffleEnabled} color={ACID} compact={mode === 'compact'}
             />
             <TransBtn
               icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 010 8.49m-8.48-.01a6 6 0 010-8.49m11.31-2.82a10 10 0 010 14.14m-14.14 0a10 10 0 010-14.14"/></svg>}
