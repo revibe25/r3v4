@@ -18,11 +18,13 @@
 import { router, publicProcedure } from './trpc';
 import { dawRouter }          from './routers/daw';
 import { subscriptionRouter } from './routers/subscription';
-import { sessionsRouter } from "./routers/sessions";
+import { sessionsRouter }        from "./routers/sessions";
+import { sessionMetricsRouter }  from "./routers/sessionMetrics.router";
 import { adminRouter } from "./routers/adminRouter";
 
 export const appRouter = router({
-  sessions: sessionsRouter,
+  sessions:       sessionsRouter,
+  sessionMetrics: sessionMetricsRouter,
   admin: adminRouter,
   // ── System ──────────────────────────────────────────────────────────────────
   ping: publicProcedure.query(() => ({ pong: true, ts: Date.now() })),
