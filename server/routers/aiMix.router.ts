@@ -1,11 +1,12 @@
 import { z } from "zod";
-import { router, publicProcedure } from "../trpc";
+import { router }             from "../trpc";
+import { protectedProcedure } from "../base-procedures";
 import { AIMixingService } from "../../services/ai-mix/src/AIMixingService";
 
 const aiService = new AIMixingService();
 
 export const aiMixRouter = router({
-  analyze: publicProcedure
+  analyze: protectedProcedure
     .input(z.object({
       genre:                z.string().min(1),
       targetLoudness:       z.number().min(-23).max(-6),
