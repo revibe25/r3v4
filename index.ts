@@ -66,7 +66,7 @@ process.on('uncaughtException', (err: Error) => {
 import { trpcAuth, loopStationAuth } from './server/middleware/auth';
 import { loopStationErrorHandler } from './server/middleware/errorHandler';
 import { stripeWebhookHandler } from './server/routes/stripe-webhook';
-import { appRouter } from './server/routers';
+import { appRouter } from './server/procedures';
 import { createContext } from './server/trpc';
 import { registerRoutes }      from './server/routes';
 import loopRoutes              from './server/routes/loops';
@@ -157,7 +157,42 @@ async function main(): Promise<void> {
   app.use('/api', loopStationLimiter, loopStationAuth, loopProjectRoutes);
   app.use('/api', loopStationLimiter, loopStationAuth, midiRoutes);
 
-  // 404 — registered after all routes so it only fires for unmatched paths
+  
+// ── Admin stats endpoint ──────────────────────────────────────────────────────
+app.get('/api/admin/stats', async (req: any, res: any) => {
+  const parts = (req.headers['authorization'] ?? '').split(' ');
+  if (parts[0] !== 'Bearer' || !parts[1]) {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+  if (!req.user?.email || req.user.email !== process.env.ADMIN_EMAIL) {
+    return res.status(403).json({ error: 'Forbidden.' });
+  }
+  let dbStatus = 'ok', dbLatencyMs = 0;
+  try {
+    const { db } = await import('./server/db/index.js');
+    const { sql } = await import('drizzle-orm');
+    const t0 = Date.now();
+    await db.execute(sql`SELECT 1`);
+    dbLatencyMs = Date.now() - t0;
+  } catch { dbStatus = 'error'; }
+  const mem   = process.memoryUsage();
+  const rooms = getRoomStats();
+  return res.json({
+    uptime:      Math.floor(process.uptime()),
+    nodeVersion: process.version,
+    env:         process.env.NODE_ENV ?? 'development',
+    memory: {
+      rss:       Math.round(mem.rss       / 1024 / 1024),
+      heapUsed:  Math.round(mem.heapUsed  / 1024 / 1024),
+      heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+    },
+    db: { status: dbStatus, latencyMs: dbLatencyMs },
+    collab: rooms,
+    ts: new Date().toISOString(),
+  });
+});
+
+// 404 — registered after all routes so it only fires for unmatched paths
   app.use((_req, res) => {
     res.status(404).json({
       error: 'Not Found',

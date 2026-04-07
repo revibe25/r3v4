@@ -33,9 +33,12 @@
  */
 
 import {
-  pgTable, uuid, text, timestamp, boolean, integer, jsonb,
+  pgTable, uuid, text, timestamp, boolean, integer, jsonb, pgEnum,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+
+export const OUTCOME_VALUES = ['auto_applied', 'accepted', 'rejected', 'ignored', 'discarded'] as const;
+export const outcomeEnum = pgEnum('outcome', OUTCOME_VALUES);
 
 // ── Effect Presets ────────────────────────────────────────────────────────────
 export const effectPresets = pgTable("effect_presets", {
@@ -87,6 +90,9 @@ export const projects = pgTable("projects", {
   data: jsonb("data"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  state:     text('state').notNull().default('{}'),
+  deletedAt:  timestamp('deleted_at', { withTimezone: true }),
 });
 
 // ── Samples ───────────────────────────────────────────────────────────────────

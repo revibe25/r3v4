@@ -51,6 +51,7 @@ export const users = pgTable("users", {
   tier: text("tier").notNull().default("explorer"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  isAdmin: boolean("is_admin").notNull().default(false),
 });
 
 // ==================== USAGE TRACKING ====================
@@ -98,6 +99,9 @@ export const projects = pgTable("projects", {
   filePath: text("file_path"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+
+  state:     text('state').notNull().default('{}'),
+  deletedAt:  timestamp('deleted_at', { withTimezone: true }),
 }, (table) => ({
   userIdIdx: index("projects_user_id_idx").on(table.userId),
 }));
