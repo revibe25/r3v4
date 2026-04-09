@@ -518,6 +518,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1014.0
         version: 3.1014.0
+      '@lemonsqueezy/lemonsqueezy.js':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@llpte/llpte-signal':
         specifier: workspace:*
         version: link:../packages/llpte-signal
@@ -537,7 +540,7 @@ importers:
         specifier: ^16.3.1
         version: 16.6.1
       drizzle-orm:
-        specifier: 0.39.3
+        specifier: ^0.45.1
         version: 0.39.3(@types/pg@8.20.0)(pg@8.20.0)(postgres@3.4.9)
       drizzle-zod:
         specifier: ^0.8.0
@@ -570,7 +573,7 @@ importers:
         specifier: ^8.16.3
         version: 8.20.0
       postgres:
-        specifier: 3.4.9
+        specifier: ^3.4.8
         version: 3.4.9
       stripe:
         specifier: ^20.3.1
