@@ -13,7 +13,9 @@
     "bench": "tsx --tsconfig tsconfig.bench.json benchmarks/run.bench.ts",
     "lint": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@r3vibe/shared": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vitest": "^1.6.0",

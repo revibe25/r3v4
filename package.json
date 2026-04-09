@@ -5,24 +5,25 @@
   "private": true,
   "scripts": {
     "dev": "concurrently --kill-others-on-fail -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
-    "dev:server": "tsx watch --ignore ./client --ignore ./node_modules index.ts",
+    "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
     "dev:client": "pnpm --filter @r3vibe/client dev",
     "build": "tsc",
     "start": "node dist/index.js",
     "seed": "tsx scripts/seed/index.ts",
     "typecheck": "tsc --noEmit",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "implement-metrics": "tsx implement-session-metrics.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1014.0",
-    "@aws-sdk/s3-request-presigner": "^3.1014.0",
+    "@aws-sdk/client-s3": "^3.1024.0",
+    "@aws-sdk/s3-request-presigner": "^3.1024.0",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
-    "@trpc/server": "^11.14.1",
+    "@trpc/server": "^11.16.0",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "drizzle-orm": "^0.39.3",
+    "dotenv": "^17.4.1",
+    "drizzle-orm": "0.39.3",
     "drizzle-zod": "^0.7.1",
     "express": "^4.22.1",
     "express-rate-limit": "^7.5.1",
@@ -31,10 +32,11 @@
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
     "pg": "^8.20.0",
-    "postgres": "^3.4.8",
+    "pnpm": "^10.33.0",
+    "postgres": "^3.4.9",
     "stripe": "^20.4.1",
     "uuid": "^9.0.1",
-    "ws": "^8.19.0",
+    "ws": "^8.20.0",
     "zod": "^3.25.76",
     "zod-validation-error": "^3.5.4"
   },
@@ -47,7 +49,8 @@
     "@types/express-serve-static-core": "^5.1.1",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.1.0",
-    "@types/node": "^20.19.37",
+    "@types/node": "^20.19.39",
+    "@types/pg": "^8.20.0",
     "@types/qs": "^6.15.0",
     "@types/uuid": "^9.0.8",
     "@types/ws": "^8.18.1",
@@ -63,5 +66,12 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@smithy/types": "4.13.1",
+      "drizzle-orm": "0.39.3",
+      "postgres": "3.4.9"
+    }
   }
 }

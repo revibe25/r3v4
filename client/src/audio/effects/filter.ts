@@ -7,7 +7,6 @@ export class FilterEffect {
 
   constructor() {
     this.filter = new Tone.Filter({ frequency: 20000, type: 'lowpass', rolloff: -12 });
-    this.filter.toDestination();
     this.params = {
       enabled: true, type: 'filter',
       frequency: 20000, filterType: 'lowpass',
@@ -39,6 +38,19 @@ export class FilterEffect {
   getParams(): FilterParams { return { ...this.params }; }
   getNode(): Tone.Filter { return this.filter; }
   dispose(): void { this.filter.dispose(); }
+  /** Returns the terminal output node for explicit chain wiring. */
+  getOutput(): Tone.Filter {
+    return this.filter;
+  }
+
+  /**
+   * Connect this effect into an explicit audio chain.
+   * Use instead of letting the effect route to ctx.destination directly.
+   */
+  connectTo(destination: Tone.ToneAudioNode): this {
+    this.filter.connect(destination);
+    return this;
+  }
 }
 
 export const FILTER_PRESETS = {

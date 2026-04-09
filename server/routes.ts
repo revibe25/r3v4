@@ -1,16 +1,32 @@
-import { z } from 'zod';
 /**
  * server/routes.ts
  *
- * Canonical REST surface - tRPC handles all CRUD.
+ * Canonical REST surface — tRPC handles all CRUD.
  * Only routes that cannot be expressed as tRPC procedures live here:
- *   . /api/auth/*          - token issuance (login/register/me/refresh)
- *   . /api/samples/upload  - multipart file upload (tRPC cannot handle multipart)
- *   . /api/audio/analyze   - reserved; returns 501 until llpte-signal is wired in
+ *   . /api/auth/*          — token issuance (login/register/me/change-password)
+ *   . /api/samples/upload  — multipart file upload (tRPC cannot handle multipart)
+ *   . /api/audio/analyze   — audio analysis endpoint
  *
- * All session/project/preset/settings CRUD has been removed - the client
- * calls those exclusively via tRPC (/api/trpc/*) and the duplicate REST
- * surface was untested, unmaintained dead code.
+ * ── CHANGE: trpcAuth mounted globally ────────────────────────────────────────
+ * ROOT CAUSE: trpcAuth reads the Authorization header, verifies the JWT, and
+ * populates req.user. It was exported from server/middleware/auth.ts but never
+ * applied as middleware anywhere in this file. Every request arrived at every
+ * handler with req.user = undefined. requireUser on /api/auth/me therefore
+ * always returned 401. hydrateFromToken() in the client received 401, called
+ * clearAuth(), set isAuthenticated=false, and ProtectedRoute redirected to
+ * /login — destroying the session on every protected-page mount.
+ *
+ * FIX RATIONALE: app.use(trpcAuth) before all route mounts guarantees req.user
+ * is populated for any request carrying a valid Bearer token. trpcAuth is
+ * non-blocking — it unconditionally calls next() — so public routes that do
+ * not call requireUser are completely unaffected.
+ *
+ * AFFECTED SURFACE: All routes that call requireUser. No route logic changes.
+ *
+ * REGRESSION CHECK: Public routes (/api/auth/login, /api/auth/register) do not
+ * call requireUser. trpcAuth only writes to req.user; it never rejects. Existing
+ * upload and audio-analysis routes gain correct req.user population, which they
+ * already required — they were silently broken before this fix.
  */
 
 import { logger } from './lib/logger';
@@ -21,7 +37,7 @@ import path from "path";
 import fs from "fs/promises";
 import { insertSampleSchema } from "./db/schema";
 import { storage } from "./storage";
-import { requireUser } from "./middleware/auth";
+import { trpcAuth, requireUser } from "./middleware/auth";
 import authRouter from "./routes/auth";
 import { uploadLimiter } from "./middleware/rateLimit";
 
@@ -66,10 +82,17 @@ const upload = multer({
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
 
-  // AUTH
+  // ── GLOBAL JWT MIDDLEWARE ─────────────────────────────────────────────────
+  // Must be first. Parses Authorization: Bearer <token>, verifies the JWT,
+  // and writes the decoded payload to req.user when valid. Non-blocking:
+  // always calls next(). An invalid or absent token is silently ignored here;
+  // routes that require authentication enforce it via requireUser below.
+  app.use(trpcAuth);
+
+  // ── AUTH ROUTES ───────────────────────────────────────────────────────────
   app.use('/api/auth', authRouter);
 
-  // SAMPLE UPLOAD
+  // ── SAMPLE UPLOAD ─────────────────────────────────────────────────────────
   app.post(
     "/api/samples/upload",
     requireUser,
@@ -108,7 +131,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     },
   );
 
-  // AUDIO ANALYSIS
+  // ── AUDIO ANALYSIS ────────────────────────────────────────────────────────
   app.post(
     "/api/audio/analyze",
     requireUser,

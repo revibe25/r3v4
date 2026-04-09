@@ -40,6 +40,8 @@ export const SUBSCRIPTION_STATUSES = [
   'past_due',
   'canceled',
   'incomplete',
+  'incomplete_expired',
+  'unpaid',
   'paused',
 ] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];

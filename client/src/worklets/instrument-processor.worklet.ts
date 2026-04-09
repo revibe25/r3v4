@@ -8,29 +8,30 @@
  *
  * Parameters (all a-rate):
  *   masterGain      0-2,  default 1.0    post-processing output level
- *   compThreshold  -60-0, default -24    shared compression threshold (dBFS)
+ *   compThreshold  -60-0, default SIDE_THRESHOLD_DEFAULT    shared compression threshold (dBFS)
  *   compRatio       1-20, default 4      compression ratio N:1
  *   msWidth         0-2,  default 1.0    Side channel scalar (0=mono, 1=unity, 2=wide)
  *   midGain         0-2,  default 1.0    independent Mid gain
  *   sideGain        0-2,  default 1.0    independent Side gain (stacks with msWidth)
- *   midThreshold   -60-0, default -24    Mid-specific compression threshold
+ *   midThreshold   -60-0, default SIDE_THRESHOLD_DEFAULT    Mid-specific compression threshold
  *   sideThreshold  -60-0, default -30    Side-specific compression threshold
  *
  * Registration: "instrument-processor" (unchanged — no call-site changes needed)
  * Mono fallback: single-channel input processes as mid=signal, side=0
  */
 
+const SIDE_THRESHOLD_DEFAULT = -24;
 class InstrumentProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
       { name: "masterGain",    defaultValue: 1.15, minValue: 0,  maxValue: 2.0 }, // makeup gain for compression
-      { name: "compThreshold", defaultValue: -18, minValue: -60, maxValue: 0   }, // was -24: too aggressive
+      { name: "compThreshold", defaultValue: -18, minValue: -60, maxValue: 0   }, // was SIDE_THRESHOLD_DEFAULT: too aggressive
       { name: "compRatio",     defaultValue: 2.5, minValue: 1,   maxValue: 20  }, // was 4: too much squash
       { name: "msWidth",       defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
       { name: "midGain",       defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
       { name: "sideGain",      defaultValue: 1.0, minValue: 0,   maxValue: 2.0 },
-      { name: "midThreshold",  defaultValue: -24, minValue: -60, maxValue: 0   },
-      { name: "sideThreshold", defaultValue: -24, minValue: -60, maxValue: 0   }, // was -30: over-compressed stereo
+      { name: "midThreshold",  defaultValue: SIDE_THRESHOLD_DEFAULT, minValue: -60, maxValue: 0   },
+      { name: "sideThreshold", defaultValue: SIDE_THRESHOLD_DEFAULT, minValue: -60, maxValue: 0   }, // was -30: over-compressed stereo
     ];
   }
 
@@ -87,12 +88,12 @@ class InstrumentProcessor extends AudioWorkletProcessor {
       const side = (L[i] - R[i]) * 0.5;
 
       // Mid channel: compressor + gain
-      const midC       = this._compress(this._midEnv,  mid,  midThresh  !== -24 ? midThresh  : compThresh, compRatio);
+      const midC       = this._compress(this._midEnv,  mid,  midThresh  !== SIDE_THRESHOLD_DEFAULT ? midThresh  : compThresh, compRatio);
       this._midEnv     = midC.env;
       const procMid    = mid  * midC.gr  * midGainVal;
 
       // Side channel: compressor + width + gain
-      const sideC      = this._compress(this._sideEnv, side, sideThresh !== -30 ? sideThresh : compThresh, compRatio);
+      const sideC      = this._compress(this._sideEnv, side, sideThresh !== SIDE_THRESHOLD_DEFAULT ? sideThresh : compThresh, compRatio);
       this._sideEnv    = sideC.env;
       const procSide   = side * sideC.gr * msWidth * sideGainVal;
 

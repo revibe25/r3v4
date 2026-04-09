@@ -1,291 +1,673 @@
-// client/src/components/vst-browser.tsx
+/**
+ * client/src/components/vst-browser.tsx
+ * VST Plugin Browser — Acid Grid Edition
+ *
+ * Fully restyled to match the ag- hardware aesthetic from instrument.tsx:
+ * IBM Plex Mono, zero border-radius, acid-green (#a3e635) accents,
+ * AG token system, no shadcn dependencies — all inline styles.
+ *
+ * Logic preserved 1:1:
+ *   VSTScanner.loadFromStorage() / scanDirectory()
+ *   Favorites, Recent, Category tabs
+ *   Grid / List view toggle
+ *   Per-category accent colours
+ *   useVSTStore channel integration
+ */
 
-import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { VSTScanner, VSTPluginInfo } from '@/audio/fx/vst-scanner';
-import { Search, Star, TrendingUp, Grid, List, RefreshCw } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback, CSSProperties } from 'react';
+import { VSTScanner } from '@/audio/fx/vst-scanner';
+import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
+import { Search, Star, TrendingUp, Grid, List, RefreshCw, Package } from 'lucide-react';
 import { getAudioContext } from '@/audio/core/audio-context';
-import { useVSTStore }     from '@/store/vst-store';
+import { useVSTStore } from '@/store/vst-store';
 
+// ── Acid Grid design tokens ───────────────────────────────────────────────────
+// Mirrors the CSS custom properties in instrument.tsx STYLES block.
+const AG = {
+  black:   '#060606',
+  ink:     '#0a0a0a',
+  panel:   '#0d0d0d',
+  card:    '#0f0f0f',
+  border:  '#1c1c1c',
+  mute:    '#2a2a2a',
+  dim:     '#3a3a3a',
+  mid:     '#666',
+  soft:    '#888',
+  acid:    '#a3e635',
+  acid2:   '#84cc16',
+  acidDim: 'rgba(163,230,53,0.08)',
+  acidD:   '#4d6b18',
+  white:   '#f0f0f0',
+  err:     '#ff3b3b',
+  rec:     '#ef4444',
+  cyan:    '#22d3ee',
+  font:    "'IBM Plex Mono', 'JetBrains Mono', monospace",
+} as const;
+
+// Per-category accent colours for badges and active states
+const CAT_COLOR: Record<string, string> = {
+  synth:      AG.acid,
+  instrument: AG.acid,
+  effects:    AG.cyan,
+  effect:     AG.cyan,
+  dynamics:   '#f59e0b',
+  eq:         '#a78bfa',
+  reverb:     '#60a5fa',
+  delay:      '#34d399',
+  distortion: AG.err,
+  utility:    AG.soft,
+  filter:     '#fb923c',
+  chorus:     '#e879f9',
+  modulation: '#38bdf8',
+};
+const catAccent = (cat = '') => CAT_COLOR[cat.toLowerCase()] ?? AG.soft;
+
+// ── Shared style helpers ──────────────────────────────────────────────────────
+const mono: CSSProperties = { fontFamily: AG.font };
+const tag: CSSProperties  = {
+  ...mono,
+  fontSize: 7, letterSpacing: '0.2em',
+  textTransform: 'uppercase' as const,
+};
+
+// Keyframes injected once
+const KEYFRAMES = `
+  @keyframes vst-spin  { to { transform: rotate(360deg); } }
+  @keyframes vst-sweep { from { left: -60%; } to { left: 100%; } }
+  @keyframes vst-pulse { from { opacity: 0.5; } to { opacity: 1; } }
+`;
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 interface VSTBrowserProps {
   onPluginSelect: (plugin: VSTPluginInfo) => void;
-  channelId?:    string;   // auto-insert plugin into this channel when selected
+  channelId?:    string;
   showFXChain?:  boolean;
 }
 
-export function VSTBrowser({ onPluginSelect, channelId, showFXChain }: VSTBrowserProps) {
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   const addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
-  const [plugins,   setPlugins]   = useState<VSTPluginInfo[]>([]);
-  const [recentIds, setRecentIds] = useState<string[]>([]);
-  const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanProgress, setScanProgress] = useState(0);
 
+  const [plugins,     setPlugins]     = useState<VSTPluginInfo[]>([]);
+  const [recentIds,   setRecentIds]   = useState<string[]>([]);
+  const [loadingId,   setLoadingId]   = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCat, setSelectedCat] = useState<string>('all');
+  const [viewMode,    setViewMode]    = useState<'grid' | 'list'>('grid');
+  const [isScanning,  setIsScanning]  = useState(false);
+  const [scanMsg,     setScanMsg]     = useState('');
+
+  // Load cached plugins on mount
   useEffect(() => {
-    // Load cached plugins on mount
     VSTScanner.loadFromStorage();
     setPlugins(VSTScanner.getAllCachedPlugins());
   }, []);
 
-  const handleScan = async () => {
+  // ── Scan ─────────────────────────────────────────────────────────────────
+  const handleScan = useCallback(async () => {
     setIsScanning(true);
-    setScanProgress(0);
-
+    setScanMsg('INITIALIZING SCANNER...');
     try {
       const audioCtx = getAudioContext();
+      setScanMsg('SCANNING /PLUGINS...');
       const result = await VSTScanner.scanDirectory('/plugins', audioCtx);
-      
       setPlugins(result.plugins);
       VSTScanner.saveToStorage();
-
-      if (result.errors.length > 0) {
-        console.warn('Scan completed with errors:', result.errors);
-      }
-    } catch (error) {
-      console.error('Scan failed:', error);
+      setScanMsg(`FOUND ${result.plugins.length} PLUGIN${result.plugins.length !== 1 ? 'S' : ''}`);
+      setTimeout(() => setScanMsg(''), 2500);
+    } catch (err) {
+      setScanMsg('SCAN FAILED');
+      setTimeout(() => setScanMsg(''), 2500);
+      console.error('VSTBrowser scan error:', err);
     } finally {
       setIsScanning(false);
-      setScanProgress(100);
     }
-  };
+  }, []);
 
-  const handlePluginSelect = (plugin: VSTPluginInfo) => {
+  // ── Select ───────────────────────────────────────────────────────────────
+  const handlePluginSelect = useCallback((plugin: VSTPluginInfo) => {
     setLoadingId(plugin.id);
-    setRecentIds(prev => [plugin.id, ...prev.filter(id => id !== plugin.id)].slice(0, 10));
+    setRecentIds(prev =>
+      [plugin.id, ...prev.filter(id => id !== plugin.id)].slice(0, 10)
+    );
     if (channelId) addPluginToChannel(channelId, plugin.id, plugin.name);
     onPluginSelect(plugin);
     setTimeout(() => setLoadingId(null), 600);
-  };
+  }, [channelId, addPluginToChannel, onPluginSelect]);
+
+  // ── Favorite toggle ───────────────────────────────────────────────────────
+  const toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPlugins(prev =>
+      prev.map(p => p.id === pluginId ? { ...p, isFavorite: !p.isFavorite } : p)
+    );
+    VSTScanner.saveToStorage();
+  }, []);
+
+  // ── Derived data ──────────────────────────────────────────────────────────
+  const categories = useMemo(
+    () => Array.from(new Set(plugins.map(p => p.category))).sort(),
+    [plugins],
+  );
 
   const filteredPlugins = useMemo(() => {
     return plugins.filter(plugin => {
-      // Special tabs first
-      if (selectedCategory === 'favorites') return !!plugin.isFavorite;
-      if (selectedCategory === 'recent')    return recentIds.includes(plugin.id);
-
-      // Category filter
-      if (selectedCategory !== 'all' && plugin.category !== selectedCategory) {
-        return false;
-      }
-
-      // Search filter
+      if (selectedCat === 'favorites') return !!plugin.isFavorite;
+      if (selectedCat === 'recent')    return recentIds.includes(plugin.id);
+      if (selectedCat !== 'all' && plugin.category !== selectedCat) return false;
       if (searchQuery) {
-        const query = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase();
         return (
-          plugin.name.toLowerCase().includes(query) ||
-          plugin.vendor.toLowerCase().includes(query) ||
-          plugin.tags.some(tag => tag.includes(query))
+          plugin.name.toLowerCase().includes(q) ||
+          plugin.vendor.toLowerCase().includes(q) ||
+          plugin.tags.some(t => t.toLowerCase().includes(q))
         );
       }
       return true;
     });
-  }, [plugins, searchQuery, selectedCategory, recentIds]);
+  }, [plugins, searchQuery, selectedCat, recentIds]);
 
-  const categories = useMemo(() => {
-    const cats = new Set(plugins.map(p => p.category));
-    return Array.from(cats);
-  }, [plugins]);
+  const TABS = [
+    { id: 'all',       label: 'ALL',    icon: null,                           accent: AG.white },
+    { id: 'favorites', label: 'FAV',    icon: <Star size={9} />,              accent: '#f59e0b' },
+    { id: 'recent',    label: 'RECENT', icon: <TrendingUp size={9} />,        accent: AG.cyan },
+    ...categories.map(c => ({ id: c, label: c.toUpperCase(), icon: null, accent: catAccent(c) })),
+  ];
 
-  const toggleFavorite = (pluginId: string) => {
-    setPlugins(prev =>
-      prev.map(p =>
-        p.id === pluginId ? { ...p, isFavorite: !p.isFavorite } : p
-      )
-    );
-    VSTScanner.saveToStorage();
-  };
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>VST Plugin Browser</span>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-            >
-              {viewMode === 'grid' ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleScan}
-              disabled={isScanning}
-            >
-              <RefreshCw className={`h-4 w-4 ${isScanning ? 'animate-spin' : ''}`} />
-              {isScanning ? 'Scanning...' : 'Scan'}
-            </Button>
-          </div>
-        </CardTitle>
+    <div style={{
+      display: 'flex', flexDirection: 'column',
+      background: AG.panel, fontFamily: AG.font,
+      minHeight: 0, height: '100%',
+    }}>
+      <style>{KEYFRAMES}</style>
 
-        <div className="flex gap-2 mt-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-[#888]" />
-            <Input
-              placeholder="Search plugins..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent>
-        <Tabs value={selectedCategory} onValueChange={setSelectedCategory}>
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="favorites">
-              <Star className="h-4 w-4 mr-1" />
-              Favorites
-            </TabsTrigger>
-            <TabsTrigger value="recent">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              Recent
-            </TabsTrigger>
-            {categories.map(cat => (
-              <TabsTrigger key={cat} value={cat}>
-                {cat}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <TabsContent value={selectedCategory} className="mt-4">
-            <ScrollArea className="h-[500px]">
-              {viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {filteredPlugins.map(plugin => (
-                    <PluginCard
-                      key={plugin.id}
-                      plugin={plugin}
-                      onSelect={() => handlePluginSelect(plugin)}
-                      loading={loadingId === plugin.id}
-                      onToggleFavorite={() => toggleFavorite(plugin.id)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {filteredPlugins.map(plugin => (
-                    <PluginListItem
-                      key={plugin.id}
-                      plugin={plugin}
-                      onSelect={() => handlePluginSelect(plugin)}
-                      loading={loadingId === plugin.id}
-                      onToggleFavorite={() => toggleFavorite(plugin.id)}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {filteredPlugins.length === 0 && (
-                <div className="text-center py-12 text-[#888]">
-                  {searchQuery ? 'No plugins found' : 'No plugins available. Click Scan to load plugins.'}
-                </div>
-              )}
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PluginCard({
-  plugin,
-  onSelect,
-  onToggleFavorite,
-  loading,
-}: {
-  plugin: VSTPluginInfo;
-  onSelect: () => void;
-  onToggleFavorite: () => void;
-  loading?: boolean;
-}) {
-  return (
-    <Card
-      className={`cursor-pointer hover:bg-accent transition-colors${loading ? ' opacity-60 pointer-events-none' : ''}`}
-      onClick={onSelect}
-    >
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <Badge variant="secondary">{plugin.category}</Badge>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite();
+      {/* ── Toolbar ──────────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 6,
+        padding: '8px 14px',
+        background: AG.ink,
+        borderBottom: `1px solid ${AG.border}`,
+        flexShrink: 0,
+      }}>
+        {/* Search */}
+        <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+          <Search size={10} style={{
+            position: 'absolute', left: 10, top: '50%',
+            transform: 'translateY(-50%)',
+            color: AG.mid, pointerEvents: 'none',
+          }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="SEARCH PLUGINS..."
+            style={{
+              ...mono,
+              width: '100%', boxSizing: 'border-box',
+              background: AG.black,
+              border: `1px solid ${AG.border}`,
+              borderRadius: 0,
+              color: AG.white,
+              fontSize: 9, letterSpacing: '0.15em',
+              padding: '6px 10px 6px 28px',
+              outline: 'none',
+              transition: 'border-color 0.1s, box-shadow 0.1s',
             }}
-            className="text-yellow-500 hover:text-yellow-600"
-          >
-            <Star className={`h-4 w-4 ${plugin.isFavorite ? 'fill-current' : ''}`} />
-          </button>
+            onFocus={e => {
+              e.currentTarget.style.borderColor = AG.acid;
+              e.currentTarget.style.boxShadow  = `0 0 0 1px ${AG.acid}`;
+            }}
+            onBlur={e => {
+              e.currentTarget.style.borderColor = AG.border;
+              e.currentTarget.style.boxShadow  = 'none';
+            }}
+          />
         </div>
 
-        <h3 className="font-semibold truncate">{plugin.name}</h3>
-        <p className="text-sm text-[#888] truncate">{plugin.vendor}</p>
+        {/* View toggle: grid / list */}
+        {(['grid', 'list'] as const).map(mode => {
+          const active = viewMode === mode;
+          return (
+            <button
+              key={mode}
+              onClick={() => setViewMode(mode)}
+              title={`${mode} view`}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                width: 28, height: 28, padding: 0, flexShrink: 0,
+                background: active ? AG.acidDim : 'transparent',
+                border: `1px solid ${active ? AG.acid : AG.border}`,
+                color: active ? AG.acid : AG.mid,
+                cursor: 'pointer',
+                boxShadow: active ? `0 0 8px ${AG.acid}33` : 'none',
+                transition: 'all 0.1s',
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.borderColor = AG.dim;
+                  e.currentTarget.style.color       = AG.soft;
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.borderColor = AG.border;
+                  e.currentTarget.style.color       = AG.mid;
+                }
+              }}
+            >
+              {mode === 'grid' ? <Grid size={11} /> : <List size={11} />}
+            </button>
+          );
+        })}
 
-        <div className="flex flex-wrap gap-1 mt-2">
-          {plugin.tags.slice(0, 2).map(tag => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
+        {/* Scan button */}
+        <button
+          onClick={handleScan}
+          disabled={isScanning}
+          style={{
+            ...mono,
+            display: 'flex', alignItems: 'center', gap: 6,
+            height: 28, padding: '0 12px', flexShrink: 0,
+            background: isScanning ? AG.acidDim : 'transparent',
+            border: `1px solid ${isScanning ? AG.acid : AG.border}`,
+            color: isScanning ? AG.acid : AG.mid,
+            cursor: isScanning ? 'default' : 'pointer',
+            fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            transition: 'all 0.1s',
+          }}
+          onMouseEnter={e => {
+            if (!isScanning) {
+              e.currentTarget.style.borderColor = AG.acid;
+              e.currentTarget.style.color       = AG.acid;
+            }
+          }}
+          onMouseLeave={e => {
+            if (!isScanning) {
+              e.currentTarget.style.borderColor = AG.border;
+              e.currentTarget.style.color       = AG.mid;
+            }
+          }}
+        >
+          <RefreshCw
+            size={10}
+            style={{ animation: isScanning ? 'vst-spin 1s linear infinite' : 'none' }}
+          />
+          {isScanning ? 'SCANNING' : 'SCAN'}
+        </button>
+      </div>
+
+      {/* Scan progress sweep bar */}
+      {isScanning && (
+        <div style={{
+          height: 2, background: AG.border,
+          position: 'relative', overflow: 'hidden', flexShrink: 0,
+        }}>
+          <div style={{
+            position: 'absolute', left: '-60%', top: 0, bottom: 0, width: '60%',
+            background: `linear-gradient(90deg, transparent, ${AG.acid}, transparent)`,
+            animation: 'vst-sweep 1.2s linear infinite',
+          }} />
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Scan status message */}
+      {scanMsg && (
+        <div style={{
+          ...tag, color: isScanning ? AG.acid : AG.soft,
+          padding: '4px 14px',
+          background: AG.ink, borderBottom: `1px solid ${AG.border}`,
+          flexShrink: 0,
+        }}>
+          {scanMsg}
+        </div>
+      )}
+
+      {/* ── Category tabs ─────────────────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 2,
+        overflowX: 'auto', flexShrink: 0,
+        padding: '6px 14px',
+        background: AG.black,
+        borderBottom: `1px solid ${AG.border}`,
+        // hide scrollbar
+        scrollbarWidth: 'none' as const,
+      }}>
+        {TABS.map(({ id, label, icon, accent }) => {
+          const active = selectedCat === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setSelectedCat(id)}
+              style={{
+                ...mono,
+                display: 'flex', alignItems: 'center', gap: 5,
+                height: 24, padding: '0 10px', flexShrink: 0,
+                background: active ? `${accent}18` : 'transparent',
+                border: `1px solid ${active ? accent : AG.border}`,
+                color: active ? accent : AG.mid,
+                fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+                cursor: 'pointer',
+                boxShadow: active ? `0 0 8px ${accent}33` : 'none',
+                transition: 'all 0.1s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => {
+                if (!active) {
+                  e.currentTarget.style.color       = AG.soft;
+                  e.currentTarget.style.borderColor = AG.mute;
+                }
+              }}
+              onMouseLeave={e => {
+                if (!active) {
+                  e.currentTarget.style.color       = AG.mid;
+                  e.currentTarget.style.borderColor = AG.border;
+                }
+              }}
+            >
+              {icon}
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Plugin area ───────────────────────────────────────────────────── */}
+      <div style={{
+        flex: 1, overflowY: 'auto', minHeight: 0,
+        padding: viewMode === 'grid' ? '12px 14px 6px' : 0,
+        scrollbarWidth: 'thin' as const,
+        scrollbarColor: `${AG.acidD} ${AG.ink}`,
+      }}>
+
+        {/* Empty state */}
+        {filteredPlugins.length === 0 && (
+          <div style={{
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            gap: 14, padding: '40px 20px',
+          }}>
+            <Package size={28} color={AG.dim} />
+            <div style={{ ...tag, color: AG.mid, textAlign: 'center', fontSize: 9 }}>
+              {searchQuery
+                ? 'NO PLUGINS MATCH SEARCH'
+                : plugins.length === 0
+                  ? 'NO PLUGINS LOADED — CLICK SCAN'
+                  : 'EMPTY FOR THIS FILTER'}
+            </div>
+            {plugins.length === 0 && !searchQuery && (
+              <div style={{
+                ...mono, fontSize: 8, color: AG.dim,
+                textAlign: 'center', lineHeight: 2,
+                maxWidth: 240,
+              }}>
+                Place .vst3 / .vst files in /plugins then press SCAN
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Grid view ──────────────────────────────────────────────────── */}
+        {viewMode === 'grid' && filteredPlugins.length > 0 && (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(158px, 1fr))',
+            gap: 5,
+          }}>
+            {filteredPlugins.map(plugin => (
+              <PluginCard
+                key={plugin.id}
+                plugin={plugin}
+                loading={loadingId === plugin.id}
+                onSelect={() => handlePluginSelect(plugin)}
+                onToggleFavorite={e => toggleFavorite(plugin.id, e)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* ── List view ──────────────────────────────────────────────────── */}
+        {viewMode === 'list' && filteredPlugins.length > 0 && (
+          <div>
+            {/* List header */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '88px 1fr 110px 70px 28px',
+              gap: 0,
+              padding: '5px 14px',
+              background: AG.black,
+              borderBottom: `1px solid ${AG.border}`,
+              position: 'sticky', top: 0, zIndex: 1,
+            }}>
+              {['CAT', 'NAME', 'VENDOR', 'VER', '★'].map(h => (
+                <div key={h} style={{ ...tag, color: AG.dim, fontSize: 8 }}>{h}</div>
+              ))}
+            </div>
+            {filteredPlugins.map(plugin => (
+              <PluginListItem
+                key={plugin.id}
+                plugin={plugin}
+                loading={loadingId === plugin.id}
+                onSelect={() => handlePluginSelect(plugin)}
+                onToggleFavorite={e => toggleFavorite(plugin.id, e)}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Footer count */}
+        {filteredPlugins.length > 0 && (
+          <div style={{
+            ...tag, fontSize: 8, color: AG.dim, textAlign: 'right',
+            padding: viewMode === 'grid' ? '8px 0 2px' : '6px 14px',
+          }}>
+            {filteredPlugins.length} PLUGIN{filteredPlugins.length !== 1 ? 'S' : ''}
+            {searchQuery && ` — "${searchQuery.toUpperCase()}"`}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-function PluginListItem({
-  plugin,
-  onSelect,
-  onToggleFavorite,
-  loading,
+// ─────────────────────────────────────────────────────────────────────────────
+// PLUGIN CARD — grid view
+// ─────────────────────────────────────────────────────────────────────────────
+function PluginCard({
+  plugin, loading, onSelect, onToggleFavorite,
 }: {
-  plugin: VSTPluginInfo;
-  onSelect: () => void;
-  onToggleFavorite: () => void;
-  loading?: boolean;
+  plugin:           VSTPluginInfo;
+  loading?:         boolean;
+  onSelect:         () => void;
+  onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
+  const [hovered, setHovered] = useState(false);
+  const accent = catAccent(plugin.category);
+
   return (
     <div
-      className={`flex items-center justify-between p-3 border rounded-none hover:bg-accent cursor-pointer${loading ? ' opacity-60 pointer-events-none' : ''}`}
-      onClick={onSelect}
+      onClick={loading ? undefined : onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        background: hovered ? '#111111' : AG.card,
+        border: `1px solid ${hovered ? AG.dim : AG.border}`,
+        borderTop: `2px solid ${hovered ? accent : AG.border}`,
+        cursor: loading ? 'wait' : 'pointer',
+        opacity: loading ? 0.55 : 1,
+        transition: 'background 0.1s, border-color 0.1s',
+        padding: '10px 10px 9px',
+        display: 'flex', flexDirection: 'column', gap: 7,
+        animation: loading ? 'vst-pulse 0.5s ease infinite alternate' : 'none',
+        boxShadow: hovered ? `inset 0 0 20px rgba(0,0,0,0.4)` : 'none',
+      }}
     >
-      <div className="flex items-center gap-4 flex-1">
-        <Badge variant="secondary">{plugin.category}</Badge>
-        <div className="flex-1">
-          <h4 className="font-medium">{plugin.name}</h4>
-          <p className="text-sm text-[#888]">
-            {plugin.vendor} • v{plugin.version}
-          </p>
-        </div>
-        <div className="flex gap-1">
-          {plugin.tags.slice(0, 3).map(tag => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
+      {/* Category badge + favorite */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
+        <span style={{
+          ...tag, fontSize: 7,
+          color: accent,
+          background: `${accent}14`,
+          border: `1px solid ${accent}40`,
+          padding: '2px 5px',
+          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          maxWidth: '72%',
+        }}>
+          {plugin.category || 'VST'}
+        </span>
+        <button
+          onClick={onToggleFavorite}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: 2, flexShrink: 0,
+            color: plugin.isFavorite ? '#f59e0b' : AG.dim,
+            transition: 'color 0.1s',
+            display: 'flex', alignItems: 'center',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#f59e0b'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? '#f59e0b' : AG.dim; }}
+        >
+          <Star size={10} style={{ fill: plugin.isFavorite ? '#f59e0b' : 'none' }} />
+        </button>
+      </div>
+
+      {/* Plugin name */}
+      <div style={{
+        fontFamily: AG.font, fontWeight: 600, fontSize: 11,
+        color: hovered ? AG.white : '#d4d4d4',
+        letterSpacing: '0.02em', lineHeight: 1.2,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>
+        {plugin.name}
+      </div>
+
+      {/* Vendor */}
+      <div style={{
+        fontFamily: AG.font, fontSize: 8, color: AG.soft,
+        letterSpacing: '0.08em',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+      }}>
+        {plugin.vendor}
+      </div>
+
+      {/* Tags */}
+      {plugin.tags.length > 0 && (
+        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          {plugin.tags.slice(0, 2).map(t => (
+            <span key={t} style={{
+              ...tag, fontSize: 7, color: AG.mid,
+              border: `1px solid ${AG.border}`,
+              padding: '1px 4px',
+            }}>
+              {t}
+            </span>
           ))}
         </div>
-      </div>
+      )}
+
+      {/* Hover accent line at bottom */}
+      {hovered && (
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+          background: accent,
+          boxShadow: `0 0 6px ${accent}`,
+          pointerEvents: 'none',
+        }} />
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PLUGIN LIST ITEM — list view
+// ─────────────────────────────────────────────────────────────────────────────
+function PluginListItem({
+  plugin, loading, onSelect, onToggleFavorite,
+}: {
+  plugin:           VSTPluginInfo;
+  loading?:         boolean;
+  onSelect:         () => void;
+  onToggleFavorite: (e: React.MouseEvent) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const accent = catAccent(plugin.category);
+
+  return (
+    <div
+      onClick={loading ? undefined : onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '88px 1fr 110px 70px 28px',
+        alignItems: 'center',
+        gap: 0,
+        padding: '0 14px',
+        height: 38,
+        background: hovered ? '#0f0f0f' : 'transparent',
+        borderBottom: `1px solid ${AG.border}`,
+        borderLeft: `3px solid ${hovered ? accent : 'transparent'}`,
+        cursor: loading ? 'wait' : 'pointer',
+        opacity: loading ? 0.55 : 1,
+        transition: 'background 0.08s, border-left-color 0.08s',
+        animation: loading ? 'vst-pulse 0.5s ease infinite alternate' : 'none',
+      }}
+    >
+      {/* Category */}
+      <span style={{
+        ...tag, fontSize: 7, color: accent,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        paddingRight: 8,
+      }}>
+        {plugin.category || '—'}
+      </span>
+
+      {/* Name */}
+      <span style={{
+        fontFamily: AG.font, fontWeight: 600, fontSize: 10,
+        color: hovered ? AG.white : '#cccccc',
+        letterSpacing: '0.04em',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        paddingRight: 8,
+      }}>
+        {plugin.name}
+      </span>
+
+      {/* Vendor */}
+      <span style={{
+        fontFamily: AG.font, fontSize: 9, color: AG.soft,
+        letterSpacing: '0.06em',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        paddingRight: 8,
+      }}>
+        {plugin.vendor}
+      </span>
+
+      {/* Version */}
+      <span style={{
+        fontFamily: AG.font, fontSize: 8, color: AG.dim, letterSpacing: '0.1em',
+      }}>
+        {plugin.version ? `v${plugin.version}` : '—'}
+      </span>
+
+      {/* Favorite */}
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleFavorite();
+        onClick={onToggleFavorite}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: plugin.isFavorite ? '#f59e0b' : AG.dim,
+          transition: 'color 0.1s',
         }}
-        className="text-yellow-500 hover:text-yellow-600"
+        onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = '#f59e0b'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? '#f59e0b' : AG.dim; }}
       >
-        <Star className={`h-4 w-4 ${plugin.isFavorite ? 'fill-current' : ''}`} />
+        <Star size={10} style={{ fill: plugin.isFavorite ? '#f59e0b' : 'none' }} />
       </button>
     </div>
   );

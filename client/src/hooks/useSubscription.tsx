@@ -6,7 +6,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { trpc } from '../lib/trpc';
-import { useAuthStore } from '../stores/authStore';                      // adjust to your trpc client path
+import { useAuthStore } from '../hooks/authStore';
 import {
   UserSubscription,
   SubscriptionTier,
@@ -53,7 +53,7 @@ const SubscriptionContext = createContext<SubscriptionContextValue | null>(null)
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
   // Gate query on Zustand auth store token — avoids a guaranteed 401
   // on every page load for unauthenticated visitors.
-  const hasToken = Boolean(useAuthStore.getState().token);
+  const hasToken = useAuthStore(s => Boolean(s.token));
 
   const { data, isLoading } = trpc.subscription.getMySubscription.useQuery(undefined, {
     enabled: hasToken,

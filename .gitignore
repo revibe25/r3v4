@@ -60,3 +60,12 @@ coverage.py
 # ── Shadow server src ────────────────────────────────────────────────────────
 server/src/
 .turbo/
+
+# compiled server output
+server/dist/
+
+# runtime logs
+internal/logs/
+
+# deploy log (explicit)
+r3-deploy.log

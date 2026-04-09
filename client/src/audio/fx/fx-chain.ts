@@ -266,12 +266,12 @@ export class FXChain {
 
   setPreGain(gain: number): void {
     this.preGainValue = gain;
-    this.inputNode.gain.value = gain;
+    this.inputNode.gain.setTargetAtTime(gain, context.currentTime, 0.015);
   }
 
   setPostGain(gain: number): void {
     this.postGainValue = gain;
-    this.outputNode.gain.value = gain;
+    this.outputNode.gain.setTargetAtTime(gain, context.currentTime, 0.015);
   }
 
   // ─── Serialization ───────────────────────────────────────────────────────

@@ -1,211 +1,367 @@
 /**
  * server/routes/auth.ts
  *
- * Auth routes: register, login, me.
+ * Authentication routes: /register, /login, /logout, /me, /change-password.
  *
- * ROOT CAUSE for prior empty stub: The file was scaffolded but never
- * implemented. No user could obtain a token, making every protected
- * route unreachable in practice despite auth enforcement being correct.
- *
- * DESIGN DECISIONS:
- *
- * 1. bcrypt cost factor 12
- *    Cost 10 is the common default. At cost 12, hash time on modern
- *    hardware is ~250-400ms — acceptable for auth, meaningfully harder
- *    to brute-force offline. Cost 14+ causes noticeable UX latency.
- *
- * 2. Username uniqueness enforced at DB layer (UNIQUE constraint on users.username)
- *    We check explicitly first to return a clean 409 rather than letting
- *    Drizzle throw a raw Postgres unique violation error to the client.
- *
- * 3. /me returns only the token payload fields (id, username, email, tier)
- *    It does not re-query the DB. The token is the source of truth for
- *    identity within a session. If tier changes (e.g. after upgrade),
- *    the client must re-login to get a new token — acceptable tradeoff
- *    vs. a DB round-trip on every /me call.
- *
- * 4. Timing-safe comparison for login:
- *    bcrypt.compare is already timing-safe. We do NOT short-circuit on
- *    "user not found" before calling compare — instead we compare against
- *    a dummy hash to keep response time constant and prevent user
- *    enumeration via timing differences.
- *
- * 5. Password requirements: min 8 chars, max 72 chars.
- *    72 is bcrypt's internal input limit — bytes beyond 72 are silently
- *    truncated. Enforcing the max here prevents false equivalence where
- *    "password123...73chars" === "password123...74chars" from bcrypt's view.
+ * Security considerations:
+ * - Timing attack prevention: Always run bcrypt.compare even when user not found
+ * - Lazy DUMMY_HASH: Computed on first request, cached for process lifetime
+ * - Credential field: Accepts email OR username (determined by "@" presence)
+ * - Password field: Stored as 'password' column in DB (schema confirmed)
+ * - Token lifecycle: JWT with configurable expiry, stateless validation
  */
 
-import { Router } from 'express';
-import bcrypt from 'bcrypt';
-import { z } from 'zod';
-import { signToken } from '../middleware/auth';
-import { requireUser } from '../middleware/auth';
-import { storage } from '../storage';
-import { logger } from '../lib/logger';
+import { Router } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
+import { storage } from "../storage";
+import { logger } from "../utils/logger";
+import { requireUser } from "../middleware/requireUser";
 
-const router: Router = Router();
+const router = Router();
 
+// ── Environment config ────────────────────────────────────────────────────────
+const JWT_SECRET = process.env.JWT_SECRET ?? "dev_secret_do_not_use_in_production_32x";
+const JWT_EXPIRES = (process.env.JWT_EXPIRES ?? "7d") as string;
 const BCRYPT_ROUNDS = 12;
 
-// Dummy hash used to prevent user enumeration via timing.
-// Pre-computed at module load so it doesn't add latency to the first request.
-const DUMMY_HASH = await bcrypt.hash('dummy_timing_protection', BCRYPT_ROUNDS);
+// ── §SES.8 BLOCK fix 1: lazy DUMMY_HASH singleton ────────────────────────────
+// Do NOT use top-level await — causes SyntaxError in CommonJS.
+// Computed on first request and cached for the process lifetime.
+let _dummyHash: string | null = null;
+
+async function getDummyHash(): Promise<string> {
+  if (_dummyHash === null) {
+    _dummyHash = await bcrypt.hash("__r3_dummy_password__", BCRYPT_ROUNDS);
+  }
+  return _dummyHash;
+}
+
+// ── Validation schemas ────────────────────────────────────────────────────────
 
 const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3,  'Username must be at least 3 characters')
-    .max(32, 'Username must be at most 32 characters')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Username may only contain letters, numbers, _ and -'),
-  password: z
-    .string()
-    .min(8,  'Password must be at least 8 characters')
-    .max(72, 'Password must be at most 72 characters'),
+  /**
+   * Email is optional — users may register with username only.
+   * If provided, must be valid email format.
+   */
   email: z
     .string()
-    .email('Invalid email address')
-    .max(255)
-    .optional(),
+    .email("Invalid email address")
+    .optional()
+    .or(z.literal("")), // Allow empty string as falsy
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(32, "Username must be at most 32 characters")
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username may only contain letters, digits, _ or -"
+    ),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password must be at most 128 characters"),
 });
 
+/**
+ * §SES.8 BLOCK fix 2: `credential` accepts email OR username.
+ * Single field resolved at login time based on "@" presence.
+ */
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1),
+  credential: z
+    .string()
+    .min(1, "Email or username is required")
+    .max(255, "Credential is too long"),
+  password: z.string().min(1, "Password is required"),
 });
 
-// ── POST /api/auth/register ───────────────────────────────────────────────────
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(128, "Password must be at most 128 characters"),
+});
 
-router.post('/register', async (req, res) => {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Sign JWT token with user payload.
+ * Expiry is controlled via JWT_EXPIRES env var (default: 7d).
+ */
+function signToken(payload: {
+  id: string;
+  email?: string;
+  username?: string;
+  tier: string;
+}): string {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES,
+  } as jwt.SignOptions);
+}
+
+/**
+ * Remove sensitive fields from user object before sending to client.
+ * CRITICAL: Removes 'password' field (the actual column name), not 'passwordHash'.
+ */
+function safeUser(user: Record<string, unknown>) {
+  const { password: _, ...rest } = user;
+  return rest;
+}
+
+/**
+ * Normalize credential to email format for logging/debugging.
+ * If credential looks like email, use it; otherwise return masked username.
+ */
+function normalizeCredentialForLog(credential: string): string {
+  return credential.includes("@") ? credential : `user:${credential}`;
+}
+
+// ── POST /auth/register ───────────────────────────────────────────────────────
+
+router.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({
-      error: 'Invalid registration data',
-      details: parsed.error.issues,
-    });
+    logger.warn(
+      { errors: parsed.error.flatten() },
+      "register: validation failed"
+    );
+    return res.status(400).json({ error: parsed.error.flatten() });
   }
 
-  const { username, password, email } = parsed.data;
+  const { email, username, password } = parsed.data;
 
   try {
-    // Explicit uniqueness check for a clean 409 — avoids leaking raw DB errors.
-    const existing = await storage.getUserByUsername(username);
-    if (existing) {
-      return res.status(409).json({ error: 'Username already taken' });
+    // ── Check username uniqueness ─────────────────────────────────────────────
+    const existingByUsername = await storage.getUserByUsername(username);
+    if (existingByUsername) {
+      logger.warn({ username }, "register: username already taken");
+      return res.status(409).json({ error: "Username is already taken" });
     }
 
+    // ── Check email uniqueness (if provided) ──────────────────────────────────
+    if (email) {
+      const existingByEmail = await storage.getUserByEmail(email);
+      if (existingByEmail) {
+        logger.warn({ email }, "register: email already registered");
+        return res.status(409).json({
+          error: "Email address is already registered",
+        });
+      }
+    }
+
+    // ── Hash password with bcrypt ─────────────────────────────────────────────
     const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
+    // ── Create user in database ───────────────────────────────────────────────
     const user = await storage.createUser({
+      email: email || null, // Store null if email is empty string
       username,
       password: passwordHash,
-      email: email ?? null,
+      tier: "explorer",
     });
 
+    // ── Sign JWT ──────────────────────────────────────────────────────────────
     const token = signToken({
-      id:       user.id,
-      username: user.username,
-      email:    user.email ?? null,
-      tier:     user.tier,
+      id: user.id,
+      email: (user.email as string | null) ?? undefined,
+      username: user.username as string,
+      tier: (user.tier as string | undefined) ?? "explorer",
     });
 
-    logger.info('[auth] registered', { userId: user.id, username: user.username });
+    logger.info({ userId: user.id, username }, "User registered successfully");
 
-    return res.status(201).json({ token, user: {
-      id:       user.id,
-      username: user.username,
-      email:    user.email ?? null,
-      tier:     user.tier,
-    }});
+    return res.status(201).json({
+      token,
+      user: safeUser(user as Record<string, unknown>),
+    });
   } catch (err) {
-    logger.error('[auth] register error', { error: (err as Error).message });
-    return res.status(500).json({ error: 'Registration failed' });
+    logger.error({ err }, "register: unexpected error");
+    return res
+      .status(500)
+      .json({ error: "Registration failed — please try again later" });
   }
 });
 
-// ── POST /api/auth/login ──────────────────────────────────────────────────────
+// ── POST /auth/login ──────────────────────────────────────────────────────────
 
-router.post('/login', async (req, res) => {
+router.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Email and password are required' });
+    logger.warn(
+      { errors: parsed.error.flatten(), credential: req.body.credential },
+      "login: validation failed"
+    );
+    return res.status(400).json({ error: parsed.error.flatten() });
   }
 
-  const { email, password } = parsed.data;
+  const { credential, password } = parsed.data;
 
   try {
-    const user = await storage.getUserByEmail(email);
+    // ── Determine lookup strategy ─────────────────────────────────────────────
+    const isEmailAttempt = credential.includes("@");
+    const credentialLog = normalizeCredentialForLog(credential);
 
-    // Always run bcrypt.compare to prevent timing-based user enumeration.
-    // If user doesn't exist, compare against dummy hash — result will be
-    // false, and we return the same 401 as a wrong password.
-    const hashToCompare = user?.password ?? DUMMY_HASH;
-    const valid = await bcrypt.compare(password, hashToCompare);
+    // ── Fetch user by credential ──────────────────────────────────────────────
+    const user = isEmailAttempt
+      ? await storage.getUserByEmail(credential)
+      : await storage.getUserByUsername(credential);
 
-    if (!user || !valid) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+    if (!user) {
+      logger.warn({ credential: credentialLog }, "login: user not found");
     }
 
+    // ── Timing-attack prevention: Always compare password ────────────────────
+    // If user not found or password field missing, compare against dummy hash
+    // to ensure consistent timing across success and failure paths.
+    const dummyHash = await getDummyHash();
+    const storedHash = (user as Record<string, unknown>)?.password as
+      | string
+      | undefined;
+
+    const passwordValid = await bcrypt.compare(
+      password,
+      storedHash ?? dummyHash
+    );
+
+    // ── Reject if user not found or password invalid ──────────────────────────
+    if (!user || !passwordValid) {
+      logger.warn(
+        {
+          credential: credentialLog,
+          userFound: !!user,
+          passwordValid,
+        },
+        "login: authentication failed"
+      );
+      // Generic error — never reveal whether account exists
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // ── Sign JWT ──────────────────────────────────────────────────────────────
+    const u = user as Record<string, unknown>;
     const token = signToken({
-      id:       user.id,
-      username: user.username,
-      email:    user.email ?? null,
-      tier:     user.tier,
+      id: u.id as string,
+      email: (u.email as string | null) ?? undefined,
+      username: u.username as string,
+      tier: (u.tier as string | undefined) ?? "explorer",
     });
 
-    logger.info('[auth] login', { userId: user.id, username: user.username });
+    logger.info(
+      { userId: u.id, username: u.username, credential: credentialLog },
+      "User logged in successfully"
+    );
 
-    return res.json({ token, user: {
-      id:       user.id,
-      username: user.username,
-      email:    user.email ?? null,
-      tier:     user.tier,
-    }});
+    return res.json({
+      token,
+      user: safeUser(u),
+    });
   } catch (err) {
-    logger.error('[auth] login error', { error: (err as Error).message });
-    return res.status(500).json({ error: 'Login failed' });
+    logger.error({ err, credential: req.body.credential }, "login: error");
+    return res
+      .status(500)
+      .json({ error: "Login failed — please try again later" });
   }
 });
 
-// ── GET /api/auth/me ──────────────────────────────────────────────────────────
+// ── POST /auth/logout ─────────────────────────────────────────────────────────
 
-router.get('/me', requireUser, (req, res) => {
-  // requireUser guarantees req.user is populated — no DB call needed.
-  return res.json({
-    id:       req.user!.id,
-    username: req.user!.username,
-    email:    req.user!.email ?? null,
-    tier:     req.user!.tier,
-  });
+router.post("/logout", (_req, res) => {
+  /**
+   * Stateless JWT: client is responsible for clearing stored token.
+   *
+   * For server-side token invalidation, implement a token blocklist:
+   * 1. Store revoked token JTI (claim id) in Redis with TTL = token expiry
+   * 2. Check blocklist in auth middleware before accepting token
+   * 3. Add 'jti' claim to signToken() payload
+   *
+   * For now, logout is a no-op on server side.
+   */
+  res.json({ message: "Logged out successfully" });
 });
 
+// ── GET /auth/me ──────────────────────────────────────────────────────────────
 
-// ── POST /api/auth/refresh ────────────────────────────────────────────────────
-// Issues a new token from a still-valid existing token.
-// trpcAuth (global middleware) has already decoded the Bearer token into
-// req.user before this handler runs — no credentials needed.
-//
-// TRADEOFF: The old token is not invalidated (no blacklist). If a token is
-// stolen, both old and new are valid until the old one expires naturally.
-// Acceptable for stateless JWT; add Redis blacklist if stricter revocation
-// is required.
-router.post('/refresh', requireUser, (req, res) => {
-  const token = signToken({
-    id:       req.user!.id,
-    username: req.user!.username,
-    email:    req.user!.email ?? null,
-    tier:     req.user!.tier,
-  });
+router.get("/me", requireUser, async (req, res) => {
+  try {
+    const userId = req.user!.id;
 
-  return res.json({
-    token,
-    user: {
-      id:       req.user!.id,
-      username: req.user!.username,
-      email:    req.user!.email ?? null,
-      tier:     req.user!.tier,
-    },
-  });
+    // ── Fetch fresh user data from DB ────────────────────────────────────────
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      logger.warn({ userId }, "me: user not found in DB");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    logger.debug({ userId }, "me: user fetched");
+
+    return res.json({ user: safeUser(user as Record<string, unknown>) });
+  } catch (err) {
+    logger.error({ err, userId: req.user!.id }, "me: unexpected error");
+    return res
+      .status(500)
+      .json({ error: "Failed to fetch user profile" });
+  }
+});
+
+// ── POST /auth/change-password ────────────────────────────────────────────────
+
+router.post("/change-password", requireUser, async (req, res) => {
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    logger.warn(
+      { errors: parsed.error.flatten() },
+      "change-password: validation failed"
+    );
+    return res.status(400).json({ error: parsed.error.flatten() });
+  }
+
+  const { currentPassword, newPassword } = parsed.data;
+  const userId = req.user!.id;
+
+  try {
+    // ── Fetch user from DB ────────────────────────────────────────────────────
+    const user = await storage.getUserById(userId);
+    if (!user) {
+      logger.warn({ userId }, "change-password: user not found");
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const u = user as Record<string, unknown>;
+
+    // ── CRITICAL FIX: Read 'password' column, NOT 'passwordHash' ──────────────
+    const currentHash = u.password as string | undefined;
+
+    if (!currentHash) {
+      logger.warn({ userId }, "change-password: no password hash stored");
+      return res.status(400).json({
+        error: "Cannot change password for this account type",
+      });
+    }
+
+    // ── Verify current password ───────────────────────────────────────────────
+    const valid = await bcrypt.compare(currentPassword, currentHash);
+    if (!valid) {
+      logger.warn({ userId }, "change-password: incorrect current password");
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // ── Hash new password ─────────────────────────────────────────────────────
+    const newHash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+
+    // ── Update password in DB ─────────────────────────────────────────────────
+    await storage.updateUserPassword(userId, newHash);
+
+    logger.info({ userId }, "Password changed successfully");
+    return res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    logger.error({ err, userId }, "change-password: unexpected error");
+    return res
+      .status(500)
+      .json({ error: "Failed to update password" });
+  }
 });
 
 export default router;
+export const authRouter = router;

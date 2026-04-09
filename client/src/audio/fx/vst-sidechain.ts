@@ -28,7 +28,7 @@ export class SidechainRouterState {
     const connectionId = `${config.sourceChannelId}_to_${config.targetVSTId}`;
 
     const sidechainGain = this.audioContext.createGain();
-    sidechainGain.gain.value = config.gainCompensation;
+    sidechainGain.gain.setTargetAtTime(config.gainCompensation, this.audioContext.currentTime, 0.015);
 
     const analyzer = this.audioContext.createAnalyser();
     analyzer.fftSize = 2048;
@@ -59,14 +59,14 @@ export class SidechainRouterState {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.enabled = true;
-    connection.sidechainGain.gain.value = connection.config.gainCompensation;
+    connection.sidechainGain.gain.setTargetAtTime(connection.config.gainCompensation, this.audioContext.currentTime, 0.015);
   }
 
   disableConnection(connectionId: string): void {
     const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.enabled = false;
-    connection.sidechainGain.gain.value = 0;
+    connection.sidechainGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.015);
   }
 
   removeConnection(connectionId: string): void {

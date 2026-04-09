@@ -1415,8 +1415,8 @@ class LoopEngine {
   bypassExciter(bypassed: boolean): void {
     if (!this.ready('bypassExciter') || !this._exciterEnabled) return;
     if (bypassed) {
-      if (this._exciterWetGain) this._exciterWetGain.gain.value = 0;
-      if (this._exciterDryGain) this._exciterDryGain.gain.value = 1;
+      if (this._exciterWetGain) this._exciterWetGain.gain.setTargetAtTime(0, ctx.currentTime, 0.015);
+      if (this._exciterDryGain) this._exciterDryGain.gain.setTargetAtTime(1, ctx.currentTime, 0.015);
     } else {
       if (this._exciterWetGain) lerpParam(this._exciterWetGain.gain as any, this._exciterState.amount, 0.05);
       if (this._exciterDryGain) lerpParam(this._exciterDryGain.gain as any, 1 - this._exciterState.amount * 0.5, 0.05);
@@ -1491,7 +1491,7 @@ class LoopEngine {
 
         // Gain reduction: 1 = no duck, (1 - amount) = max duck
         const duck = 1 - this._sidechainEnvLevel * this._sidechainAmount;
-        this.sidechainGain.gain.value = clamp(duck, 0, 1);
+        this.sidechainGain.gain.setTargetAtTime(clamp(duck, 0, 1), ctx.currentTime, 0.015);
       }, time);
     }, SC_UPDATE_INTERVAL);
 

@@ -46,8 +46,24 @@ const HEALTH_INTERVAL_MS = 2_000;
 // ── Master Engine ─────────────────────────────────────────────────────────────
 
 class MasterEngine {
-  // Shared AudioContext — authoritative instance for the entire app.
-  readonly context: AudioContext = getAudioContext();
+  // ── Lazy AudioContext — deferred to first use after a user gesture ────────
+  //
+  //  WHY: Class field initializers run synchronously at `new MasterEngine()`.
+  //  Since `masterEngine` is exported at module scope, a class field would call
+  //  getAudioContext() (→ new AudioContext()) on import — before any user
+  //  gesture — violating Chrome's autoplay policy and triggering Tone.js
+  //  standardized-audio-context capability probes in the console.
+  //
+  //  HOW: The getter defers creation to the first property access, which only
+  //  occurs inside init() → ensureAudioRunning(), i.e. after an explicit call
+  //  from a user-gesture handler. All external consumers of `masterEngine.context`
+  //  are unchanged — the getter is transparent at the call site.
+  private _context: AudioContext | null = null;
+
+  get context(): AudioContext {
+    if (!this._context) this._context = getAudioContext();
+    return this._context;
+  }
 
   // Sub-engine references
   readonly transport = transportEngine;

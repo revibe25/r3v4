@@ -1,5 +1,6 @@
 import React from "react";
 import { Clip } from "@/types/daw.types";
+import { useDAWStore } from "@/hooks/useDAWStore";
 import { timeToPixels } from "@/utils/time";
 
 interface ClipBlockProps {
@@ -19,8 +20,9 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   onSelect,
   onContext,
 }) => {
-  const left = timeToPixels(clip.startTime);
-  const width = timeToPixels(clip.duration);
+  const zoom = useDAWStore(s => s.zoom);
+  const left = timeToPixels(clip.startTime, zoom);
+  const width = timeToPixels(clip.duration, zoom);
 
   return (
     <div

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const ACID       = "#b8ff00";
+const ACID       = "#a3e635";
 const RED        = "#ff2200";
 const AMBER      = "#ffaa00";
 const BLK        = "#000000";
@@ -942,7 +942,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     <div style={{ fontFamily: "'IBM Plex Mono','JetBrains Mono',monospace" }}>
       <style>{`
         @keyframes mic-pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
-        .mic-root select option { background:#0c0c0c; color:#b8ff00; }
+        .mic-root select option { background:#0c0c0c; color:#a3e635; }
         .mic-root * { box-sizing:border-box; }
         .mic-root button:focus-visible { outline:1px solid ${ACID}; outline-offset:1px; }
         .clip-row:hover { background:rgba(184,255,0,0.03) !important; }

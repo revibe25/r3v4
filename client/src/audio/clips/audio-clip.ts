@@ -152,7 +152,7 @@ export class AudioClip {
       // Build the clip gain node so volume / fades don't bleed into the
       // channel-level gain that MixerChannel owns.
       this.gainNode = this.context.createGain();
-      this.gainNode.gain.value = this.config.gain ?? 1;
+      this.gainNode.gain.setTargetAtTime(this.config.gain ?? 1, this.context.currentTime, 0.015);
       this.gainNode.connect(this.channel.input);
 
       // Build the buffer source

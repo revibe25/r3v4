@@ -51,4 +51,49 @@ export async function abortMultipartUpload(fileKey: string, uploadId: string) {
 
 export function getPublicUrl(fileKey: string): string {
   return `${UPLOAD_CONFIG.STORAGE_ENDPOINT.replace(/\/$/, '')}/${UPLOAD_CONFIG.STORAGE_BUCKET}/${fileKey}`;
+
+}
+
+// ── Storage helper functions ──────────────────────────────
+
+export async function getUserById(userId: string) {
+  const { db } = await import('../db');
+  const { users } = await import('../db/schema');
+  const { eq } = await import('drizzle-orm');
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  return user ?? null;
+}
+
+export async function getMixCountByUser(_userId: string): Promise<number> {
+  // `mixes` table not yet in schema — return 0 (safe under-count; no user wrongly blocked).
+  // TODO: add mixes table to db/schema.ts and replace this stub.
+  return 0;
+}
+
+export async function updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+  const { db } = await import('../db');
+  const { users } = await import('../db/schema');
+  const { eq } = await import('drizzle-orm');
+  await db.update(users).set({ password: hashedPassword }).where(eq(users.id, userId));
+}
+
+export async function applyEffectToTrack(params: {
+  userId: string;
+  trackId: string;
+  effectId: string;
+  settings?: Record<string, unknown>;
+}): Promise<{ id: string; trackId: string; effectId: string }> {
+  // `trackEffects` table not yet in schema — return stub id so callers don't crash.
+  // TODO: add trackEffects table to db/schema.ts and replace this stub.
+  const { randomUUID } = await import('crypto');
+  return { id: randomUUID(), trackId: params.trackId, effectId: params.effectId };
+}
+
+export async function removeEffectFromTrack(_params: {
+  userId: string;
+  trackId: string;
+  effectId: string;
+}): Promise<void> {
+  // `trackEffects` table not yet in schema — no-op stub.
+  // TODO: add trackEffects table to db/schema.ts and replace this stub.
 }

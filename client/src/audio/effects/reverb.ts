@@ -17,7 +17,6 @@ export class ReverbEffect {
     this.reverb.connect(this.wetGain);
     this.dryGain.connect(this.output);
     this.wetGain.connect(this.output);
-    this.output.toDestination();
 
     this.params = {
       enabled: true, type: 'reverb',
@@ -64,6 +63,19 @@ export class ReverbEffect {
     this.dryGain.dispose();
     this.wetGain.dispose();
     this.output.dispose();
+  }
+  /** Returns the terminal output node for explicit chain wiring. */
+  getOutput(): Tone.Gain {
+    return this.output;
+  }
+
+  /**
+   * Connect this effect into an explicit audio chain.
+   * Use instead of letting the effect route to ctx.destination directly.
+   */
+  connectTo(destination: Tone.ToneAudioNode): this {
+    this.output.connect(destination);
+    return this;
   }
 }
 

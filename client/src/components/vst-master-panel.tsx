@@ -16,7 +16,8 @@ import type {
   VSTAutomationEngine,
   MixerChannel,
 } from '@/types/audio';
-import { SidechainRouter } from '@/audio/fx/vst-sidechain';
+import { SidechainRouter }  from '@/audio/fx/vst-sidechain';
+import { getAudioContext } from '@/audio/core/audio-context';
 
 // ============================================
 // TYPES
@@ -116,7 +117,7 @@ function VSTMasterPanel({
   // Lazy AudioContext for serializer (only needed for sampleRate)
   const audioCtxRef = useRef<AudioContext | null>(null);
   const getAudioCtx = () => {
-    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+    if (!audioCtxRef.current) audioCtxRef.current = getAudioContext();
     return audioCtxRef.current;
   };
 

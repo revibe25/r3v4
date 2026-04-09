@@ -1441,7 +1441,6 @@ export default function InstrumentPage({
 
               <div className="ag-controls-block">
                 <Link href="/multitrack" className="ag-nav-btn">🎚 DAW</Link>
-                <Link href="/vst" className="ag-nav-btn">🔌 VST</Link>
 
               </div>
             </div>

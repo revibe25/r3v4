@@ -103,7 +103,7 @@ export class Compressor extends FXNodeBase {
     // connect it in parallel with the main signal. A true sidechain would
     // require an AudioWorklet processor.
     this.sidechainInput = this.context.createGain();
-    this.sidechainInput.gain.value = 0; // silent — influences detection only
+    this.sidechainInput.gain.setTargetAtTime(0, this.context.currentTime, 0.015); // silent — influences detection only
 
     if (initialParams) {
       this._params = { ...this._params, ...initialParams };

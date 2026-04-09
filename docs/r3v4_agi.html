@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R3 v4 · AGI Agent Mesh</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --acid:#a3e635;--cyan:#00F5FF;--violet:#8B5CF6;--amber:#F59E0B;
+  --red:#EF4444;--emerald:#10B981;--blue:#3B82F6;--rose:#F43F5E;
+  --black:#060606;--z950:#09090b;--z900:#18181b;--z800:#27272a;
+  --z700:#3f3f46;--z600:#52525b;--z500:#71717a;--z400:#a1a1aa;
+  --z300:#d4d4d8;--z100:#f4f4f5;
+}
+html,body{height:100%;overflow:hidden;background:var(--black)}
+body{font-family:'JetBrains Mono',monospace;color:var(--z100);font-size:12px}
+
+/* ── LAYOUT ── */
+.shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;
+  border-bottom:1px solid var(--z800);background:var(--z900);flex-shrink:0;min-height:48px}
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:220px;flex-shrink:0;border-right:1px solid var(--z800);
+  background:var(--z900);display:flex;flex-direction:column;overflow:hidden}
+.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--z950)}
+.bottombar{height:200px;flex-shrink:0;border-top:1px solid var(--z800);
+  background:var(--z900);display:flex;overflow:hidden}
+
+/* ── TOPBAR ── */
+.logo{font-size:13px;font-weight:700;color:var(--acid);letter-spacing:.15em;
+  text-shadow:0 0 20px rgba(163,230,53,.4)}
+.logo-ver{font-size:9px;color:var(--z600);margin-left:6px;letter-spacing:.1em}
+.tb-spacer{flex:1}
+.tb-stat{display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:0 10px;border-right:1px solid var(--z800)}
+.tb-stat:last-of-type{border:none}
+.tb-val{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.tb-lbl{font-size:8px;color:var(--z600);letter-spacing:.1em}
+.pulse{animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+.api-key-input{background:var(--z800);border:1px solid var(--z700);border-radius:5px;
+  padding:4px 8px;color:var(--z400);font-size:10px;font-family:'JetBrains Mono',monospace;
+  width:220px;outline:none;transition:border-color .2s}
+.api-key-input:focus{border-color:var(--acid);color:var(--z100)}
+.api-key-input::placeholder{color:var(--z700)}
+.key-status{font-size:9px;padding:2px 8px;border-radius:10px}
+.key-ok{background:rgba(16,185,129,.15);color:var(--emerald);border:1px solid rgba(16,185,129,.3)}
+.key-no{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
+
+/* ── SIDEBAR ── */
+.sb-logo{padding:12px 12px 8px;border-bottom:1px solid var(--z800);flex-shrink:0}
+.sb-title{font-size:9px;color:var(--z600);letter-spacing:.15em;margin-bottom:2px}
+.sb-count{font-size:10px;color:var(--z400)}
+.sb-agents{flex:1;overflow-y:auto;padding:6px}
+.sb-cat{font-size:8px;color:var(--z700);letter-spacing:.15em;padding:8px 6px 4px;text-transform:uppercase}
+.sb-agent{display:flex;align-items:center;gap:7px;padding:6px 7px;border-radius:6px;
+  cursor:pointer;border:1px solid transparent;margin-bottom:1px;transition:all .12s;position:relative}
+.sb-agent:hover{background:rgba(255,255,255,.04)}
+.sb-agent.active{border-color:rgba(255,255,255,.1)}
+.sb-agent.running{border-color:rgba(163,230,53,.3);background:rgba(163,230,53,.04)}
+.sb-icon{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s}
+.sb-name{font-size:11px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-badge{font-size:8px;padding:1px 5px;border-radius:8px;flex-shrink:0}
+.sb-indicator{position:absolute;left:0;top:20%;bottom:20%;width:2px;border-radius:1px}
+.sb-footer{padding:10px 12px;border-top:1px solid var(--z800);flex-shrink:0}
+.sb-footer-txt{font-size:8px;color:var(--z700);line-height:1.8}
+
+/* ── WORKSPACE ── */
+.ws-header{display:flex;align-items:center;gap:10px;padding:10px 16px;
+  border-bottom:1px solid var(--z800);flex-shrink:0;min-height:48px}
+.ws-agent-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0}
+.ws-agent-name{font-size:14px;font-weight:700;letter-spacing:.04em}
+.ws-agent-role{font-size:10px;color:var(--z400);margin-top:1px;font-family:'Inter',sans-serif}
+.ws-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;
+  padding:8px 16px;border-bottom:1px solid var(--z800);flex-shrink:0;overflow-x:auto}
+.ws-actions::-webkit-scrollbar{display:none}
+.qa-chip{padding:4px 10px;border-radius:16px;font-size:10px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;flex-shrink:0;letter-spacing:.02em;
+  font-family:'JetBrains Mono',monospace}
+.ws-messages{flex:1;overflow-y:auto;padding:16px;scroll-behavior:smooth}
+.ws-messages::-webkit-scrollbar{width:3px}
+.ws-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+.msg-row{display:flex;gap:8px;margin-bottom:16px;align-items:flex-start}
+.msg-row.user{flex-direction:row-reverse}
+.msg-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:10px;flex-shrink:0}
+.msg-bubble{max-width:80%;padding:9px 12px;font-size:11px;line-height:1.7;
+  font-family:'JetBrains Mono',monospace;position:relative}
+.msg-bubble.user{border-radius:12px 3px 12px 12px;background:rgba(255,255,255,.06);
+  border:1px solid var(--z700);color:var(--z100)}
+.msg-bubble.assistant{border-radius:3px 12px 12px 12px;border:1px solid}
+.msg-meta{font-size:9px;color:var(--z600);margin-top:4px;display:flex;gap:8px;align-items:center}
+.conf-bar-wrap{display:flex;align-items:center;gap:4px}
+.conf-bar{height:3px;border-radius:2px;transition:width .3s;flex-shrink:0}
+.copy-msg{position:absolute;top:4px;right:6px;background:transparent;border:none;
+  color:var(--z700);cursor:pointer;font-size:9px;font-family:'JetBrains Mono',monospace;
+  transition:color .15s;padding:2px 4px}
+.copy-msg:hover{color:var(--acid)}
+.ws-input-area{padding:10px 16px;border-top:1px solid var(--z800);
+  display:flex;gap:8px;align-items:flex-end;flex-shrink:0}
+.ws-textarea{flex:1;background:var(--z900);border:1px solid var(--z700);border-radius:7px;
+  padding:8px 11px;color:var(--z100);font-family:'JetBrains Mono',monospace;font-size:11px;
+  resize:none;outline:none;line-height:1.6;max-height:100px;overflow-y:auto;transition:border-color .2s}
+.ws-textarea:focus{border-color:rgba(163,230,53,.4)}
+.ws-textarea::placeholder{color:var(--z700)}
+.send-btn{padding:8px 16px;border-radius:7px;font-size:11px;font-family:'JetBrains Mono',monospace;
+  font-weight:700;letter-spacing:.06em;cursor:pointer;border:none;transition:all .2s;flex-shrink:0}
+.send-btn:disabled{background:var(--z800);color:var(--z600);cursor:not-allowed}
+.typing-dots{display:flex;gap:4px;padding:10px 12px;border-radius:3px 12px 12px 12px;
+  border:1px solid;width:fit-content}
+.typing-dots span{width:4px;height:4px;border-radius:50%;animation:blink 1.2s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+
+/* ── BOTTOM PANELS ── */
+.bot-panel{flex:1;border-right:1px solid var(--z800);display:flex;flex-direction:column;overflow:hidden}
+.bot-panel-header{padding:7px 12px;border-bottom:1px solid var(--z800);
+  display:flex;align-items:center;gap:8px;flex-shrink:0}
+.bot-panel-title{font-size:10px;font-weight:700;letter-spacing:.1em}
+.bus-panel{width:320px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden}
+.bus-log{flex:1;overflow-y:auto;padding:6px 8px;font-size:9px}
+.bus-log::-webkit-scrollbar{width:2px}
+.bus-log::-webkit-scrollbar-thumb{background:rgba(255,255,255,.06)}
+.bus-entry{display:flex;gap:5px;margin-bottom:3px;align-items:baseline;line-height:1.6}
+.bus-ts{color:var(--z700);flex-shrink:0;width:18px}
+.bus-dir{flex-shrink:0;font-size:8px;padding:0 4px;border-radius:3px;line-height:1.6}
+.bus-dir.req{background:rgba(59,130,246,.15);color:#93C5FD}
+.bus-dir.res{background:rgba(16,185,129,.12);color:#6EE7B7}
+.bus-dir.brd{background:rgba(139,92,246,.12);color:#C4B5FD}
+.bus-dir.esc{background:rgba(245,158,11,.12);color:#FCD34D}
+.bus-text{color:var(--z500);flex:1;word-break:break-all}
+.pipeline-panel{width:260px;flex-shrink:0;border-left:1px solid var(--z800);
+  display:flex;flex-direction:column;overflow:hidden}
+.pipeline-nodes{flex:1;overflow-y:auto;padding:8px}
+.p-node{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:5px;
+  background:var(--z800);border:1px solid var(--z700);margin-bottom:4px;transition:all .3s}
+.p-node.active-node{border-color:rgba(0,245,255,.3);background:rgba(0,245,255,.05)}
+.p-node-accent{width:3px;height:32px;border-radius:2px;flex-shrink:0}
+.p-node-info{flex:1;min-width:0}
+.p-node-name{font-size:10px;font-weight:600}
+.p-node-pkg{font-size:8px;color:var(--z600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-node-sla{font-size:9px;flex-shrink:0;padding:1px 5px;border-radius:4px}
+.sla-ok{background:rgba(16,185,129,.12);color:var(--emerald)}
+.sla-warn{background:rgba(245,158,11,.12);color:var(--amber)}
+.sla-fail{background:rgba(239,68,68,.12);color:var(--red)}
+.p-connector{text-align:center;font-size:10px;color:var(--z700);margin:2px 0}
+.orchestrator-panel{width:180px;flex-shrink:0;border-left:1px solid var(--z800);
+  display:flex;flex-direction:column;overflow:hidden}
+.orch-stat{padding:8px 10px;border-bottom:1px solid var(--z800)}
+.orch-val{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.orch-lbl{font-size:8px;color:var(--z600);letter-spacing:.1em;margin-top:1px}
+.mvp-item{display:flex;align-items:center;gap:6px;padding:5px 10px;
+  border-bottom:1px solid var(--z800);font-size:9px}
+
+/* ── PILLS / TAGS ── */
+.pill{font-size:8px;padding:2px 6px;border-radius:10px;letter-spacing:.04em;flex-shrink:0}
+.p-acid{background:rgba(163,230,53,.12);color:var(--acid);border:1px solid rgba(163,230,53,.25)}
+.p-cyan{background:rgba(0,245,255,.08);color:var(--cyan);border:1px solid rgba(0,245,255,.2)}
+.p-violet{background:rgba(139,92,246,.12);color:var(--violet);border:1px solid rgba(139,92,246,.25)}
+.p-amber{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.p-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.p-emerald{background:rgba(16,185,129,.1);color:var(--emerald);border:1px solid rgba(16,185,129,.2)}
+.p-gray{background:var(--z800);color:var(--z500);border:1px solid var(--z700)}
+
+/* ── CODE ── */
+pre{margin:6px 0;background:var(--z800);border:1px solid var(--z700);border-radius:5px;
+  padding:8px 10px;overflow-x:auto;font-size:10px;line-height:1.7}
+code{background:var(--z800);border:1px solid var(--z700);border-radius:3px;
+  padding:1px 4px;font-size:10px;font-family:'JetBrains Mono',monospace}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  height:100%;gap:12px;opacity:.4;text-align:center}
+.empty-icon{font-size:40px;line-height:1}
+.empty-name{font-size:12px;font-weight:700;letter-spacing:.06em}
+.empty-hint{font-size:10px;color:var(--z500)}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <div class="logo">R3<span style="color:var(--z600)">.</span>AGI<span class="logo-ver">v4.2.1</span></div>
+    <div style="font-size:8px;color:var(--z700);letter-spacing:.12em">AGENT MESH · WIRE.TXT §0 ACTIVE</div>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="tb-stat">
+    <div class="tb-val" id="stat-agents" style="color:var(--acid)">16</div>
+    <div class="tb-lbl">AGENTS</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-val" id="stat-msgs" style="color:var(--cyan)">0</div>
+    <div class="tb-lbl">MSGS</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-val" id="stat-latency" style="color:var(--emerald)">—</div>
+    <div class="tb-lbl">LATENCY</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-val" id="stat-conf" style="color:var(--violet)">—</div>
+    <div class="tb-lbl">CONF</div>
+  </div>
+  <div class="tb-stat">
+    <div class="tb-val pulse" id="bus-dot" style="color:var(--z600)">●</div>
+    <div class="tb-lbl">BUS</div>
+  </div>
+  <input class="api-key-input" id="api-key" type="password" placeholder="sk-ant-api03-… (paste Anthropic key)" oninput="onKeyInput(this)">
+  <span class="key-status key-no" id="key-status">NO KEY</span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-title">EXPERT AGENT SUITE</div>
+      <div class="sb-count" id="sb-count">16 agents · 7 categories</div>
+    </div>
+    <div class="sb-agents" id="sb-agents"></div>
+    <div class="sb-footer">
+      <div class="sb-footer-txt">
+        ARTIFACT-BOUND · NO HALLUCINATION<br>
+        Wire.txt · CLAUDE.md · llpte.md<br>
+        agents.md · auth.md · workflow.md<br>
+        testing.md · patch-scripts.md · SKILL.md
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace">
+    <div class="ws-header" id="ws-header">
+      <div class="empty-state" style="height:auto;flex-direction:row;opacity:1;gap:10px">
+        <div style="font-size:11px;color:var(--z600)">← select an agent</div>
+      </div>
+    </div>
+    <div class="ws-actions" id="ws-actions" style="display:none"></div>
+    <div class="ws-messages" id="ws-messages">
+      <div class="empty-state">
+        <div class="empty-icon">⬡</div>
+        <div class="empty-name">R3 V4 · AGI AGENT MESH</div>
+        <div class="empty-hint">16 agents · live Anthropic API · P2P AgentBus<br>select any agent from the sidebar to begin</div>
+      </div>
+    </div>
+    <div class="ws-input-area">
+      <textarea class="ws-textarea" id="ws-input" rows="1"
+        placeholder="Ask the active agent…"
+        onkeydown="onInputKey(event)"
+        oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled>SEND</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+
+  <!-- Telegram Bot Sim -->
+  <div class="bot-panel">
+    <div class="bot-panel-header">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--z700)" id="tg-dot"></div>
+      <div class="bot-panel-title" style="color:var(--acid)">TELEGRAM BOT</div>
+      <span class="pill p-violet">r3agent.py</span>
+      <div style="flex:1"></div>
+      <input id="tg-sim-input" style="background:var(--z800);border:1px solid var(--z700);
+        border-radius:5px;padding:3px 7px;color:var(--z100);font-size:10px;
+        font-family:'JetBrains Mono',monospace;outline:none;width:160px"
+        placeholder="simulate telegram msg…" onkeydown="if(event.key==='Enter')simTelegram()">
+      <button onclick="simTelegram()" style="background:var(--z700);border:none;border-radius:5px;
+        padding:3px 8px;color:var(--z100);cursor:pointer;font-size:10px;
+        font-family:'JetBrains Mono',monospace">SEND</button>
+    </div>
+    <div id="tg-log" style="flex:1;overflow-y:auto;padding:6px 10px;font-size:10px;
+      font-family:'JetBrains Mono',monospace">
+      <div style="color:var(--z700)">🤖 R3 Agent — Wire.txt §0 active · awaiting messages…</div>
+    </div>
+  </div>
+
+  <!-- AgentBus -->
+  <div class="bus-panel">
+    <div class="bot-panel-header">
+      <div class="bot-panel-title" style="color:var(--cyan)">AGENTBUS</div>
+      <span class="pill p-cyan">BroadcastChannel · r3v4-agent-bus</span>
+      <div style="flex:1"></div>
+      <button onclick="clearBus()" style="background:transparent;border:1px solid var(--z800);
+        border-radius:4px;padding:2px 6px;color:var(--z600);cursor:pointer;font-size:9px;
+        font-family:'JetBrains Mono',monospace">CLR</button>
+    </div>
+    <div class="bus-log" id="bus-log"></div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="pipeline-panel">
+    <div class="bot-panel-header">
+      <div class="bot-panel-title" style="color:var(--violet)">LLPTE PIPELINE</div>
+    </div>
+    <div class="pipeline-nodes" id="pipeline-nodes"></div>
+  </div>
+
+  <!-- Orchestrator -->
+  <div class="orchestrator-panel">
+    <div class="bot-panel-header">
+      <div class="bot-panel-title" style="color:var(--amber)">ORCHESTRATOR</div>
+    </div>
+    <div class="orch-stat">
+      <div class="orch-val" id="orch-active" style="color:var(--cyan)">—</div>
+      <div class="orch-lbl">ACTIVE AGENT</div>
+    </div>
+    <div class="orch-stat">
+      <div class="orch-val" id="orch-conf" style="color:var(--violet)">—</div>
+      <div class="orch-lbl">CONF GATE</div>
+    </div>
+    <div class="orch-stat">
+      <div class="orch-val" id="orch-lat" style="color:var(--emerald)">—</div>
+      <div class="orch-lbl">P50 LATENCY</div>
+    </div>
+    <div style="padding:6px 10px;border-bottom:1px solid var(--z800)">
+      <div style="font-size:8px;color:var(--z600);letter-spacing:.1em;margin-bottom:4px">MVP QUEUE</div>
+      <div class="mvp-item" style="border:none;padding:3px 0">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--emerald)"></div>
+        <span style="color:var(--z400)">Auto-Leveling</span>
+        <span class="pill p-emerald" style="margin-left:auto">✓</span>
+      </div>
+      <div class="mvp-item" style="border:none;padding:3px 0">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--emerald)"></div>
+        <span style="color:var(--z400)">Smart Transitions</span>
+        <span class="pill p-emerald" style="margin-left:auto">✓</span>
+      </div>
+      <div class="mvp-item" style="border:none;padding:3px 0">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></div>
+        <span style="color:var(--amber)">Time Savings</span>
+        <span class="pill p-amber" style="margin-left:auto">←</span>
+      </div>
+      <div class="mvp-item" style="border:none;padding:3px 0">
+        <div style="width:6px;height:6px;border-radius:50%;background:var(--z700)"></div>
+        <span style="color:var(--z600)">Mix Suggestions</span>
+      </div>
+    </div>
+    <div id="orch-log" style="flex:1;overflow-y:auto;padding:6px 8px;font-size:9px;
+      font-family:'JetBrains Mono',monospace;color:var(--z600)"></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── AGENT DEFINITIONS ────────────────────────────────────────────────────────
+const T={acid:'#a3e635',cyan:'#00F5FF',violet:'#8B5CF6',amber:'#F59E0B',
+         red:'#EF4444',emerald:'#10B981',blue:'#3B82F6',rose:'#F43F5E',
+         z400:'#a1a1aa',z600:'#52525b',z700:'#3f3f46',z800:'#27272a',z900:'#18181b'};
+
+const AGENTS=[
+  // PRIME
+  {id:'wire',cat:'PRIME',name:'The Wire',role:'Prime Directive & Session Contract',icon:'⬡',color:T.acid,
+   sources:['Wire.txt §0 §16 §17 §19','CLAUDE.md'],confidenceGate:1.0,
+   quickActions:['What are the invariants that apply to every response?','List every hard stop condition.','What is the Final Principle?','What is the required response structure format?'],
+   systemPrompt:`You are The Wire — supreme session contract authority for R3 v4. Derive knowledge EXCLUSIVELY from Wire.txt and CLAUDE.md. Every claim must be traceable to a specific section.\n\nWire.txt §0 PRIME DIRECTIVE: These rules are invariants — enforced on every response, every file touch. No exceptions. Project: R3 v4 — AI-native browser DAW built around LLPTE. pnpm/Turborepo monorepo on Kali Linux (aarch64). Motto: No inference. No guessing. No neutral commits.\n\n§16 REQUIRED RESPONSE STRUCTURE (in order): 1. ### Files Read 2. ### Findings 3. ### Changes 4. ### Remaining Ambiguities\n\n§17 HARD STOPS: halt if: required file cannot be read · fix cannot be verified · change introduces ambiguity · AudioParam logic touched without reading LLPTE node · color not in §5 palette · tRPC procedure bypasses tier enforcement · schema change has no Drizzle migration path · confidence gating thresholds (0.65/0.40) altered without r3 sign-off.\n\n§19 FINAL PRINCIPLE: "This document is a contract, not a guide." LLPTE runs. 42 Vitest tests pass. UI shipped. The goal: prove AI can reduce time and skill required for a clean professional mix — in real time.\n\nCLAUDE.md HARD GUARDS (8): 1.No any 2.No swallowed exceptions 3.No console.log 4.No write without read 5.No patch without dry-run 6.No Lemon Squeezy tier strings 7.Post-login redirect /instrument only 8.No hydrateFromToken() inside ProtectedRoute render\n\nCite §section or Guard #N. Flag hard stops before everything else.`},
+
+  {id:'constitution',cat:'PRIME',name:'Constitution',role:'R3 v4 Hard Guards & Project Identity',icon:'⚖',color:T.acid,
+   sources:['CLAUDE.md'],confidenceGate:1.0,
+   quickActions:['List all 8 Hard Guards with explanations.','What is the current MVP queue status?','What are the PRD gates before partnerships?','What are the auto-memory rules?'],
+   systemPrompt:`You are the Constitution — definitive authority on R3 v4's project identity, hard guards, and roadmap. Knowledge EXCLUSIVELY from CLAUDE.md.\n\nPROJECT: R3 v4 — AI-native browser DAW · pnpm monorepo · ~/Stable/R3 v4/\nPackages: @llpte/* (AI pipeline) · @r3vibe/* (app)\n\nIDENTITY: R3 v4 is AI-first. LLPTE is the moat — never treat it as an afterthought.\nRouting: Pricing → Login → Instrument → DAW → Loopstation\nTiers (Stripe ONLY): explorer · creator · pro_artist\n\nHARD GUARDS (8, non-negotiable):\n1. No any — use unknown + type guard\n2. No swallowed exceptions — all async functions handle errors explicitly\n3. No console.log in committed code\n4. No write without read first (Wire.txt protocol)\n5. No patch applied without dry-run confirmation\n6. No Lemon Squeezy tier strings — ever (Stripe only)\n7. Post-login redirect: /instrument only, never /daw\n8. No hydrateFromToken() inside ProtectedRoute render\n\nCOMMANDS: pnpm tsc --noEmit · pnpm test · pnpm dev\n\nMVP QUEUE: ✅1.AI Auto-Leveling (20 tests) ✅2.Smart Transitions (22 tests) 🔲3.Time Savings Tracking (CURRENT) 🔲4.Mix Suggestion System\n\nPRD GATES (before sell/partnership): ≥65% AI suggestion acceptance · measurable time savings · 50–100 paying beta users\n\nCite Guard #N. State MVP #3 as current priority.`},
+
+  // AI PIPELINE
+  {id:'llpte',cat:'AI PIPELINE',name:'LLPTE Oracle',role:'Pipeline Rules, SLAs & Confidence Gating',icon:'≋',color:T.violet,
+   sources:['llpte.md','Wire.txt §3'],confidenceGate:0.65,
+   quickActions:['State the full pipeline node order and each node\'s package.','Explain all 3 hard SLAs with current verified values.','Walk through the confidence gating logic with all 3 thresholds.','Describe the LLPTE throttle sequence when inference exceeds 25ms.'],
+   systemPrompt:`You are the LLPTE Oracle — definitive expert on R3 v4's AI pipeline. Knowledge EXCLUSIVELY from llpte.md and Wire.txt §3.\n\nNODE ORDER (immutable): inputRouter → spectralAnalyzer → aiMixEngine → transitionGraph → outputBus\n\nPackages: inputRouter=@llpte/llpte-adapters(gray) · spectralAnalyzer=@llpte/llpte-signal(cyan) · aiMixEngine=@llpte/llpte-ai(violet) · transitionGraph=@llpte/llpte-transition-graph(blue) · outputBus=@llpte/llpte-execution(emerald)\n\nHARD SLAs: inference latency ≤15ms p50 (verified 10ms) · ≤25ms p99 · node tick ≤1ms (0.8ms) · active edges ≤2000 MVP (current 847) · memory ≤50MB/node · pipeline uptime 99.9%/session\n\nCONFIDENCE GATING (immutable — altering requires r3 sign-off):\n  ≥0.65 → auto-apply via AudioParam.setTargetAtTime()\n  ≥0.40 → surface ghost knob / suggestion panel\n  <0.40 → discard silently (log 'discarded')\n\nAUDIO STACK: WASM + SharedArrayBuffer + AudioWorklet ONLY — nothing on main thread\nWAVEFORM: WebGPU renderer ONLY in production paths\nINFERENCE: quantized + SIMD ONLY in hot path\n\nTHROTTLE SEQUENCE: >25ms sustained → reduce to 4 tracks + toast · recovery ≤15ms in 10s → restore · no recovery → AI disabled\n\nAUDIOPARAM RULE: ALL gain changes via AudioParam.setTargetAtTime() — NEVER direct .value assignment.\n\nCite node name, SLA metric, or §3 subsection. Flag any confidence gating threshold alteration.`},
+
+  {id:'arch',cat:'AI PIPELINE',name:'Arch Agent',role:'P2P Directory Agent Architecture',icon:'◈',color:T.violet,
+   sources:['agents.md'],confidenceGate:0.65,
+   quickActions:['Describe all 5 layers of the agent runtime.','What is the only valid write path from the browser?','How does confidence gating apply at the agent layer?','Which two agents should be built first and why?'],
+   systemPrompt:`You are the Arch Agent — expert on R3 v4's P2P directory agent architecture. Knowledge EXCLUSIVELY from agents.md.\n\nLAYER 1 — AgentManifest: agent.manifest.ts at root of each directory. Fields: id(string) · scope(glob) · peers(string[]) · tools(['read','write','patch','verify']) · confidenceGate(0.65) · latencySLA(15ms)\n\nLAYER 2 — AgentRegistry (Zustand): auto-discovers manifests at startup. agents:Map<string,AgentManifest> · register(manifest) · lookup(id) · peers(id)\n\nLAYER 3 — AgentBus (BroadcastChannel): channel='r3v4-agent-bus'. Message:{from,to,type:'request'|'response'|'broadcast',payload,traceId}. Timeout=latencySLA from manifest.\n\nLAYER 4 — AgentRuntime: async loop: receive→read scoped files→call Anthropic→execute tools→emit result. Model: claude-sonnet-4-20250514. Scope boundary enforced at tool level. System prompt built from manifest+context.\n\nLAYER 5 — tRPC FileTools (ONLY WRITE PATH): agentWrite(protectedProcedure). Input:{agentId,path,content,dryRun:boolean DEFAULT TRUE}. assertScopeAllowed validates path. dryRun=true→diff only. dryRun=false→.bak backup→write→pnpm tsc --noEmit.\n\nKEY: confidenceGate(0.65) and latencySLA(15ms) from LLPTE apply directly to agent layer. Agent below 0.65 does NOT write — escalates.\n\nFIRST AGENTS TO BUILD: @llpte/spectral and @r3vibe/auth — clearest scope boundaries.\n\nCite Layer number and field name.`},
+
+  {id:'spectral',cat:'AI PIPELINE',name:'Spectral Agent',role:'@llpte/spectral · Directory Agent',icon:'≈',color:T.cyan,
+   sources:['agents.md','agentManifests.ts'],confidenceGate:0.65,
+   quickActions:['Audit spectral analyzer hot path for GC pressure.','What anchor text identifies the confidence gating block?','Propose a dry-run patch for the three-tier confidence logic.','Escalate a frequency masking decision to @llpte/llpte-ai.'],
+   systemPrompt:`You are @llpte/llpte-signal, a directory agent for R3 v4 — AI-native browser DAW.\n\nScope: packages/@llpte/llpte-signal/src/**\nPipeline position: node 2/5\n  inputRouter → YOU (spectralAnalyzer) → aiMixEngine → transitionGraph → outputBus\nPackage: @llpte/llpte-signal\n\nHARD CONSTRAINTS:\n- Inference latency SLA: ≤15ms p50 · ≤25ms p99\n- Confidence gate: ≥0.65 AUTO-APPLY · ≥0.40 SUGGEST · <0.40 DISCARD\n- Zero GC pressure — typed array pool allocators only\n- WASM + SharedArrayBuffer + AudioWorklet only\n- Quantized + SIMD only in hot path\n- No any · No swallowed exceptions · No console.log\n- All patches: dry-run default, .bak before write, pnpm tsc --noEmit on exit\n\nRESPONSE FORMAT:\nconfidence: <0.00–1.00>\ntier: AUTO-APPLY | SUGGEST | DISCARD\n\nThen: ANALYSIS · RECOMMENDATION · FILES AFFECTED · ANCHOR TEXT · DRY-RUN DIFF · SLA NOTE\n\nIf escalating: ESCALATE → @llpte/llpte-ai: <reason>`},
+
+  // INTERFACE
+  {id:'design',cat:'INTERFACE',name:'Design Oracle',role:'Acid-Techno Palette & UI Zone Specs',icon:'◉',color:T.cyan,
+   sources:['Wire.txt §4 §5'],confidenceGate:0.65,
+   quickActions:['List every color token with its semantic role.','What colors are forbidden and why?','Specify Zone 4B — LLPTE Node Graph exactly.','What is the typography contract for numeric readouts?'],
+   systemPrompt:`You are the Design Oracle — definitive authority on R3 v4's UI architecture and design system. Knowledge EXCLUSIVELY from Wire.txt §4 and §5.\n\n§5 DESIGN SYSTEM (acid-techno palette — non-negotiable):\n#060606 (--ag-black) = Absolute black. ALL primary backgrounds.\n#a3e635 (--ag-acid) = Acid green. Primary interactive accent. (NOT #b8ff00 — stale, forbidden)\n#00F5FF = Cyan. Active state. Audio engine running. Playhead.\n#8B5CF6 = Violet. AI actions. LLPTE overlay. Suggestions.\n#F59E0B = Amber. Warning. VU amber zone. Inference timeout.\n#EF4444 = Red. Danger. VU clip. Armed record.\n#10B981 = Emerald. Output bus. Active effects. Confirmed OK.\nzinc-950 = Dominant zone background. zinc-900 = Sidebar bg. zinc-800 = Card bg.\n\nFORBIDDEN: #b8ff00 (stale acid) · purple gradients on non-AI surfaces · any accent color swap.\n\nTYPOGRAPHY: BPM/dB/ms/Hz/latency → JetBrains Mono · Labels/nav/prose → Inter\n\n§4 ZONES: Zone1=TopNav(48px,#060606) · Zone2=LeftSidebar(240px,zinc-900) · Zone3=Timeline(zinc-950,playhead=cyan) · Zone4A=DJMixer(bottom-left,220px) · Zone4B=LLPTENodeGraph(zinc-950,8pxDotGrid,animatedDashes,STATIC=FAILURE) · Zone5=EffectsRack(280px,zinc-900)\n\nZone4B critical: connector lines 1px animated dashes (5px/5px gap) 30px/sec. STATIC CONNECTORS = DEMO FAILURE. LLPTE Core: 2× size, 3-seg arc, inference 10ms badge (emerald), pulsing ring. Tooltip: 847 active edges | last tick 0.8ms.\n\nCite §4 zone or §5 token. Flag #b8ff00 immediately.`},
+
+  {id:'demo',cat:'INTERFACE',name:'Demo Director',role:'Demo Integrity & Pre-Demo QA',icon:'▶',color:T.cyan,
+   sources:['Wire.txt §15'],confidenceGate:0.65,
+   quickActions:['List all 11 demo failure conditions.','Run me through the full pre-demo QA checklist.','What must the Pitch Shifter state be during demo?','What badge must be visible in top nav?'],
+   systemPrompt:`You are the Demo Director — definitive authority on R3 v4's demo integrity. Knowledge EXCLUSIVELY from Wire.txt §15.\n\n11 FAILURE CONDITIONS (any one = demo failure):\n1. inference 10ms badge NOT updating every 100ms\n2. All 5 LLPTE connector lines NOT animated\n3. Transition Graph tooltip missing (edges + tick time)\n4. Signal oscilloscope <30fps or missing violet+cyan\n5. LLPTE Core arc spinner NOT rotating during play\n6. AI suggestion NOT firing within 2 bars of playback\n7. Time Savings panel missing real data or PNG export broken\n8. Send to AI context menu broken\n9. Any audio dropout in 20-minute demo\n10. Any crash\n11. Pro badge NOT visible in top nav\n\nPRE-DEMO QA (run 30 min before): LLPTE benchmark p50≤15ms · all 5 nodes animated · badge updating 100ms · tooltip active · ghost knobs ≤2 bars · toasts working · Time Savings panel live · Export PNG functional · Send to AI working · all 6 effects loading · VU meters active · crossfader responsive · session summary on stop · Pro badge visible · CPU<60% at 8 tracks · 5min sustained zero dropouts · memory<2GB at 8 tracks\n\nPitch Shifter: ALWAYS BYPASSED during demo. Never activate.\n\nCite §15 item number. Flag any proposed change that breaks a failure condition as CRITICAL REGRESSION.`},
+
+  // DATA LAYER
+  {id:'schema',cat:'DATA LAYER',name:'Schema Architect',role:'DB Schema, API & WebSocket Contracts',icon:'⬠',color:T.amber,
+   sources:['Wire.txt §6 §7'],confidenceGate:0.65,
+   quickActions:['List all PostgreSQL tables and their columns.','What are the 5 time savings baselines?','List all WebSocket events — client→server and server→client.','What is the correct tRPC path?'],
+   systemPrompt:`You are the Schema Architect — definitive expert on R3 v4's data architecture. Knowledge EXCLUSIVELY from Wire.txt §6 and §7.\n\n§6 TABLES: users(id,email,hashedPassword,createdAt,tier) · sessions(id,userId,startedAt,endedAt,metrics) · sessionMetrics(id,sessionId,aiActionsCount,timeSavedMs,...) · subscriptions(id,userId,tier,stripeCustomerId,status) · projects(id,userId,name,arrangementJSON,createdAt) · samples(id,userId,filename,path,duration,sampleRate,bitDepth) · aiDecisionLog(id,sessionId,actionType,confidence,accepted,timestamp)\n\nMATERIALIZED VIEWS: mv_user_session_averages · mv_ai_acceptance_rates\n\nTIME SAVINGS BASELINES (immutable):\n  Gain adjustment: 45s→0.5s = 44.5s saved\n  EQ sweep: 90s→1s = 89s saved\n  Crossfade transition: 180s→5s = 175s saved\n  Filter sweep: 240s→5s = 235s saved\n  Frequency conflict: 300s→0.1s = 299.9s saved\n\n§7 tRPC PATH: CORRECT=/api/trpc (WRONG=/trpc — was broken, now fixed — DO NOT reintroduce)\n\nWEBSOCKET: Client→Server: transport:play{bpm} · transport:stop{} · ai:sendToAI{clipId,transitionType?} · suggestion:respond{decisionId,outcome}\nServer→Client: ai:suggestion{suggestion} · ai:levelingApplied{trackId,gainDelta,confidence} · ai:transitionReady{clipId,curveData} · llpte:metricsUpdate{metrics} · session:timeSavedUpdate{savedMs}\n\nRATE LIMIT: 100 AI requests/min/user. AIDecisionLog.outcome ENUM: auto_applied|accepted|rejected|ignored|discarded\n\nFlag any /trpc path (not /api/trpc) immediately.`},
+
+  {id:'auth',cat:'DATA LAYER',name:'Auth Guardian',role:'Auth, Security & JWT Contracts',icon:'⊕',color:T.red,
+   sources:['auth.md','Wire.txt §8'],confidenceGate:0.65,
+   quickActions:['What is the canonical auth store? What is forbidden?','Explain the hydrateFromToken session destruction bug.','What does the JWT payload contain?','List all confirmed-fixed auth issues.'],
+   systemPrompt:`You are the Auth Guardian — definitive expert on R3 v4's auth and security. Knowledge EXCLUSIVELY from auth.md and Wire.txt §8.\n\nAUTH STORE: Canonical=hooks/authStore (import ONLY from here). DEAD=store/auth-store.ts (NEVER resurrect). Any import from dead stub = violation.\n\nPROTECTEDROUTE: MUST NOT call hydrateFromToken() on every mount — CAUSES SESSION DESTRUCTION. hydrateFromToken() MUST set isLoading:true before any async fetch.\n\ntRPC MIDDLEWARE: MUST be mounted on /trpc. No other path.\n\nLAYOUT: Post-login redirect: /instrument — NEVER /daw. NAV_HEIGHT_PX constant + --nav-h CSS var both required. PageNav reads from hooks/authStore ONLY.\n\n§8 CONFIRMED FIXED: Missing trpcAuth middleware mount · hydrateFromToken() race condition · Missing loading state · Path traversal on uploads · req.user type augmentation · bcrypt lazy initialization · Admin seeder idempotency\n\nAUTH LAYERS: Route(trpcAuth middleware) · Procedure(tRPC context) · Data(userId FK on every Drizzle query) · File(path traversal allowlist) · Tier(subscription check in ALL AI procedures)\n\nJWT: userId+tier ONLY — NO email, NO PII. Storage: httpOnly cookie.\n\nROUTER: wouter (NOT react-router-dom — removed).\n\nFlag hydrateFromToken() called on every mount as SESSION DESTRUCTION BUG.`},
+
+  // BUILD
+  {id:'stack',cat:'BUILD',name:'Stack Guard',role:'Locked Versions & Canonical Designations',icon:'⊗',color:T.emerald,
+   sources:['Wire.txt §2 §12 §13'],confidenceGate:0.65,
+   quickActions:['List all locked runtime and framework versions.','What Three.js version is pinned and what APIs are forbidden?','List all canonical file location designations.','What redundancy patterns must be eliminated?'],
+   systemPrompt:`You are the Stack Guard — definitive authority on locked stack versions and canonical designations. Knowledge EXCLUSIVELY from Wire.txt §2, §12, §13.\n\n§2 STACK (DO NOT suggest upgrades):\nTypeScript 5.9.3(strict) · React 18.3.1(no React 19) · Vite 5.4.21 · Express 4.22.1 · tRPC · Wouter(NOT react-router-dom) · Zustand · Three.js r128/0.182.0(PINNED — no post-r128 APIs) · Tone.js · Drizzle 0.39.3 · PostgreSQL pg@8.20.0 · Zod 3.25.76 · drizzle-zod 0.7.1 · bcrypt 6.0.0 · jsonwebtoken 9.0.3 · Stripe 20.4.1 · ws 8.20.0 · multer 2.1.1 · express-rate-limit 7.5.1 · helmet 8.1.0 · Vitest(42 confirmed cases)\n\nDEV: Kali Linux aarch64 · pnpm · Turborepo · Vercel(frontend) · Railway/Docker(backend)\n\n§12 REFACTOR STANDARDS: Cyclomatic complexity→reduce. One canonical impl per concern. AudioWorklet ≤3ms. UI ≥60fps during playback.\n\nREDUNDANCY TO ELIMINATE: Multiple appRouter defs(canonical=server/procedures.ts) · Duplicate CSS tokens(canonical=client/tailwind.config.ts) · Stale Lemon Squeezy code · Orphaned .bak files\n\n§13 CANONICAL DESIGNATIONS:\ntRPC router→server/procedures.ts · DB schema→shared/schema.ts · Tailwind→client/tailwind.config.ts · LLPTE topology→packages/llpte-core/ · Auth store→client/stores/(Zustand) · Router→wouter\n\nFlag version upgrades and canonical path deviations immediately.`},
+
+  {id:'workflow',cat:'BUILD',name:'Workflow Guard',role:'Session Workflow & Response Protocol',icon:'⚡',color:T.emerald,
+   sources:['workflow.md'],confidenceGate:0.65,
+   quickActions:['When exactly can I skip the interview questions?','What must a verification plan include?','What does the self-review checklist cover?','Explain the Read-Before-Write Wire.txt protocol.'],
+   systemPrompt:`You are the Workflow Guard — definitive enforcer of R3 v4's session workflow. Knowledge EXCLUSIVELY from workflow.md.\n\nRULE 1 — Interview Before Building: For any new feature or non-trivial change, ask these 4 questions first. Wait for answers. Summarize. Get confirmation. THEN code.\n  Q1: What is the core problem this solves?\n  Q2: Who is this for — DJ, creator, or both?\n  Q3: What does success look like (metric/SLA/behavior)?\n  Q4: What should this NOT do?\nSkip ONLY for: single-file bug fixes with no API surface changes.\n\nRULE 2 — Verification Plan First: State which files change and why · How correctness confirmed (tsc,Vitest,manual) · Regression risk and mitigation.\n\nRULE 3 — Self-Review: All 8 Hard Guards respected · No redundant imports/dead code · No type errors/auth regressions/store conflicts · pnpm tsc --noEmit passes clean.\n\nRULE 4 — Read-Before-Write: Read every file in full import graph before any destructive action. Confirm file contents, occurrence counts, anchor text. Never assume — read then act.\n\nCite exact rule number and name. Flag any action that skips a required step BEFORE providing code.`},
+
+  {id:'patch',cat:'BUILD',name:'Patch Engineer',role:'Change Delivery Protocol',icon:'⌥',color:T.amber,
+   sources:['patch-scripts.md','Wire.txt §14'],confidenceGate:0.65,
+   quickActions:['List all 5 required patch script behaviors.','What is the script naming convention?','What are the 4 required fields for every change?','What output must dry-run print vs. apply?'],
+   systemPrompt:`You are the Patch Engineer — definitive expert on R3 v4's patch script and change delivery standards. Knowledge EXCLUSIVELY from patch-scripts.md and Wire.txt §14.\n\nDELIVERY FORMAT: Every patch delivered as a Python script. No exceptions.\n\n5 REQUIRED BEHAVIORS (all mandatory):\n1. --dry-run is DEFAULT — --apply flag required to write anything\n2. Per-file .bak backup BEFORE any write\n3. Anchor-text replacement with occurrence count validation → abort if count ≠ exactly 1\n4. pnpm tsc --noEmit runs as final step\n5. Non-zero exit on any failure — never silently continue\n\nFORBIDDEN: Silent failures · partial writes · replacing without occurrence count check · skipping tsc · write without .bak\n\nSCRIPT NAMING: r3-<domain>-fix-<N>.py · r3-<domain>-audit.py\n\n§14 4 REQUIRED FIELDS per change:\n1. Root cause — what is broken and why\n2. Fix rationale — why this specific fix is correct\n3. Affected surface — every file/function/boundary touched\n4. Regression check — what preserved and how confirmed\n\nDRY-RUN OUTPUT: file path · anchor found · replacement preview · occurrence count\nAPPLY OUTPUT: backup path · bytes written · tsc result\n\nCite requirement number or forbidden item. Check all 5 behaviors and 4 forbidden items when reviewing.`},
+
+  // QUALITY
+  {id:'testing',cat:'QUALITY',name:'Test Sentinel',role:'Testing Standards & Definition of Done',icon:'✓',color:T.emerald,
+   sources:['testing.md'],confidenceGate:0.65,
+   quickActions:['List all 7 required LLPTE test layers in order.','What are the 3 Definition of Done conditions?','Where must test files live?','What are the 3 test style rules?'],
+   systemPrompt:`You are the Test Sentinel — definitive expert on R3 v4's testing standards. Knowledge EXCLUSIVELY from testing.md.\n\nFRAMEWORK: Vitest — not Jest, not anything else.\n\nFILE LOCATION: Tests in __tests__/ adjacent to source file. NEVER in root-level test folder.\n\n7 REQUIRED LLPTE LAYERS (all required — missing any = incomplete coverage):\n1. shared types\n2. signal analysis\n3. AI inference\n4. Web Audio execution\n5. pipeline orchestration\n6. React hook\n7. UI component\n\nDEFINITION OF DONE (3 conditions — ALL required, none optional):\n1. Tests are green\n2. pnpm tsc --noEmit is clean\n3. Manual flow confirmed end-to-end\n"Code written" is NOT done. All 3 must hold simultaneously.\n\n3 STYLE RULES:\n1. Test behavior, not implementation details\n2. One assertion concept per test\n3. No test should depend on another's side effects\n\nWire.txt §2: 42 confirmed passing cases across LLPTE.\n\nCite File Location rule, Layer N, DoD condition N, Style rule N. Apply all 3 DoD conditions when asked if a feature is done.`},
+
+  {id:'correctness',cat:'QUALITY',name:'Correctness Auditor',role:'Edge Cases, Error Boundaries & Connection Points',icon:'⟁',color:T.red,
+   sources:['Wire.txt §9 §10 §11'],confidenceGate:0.65,
+   quickActions:['What R3-specific edge cases must always be audited?','List all audio engine error handling specs.','What connection points need verification?','What is never acceptable under error boundary rules?'],
+   systemPrompt:`You are the Correctness Auditor — definitive expert on R3 v4's correctness and error boundaries. Knowledge EXCLUSIVELY from Wire.txt §9, §10, §11.\n\n§9 R3-SPECIFIC EDGE CASES (always audit): AudioContext suspended · SharedArrayBuffer unavailable · WebGPU unavailable · LLPTE inference timeout mid-session · confidence below all thresholds · Stripe webhook failure → tier desync · JWT expiry → silent refresh → soft sign-out · session write failure → buffer+retry · free-tier limit → non-blocking upgrade modal ZERO data loss · DB unavailable → cached tier+stale badge\n\n§10 CONNECTION POINTS: Function contracts · tRPC boundaries(Zod both ends) · LLPTE node edges · AudioParam writes(setTargetAtTime ONLY) · WebSocket events(match §7 contracts) · Data flow(no implicit coercion) · Drizzle queries(userId FK on every read) · Async ops(non-blocking,cancellation-safe) · Upload paths(allowlist-validated) · Subscription tier(checked in procedure NOT just UI) · Wouter routes(all 8 pages,correct ProtectedRoute guards) · LLPTE packages(no circular deps)\n\n§11 NEVER ACCEPTABLE: Silent corruption · hung process with no user state · cascading failure without throttle · error messages leaking paths/stack traces/PII to UI\n\nAUDIO ERRORS: suspended→overlay+.resume() · load fail→toast+retry · underrun→toast+throttle · SHB missing→non-WASM fallback · WebGPU missing→Canvas2D fallback\n\nLLPTE ERRORS: timeout>25ms→amber badge+throttle4 · node init fail→toast+reload · transition fail→manual mode+toast\n\nCite §9 edge case, §10 boundary type, §11 error category.`},
+
+  // STRATEGY
+  {id:'skills',cat:'STRATEGY',name:'Skill Advisor',role:'Skill Discovery & Automation',icon:'⬟',color:T.cyan,
+   sources:['SKILL.md'],confidenceGate:0.65,
+   quickActions:['What 5 fields are required for every skill recommendation?','Recommend the highest-value skill to build right now.','Write a complete SKILL.md for the patch-gen skill.','What makes a good trigger description?'],
+   systemPrompt:`You are the Skill Advisor — definitive expert on discovering and building Claude Skills for R3 v4. Knowledge EXCLUSIVELY from SKILL.md.\n\nFor each recommendation provide ALL 5 FIELDS:\n1. Skill name — /slash-command it creates\n2. Trigger description — when Claude auto-loads it (≤250 chars)\n3. What it automates — specific manual steps replaced\n4. Frequency — sessions/week where it saves time\n5. Starter SKILL.md — complete, ready-to-paste file\n\nCANDIDATE SKILLS: llpte-node-scaffold · patch-gen · vitest-scaffold · auth-audit · prd-decompose\n\nAlways produce all 5 fields. Derive candidates from actual recurring patterns. Be concrete.`},
+
+  {id:'scope',cat:'STRATEGY',name:'Scope Guard',role:'MVP Boundaries & Non-Goals',icon:'⬢',color:T.amber,
+   sources:['Wire.txt §1 §18'],confidenceGate:0.65,
+   quickActions:['List all 13 MVP non-goals — what must NOT be built.','What is the completion gate before any analysis?','When must I STOP and declare blocked?','Is stem separation in scope for MVP?'],
+   systemPrompt:`You are the Scope Guard — definitive authority on R3 v4's MVP scope boundaries. Knowledge EXCLUSIVELY from Wire.txt §1 and §18.\n\n§1 READ BEFORE ANYTHING ELSE: Locate and fully read EVERY file involved. Do NOT infer contents. If new file surfaces mid-conversation → STOP. Read it. If file cannot be read → STOP. Declare blocked.\n\nCOMPLETION GATE: List every file read before proceeding.\n\n§18 NON-GOALS (do NOT propose, implement, or stub without explicit r3 instruction):\n✗ VST/AU/AAX plugin support\n✗ Advanced MIDI piano-roll composition\n✗ Real-time multi-user collaboration\n✗ Mobile platform audio engine\n✗ Sound design/synthesis (granular, wavetable, FM)\n✗ Plugin marketplace/SDK\n✗ Hardware controller MIDI CC mapping\n✗ AI model training UI\n✗ True offline mode\n✗ S3 audio storage migration (server-local for MVP)\n✗ Public LLPTE API\n✗ Stem separation\n✗ Custom AI preference weighting UI\n\nIf proposed feature appears on this list, flag it as OUT OF SCOPE before any further discussion. Cite §18 item.`},
+];
+
+const CATEGORIES=['PRIME','AI PIPELINE','INTERFACE','DATA LAYER','BUILD','QUALITY','STRATEGY'];
+const PIPELINE_NODES=[
+  {name:'inputRouter',pkg:'@llpte/llpte-adapters',color:'#71717a',sla:'—'},
+  {name:'spectralAnalyzer',pkg:'@llpte/llpte-signal',color:'#00F5FF',sla:'10ms'},
+  {name:'aiMixEngine',pkg:'@llpte/llpte-ai',color:'#8B5CF6',sla:'10ms'},
+  {name:'transitionGraph',pkg:'@llpte/llpte-transition-graph',color:'#3B82F6',sla:'0.8ms/tick'},
+  {name:'outputBus',pkg:'@llpte/llpte-execution',color:'#10B981',sla:'—'},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let activeAgentId=null;
+let conversations={};
+let totalMsgs=0;
+let busTraceCounter=0;
+let apiKey='';
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+function init(){
+  buildSidebar();
+  buildPipeline();
+  busBootBroadcast();
+  setInterval(animateBusDot,3000);
+}
+
+function buildSidebar(){
+  const sb=document.getElementById('sb-agents');
+  CATEGORIES.forEach(cat=>{
+    const agents=AGENTS.filter(a=>a.cat===cat);
+    if(!agents.length)return;
+    const catEl=document.createElement('div');
+    catEl.className='sb-cat';
+    catEl.textContent=cat;
+    sb.appendChild(catEl);
+    agents.forEach(agent=>{
+      const el=document.createElement('div');
+      el.className='sb-agent';
+      el.id='sb-'+agent.id;
+      el.onclick=()=>selectAgent(agent.id);
+      const msgCount=(conversations[agent.id]||[]).length;
+      el.innerHTML=`
+        <div class="sb-icon" style="background:${agent.color}18;border:1px solid ${agent.color}35;color:${agent.color}">${agent.icon}</div>
+        <div class="sb-name" style="color:#71717a">${agent.name}</div>
+        ${msgCount>0?`<span class="sb-badge" style="background:${agent.color}20;color:${agent.color};border:1px solid ${agent.color}35">${msgCount}</span>`:''}
+      `;
+      sb.appendChild(el);
+    });
+  });
+}
+
+function buildPipeline(){
+  const container=document.getElementById('pipeline-nodes');
+  PIPELINE_NODES.forEach((node,i)=>{
+    const el=document.createElement('div');
+    el.className='p-node';
+    el.id='pnode-'+node.name;
+    el.innerHTML=`
+      <div class="p-node-accent" style="background:${node.color}"></div>
+      <div class="p-node-info">
+        <div class="p-node-name" style="color:${node.color}">${node.name}</div>
+        <div class="p-node-pkg">${node.pkg}</div>
+      </div>
+      <span class="p-node-sla sla-ok">${node.sla}</span>
+    `;
+    container.appendChild(el);
+    if(i<PIPELINE_NODES.length-1){
+      const conn=document.createElement('div');
+      conn.className='p-connector';
+      conn.textContent='↓';
+      container.appendChild(conn);
+    }
+  });
+}
+
+// ── AGENT SELECTION ──────────────────────────────────────────────────────────
+function selectAgent(id){
+  const agent=AGENTS.find(a=>a.id===id);
+  if(!agent)return;
+  activeAgentId=id;
+
+  // Update sidebar
+  document.querySelectorAll('.sb-agent').forEach(el=>el.classList.remove('active'));
+  const sbEl=document.getElementById('sb-'+id);
+  if(sbEl){
+    sbEl.classList.add('active');
+    sbEl.style.borderColor=agent.color+'35';
+    sbEl.style.background=agent.color+'08';
+    sbEl.querySelector('.sb-name').style.color=agent.color;
+    // Active indicator
+    let ind=sbEl.querySelector('.sb-indicator');
+    if(!ind){ind=document.createElement('div');ind.className='sb-indicator';sbEl.appendChild(ind);}
+    ind.style.background=agent.color;
+    ind.style.boxShadow=`0 0 6px ${agent.color}`;
+  }
+
+  // Restore other sidebar items
+  document.querySelectorAll('.sb-agent').forEach(el=>{
+    if(el.id!=='sb-'+id){
+      el.style.borderColor='transparent';
+      el.style.background='transparent';
+      const nm=el.querySelector('.sb-name');
+      if(nm)nm.style.color='#71717a';
+      const indEl=el.querySelector('.sb-indicator');
+      if(indEl)indEl.remove();
+    }
+  });
+
+  // Render workspace header
+  const header=document.getElementById('ws-header');
+  header.innerHTML=`
+    <div class="ws-agent-icon" style="background:${agent.color}18;border:1.5px solid ${agent.color}45;box-shadow:0 0 20px ${agent.color}20;color:${agent.color}">${agent.icon}</div>
+    <div>
+      <div class="ws-agent-name" style="color:${agent.color}">${agent.name}</div>
+      <div class="ws-agent-role">${agent.role}</div>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${agent.sources.map(s=>`<span class="pill p-gray">${s}</span>`).join('')}
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="pill" style="background:${agent.color}15;color:${agent.color};border:1px solid ${agent.color}30">gate ${agent.confidenceGate.toFixed(2)}</span>
+      <button onclick="clearConversation()" style="background:transparent;border:1px solid var(--z800);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--z600);font-size:9px;font-family:'JetBrains Mono',monospace;transition:all .15s" onmouseover="this.style.borderColor='var(--z600)'" onmouseout="this.style.borderColor='var(--z800)'">CLR</button>
+    </div>
+  `;
+
+  // Quick actions
+  const actions=document.getElementById('ws-actions');
+  actions.style.display='flex';
+  actions.innerHTML=agent.quickActions.map(qa=>`
+    <button class="qa-chip" 
+      style="background:${agent.color}0A;border:1px solid ${agent.color}25;color:var(--z500)"
+      onmouseover="this.style.background='${agent.color}18';this.style.color='${agent.color}'"
+      onmouseout="this.style.background='${agent.color}0A';this.style.color='var(--z500)'"
+      onclick="quickSend('${qa.replace(/'/g,"\\'")}')">
+      ${qa}
+    </button>
+  `).join('');
+
+  // Render messages
+  renderMessages();
+
+  // Update input
+  const inp=document.getElementById('ws-input');
+  inp.placeholder=`Ask ${agent.name}…`;
+  inp.style.borderColor='var(--z700)';
+  updateSendBtn();
+
+  // Orchestrator
+  document.getElementById('orch-active').textContent=agent.id.toUpperCase();
+  document.getElementById('orch-conf').textContent=agent.confidenceGate.toFixed(2);
+
+  // Pipeline highlight for pipeline agents
+  document.querySelectorAll('.p-node').forEach(n=>n.classList.remove('active-node'));
+  if(agent.id==='spectral'||agent.id==='llpte'){
+    const pn=document.getElementById('pnode-spectralAnalyzer');
+    if(pn)pn.classList.add('active-node');
+  }
+
+  busEmit('user',agent.id,'req',`agent selected · ${agent.name}`);
+  orchestLog(`→ ${agent.id} selected`);
+}
+
+// ── MESSAGES ─────────────────────────────────────────────────────────────────
+function renderMessages(){
+  const container=document.getElementById('ws-messages');
+  const agent=AGENTS.find(a=>a.id===activeAgentId);
+  const msgs=(conversations[activeAgentId]||[]);
+  if(!msgs.length){
+    container.innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon" style="color:${agent.color};opacity:.25;text-shadow:0 0 30px ${agent.color}">${agent.icon}</div>
+        <div class="empty-name" style="color:${agent.color};opacity:.5">${agent.name}</div>
+        <div class="empty-hint">${agent.sources.join(' · ')}<br>use a quick action above or type your question</div>
+      </div>`;
+    return;
+  }
+  container.innerHTML='';
+  msgs.forEach((msg,i)=>appendMessageEl(msg,agent,i));
+  container.scrollTop=container.scrollHeight;
+}
+
+function appendMessageEl(msg,agent,idx){
+  const container=document.getElementById('ws-messages');
+  if(container.querySelector('.empty-state'))container.innerHTML='';
+  const isUser=msg.role==='user';
+  const row=document.createElement('div');
+  row.className='msg-row '+(isUser?'user':'');
+  const confColor=msg.confidence>=0.65?'#10B981':msg.confidence>=0.4?'#F59E0B':'#EF4444';
+  const confWidth=msg.confidence?Math.round(msg.confidence*60)+'px':'0px';
+  row.innerHTML=`
+    ${!isUser?`<div class="msg-avatar" style="background:${agent.color}18;border:1px solid ${agent.color}35;color:${agent.color};box-shadow:0 0 10px ${agent.color}20">${agent.icon}</div>`:''}
+    <div class="msg-bubble ${isUser?'user':'assistant'}" style="${!isUser?`background:${agent.color}08;border-color:${agent.color}25`:''}">
+      <div style="white-space:pre-wrap;word-break:break-word">${formatMsgContent(msg.content)}</div>
+      ${!isUser?`
+        <div class="msg-meta">
+          ${msg.latency?`<span style="color:${msg.latency<=15?'#10B981':'#F59E0B'}">${msg.latency}ms</span>`:''}
+          ${msg.confidence!=null?`
+            <div class="conf-bar-wrap">
+              <div class="conf-bar" style="width:${confWidth};background:${confColor}"></div>
+              <span style="color:${confColor}">${Math.round(msg.confidence*100)}%</span>
+            </div>`:''}
+        </div>
+        <button class="copy-msg" onclick="copyMsg(${idx})">copy</button>
+      `:''}
+    </div>
+    ${isUser?`<div class="msg-avatar" style="background:var(--z800);border:1px solid var(--z700);color:var(--z500);font-size:10px">YOU</div>`:''}
+  `;
+  container.appendChild(row);
+  container.scrollTop=container.scrollHeight;
+}
+
+function formatMsgContent(text){
+  const escaped=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Code blocks
+  const withCode=escaped.replace(/```(\w*)\n([\s\S]*?)```/g,(_,lang,code)=>`
+    <div style="margin:6px 0;background:var(--z800);border:1px solid var(--z700);border-radius:5px;overflow:hidden">
+      ${lang?`<div style="padding:3px 8px;background:var(--z900);border-bottom:1px solid var(--z700);font-size:9px;color:var(--acid);letter-spacing:.08em">${lang}</div>`:''}
+      <pre style="margin:0;padding:8px 10px;font-size:10px;line-height:1.7;white-space:pre;overflow-x:auto">${code.trim()}</pre>
+    </div>`);
+  // Inline code
+  const withInline=withCode.replace(/`([^`]+)`/g,'<code>$1</code>');
+  // Bold
+  const withBold=withInline.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  return withBold;
+}
+
+function copyMsg(idx){
+  const msgs=conversations[activeAgentId]||[];
+  if(msgs[idx])navigator.clipboard.writeText(msgs[idx].content);
+}
+
+// ── SEND LOGIC ───────────────────────────────────────────────────────────────
+function quickSend(text){
+  const inp=document.getElementById('ws-input');
+  inp.value=text;
+  sendMessage();
+}
+
+function onInputKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+  updateSendBtn();
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,100)+'px';
+  updateSendBtn();
+}
+
+function updateSendBtn(){
+  const btn=document.getElementById('send-btn');
+  const inp=document.getElementById('ws-input');
+  const agent=activeAgentId?AGENTS.find(a=>a.id===activeAgentId):null;
+  const hasKey=!!apiKey;
+  const hasText=!!(inp&&inp.value.trim());
+  const ready=hasKey&&hasText&&agent;
+  btn.disabled=!ready;
+  if(agent&&ready){
+    btn.style.background=agent.color;
+    btn.style.color='#060606';
+    btn.style.boxShadow=`0 0 16px ${agent.color}40`;
+  } else {
+    btn.style.background='var(--z800)';
+    btn.style.color='var(--z600)';
+    btn.style.boxShadow='none';
+  }
+}
+
+async function sendMessage(){
+  if(!activeAgentId)return;
+  const agent=AGENTS.find(a=>a.id===activeAgentId);
+  const inp=document.getElementById('ws-input');
+  const text=inp.value.trim();
+  if(!text||!apiKey)return;
+
+  inp.value='';
+  inp.style.height='auto';
+  updateSendBtn();
+
+  if(!conversations[activeAgentId])conversations[activeAgentId]=[];
+  const history=conversations[activeAgentId];
+
+  // User message
+  history.push({role:'user',content:text});
+  totalMsgs++;
+  document.getElementById('stat-msgs').textContent=totalMsgs;
+  updateSbBadge(activeAgentId);
+  renderMessages();
+
+  // Typing indicator
+  const container=document.getElementById('ws-messages');
+  const typing=document.createElement('div');
+  typing.className='msg-row';
+  typing.id='typing-indicator';
+  typing.innerHTML=`
+    <div class="msg-avatar" style="background:${agent.color}18;border:1px solid ${agent.color}35;color:${agent.color}">${agent.icon}</div>
+    <div class="typing-dots" style="border-color:${agent.color}25;background:${agent.color}08">
+      <span style="background:${agent.color}"></span>
+      <span style="background:${agent.color}"></span>
+      <span style="background:${agent.color}"></span>
+    </div>`;
+  container.appendChild(typing);
+  container.scrollTop=container.scrollHeight;
+
+  // AgentBus emit
+  const traceId='tr-'+(++busTraceCounter).toString().padStart(4,'0');
+  busEmit('user',agent.id,'req',`"${text.slice(0,40)}${text.length>40?'…':''}" [${traceId}]`);
+  orchestLog(`⟳ ${agent.id} · [${traceId}]`);
+
+  // Update pipeline node
+  const pipelineNode=getPipelineNodeForAgent(agent.id);
+  if(pipelineNode){
+    const pn=document.getElementById('pnode-'+pipelineNode);
+    if(pn)pn.classList.add('active-node');
+  }
+
+  const t0=performance.now();
+
+  try{
+    const messages=history.map(m=>({role:m.role,content:m.content}));
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:agent.systemPrompt,
+        messages,
+      })
+    });
+    if(!resp.ok){
+      const err=await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message||`HTTP ${resp.status}`);
+    }
+    const data=await resp.json();
+    const reply=(data.content||[]).find(b=>b.type==='text')?.text||'(no response)';
+    const elapsed=Math.round(performance.now()-t0);
+    const simLatency=Math.round(Math.random()*8+4);// simulated hot-path latency
+    const conf=parseConfidence(reply);
+
+    // Remove typing
+    document.getElementById('typing-indicator')?.remove();
+
+    // Assistant message
+    const assistantMsg={role:'assistant',content:reply,latency:simLatency,confidence:conf};
+    history.push(assistantMsg);
+    updateSbBadge(activeAgentId);
+    appendMessageEl(assistantMsg,agent,history.length-1);
+
+    // Stats
+    document.getElementById('stat-latency').textContent=simLatency+'ms';
+    document.getElementById('stat-conf').textContent=conf!=null?Math.round(conf*100)+'%':'—';
+    document.getElementById('orch-lat').textContent=simLatency+'ms';
+    document.getElementById('orch-conf').textContent=conf!=null?conf.toFixed(2):'—';
+
+    // Confidence gate check
+    if(conf!=null&&conf<agent.confidenceGate){
+      const peer=getPeer(agent);
+      busEmit(agent.id,peer||'user','esc',`conf=${conf.toFixed(2)}<${agent.confidenceGate} · escalating [${traceId}]`);
+      orchestLog(`⚠ ${agent.id} conf=${conf.toFixed(2)} < gate · escalated`);
+    } else {
+      busEmit(agent.id,'user','res',`conf=${conf!=null?conf.toFixed(2):'n/a'} · ${simLatency}ms · [${traceId}]`);
+      orchestLog(`✓ ${agent.id} · ${simLatency}ms`);
+    }
+
+    // Check for patch
+    if(hasPatch(reply)){
+      busEmit(agent.id,'agentWrite','req',`dryRun=true · scope guarded · [${traceId}]`);
+    }
+
+    // Update pipeline node latency display
+    if(pipelineNode){
+      const pn=document.getElementById('pnode-'+pipelineNode);
+      if(pn){
+        const slaEl=pn.querySelector('.p-node-sla');
+        if(slaEl){
+          slaEl.textContent=simLatency+'ms';
+          slaEl.className='p-node-sla '+(simLatency<=15?'sla-ok':simLatency<=25?'sla-warn':'sla-fail');
+        }
+        setTimeout(()=>pn.classList.remove('active-node'),2000);
+      }
+    }
+
+  } catch(e){
+    document.getElementById('typing-indicator')?.remove();
+    const errMsg={role:'assistant',content:`⚠ Error: ${e.message}`,latency:null,confidence:null};
+    history.push(errMsg);
+    appendMessageEl(errMsg,agent,history.length-1);
+    orchestLog(`✗ ${agent.id} · ${e.message.slice(0,40)}`);
+  }
+}
+
+function getPeer(agent){
+  if(agent.id==='spectral')return'@llpte/llpte-ai';
+  if(agent.id==='arch')return'@r3vibe/daw-ui';
+  return null;
+}
+
+function getPipelineNodeForAgent(agentId){
+  const map={spectral:'spectralAnalyzer',llpte:'aiMixEngine',arch:'transitionGraph'};
+  return map[agentId]||null;
+}
+
+function parseConfidence(text){
+  const m=text.match(/confidence[:\s]+([0-9]\.[0-9]+)/i)||text.match(/\b(0\.[0-9]{2,})\b/);
+  if(m)return Math.min(1,Math.max(0,parseFloat(m[1])));
+  return null;
+}
+
+function hasPatch(text){
+  return /dry.run|\.bak|pnpm tsc|anchor text|occurrence count|patch/i.test(text);
+}
+
+function clearConversation(){
+  if(!activeAgentId)return;
+  conversations[activeAgentId]=[];
+  updateSbBadge(activeAgentId);
+  renderMessages();
+}
+
+function updateSbBadge(id){
+  const agent=AGENTS.find(a=>a.id===id);
+  const sbEl=document.getElementById('sb-'+id);
+  if(!sbEl||!agent)return;
+  const count=(conversations[id]||[]).length;
+  let badge=sbEl.querySelector('.sb-badge');
+  if(count>0){
+    if(!badge){badge=document.createElement('span');badge.className='sb-badge';sbEl.appendChild(badge);}
+    badge.textContent=count;
+    badge.style.cssText=`background:${agent.color}20;color:${agent.color};border:1px solid ${agent.color}35`;
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+// ── API KEY ───────────────────────────────────────────────────────────────────
+function onKeyInput(el){
+  apiKey=el.value.trim();
+  const status=document.getElementById('key-status');
+  if(apiKey.startsWith('sk-ant-')){
+    status.textContent='READY';
+    status.className='key-status key-ok';
+  } else {
+    status.textContent='NO KEY';
+    status.className='key-status key-no';
+    apiKey='';
+  }
+  updateSendBtn();
+}
+
+// ── AGENTBUS ─────────────────────────────────────────────────────────────────
+function ts(){const n=new Date();return n.getHours().toString().padStart(2,'0')+':'+n.getSeconds().toString().padStart(2,'0');}
+
+function busEmit(from,to,type,text){
+  const dot=document.getElementById('bus-dot');
+  dot.style.color='#a3e635';
+  dot.style.textShadow='0 0 8px #a3e635';
+  setTimeout(()=>{dot.style.color='var(--z600)';dot.style.textShadow='none';},400);
+
+  const log=document.getElementById('bus-log');
+  const entry=document.createElement('div');
+  entry.className='bus-entry';
+  const typeClass=type==='req'?'req':type==='res'?'res':type==='esc'?'esc':'brd';
+  const typeLabel=type==='req'?'REQ→':type==='res'?'RES←':type==='esc'?'ESC↗':'BCAST';
+  entry.innerHTML=`<span class="bus-ts">${ts()}</span><span class="bus-dir ${typeClass}">${typeLabel}</span><span class="bus-text">${from}→${to} · ${text}</span>`;
+  log.appendChild(entry);
+  log.scrollTop=log.scrollHeight;
+}
+
+function clearBus(){
+  document.getElementById('bus-log').innerHTML='';
+  busEmit('system','*','brd','bus log cleared');
+}
+
+function busBootBroadcast(){
+  setTimeout(()=>{
+    busEmit('@llpte/llpte-signal','r3v4-agent-bus','brd','manifest registered · tools: read,write,patch,verify · gate:0.65 · sla:15ms');
+    busEmit('@r3vibe/auth','r3v4-agent-bus','brd','manifest registered · tools: read,patch,verify · gate:0.65');
+    busEmit('system','*','brd',`${AGENTS.length} agents ready · Wire.txt §0 active`);
+  },400);
+}
+
+function animateBusDot(){
+  if(Math.random()>0.6){
+    busEmit('system','*','brd','heartbeat · pipeline nominal');
+  }
+}
+
+function orchestLog(text){
+  const el=document.getElementById('orch-log');
+  const line=document.createElement('div');
+  line.style.cssText='padding:2px 0;border-bottom:1px solid var(--z800);color:var(--z600)';
+  line.textContent=ts()+' '+text;
+  el.insertBefore(line,el.firstChild);
+  if(el.children.length>20)el.removeChild(el.lastChild);
+}
+
+// ── TELEGRAM BOT SIM ─────────────────────────────────────────────────────────
+async function simTelegram(){
+  const inp=document.getElementById('tg-sim-input');
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  const log=document.getElementById('tg-log');
+
+  const userBubble=document.createElement('div');
+  userBubble.style.cssText='margin-bottom:6px;text-align:right';
+  userBubble.innerHTML=`<span style="background:rgba(163,230,53,.1);border:1px solid rgba(163,230,53,.25);border-radius:10px 3px 10px 10px;padding:4px 8px;font-size:10px;display:inline-block;max-width:80%;text-align:left;color:#f4f4f5">👤 ${text}</span>`;
+  log.appendChild(userBubble);
+  log.scrollTop=log.scrollHeight;
+
+  if(!apiKey){
+    const noKey=document.createElement('div');
+    noKey.style.cssText='color:#F59E0B;font-size:9px;padding:3px 0';
+    noKey.textContent='⚠ Paste Anthropic API key in top bar to enable bot responses.';
+    log.appendChild(noKey);
+    return;
+  }
+
+  document.getElementById('tg-dot').style.cssText='width:7px;height:7px;border-radius:50%;background:#a3e635;box-shadow:0 0 6px #a3e635';
+
+  const R3_PATH='/home/r3/Stable/R3 v4';
+  const sysPrompt=`You are R3 Agent — Wire.txt §0 prime directive active.
+Project: R3 v4 pnpm monorepo at '${R3_PATH}' on Penguin (ChromeOS Linux).
+LLPTE pipeline: inputRouter→spectralAnalyzer→aiMixEngine→transitionGraph→outputBus
+Hard guards: no any · no swallowed exceptions · no console.log · read before write
+Confidence gate: ≥0.65 auto-apply · ≥0.40 suggest · <0.40 discard silently
+MVP queue: ✅ Auto-Leveling ✅ Smart Transitions 🔲 Time Savings Tracking (CURRENT) 🔲 Mix Suggestions
+Stripe tiers: explorer · creator · pro_artist (NO Lemon Squeezy strings ever)
+For SSH commands respond EXACTLY: EXEC: <command>
+For Wire.txt questions cite the exact §section. For Hard Guards cite Guard #N.
+Be concise. Flag destructive ops. Always cite sources.`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:512,
+        system:sysPrompt,
+        messages:[{role:'user',content:text}]
+      })
+    });
+    const data=await resp.json();
+    const reply=(data.content||[]).find(b=>b.type==='text')?.text||'(no response)';
+
+    const botBubble=document.createElement('div');
+    botBubble.style.cssText='margin-bottom:6px';
+    const isExec=/^EXEC:/m.test(reply);
+    const execMatch=reply.match(/^EXEC:\s*(.+)$/m);
+    botBubble.innerHTML=`<span style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:3px 10px 10px 10px;padding:4px 8px;font-size:10px;display:inline-block;max-width:90%;white-space:pre-wrap;word-break:break-word;color:#f4f4f5">🤖 ${reply.slice(0,300)}${reply.length>300?'…':''}</span>`;
+    log.appendChild(botBubble);
+
+    if(isExec&&execMatch){
+      const execLine=document.createElement('div');
+      execLine.style.cssText='color:#10B981;font-size:9px;padding:2px 0;font-family:"JetBrains Mono",monospace';
+      execLine.textContent='🔧 Would SSH-exec: '+execMatch[1];
+      log.appendChild(execLine);
+      busEmit('r3agent.py','penguin:ssh','req','EXEC: '+execMatch[1].slice(0,40));
+    }
+
+    document.getElementById('tg-dot').style.cssText='width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981';
+  } catch(e){
+    const errLine=document.createElement('div');
+    errLine.style.cssText='color:#EF4444;font-size:9px;padding:2px 0';
+    errLine.textContent='✗ '+e.message;
+    log.appendChild(errLine);
+    document.getElementById('tg-dot').style.cssText='width:7px;height:7px;border-radius:50%;background:#EF4444';
+  }
+  log.scrollTop=log.scrollHeight;
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>

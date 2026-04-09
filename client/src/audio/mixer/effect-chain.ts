@@ -122,8 +122,8 @@ export class EffectChain implements IEffectChain {
     // Build per-slot wet/dry nodes
     const dry = this.audioContext.createGain();
     const wet = this.audioContext.createGain();
-    dry.gain.value = 1 - wetDry;
-    wet.gain.value = wetDry;
+    dry.gain.setTargetAtTime(1 - wetDry, this.audioContext.currentTime, 0.015);
+    wet.gain.setTargetAtTime(wetDry, this.audioContext.currentTime, 0.015);
     this.wetNodes.set(effect.id, { dry, wet });
 
     const slot: EffectSlot = { index: insertAt, effect, wetDry };

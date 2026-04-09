@@ -26,8 +26,8 @@ export abstract class FXNodeBase implements FXNode {
     this.dryGain = this.context.createGain();
 
     // defaults
-    this.wetGain.gain.value = 1;
-    this.dryGain.gain.value = 0;
+    this.wetGain.gain.setTargetAtTime(1, this.context.currentTime, 0.015);
+    this.dryGain.gain.setTargetAtTime(0, this.context.currentTime, 0.015);
 
     // dry path
     this.input.connect(this.dryGain);

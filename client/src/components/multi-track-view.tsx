@@ -2,7 +2,8 @@
 // Production-Ready Enhanced DAW multi-track-view
 // Features: Drag & drop, context menus, undo/redo, track grouping
 
-import React, { useCallback, useState, useRef } from 'react';
+// PATCH-M05: added useEffect + useMemo (required by M01, M02, M04)
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Circle, Play, Square, Plus, Trash2, Copy,
   ChevronDown, ChevronRight, Zap, Settings
@@ -91,19 +92,53 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     y: number; 
     trackId: string 
   } | null>(null);
-  const trackListRef = useRef<HTMLDivElement>(null);
+  const trackListRef    = useRef<HTMLDivElement>(null);
+  const contextMenuRef  = useRef<HTMLDivElement>(null);
 
-  // Filter and group tracks
-  const visibleTracks = tracks.filter(t => !t.hidden);
-  const groupedTracks = new Map<string, Track[]>();
+  // PATCH-M02: Context menu dismiss — Escape key + click-outside.
+  //   Root cause: onMouseLeave-only dismiss fails on keyboard nav
+  //   and misses click-outside — accessibility violation.
+  //   Listeners registered only while menu is open; cleaned up on close.
+  useEffect(() => {
+    if (!contextMenu) return;
 
-  visibleTracks.forEach(track => {
-    const groupId = track.groupId || 'ungrouped';
-    if (!groupedTracks.has(groupId)) {
-      groupedTracks.set(groupId, []);
-    }
-    groupedTracks.get(groupId)!.push(track);
-  });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setContextMenu(null);
+      }
+    };
+    const onOutside = (e: MouseEvent) => {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(e.target as Node)
+      ) {
+        setContextMenu(null);
+      }
+    };
+
+    document.addEventListener('keydown',   onKey,     { capture: true });
+    document.addEventListener('mousedown', onOutside, { capture: true });
+    return () => {
+      document.removeEventListener('keydown',   onKey,     { capture: true });
+      document.removeEventListener('mousedown', onOutside, { capture: true });
+    };
+  }, [contextMenu]); // re-register when contextMenu opens/closes
+
+  // PATCH-M01: memoize — avoid O(n) recompute at 60fps after M04 meter loop.
+  //   Root cause: both computations ran unconditionally on every render.
+  //   Keyed on `tracks` reference — Zustand guarantees stability for
+  //   unmodified arrays.
+  const { visibleTracks, groupedTracks } = useMemo(() => {
+    const visible = tracks.filter(t => !t.hidden);
+    const grouped = new Map<string, Track[]>();
+    visible.forEach(track => {
+      const groupId = track.groupId ?? 'ungrouped';
+      if (!grouped.has(groupId)) grouped.set(groupId, []);
+      grouped.get(groupId)!.push(track);
+    });
+    return { visibleTracks: visible, groupedTracks: grouped };
+  }, [tracks]);
 
   // Drag handlers
   const handleDragStart = useCallback((
@@ -125,24 +160,38 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     e.dataTransfer.dropEffect = 'move';
   }, []);
 
+  // PATCH-M03: explicit branches for same-track reorder vs cross-track drop.
+  //   Root cause: cross-track drop silent no-op contradicts 'move' cursor.
+  //   Future extension point: expose onMoveFX(fromTrack, fromIdx, toTrack, toIdx).
   const handleDropFX = useCallback((
-    e: React.DragEvent, 
-    targetTrackId: string, 
-    targetIndex: number
+    e: React.DragEvent,
+    targetTrackId: string,
+    targetIndex: number,
   ) => {
     e.preventDefault();
     try {
+      // Null-guard: bail if drag state is not an FX drag
       if (
-        dragState.source === 'fx' &&
-        dragState.trackId &&
-        dragState.fxIndex !== null &&
-        dragState.trackId === targetTrackId &&
-        onReorderFX
-      ) {
+        dragState.source !== 'fx' ||
+        dragState.trackId == null ||
+        dragState.fxIndex == null
+      ) return;
+
+      if (dragState.trackId === targetTrackId && onReorderFX) {
+        // Primary path: same-track FX reorder
         onReorderFX(targetTrackId, dragState.fxIndex, targetIndex);
+      } else if (dragState.trackId !== targetTrackId) {
+        // Cross-track drop — not yet implemented.
+        // Future: call onMoveFX?.(dragState.trackId, dragState.fxIndex,
+        //                        targetTrackId, targetIndex)
+        console.info(
+          '[MultitrackView] Cross-track FX move not yet supported.',
+          { from: dragState.trackId, fromIdx: dragState.fxIndex,
+            to: targetTrackId,       toIdx: targetIndex },
+        );
       }
     } catch (error) {
-      console.error('Drop FX error:', error);
+      console.error('[MultitrackView] Drop FX error:', error);
     } finally {
       setDragState({ source: null, trackId: null, fxIndex: null });
     }
@@ -180,6 +229,53 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
       return newSet;
     });
   }, []);
+
+  // PATCH-M04: VU meter decay animation — 15 dB/s fallback.
+  //   Root cause: static prop-driven meter freezes at peak when signal drops.
+  //   Fix: RAF loop with peak-hold; decay activates on falling edge only.
+  //   Regression: upward snap is immediate (no smoothing); decay is 60-FPS-rate.
+  const [meterLevels, setMeterLevels] = useState<Record<string, number>>({});
+  const meterPeaks     = useRef<Record<string, number>>({});
+  // RA-03: last RAF timestamp — persists across renders in a ref
+  const meterLastTsRef = useRef<number>(0);
+  const meterRafRef    = useRef<number>(0);
+
+  useEffect(() => {
+    // RA-03: timestamp-based decay — frame-rate-independent.
+    //   15 dB/s × elapsed_seconds is correct at 30/60/90/120/144 Hz.
+    const DECAY_DB_PER_SEC = 15;
+
+    const animate = (timestamp: number) => {
+      // delta_s: 0 on first frame (lastTs == 0 after effect restart)
+      const delta_s = meterLastTsRef.current === 0
+        ? 0
+        : (timestamp - meterLastTsRef.current) / 1000;
+      meterLastTsRef.current = timestamp;
+      const decay = DECAY_DB_PER_SEC * delta_s;
+
+      setMeterLevels(prev => {
+        const next: Record<string, number> = {};
+        let changed = false;
+        for (const track of tracks) {
+          const liveLevel  = track.meter ?? 0;
+          const heldPeak   = meterPeaks.current[track.id] ?? 0;
+          // Snap up instantly; decay when signal falls below held peak
+          const newLevel   = liveLevel >= heldPeak
+            ? liveLevel
+            : Math.max(0, heldPeak - decay);
+          meterPeaks.current[track.id] = newLevel;
+          next[track.id] = newLevel;
+          if (prev[track.id] !== newLevel) changed = true;
+        }
+        return changed ? next : prev; // bail-out when nothing changed
+      });
+      meterRafRef.current = requestAnimationFrame(animate);
+    };
+
+    meterLastTsRef.current = 0; // reset on every effect restart
+    meterRafRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(meterRafRef.current);
+  }, [tracks]); // re-init when track list changes
 
   // Format timecode
   const formatTime = (seconds: number): string => {
@@ -377,10 +473,14 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
                       <div
                         className="w-full bg-gradient-to-t from-green-500 via-yellow-500 to-red-500 transition-all"
                         style={{
-                          height: `${Math.min(
-                            100,
-                            Math.max(0, (track.meter ?? 0) * 100)
-                          )}%`,
+                          // PATCH-M04-b: decayed level from animation loop
+                          height: `${
+                            Math.min(
+                              100,
+                              Math.max(0, (meterLevels[track.id] ?? track.meter ?? 0) * 100),
+                            )
+                          }%`,
+                          transition: 'height 0.016s linear', // 1-frame smoothing
                         }}
                         role="progressbar"
                         aria-valuemin={0}
@@ -488,6 +588,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
       {/* Context Menu */}
       {contextMenu && (
         <div
+          ref={contextMenuRef}  // PATCH-M06: required by M02 click-outside
           className="fixed bg-muted border border-border rounded-lg shadow-xl z-50 py-1 min-w-48"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onMouseLeave={() => setContextMenu(null)}

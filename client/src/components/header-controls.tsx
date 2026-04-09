@@ -56,7 +56,7 @@ const S = {
   bg:         '#000000',
   bgPanel:    '#0c0c0c',
   border:     '#222',
-  accent:     '#b8ff00',
+  accent:     '#a3e635',
   textDim:    '#555',
   textMuted:  '#444',
   textActive: '#fff',

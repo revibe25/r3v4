@@ -2,30 +2,26 @@
  * server/routers/subscription.ts
  *
  * Fix H1 — ctx.user.name → ctx.user.username (from prior round)
- * Fix     — ctx.user possibly undefined (20 errors from prior round)
+ * Fix     — ctx.user possibly undefined (resolved by AuthenticatedContext in trpc.ts)
  * Fix     — email type: string | null not assignable to string
+ * Fix     — Removed all ctx.user! non-null assertions. requireAuth narrows ctx to
+ *            AuthenticatedContext (user: AuthPayload, non-optional) before any
+ *            handler runs. Assertions were redundant noise that obscured intent.
  *
- * ROOT CAUSE (ctx.user undefined):
- * TRPCContext.user was typed as AuthPayload | undefined. Even though requireAuth
- * throws UNAUTHORIZED when user is absent, TypeScript's type narrowing did not
- * propagate through the tRPC middleware chain in the previous trpc.ts definition.
- * After requireAuth now casts to AuthenticatedContext (user: AuthPayload), the
- * type flows through and ctx.user is non-optional here. The non-null assertions
- * (!) below are a belt-and-suspenders safety net — they will never fire because
- * requireAuth has already thrown before this code runs.
+ * ROOT CAUSE (ctx.user undefined — now resolved upstream):
+ * TRPCContext.user was typed as AuthPayload | undefined. requireAuth in trpc.ts
+ * now casts to AuthenticatedContext, propagating user: AuthPayload (non-optional)
+ * through the full middleware chain. ctx.user is safe to access directly.
  *
  * ROOT CAUSE (email string | null):
  * AuthPayload.email is `string | null`. CreateCheckoutOptions.email is `string`.
- * A user who registered without an email will have null. A null email passed
- * to Stripe.customers.create is rejected by the Stripe SDK types. The fallback
- * to an empty string is intentional — getOrCreateStripeCustomer passes `email`
- * to Stripe only for customer creation; an empty string is accepted by Stripe
- * and the customer can update it later in the portal.
+ * A user who registered without an email will have null. The fallback to an empty
+ * string is intentional — Stripe accepts '' for optional email on customer creation.
  */
 
 import { z } from 'zod';
-import { router } from '../trpc';
-import { protectedProcedure } from '../procedures';
+import { router }              from '../trpc';
+import { protectedProcedure } from '../base-procedures';
 import {
   createCheckoutSession,
   createPortalSession,
@@ -35,7 +31,7 @@ import { BILLING_CYCLES } from '../../shared/subscription.types';
 
 export const subscriptionRouter = router({
   getMySubscription: protectedProcedure.query(async ({ ctx }) => {
-    return getUserSubscription(ctx.user!.id);
+    return getUserSubscription(ctx.user.id);
   }),
 
   createCheckout: protectedProcedure
@@ -48,11 +44,11 @@ export const subscriptionRouter = router({
     .mutation(async ({ ctx, input }) => {
       const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
       const url = await createCheckoutSession({
-        userId: ctx.user!.id,
-        // Fix: email is string | null; Stripe accepts empty string for optional email
-        email: ctx.user!.email ?? '',
-        // Fix H1: was ctx.user.name (undefined) — field is username
-        name: ctx.user!.username,
+        userId: ctx.user.id,
+        // email is string | null on AuthPayload; Stripe accepts '' for optional email
+        email: ctx.user.email ?? '',
+        // Fix H1: was ctx.user.name (undefined) — correct field is username
+        name: ctx.user.username,
         tier: input.tier,
         billingCycle: input.billingCycle,
         successUrl: `${baseUrl}${input.successPath}`,
@@ -66,7 +62,7 @@ export const subscriptionRouter = router({
     .input(z.object({ returnPath: z.string().default('/account') }))
     .mutation(async ({ ctx, input }) => {
       const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
-      const url = await createPortalSession(ctx.user!.id, `${baseUrl}${input.returnPath}`);
+      const url = await createPortalSession(ctx.user.id, `${baseUrl}${input.returnPath}`);
       return { url };
     }),
 });

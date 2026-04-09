@@ -909,9 +909,9 @@ export function AudioVisualizer({
   const hasOwnAudio = !externalGetAnalyserData;
 
   // ── ACID TECHNO DESIGN TOKENS ──────────────────────────────────────────────
-  const ACID = "#b8ff00";
-  const ACID_DIM = "#b8ff0033";
-  const ACID_BORDER = "#b8ff0066";
+  const ACID = "#a3e635";
+  const ACID_DIM = "#a3e63533";
+  const ACID_BORDER = "#a3e63566";
   const BLACK = "#000000";
   const SURFACE = "#0c0c0c";
   const SURFACE2 = "#111111";

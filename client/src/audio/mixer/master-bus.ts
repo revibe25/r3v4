@@ -10,7 +10,7 @@ export class MasterBus {
   constructor() {
     this.context = getAudioContext();
     this.gainNode = this.context.createGain();
-    this.gainNode.gain.value = 1;
+    this.gainNode.gain.setTargetAtTime(1, this.context.currentTime, 0.015);
 
     this.gainNode.connect(this.context.destination);
   }

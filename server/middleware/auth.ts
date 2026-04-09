@@ -12,15 +12,18 @@
  * It has no runtime effect — jwt.js calls ms() on any string value internally.
  */
 
+/// <reference path="../types/express.d.ts" />
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../lib/logger';
+import type { SubscriptionTier } from '../../shared/subscription.types';
 
 export interface AuthPayload {
   id: string;
-  username: string;
-  email: string | null;
-  tier: string;
+  username?: string;
+  /** undefined when user registered without email */
+  email?: string;
+  tier: SubscriptionTier;
 }
 
 const RAW_SECRET = process.env.JWT_SECRET ?? '';
@@ -53,8 +56,8 @@ function verifyToken(token: string): AuthPayload | null {
     return {
       id: decoded.id,
       username: decoded.username,
-      email: decoded.email ?? null,
-      tier: decoded.tier ?? 'explorer',
+      email: decoded.email ?? undefined,
+      tier: (decoded.tier ?? 'explorer') as SubscriptionTier,
     };
   } catch {
     return null;

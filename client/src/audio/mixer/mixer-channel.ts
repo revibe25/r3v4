@@ -62,9 +62,9 @@ export class MixerChannel implements MixerChannel {
     this.meterDataArray = new Uint8Array(this.analyserNode.frequencyBinCount) as unknown as Uint8Array;
     
     // Set default values
-    this.gainNode.gain.value = this._volume;
+    this.gainNode.gain.setTargetAtTime(this._volume, this.context.currentTime, 0.015);
     this.panNode.pan.value = this._pan;
-    this.output.gain.value = 1;
+    this.output.gain.setTargetAtTime(1, this.context.currentTime, 0.015);
     
     // Wire signal path: input → fxChain → pan → gain → analyser → output
     this.input.connect((this.fxChain as any).getInput());

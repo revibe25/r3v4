@@ -1,32 +1,3 @@
-// R3 Engine Context — injected by implement-r3.ts Phase 14
-import { MixerEngine } from "@r3/llpte-core/mixer";
-import { DJEngine }    from "@r3/llpte-core/dj";
-import type { MixerState, DJSession } from "@r3/llpte-core/types";
-
-const EMPTY_MIXER_STATE: MixerState = {
-  channels: new Map(), buses: new Map(),
-  masterFader: 0 as any, soloExclusive: true,
-};
-const DEFAULT_DJ_SESSION: DJSession = {
-  decks: {
-    A: { id: "A", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
-         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
-         cuePoints: [], beatGrid: null, waveformData: null },
-    B: { id: "B", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
-         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
-         cuePoints: [], beatGrid: null, waveformData: null },
-    C: { id: "C", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
-         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
-         cuePoints: [], beatGrid: null, waveformData: null },
-    D: { id: "D", trackId: null, position: 0 as any, bpm: 120, pitch: 0, playbackRate: 1,
-         isPlaying: false, isLooping: false, loopStart: null, loopEnd: null,
-         cuePoints: [], beatGrid: null, waveformData: null },
-  },
-  crossfader: 0, masterBpm: 120, syncEnabled: false, tempoRange: 0.10,
-};
-export const mixerEngine = new MixerEngine(EMPTY_MIXER_STATE);
-export const djEngine    = new DJEngine(DEFAULT_DJ_SESSION);
-// END R3 Engine Context
 
 /**
  * server/trpc.ts
@@ -40,20 +11,28 @@ export const djEngine    = new DJEngine(DEFAULT_DJ_SESSION);
  * NEW    — Export AuthenticatedContext so requireAuth can narrow ctx.user
  *          from AuthPayload | undefined → AuthPayload, propagating through
  *          the full middleware chain to every protectedProcedure handler.
+ * Fix D  — Removed duplicate protectedProcedure export from this file.
+ *
+ * ROOT CAUSE (duplicate protectedProcedure):
+ * This file exported `protectedProcedure = publicProc.use(requireAuth)` while
+ * procedures.ts exported the full chain `publicProc.use(requireAuth).use(attachSubscription)`.
+ * Any router importing from trpc.ts instead of procedures.ts would silently
+ * skip attachSubscription — ctx.subscription would be undefined in handlers
+ * that depend on it (requireTier, requireFeature, checkAiTransitionLimit).
+ * Fix: protectedProcedure is exported ONLY from procedures.ts.
+ * requireAuth remains exported here so procedures.ts can import it without
+ * creating a circular dependency.
  *
  * ROOT CAUSE (ctx.subscription missing):
  * feature-gate.ts calls `ctx.subscription?.tier` in three middlewares. TRPCContext
  * never declared a subscription field. TypeScript rejected every access. Adding
- * it here as `UserSubscription | null | undefined` (undefined = not yet fetched,
- * null = user has no subscription row) resolves all seven feature-gate errors.
+ * it here as `UserSubscription | null | undefined` resolves all feature-gate errors.
  *
  * ROOT CAUSE (ctx.user narrowing):
- * requireAuth threw UNAUTHORIZED when user was absent but the return type of
+ * requireAuth throws UNAUTHORIZED when user is absent but the return type of
  * `next({ ctx: { ...ctx, user: ctx.user } })` was still TRPCContext with
  * `user?: AuthPayload`. TypeScript saw every downstream ctx.user as possibly
- * undefined even though requireAuth guaranteed it was not. The fix is to cast
- * to AuthenticatedContext in the next() call — the type now narrows through the
- * full middleware chain.
+ * undefined. The fix: cast to AuthenticatedContext in the next() call.
  *
  * WHY AuthenticatedContext IS CORRECT:
  * Omit<TRPCContext, 'user'> & { user: AuthPayload } replaces the optional
@@ -61,20 +40,22 @@ export const djEngine    = new DJEngine(DEFAULT_DJ_SESSION);
  * receives this type, and ctx.user.id compiles without '!' assertions.
  */
 
-import { initTRPC, TRPCError } from '@trpc/server';
+/// <reference path="./types/express.d.ts" />
+import { initTRPC, TRPCError }  from '@trpc/server';
 import type { Request, Response } from 'express';
-import type { AuthPayload } from './middleware/auth';
-import type { UserSubscription } from '../shared/subscription.types';
+import type { AuthPayload }       from './middleware/auth';
+import type { UserSubscription }  from '../shared/subscription.types';
+import {
+  MixerEngine,
+  DJEngine,
+  mixerEngine,
+  djEngine,
+} from './lib/engine-stubs';
 
-// ── Express global augmentation ───────────────────────────────────────────────
-// Single source: AuthPayload from auth.ts. No inline re-definition anywhere else.
-declare global {
-  namespace Express {
-    interface Request {
-      user?: AuthPayload;
-    }
-  }
-}
+const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-change-in-production';
+
+// Express.Request.user is declared in server/types/express.d.ts — single source.
+// Duplicate augmentation removed to prevent TS2717 (conflicting declarations).
 
 // ── Base context (unauthenticated) ────────────────────────────────────────────
 export interface TRPCContext {
@@ -95,6 +76,10 @@ export interface TRPCContext {
    * AI transition calls. Example: X-Session-Id: <uuid>
    */
   sessionId: string | undefined;
+  /** Audio mixer engine — stub implementation */
+  mixerEngine: MixerEngine;
+  /** DJ engine — stub implementation */
+  djEngine: DJEngine;
 }
 
 /**
@@ -110,6 +95,8 @@ export function createContext({ req, res }: { req: Request; res: Response }): TR
     res,
     user: req.user,
     sessionId: (req.headers['x-session-id'] as string | undefined) || undefined,
+    mixerEngine,
+    djEngine,
     // subscription is populated later by attachSubscription middleware
   };
 }
@@ -125,6 +112,10 @@ export const middleware  = t.middleware;
  * Returns AuthenticatedContext so that downstream middlewares and handlers
  * see ctx.user as AuthPayload (non-optional). Must be chained first in
  * protectedProcedure before attachSubscription.
+ *
+ * Exported for use by procedures.ts only.
+ * Do NOT use this to build a procedure directly — import protectedProcedure
+ * from procedures.ts, which composes requireAuth + attachSubscription.
  */
 export const requireAuth = middleware(({ ctx, next }) => {
   if (!ctx.user?.id) {
@@ -138,21 +129,10 @@ export const requireAuth = middleware(({ ctx, next }) => {
   return next({ ctx: ctx as unknown as AuthenticatedContext });
 });
 
-/**
- * protectedProcedure — base procedure for authenticated routes.
- *
- * Composes publicProc with requireAuth middleware so that:
- *   1. Unauthenticated callers receive UNAUTHORIZED before any handler runs.
- *   2. Handlers receive ctx typed as AuthenticatedContext (ctx.user: AuthPayload,
- *      not AuthPayload | undefined) — no `!` assertions required downstream.
- *
- * Usage:
- *   export const myRouter = router({
- *     myRoute: protectedProcedure.input(z.object({...})).query(({ ctx, input }) => {
- *       // ctx.user.id is string, not string | undefined
- *     }),
- *   });
- */
-export const protectedProcedure = publicProc.use(requireAuth);
-// R3: add engines to context — update your createContext() return value:
-// export function createContext() { return { ...yourExistingCtx, mixerEngine, djEngine }; }
+// ── protectedProcedure is NOT exported from this file ─────────────────────────
+// The single canonical definition is in procedures.ts:
+//   publicProc.use(requireAuth).use(attachSubscription)
+// Exporting it here (requireAuth only) created two divergent definitions —
+// any router that imported from trpc.ts instead of procedures.ts silently
+// skipped attachSubscription. All routers must import from procedures.ts.
+export const publicProcedure = t.procedure;

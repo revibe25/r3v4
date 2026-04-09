@@ -19,6 +19,7 @@ export default {
     },
     extend: {
       colors: {
+        violet: '#8B5CF6',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

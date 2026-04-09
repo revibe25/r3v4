@@ -1,0 +1,8 @@
+# R3 v4 Secrets Archive Manifest
+# Created   : 2026-04-08T02:00:35Z
+# Host      : penguin
+# Git HEAD  : 6afe895
+# Files     : 2
+#
+.r3-wire-fix-backups-20260405_025223/client/.env.local
+client/.env.local

@@ -3,7 +3,11 @@
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -12,9 +16,20 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
+    "types": []
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "benchmarks"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests",
+    "benchmarks"
+  ],
+  "references": [
+    {
+      "path": "../../shared"
+    }
+  ]
 }

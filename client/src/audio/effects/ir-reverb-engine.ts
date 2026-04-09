@@ -49,9 +49,9 @@ export class IRReverbEngine {
     this._wetGain = ctx.createGain();
     this._dryGain = ctx.createGain();
     this._output = ctx.createGain();
-    this._preGain.gain.value  = this._preG;
-    this._wetGain.gain.value  = this._wet;
-    this._dryGain.gain.value  = 1 - this._wet;
+    this._preGain.gain.setTargetAtTime(this._preG, ctx.currentTime, 0.015);
+    this._wetGain.gain.setTargetAtTime(this._wet, ctx.currentTime, 0.015);
+    this._dryGain.gain.setTargetAtTime(1 - this._wet, ctx.currentTime, 0.015);
     // Wet path
     this._input.connect(this._preGain);
     this._preGain.connect(this._conv);
@@ -110,7 +110,7 @@ export class IRReverbEngine {
 
   setPreGain(gain: number): void {
     this._preG = Math.max(0, Math.min(4, gain));
-    if (this._preGain) this._preGain.gain.value = this._preG;
+    if (this._preGain) this._preGain.gain.setTargetAtTime(this._preG, ctx.currentTime, 0.015);
   }
 
   get loaded()   { return this._loaded; }

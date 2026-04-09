@@ -117,7 +117,7 @@ class AudioEngine {
     // With 32 voices at gain=1.0 and masterGain=0.95, any 2+ simultaneous
     // note-ons sum to >0 dBFS and clip. 0.72 gives ~4 voices of headroom
     // before the downstream limiter fires.
-    this.masterGain.gain.value = 0.72;
+    this.masterGain.gain.setTargetAtTime(0.72, this.ctx.currentTime, 0.015);
     // masterGain is connected after AudioWorklet registration below
 
     // Set up analyser
@@ -136,7 +136,7 @@ class AudioEngine {
     // Create optimized voice pool with 32 voices
     for (let i = 0; i < 32; i++) {
       const g = this.ctx.createGain();
-      g.gain.value = 1;
+      g.gain.setTargetAtTime(1, this.ctx.currentTime, 0.015);
       g.connect(this.filterNode);
       this.voicePool.push({ gain: g, inUse: false, lastUsed: 0, source: null });
     }
@@ -328,7 +328,7 @@ class AudioEngine {
 
     // Set volume with slight ramp to avoid clicks
     voice.gain.gain.setValueAtTime(0, now);
-    voice.gain.gain.linearRampToValueAtTime(vol, now + 0.001);
+    voice.gain.gain.linearRampToValueAtTime(vol, now + 0.008) // 8ms — click-free;
 
     const src = this.ctx.createBufferSource();
     src.buffer = bufToUse;

@@ -1,0 +1,245 @@
+{
+  "stamp": "20260405_030746",
+  "root": "/home/r3/Stable/R3 v4",
+  "deleted": [
+    {
+      "path": "/home/r3/Stable/R3 v4/server/procedures.d.ts",
+      "reason": "compiled artifact \u2014 source procedures.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/procedures.d.ts.map",
+      "reason": "compiled artifact \u2014 source procedures.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/procedures.js",
+      "reason": "compiled artifact \u2014 source procedures.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/procedures.js.map",
+      "reason": "compiled artifact \u2014 source procedures.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/storage.d.ts",
+      "reason": "compiled artifact \u2014 source storage.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/storage.d.ts.map",
+      "reason": "compiled artifact \u2014 source storage.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/storage.js",
+      "reason": "compiled artifact \u2014 source storage.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/storage.js.map",
+      "reason": "compiled artifact \u2014 source storage.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.d.ts",
+      "reason": "compiled artifact \u2014 source trpc.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.d.ts.map",
+      "reason": "compiled artifact \u2014 source trpc.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.js",
+      "reason": "compiled artifact \u2014 source trpc.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.js.map",
+      "reason": "compiled artifact \u2014 source trpc.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/audio.types.d.ts",
+      "reason": "compiled artifact \u2014 source audio.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/audio.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source audio.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/auto-level.types.d.ts",
+      "reason": "compiled artifact \u2014 source auto-level.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/auto-level.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source auto-level.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/auto-level.types.js",
+      "reason": "compiled artifact \u2014 source auto-level.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/auto-level.types.js.map",
+      "reason": "compiled artifact \u2014 source auto-level.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/dj.types.d.ts",
+      "reason": "compiled artifact \u2014 source dj.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/dj.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source dj.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/effects.types.d.ts",
+      "reason": "compiled artifact \u2014 source effects.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/effects.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source effects.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/index.d.ts",
+      "reason": "compiled artifact \u2014 source index.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/index.d.ts.map",
+      "reason": "compiled artifact \u2014 source index.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/mixer.types.d.ts",
+      "reason": "compiled artifact \u2014 source mixer.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/mixer.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source mixer.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema-subscription.d.ts",
+      "reason": "compiled artifact \u2014 source schema-subscription.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema-subscription.d.ts.map",
+      "reason": "compiled artifact \u2014 source schema-subscription.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema.d.ts",
+      "reason": "compiled artifact \u2014 source schema.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema.d.ts.map",
+      "reason": "compiled artifact \u2014 source schema.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/subscription.types.d.ts",
+      "reason": "compiled artifact \u2014 source subscription.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/subscription.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source subscription.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/types.d.ts",
+      "reason": "compiled artifact \u2014 source types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/types.d.ts.map",
+      "reason": "compiled artifact \u2014 source types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/waveform.types.d.ts",
+      "reason": "compiled artifact \u2014 source waveform.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/waveform.types.d.ts.map",
+      "reason": "compiled artifact \u2014 source waveform.types.ts exists; tsc output belongs in dist/, not alongside source",
+      "phase": "B"
+    }
+  ],
+  "archived": [],
+  "flagged": [
+    {
+      "path": "/home/r3/Stable/R3 v4/0",
+      "reason": "unknown file at root \u2014 `cat 0` to inspect; then delete or move to docs/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/depgraph.json",
+      "reason": "unclear origin \u2014 if Turborepo-generated: add to .gitignore and delete; if manually curated: move to docs/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/index.ts",
+      "reason": "check railway.toml startCommand and Dockerfile CMD; if this IS the server entry, keep; if stale, archive to internal/archive/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3audit",
+      "reason": "'r3audit' \u2014 `cat r3audit` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3execute",
+      "reason": "'r3execute' \u2014 `cat r3execute` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3setup",
+      "reason": "'r3setup' \u2014 `cat r3setup` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/client",
+      "reason": "client/client/ nested dir should not exist \u2014 inspect vs client/src/; if duplicate, delete"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/components",
+      "reason": "client/components/ outside client/src/ \u2014 confirm src/components/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/hooks",
+      "reason": "client/hooks/ outside client/src/ \u2014 confirm src/hooks/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/stores",
+      "reason": "client/stores/ outside client/src/ \u2014 confirm src/stores/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/shared",
+      "reason": "client/shared/ outside client/src/ \u2014 workspace shared/ package is canonical; this is likely a stale copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/src",
+      "reason": "root-level src/ should not exist in a monorepo \u2014 compare with client/src/engine/ and client/src/visual/; if duplicate, delete; if canonical, move to the correct package"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/llpte-signal.d.ts",
+      "reason": "LLPTE package declaration sitting in shared/ \u2014 should come from packages/llpte-signal via package.json#exports; fix package exports, then delete this file"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema-daw-patch.ts",
+      "reason": "'patch' in filename implies a temporary fix applied inline \u2014 verify contents are merged into schema.ts; if so, delete; if still needed permanently, rename to remove 'patch'"
+    }
+  ]
+}

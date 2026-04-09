@@ -6,12 +6,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { LogOut } from 'lucide-react';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/hooks/authStore';
 
 const S = {
   bg:     '#0c0c0c',
   border: '#222',
-  accent: '#b8ff00',
+  accent: '#a3e635',
   dim:    '#555',
   danger: '#ff3b3b',
   font:   "'IBM Plex Mono', 'JetBrains Mono', monospace",
@@ -24,7 +24,7 @@ interface LogoutButtonProps {
 export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   const [confirming, setConfirming] = useState(false);
   const [, navigate]  = useLocation();
-  const { clearAuth } = useAuthStore();
+  const { logout } = useAuthStore();
   const popoverRef    = useRef<HTMLDivElement>(null);
   const triggerRef    = useRef<HTMLButtonElement>(null);
 
@@ -52,11 +52,11 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   }, [confirming]);
 
   const handleConfirm = useCallback(() => {
-    clearAuth();
-    localStorage.removeItem('r3-auth');
+    logout();                          // clears hooks/authStore + r3_token
+    localStorage.removeItem('r3-auth'); // purge legacy stores/authStore key
     setConfirming(false);
     navigate('/login');
-  }, [clearAuth, navigate]);
+  }, [logout, navigate]);
 
   return (
     <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>

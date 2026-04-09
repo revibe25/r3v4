@@ -1,4 +1,5 @@
-import type { MixerState } from "@r3/llpte-core";
+// import type { MixerState } from "@r3/llpte-core";
+export interface MixerState { [key: string]: any; }
 
 export interface AIMixSuggestion {
   readonly channelId: string;
@@ -86,7 +87,7 @@ export class AIMixingService {
           signal: AbortSignal.timeout(5000),
         });
         if (!res.ok) throw new Error(`Model endpoint returned ${res.status}`);
-        const modelSuggestions: AIMixSuggestion[] = await res.json();
+        const modelSuggestions = await res.json() as AIMixSuggestion[];
         const merged = new Map(suggestions.map((s) => [`${s.channelId}:${s.paramId}`, s]));
         for (const ms of modelSuggestions) merged.set(`${ms.channelId}:${ms.paramId}`, ms);
         return [...merged.values()];

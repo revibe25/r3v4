@@ -1,4 +1,11 @@
 // client/src/pages/login.tsx
+// Enhanced v2 — PRD-compliant design system
+// Colors: cyan #00F5FF (active), violet #8B5CF6 (AI), lime #a3e635 (accent),
+//         amber #f59e0b (warning), red #ff3b3b (error)
+// Font: JetBrains Mono (data), IBM Plex Mono (fallback)
+// Background: #060606, Card: #0a0a0a, Border: #1c1c1c
+// Live pulse wave canvas behind panel — animated LLPTE signal visualization
+
 import {
   useState,
   useEffect,
@@ -8,40 +15,50 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import { Link } from 'wouter';
-import { LogIn, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
+import { LogIn, AlertCircle, Eye, EyeOff, Cpu, Activity } from 'lucide-react';
+import { useAuthStore } from '../hooks/authStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type LoginState = 'idle' | 'loading' | 'error' | 'success';
 
-// Bug fix #1: explicit typed interface replaces Record<string,string>
 interface Tokens {
   bg:       string;
   card:     string;
+  cardGlow: string;
   border:   string;
+  borderHi: string;
   accent:   string;
   accentHv: string;
+  cyan:     string;
+  violet:   string;
+  amber:    string;
   text:     string;
+  textSub:  string;
   muted:    string;
   dim:      string;
   error:    string;
   font:     string;
 }
 
-// ─── Design tokens — module-level constant (exact match to existing file) ─────
-// Bug fix #1 cont.: T is module-level so sub-components close over it directly
-// instead of receiving it as a prop typed as Record<string,string>.
+// ─── Design tokens — PRD-compliant ───────────────────────────────────────────
 const T: Tokens = {
   bg:       '#060606',
   card:     '#0a0a0a',
+  cardGlow: '#0d0d0d',
   border:   '#1c1c1c',
-  accent:   '#a3e635',
+  borderHi: '#2a2a2a',
+  accent:   '#a3e635',       // lime — R3 brand
   accentHv: '#84cc16',
+  cyan:     '#00F5FF',       // PRD: active state
+  violet:   '#8B5CF6',       // PRD: AI signal
+  amber:    '#f59e0b',       // PRD: warning
   text:     '#f0f0f0',
+  textSub:  '#a0a0a0',
   muted:    '#555555',
   dim:      '#333333',
   error:    '#ff3b3b',
-  font:     "'IBM Plex Mono','JetBrains Mono',monospace",
+  font:     "'JetBrains Mono','IBM Plex Mono','Fira Code',monospace",
 };
 
 // ─── Password strength ────────────────────────────────────────────────────────
@@ -55,17 +72,18 @@ function getStrength(pw: string): number {
   return s;
 }
 const STRENGTH_LABEL = ['', 'WEAK', 'FAIR', 'STRONG', 'MAX'] as const;
-const STRENGTH_COLOR = ['', '#ff3b3b', '#f59e0b', '#a3e635', '#a3e635'] as const;
+const STRENGTH_COLOR = ['', '#ff3b3b', '#f59e0b', '#a3e635', '#00F5FF'] as const;
 
 // ─── Keyframe injection ───────────────────────────────────────────────────────
-const INJECTED_ID = 'r3-login-keyframes';
-// Bug fix #5: guard against SSR / test environments where document is absent
+const INJECTED_ID = 'r3-login-v2-keyframes';
 function injectKeyframes(): void {
   if (typeof document === 'undefined') return;
   if (document.getElementById(INJECTED_ID)) return;
   const style = document.createElement('style');
   style.id = INJECTED_ID;
   style.textContent = `
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
     @keyframes r3-shake {
       0%,100% { transform: translateX(0); }
       18%     { transform: translateX(-6px); }
@@ -80,15 +98,81 @@ function injectKeyframes(): void {
     @keyframes r3-spin {
       to { transform: rotate(360deg); }
     }
-    .r3-shake  { animation: r3-shake 0.42s cubic-bezier(.22,1,.36,1); }
-    .r3-fadein { animation: r3-fadein 0.22s ease; }
-    .r3-spin   { animation: r3-spin 0.75s linear infinite; }
+    @keyframes r3-pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+    @keyframes r3-scan {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.6; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
+    @keyframes r3-glow-border {
+      0%, 100% { box-shadow: 0 0 0 0 transparent, inset 0 1px 0 rgba(0,245,255,0.06); }
+      50%      { box-shadow: 0 0 40px rgba(0,245,255,0.04), inset 0 1px 0 rgba(0,245,255,0.12); }
+    }
+    @keyframes r3-node-ping {
+      0%   { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    @keyframes r3-dash-flow {
+      to { stroke-dashoffset: -20; }
+    }
+
+    .r3-shake        { animation: r3-shake 0.42s cubic-bezier(.22,1,.36,1); }
+    .r3-fadein       { animation: r3-fadein 0.22s ease; }
+    .r3-spin         { animation: r3-spin 0.75s linear infinite; }
+    .r3-glow-card    { animation: r3-glow-border 4s ease-in-out infinite; }
+
+    .r3-input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: #060606;
+      border: 1px solid #1c1c1c;
+      border-radius: 0;
+      color: #f0f0f0;
+      font-family: 'JetBrains Mono','IBM Plex Mono',monospace;
+      font-size: 13px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      letter-spacing: 0.02em;
+    }
+    .r3-input:focus {
+      border-color: #00F5FF;
+      box-shadow: 0 0 0 1px rgba(0,245,255,0.15), inset 0 0 20px rgba(0,245,255,0.02);
+    }
+    .r3-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .r3-input::placeholder { color: #333; }
+
+    .r3-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border: 1px solid #2a2a2a;
+      background: #060606;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .r3-checkbox:checked {
+      background: #a3e635;
+      border-color: #a3e635;
+    }
   `;
   document.head.appendChild(style);
 }
 
-// ─── Animated waveform background ────────────────────────────────────────────
-function WaveCanvas() {
+// ─── Live Pulse Wave Canvas ───────────────────────────────────────────────────
+// Multi-layer signal visualization: LLPTE pre/post AI signal (violet + cyan)
+// plus ambient carrier waves — all animated at 60fps
+function PulseWaveCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -97,65 +181,92 @@ function WaveCanvas() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId    = 0;
-    let t         = 0;
+    let animId = 0;
+    let t = 0;
     let resizeTimer = 0;
 
-    // Bug fix #10: getBoundingClientRect is reliable post-layout;
-    // fall back to offsetWidth/Height, then a safe default.
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const w    = Math.round(rect.width  || canvas.offsetWidth  || 480);
-      const h    = Math.round(rect.height || canvas.offsetHeight || 300);
-      // Only touch canvas dimensions when they actually changed —
-      // assigning canvas.width resets the context and causes a blank frame.
+      const w = Math.round(rect.width  || canvas.offsetWidth  || 800);
+      const h = Math.round(rect.height || canvas.offsetHeight || 600);
       if (canvas.width !== w)  canvas.width  = w;
       if (canvas.height !== h) canvas.height = h;
     };
-
-    // Bug fix #4: debounce resize so rapid drag-resizes don't stomp mid-draw
     const onResize = () => {
       clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(resize, 100);
+      resizeTimer = window.setTimeout(resize, 80);
     };
-
     resize();
     window.addEventListener('resize', onResize);
 
-    const waves = [
-      { amp: 18, freq: 0.012, speed: 0.018, color: 'rgba(184,255,0,0.18)',  lineW: 1.5, yOff: 0.50 },
-      { amp: 10, freq: 0.022, speed: 0.028, color: 'rgba(184,255,0,0.09)',  lineW: 1,   yOff: 0.44 },
-      { amp: 24, freq: 0.008, speed: 0.011, color: 'rgba(184,255,0,0.055)', lineW: 1,   yOff: 0.56 },
+    // Signal layers — PRD-accurate: violet = AI/pre, cyan = post-AI, lime = carrier
+    const layers = [
+      // Carrier / ambient — lime green, slow, wide
+      { amp: 28,  freq: 0.007, speed: 0.008, phase: 0,    color: 'rgba(163,230,53,0.07)',  lineW: 1,   yOff: 0.50 },
+      { amp: 14,  freq: 0.015, speed: 0.014, phase: 1.1,  color: 'rgba(163,230,53,0.04)',  lineW: 0.8, yOff: 0.38 },
+      { amp: 20,  freq: 0.010, speed: 0.010, phase: 2.3,  color: 'rgba(163,230,53,0.035)', lineW: 0.8, yOff: 0.62 },
+
+      // Pre-AI signal — violet, medium frequency
+      { amp: 38,  freq: 0.018, speed: 0.022, phase: 0.5,  color: 'rgba(139,92,246,0.14)',  lineW: 1.2, yOff: 0.46 },
+      { amp: 22,  freq: 0.030, speed: 0.032, phase: 1.8,  color: 'rgba(139,92,246,0.08)',  lineW: 0.8, yOff: 0.54 },
+
+      // Post-AI signal — cyan, tighter, more processed
+      { amp: 26,  freq: 0.024, speed: 0.028, phase: 0.9,  color: 'rgba(0,245,255,0.12)',   lineW: 1.5, yOff: 0.48 },
+      { amp: 16,  freq: 0.040, speed: 0.038, phase: 2.1,  color: 'rgba(0,245,255,0.07)',   lineW: 1,   yOff: 0.52 },
+      { amp: 10,  freq: 0.055, speed: 0.045, phase: 0.3,  color: 'rgba(0,245,255,0.04)',   lineW: 0.7, yOff: 0.50 },
+
+      // LLPTE deep carrier — amber, very slow
+      { amp: 60,  freq: 0.004, speed: 0.004, phase: 3.0,  color: 'rgba(245,158,11,0.025)', lineW: 1,   yOff: 0.50 },
     ];
 
     const draw = () => {
       const { width, height } = canvas;
-      // Bug fix #4 cont.: skip draw when canvas has no area
       if (width > 0 && height > 0) {
         ctx.clearRect(0, 0, width, height);
-        waves.forEach(w => {
+
+        // Radial ambient glow behind card center
+        const cx = width * 0.5;
+        const cy = height * 0.5;
+        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.55);
+        grd.addColorStop(0, 'rgba(139,92,246,0.04)');
+        grd.addColorStop(0.5, 'rgba(0,245,255,0.02)');
+        grd.addColorStop(1, 'transparent');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, width, height);
+
+        layers.forEach(w => {
           ctx.beginPath();
           ctx.strokeStyle = w.color;
-          ctx.lineWidth   = w.lineW;
-          ctx.shadowColor = '#a3e635';
-          ctx.shadowBlur  = 6;
-          for (let x = 0; x <= width; x += 2) {
+          ctx.lineWidth = w.lineW;
+
+          const yBase = height * w.yOff;
+          for (let x = 0; x <= width; x += 1.5) {
+            const tScaled = t * w.speed * 60;
             const y =
-              height * w.yOff
-              + Math.sin(x * w.freq + t * w.speed * 60) * w.amp
-              + Math.sin(x * w.freq * 0.5 + t * w.speed * 40) * (w.amp * 0.4);
+              yBase
+              + Math.sin(x * w.freq + tScaled + w.phase) * w.amp
+              + Math.sin(x * w.freq * 0.47 + tScaled * 0.6 + w.phase * 1.3) * (w.amp * 0.35)
+              + Math.sin(x * w.freq * 2.1  + tScaled * 1.4 + w.phase * 0.7) * (w.amp * 0.15);
             x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
           }
           ctx.stroke();
-          ctx.shadowBlur = 0;
         });
+
+        // Vertical scan line — subtle CRT sweep
+        const scanX = ((t * 0.4) % (width + 200)) - 100;
+        const scanGrd = ctx.createLinearGradient(scanX - 30, 0, scanX + 30, 0);
+        scanGrd.addColorStop(0, 'transparent');
+        scanGrd.addColorStop(0.5, 'rgba(0,245,255,0.025)');
+        scanGrd.addColorStop(1, 'transparent');
+        ctx.fillStyle = scanGrd;
+        ctx.fillRect(scanX - 30, 0, 60, height);
+
         t++;
       }
       animId = requestAnimationFrame(draw);
     };
 
     draw();
-
     return () => {
       cancelAnimationFrame(animId);
       clearTimeout(resizeTimer);
@@ -177,8 +288,284 @@ function WaveCanvas() {
   );
 }
 
+// ─── Mini LLPTE oscilloscope — shows last 200 "ticks" as a live waveform ─────
+function MiniOscilloscope({ active }: { active: boolean }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const bufRef    = useRef<Float32Array>(new Float32Array(200));
+  const tRef      = useRef(0);
+
+  useEffect(() => {
+    if (!active) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId = 0;
+
+    const draw = () => {
+      const t = tRef.current++;
+      const buf = bufRef.current;
+      // Simulate LLPTE post-AI signal
+      const newSample =
+        Math.sin(t * 0.12) * 0.4
+        + Math.sin(t * 0.07 + 1.2) * 0.25
+        + Math.sin(t * 0.21 + 0.5) * 0.15
+        + (Math.random() - 0.5) * 0.06;
+      buf.copyWithin(0, 1);
+      buf[buf.length - 1] = newSample;
+
+      const { width, height } = canvas;
+      ctx.clearRect(0, 0, width, height);
+
+      // Violet pre-AI (offset/phase shifted)
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(139,92,246,0.7)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < buf.length; i++) {
+        const x = (i / buf.length) * width;
+        const vPre = Math.sin((tRef.current - buf.length + i) * 0.12 + 0.8) * 0.4
+                   + Math.sin((tRef.current - buf.length + i) * 0.07 + 2.0) * 0.25;
+        const y = height * 0.5 - vPre * (height * 0.38);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Cyan post-AI
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(0,245,255,0.85)';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < buf.length; i++) {
+        const x = (i / buf.length) * width;
+        const y = height * 0.5 - buf[i] * (height * 0.38);
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Zero line
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 0.5;
+      ctx.moveTo(0, height * 0.5);
+      ctx.lineTo(width, height * 0.5);
+      ctx.stroke();
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animId);
+  }, [active]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={220}
+      height={36}
+      style={{ width: '100%', height: 36, display: 'block' }}
+    />
+  );
+}
+
+// ─── LLPTE status badge row ───────────────────────────────────────────────────
+function LLPTEBar({ state }: { state: LoginState }) {
+  const isActive = state === 'loading' || state === 'success';
+  const latency  = isActive ? '10ms' : '—';
+  const edges    = isActive ? '847' : '—';
+
+  const badge = (label: string, val: string, color: string) => (
+    <div style={{
+      display:    'flex',
+      alignItems: 'center',
+      gap:        5,
+      padding:    '3px 8px',
+      border:     `1px solid ${T.border}`,
+      background: '#080808',
+    }}>
+      <div style={{
+        width:        5,
+        height:        5,
+        borderRadius: '50%',
+        background:    color,
+        boxShadow:     isActive ? `0 0 6px ${color}` : 'none',
+        flexShrink:    0,
+        animation:     isActive ? 'r3-pulse-dot 1.4s ease-in-out infinite' : 'none',
+      }} />
+      <span style={{ fontSize: 8, color: T.muted, letterSpacing: '.2em' }}>{label}</span>
+      <span style={{ fontSize: 8, color: isActive ? color : T.dim, letterSpacing: '.1em', fontWeight: 700 }}>{val}</span>
+    </div>
+  );
+
+  return (
+    <div style={{
+      display:      'flex',
+      alignItems:   'center',
+      gap:          6,
+      padding:      '10px 36px',
+      borderBottom: `1px solid ${T.border}`,
+      background:   '#070707',
+      overflowX:    'auto',
+    }}>
+      <Cpu size={9} color={T.muted} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+      <span style={{ fontSize: 8, letterSpacing: '.25em', color: T.dim, marginRight: 4 }}>LLPTE</span>
+      {badge('INFER', latency, T.cyan)}
+      {badge('EDGES', edges,   T.violet)}
+      {badge('TICK',  isActive ? '0.8ms' : '—', T.accent)}
+      <div style={{ flex: 1 }} />
+      <Activity size={9} color={isActive ? T.cyan : T.dim} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+    </div>
+  );
+}
+
+// ─── Mini oscilloscope panel ──────────────────────────────────────────────────
+function OscilloscopePanel({ active }: { active: boolean }) {
+  return (
+    <div style={{
+      padding:      '10px 36px 12px',
+      borderBottom: `1px solid ${T.border}`,
+      background:   '#070707',
+    }}>
+      <div style={{
+        display:       'flex',
+        justifyContent:'space-between',
+        alignItems:    'center',
+        marginBottom:  6,
+      }}>
+        <span style={{ fontSize: 8, color: T.dim, letterSpacing: '.2em' }}>SIGNAL</span>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <span style={{ fontSize: 7, color: T.violet, letterSpacing: '.15em' }}>■ PRE-AI</span>
+          <span style={{ fontSize: 7, color: T.cyan,   letterSpacing: '.15em' }}>■ POST-AI</span>
+        </div>
+      </div>
+      <div style={{
+        background: T.bg,
+        border:     `1px solid ${T.border}`,
+        overflow:   'hidden',
+      }}>
+        <MiniOscilloscope active={active} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Submit button ────────────────────────────────────────────────────────────
+function SubmitButton({ state }: { state: LoginState }) {
+  const isLoading = state === 'loading';
+  const isSuccess = state === 'success';
+  const [hovered, setHovered] = useState(false);
+
+  const bg = isSuccess
+    ? T.cyan
+    : hovered && !isLoading
+    ? T.accentHv
+    : T.accent;
+
+  return (
+    <button
+      type="submit"
+      disabled={isLoading || isSuccess}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display:        'flex',
+        alignItems:     'center',
+        justifyContent: 'center',
+        gap:            9,
+        width:          '100%',
+        padding:        '15px',
+        border:         'none',
+        borderRadius:   0,
+        background:     bg,
+        color:          '#060606',
+        fontFamily:     T.font,
+        fontSize:       11,
+        letterSpacing:  '.3em',
+        textTransform:  'uppercase' as const,
+        fontWeight:     700,
+        cursor:         isLoading || isSuccess ? 'not-allowed' : 'pointer',
+        transition:     'background 0.15s, box-shadow 0.2s',
+        opacity:        isLoading ? 0.8 : 1,
+        boxShadow:      isSuccess
+          ? `0 0 30px ${T.cyan}55, 0 0 60px ${T.cyan}22`
+          : hovered && !isLoading
+          ? `0 0 20px ${T.accent}44`
+          : `0 0 12px ${T.accent}22`,
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Sweep shimmer on hover */}
+      {hovered && !isLoading && !isSuccess && (
+        <div style={{
+          position:   'absolute',
+          inset:      0,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%)',
+          animation:  'r3-scan 0.6s ease-out forwards',
+          pointerEvents: 'none',
+        }} />
+      )}
+
+      {isSuccess ? (
+        <>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          AUTHORIZED
+        </>
+      ) : isLoading ? (
+        <>
+          <svg
+            className="r3-spin"
+            width="13" height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <circle cx="12" cy="12" r="10" strokeDasharray="40" strokeDashoffset="30" strokeLinecap="round" />
+          </svg>
+          AUTHENTICATING…
+        </>
+      ) : (
+        <>
+          <LogIn size={13} strokeWidth={2} />
+          AUTHENTICATE
+        </>
+      )}
+    </button>
+  );
+}
+
+// ─── Field block ──────────────────────────────────────────────────────────────
+function FieldBlock({
+  label,
+  children,
+  style,
+}: {
+  label:    string;
+  children: ReactNode;
+  style?:   CSSProperties;
+}) {
+  return (
+    <div style={{ marginBottom: 20, ...style }}>
+      <span style={{
+        display:       'block',
+        fontSize:      9,
+        letterSpacing: '.28em',
+        textTransform: 'uppercase' as const,
+        color:         T.muted,
+        marginBottom:  8,
+      }}>
+        {label}
+      </span>
+      {children}
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function LoginPage() {
+  const [, setLocation] = useLocation();
   const [credential, setCredential] = useState('');
   const [password,   setPassword]   = useState('');
   const [showPw,     setShowPw]     = useState(false);
@@ -186,12 +573,9 @@ export default function LoginPage() {
   const [loginState, setLoginState] = useState<LoginState>('idle');
   const [errorMsg,   setErrorMsg]   = useState('');
   const [mounted,    setMounted]    = useState(false);
-  // Bug fix #3: use an incrementing key to force re-application of the shake
-  // class even when the same error fires twice in a row.
-  const [shakeKey, setShakeKey] = useState(0);
+  const [shakeKey,   setShakeKey]   = useState(0);
 
   const credRef       = useRef<HTMLInputElement>(null);
-  // Bug fix #2: store the auto-reset timer so we can cancel it on unmount
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const strength  = getStrength(password);
@@ -201,10 +585,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     injectKeyframes();
-    const mountTimer = setTimeout(() => setMounted(true), 40);
+    const mountTimer = setTimeout(() => setMounted(true), 60);
     return () => {
       clearTimeout(mountTimer);
-      // Bug fix #2: cancel pending auto-reset if component unmounts mid-error
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     };
   }, []);
@@ -213,9 +596,6 @@ export default function LoginPage() {
     if (mounted) credRef.current?.focus();
   }, [mounted]);
 
-  // Bug fix #2 + #3: triggerError is the single source of truth for errors.
-  // It cancels any existing timer, sets state, increments shakeKey (so the
-  // shake class always re-applies via key change), and owns its own cleanup ref.
   const triggerError = useCallback((msg: string) => {
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     setErrorMsg(msg);
@@ -238,39 +618,26 @@ export default function LoginPage() {
     setErrorMsg('');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method:      'POST',
-        headers:     { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body:        JSON.stringify({ credential: trimmed, password }),
-      });
-
-      if (res.ok) {
-        setLoginState('success');
-        setTimeout(() => { window.location.href = '/'; }, 650);
-      } else {
-        let msg = 'Authentication failed — check your credentials.';
-        try {
-          const data = await res.json();
-          // Guard: only use message if it's actually a non-empty string
-          if (typeof data?.message === 'string' && data.message.trim()) {
-            msg = data.message.trim();
-          }
-        } catch { /* non-JSON body — keep default message */ }
-        triggerError(msg);
-      }
-    } catch {
-      triggerError('Network error — please try again.');
+      await useAuthStore.getState().login(trimmed, password);
+      setLoginState('success');
+      setTimeout(() => setLocation('/instrument'), 800);
+    } catch (err) {
+      const raw = (err as Error).message ?? '';
+      triggerError(raw || 'Authentication failed — check your credentials.');
     }
   };
 
+  // PRD: grid texture behind everything
   const gridBg = [
-    'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px)',
-    'repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,.016) 31px,rgba(255,255,255,.016) 32px)',
+    'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.008) 3px,rgba(255,255,255,.008) 4px)',
+    'repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.01) 39px,rgba(255,255,255,.01) 40px)',
   ].join(',');
 
-  // Bug fix #8: simplified — only error changes the top border colour
-  const cardBorderTop = `3px solid ${isError ? T.error : T.accent}`;
+  // Top border: cyan on active/success, error on error, accent normally
+  const topBorderColor = isSuccess ? T.cyan : isError ? T.error : T.accent;
+
+  const cardTranslateY = mounted ? '0' : '16px';
+  const cardOpacity    = mounted ? 1 : 0;
 
   return (
     <div style={{
@@ -286,62 +653,81 @@ export default function LoginPage() {
       overflow:        'hidden',
     }}>
 
-      <WaveCanvas />
+      {/* ── Live pulse wave background ── */}
+      <PulseWaveCanvas />
 
-      {/*
-        Bug fix #3: changing `key` causes React to unmount + remount this div,
-        which re-applies the CSS class fresh — guaranteeing the shake animation
-        fires every time triggerError is called, including consecutive calls
-        with the same message.
-        key="card-0" on initial render avoids the shake playing on mount.
-      */}
+      {/* ── Subtle corner vignette ── */}
+      <div style={{
+        position:      'absolute',
+        inset:         0,
+        background:    'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* ── Panel ── */}
       <div
         key={shakeKey === 0 ? 'card-init' : `card-${shakeKey}`}
-        className={shakeKey > 0 ? 'r3-shake' : undefined}
+        className={`r3-glow-card${shakeKey > 0 ? ' r3-shake' : ''}`}
         style={{
           position:   'relative',
           zIndex:     10,
-          width:      'min(520px, calc(100vw - 40px))',
+          width:      'min(540px, calc(100vw - 40px))',
           background: T.card,
           border:     `1px solid ${T.border}`,
-          borderTop:  cardBorderTop,
-          opacity:    mounted ? 1 : 0,
-          transform:  mounted ? 'none' : 'translateY(10px)',
-          transition: 'opacity 0.35s ease, transform 0.35s ease, border-top-color 0.2s',
+          borderTop:  `2px solid ${topBorderColor}`,
+          opacity:    cardOpacity,
+          transform:  `translateY(${cardTranslateY})`,
+          transition: 'opacity 0.45s ease, transform 0.45s cubic-bezier(.22,1,.36,1), border-top-color 0.25s',
         }}
       >
-        {/* Top glow line — sits just below the 3px border */}
+        {/* Top glow under border */}
         <div style={{
           position:      'absolute',
-          top:           2,
+          top:           1,
           left:          0,
           right:         0,
           height:        1,
-          background:    `linear-gradient(90deg, transparent 0%, ${T.accent}44 50%, transparent 100%)`,
+          background:    `linear-gradient(90deg, transparent 0%, ${topBorderColor}55 40%, ${topBorderColor}33 60%, transparent 100%)`,
           pointerEvents: 'none',
+          transition:    'background 0.25s',
         }} />
+
+        {/* Outer glow ring — success only */}
+        {isSuccess && (
+          <div style={{
+            position:      'absolute',
+            inset:         -1,
+            border:        `1px solid ${T.cyan}30`,
+            boxShadow:     `0 0 40px ${T.cyan}15`,
+            pointerEvents: 'none',
+          }} />
+        )}
 
         {/* ── Header ── */}
         <div style={{
-          padding:      '26px 36px 22px',
+          padding:      '22px 36px 20px',
           borderBottom: `1px solid ${T.border}`,
           display:      'flex',
           alignItems:   'center',
           gap:          14,
         }}>
+          {/* Status dot */}
           <div style={{
             width:        8,
             height:       8,
             borderRadius: '50%',
-            background:   isError ? T.error : T.accent,
+            background:   isError ? T.error : isSuccess ? T.cyan : T.accent,
             boxShadow:    isError
-              ? `0 0 8px ${T.error}, 0 0 16px ${T.error}55`
-              : `0 0 8px ${T.accent}, 0 0 16px ${T.accent}55`,
+              ? `0 0 10px ${T.error}, 0 0 20px ${T.error}55`
+              : isSuccess
+              ? `0 0 10px ${T.cyan}, 0 0 20px ${T.cyan}55`
+              : `0 0 8px ${T.accent}, 0 0 16px ${T.accent}44`,
             flexShrink:   0,
             transition:   'background 0.2s, box-shadow 0.2s',
+            animation:    'r3-pulse-dot 2s ease-in-out infinite',
           }} />
 
-          <LogIn size={16} color={T.accent} strokeWidth={1.5} />
+          <LogIn size={15} color={isSuccess ? T.cyan : T.accent} strokeWidth={1.5} style={{ transition: 'color 0.2s' }} />
 
           <div style={{ flex: 1 }}>
             <div style={{
@@ -350,9 +736,16 @@ export default function LoginPage() {
               color:         T.text,
               letterSpacing: '-.01em',
               lineHeight:    1,
-              marginBottom:  5,
+              marginBottom:  6,
             }}>
               R3<span style={{ color: T.accent, margin: '0 3px' }}>/</span>NATIVE
+              <span style={{
+                marginLeft:    10,
+                fontSize:       9,
+                letterSpacing: '.2em',
+                color:         T.dim,
+                fontWeight:    400,
+              }}>v4.2.1</span>
             </div>
             <div style={{
               fontSize:      9,
@@ -364,21 +757,40 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* State chip */}
           <div style={{
+            display:       'flex',
+            alignItems:    'center',
+            gap:           6,
             fontSize:      8,
-            letterSpacing: '.25em',
+            letterSpacing: '.2em',
             textTransform: 'uppercase' as const,
-            color:         isSuccess ? T.accent : isError ? T.error : T.dim,
+            color:         isSuccess ? T.cyan : isError ? T.error : isLoading ? T.violet : T.dim,
             borderLeft:    `1px solid ${T.border}`,
             paddingLeft:   14,
             transition:    'color 0.2s',
           }}>
+            {isLoading && (
+              <div style={{
+                width:        6,
+                height:       6,
+                borderRadius: '50%',
+                background:   T.violet,
+                animation:    'r3-pulse-dot 0.8s ease-in-out infinite',
+              }} />
+            )}
             {isSuccess ? 'AUTHORIZED' : isError ? 'DENIED' : isLoading ? 'CHECKING' : 'SECURE'}
           </div>
         </div>
 
+        {/* ── LLPTE status bar ── */}
+        <LLPTEBar state={loginState} />
+
+        {/* ── Oscilloscope ── */}
+        <OscilloscopePanel active={isLoading || isSuccess} />
+
         {/* ── Form ── */}
-        <form onSubmit={handleSubmit} style={{ padding: '30px 36px 34px' }} noValidate>
+        <form onSubmit={handleSubmit} style={{ padding: '28px 36px 32px' }} noValidate>
 
           {isError && errorMsg && (
             <div
@@ -388,20 +800,19 @@ export default function LoginPage() {
                 display:      'flex',
                 gap:          10,
                 alignItems:   'flex-start',
-                background:   'rgba(255,59,59,.06)',
-                borderLeft:   `3px solid ${T.error}`,
+                background:   'rgba(255,59,59,.05)',
+                borderLeft:   `2px solid ${T.error}`,
                 padding:      '12px 16px',
                 marginBottom: 24,
               }}
             >
-              <AlertCircle size={13} color={T.error} style={{ marginTop: 1, flexShrink: 0 }} />
-              <span style={{ fontSize: 11, color: 'rgba(255,59,59,.85)', letterSpacing: '.05em' }}>
+              <AlertCircle size={12} color={T.error} style={{ marginTop: 1, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: 'rgba(255,59,59,.8)', letterSpacing: '.05em', lineHeight: 1.5 }}>
                 {errorMsg}
               </span>
             </div>
           )}
 
-          {/* Bug fix #6: autocomplete="username" — valid single-token value */}
           <FieldBlock label="Email or Username">
             <input
               ref={credRef}
@@ -412,9 +823,7 @@ export default function LoginPage() {
               autoComplete="username"
               spellCheck={false}
               disabled={isLoading || isSuccess}
-              style={mkInputStyle()}
-              onFocus={e => applyFocusStyle(e.currentTarget)}
-              onBlur={e  => applyBlurStyle(e.currentTarget)}
+              className="r3-input"
             />
           </FieldBlock>
 
@@ -427,9 +836,8 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 disabled={isLoading || isSuccess}
-                style={{ ...mkInputStyle(), paddingRight: 44 }}
-                onFocus={e => applyFocusStyle(e.currentTarget)}
-                onBlur={e  => applyBlurStyle(e.currentTarget)}
+                className="r3-input"
+                style={{ paddingRight: 44 }}
               />
               <button
                 type="button"
@@ -449,44 +857,46 @@ export default function LoginPage() {
                   alignItems: 'center',
                 }}
               >
-                {showPw ? <EyeOff size={14} strokeWidth={1.5} /> : <Eye size={14} strokeWidth={1.5} />}
+                {showPw ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
               </button>
             </div>
           </FieldBlock>
 
+          {/* Strength bar */}
           {password.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
               <div style={{ display: 'flex', gap: 3, flex: 1 }}>
                 {([1, 2, 3, 4] as const).map(n => (
                   <div key={n} style={{
                     flex:       1,
                     height:     2,
                     background: n <= strength ? STRENGTH_COLOR[strength] : T.border,
-                    transition: 'background 0.25s',
+                    transition: 'background 0.3s',
                     boxShadow:  n <= strength && strength >= 3
-                      ? `0 0 4px ${STRENGTH_COLOR[strength]}88`
+                      ? `0 0 6px ${STRENGTH_COLOR[strength]}88`
                       : 'none',
                   }} />
                 ))}
               </div>
               <span style={{
-                fontSize:      9,
+                fontSize:      8,
                 letterSpacing: '.2em',
                 color:         strength > 0 ? STRENGTH_COLOR[strength] : T.muted,
                 minWidth:      38,
                 textAlign:     'right' as const,
-                transition:    'color 0.25s',
+                transition:    'color 0.3s',
               }}>
                 {STRENGTH_LABEL[strength]}
               </span>
             </div>
           )}
 
+          {/* Remember + Forgot */}
           <div style={{
             display:        'flex',
             alignItems:     'center',
             justifyContent: 'space-between',
-            marginBottom:   26,
+            marginBottom:   28,
           }}>
             <label style={{
               display:    'flex',
@@ -500,16 +910,7 @@ export default function LoginPage() {
                 checked={remember}
                 onChange={e => setRemember(e.target.checked)}
                 disabled={isLoading || isSuccess}
-                style={{
-                  appearance: 'none',
-                  width:      12,
-                  height:     12,
-                  border:     `1px solid ${remember ? T.accent : '#2a2a2a'}`,
-                  background: remember ? T.accent : T.bg,
-                  cursor:     'pointer',
-                  flexShrink: 0,
-                  transition: 'background 0.15s, border-color 0.15s',
-                }}
+                className="r3-checkbox"
               />
               <span style={{ fontSize: 9, letterSpacing: '.2em', textTransform: 'uppercase' as const, color: T.muted }}>
                 Remember me
@@ -519,11 +920,12 @@ export default function LoginPage() {
             <Link
               href="/forgot-password"
               style={{
-                fontSize:      9,
-                letterSpacing: '.15em',
-                textTransform: 'uppercase' as const,
-                color:         T.dim,
-                textDecoration:'none',
+                fontSize:       9,
+                letterSpacing:  '.15em',
+                textTransform:  'uppercase' as const,
+                color:          T.dim,
+                textDecoration: 'none',
+                transition:     'color 0.15s',
               }}
             >
               Forgot password?
@@ -532,11 +934,10 @@ export default function LoginPage() {
 
           <SubmitButton state={loginState} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '26px 0' }}>
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, margin: '24px 0' }}>
             <div style={{ flex: 1, height: 1, background: T.border }} />
-            <span style={{ fontSize: 9, letterSpacing: '.2em', color: T.dim, textTransform: 'uppercase' as const }}>
-              or
-            </span>
+            <span style={{ fontSize: 8, letterSpacing: '.25em', color: T.dim, textTransform: 'uppercase' as const }}>or</span>
             <div style={{ flex: 1, height: 1, background: T.border }} />
           </div>
 
@@ -545,145 +946,45 @@ export default function LoginPage() {
             <Link href="/" style={{ color: T.accent, textDecoration: 'none' }}>
               View Plans →
             </Link>
+            {' '}·{' '}
+            <Link href="/auth" style={{ color: T.violet, textDecoration: 'none' }}>
+              Full Auth →
+            </Link>
           </p>
         </form>
 
+        {/* ── Footer strip ── */}
         <div style={{
-          height:     3,
-          background: `repeating-linear-gradient(90deg, ${T.border} 0px, ${T.border} 1px, transparent 1px, transparent 4px)`,
-          opacity:    0.5,
+          display:        'flex',
+          justifyContent: 'space-between',
+          alignItems:     'center',
+          padding:        '10px 36px',
+          borderTop:      `1px solid ${T.border}`,
+          background:     '#070707',
+        }}>
+          <span style={{ fontSize: 7, letterSpacing: '.2em', color: T.dim }}>SECURE · ENCRYPTED</span>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {/* Tiny node indicators — PRD LLPTE pipeline nodes */}
+            {[T.cyan, T.violet, T.violet, T.cyan, '#10B981'].map((c, i) => (
+              <div key={i} style={{
+                width:        5,
+                height:       5,
+                borderRadius: '50%',
+                background:    c,
+                opacity:       0.5,
+              }} />
+            ))}
+          </div>
+          <span style={{ fontSize: 7, letterSpacing: '.2em', color: T.dim }}>R3 v4</span>
+        </div>
+
+        {/* Bottom scan line */}
+        <div style={{
+          height:     2,
+          background: `repeating-linear-gradient(90deg, ${T.border} 0px, ${T.border} 1px, transparent 1px, transparent 5px)`,
+          opacity:    0.4,
         }} />
       </div>
     </div>
   );
-}
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-// Bug fix #7: label color now reads from module-level T, not a hardcoded '#555'
-function FieldBlock({
-  label,
-  children,
-  style,
-}: {
-  label:    string;
-  children: ReactNode;
-  style?:   CSSProperties;
-}) {
-  return (
-    <div style={{ marginBottom: 20, ...style }}>
-      <span style={{
-        display:       'block',
-        fontSize:      9,
-        letterSpacing: '.25em',
-        textTransform: 'uppercase' as const,
-        color:         T.muted,
-        marginBottom:  8,
-      }}>
-        {label}
-      </span>
-      {children}
-    </div>
-  );
-}
-
-// Bug fix #1: SubmitButton no longer accepts T as a prop — it closes over the
-// module-level constant directly, avoiding the Record<string,string> mismatch.
-function SubmitButton({ state }: { state: LoginState }) {
-  const isLoading = state === 'loading';
-  const isSuccess = state === 'success';
-  const [hovered, setHovered] = useState(false);
-
-  const bg = hovered && !isLoading && !isSuccess ? T.accentHv : T.accent;
-
-  return (
-    <button
-      type="submit"
-      disabled={isLoading || isSuccess}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display:        'flex',
-        alignItems:     'center',
-        justifyContent: 'center',
-        gap:            9,
-        width:          '100%',
-        padding:        '14px',
-        border:         'none',
-        borderRadius:   0,
-        background:     bg,
-        color:          '#060606',
-        fontFamily:     T.font,
-        fontSize:       11,
-        letterSpacing:  '.25em',
-        textTransform:  'uppercase' as const,
-        fontWeight:     700,
-        cursor:         isLoading || isSuccess ? 'not-allowed' : 'pointer',
-        transition:     'background 0.1s, box-shadow 0.2s',
-        opacity:        isLoading ? 0.75 : 1,
-        boxShadow:      isSuccess
-          ? `0 0 20px ${T.accent}66`
-          : `0 0 12px ${T.accent}33`,
-      }}
-    >
-      {isSuccess ? (
-        <>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-          AUTHORIZED
-        </>
-      ) : isLoading ? (
-        <>
-          <svg
-            className="r3-spin"
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-          >
-            <circle cx="12" cy="12" r="10" strokeDasharray="40" strokeDashoffset="30" strokeLinecap="round" />
-          </svg>
-          CHECKING…
-        </>
-      ) : (
-        <>
-          <LogIn size={13} strokeWidth={2} />
-          Sign In
-        </>
-      )}
-    </button>
-  );
-}
-
-// ─── Input style helpers ──────────────────────────────────────────────────────
-// Bug fix #1: close over module-level T — no prop threading needed
-
-function mkInputStyle(): CSSProperties {
-  return {
-    display:      'block',
-    width:        '100%',
-    boxSizing:    'border-box',
-    background:   T.bg,
-    border:       `1px solid ${T.border}`,
-    borderRadius: 0,
-    color:        T.text,
-    fontFamily:   T.font,
-    fontSize:     13,
-    padding:      '12px 14px',
-    outline:      'none',
-    transition:   'border-color .1s, box-shadow .1s',
-  };
-}
-
-function applyFocusStyle(el: HTMLInputElement): void {
-  el.style.borderColor = T.accent;
-  el.style.boxShadow   = `0 0 0 1px ${T.accent}33`;
-}
-
-function applyBlurStyle(el: HTMLInputElement): void {
-  el.style.borderColor = T.border;
-  el.style.boxShadow   = 'none';
 }

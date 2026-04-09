@@ -28,7 +28,7 @@
     --muted: 210 15% 20%;
     --muted-foreground: 210 10% 65%;
     
-    --accent: 210 15% 22%;
+    --accent: 65 100% 56%;
     --accent-foreground: 210 10% 95%;
     
     --destructive: 0 62% 50%;
@@ -824,3 +824,111 @@ input[type="radio"] {
   --input: 42 15% 22%;
   --ring: 43 65% 52%;
 }
+
+/* ============================================================================
+   MISSING THEME OVERRIDES — forest · sunset · midnight · aurora · light
+   Added: these themes existed in theme-config.ts but had no CSS variable
+   definitions; they silently fell through to :root (dark) values.
+   ============================================================================ */
+
+.forest {
+  --background: 160 30% 6%;
+  --foreground: 155 20% 85%;
+  --card: 160 30% 10%;
+  --card-foreground: 155 20% 85%;
+  --popover: 160 30% 8%;
+  --popover-foreground: 155 20% 85%;
+  --primary: 152 60% 38%;
+  --primary-foreground: 160 30% 5%;
+  --secondary: 158 20% 18%;
+  --secondary-foreground: 155 20% 82%;
+  --muted: 158 20% 14%;
+  --muted-foreground: 155 15% 52%;
+  --accent: 158 20% 20%;
+  --accent-foreground: 155 20% 85%;
+  --border: 158 20% 20%;
+  --input: 158 20% 20%;
+  --ring: 152 60% 38%;
+}
+
+.sunset {
+  --background: 15 28% 7%;
+  --foreground: 20 18% 88%;
+  --card: 15 28% 11%;
+  --card-foreground: 20 18% 88%;
+  --popover: 15 28% 9%;
+  --popover-foreground: 20 18% 88%;
+  --primary: 22 80% 52%;
+  --primary-foreground: 15 28% 5%;
+  --secondary: 18 18% 20%;
+  --secondary-foreground: 20 18% 85%;
+  --muted: 18 18% 16%;
+  --muted-foreground: 20 12% 55%;
+  --accent: 18 18% 22%;
+  --accent-foreground: 20 18% 88%;
+  --border: 18 18% 22%;
+  --input: 18 18% 22%;
+  --ring: 22 80% 52%;
+}
+
+.midnight {
+  --background: 235 35% 5%;
+  --foreground: 230 18% 88%;
+  --card: 235 35% 9%;
+  --card-foreground: 230 18% 88%;
+  --popover: 235 35% 7%;
+  --popover-foreground: 230 18% 88%;
+  --primary: 234 80% 58%;
+  --primary-foreground: 235 35% 4%;
+  --secondary: 233 22% 18%;
+  --secondary-foreground: 230 18% 85%;
+  --muted: 233 22% 14%;
+  --muted-foreground: 230 12% 52%;
+  --accent: 233 22% 20%;
+  --accent-foreground: 230 18% 88%;
+  --border: 233 22% 20%;
+  --input: 233 22% 20%;
+  --ring: 234 80% 58%;
+}
+
+.aurora {
+  --background: 280 30% 6%;
+  --foreground: 285 18% 88%;
+  --card: 280 30% 10%;
+  --card-foreground: 285 18% 88%;
+  --popover: 280 30% 8%;
+  --popover-foreground: 285 18% 88%;
+  --primary: 288 75% 60%;
+  --primary-foreground: 280 30% 5%;
+  --secondary: 282 20% 20%;
+  --secondary-foreground: 285 18% 85%;
+  --muted: 282 20% 15%;
+  --muted-foreground: 285 12% 52%;
+  --accent: 282 20% 22%;
+  --accent-foreground: 285 18% 88%;
+  --border: 282 20% 22%;
+  --input: 282 20% 22%;
+  --ring: 288 75% 60%;
+}
+
+/* Light = brushed aluminum — not a bright white, a cool muted silver */
+.light {
+  --background: 210 18% 86%;
+  --foreground: 213 25% 12%;
+  --card: 210 18% 90%;
+  --card-foreground: 213 25% 12%;
+  --popover: 210 18% 92%;
+  --popover-foreground: 213 25% 12%;
+  --primary: 217 75% 42%;
+  --primary-foreground: 210 18% 96%;
+  --secondary: 210 12% 74%;
+  --secondary-foreground: 213 25% 15%;
+  --muted: 210 12% 80%;
+  --muted-foreground: 213 18% 38%;
+  --accent: 210 12% 76%;
+  --accent-foreground: 213 25% 12%;
+  --border: 210 12% 70%;
+  --input: 210 12% 70%;
+  --ring: 217 75% 42%;
+}
+

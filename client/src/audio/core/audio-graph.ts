@@ -67,7 +67,7 @@ export class AudioGraph {
 
     // Master gain
     this.masterGain       = this.context.createGain();
-    this.masterGain.gain.value = 1.0;
+    this.masterGain.gain.setTargetAtTime(1.0, this.context.currentTime, 0.015);
 
     // Transparent brickwall limiter — prevents inter-sample clipping on export
     this.limiter = this.context.createDynamicsCompressor();
@@ -165,8 +165,8 @@ export class AudioGraph {
     const gain   = this.context.createGain();
     const output = this.context.createGain();
 
-    gain.gain.value   = initialGain;
-    output.gain.value = 1.0;
+    gain.gain.setTargetAtTime(initialGain, this.context.currentTime, 0.015);
+    output.gain.setTargetAtTime(1.0, this.context.currentTime, 0.015);
 
     input.connect(gain);
     gain.connect(output);

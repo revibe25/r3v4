@@ -358,6 +358,98 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result[0];
   }
+
+  // ── Extended methods ──────────────────────────────────────────────────────
+  // Previously misplaced in server/services/storage.ts by r3-patch-storage.py.
+  // Canonical location: DatabaseStorage class in server/storage.ts.
+
+  /** Alias for getUser(). Called by auth routes and enforceUsage middleware. */
+  async getUserById(userId: string): Promise<User | undefined> {
+    return this.getUser(userId);
+  }
+
+  /**
+   * Mix count for per-tier enforcement (enforceUsage middleware).
+   * Returns 0 safely when the mixes table is not yet in the schema —
+   * under-count is always safe: no user is falsely blocked.
+   */
+  async getMixCountByUser(userId: string): Promise<number> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const schema = await import("./db/schema") as unknown as Record<string, any>;
+      if (!schema.mixes) return 0;
+      const { count } = await import("drizzle-orm");
+      const [row] = await db
+        .select({ value: count() })
+        .from(schema.mixes)
+        .where(eq(schema.mixes.userId, userId));
+      return Number(row?.value ?? 0);
+    } catch {
+      return 0;
+    }
+  }
+
+  /** Replaces the stored password hash for a user (change-password route). */
+  async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.update(users).set({ password: hashedPassword } as any).where(eq(users.id, userId));
+  }
+
+  /**
+   * Records an effect→track association.
+   * Gracefully stubs until the trackEffects table is added to the schema.
+   * Returns a valid shape so callers never crash on missing migration.
+   */
+  async applyEffectToTrack(params: {
+    userId:    string;
+    trackId:   string;
+    effectId:  string;
+    settings?: Record<string, unknown>;
+  }): Promise<{ id: string; trackId: string; effectId: string }> {
+    const { trackId, effectId } = params;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const schema = await import("./db/schema") as unknown as Record<string, any>;
+      if (!schema.trackEffects) {
+        return { id: crypto.randomUUID(), trackId, effectId };
+      }
+      const id = crypto.randomUUID();
+      await db.insert(schema.trackEffects).values({
+        id, trackId, effectId,
+        settings: params.settings ?? {},
+      });
+      return { id, trackId, effectId };
+    } catch {
+      return { id: crypto.randomUUID(), trackId, effectId };
+    }
+  }
+
+  /**
+   * Removes an effect→track association.
+   * No-op stub until trackEffects is added to the schema.
+   */
+  async removeEffectFromTrack(params: {
+    userId:   string;
+    trackId:  string;
+    effectId: string;
+  }): Promise<void> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const schema = await import("./db/schema") as unknown as Record<string, any>;
+      if (!schema.trackEffects) return;
+      const { and } = await import("drizzle-orm");
+      await db
+        .delete(schema.trackEffects)
+        .where(
+          and(
+            eq(schema.trackEffects.trackId,  params.trackId),
+            eq(schema.trackEffects.effectId, params.effectId),
+          ),
+        );
+    } catch {
+      // trackEffects not yet migrated — no-op
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

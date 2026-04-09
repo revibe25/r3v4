@@ -13,7 +13,7 @@
 
 import React from 'react';
 import { X, Zap } from 'lucide-react';
-import { useVSTContextOptional } from '@/App';
+import { useVSTContextOptional } from '@/contexts/VSTContext';
 import { VSTPluginManager } from '@/components/vst-plugin-manager';
 import { VSTPerformanceUI } from '@/components/vst-performance-monitor-ui';
 import type { VSTPanelModalProps } from '../types';

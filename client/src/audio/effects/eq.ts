@@ -8,7 +8,6 @@ export class EQEffect {
 
   constructor() {
     this.lowShelf = new Tone.EQ3({ low: 0, mid: 0, high: 0 });
-    this.lowShelf.toDestination();
     this.params = { enabled: true, type: 'eq', low: 0, mid: 0, high: 0, wet: 1, dry: 0 };
   }
 
@@ -33,6 +32,19 @@ export class EQEffect {
   getParams(): EQParams { return { ...this.params }; }
   getNode(): Tone.EQ3 { return this.lowShelf; }
   dispose(): void { this.lowShelf.dispose(); }
+  /** Returns the terminal output node for explicit chain wiring. */
+  getOutput(): Tone.EQ3 {
+    return this.lowShelf;
+  }
+
+  /**
+   * Connect this effect into an explicit audio chain.
+   * Use instead of letting the effect route to ctx.destination directly.
+   */
+  connectTo(destination: Tone.ToneAudioNode): this {
+    this.lowShelf.connect(destination);
+    return this;
+  }
 }
 
 export const EQ_PRESETS = {

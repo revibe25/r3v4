@@ -6,7 +6,7 @@ import { Volume2, Plus } from "lucide-react";
 import { DJControls } from "./dj-controls";
 import { ChannelStrip } from "./channel-strip";
 import { SpectrumAnalyzer } from "./SpectrumAnalyzer";
-import { VUMeter } from "./VUMeter";
+import { VUMeter } from "./vumeter";
 import { Slider } from "@/components/ui/slider";
 import { defaultChannel } from "./utils";
 import { ChannelState, MasterState } from "./types";

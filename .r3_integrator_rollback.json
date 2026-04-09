@@ -1,0 +1,56 @@
+[
+  {
+    "description": "Fix 1: AgentSuite.tsx React import",
+    "backup_path": "/home/r3/Stable/R3 v4/scripts/AgentSuite.20260406_234745_026912.bak",
+    "original_path": "/home/r3/Stable/R3 v4/scripts/AgentSuite.tsx",
+    "action": "restore"
+  },
+  {
+    "description": "Fix 2: AgentMeshPanel.tsx /api/trpc correction",
+    "backup_path": "/home/r3/Stable/R3 v4/scripts/AgentMeshPanel.20260406_234745_036810.bak",
+    "original_path": "/home/r3/Stable/R3 v4/scripts/AgentMeshPanel.tsx",
+    "action": "restore"
+  },
+  {
+    "description": "File move (new): adminRouter.ts",
+    "backup_path": null,
+    "original_path": "/home/r3/Stable/R3 v4/server/routers/adminRouter.ts",
+    "action": "delete"
+  },
+  {
+    "description": "File move (new): AgentSuite.tsx",
+    "backup_path": null,
+    "original_path": "/home/r3/Stable/R3 v4/client/src/components/admin/AgentSuite.tsx",
+    "action": "delete"
+  },
+  {
+    "description": "File move (new): AgentMeshPanel.tsx",
+    "backup_path": null,
+    "original_path": "/home/r3/Stable/R3 v4/client/src/components/admin/AgentMeshPanel.tsx",
+    "action": "delete"
+  },
+  {
+    "description": "File move (new): AgentSuitePage.tsx",
+    "backup_path": null,
+    "original_path": "/home/r3/Stable/R3 v4/client/src/pages/admin/AgentSuitePage.tsx",
+    "action": "delete"
+  },
+  {
+    "description": "PATCH 7a: add adminRouter import to procedures.ts",
+    "backup_path": "/home/r3/Stable/R3 v4/server/procedures.20260406_234745_066176.bak",
+    "original_path": "/home/r3/Stable/R3 v4/server/procedures.ts",
+    "action": "restore"
+  },
+  {
+    "description": "PATCH 7b: wire admin: adminRouter into appRouter",
+    "backup_path": "/home/r3/Stable/R3 v4/server/procedures.20260406_234745_072053.bak",
+    "original_path": "/home/r3/Stable/R3 v4/server/procedures.ts",
+    "action": "restore"
+  },
+  {
+    "description": "PATCH 7c: add /admin/agents route to App.tsx",
+    "backup_path": "/home/r3/Stable/R3 v4/client/src/App.20260406_234745_075575.bak",
+    "original_path": "/home/r3/Stable/R3 v4/client/src/App.tsx",
+    "action": "restore"
+  }
+]

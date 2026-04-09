@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'wouter';
 
-import { useVSTContext } from '@/App';
+import { useVSTContext } from '@/contexts/VSTContext';
 import { VSTPerformanceUI } from '@/components/vst-performance-monitor-ui';
 
 // Fixed: Changed from './audioengine' to './AudioEngine' (correct case-sensitive filename)

@@ -6,7 +6,7 @@
  */
 
 import { QueryClient, type QueryFunction } from '@tanstack/react-query';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../hooks/authStore';
 
 function authHeaders(extra?: Record<string, string>): Record<string, string> {
   const token = useAuthStore.getState().token;

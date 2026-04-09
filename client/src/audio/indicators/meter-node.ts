@@ -1,7 +1,6 @@
-// @ts-nocheck
 // client/src/audio/indicators/meter-node.ts
 
-import { MeterData } from "../../../shared/types/meter.types";
+import { MeterData } from "../../../../shared/audio.types";
 import { getAudioContext } from "../core/audio-context";
 
 export class MeterNode {

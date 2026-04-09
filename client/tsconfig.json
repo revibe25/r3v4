@@ -37,6 +37,7 @@
   ],
   "exclude": [
     "src/components/beat-intro (1).tsx",
+    "src/index.ts",
     "src/audio/fx/vst-processor.worklet.ts",
     "src/audio/recorder/recorder-worklet.ts",
     "src/worklets/instrument-processor.worklet.ts"

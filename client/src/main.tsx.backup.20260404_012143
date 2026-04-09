@@ -1,0 +1,29 @@
+import { useAudioInitialization } from './hooks/useAudioInitialization';
+
+
+/**
+ * client/src/main.tsx
+ * R3 v4 Vite entry point.
+ *
+ * - React 18 createRoot (concurrent mode)
+ * - StrictMode enabled for development double-render detection
+ * - Tailwind base styles imported via index.css
+ * - App mounts to #root (see client/index.html)
+ *
+ * Note: AudioContext is NOT started here — it is started lazily on first
+ * user interaction via engine.resumeContext() in DAW.tsx (browser policy).
+ */
+
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const root = document.getElementById('root');
+if (!root) throw new Error('Root element #root not found in index.html');
+
+createRoot(root).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

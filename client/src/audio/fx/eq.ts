@@ -282,7 +282,7 @@ export class EQ extends FXNodeBase {
       if (hasGain) {
         ramp
           ? smoothParam(node.gain, config.gain, t)
-          : (node.gain.value = config.gain);
+          : (node.gain.setTargetAtTime(config.gain), this.context.currentTime, 0.015);
       }
 
       ramp
@@ -292,7 +292,7 @@ export class EQ extends FXNodeBase {
       // Neutral values that pass signal unmodified regardless of filter type
       ramp
         ? node.gain.setTargetAtTime(0, t, TAU)
-        : (node.gain.value = 0);
+        : (node.gain.setTargetAtTime(0), this.context.currentTime, 0.015);
     }
   }
 

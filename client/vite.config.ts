@@ -135,7 +135,7 @@ export default defineConfig(({ mode }): UserConfig => {
         '@':       r('./src'),
         '@shared': r('../shared'),
       },
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
+      extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
     },
 
     // ── Dev server ────────────────────────────────────────────────────────────

@@ -198,7 +198,7 @@ class LFO {
     this.gainNode   = this.audioContext.createGain();
     this.oscillator.type = this.config.waveform as OscillatorType;
     this.oscillator.frequency.value = this.config.frequency;
-    this.gainNode.gain.value = this.config.depth;
+    this.gainNode.gain.setTargetAtTime(this.config.depth, this.audioContext.currentTime, 0.015);
     this.oscillator.connect(this.gainNode);
     this.oscillator.start();
   }

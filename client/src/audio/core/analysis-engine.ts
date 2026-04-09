@@ -93,7 +93,7 @@ export class AudioEngine {
     if (this.context) return this.context;
     this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
     this.masterGain = this.context.createGain();
-    this.masterGain.gain.value = 1;
+    this.masterGain.gain.setTargetAtTime(1, this.context.currentTime, 0.015);
     this.masterGain.connect(this.context.destination);
     this.loop();
     return this.context;

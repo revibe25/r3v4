@@ -46,7 +46,7 @@ import {
 import { Link } from 'wouter';
 
 import { PageNav } from '@/components/page-nav';
-import { useVSTContextOptional } from '@/App';
+import { useVSTContextOptional } from '@/contexts/VSTContext';
 import { VSTPerformanceUI } from '@/components/vst-performance-monitor-ui';
 import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
 
