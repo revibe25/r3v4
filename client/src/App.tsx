@@ -53,6 +53,7 @@ import { LoopStation505 } from './features/loopstation/LoopStation505';
 import VisualsPage        from './pages/visuals';
 import NotFound           from './pages/not-found';
 import AdminPage          from './pages/AdminPage';
+import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
 import MultiTrackPanel    from './components/multi-track-panel';
 import CollabDAWPro       from './pages/collaborative-daw-pro';
 import MultitrackView     from './components/multi-track-view';
