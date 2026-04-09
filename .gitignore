@@ -69,3 +69,4 @@ internal/logs/
 
 # deploy log (explicit)
 r3-deploy.log
+secrets/
