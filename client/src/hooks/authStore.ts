@@ -138,7 +138,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // get() is in scope from create<AuthState>((set, get) => ...) closure.
     if (get().user) return;
 
-    // [wire§8] removed — auth via httpOnly cookie
+    const stored = localStorage.getItem('token');
     if (!stored) return;
 
     set({ loading: true });
