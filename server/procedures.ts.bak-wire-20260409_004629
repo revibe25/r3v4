@@ -20,10 +20,7 @@ import { dawRouter }          from './routers/daw';
 import { subscriptionRouter } from './routers/subscription';
 import { sessionsRouter }        from "./routers/sessions";
 import { sessionMetricsRouter }  from "./routers/sessionMetrics.router";
-import { adminRouter }         from "./routers/adminRouter";
-import { mixerRouter }         from "./routers/mixer.router";
-import { djRouter }            from "./routers/dj.router";
-import { aiMixRouter }         from "./routers/aiMix.router";
+import { adminRouter } from "./routers/adminRouter";
 
 export const appRouter = router({
   sessions:       sessionsRouter,
@@ -37,12 +34,6 @@ export const appRouter = router({
 
   // ── Subscription (Stripe checkout, portal, plan status) ──────────────────
   subscription: subscriptionRouter,
-  mixer:        mixerRouter,
-  dj:           djRouter,
-  aiMix:        aiMixRouter,
-  mixer:        mixerRouter,
-  dj:           djRouter,
-  aiMix:        aiMixRouter,
 })
 
 export type AppRouter = typeof appRouter;
