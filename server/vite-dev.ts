@@ -29,7 +29,7 @@ export async function setupVite(server: Server, app: Express) {
       },
     },
     server: {
-      allowedHosts: true as any,
+      allowedHosts: true as true,
       middlewareMode: true,
       hmr: { server, path: "/vite-hmr" },
     },

@@ -124,7 +124,7 @@ export class DatabaseStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values({
-      ...(insertUser as any),
+      ...insertUser,
       tier: "explorer",
     }).returning();
     return result[0];
@@ -132,7 +132,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUser(id: string, updates: Partial<InsertUser>): Promise<User | undefined> {
     const result = await db.update(users)
-      .set({ ...(updates as any), updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(users.id, id))
       .returning();
     return result[0];
@@ -347,13 +347,13 @@ export class DatabaseStorage implements IStorage {
     if (existing.length === 0) {
       const result = await db.insert(settings).values({
         userId: userId ?? null,
-        ...(updates as any),
+        ...(updates as Partial<typeof settings.$inferInsert>),
       }).returning();
       return result[0];
     }
 
     const result = await db.update(settings)
-      .set({ ...(updates as any), updatedAt: new Date() })
+      .set({ ...updates, updatedAt: new Date() })
       .where(eq(settings.id, existing[0].id))
       .returning();
     return result[0];
@@ -392,7 +392,7 @@ export class DatabaseStorage implements IStorage {
   /** Replaces the stored password hash for a user (change-password route). */
   async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.update(users).set({ password: hashedPassword } as any).where(eq(users.id, userId));
+    await db.update(users).set({ password: hashedPassword } as Partial<typeof users.$inferInsert>).where(eq(users.id, userId));
   }
 
   /**

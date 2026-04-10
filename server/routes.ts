@@ -121,7 +121,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           return res.status(400).json({ error: "Invalid sample data", details: parsed.error.issues });
         }
 
-        const sample = await storage.createSample(parsed.data as any);
+        const sample = await storage.createSample(parsed.data);
         res.status(201).json(sample);
       } catch (error) {
         logger.error("Error uploading sample:", error as Record<string, unknown>);

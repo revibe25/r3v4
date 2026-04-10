@@ -1,30 +1,45 @@
 #!/usr/bin/env bash
 # ============================================================
-#  r3zip.sh — Advanced archive script for R3 v4
+#  r3zip.sh — Archive script for R3 v4 (root: ~/Stable)
+#
+#  Confirmed layout (tree -L 2 ~/Stable):
+#    ~/Stable/
+#      client/        server/       packages/     shared/
+#      services/      internal/     db/           drizzle/
+#      config/        docs/         nginx/        scripts/
+#      tests/         tools/        uploads/      r3audit/
+#      r3execute/     r3setup/      node_modules/ secrets/
+#      archives/      logs/
+#      package.json   pnpm-workspace.yaml  turbo.json
+#      drizzle.config.ts  docker-compose.yml  Dockerfile
+#      railway.toml   tsconfig.json  eslint.config.mjs
+#      r3zip.sh       r3zip-secrets.sh  r3_hygiene.py
+#      integrate_agent_suite.py  resolve_blockers.py
+#
 #  Usage:
-#    ./r3zip.sh                  # full snapshot (source mode)
-#    ./r3zip.sh --mode=source    # source-only (default)
+#    ./r3zip.sh                  # source snapshot (default)
+#    ./r3zip.sh --mode=source    # source-only
 #    ./r3zip.sh --mode=full      # include build artifacts
-#    ./r3zip.sh --mode=deploy    # deployable bundle (no dev deps)
-#    ./r3zip.sh --dry            # dry-run, list what would be included
-#    ./r3zip.sh --verify         # verify integrity of last archive
+#    ./r3zip.sh --mode=deploy    # runtime bundle only
+#    ./r3zip.sh --dry            # list what would be included
+#    ./r3zip.sh --verify         # verify last archive integrity
 #    ./r3zip.sh --help
 # ============================================================
 
 set -euo pipefail
 
 # ── Config ───────────────────────────────────────────────────
-PROJECT_ROOT="${HOME}/Stable/R3 v4"
-ARCHIVE_DIR="${HOME}/Stable/archives"
-LOG_DIR="${HOME}/Stable/logs"
+PROJECT_ROOT="${HOME}/Stable"          # monorepo root IS ~/Stable
+ARCHIVE_DIR="${PROJECT_ROOT}/archives" # kept inside Stable, excluded from archive
+LOG_DIR="${PROJECT_ROOT}/logs"         # same
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 MODE="source"
 DRY=false
 VERIFY=false
 
-# Palette (tput-safe; no-op if terminal doesn't support colors)
+# ── Palette ──────────────────────────────────────────────────
 if command -v tput &>/dev/null && tput colors &>/dev/null 2>&1; then
-  ACID='\033[38;2;163;230;53m'   # --ag-acid #a3e635
+  ACID='\033[38;2;163;230;53m'
   DIM='\033[2m'
   RED='\033[0;31m'
   YLW='\033[0;33m'
@@ -33,7 +48,6 @@ else
   ACID='' DIM='' RED='' YLW='' RST=''
 fi
 
-# ── Helpers ──────────────────────────────────────────────────
 log()  { echo -e "${ACID}▸${RST} $*"; }
 dim()  { echo -e "${DIM}  $*${RST}"; }
 warn() { echo -e "${YLW}⚠  $*${RST}"; }
@@ -56,13 +70,13 @@ for arg in "$@"; do
     --dry)    DRY=true ;;
     --verify) VERIFY=true ;;
     --help)
-      sed -n '3,12p' "$0" | sed 's/^#  *//'
+      sed -n '3,20p' "$0" | sed 's/^#  *//'
       exit 0 ;;
     *) die "Unknown argument: $arg" ;;
   esac
 done
 
-# ── Verify mode (standalone) ─────────────────────────────────
+# ── Verify mode ───────────────────────────────────────────────
 if $VERIFY; then
   LATEST="$(ls -t "${ARCHIVE_DIR}"/r3v4_*.tar.gz 2>/dev/null | head -1 || true)"
   [[ -z "$LATEST" ]] && die "No archives found in ${ARCHIVE_DIR}"
@@ -78,9 +92,8 @@ if $VERIFY; then
   exit 0
 fi
 
-# ── Guard: project must exist ─────────────────────────────────
-[[ -d "$PROJECT_ROOT" ]] || die "Project not found: ${PROJECT_ROOT}"
-
+# ── Guard ─────────────────────────────────────────────────────
+[[ -d "$PROJECT_ROOT" ]] || die "Project root not found: ${PROJECT_ROOT}"
 mkdir -p "$ARCHIVE_DIR" "$LOG_DIR"
 
 ARCHIVE_NAME="r3v4_${MODE}_${TIMESTAMP}.tar.gz"
@@ -89,15 +102,30 @@ LOG_PATH="${LOG_DIR}/r3zip_${TIMESTAMP}.log"
 MANIFEST_PATH="${ARCHIVE_DIR}/r3v4_${MODE}_${TIMESTAMP}.manifest"
 CHECKSUM_FILE="${LOG_DIR}/r3v4_${MODE}_${TIMESTAMP}.sha256"
 
-# ── Exclusion rules per mode ──────────────────────────────────
-# Patterns follow GNU tar glob rules (matched against archive member paths).
+# ── Exclusions ────────────────────────────────────────────────
+#
+# SELF-REFERENTIAL EXCLUSIONS (critical — these live inside PROJECT_ROOT):
+#   archives/   — where this script writes its own output
+#   logs/       — log files from this and other scripts
+#   secrets/    — encrypted .gpg archives from r3zip-secrets.sh
+#   HMAC.sha256 — secrets script sidecar (written to Stable root)
+#   MANIFEST.txt — secrets script sidecar (written to Stable root)
+#
 BASE_EXCLUDES=(
-  # package deps — never archive these
+  # ── self-referential: output dirs that live inside PROJECT_ROOT ──
+  "Stable/archives"
+  "Stable/logs"
+  "Stable/secrets"
+  # ── secrets script sidecars (written loose to Stable root) ──
+  "Stable/HMAC.sha256"
+  "Stable/MANIFEST.txt"
+
+  # ── package deps ──
   "*/node_modules"
   "*/.pnpm-store"
   "*/pnpm-lock.yaml.bak"
 
-  # build / emit artifacts
+  # ── build / emit artifacts ──
   "*/.turbo"
   "*/dist"
   "*/build"
@@ -106,39 +134,37 @@ BASE_EXCLUDES=(
   "*/storybook-static"
   "*/tsconfig.tsbuildinfo"
 
-  # test artifacts
+  # ── test artifacts ──
   "*/coverage"
   "*/.nyc_output"
   "*/test-results"
   "*/playwright-report"
 
-  # runtime caches
+  # ── runtime caches ──
   "*/.cache"
   "*/__pycache__"
   "*.pyc"
 
-  # secret env files — never include
+  # ── secret env files — covered by r3zip-secrets.sh ──
   "*/.env.local"
   "*/.env.production"
   "*/.env.*.local"
   "*/.env.secret"
 
-  # log files
+  # ── logs ──
   "*.log"
   "npm-debug.log*"
   "yarn-error.log*"
   "pnpm-debug.log*"
 
-  # OS junk
+  # ── OS / editor junk ──
   ".DS_Store"
   "Thumbs.db"
   "desktop.ini"
-
-  # editor artifacts
   "*/.idea"
   "*/.vscode/settings.json"
 
-  # temp / swap
+  # ── temp / swap ──
   "*.tmp"
   "*.swp"
   "*.bak"
@@ -173,31 +199,32 @@ for pat in "${EXCLUDES[@]}"; do
   EXCLUDE_FLAGS+=("--exclude=${pat}")
 done
 
-# ── Pre-flight summary ────────────────────────────────────────
+# ── Pre-flight ────────────────────────────────────────────────
 hr
 echo -e "${ACID}  R3 v4 — Archive Script${RST}"
 hr
 log "Mode     : ${MODE}"
-log "Source   : ${PROJECT_ROOT}"
+log "Root     : ${PROJECT_ROOT}"
 log "Output   : ${ARCHIVE_PATH}"
 log "Dry run  : ${DRY}"
 hr
 
-# FIX (Bug 5): du --exclude matches basenames only — no leading */
+# du basenames only (no leading */ — that's a du limitation)
 RAW_SIZE=$(du -sb \
            --exclude="node_modules" \
            --exclude=".turbo" \
            --exclude="dist" \
            --exclude="build" \
            --exclude=".next" \
+           --exclude="archives" \
+           --exclude="logs" \
+           --exclude="secrets" \
            "$PROJECT_ROOT" 2>/dev/null \
            | awk '{print $1}' || echo 0)
-dim "Approx source size (excl. build artifacts): $(human_size "$RAW_SIZE")"
+dim "Approx source size (excl. artifacts): $(human_size "$RAW_SIZE")"
 echo
 
 # ── Dry run ───────────────────────────────────────────────────
-# FIX (Bug 2): -t/--list and -c are mutually exclusive tar operations.
-#              Correct approach: -czv to /dev/null (verbose create = lists files).
 if $DRY; then
   log "DRY RUN — files that would be included:"
   tar -czvf /dev/null \
@@ -217,14 +244,9 @@ if $DRY; then
   exit 0
 fi
 
-# ── Checksums pre-archive ─────────────────────────────────────
+# ── Checksums ─────────────────────────────────────────────────
 log "Computing pre-archive checksums..."
 
-# FIX (Bug 1): -name clauses MUST be wrapped in \( ... \) so the
-#              -not\( path exclusions \) applies to ALL name branches.
-#              Without the grouping, bare -o creates top-level OR branches
-#              that bypass path exclusions entirely — files inside
-#              node_modules/dist/etc. would be incorrectly checksummed.
 find "$PROJECT_ROOT" \
   -not \( \
     -path "*/node_modules/*" -o \
@@ -232,7 +254,10 @@ find "$PROJECT_ROOT" \
     -path "*/dist/*"         -o \
     -path "*/build/*"        -o \
     -path "*/.next/*"        -o \
-    -path "*/.cache/*"       \
+    -path "*/.cache/*"       -o \
+    -path "*/archives/*"     -o \
+    -path "*/logs/*"         -o \
+    -path "*/secrets/*"      \
   \) \
   -type f \
   \( \
@@ -244,23 +269,27 @@ find "$PROJECT_ROOT" \
     -name "*.env"  -o \
     -name "*.sql"  -o \
     -name "*.css"  -o \
-    -name "*.scss" \
+    -name "*.scss" -o \
+    -name "*.py"   -o \
+    -name "*.sh"   -o \
+    -name "*.toml" -o \
+    -name "*.yaml" -o \
+    -name "*.yml"  \
   \) \
   2>/dev/null \
 | LC_ALL=C sort \
 | xargs -d '\n' sha256sum 2>/dev/null > "$CHECKSUM_FILE" || true
 
 CKSUM_COUNT=$(wc -l < "$CHECKSUM_FILE" | tr -d ' ')
-dim "Pre-archive checksums: ${CKSUM_COUNT} source files → ${CHECKSUM_FILE}"
+dim "Pre-archive checksums: ${CKSUM_COUNT} files → ${CHECKSUM_FILE}"
 
-# ── Build manifest ────────────────────────────────────────────
+# ── Manifest ──────────────────────────────────────────────────
 log "Generating manifest..."
-
-# FIX (Bug 2): verbose create to /dev/null instead of --list
 {
   echo "# R3 v4 Archive Manifest"
   echo "# Generated : $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo "# Mode      : ${MODE}"
+  echo "# Root      : ${PROJECT_ROOT}"
   echo "# Host      : $(hostname)"
   echo "# Git HEAD  : $(git -C "$PROJECT_ROOT" rev-parse --short HEAD 2>/dev/null || echo 'not a git repo')"
   echo "# Git branch: $(git -C "$PROJECT_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'n/a')"
@@ -284,21 +313,15 @@ MANIFEST_LINES=$(grep -c '/' "$MANIFEST_PATH" 2>/dev/null || echo 0)
 dim "Manifest: ${MANIFEST_LINES} entries → ${MANIFEST_PATH}"
 
 # ── Git dirty check ───────────────────────────────────────────
-# FIX (Bug 3a): [[ -gt ]] instead of bare (( )) to avoid set -e
-#               tripping on a falsy (0) arithmetic result.
 DIRTY_COUNT=$(git -C "$PROJECT_ROOT" status --short 2>/dev/null | wc -l | tr -d ' ' || echo 0)
 if [[ "$DIRTY_COUNT" -gt 0 ]]; then
   warn "${DIRTY_COUNT} uncommitted change(s) — archiving current working state."
 fi
 
-# ── Archive ───────────────────────────────────────────────────
+# ── Compress ──────────────────────────────────────────────────
 log "Compressing..."
-
 START_TS=$(date +%s%N)
 
-# FIX (Bug 4): --checkpoint-action="echo=...%{read,wrote}T" is non-standard
-#              and breaks on many GNU tar versions. Use --checkpoint-action=dot
-#              which is universally supported.
 tar -czf "$ARCHIVE_PATH" \
     "${EXCLUDE_FLAGS[@]}" \
     --checkpoint=500 \
@@ -307,19 +330,18 @@ tar -czf "$ARCHIVE_PATH" \
     "${PROJECT_ROOT##*/}" \
   2>&1 | tee -a "$LOG_PATH"
 
-echo  # newline after checkpoint dots
-
+echo  # newline after dots
 END_TS=$(date +%s%N)
 ELAPSED_MS=$(( (END_TS - START_TS) / 1000000 ))
 
-# ── Integrity check — verify the archive we just wrote ────────
+# ── Integrity check ───────────────────────────────────────────
 log "Verifying archive integrity..."
 if ! tar -tzf "$ARCHIVE_PATH" &>/dev/null; then
   die "Archive failed integrity check — file may be truncated or corrupt."
 fi
 log "✓ Integrity verified"
 
-# ── Post-archive stats ────────────────────────────────────────
+# ── Stats ─────────────────────────────────────────────────────
 ARCHIVE_BYTES=$(stat -c%s "$ARCHIVE_PATH" 2>/dev/null || stat -f%z "$ARCHIVE_PATH")
 ENTRY_COUNT=$(tar -tzf "$ARCHIVE_PATH" | wc -l | tr -d ' ')
 
@@ -347,11 +369,7 @@ dim "Manifest : ${MANIFEST_PATH}"
 dim "Checksums: ${CHECKSUM_FILE}"
 hr
 
-# ── Auto-prune old archives (keep last 10 per mode) ───────────
-# FIX (Bug 3b): mapfile avoids word-splitting on filenames.
-#               PRUNED=$(( PRUNED + 1 )) instead of (( PRUNED++ )) —
-#               the latter exits 1 when the value increments from 0,
-#               which trips set -e and silently kills the script.
+# ── Auto-prune (keep last 10 per mode) ───────────────────────
 KEEP=10
 PRUNED=0
 mapfile -t ARCHIVE_LIST < <(ls -t "${ARCHIVE_DIR}"/r3v4_"${MODE}"_*.tar.gz 2>/dev/null || true)
@@ -362,9 +380,7 @@ if [[ "${#ARCHIVE_LIST[@]}" -gt "$KEEP" ]]; then
     dim "Pruned: $(basename "$old")"
     PRUNED=$(( PRUNED + 1 ))
   done
-  if [[ "$PRUNED" -gt 0 ]]; then
-    dim "Auto-pruned ${PRUNED} archive(s) — keeping last ${KEEP} per mode."
-  fi
+  [[ "$PRUNED" -gt 0 ]] && dim "Auto-pruned ${PRUNED} archive(s) — keeping last ${KEEP} per mode."
 fi
 
 log "Done. Run with --verify to check the latest archive."

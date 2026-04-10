@@ -83,7 +83,7 @@ const sessionsRouter = router({
 });
 
 // ── Projects ──────────────────────────────────────────────────────────────────
-const projectsRouter = router({
+export const projectsRouter = router({
   list: protectedProcedure
     .query(({ ctx }) => storage.getProjectsByUser(ctx.user.id)),
 
@@ -123,7 +123,7 @@ const projectsRouter = router({
 });
 
 // ── Presets ───────────────────────────────────────────────────────────────────
-const presetsRouter = router({
+export const presetsRouter = router({
   list: protectedProcedure
     .input(z.object({ type: z.string().optional() }))
     .query(({ ctx, input }) => storage.getPresetsByUser(ctx.user.id, input.type)),
@@ -166,7 +166,7 @@ const presetsRouter = router({
 });
 
 // ── Settings ──────────────────────────────────────────────────────────────────
-const settingsRouter = router({
+export const settingsRouter = router({
   get: protectedProcedure
     .query(({ ctx }) => storage.getSettings(ctx.user.id)),
 

@@ -2,28 +2,29 @@
 # ================================================================
 #  r3zip-secrets.sh — Expert encrypted archive for R3 v4 secrets
 #
+#  Confirmed layout: monorepo root IS ~/Stable (not ~/Stable/R3 v4)
+#
 #  Targets ONLY the files excluded from r3zip.sh:
 #    • .env.local / .env.production / .env.*.local / .env.secret
-#    • .env.development (may contain real credentials)
-#    • Any additional paths you append to EXTRA_TARGETS below
+#    • .env.development / .env.test (may contain real credentials)
+#    • Any additional absolute paths in EXTRA_TARGETS below
 #
 #  Security model:
-#    • AES-256-CBC encryption via GPG symmetric mode
-#    • Passphrase read from a TTY (never appears in ps/history)
-#    • Passphrase fed to gpg via --passphrase-file (RAM file, never on command line)
+#    • AES-256 encryption via GPG symmetric mode
+#    • S2K: SHA-512 digest / mode 3 (iterated+salted) / 65,011,712 iters
+#    • Passphrase read from TTY (never appears in ps/history)
+#    • Passphrase written to RAM file, fed via --passphrase-file
 #    • umask 077 — all created files are chmod 600 from birth
-#    • Temp staging dir lives in /dev/shm (RAM) when available,
-#      falls back to /tmp with immediate shred-on-exit
-#    • Staging dir is shred+wiped in an EXIT trap — always runs
+#    • Staging dir lives in /dev/shm (RAM); falls back to /tmp
+#    • Staging is shred+wiped in an EXIT trap — always runs
 #    • Encrypted archive is SHA-256 verified post-write
-#    • HMAC of the plaintext tar is embedded before encryption
-#      so decryption can prove nothing was tampered with
-#    • No secret values are ever written to logs or manifests
-#    • Process list safe: passphrase passed via file descriptor
+#    • HMAC of plaintext tar embedded inside before encryption
+#    • No secret values ever written to logs or manifests
+#    • --pinentry-mode loopback + --no-symkey-cache bypass gpg-agent
 #
 #  Usage:
 #    ./r3zip-secrets.sh               # encrypt secrets
-#    ./r3zip-secrets.sh --decrypt     # decrypt + verify latest archive
+#    ./r3zip-secrets.sh --decrypt     # decrypt + restore latest archive
 #    ./r3zip-secrets.sh --list        # list contents of latest archive
 #    ./r3zip-secrets.sh --verify      # verify archive integrity only
 #    ./r3zip-secrets.sh --dry         # show which files would be captured
@@ -35,19 +36,19 @@
 
 set -euo pipefail
 
-# ── Force restrictive umask immediately ──────────────────────
+# ── Force restrictive umask immediately ──────────────────────────
 # Every file this script creates is born 600. Non-negotiable.
 umask 077
 
-# ── Config ───────────────────────────────────────────────────
-PROJECT_ROOT="${HOME}/Stable/R3 v4"
-SECRETS_DIR="${HOME}/Stable/secrets"
-LOG_DIR="${HOME}/Stable/logs"
+# ── Config ───────────────────────────────────────────────────────
+PROJECT_ROOT="${HOME}/Stable"          # monorepo root IS ~/Stable
+SECRETS_DIR="${PROJECT_ROOT}/secrets"  # inside PROJECT_ROOT — excluded from r3zip.sh
+LOG_DIR="${PROJECT_ROOT}/logs"         # inside PROJECT_ROOT — excluded from r3zip.sh
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 KEEP=10          # max encrypted archives to retain
 MODE="encrypt"
 
-# ── Palette ──────────────────────────────────────────────────
+# ── Palette ──────────────────────────────────────────────────────
 if command -v tput &>/dev/null && tput colors &>/dev/null 2>&1; then
   ACID='\033[38;2;163;230;53m'
   DIM='\033[2m'
@@ -65,9 +66,8 @@ warn()   { echo -e "${YLW}⚠  $*${RST}"; }
 info()   { echo -e "${CYN}ℹ  $*${RST}"; }
 die()    { echo -e "${RED}✗  $*${RST}" >&2; exit 1; }
 hr()     { printf '%.0s─' {1..60}; echo; }
-secret() { echo -e "${DIM}  [REDACTED]${RST}"; }  # never log values
 
-# ── Arg parse ────────────────────────────────────────────────
+# ── Arg parse ────────────────────────────────────────────────────
 for arg in "$@"; do
   case "$arg" in
     --decrypt) MODE="decrypt" ;;
@@ -75,20 +75,20 @@ for arg in "$@"; do
     --verify)  MODE="verify" ;;
     --dry)     MODE="dry" ;;
     --help)
-      sed -n '3,26p' "$0" | sed 's/^#  *//'
+      sed -n '3,31p' "$0" | sed 's/^#  *//'
       exit 0 ;;
     *) die "Unknown argument: $arg" ;;
   esac
 done
 
-# ── Dependency check ─────────────────────────────────────────
+# ── Dependency check ─────────────────────────────────────────────
 for dep in gpg tar sha256sum shred find sort; do
   command -v "$dep" &>/dev/null || die "Required tool not found: ${dep}"
 done
 
-# ── Staging area in RAM (or /tmp) ────────────────────────────
-# /dev/shm is a tmpfs mount — data never touches the physical disk.
-# If unavailable, fall back to /tmp but still shred on exit.
+# ── Staging area in RAM (or /tmp) ────────────────────────────────
+# /dev/shm is tmpfs — data never touches physical disk.
+# Falls back to /tmp but still shreds on exit.
 STAGING=""
 if [[ -d /dev/shm && -w /dev/shm ]]; then
   STAGING="$(mktemp -d /dev/shm/r3secrets.XXXXXXXXXX)"
@@ -98,24 +98,25 @@ else
   warn "RAM staging unavailable — using /tmp (will shred on exit)"
 fi
 
-# ── EXIT trap — always wipes staging ─────────────────────────
-# Runs on normal exit, error exit, and SIGINT/SIGTERM.
-# shred overwrites with 3 passes before unlinking.
+# ── EXIT trap — always wipes staging ─────────────────────────────
+# Runs on normal exit, error exit, SIGINT, SIGTERM.
+# shred overwrites 3 passes before unlinking.
 cleanup() {
   if [[ -n "$STAGING" && -d "$STAGING" ]]; then
     find "$STAGING" -type f -exec shred -uzn 3 {} \; 2>/dev/null || true
     rm -rf "$STAGING" 2>/dev/null || true
   fi
-  # Wipe the passphrase FD temp file if it somehow still exists
   [[ -n "${PASS_FILE:-}" && -f "${PASS_FILE:-}" ]] && shred -uzn 3 "$PASS_FILE" 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
-# ── Target file discovery ────────────────────────────────────
-# These are the exact files r3zip.sh excludes.
+# ── Target file discovery ─────────────────────────────────────────
+# Scans PROJECT_ROOT (~/Stable) for all secret env files.
+# Excludes build artifacts AND the output dirs that live inside
+# PROJECT_ROOT (secrets/, archives/, logs/).
 # Extend EXTRA_TARGETS with additional absolute paths as needed.
 EXTRA_TARGETS=()
-# Example: EXTRA_TARGETS+=("${HOME}/Stable/R3 v4/apps/api/.env.railway")
+# Example: EXTRA_TARGETS+=("${HOME}/Stable/config/.env.railway")
 
 discover_targets() {
   find "$PROJECT_ROOT" \
@@ -123,7 +124,10 @@ discover_targets() {
       -path "*/node_modules/*" -o \
       -path "*/.turbo/*"       -o \
       -path "*/dist/*"         -o \
-      -path "*/build/*"        \
+      -path "*/build/*"        -o \
+      -path "*/secrets/*"      -o \
+      -path "*/archives/*"     -o \
+      -path "*/logs/*"         \
     \) \
     -type f \
     \( \
@@ -138,15 +142,15 @@ discover_targets() {
   | LC_ALL=C sort
 }
 
-# ── Latest archive helper ─────────────────────────────────────
+# ── Latest archive helper ─────────────────────────────────────────
 latest_archive() {
   ls -t "${SECRETS_DIR}"/r3v4_secrets_*.tar.gz.gpg 2>/dev/null | head -1 || true
 }
 
-# ── Passphrase acquisition ────────────────────────────────────
-# Reads from TTY directly — never from $1, env vars, or command line.
-# Written to a temp file in staging (RAM) and passed to gpg via --passphrase-fd.
-# The file is shred-wiped by the EXIT trap.
+# ── Passphrase acquisition ────────────────────────────────────────
+# Reads from TTY — never from $1, env vars, or command line.
+# Written to a RAM temp file; fed to gpg via --passphrase-file.
+# Shred-wiped by EXIT trap.
 acquire_passphrase() {
   local prompt="$1"
   local confirm="${2:-false}"
@@ -157,7 +161,6 @@ acquire_passphrase() {
     die "No TTY detected. Run this script interactively — passphrase cannot be read safely."
   fi
 
-  # Read passphrase from TTY (not stdin) so it works even with pipes
   IFS= read -rs -p "$(echo -e "${CYN}${prompt}${RST} ")" PASSPHRASE < /dev/tty
   echo  # newline after silent input
 
@@ -172,23 +175,20 @@ acquire_passphrase() {
     unset PASSPHRASE2
   fi
 
-  # Write to RAM-resident temp file, not to any shell variable that persists
   printf '%s' "$PASSPHRASE" > "$PASS_FILE"
   chmod 600 "$PASS_FILE"
   unset PASSPHRASE
 }
 
-# ── Strength check (non-blocking advisory) ───────────────────
+# ── Passphrase strength check (advisory) ─────────────────────────
 check_passphrase_strength() {
-  local length
-  length=$(wc -c < "$PASS_FILE")
   local score=0
   local pp
   pp=$(cat "$PASS_FILE")
-  [[ ${#pp} -ge 20 ]]                   && score=$(( score + 1 ))
-  [[ "$pp" =~ [A-Z] ]]                  && score=$(( score + 1 ))
-  [[ "$pp" =~ [a-z] ]]                  && score=$(( score + 1 ))
-  [[ "$pp" =~ [0-9] ]]                  && score=$(( score + 1 ))
+  [[ ${#pp} -ge 20 ]]                    && score=$(( score + 1 ))
+  [[ "$pp" =~ [A-Z] ]]                   && score=$(( score + 1 ))
+  [[ "$pp" =~ [a-z] ]]                   && score=$(( score + 1 ))
+  [[ "$pp" =~ [0-9] ]]                   && score=$(( score + 1 ))
   [[ "$pp" =~ ['!@#$%^&*()_+\-={}|'] ]] && score=$(( score + 1 ))
   unset pp
 
@@ -223,7 +223,6 @@ if [[ "$MODE" == "dry" ]]; then
   log "${#TARGETS[@]} file(s) would be encrypted:"
   echo
   for f in "${TARGETS[@]}"; do
-    # Show path and line count — never show values
     LINES=$(wc -l < "$f" 2>/dev/null || echo "?")
     KEYS=$(grep -c '^\s*[A-Z_][A-Z0-9_]*=' "$f" 2>/dev/null || echo "?")
     dim "$(realpath --relative-to="$PROJECT_ROOT" "$f" 2>/dev/null || echo "$f")  [${LINES} lines, ${KEYS} key(s)]"
@@ -265,13 +264,13 @@ if [[ "$MODE" == "verify" ]]; then
   # 1. File exists and is non-empty
   [[ -s "$LATEST" ]] || die "Archive file is empty."
 
-  # 2. GPG can decrypt it (passphrase check)
+  # 2. GPG decryption check
   acquire_passphrase "Passphrase to verify:"
 
   DECRYPTED_TAR="${STAGING}/verify.tar.gz"
   if ! gpg --batch \
-      --pinentry-mode loopback \
-      --no-symkey-cache \
+           --pinentry-mode loopback \
+           --no-symkey-cache \
            --passphrase-file "$PASS_FILE" \
            --output "$DECRYPTED_TAR" \
            --decrypt "$LATEST" \
@@ -296,12 +295,12 @@ if [[ "$MODE" == "verify" ]]; then
     warn "No HMAC record found — archive may predate HMAC feature."
   fi
 
-  # 5. Permissions check on the encrypted file
+  # 5. Permissions check
   PERMS=$(stat -c '%a' "$LATEST")
   if [[ "$PERMS" == "600" ]]; then
     log "✓ File permissions: 600 (correct)"
   else
-    warn "File permissions: ${PERMS} — expected 600. Fix with: chmod 600 $(basename "$LATEST")"
+    warn "File permissions: ${PERMS} — expected 600. Fix: chmod 600 $(basename "$LATEST")"
   fi
 
   hr
@@ -318,7 +317,7 @@ if [[ "$MODE" == "decrypt" ]]; then
   hr
   echo -e "${ACID}  R3 v4 — Decrypt Secrets${RST}"
   hr
-  warn "Decryption will write plaintext .env files to: ${PROJECT_ROOT}"
+  warn "Decryption will write plaintext .env files into: ${PROJECT_ROOT}"
   warn "Existing files at matching paths will be OVERWRITTEN."
   echo
   IFS= read -rp "$(echo -e "${YLW}Type YES to continue: ${RST}")" CONFIRM < /dev/tty
@@ -329,8 +328,8 @@ if [[ "$MODE" == "decrypt" ]]; then
   DECRYPTED_TAR="${STAGING}/decrypted.tar.gz"
   log "Decrypting..."
   if ! gpg --batch \
-      --pinentry-mode loopback \
-      --no-symkey-cache \
+           --pinentry-mode loopback \
+           --no-symkey-cache \
            --passphrase-file "$PASS_FILE" \
            --output "$DECRYPTED_TAR" \
            --decrypt "$LATEST" \
@@ -339,16 +338,22 @@ if [[ "$MODE" == "decrypt" ]]; then
   fi
   log "✓ Decryption succeeded"
 
-  # Extract — skip the HMAC sidecar file, restore everything else
+  # Extract to PROJECT_ROOT's parent (~/) so Stable/... paths land correctly.
+  # HMAC and MANIFEST sidecars are excluded — source files only.
   tar -xzf "$DECRYPTED_TAR" \
       --exclude="HMAC.sha256" \
       --exclude="MANIFEST.txt" \
       -C "${PROJECT_ROOT%/*}" \
       2>/dev/null
 
-  # Re-enforce permissions on restored env files
+  # Re-enforce 600 on all restored env files
   find "$PROJECT_ROOT" \
-    -not \( -path "*/node_modules/*" \) \
+    -not \( \
+      -path "*/node_modules/*" -o \
+      -path "*/secrets/*"      -o \
+      -path "*/archives/*"     -o \
+      -path "*/logs/*"         \
+    \) \
     -type f \
     \( \
       -name ".env.local"       -o \
@@ -369,7 +374,7 @@ fi
 # ================================================================
 #  MODE: encrypt (default)
 # ================================================================
-[[ -d "$PROJECT_ROOT" ]] || die "Project not found: ${PROJECT_ROOT}"
+[[ -d "$PROJECT_ROOT" ]] || die "Project root not found: ${PROJECT_ROOT}"
 mkdir -p "$SECRETS_DIR" "$LOG_DIR"
 
 ARCHIVE_NAME="r3v4_secrets_${TIMESTAMP}.tar.gz.gpg"
@@ -379,13 +384,13 @@ LOG_PATH="${LOG_DIR}/r3secrets_${TIMESTAMP}.log"
 hr
 echo -e "${ACID}  R3 v4 — Secrets Encryption${RST}"
 hr
-log "Source   : ${PROJECT_ROOT}"
+log "Root     : ${PROJECT_ROOT}"
 log "Output   : ${ARCHIVE_PATH}"
 log "Staging  : ${STAGING} (wiped on exit)"
 hr
 echo
 
-# ── Discover targets ─────────────────────────────────────────
+# ── Discover targets ──────────────────────────────────────────────
 mapfile -t TARGETS < <(discover_targets)
 for extra in "${EXTRA_TARGETS[@]+"${EXTRA_TARGETS[@]}"}"; do
   [[ -f "$extra" ]] && TARGETS+=("$extra")
@@ -404,17 +409,19 @@ for f in "${TARGETS[@]}"; do
 done
 echo
 
-# ── Acquire + validate passphrase ────────────────────────────
+# ── Acquire + validate passphrase ─────────────────────────────────
 acquire_passphrase "Enter encryption passphrase (min 16 chars):" "true"
 check_passphrase_strength
 echo
 
-# ── Stage plaintext tar in RAM ────────────────────────────────
+# ── Stage plaintext tar in RAM ────────────────────────────────────
 log "Staging plaintext archive in RAM..."
 PLAIN_TAR="${STAGING}/secrets.tar.gz"
 
-# Build the tar from the project root so paths inside are relative
-# and match the layout expected by --decrypt mode.
+# Pack from PROJECT_ROOT's parent (~/) so archive members are
+# relative paths like Stable/client/.env.local — matching decrypt's
+# tar -C ~/. The prefix substitution strips the leading /home/r3v/
+# from each absolute target path.
 tar -czf "$PLAIN_TAR" \
     -C "${PROJECT_ROOT%/*}" \
     "${TARGETS[@]/#"${PROJECT_ROOT%/*}"\//}" \
@@ -423,19 +430,20 @@ tar -czf "$PLAIN_TAR" \
 PLAIN_SIZE=$(stat -c%s "$PLAIN_TAR")
 dim "Plaintext payload: $(numfmt --to=iec "$PLAIN_SIZE" 2>/dev/null || echo "${PLAIN_SIZE}B")"
 
-# ── Compute HMAC of the plaintext tar ────────────────────────
-# The HMAC is stored *inside* the tar so decryption can verify
-# the payload was not modified between encrypt and decrypt.
+# ── Compute HMAC of plaintext tar ─────────────────────────────────
+# Embedded inside the encrypted archive so decrypt can verify
+# the payload was not tampered with.
 HMAC=$(sha256sum "$PLAIN_TAR" | awk '{print $1}')
 HMAC_FILE="${STAGING}/HMAC.sha256"
 printf '%s  secrets.tar.gz  %s\n' "$HMAC" "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" > "$HMAC_FILE"
 
-# ── Build manifest (no values — paths only) ──────────────────
+# ── Build manifest (paths only — no values) ───────────────────────
 MANIFEST_FILE="${STAGING}/MANIFEST.txt"
 {
   echo "# R3 v4 Secrets Archive Manifest"
   echo "# Created   : $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo "# Host      : $(hostname)"
+  echo "# Root      : ${PROJECT_ROOT}"
   echo "# Git HEAD  : $(git -C "$PROJECT_ROOT" rev-parse --short HEAD 2>/dev/null || echo 'n/a')"
   echo "# Files     : ${#TARGETS[@]}"
   echo "#"
@@ -444,11 +452,10 @@ MANIFEST_FILE="${STAGING}/MANIFEST.txt"
   done
 } > "$MANIFEST_FILE"
 
-# ── Rebuild tar with HMAC + manifest sidecar ─────────────────
+# ── Repack tar with HMAC + manifest sidecars ──────────────────────
 PLAIN_TAR2="${STAGING}/secrets_final.tar.gz"
 (
   cd "$STAGING"
-  # Repack: original secrets + HMAC + manifest
   tar -czf "$PLAIN_TAR2" \
       -C "${PROJECT_ROOT%/*}" \
       "${TARGETS[@]/#"${PROJECT_ROOT%/*}"\//}" \
@@ -457,17 +464,16 @@ PLAIN_TAR2="${STAGING}/secrets_final.tar.gz"
       MANIFEST.txt \
     2>/dev/null
 )
-shred -uzn 3 "$PLAIN_TAR" 2>/dev/null || true  # wipe the intermediate tar
+shred -uzn 3 "$PLAIN_TAR" 2>/dev/null || true  # wipe intermediate tar from RAM
 
-# ── Encrypt with GPG AES-256 ─────────────────────────────────
+# ── Encrypt with GPG AES-256 ──────────────────────────────────────
 log "Encrypting with GPG AES-256..."
-
 START_TS=$(date +%s%N)
 
 gpg --batch \
-      --pinentry-mode loopback \
-      --no-symkey-cache \
     --yes \
+    --pinentry-mode loopback \
+    --no-symkey-cache \
     --passphrase-file "$PASS_FILE" \
     --symmetric \
     --cipher-algo AES256 \
@@ -482,19 +488,16 @@ gpg --batch \
 END_TS=$(date +%s%N)
 ELAPSED_MS=$(( (END_TS - START_TS) / 1000000 ))
 
-# Enforce 600 on the output immediately
-chmod 600 "$ARCHIVE_PATH"
+chmod 600 "$ARCHIVE_PATH"                        # enforce 600 immediately
+shred -uzn 3 "$PLAIN_TAR2" 2>/dev/null || true   # wipe final plaintext tar
 
-# Wipe the plaintext tar from RAM
-shred -uzn 3 "$PLAIN_TAR2" 2>/dev/null || true
-
-# ── Post-encryption verification ─────────────────────────────
+# ── Post-encryption verification ──────────────────────────────────
 log "Verifying encrypted output..."
 VERIFY_TAR="${STAGING}/verify.tar.gz"
 
 if ! gpg --batch \
-      --pinentry-mode loopback \
-      --no-symkey-cache \
+         --pinentry-mode loopback \
+         --no-symkey-cache \
          --passphrase-file "$PASS_FILE" \
          --output "$VERIFY_TAR" \
          --decrypt "$ARCHIVE_PATH" \
@@ -507,13 +510,13 @@ if ! tar -tzf "$VERIFY_TAR" &>/dev/null; then
 fi
 
 VERIFY_HMAC=$(tar -xzf "$VERIFY_TAR" -O HMAC.sha256 2>/dev/null | awk '{print $1}' || true)
-VERIFY_COUNT=$(tar -tzf "$VERIFY_TAR" | grep -v 'HMAC\|MANIFEST' | wc -l | tr -d ' ')
+VERIFY_COUNT=$(tar -tzf "$VERIFY_TAR" | grep -v 'HMAC\|MANIFEST' | wc -l | tr -d ' ' || echo 0)
 shred -uzn 3 "$VERIFY_TAR" 2>/dev/null || true
 
 log "✓ Decryption verified"
 log "✓ HMAC verified"
 
-# ── Stats & log ──────────────────────────────────────────────
+# ── Stats & log ───────────────────────────────────────────────────
 ARCHIVE_BYTES=$(stat -c%s "$ARCHIVE_PATH")
 ARCHIVE_SHA=$(sha256sum "$ARCHIVE_PATH" | awk '{print $1}')
 PERMS=$(stat -c '%a' "$ARCHIVE_PATH")
@@ -521,13 +524,15 @@ PERMS=$(stat -c '%a' "$ARCHIVE_PATH")
 {
   echo "# R3 v4 Secrets Archive Log"
   echo "# Timestamp  : $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  echo "# Root       : ${PROJECT_ROOT}"
   echo "# Archive    : ${ARCHIVE_NAME}"
   echo "# Files      : ${VERIFY_COUNT}"
   echo "# Size       : ${ARCHIVE_BYTES} bytes"
+  echo "# Time       : ${ELAPSED_MS}ms"
   echo "# SHA-256    : ${ARCHIVE_SHA}"
   echo "# HMAC match : ${VERIFY_HMAC}"
   echo "# Permissions: ${PERMS}"
-  echo "# Cipher     : AES-256 / S2K SHA-512 / count 65011712"
+  echo "# Cipher     : AES-256 / s2k-digest SHA-512 / mode 3 / iter 65,011,712"
   echo "# NOTE       : No secret values are recorded in this log."
 } > "$LOG_PATH"
 
@@ -542,18 +547,19 @@ dim "Files      : ${VERIFY_COUNT} secret file(s)"
 dim "SHA-256    : ${ARCHIVE_SHA}"
 dim "Cipher     : AES-256 / s2k-digest SHA-512 / mode 3 / iter 65,011,712"
 dim "HMAC       : embedded + verified"
+dim "Time       : ${ELAPSED_MS}ms"
 dim "Log        : ${LOG_PATH}"
 hr
 
-# ── Auto-prune old secret archives ───────────────────────────
+# ── Auto-prune old secret archives ────────────────────────────────
+# Shred (not just rm) — old encrypted archives get 3-pass overwrite.
 PRUNED=0
 mapfile -t SECRET_LIST < <(ls -t "${SECRETS_DIR}"/r3v4_secrets_*.tar.gz.gpg 2>/dev/null || true)
 
 if [[ "${#SECRET_LIST[@]}" -gt "$KEEP" ]]; then
   for old in "${SECRET_LIST[@]:$KEEP}"; do
-    # Shred old encrypted archives before unlinking
     shred -uzn 3 "$old" 2>/dev/null || rm -f "$old"
-    dim "Shredded old archive: $(basename "$old")"
+    dim "Shredded: $(basename "$old")"
     PRUNED=$(( PRUNED + 1 ))
   done
   [[ "$PRUNED" -gt 0 ]] && dim "Shredded ${PRUNED} old archive(s) — keeping last ${KEEP}."

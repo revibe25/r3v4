@@ -66,7 +66,7 @@ export function getStripe(): Stripe {
 /** @deprecated Use getStripe() — kept for callers that destructure `stripe` */
 export const stripe = new Proxy({} as Stripe, {
   get(_target, prop) {
-    return (getStripe() as any)[prop];
+    return Reflect.get(getStripe(), prop);
   },
 });
 

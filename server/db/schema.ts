@@ -216,6 +216,21 @@ export const waveformEditsTable = pgTable("waveform_edits", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+
+export const aiDecisionLog = pgTable("ai_decision_log", {
+  id:                   text("id").primaryKey(),
+  sessionId:            text("session_id").notNull(),
+  nodeId:               text("node_id").notNull(),          // 'aiMixEngine' | 'transitionGraph'
+  actionType:           text("action_type").notNull(),      // 'gain_adjust' | 'eq_suggest' | 'transition_generate' | 'conflict_flag'
+  trackId:              text("track_id"),
+  inputConfidence:      real("input_confidence").notNull(),
+  displayedConfidence:  real("displayed_confidence").notNull(),
+  decision:             jsonb("decision").notNull(),
+  outcome:              text("outcome").notNull(),           // 'auto_applied' | 'accepted' | 'rejected' | 'ignored' | 'discarded'
+  latencyMs:            integer("latency_ms").notNull(),
+  timestamp:            text("timestamp").notNull(),
+});
+
 // ==================== TYPESCRIPT TYPES ====================
 export type User               = typeof users.$inferSelect;
 export type InsertUser         = typeof users.$inferInsert;
@@ -233,9 +248,12 @@ export type Settings           = typeof settings.$inferSelect;
 export type InsertSettings     = typeof settings.$inferInsert;
 export type MidiMapping        = typeof midiMappings.$inferSelect;
 export type InsertMidiMapping  = typeof midiMappings.$inferInsert;
+export type AIDecisionLog      = typeof aiDecisionLog.$inferSelect;
+export type InsertAIDecisionLog = typeof aiDecisionLog.$inferInsert;
 
 // ==================== ZOD INSERT SCHEMAS ====================
 export const insertSessionSchema = createInsertSchema(sessions);
 export const insertProjectSchema = createInsertSchema(projects);
 export const insertSampleSchema  = createInsertSchema(samples);
-export const insertPresetSchema  = createInsertSchema(presets);
+export const insertPresetSchema      = createInsertSchema(presets);
+export const insertAIDecisionSchema  = createInsertSchema(aiDecisionLog);

@@ -41,6 +41,8 @@ import type {
 import { useLoopEngineFFTRef }   from '../hooks/useLoopEngineFFTRef';
 import { AudioReactiveScene }    from '../components/daw/AudioReactiveScene';
 import { WaveformMesh }          from '../components/daw/WaveformMesh';
+import { SessionChip }           from '../components/session-summary/SessionChip';
+import { SessionSummaryPanel }   from '../components/session-summary/SessionSummaryPanel';
 
 // ─── Shared mini-components ───────────────────────────────────────────────────
 
@@ -1745,6 +1747,7 @@ export default function DAW() {
         overflow: 'hidden',
       }}
     >
+      <SessionSummaryPanel />
       {/* Transport bar — always visible at top */}
       <TransportBar engine={engine} />
 
@@ -1777,6 +1780,7 @@ export default function DAW() {
         </Btn>
 
         <div className="ml-auto flex items-center gap-2">
+              <SessionChip />
           <span className="text-[8px] text-[#333]">ZOOM</span>
           <Btn className="text-[9px]" onClick={() => useDAWStore.getState().setZoom(useDAWStore.getState().zoom * 0.8)}>−</Btn>
           <span className="text-[9px] font-mono text-[#555] w-8 text-center">
@@ -1834,6 +1838,7 @@ export default function DAW() {
 const StatusBar = memo(() => {
   const { playing, recording, collabConnected, collabUsers, syncStatus, bpm, timeSignature } = useDAWStore();
   return (
+    <>
     <>
       <div className="flex items-center gap-1.5">
         <Led on={playing}    color="#22c55e"  />

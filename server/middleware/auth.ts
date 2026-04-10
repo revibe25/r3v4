@@ -68,7 +68,7 @@ export function signToken(payload: AuthPayload): string {
   // `as any` on options: @types/jsonwebtoken@9 uses branded StringValue type for
   // expiresIn. TOKEN_EXPIRY is validated against EXPIRY_PATTERN above so the
   // runtime value is always valid. The cast satisfies the type checker only.
-  return jwt.sign(payload, SECRET, { expiresIn: TOKEN_EXPIRY } as any);
+  return jwt.sign(payload, SECRET, { expiresIn: TOKEN_EXPIRY } as Parameters<typeof jwt.sign>[2]);
 }
 
 // ── Non-blocking: populates req.user if valid token present ──────────────────

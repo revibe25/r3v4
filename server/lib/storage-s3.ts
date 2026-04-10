@@ -70,7 +70,7 @@ export function getS3(): S3Client {
 /** @deprecated Use getS3() directly. Proxy preserved for legacy callers. */
 export const s3 = new Proxy({} as S3Client, {
   get(_target, prop) {
-    return (getS3() as any)[prop];
+    return Reflect.get(getS3(), prop);
   },
 });
 
@@ -117,7 +117,7 @@ function getUploadS3(): multer.Multer {
  */
 export const uploadS3: multer.Multer = new Proxy({} as multer.Multer, {
   get(_target, prop) {
-    return (getUploadS3() as any)[prop];
+    return Reflect.get(getUploadS3(), prop);
   },
 });
 

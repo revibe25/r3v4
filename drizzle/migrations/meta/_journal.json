@@ -36,6 +36,13 @@
       "when": 1775536731947,
       "tag": "0004_parched_moon_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775715218184,
+      "tag": "0005_overjoyed_gambit",
+      "breakpoints": true
     }
   ]
 }

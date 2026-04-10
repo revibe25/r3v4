@@ -228,7 +228,7 @@ export interface MixerEvent {
   type: MixerEventType;
   timestamp: number;
   channelId?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 // ==========================================
@@ -299,10 +299,10 @@ export const MIXER_CONSTANTS = {
 // TYPE GUARDS
 // ==========================================
 
-export function isMixerChannelState(obj: any): obj is MixerChannelState {
+export function isMixerChannelState(obj: unknown): obj is MixerChannelState {
   return (
-    obj &&
     typeof obj === 'object' &&
+    obj !== null &&
     'config' in obj &&
     'gain' in obj &&
     'pan' in obj &&
@@ -311,11 +311,12 @@ export function isMixerChannelState(obj: any): obj is MixerChannelState {
   );
 }
 
-export function isMasterBusState(obj: any): obj is MasterBusState {
+export function isMasterBusState(obj: unknown): obj is MasterBusState {
   return (
-    obj &&
     typeof obj === 'object' &&
-    obj.id === 'master' &&
+    obj !== null &&
+    'id' in obj &&
+    (obj as Record<string, unknown>).id === 'master' &&
     'gain' in obj &&
     'meter' in obj
   );

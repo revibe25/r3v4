@@ -25,7 +25,8 @@
  */
 
 import http from 'http';
-import express from 'express';
+import express
+import type { Request, Response } from 'express' from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
@@ -159,7 +160,7 @@ async function main(): Promise<void> {
 
   
 // ── Admin stats endpoint ──────────────────────────────────────────────────────
-app.get('/api/admin/stats', async (req: any, res: any) => {
+app.get('/api/admin/stats', async (req: Request, res: Response) => {
   const parts = (req.headers['authorization'] ?? '').split(' ');
   if (parts[0] !== 'Bearer' || !parts[1]) {
     return res.status(401).json({ error: 'Authentication required.' });

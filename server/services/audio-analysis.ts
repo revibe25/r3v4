@@ -26,7 +26,7 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   ({ AudioContext } = require('node-web-audio-api'));
 } catch {
-  AudioContext = null as any;
+  AudioContext = null;
 }
 
 import type { AnalysisResult as LlpteResult } from '@llpte/llpte-signal';
