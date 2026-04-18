@@ -1,0 +1,109 @@
+**/node_modules/
+dist/
+logs/
+*.log
+*.tmp
+*.swp
+.DS_Store
+**/__pycache__/
+*.pyc
+*.tsbuildinfo
+*.vite
+.env
+server/.env
+.local/
+node
+_dev/legacy/
+
+# LLPTE packages build output
+packages/*/dist/
+packages/*/*.tsbuildinfo
+internal/
+server/storage.js
+server/trpc.js
+server/db/index.js
+server/db/schema.js
+server/lib/logger.js
+server/routers/index.js
+shared/types/*.js
+*.bak
+*.bak.*
+.r3-sub-backup-*/
+
+# Launch prep additions
+uploads/
+
+# Env files
+.env.*
+!.env.example
+
+# ── Coverage output ──────────────────────────────────────────────────────────
+coverage/
+lcov.info
+
+# ── Backup artifacts ─────────────────────────────────────────────────────────
+*.ls-new
+*.landscape-bak
+*.pricing-backup
+R3_v4_full_backup.zip
+.patch-backup-*/
+.upgrade-backup-*/
+.upgrade-backup-followup-*/
+
+# ── Ad-hoc utilities (not deployable) ───────────────────────────────────────
+r3.sh
+r3-cleanup.sh
+r3-postclean.sh
+r3v4-upgrade.sh
+coverage.py
+
+# ── Shadow server src ────────────────────────────────────────────────────────
+server/src/
+.turbo/
+
+# compiled server output
+server/dist/
+
+# runtime logs
+internal/logs/
+
+# deploy log (explicit)
+r3-deploy.log
+secrets/
+secrets/
+*.bak
+*.bak-*
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+*.bak6
+*.color-bak
+*.theme-bak
+*.backup.*
+.r3-backup*/
+.r3-backups*/
+.r3-ts-fix*/
+.r3-wire-fix*/
+.r3-audits*/
+secrets/
+*.bak
+*.bak-*
+*.bak2
+*.bak3
+*.bak4
+*.bak5
+*.bak6
+*.color-bak
+*.theme-bak
+*.backup.*
+.r3-backup*/
+.r3-backups*/
+.r3-ts-fix*/
+.r3-wire-fix*/
+.r3-audits*/
+archives/*.tar.gz
+archives/*.gz
+archives/*.zip
+client/public/sounds/
+uploads/

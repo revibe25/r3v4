@@ -1,0 +1,13 @@
+{
+  "files": [
+    "/home/r3/Stable/R3 v4/tools/auth_god.py",
+    "/home/r3/Stable/R3 v4/tools/auth_report.json",
+    "/home/r3/Stable/R3 v4/tools/auth_graph.html"
+  ],
+  "issues": [],
+  "dependencies": {
+    "/home/r3/Stable/R3 v4/tools/auth_god.py": [],
+    "/home/r3/Stable/R3 v4/tools/auth_report.json": [],
+    "/home/r3/Stable/R3 v4/tools/auth_graph.html": []
+  }
+}

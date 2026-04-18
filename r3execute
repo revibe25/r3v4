@@ -1,0 +1,685 @@
+#!/usr/bin/env bash
+# ============================================================================
+#  r3execute — R3 v4 Directive Execution & Audit Runner
+#  Audits current project state against the R3 v4 Engineering Directive.
+#  Executes safe automated fixes (e.g. maxHeight destructure, dead files).
+#
+#  Usage:
+#    bash r3execute           — audit only
+#    bash r3execute . --clean — audit + remove dead .bak files
+# ============================================================================
+set -euo pipefail
+
+GRN=$'\033[0;32m'; RED=$'\033[0;31m'; YLW=$'\033[0;33m'
+CYN=$'\033[0;36m'; BLD=$'\033[1m'; DIM=$'\033[2m'; RST=$'\033[0m'
+
+ok()      { echo "${GRN}✓${RST} $*"; }
+fail()    { echo "${RED}✗${RST} $*"; FAILURES=$((FAILURES+1)); }
+warn()    { echo "${YLW}⚠${RST}  $*"; WARNINGS=$((WARNINGS+1)); }
+info()    { echo "${CYN}→${RST} $*"; }
+fixed()   { echo "${GRN}⚡${RST} AUTO-FIXED: $*"; }
+section() {
+  echo ""
+  echo "${BLD}${CYN}── $* ──────────────────────────────────────${RST}"
+}
+
+FAILURES=0
+WARNINGS=0
+ROOT="${1:-$PWD}"
+DB_URL="postgresql://r3:r3vibe@localhost:5432/r3vibe"
+
+echo ""
+echo "${BLD}${CYN}╔══════════════════════════════════════════════════════╗${RST}"
+echo "${BLD}${CYN}║  R3 v4 · Directive Execution & Audit Runner         ║${RST}"
+echo "${BLD}${CYN}╚══════════════════════════════════════════════════════╝${RST}"
+echo "${DIM}  Root   : $ROOT${RST}"
+echo "${DIM}  DB     : $DB_URL${RST}"
+echo "${DIM}  Mode   : ${2:-audit only}${RST}"
+echo ""
+
+# ── Helper: check a key exists and isn't a placeholder ──────────────────────
+check_env() {
+  local file="$1" key="$2"
+  if [[ ! -f "$file" ]]; then
+    fail "$key — file not found: $file"
+    return
+  fi
+  if grep -q "^${key}=" "$file" 2>/dev/null; then
+    local val
+    val=$(grep "^${key}=" "$file" | cut -d= -f2-)
+    if [[ -z "$val" ]] \
+    || [[ "$val" == *"your_"* ]] \
+    || [[ "$val" == *"replace"* ]] \
+    || [[ "$val" == "supersecret" ]] \
+    || [[ "$val" == *"example"* ]]; then
+      warn "$key has placeholder/weak value in $(basename "$file")"
+    else
+      ok "$key present in $(basename "$file")"
+    fi
+  else
+    fail "$key MISSING from $(basename "$file")"
+  fi
+}
+
+# ── Helper: grep check with explicit ok/fail (avoids && ok || fail pitfall) ──
+grep_check() {
+  local file="$1" pattern="$2" ok_msg="$3" fail_msg="$4"
+  if [[ ! -f "$file" ]]; then
+    fail "$fail_msg (file not found: $(basename "$file"))"
+    return
+  fi
+  if grep -q "$pattern" "$file" 2>/dev/null; then
+    ok "$ok_msg"
+  else
+    fail "$fail_msg"
+  fi
+}
+
+# ============================================================================
+# SECTION 1 — ENVIRONMENT CONTRACT
+# ============================================================================
+section "1. Environment Contract"
+
+info "Checking server/.env..."
+for key in JWT_SECRET DATABASE_URL SESSION_SECRET; do
+  check_env "$ROOT/server/.env" "$key"
+done
+
+info "Checking root .env..."
+for key in STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET DATABASE_URL SESSION_SECRET; do
+  check_env "$ROOT/.env" "$key"
+done
+
+# JWT_SECRET length check
+JWT_VAL=$(grep "^JWT_SECRET=" "$ROOT/server/.env" 2>/dev/null | cut -d= -f2- || echo "")
+if [[ ${#JWT_VAL} -ge 64 ]]; then
+  ok "JWT_SECRET length: ${#JWT_VAL} chars (>=64 required)"
+else
+  fail "JWT_SECRET too short: ${#JWT_VAL} chars — need >=64"
+fi
+
+# SESSION_SECRET strength check
+SESSION_VAL=$(grep "^SESSION_SECRET=" "$ROOT/server/.env" 2>/dev/null | cut -d= -f2- || echo "")
+if [[ "$SESSION_VAL" == "supersecret" ]]; then
+  fail "SESSION_SECRET is 'supersecret' — CRITICAL SECURITY RISK"
+elif [[ ${#SESSION_VAL} -ge 64 ]]; then
+  ok "SESSION_SECRET hardened (${#SESSION_VAL} chars)"
+elif [[ ${#SESSION_VAL} -ge 32 ]]; then
+  ok "SESSION_SECRET adequate (${#SESSION_VAL} chars)"
+else
+  warn "SESSION_SECRET weak (${#SESSION_VAL} chars — recommend >=64)"
+fi
+
+# Startup validation guard in server/config.ts
+grep_check \
+  "$ROOT/server/config.ts" \
+  "JWT_SECRET\|DATABASE_URL\|throw\|Missing" \
+  "server/config.ts has startup env validation" \
+  "server/config.ts missing startup env validation guard"
+
+# ============================================================================
+# SECTION 2 — AUTH STORE INTEGRITY
+# ============================================================================
+section "2. Auth Store Integrity"
+
+CANONICAL_STORE="$ROOT/client/src/stores/authStore.ts"
+DEAD_STORE_1="$ROOT/client/src/store/auth-store.ts"
+DEAD_STORE_2="$ROOT/client/src/store/authStore.ts"
+
+[[ -f "$CANONICAL_STORE" ]] \
+  && ok "Canonical store exists: client/src/stores/authStore.ts" \
+  || fail "Canonical store MISSING: client/src/stores/authStore.ts"
+
+[[ ! -f "$DEAD_STORE_1" ]] \
+  && ok "Dead store absent: store/auth-store.ts" \
+  || fail "Dead store still exists — DELETE: store/auth-store.ts"
+
+[[ ! -f "$DEAD_STORE_2" ]] \
+  && ok "Dead store absent: store/authStore.ts" \
+  || fail "Dead store still exists — DELETE: store/authStore.ts"
+
+grep_check \
+  "$CANONICAL_STORE" \
+  "isAuthenticated: state.isAuthenticated" \
+  "isAuthenticated persisted in partialize (survives reload)" \
+  "isAuthenticated NOT in partialize — auth state lost on reload"
+
+grep_check \
+  "$CANONICAL_STORE" \
+  "hydrateFromToken" \
+  "hydrateFromToken present in store" \
+  "hydrateFromToken missing from canonical store"
+
+# Dead import sweep
+DEAD_IMPORT_COUNT=$(grep -rn "store/auth-store" \
+  "$ROOT/client/src" \
+  --include="*.ts" --include="*.tsx" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+if [[ "$DEAD_IMPORT_COUNT" -eq 0 ]]; then
+  ok "Zero dead imports to store/auth-store"
+else
+  fail "$DEAD_IMPORT_COUNT dead import(s) to store/auth-store still present:"
+  grep -rn "store/auth-store" "$ROOT/client/src" \
+    --include="*.ts" --include="*.tsx" 2>/dev/null || true
+fi
+
+# ============================================================================
+# SECTION 3 — DATABASE & SUBSCRIPTION
+# ============================================================================
+section "3. Database & Subscription"
+
+info "Testing PostgreSQL connection..."
+if psql "$DB_URL" -c "SELECT 1;" &>/dev/null 2>&1; then
+  ok "PostgreSQL connection successful"
+
+  # User existence
+  USER_EXISTS=$(psql "$DB_URL" -t \
+    -c "SELECT COUNT(*) FROM users WHERE username='testuser';" \
+    2>/dev/null | tr -d '[:space:]' || echo 0)
+  if [[ "$USER_EXISTS" -eq 1 ]]; then
+    ok "User 'testuser' exists"
+  else
+    fail "User 'testuser' NOT found in DB"
+  fi
+
+  # Tier check
+  TIER_VAL=$(psql "$DB_URL" -t \
+    -c "SELECT tier FROM users WHERE username='testuser';" \
+    2>/dev/null | tr -d '[:space:]' || echo "")
+  if [[ "$TIER_VAL" == "pro_artist" ]]; then
+    ok "User tier: pro_artist"
+  else
+    warn "User tier: '${TIER_VAL:-empty}' — expected pro_artist"
+  fi
+
+  # Email check
+  EMAIL_VAL=$(psql "$DB_URL" -t \
+    -c "SELECT COALESCE(email,'NULL') FROM users WHERE username='testuser';" \
+    2>/dev/null | tr -d '[:space:]' || echo "NULL")
+  if [[ "$EMAIL_VAL" == "NULL" || -z "$EMAIL_VAL" ]]; then
+    fail "User email is NULL — email-based login will fail"
+  else
+    ok "User email set: $EMAIL_VAL"
+  fi
+
+  # Subscription record
+  SUB_TIER=$(psql "$DB_URL" -t \
+    -c "SELECT tier FROM subscriptions \
+        WHERE user_id=(SELECT id FROM users WHERE username='testuser') \
+        LIMIT 1;" \
+    2>/dev/null | tr -d '[:space:]' || echo "")
+  if [[ -n "$SUB_TIER" ]]; then
+    ok "Subscription record exists: tier=$SUB_TIER"
+  else
+    fail "No subscription record for testuser — checkout/gating will fail"
+  fi
+
+  # Check stripe_events table exists (idempotency guard)
+  EVENTS_TABLE=$(psql "$DB_URL" -t \
+    -c "SELECT COUNT(*) FROM information_schema.tables \
+        WHERE table_name='stripe_events';" \
+    2>/dev/null | tr -d '[:space:]' || echo 0)
+  if [[ "$EVENTS_TABLE" -ge 1 ]]; then
+    ok "stripe_events table present (webhook idempotency guard)"
+  else
+    warn "stripe_events table missing — webhook idempotency guard absent"
+  fi
+
+else
+  warn "Cannot connect to PostgreSQL — skipping all DB checks"
+  warn "Ensure server is running and DB_URL is correct"
+fi
+
+# ============================================================================
+# SECTION 4 — DEAD FILE CLEANUP
+# ============================================================================
+section "4. Dead File Cleanup"
+
+BAK_FILES=$(find "$ROOT" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/.git/*" \
+  \( -name "*.bak*" -o -name "*.save" -o -name "*.archived*" -o -name "*-backup" \) \
+  2>/dev/null || true)
+
+if [[ -z "$BAK_FILES" ]]; then
+  ok "No dead backup files found"
+else
+  warn "Dead backup files present ($(echo "$BAK_FILES" | grep -c . || echo 0) files):"
+  echo "$BAK_FILES" | while IFS= read -r f; do
+    [[ -n "$f" ]] && echo "  ${YLW}→${RST} $f"
+  done
+  if [[ "${2:-}" == "--clean" ]]; then
+    echo "$BAK_FILES" | while IFS= read -r f; do
+      [[ -n "$f" ]] && rm -v "$f" && fixed "Removed: $f"
+    done
+  else
+    info "Run with --clean to auto-remove"
+  fi
+fi
+
+# ============================================================================
+# SECTION 5 — LLPTE PACKAGE BOUNDARIES
+# ============================================================================
+section "5. LLPTE Package Boundaries"
+
+PKGS_DIR="$ROOT/packages"
+if [[ -d "$PKGS_DIR" ]]; then
+
+  # All 6 packages must exist
+  for pkg in llpte-core llpte-signal llpte-transition-graph \
+              llpte-execution llpte-ai llpte-adapters; do
+    if [[ -d "$PKGS_DIR/$pkg" ]]; then
+      ok "Package present: $pkg"
+    else
+      fail "Package MISSING: $pkg"
+    fi
+  done
+
+  # llpte-core must have zero upward deps
+  CORE_PKG="$PKGS_DIR/llpte-core/package.json"
+  if [[ -f "$CORE_PKG" ]]; then
+    UPWARD=$(grep -cE "llpte-ai|llpte-adapters|llpte-execution|llpte-signal" \
+      "$CORE_PKG" 2>/dev/null || true)
+    if [[ "$UPWARD" -eq 0 ]]; then
+      ok "llpte-core: zero upward LLPTE dependencies"
+    else
+      fail "llpte-core has $UPWARD upward LLPTE dep(s) — architectural violation"
+    fi
+  else
+    warn "llpte-core/package.json not found — cannot verify boundary"
+  fi
+
+  # llpte-adapters must not be imported by other LLPTE packages
+  ADAPTERS_IN_CORE=$(grep -rn "llpte-adapters" \
+    "$PKGS_DIR/llpte-core" \
+    "$PKGS_DIR/llpte-signal" \
+    "$PKGS_DIR/llpte-execution" \
+    "$PKGS_DIR/llpte-ai" \
+    --include="*.ts" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+  if [[ "$ADAPTERS_IN_CORE" -eq 0 ]]; then
+    ok "llpte-adapters not imported by inner packages"
+  else
+    fail "llpte-adapters imported by inner packages ($ADAPTERS_IN_CORE occurrences) — violation"
+  fi
+
+else
+  warn "packages/ directory not found — skipping LLPTE boundary checks"
+fi
+
+# ============================================================================
+# SECTION 6 — PANEL SCROLL WIRING
+# ============================================================================
+section "6. Panel Scroll Wiring"
+
+INST="$ROOT/client/src/pages/instrument.tsx"
+if [[ ! -f "$INST" ]]; then
+  fail "instrument.tsx not found"
+else
+  # scrollable prop in render calls (expect 2 — one per column map)
+  SCROLLABLE_COUNT=$(grep -c "scrollable={true}" "$INST" 2>/dev/null || echo 0)
+  if [[ "$SCROLLABLE_COUNT" -ge 2 ]]; then
+    ok "scrollable={true} wired in both column map renders ($SCROLLABLE_COUNT)"
+  else
+    fail "scrollable={true} only in $SCROLLABLE_COUNT render call(s) — expected 2"
+  fi
+
+  # maxHeight in panel objects (expect >=9 — one per panel)
+  MAXHEIGHT_OBJ=$(grep -c "maxHeight:" "$INST" 2>/dev/null || echo 0)
+  if [[ "$MAXHEIGHT_OBJ" -ge 9 ]]; then
+    ok "maxHeight defined on all panels ($MAXHEIGHT_OBJ objects)"
+  else
+    fail "maxHeight only on $MAXHEIGHT_OBJ panel object(s) — expected >=9"
+  fi
+
+  # .ag-panel-scroll CSS block
+  CSS_COUNT=$(grep -c "ag-panel-scroll" "$INST" 2>/dev/null || echo 0)
+  if [[ "$CSS_COUNT" -ge 1 ]]; then
+    ok ".ag-panel-scroll CSS present ($CSS_COUNT rule(s))"
+  else
+    fail ".ag-panel-scroll CSS missing — scrollbar styling absent"
+  fi
+
+  # maxHeight destructured in map calls (expect 2)
+  DESTR_COUNT=$(grep -c "num, title, icon, open, body, maxHeight" "$INST" 2>/dev/null || echo 0)
+  if [[ "$DESTR_COUNT" -ge 2 ]]; then
+    ok "maxHeight destructured in both map calls"
+  else
+    fail "maxHeight NOT destructured in map calls ($DESTR_COUNT/2) — ReferenceError at runtime"
+    warn "Auto-fixing maxHeight destructure..."
+    sed -i \
+      's|].map(({ num, title, icon, open, body })|].map(({ num, title, icon, open, body, maxHeight })|g' \
+      "$INST"
+    DESTR_AFTER=$(grep -c "num, title, icon, open, body, maxHeight" "$INST" 2>/dev/null || echo 0)
+    if [[ "$DESTR_AFTER" -ge 2 ]]; then
+      fixed "maxHeight destructure fixed ($DESTR_AFTER/2 maps updated)"
+    else
+      fail "Auto-fix failed — inspect instrument.tsx map destructures manually"
+    fi
+  fi
+fi
+
+# ============================================================================
+# SECTION 7 — COLLAPSIBLE FX PANEL
+# ============================================================================
+section "7. CollapsibleFXPanel Component"
+
+CFX="$ROOT/client/src/components/collapsible-fx-panel.tsx"
+if [[ ! -f "$CFX" ]]; then
+  fail "collapsible-fx-panel.tsx not found"
+else
+  grep_check "$CFX" "scrollable.*boolean" \
+    "scrollable prop declared in interface" \
+    "scrollable prop missing from CollapsibleFXPanel interface"
+  grep_check "$CFX" "maxHeight" \
+    "maxHeight prop declared in interface" \
+    "maxHeight prop missing from CollapsibleFXPanel interface"
+  grep_check "$CFX" "ag-panel-scroll" \
+    "ag-panel-scroll scroll container render branch present" \
+    "ag-panel-scroll render branch missing — scroll never activates"
+  grep_check "$CFX" "overflowY.*auto\|overflowY: 'auto'" \
+    "overflowY: auto set on scroll container" \
+    "overflowY: auto missing from scroll container"
+fi
+
+# ============================================================================
+# SECTION 8 — LOGOUT BUTTON
+# ============================================================================
+section "8. Logout Button"
+
+LOGOUT="$ROOT/client/src/components/logout-button.tsx"
+if [[ ! -f "$LOGOUT" ]]; then
+  fail "logout-button.tsx MISSING — logout unavailable across all pages"
+else
+  ok "logout-button.tsx exists"
+  grep_check "$LOGOUT" "clearAuth" \
+    "clearAuth() called on confirm" \
+    "clearAuth missing — Zustand store not cleared on logout"
+  grep_check "$LOGOUT" "localStorage.removeItem" \
+    "localStorage.removeItem wired — persisted token cleared" \
+    "localStorage.removeItem missing — stale token survives logout"
+  grep_check "$LOGOUT" "navigate" \
+    "wouter navigate wired — redirects after logout" \
+    "navigate missing — no redirect after logout"
+  grep_check "$LOGOUT" "confirming" \
+    "Confirmation popover state present" \
+    "Confirmation popover missing — accidental logout possible"
+  grep_check "$LOGOUT" "Escape" \
+    "Escape key closes popover" \
+    "Escape key handler missing from popover"
+fi
+
+# PageNav
+PAGENAV="$ROOT/client/src/components/page-nav.tsx"
+if [[ ! -f "$PAGENAV" ]]; then
+  fail "page-nav.tsx not found"
+elif grep -q "LogoutButton" "$PAGENAV" 2>/dev/null; then
+  ok "LogoutButton wired in PageNav (all non-instrument pages)"
+else
+  fail "LogoutButton missing from PageNav"
+fi
+
+# HeaderControls
+HC="$ROOT/client/src/components/header-controls.tsx"
+if [[ ! -f "$HC" ]]; then
+  fail "header-controls.tsx not found"
+elif grep -q "LogoutButton" "$HC" 2>/dev/null; then
+  ok "LogoutButton wired in HeaderControls (instrument page)"
+else
+  fail "LogoutButton missing from HeaderControls"
+fi
+
+# ============================================================================
+# SECTION 9 — LIME DESIGN SYSTEM
+# ============================================================================
+section "9. Lime Design System"
+
+TOKENS="$ROOT/client/src/pages/pricing/tokens.ts"
+if [[ ! -f "$TOKENS" ]]; then
+  fail "pricing/tokens.ts not found"
+else
+  grep_check "$TOKENS" "b8ff00" \
+    "tokens.ts: #b8ff00 acid lime primary accent" \
+    "tokens.ts: #b8ff00 missing — pricing page accent broken"
+  grep_check "$TOKENS" "84cc16" \
+    "tokens.ts: #84cc16 lime-500 hover/creator accent" \
+    "tokens.ts: #84cc16 missing — hover states broken"
+  grep_check "$TOKENS" "060606" \
+    "tokens.ts: #060606 background matches instrument shell" \
+    "tokens.ts: #060606 missing — background mismatch"
+fi
+
+LOGIN_PAGE="$ROOT/client/src/pages/login.tsx"
+if [[ ! -f "$LOGIN_PAGE" ]]; then
+  fail "login.tsx not found"
+else
+  grep_check "$LOGIN_PAGE" "b8ff00" \
+    "login.tsx: #b8ff00 lime accent present" \
+    "login.tsx: lime accent missing — old design in place"
+  grep_check "$LOGIN_PAGE" "handleSignIn" \
+    "login.tsx: handleSignIn async handler present" \
+    "login.tsx: handleSignIn missing"
+  grep_check "$LOGIN_PAGE" "setAuth" \
+    "login.tsx: setAuth called on success" \
+    "login.tsx: setAuth not called — auth state never set"
+  grep_check "$LOGIN_PAGE" "navigate.*instrument\|/instrument" \
+    "login.tsx: redirects to /instrument after login" \
+    "login.tsx: /instrument redirect missing"
+  grep_check "$LOGIN_PAGE" "api/auth/login" \
+    "login.tsx: calls /api/auth/login endpoint" \
+    "login.tsx: API call to /api/auth/login missing"
+fi
+
+# ============================================================================
+# SECTION 10 — THREE.JS r128 SAFETY
+# ============================================================================
+section "10. Three.js r128 Safety"
+
+# CapsuleGeometry — does not exist in r128
+CAPSULE_COUNT=$(grep -rn "CapsuleGeometry" \
+  "$ROOT/client/src" \
+  --include="*.tsx" --include="*.ts" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+if [[ "$CAPSULE_COUNT" -eq 0 ]]; then
+  ok "Zero CapsuleGeometry usage (not available in r128)"
+else
+  fail "$CAPSULE_COUNT CapsuleGeometry usage(s) — not in Three.js r128, will throw:"
+  grep -rn "CapsuleGeometry" "$ROOT/client/src" \
+    --include="*.tsx" --include="*.ts" 2>/dev/null || true
+fi
+
+# Three.js in server code
+SERVER_THREE=$(grep -rn "from 'three'\|from \"three\"" \
+  "$ROOT/server" --include="*.ts" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+if [[ "$SERVER_THREE" -eq 0 ]]; then
+  ok "Three.js not imported in server code (client-only confirmed)"
+else
+  fail "Three.js imported in server code ($SERVER_THREE occurrence(s)) — browser-only library"
+  grep -rn "from 'three'\|from \"three\"" "$ROOT/server" --include="*.ts" 2>/dev/null || true
+fi
+
+# Tone.js in server code
+SERVER_TONE=$(grep -rn "from 'tone'\|from \"tone\"" \
+  "$ROOT/server" --include="*.ts" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+if [[ "$SERVER_TONE" -eq 0 ]]; then
+  ok "Tone.js not imported in server code (client-only confirmed)"
+else
+  fail "Tone.js imported in server code ($SERVER_TONE occurrence(s)) — browser-only library"
+fi
+
+# ============================================================================
+# SECTION 11 — SECURITY GUARDS
+# ============================================================================
+section "11. Security Guards"
+
+AUTH_ROUTE="$ROOT/server/routes/auth.ts"
+if [[ ! -f "$AUTH_ROUTE" ]]; then
+  fail "server/routes/auth.ts not found"
+else
+  grep_check "$AUTH_ROUTE" "getUserByEmail" \
+    "Auth route queries by email (correct — form sends email)" \
+    "Auth route not querying by email — login will fail"
+  grep_check "$AUTH_ROUTE" "bcrypt.compare" \
+    "bcrypt.compare present in auth route" \
+    "bcrypt.compare missing from auth route"
+  grep_check "$AUTH_ROUTE" "DUMMY_HASH\|dummy.*hash\|timing" \
+    "Timing-safe comparison present (prevents user enumeration)" \
+    "Timing-safe comparison may be missing — user enumeration risk"
+  grep_check "$AUTH_ROUTE" "status(400)\|status(401)\|status(409)" \
+    "Auth error status codes present" \
+    "Auth error status codes may be missing"
+fi
+
+AUTH_MW="$ROOT/server/middleware/auth.ts"
+if [[ ! -f "$AUTH_MW" ]]; then
+  fail "server/middleware/auth.ts not found"
+else
+  grep_check "$AUTH_MW" "JWT_SECRET\|SECRET" \
+    "JWT middleware reads secret from env" \
+    "JWT middleware may not read secret from env"
+  grep_check "$AUTH_MW" "signToken\|verifyToken" \
+    "signToken and/or verifyToken exported" \
+    "signToken/verifyToken missing from JWT middleware"
+fi
+
+# ============================================================================
+# SECTION 12 — PAYMENT PROVIDER STATUS
+# ============================================================================
+section "12. Payment Provider Status"
+
+LS_KEY=$(grep "^LEMONSQUEEZY_API_KEY=" "$ROOT/.env" 2>/dev/null \
+  | cut -d= -f2- || echo "")
+LS_STORE=$(grep "^LEMONSQUEEZY_STORE_ID=" "$ROOT/.env" 2>/dev/null \
+  | cut -d= -f2- || echo "")
+LS_WEBHOOK=$(grep "^LEMONSQUEEZY_WEBHOOK_SECRET=" "$ROOT/.env" 2>/dev/null \
+  | cut -d= -f2- || echo "")
+
+if [[ -z "$LS_KEY" || "$LS_KEY" == "your_ls_api_key_here" ]]; then
+  warn "LEMONSQUEEZY_API_KEY not set — migration blocked until credentials provided"
+else
+  ok "LEMONSQUEEZY_API_KEY present"
+fi
+
+if [[ -z "$LS_STORE" || "$LS_STORE" == "your_ls_store_id_here" ]]; then
+  warn "LEMONSQUEEZY_STORE_ID not set — migration blocked"
+else
+  ok "LEMONSQUEEZY_STORE_ID: $LS_STORE"
+fi
+
+if [[ -z "$LS_WEBHOOK" || "$LS_WEBHOOK" == "your_ls_webhook_secret_here" ]]; then
+  warn "LEMONSQUEEZY_WEBHOOK_SECRET not set — webhook verification will fail"
+else
+  ok "LEMONSQUEEZY_WEBHOOK_SECRET present"
+fi
+
+LS_SERVICE="$ROOT/server/services/ls-subscription.ts"
+if [[ -f "$LS_SERVICE" ]]; then
+  ok "LemonSqueezy service built: server/services/ls-subscription.ts"
+  grep_check "$LS_SERVICE" "createCheckoutSession" \
+    "createCheckoutSession exported" \
+    "createCheckoutSession missing from LS service"
+  grep_check "$LS_SERVICE" "handleWebhook\|handleLemonSqueezyWebhook" \
+    "Webhook handler exported" \
+    "Webhook handler missing from LS service"
+else
+  warn "LemonSqueezy service not yet built — pending credentials from dashboard"
+  info "Need: Store ID, Creator/Pro Artist variant IDs, API Key, Webhook Secret"
+fi
+
+STRIPE_FILE_COUNT=$(grep -rn "stripe\|Stripe" \
+  "$ROOT/server" --include="*.ts" -l 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+if [[ "$STRIPE_FILE_COUNT" -gt 0 ]]; then
+  info "Stripe still present in $STRIPE_FILE_COUNT server file(s) — remove after LS migration confirmed"
+else
+  ok "Stripe fully removed from server"
+fi
+
+# ============================================================================
+# SECTION 13 — STUDIO AUTO-INITIALIZE & AUTH FLOW
+# ============================================================================
+section "13. Studio Auto-Initialize & Auth Flow"
+
+APP_TSX="$ROOT/client/src/App.tsx"
+if [[ ! -f "$APP_TSX" ]]; then
+  fail "App.tsx not found"
+else
+  grep_check "$APP_TSX" "autoInitialize={true}" \
+    "InstrumentPage autoInitialize={true} — studio opens without click" \
+    "autoInitialize={true} missing — studio requires manual click to start"
+  grep_check "$APP_TSX" "AuthPageWrapper" \
+    "AuthPageWrapper present — login uses wouter navigate (no reload)" \
+    "AuthPageWrapper missing — login causes full page reload, may lose auth state"
+  grep_check "$APP_TSX" "useLocation" \
+    "useLocation imported from wouter in App.tsx" \
+    "useLocation NOT imported in App.tsx — AuthPageWrapper will throw ReferenceError"
+  grep_check "$APP_TSX" "isAuthenticated" \
+    "isAuthenticated used in ProtectedRoute" \
+    "isAuthenticated missing from ProtectedRoute — auth guard broken"
+fi
+
+# ============================================================================
+# SECTION 14 — DEPLOYMENT READINESS
+# ============================================================================
+section "14. Deployment Readiness"
+
+VERCEL_JSON="$ROOT/client/vercel.json"
+if [[ ! -f "$VERCEL_JSON" ]]; then
+  warn "client/vercel.json not found — Vercel routing unconfigured"
+else
+  if grep -qiE "placeholder|your-app\.railway|example\.com|REPLACE" \
+      "$VERCEL_JSON" 2>/dev/null; then
+    warn "client/vercel.json has Railway domain placeholder — update before deploy"
+    info "Set to your actual Railway app URL before running: vercel --prod"
+  else
+    ok "client/vercel.json appears configured"
+  fi
+fi
+
+[[ -f "$ROOT/railway.toml" ]] \
+  && ok "railway.toml present" \
+  || warn "railway.toml not found"
+
+[[ -f "$ROOT/Dockerfile" ]] \
+  && ok "Dockerfile present" \
+  || warn "Dockerfile not found"
+
+[[ -f "$ROOT/docker-compose.yml" ]] \
+  && ok "docker-compose.yml present" \
+  || warn "docker-compose.yml not found"
+
+# Check Stripe live keys haven't been rotated
+LIVE_KEY=$(grep "^STRIPE_SECRET_KEY=sk_live_" "$ROOT/server/.env" \
+  "$ROOT/.env" 2>/dev/null | head -1 || echo "")
+if [[ -n "$LIVE_KEY" ]]; then
+  fail "LIVE Stripe key still in plaintext .env file — ROTATE IMMEDIATELY in Stripe dashboard"
+  warn "Log into Stripe → Developers → API Keys → Roll secret key"
+else
+  ok "Stripe live key not exposed in plaintext env files"
+fi
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+echo ""
+echo "${BLD}${CYN}════════════════════════════════════════════════════════${RST}"
+echo "${BLD}${CYN}  AUDIT COMPLETE${RST}"
+echo "${BLD}${CYN}════════════════════════════════════════════════════════${RST}"
+echo ""
+
+TOTAL=$((FAILURES + WARNINGS))
+
+if [[ "$FAILURES" -eq 0 && "$WARNINGS" -eq 0 ]]; then
+  echo "${GRN}${BLD}  ✓ All checks passed. Project matches directive.${RST}"
+elif [[ "$FAILURES" -eq 0 ]]; then
+  echo "${YLW}${BLD}  ⚠  0 failures · $WARNINGS warning(s)${RST}"
+  echo "${YLW}     Resolve warnings before production deploy.${RST}"
+else
+  echo "${RED}${BLD}  ✗  $FAILURES failure(s) · $WARNINGS warning(s)${RST}"
+  echo "${RED}     Fix all failures before deploy.${RST}"
+fi
+
+echo ""
+echo "${DIM}  Quick reference:${RST}"
+echo "${DIM}    bash r3execute           — audit only (from project root)${RST}"
+echo "${DIM}    bash r3execute . --clean — audit + auto-remove dead .bak files${RST}"
+echo "${DIM}    r3audit \"task\"           — AI-powered directive task runner${RST}"
+echo ""
+
+exit $FAILURES

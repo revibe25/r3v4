@@ -1,0 +1,31 @@
+{
+  "name": "@llpte/llpte-signal",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "build:watch": "tsc --project tsconfig.json --watch",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "bench": "tsx --tsconfig tsconfig.bench.json benchmarks/run.bench.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@r3vibe/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.6.0",
+    "tsx": "^4.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  }
+}

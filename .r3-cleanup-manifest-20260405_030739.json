@@ -1,0 +1,464 @@
+{
+  "stamp": "20260405_030739",
+  "root": "/home/r3/Stable/R3 v4",
+  "deleted": [
+    {
+      "path": "/home/r3/Stable/R3 v4/audio-fix-20260404_011547.log",
+      "reason": "session log \u2014 guaranteed stale",
+      "phase": "A1"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/emergency-fix-20260404_012329.log",
+      "reason": "session log \u2014 guaranteed stale",
+      "phase": "A1"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/emergency-fix-corrected-20260404_012448.log",
+      "reason": "session log \u2014 guaranteed stale",
+      "phase": "A1"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/login-fix-corrected-20260404_012046.log",
+      "reason": "session log \u2014 guaranteed stale",
+      "phase": "A1"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/login-integration-20260404_012143.log",
+      "reason": "session log \u2014 guaranteed stale",
+      "phase": "A1"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/internal/logs/audit-session-1774584833384.log",
+      "reason": "internal session log \u2014 stale",
+      "phase": "A2"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/internal/logs/files-read-summary.log",
+      "reason": "internal session log \u2014 stale",
+      "phase": "A2"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/internal/logs/files-read.log",
+      "reason": "internal session log \u2014 stale",
+      "phase": "A2"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/.env.bak-20260404_211607",
+      "reason": "root-level backup file \u2014 superseded by git",
+      "phase": "A3"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/.env.bak-authfix-20260404_213400",
+      "reason": "root-level backup file \u2014 superseded by git",
+      "phase": "A3"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/package.json.bak-purge-20260404_184607",
+      "reason": "root-level backup file \u2014 superseded by git",
+      "phase": "A3"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/package.json.bak-wire-20260404_182350",
+      "reason": "root-level backup file \u2014 superseded by git",
+      "phase": "A3"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-auth-wire-$(date +%Y%m%d_%H%M%S)",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-authfix-20260404_213400",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-fix3",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-fix6",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-ts-fix",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-wire-20260404_181801",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/index.ts.bak-wire-20260404_182350",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.ts.bak-ts-fix",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/server/trpc.ts.bak-wire-20260404_181801",
+      "reason": "server source backup \u2014 superseded by git",
+      "phase": "A4"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/package.json.bak-identity-fix",
+      "reason": "shared source backup \u2014 superseded by git",
+      "phase": "A5"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/subscription.types.ts.bak-fix4",
+      "reason": "shared source backup \u2014 superseded by git",
+      "phase": "A5"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/subscription.types.ts.bak-fix5",
+      "reason": "shared source backup \u2014 superseded by git",
+      "phase": "A5"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/tsconfig.json.bak-composite-fix",
+      "reason": "shared source backup \u2014 superseded by git",
+      "phase": "A5"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/vite.config.ts.backup.20260404_012448",
+      "reason": "client config backup \u2014 superseded by git",
+      "phase": "A6"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/vite.config.ts.backup.triple-check.20260404_012939",
+      "reason": "client config backup \u2014 superseded by git",
+      "phase": "A6"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/package-lock.json",
+      "reason": "npm lock file conflicts with pnpm-lock.yaml \u2014 pnpm is canonical in this monorepo",
+      "phase": "A7"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/src/hooks/authStore.ts.bak-auth-wire-$(date +%Y%m%d_%H%M%S)",
+      "reason": "hook source backup \u2014 superseded by git",
+      "phase": "A8"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/src/hooks/useBilling.ts.bak-auth-consolidation",
+      "reason": "hook source backup \u2014 superseded by git",
+      "phase": "A8"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/src/utils/audio.ts.backup.20260404_012448",
+      "reason": "utility source backup \u2014 superseded by git",
+      "phase": "A9"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/src/utils/auth.ts.backup.20260404_012448",
+      "reason": "utility source backup \u2014 superseded by git",
+      "phase": "A9"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/src/utils/auth.ts.backup.emergency.20260404_012329",
+      "reason": "utility source backup \u2014 superseded by git",
+      "phase": "A9"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3-fix-ses",
+      "reason": "stale fix session directory \u2014 Wire.txt \u00a76",
+      "phase": "C6"
+    }
+  ],
+  "archived": [
+    {
+      "src": "/home/r3/Stable/R3 v4/cleanup-imports.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/cleanup-imports.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/emergency-fix-corrected.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/emergency-fix-corrected.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/emergency-fix.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/emergency-fix.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/expert-audiocontext-fix.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/expert-audiocontext-fix.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-audiocontext.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-audiocontext.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-login-page-CORRECTED.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-login-page-CORRECTED.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-r3-session-metrics.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-r3-session-metrics.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-vite-triple-check.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-vite-triple-check.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/integrate-login.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/integrate-login.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-apply-fixes.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-apply-fixes.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-auth-fix.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-auth-fix.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-diagnose-fix.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-diagnose-fix.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-fix-ts-errors.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-ts-errors.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-implement-auto-level.sh",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-implement-auto-level.sh",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C1"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-auth-blockers.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-auth-blockers.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/fix-daw-imports.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/fix-daw-imports.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/implement_login.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/implement_login.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-enhance-daw-v4.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-enhance-daw-v4.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-fix-104.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-104.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-fix-effects-final.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-effects-final.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-fix-mixer-wire.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-mixer-wire.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-fix-ts-errors.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-ts-errors.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-import-audit.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-import-audit.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-nav-wire.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-nav-wire.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-patch-storage.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-patch-storage.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-purge-frontend-deps.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-purge-frontend-deps.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-resolve-ra.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-resolve-ra.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-restore-daw.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-restore-daw.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-theme-store-fix.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-theme-store-fix.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-wire-apply.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-wire-apply.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3-wire-audit.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-wire-audit.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3_file_audit.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3_file_audit.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/r3_refactor_audit.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3_refactor_audit.py",
+      "reason": "root-level one-off fix script \u2014 archived per Wire.txt \u00a76",
+      "phase": "C2"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/auto-level-session.ts",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/auto-level-session.ts",
+      "reason": "loose transient script at root \u2014 archived per Wire.txt \u00a76",
+      "phase": "C3"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/implement-session-metrics.ts",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/implement-session-metrics.ts",
+      "reason": "loose transient script at root \u2014 archived per Wire.txt \u00a76",
+      "phase": "C3"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/client/r3-fix-103.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-fix-103.py",
+      "reason": "fix script misplaced inside client/ \u2014 archived",
+      "phase": "C4"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/client/r3-wire-fix.py",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/r3-wire-fix.py",
+      "reason": "fix script misplaced inside client/ \u2014 archived",
+      "phase": "C4"
+    },
+    {
+      "src": "/home/r3/Stable/R3 v4/Advanced-level-audit-v3.md",
+      "dst": "/home/r3/Stable/R3 v4/internal/archive/Advanced-level-audit-v3.md",
+      "reason": "prior-session governance doc \u2014 archived; active directive is docs/Wire.txt",
+      "phase": "C5"
+    }
+  ],
+  "flagged": [
+    {
+      "path": "/home/r3/Stable/R3 v4/0",
+      "reason": "unknown file at root \u2014 `cat 0` to inspect; then delete or move to docs/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/depgraph.json",
+      "reason": "unclear origin \u2014 if Turborepo-generated: add to .gitignore and delete; if manually curated: move to docs/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/index.ts",
+      "reason": "check railway.toml startCommand and Dockerfile CMD; if this IS the server entry, keep; if stale, archive to internal/archive/"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3audit",
+      "reason": "'r3audit' \u2014 `cat r3audit` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3execute",
+      "reason": "'r3execute' \u2014 `cat r3execute` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/r3setup",
+      "reason": "'r3setup' \u2014 `cat r3setup` to inspect; if still in use, move to scripts/; if not, archive"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/client",
+      "reason": "client/client/ nested dir should not exist \u2014 inspect vs client/src/; if duplicate, delete"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/components",
+      "reason": "client/components/ outside client/src/ \u2014 confirm src/components/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/hooks",
+      "reason": "client/hooks/ outside client/src/ \u2014 confirm src/hooks/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/stores",
+      "reason": "client/stores/ outside client/src/ \u2014 confirm src/stores/ is the live version, then delete this copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/client/shared",
+      "reason": "client/shared/ outside client/src/ \u2014 workspace shared/ package is canonical; this is likely a stale copy"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/src",
+      "reason": "root-level src/ should not exist in a monorepo \u2014 compare with client/src/engine/ and client/src/visual/; if duplicate, delete; if canonical, move to the correct package"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/llpte-signal.d.ts",
+      "reason": "LLPTE package declaration sitting in shared/ \u2014 should come from packages/llpte-signal via package.json#exports; fix package exports, then delete this file"
+    },
+    {
+      "path": "/home/r3/Stable/R3 v4/shared/schema-daw-patch.ts",
+      "reason": "'patch' in filename implies a temporary fix applied inline \u2014 verify contents are merged into schema.ts; if so, delete; if still needed permanently, rename to remove 'patch'"
+    }
+  ]
+}

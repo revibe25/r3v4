@@ -1,0 +1,30 @@
+{
+  "stamp": "20260405_081931",
+  "root": "/home/r3/Stable/R3 v4",
+  "backed_up": [
+    "/home/r3/Stable/R3 v4/.r3-ts-fix-2-backups-20260405_081931/server/middleware/auth.ts",
+    "/home/r3/Stable/R3 v4/.r3-ts-fix-2-backups-20260405_081931/server/trpc.ts",
+    "/home/r3/Stable/R3 v4/.r3-ts-fix-2-backups-20260405_081931/client/src/pages/collaborative-daw-pro.tsx"
+  ],
+  "created": [
+    "/home/r3/Stable/R3 v4/client/src/store/auth-store.ts",
+    "/home/r3/Stable/R3 v4/client/src/utils/trpc.ts"
+  ],
+  "applied": [
+    "CREATE client/src/store/auth-store.ts (re-export shim + AuthStore type)",
+    "CREATE client/src/utils/trpc.ts (re-export shim for useSessionLifecycle)",
+    "server/middleware/auth.ts: add /// <reference path> for express.d.ts",
+    "server/trpc.ts: add /// <reference path> for express.d.ts",
+    "collab-daw: generateWaveform data: number[] (was never[])",
+    "collab-daw: toggleMute \u2014 null guard after .find() (TS18048)",
+    "collab-daw: toggleSolo \u2014 null guard after .find() (TS18048)",
+    "collab-daw: draw function \u2014 ctx null guard after getContext (TS18047)",
+    "collab-daw: animate elapsed \u2014 startTimeRef.current nullish coalesce (TS18047)",
+    "collab-daw: animate loop wrap \u2014 startTimeRef.current null guard (TS18047)",
+    "collab-daw: handleCanvasClick \u2014 canvas null guard + clickedClip: string|null",
+    "collab-daw: clickedClip closure \u2014 capture const to satisfy string type in callbacks",
+    "collab-daw: handleCanvasMouseMove \u2014 canvas null guard + hoveredClip: string|null",
+    "collab-daw: handleCanvasRightClick \u2014 canvas null guard (TS18047)",
+    "collab-daw: IconButton \u2014 all props optional with explicit TypeScript types"
+  ]
+}

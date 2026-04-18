@@ -1,0 +1,62 @@
+{
+  "id": "11111111-1111-1111-1111-111111111111",
+  "name": "Demo Session \u2013 128 BPM",
+  "bpm": 128,
+  "version": 1,
+  "createdAt": "2026-02-23T00:00:00.000Z",
+  "updatedAt": "2026-02-23T00:00:00.000Z",
+  "tracks": [
+    {
+      "idx": 0,
+      "name": "Kick",
+      "loopId": null,
+      "filename": null,
+      "volume": 0.9,
+      "muted": false,
+      "fx": {
+        "filterFreq": 20000,
+        "delayTime": 0,
+        "delayFeedback": 0,
+        "reverbDecay": 0.5,
+        "compThreshold": -12
+      }
+    },
+    {
+      "idx": 1,
+      "name": "Bass",
+      "loopId": null,
+      "filename": null,
+      "volume": 0.85,
+      "muted": false,
+      "fx": {
+        "filterFreq": 800,
+        "delayTime": 0.25,
+        "delayFeedback": 0.3,
+        "reverbDecay": 1.2,
+        "compThreshold": -18
+      }
+    },
+    {
+      "idx": 2,
+      "name": "Melody",
+      "loopId": null,
+      "filename": null,
+      "volume": 0.7,
+      "muted": true,
+      "fx": {
+        "filterFreq": 5000,
+        "delayTime": 0.5,
+        "delayFeedback": 0.5,
+        "reverbDecay": 3,
+        "compThreshold": -24
+      }
+    }
+  ],
+  "midiMap": {
+    "1-cc-7": "MASTER_VOLUME",
+    "1-cc-74": "TRACK_0_FILTER",
+    "1-note-36": "TRACK_0_RECORD",
+    "1-note-37": "TRACK_1_RECORD",
+    "1-note-38": "TRACK_2_RECORD"
+  }
+}

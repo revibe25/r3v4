@@ -1,0 +1,22 @@
+# Node modules recursively
+**/node_modules/
+
+# Build outputs
+dist/
+
+# Logs
+logs/
+*.log
+
+# Temporary / system files
+*.tmp
+*.swp
+.DS_Store
+
+# Python cache
+**/__pycache__/
+*.pyc
+
+# Vite / TS / Tailwind cache
+*.tsbuildinfo
+*.vite

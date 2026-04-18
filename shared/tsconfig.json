@@ -1,0 +1,23 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "composite": true
+  },
+  "include": [
+    "*.ts",
+    "types/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "drizzle.config.ts",
+    "types/trpc.ts"
+  ]
+}

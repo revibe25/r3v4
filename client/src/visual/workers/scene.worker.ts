@@ -1,0 +1,2 @@
+// Scene Worker stub
+export {};

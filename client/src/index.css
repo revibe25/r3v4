@@ -1,0 +1,934 @@
+@config "../tailwind.config.ts";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   3D METAL DAW THEME - GLOBAL STYLES
+   ============================================================================ */
+
+@layer base {
+  :root {
+    /* Base Colors */
+    --background: 210 20% 8%;
+    --foreground: 210 10% 90%;
+    
+    --card: 210 20% 12%;
+    --card-foreground: 210 10% 90%;
+    
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 10% 90%;
+    
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 10% 100%;
+    
+    --secondary: 210 15% 25%;
+    --secondary-foreground: 210 10% 95%;
+    
+    --muted: 210 15% 20%;
+    --muted-foreground: 210 10% 65%;
+    
+    --accent: 65 100% 56%;
+    --accent-foreground: 210 10% 95%;
+    
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 10% 100%;
+    
+    --border: 210 15% 25%;
+    --input: 210 15% 25%;
+    --ring: 217 91% 60%;
+    
+    --radius: 0.5rem;
+    
+    /* Metal-specific variables */
+    
+    
+    
+    
+  }
+
+  .dark {
+    --background: 210 20% 8%;
+    --foreground: 210 10% 90%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Selection */
+  ::selection {
+    @apply bg-primary/30;
+  }
+  
+  /* Scrollbars */
+  ::-webkit-scrollbar {
+    @apply w-3 h-3;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-metal-900 rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800 rounded border border-metal-900 shadow-metal;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply from-metal-500 via-metal-600 to-metal-700;
+  }
+  
+  ::-webkit-scrollbar-corner {
+    @apply bg-metal-900;
+  }
+}
+
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL PANELS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-panel {
+    @apply relative;
+    @apply bg-gradient-to-b from-metal-800 via-metal-900 to-metal-950;
+    @apply border border-metal-700 rounded-lg;
+    @apply shadow-metal-lg;
+    position: relative;
+  }
+  
+  .metal-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+  
+  .metal-panel-inset {
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded;
+    @apply shadow-metal-inner-lg;
+  }
+  
+  .metal-panel-raised {
+    @apply bg-gradient-to-b from-metal-700 via-metal-800 to-metal-900;
+    @apply border-t border-l border-metal-600;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL BUTTONS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-button {
+    @apply relative inline-flex items-center justify-center;
+    @apply px-4 py-2 rounded-md;
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800;
+    @apply border-t border-l border-metal-500;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+    @apply text-metal-100 font-semibold text-sm;
+    @apply transition-all duration-150;
+    @apply select-none cursor-pointer;
+  }
+  
+  .metal-button:hover {
+    @apply from-metal-500 via-metal-600 to-metal-700;
+    @apply shadow-metal-lg;
+    transform: translateY(-1px);
+  }
+  
+  .metal-button:active {
+    @apply from-metal-700 via-metal-800 to-metal-900;
+    @apply shadow-metal-pressed;
+    transform: translateY(1px);
+  }
+  
+  .metal-button:disabled {
+    @apply from-metal-800 via-metal-900 to-metal-950;
+    @apply text-metal-600 cursor-not-allowed;
+    @apply opacity-50;
+  }
+  
+  .metal-button-primary {
+    @apply bg-gradient-to-b from-blue-600 via-blue-700 to-blue-800;
+    @apply border-t border-l border-blue-500;
+    @apply border-r border-b border-blue-900;
+    @apply shadow-glow-blue;
+  }
+  
+  .metal-button-primary:hover {
+    @apply from-blue-500 via-blue-600 to-blue-700;
+  }
+  
+  .metal-button-danger {
+    @apply bg-gradient-to-b from-red-600 via-red-700 to-red-800;
+    @apply border-t border-l border-red-500;
+    @apply border-r border-b border-red-900;
+    @apply shadow-glow-red;
+  }
+  
+  .metal-button-success {
+    @apply bg-gradient-to-b from-green-600 via-green-700 to-green-800;
+    @apply border-t border-l border-green-500;
+    @apply border-r border-b border-green-900;
+    @apply shadow-glow-green;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     METAL KNOBS & SLIDERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-knob {
+    @apply relative inline-block;
+    @apply w-16 h-16 rounded-full;
+    @apply bg-gradient-to-br from-metal-600 via-metal-700 to-metal-900;
+    @apply border-4 border-metal-950;
+    @apply shadow-metal-lg;
+    position: relative;
+    cursor: grab;
+  }
+  
+  .metal-knob:active {
+    cursor: grabbing;
+  }
+  
+  .metal-knob::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    right: 40%;
+    bottom: 40%;
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(255, 255, 255, 0.4), 
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  
+  .metal-knob-indicator {
+    @apply absolute top-1 left-1/2 -translate-x-1/2;
+    @apply w-1 h-5 rounded-full;
+    @apply bg-gradient-to-b from-blue-400 to-blue-600;
+    @apply shadow-glow-blue;
+  }
+  
+  .metal-slider-track {
+    @apply relative w-full h-2 rounded-full;
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800;
+    @apply shadow-metal-inner;
+  }
+  
+  .metal-slider-thumb {
+    @apply relative w-5 h-5 rounded-full;
+    @apply bg-gradient-to-br from-metal-500 via-metal-600 to-metal-800;
+    @apply border-2 border-metal-900;
+    @apply shadow-metal-raised;
+    @apply cursor-grab;
+    @apply transition-all duration-150;
+  }
+  
+  .metal-slider-thumb:hover {
+    @apply from-metal-400 via-metal-500 to-metal-700;
+    @apply shadow-metal-lg;
+  }
+  
+  .metal-slider-thumb:active {
+    @apply cursor-grabbing shadow-metal-pressed;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     LED INDICATORS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .led-indicator {
+    @apply inline-block w-3 h-3 rounded-full;
+    @apply border border-metal-900;
+    @apply transition-all duration-150;
+  }
+  
+  .led-off {
+    @apply bg-metal-900 shadow-led-off;
+  }
+  
+  .led-red {
+    @apply bg-red-500 shadow-glow-red;
+    box-shadow: 
+      0 0 10px rgba(239, 68, 68, 0.8),
+      0 0 20px rgba(239, 68, 68, 0.4),
+      inset 0 0 5px rgba(239, 68, 68, 0.6);
+  }
+  
+  .led-green {
+    @apply bg-green-500 shadow-glow-green;
+    box-shadow: 
+      0 0 10px rgba(34, 197, 94, 0.8),
+      0 0 20px rgba(34, 197, 94, 0.4),
+      inset 0 0 5px rgba(34, 197, 94, 0.6);
+  }
+  
+  .led-blue {
+    @apply bg-blue-500 shadow-glow-blue;
+    box-shadow: 
+      0 0 10px rgba(59, 130, 246, 0.8),
+      0 0 20px rgba(59, 130, 246, 0.4),
+      inset 0 0 5px rgba(59, 130, 246, 0.6);
+  }
+  
+  .led-orange {
+    @apply bg-orange-500 shadow-glow-orange;
+    box-shadow: 
+      0 0 10px rgba(249, 115, 22, 0.8),
+      0 0 20px rgba(249, 115, 22, 0.4),
+      inset 0 0 5px rgba(249, 115, 22, 0.6);
+  }
+  
+  .led-yellow {
+    @apply bg-yellow-500;
+    box-shadow: 
+      0 0 10px rgba(234, 179, 8, 0.8),
+      0 0 20px rgba(234, 179, 8, 0.4),
+      inset 0 0 5px rgba(234, 179, 8, 0.6);
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     VU METERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .vu-meter {
+    @apply relative w-full h-4;
+    @apply bg-gradient-to-b from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded;
+    @apply shadow-metal-inner;
+    @apply overflow-hidden;
+  }
+  
+  .vu-meter-bar {
+    @apply absolute left-0 top-0 bottom-0;
+    @apply transition-all duration-100;
+    background: linear-gradient(90deg, 
+      #22c55e 0%, 
+      #22c55e 60%, 
+      #eab308 75%, 
+      #ef4444 90%,
+      #ef4444 100%
+    );
+  }
+  
+  .vu-meter-vertical {
+    @apply w-4 h-full;
+    @apply bg-gradient-to-r from-metal-950 via-metal-900 to-metal-800;
+  }
+  
+  .vu-meter-bar-vertical {
+    @apply absolute left-0 right-0 bottom-0;
+    background: linear-gradient(0deg, 
+      #22c55e 0%, 
+      #22c55e 60%, 
+      #eab308 75%, 
+      #ef4444 90%,
+      #ef4444 100%
+    );
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     FADERS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-fader-track {
+    @apply relative w-2 h-full;
+    @apply bg-gradient-to-r from-metal-950 via-metal-900 to-metal-800;
+    @apply border border-metal-800 rounded-full;
+    @apply shadow-metal-inner;
+  }
+  
+  .metal-fader-handle {
+    @apply absolute left-1/2 -translate-x-1/2;
+    @apply w-8 h-6 rounded;
+    @apply bg-gradient-to-b from-metal-500 via-metal-600 to-metal-800;
+    @apply border-t border-l border-metal-400;
+    @apply border-r border-b border-metal-900;
+    @apply shadow-metal-raised;
+    @apply cursor-grab;
+    @apply transition-shadow duration-150;
+  }
+  
+  .metal-fader-handle:hover {
+    @apply shadow-metal-lg;
+  }
+  
+  .metal-fader-handle:active {
+    @apply cursor-grabbing shadow-metal-pressed;
+  }
+  
+  .metal-fader-handle::before {
+    content: '';
+    @apply absolute inset-x-2 top-1/2 -translate-y-1/2;
+    @apply h-0.5 rounded-full;
+    @apply bg-metal-900;
+  }
+  
+  .metal-fader-handle::after {
+    content: '';
+    @apply absolute inset-x-2 top-1/2 -translate-y-1/2 translate-y-1;
+    @apply h-0.5 rounded-full;
+    @apply bg-metal-400;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     DISPLAYS & SCREENS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-display {
+    @apply relative;
+    @apply bg-gradient-to-b from-slate-950 to-slate-900;
+    @apply border-2 border-metal-900 rounded;
+    @apply shadow-metal-inner-lg;
+    @apply font-mono text-green-400;
+    @apply p-2;
+  }
+  
+  .metal-display::before {
+    content: '';
+    @apply absolute inset-0 rounded;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+    pointer-events: none;
+  }
+  
+  .lcd-display {
+    @apply metal-display;
+    @apply bg-gradient-to-b from-blue-950 to-blue-900;
+    @apply text-blue-300;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     RACK UNITS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .rack-unit {
+    @apply relative;
+    @apply bg-gradient-to-b from-metal-800 via-metal-900 to-metal-950;
+    @apply border-l-4 border-r-4 border-metal-700;
+    @apply shadow-metal-xl;
+  }
+  
+  .rack-unit::before,
+  .rack-unit::after {
+    content: '';
+    @apply absolute top-4 w-2 h-2 rounded-full;
+    @apply bg-metal-950 border border-metal-600;
+    @apply shadow-metal-inner;
+  }
+  
+  .rack-unit::before {
+    @apply left-2;
+  }
+  
+  .rack-unit::after {
+    @apply right-2;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     CHANNEL STRIPS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .channel-strip {
+    @apply metal-panel;
+    @apply flex flex-col gap-2 p-2;
+    @apply min-w-[80px];
+  }
+  
+  .channel-strip-header {
+    @apply text-xs font-bold text-center;
+    @apply text-metal-200 text-shadow-metal;
+    @apply py-1;
+    @apply bg-gradient-to-b from-metal-700 to-metal-800;
+    @apply border border-metal-600 rounded;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     TRANSPORT CONTROLS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .transport-button {
+    @apply metal-button;
+    @apply w-12 h-12 rounded-full p-0;
+  }
+  
+  .transport-button-play {
+    @apply metal-button-success;
+  }
+  
+  .transport-button-record {
+    @apply metal-button-danger;
+  }
+  
+  .transport-button-stop {
+    @apply bg-gradient-to-b from-metal-600 via-metal-700 to-metal-800;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     WAVEFORM DISPLAYS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .waveform-container {
+    @apply relative;
+    @apply bg-gradient-to-b from-slate-950 to-slate-900;
+    @apply border-2 border-metal-800 rounded;
+    @apply shadow-metal-inner-lg;
+    @apply overflow-hidden;
+  }
+  
+  .waveform-grid {
+    @apply absolute inset-0;
+    background-image: 
+      linear-gradient(rgba(71, 85, 105, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(71, 85, 105, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     EFFECTS RACKS
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .fx-rack {
+    @apply rack-unit;
+    @apply p-4 space-y-3;
+  }
+  
+  .fx-slot {
+    @apply metal-panel-inset;
+    @apply p-3 rounded;
+    @apply hover:bg-metal-800/50;
+    @apply transition-all duration-200;
+    @apply cursor-pointer;
+  }
+  
+  .fx-slot:hover {
+    @apply shadow-metal;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════
+     UTILITIES
+     ═══════════════════════════════════════════════════════════════════ */
+  
+  .metal-text-engraved {
+    @apply text-shadow-engraved;
+    @apply text-metal-300;
+  }
+  
+  .metal-text-embossed {
+    @apply text-shadow-embossed;
+    @apply text-metal-100;
+  }
+  
+  .metal-separator {
+    @apply h-px;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+  }
+  
+  .metal-divider-vertical {
+    @apply w-px h-full;
+    background: linear-gradient(180deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.1) 50%, 
+      transparent 100%
+    );
+  }
+  
+  /* Brushed metal effect */
+  .brushed-metal {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .brushed-metal::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(255, 255, 255, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+  
+  /* Screw details */
+  .screw {
+    @apply inline-block w-3 h-3 rounded-full;
+    @apply bg-gradient-to-br from-metal-600 to-metal-800;
+    @apply border border-metal-900;
+    @apply shadow-metal-inner;
+    position: relative;
+  }
+  
+  .screw::before {
+    content: '';
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply w-2 h-0.5 bg-metal-950 rounded-full;
+    transform-origin: center;
+  }
+  
+  .screw::after {
+    content: '';
+    @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+    @apply w-0.5 h-2 bg-metal-950 rounded-full;
+  }
+}
+
+@layer utilities {
+  /* Glass morphism for overlays */
+  .glass-metal {
+    @apply backdrop-blur-md bg-metal-900/80;
+    @apply border border-metal-700/50;
+    @apply shadow-metal-xl;
+  }
+  
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-transform duration-200;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Active press effect */
+  .active-press:active {
+    transform: translateY(1px);
+  }
+  
+  /* Glow pulse animation */
+  .glow-pulse {
+    @apply animate-pulse-glow;
+  }
+}
+
+/* ============================================================================
+   CUSTOM COMPONENT OVERRIDES
+   ============================================================================ */
+
+/* Tabs */
+[role="tablist"] {
+  @apply bg-gradient-to-b from-metal-800 to-metal-900;
+  @apply border border-metal-700 rounded-lg;
+  @apply p-1;
+}
+
+[role="tab"] {
+  @apply metal-button;
+  @apply text-xs px-3 py-1.5;
+}
+
+[role="tab"][data-state="active"] {
+  @apply metal-button-primary;
+}
+
+/* Dialogs / Modals */
+[role="dialog"] {
+  @apply metal-panel;
+  @apply backdrop-blur-xl;
+}
+
+/* Tooltips */
+[role="tooltip"] {
+  @apply metal-panel;
+  @apply text-xs;
+  @apply px-3 py-1.5;
+}
+
+/* Select dropdowns */
+[role="listbox"] {
+  @apply metal-panel;
+  @apply max-h-64 overflow-auto;
+}
+
+[role="option"] {
+  @apply px-3 py-2 text-sm;
+  @apply hover:bg-metal-700/50;
+  @apply cursor-pointer;
+  @apply transition-colors duration-150;
+}
+
+[role="option"][data-state="checked"] {
+  @apply bg-blue-600/20 text-blue-400;
+}
+
+/* Input fields */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea {
+  @apply metal-panel-inset;
+  @apply px-3 py-2 text-sm;
+  @apply text-metal-100;
+  @apply placeholder:text-metal-600;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500/50;
+  @apply transition-all duration-150;
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+  @apply w-4 h-4 rounded;
+  @apply bg-metal-900 border-2 border-metal-700;
+  @apply checked:bg-blue-600 checked:border-blue-600;
+  @apply shadow-metal-inner;
+  @apply cursor-pointer;
+  @apply transition-all duration-150;
+}
+
+/* Radio */
+input[type="radio"] {
+  @apply w-4 h-4 rounded-full;
+  @apply bg-metal-900 border-2 border-metal-700;
+  @apply checked:bg-blue-600 checked:border-blue-600;
+  @apply shadow-metal-inner;
+  @apply cursor-pointer;
+  @apply transition-all duration-150;
+}
+/* ============================================================================
+   METAL THEME OVERRIDES
+   ============================================================================ */
+
+.chrome {
+  --background: 210 10% 12%;
+  --foreground: 210 5% 92%;
+  --card: 210 10% 16%;
+  --card-foreground: 210 5% 92%;
+  --popover: 210 10% 14%;
+  --popover-foreground: 210 5% 92%;
+  --primary: 210 8% 78%;
+  --primary-foreground: 210 10% 10%;
+  --secondary: 210 8% 25%;
+  --secondary-foreground: 210 5% 90%;
+  --muted: 210 8% 20%;
+  --muted-foreground: 210 5% 60%;
+  --accent: 210 8% 30%;
+  --accent-foreground: 210 5% 92%;
+  --border: 210 8% 28%;
+  --input: 210 8% 28%;
+  --ring: 210 8% 78%;
+}
+
+.steel {
+  --background: 213 15% 9%;
+  --foreground: 213 8% 88%;
+  --card: 213 15% 13%;
+  --card-foreground: 213 8% 88%;
+  --popover: 213 15% 11%;
+  --popover-foreground: 213 8% 88%;
+  --primary: 213 15% 58%;
+  --primary-foreground: 213 15% 8%;
+  --secondary: 213 12% 22%;
+  --secondary-foreground: 213 8% 85%;
+  --muted: 213 12% 17%;
+  --muted-foreground: 213 8% 55%;
+  --accent: 213 12% 25%;
+  --accent-foreground: 213 8% 88%;
+  --border: 213 12% 24%;
+  --input: 213 12% 24%;
+  --ring: 213 15% 58%;
+}
+
+.bronze {
+  --background: 25 20% 8%;
+  --foreground: 30 15% 88%;
+  --card: 25 20% 12%;
+  --card-foreground: 30 15% 88%;
+  --popover: 25 20% 10%;
+  --popover-foreground: 30 15% 88%;
+  --primary: 30 60% 50%;
+  --primary-foreground: 25 20% 6%;
+  --secondary: 25 15% 20%;
+  --secondary-foreground: 30 15% 85%;
+  --muted: 25 15% 16%;
+  --muted-foreground: 30 10% 55%;
+  --accent: 25 15% 22%;
+  --accent-foreground: 30 15% 88%;
+  --border: 25 15% 22%;
+  --input: 25 15% 22%;
+  --ring: 30 60% 50%;
+}
+
+.copper {
+  --background: 20 22% 8%;
+  --foreground: 25 12% 88%;
+  --card: 20 22% 12%;
+  --card-foreground: 25 12% 88%;
+  --popover: 20 22% 10%;
+  --popover-foreground: 25 12% 88%;
+  --primary: 22 52% 48%;
+  --primary-foreground: 20 22% 6%;
+  --secondary: 20 15% 20%;
+  --secondary-foreground: 25 12% 85%;
+  --muted: 20 15% 16%;
+  --muted-foreground: 25 8% 55%;
+  --accent: 20 15% 22%;
+  --accent-foreground: 25 12% 88%;
+  --border: 20 15% 22%;
+  --input: 20 15% 22%;
+  --ring: 22 52% 48%;
+}
+
+.gold {
+  --background: 42 20% 8%;
+  --foreground: 45 15% 90%;
+  --card: 42 20% 12%;
+  --card-foreground: 45 15% 90%;
+  --popover: 42 20% 10%;
+  --popover-foreground: 45 15% 90%;
+  --primary: 43 65% 52%;
+  --primary-foreground: 42 20% 6%;
+  --secondary: 42 15% 20%;
+  --secondary-foreground: 45 15% 87%;
+  --muted: 42 15% 16%;
+  --muted-foreground: 45 10% 55%;
+  --accent: 42 15% 22%;
+  --accent-foreground: 45 15% 90%;
+  --border: 42 15% 22%;
+  --input: 42 15% 22%;
+  --ring: 43 65% 52%;
+}
+
+/* ============================================================================
+   MISSING THEME OVERRIDES — forest · sunset · midnight · aurora · light
+   Added: these themes existed in theme-config.ts but had no CSS variable
+   definitions; they silently fell through to :root (dark) values.
+   ============================================================================ */
+
+.forest {
+  --background: 160 30% 6%;
+  --foreground: 155 20% 85%;
+  --card: 160 30% 10%;
+  --card-foreground: 155 20% 85%;
+  --popover: 160 30% 8%;
+  --popover-foreground: 155 20% 85%;
+  --primary: 152 60% 38%;
+  --primary-foreground: 160 30% 5%;
+  --secondary: 158 20% 18%;
+  --secondary-foreground: 155 20% 82%;
+  --muted: 158 20% 14%;
+  --muted-foreground: 155 15% 52%;
+  --accent: 158 20% 20%;
+  --accent-foreground: 155 20% 85%;
+  --border: 158 20% 20%;
+  --input: 158 20% 20%;
+  --ring: 152 60% 38%;
+}
+
+.sunset {
+  --background: 15 28% 7%;
+  --foreground: 20 18% 88%;
+  --card: 15 28% 11%;
+  --card-foreground: 20 18% 88%;
+  --popover: 15 28% 9%;
+  --popover-foreground: 20 18% 88%;
+  --primary: 22 80% 52%;
+  --primary-foreground: 15 28% 5%;
+  --secondary: 18 18% 20%;
+  --secondary-foreground: 20 18% 85%;
+  --muted: 18 18% 16%;
+  --muted-foreground: 20 12% 55%;
+  --accent: 18 18% 22%;
+  --accent-foreground: 20 18% 88%;
+  --border: 18 18% 22%;
+  --input: 18 18% 22%;
+  --ring: 22 80% 52%;
+}
+
+.midnight {
+  --background: 235 35% 5%;
+  --foreground: 230 18% 88%;
+  --card: 235 35% 9%;
+  --card-foreground: 230 18% 88%;
+  --popover: 235 35% 7%;
+  --popover-foreground: 230 18% 88%;
+  --primary: 234 80% 58%;
+  --primary-foreground: 235 35% 4%;
+  --secondary: 233 22% 18%;
+  --secondary-foreground: 230 18% 85%;
+  --muted: 233 22% 14%;
+  --muted-foreground: 230 12% 52%;
+  --accent: 233 22% 20%;
+  --accent-foreground: 230 18% 88%;
+  --border: 233 22% 20%;
+  --input: 233 22% 20%;
+  --ring: 234 80% 58%;
+}
+
+.aurora {
+  --background: 280 30% 6%;
+  --foreground: 285 18% 88%;
+  --card: 280 30% 10%;
+  --card-foreground: 285 18% 88%;
+  --popover: 280 30% 8%;
+  --popover-foreground: 285 18% 88%;
+  --primary: 288 75% 60%;
+  --primary-foreground: 280 30% 5%;
+  --secondary: 282 20% 20%;
+  --secondary-foreground: 285 18% 85%;
+  --muted: 282 20% 15%;
+  --muted-foreground: 285 12% 52%;
+  --accent: 282 20% 22%;
+  --accent-foreground: 285 18% 88%;
+  --border: 282 20% 22%;
+  --input: 282 20% 22%;
+  --ring: 288 75% 60%;
+}
+
+/* Light = brushed aluminum — not a bright white, a cool muted silver */
+.light {
+  --background: 210 18% 86%;
+  --foreground: 213 25% 12%;
+  --card: 210 18% 90%;
+  --card-foreground: 213 25% 12%;
+  --popover: 210 18% 92%;
+  --popover-foreground: 213 25% 12%;
+  --primary: 217 75% 42%;
+  --primary-foreground: 210 18% 96%;
+  --secondary: 210 12% 74%;
+  --secondary-foreground: 213 25% 15%;
+  --muted: 210 12% 80%;
+  --muted-foreground: 213 18% 38%;
+  --accent: 210 12% 76%;
+  --accent-foreground: 213 25% 12%;
+  --border: 210 12% 70%;
+  --input: 210 12% 70%;
+  --ring: 217 75% 42%;
+}
+

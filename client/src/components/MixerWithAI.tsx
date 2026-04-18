@@ -1,0 +1,179 @@
+// ─────────────────────────────────────────────────────────────
+// client/src/components/mixer/MixerWithAI.tsx
+//
+// Integration example — shows how to wire the AI Auto-Leveling
+// system into your existing mixer component.
+//
+// Drop-in pattern:
+//   1. Build TrackAudioRef array from your existing audio nodes
+//   2. Call useAutoLeveling() with the audio context + refs
+//   3. Render <AILevelAssist> in your mixer header/sidebar
+//   4. Pass notifyFaderMove() to each fader's onChange handler
+//   5. Render <TimeSavingsPanel> in your session footer
+// ─────────────────────────────────────────────────────────────
+
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useAutoLeveling } from '../hooks/useAutoLeveling';
+import { AILevelAssist } from './AILevelAssist';
+import { TimeSavingsPanel } from './TimeSavingsPanel';
+import type { TrackAudioRef } from '../hooks/useAutoLeveling';
+
+// ── Example: Mixer Track Definition (matches your existing types) ──
+
+interface MixerTrack {
+  id: string;
+  name: string;
+  color: string;
+  gainNode: GainNode;
+  analyserNode: AnalyserNode;
+  eqNodes?: BiquadFilterNode[];
+}
+
+interface MixerWithAIProps {
+  audioContext: AudioContext;
+  masterAnalyser: AnalyserNode;
+  tracks: MixerTrack[];
+}
+
+// ── Mixer Component ────────────────────────────────────────────
+
+export function MixerWithAI({ audioContext, masterAnalyser, tracks }: MixerWithAIProps) {
+
+  // ── 1. Build TrackAudioRef array from your existing nodes ──
+  const trackRefs: TrackAudioRef[] = tracks.map(track => ({
+    trackId: track.id,
+    analyserNode: track.analyserNode,
+    gainNode: track.gainNode,
+    eqNodes: track.eqNodes,
+  }));
+
+  // ── 2. Connect auto-leveling hook ──────────────────────────
+  const {
+    enabled,
+    toggle,
+    trackStates,
+    accept,
+    reject,
+    notifyFaderMove,
+    nodeState,
+    sessionStats,
+    latestRecommendation,
+  } = useAutoLeveling(audioContext, masterAnalyser, trackRefs, {
+    autoStart: true,
+    analysisHz: 30,
+  });
+
+  // Track order for the ghost knob grid (matches your visual track order)
+  const trackOrder = tracks.map(t => t.id);
+
+  // ── 3. Fader change handler — notify AI of manual moves ────
+  const handleFaderChange = useCallback((trackId: string, newGainLinear: number) => {
+    // Update your existing gain node (your existing code)
+    const track = tracks.find(t => t.id === trackId);
+    if (track) {
+      track.gainNode.gain.setTargetAtTime(newGainLinear, audioContext.currentTime, 0.01);
+    }
+
+    // Notify LLPTE — marks override, logs manual adjustment
+    notifyFaderMove(trackId, newGainLinear);
+  }, [tracks, audioContext, notifyFaderMove]);
+
+  return (
+    <div className="flex flex-col h-full bg-[#0a0a12] text-white">
+
+      {/* ── Mixer Header ──────────────────────────────────── */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-semibold text-slate-300">Mixer</span>
+          <span className="text-[10px] font-mono text-slate-600">
+            {tracks.length} tracks
+          </span>
+        </div>
+
+        {/* ── 3. Render AI Level Assist ─────────────────── */}
+        <AILevelAssist
+          enabled={enabled}
+          onToggle={toggle}
+          trackStates={trackStates}
+          onAccept={accept}
+          onReject={reject}
+          nodeState={nodeState}
+          trackOrder={trackOrder}
+        />
+      </div>
+
+      {/* ── Track Strips (your existing mixer UI) ─────────── */}
+      <div className="flex flex-1 overflow-x-auto">
+        {tracks.map(track => (
+          <TrackStrip
+            key={track.id}
+            track={track}
+            onGainChange={handleFaderChange}
+          />
+        ))}
+      </div>
+
+      {/* ── Session Footer ─────────────────────────────────── */}
+      <div className="px-4 py-3 border-t border-white/5">
+        <div className="flex items-center justify-between">
+          <TimeSavingsPanel stats={sessionStats} expanded={false} />
+
+          {/* Debug: latest recommendation — remove for production */}
+          {latestRecommendation && process.env.NODE_ENV === 'development' && (
+            <div className="text-[9px] font-mono text-slate-700">
+              frame #{latestRecommendation.frameId} |{' '}
+              {latestRecommendation.processingTimeMs.toFixed(1)}ms |{' '}
+              {Math.round(latestRecommendation.overallConfidence * 100)}% conf
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Example Track Strip (stub — replace with your actual component) ──
+
+interface TrackStripProps {
+  track: MixerTrack;
+  onGainChange: (trackId: string, gainLinear: number) => void;
+}
+
+function TrackStrip({ track, onGainChange }: TrackStripProps) {
+  const [gain, setGain] = useState(1.0);
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newGain = parseFloat(e.target.value);
+    setGain(newGain);
+    onGainChange(track.id, newGain);
+  };
+
+  return (
+    <div
+      className="flex flex-col items-center gap-2 p-3 border-r border-white/5 min-w-[72px]"
+      style={{ borderTop: `2px solid ${track.color}` }}
+    >
+      {/* Track name */}
+      <span className="text-[9px] font-mono text-slate-400 uppercase tracking-widest">
+        {track.name}
+      </span>
+
+      {/* Fader (vertical range input — replace with your knob/fader component) */}
+      <input
+        type="range"
+        min={0}
+        max={2}
+        step={0.01}
+        value={gain}
+        onChange={handleInput}
+        className="h-24 w-2 cursor-pointer"
+        style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
+      />
+
+      {/* Gain readout */}
+      <span className="text-[9px] font-mono text-slate-500">
+        {gain.toFixed(2)}
+      </span>
+    </div>
+  );
+}

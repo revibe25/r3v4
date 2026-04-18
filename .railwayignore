@@ -1,0 +1,14 @@
+node_modules/
+client/node_modules/
+server/node_modules/
+shared/node_modules/
+packages/
+.turbo/
+coverage/
+client/dist/
+server/dist/
+*.zip
+*.tar.gz
+uploads/
+server/storage/
+R3_v4_full_backup.zip
