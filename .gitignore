@@ -16,6 +16,13 @@ node
 _dev/legacy/
 
 # LLPTE packages build output
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.d.ts.map
+packages/*/src/**/*.js.map
+shared/*.d.ts
+shared/*.d.ts.map
+shared/*.js
+shared/*.js.map
 packages/*/dist/
 packages/*/*.tsbuildinfo
 internal/
@@ -70,24 +77,6 @@ internal/logs/
 # deploy log (explicit)
 r3-deploy.log
 secrets/
-secrets/
-*.bak
-*.bak-*
-*.bak2
-*.bak3
-*.bak4
-*.bak5
-*.bak6
-*.color-bak
-*.theme-bak
-*.backup.*
-.r3-backup*/
-.r3-backups*/
-.r3-ts-fix*/
-.r3-wire-fix*/
-.r3-audits*/
-secrets/
-*.bak
 *.bak-*
 *.bak2
 *.bak3
@@ -106,4 +95,3 @@ archives/*.tar.gz
 archives/*.gz
 archives/*.zip
 client/public/sounds/
-uploads/
