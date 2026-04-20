@@ -16,7 +16,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "composite": true
   },
   "include": [
@@ -28,5 +27,16 @@
     "src/__tests__",
     "src/engine/workers",
     "src/engine/engine/workers"
+  ],
+  "references": [
+    {
+      "path": "../llpte-signal"
+    },
+    {
+      "path": "../llpte-ai"
+    },
+    {
+      "path": "../llpte-execution"
+    }
   ]
 }
