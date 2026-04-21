@@ -11,10 +11,13 @@ import {
   startSession,
   stopSession,
   getSessionSummary,
+  logAIDecision,
+  updateAIDecisionOutcome,
 } from "../services/session-metrics.service";
 import { db }             from "../db";
 import { sessionMetrics } from "../../shared/schema-session-metrics";
-import { eq, desc }       from "drizzle-orm";
+import { aiDecisionLog }   from "../db/schema";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export const sessionMetricsRouter = router({
   /** Start a new session — returns sessionId */
@@ -73,6 +76,29 @@ export const sessionMetricsRouter = router({
       }));
     }),
 
+  /** Log an AI suggestion decision to aiDecisionLog (PRD §15) */
+  recordDecision: protectedProcedure
+    .input(z.object({
+      sessionId:           z.string(),
+      nodeId:              z.string(),
+      actionType:          z.string(),
+      trackId:             z.string().optional(),
+      inputConfidence:     z.number().min(0).max(1),
+      displayedConfidence: z.number().min(0).max(1),
+      decision:            z.record(z.unknown()),
+      outcome:             z.enum(["auto_applied","accepted","rejected","ignored","discarded"]),
+      latencyMs:           z.number().int().min(0),
+    }))
+    .mutation(({ input }) => logAIDecision(input)),
+
+  /** Update outcome of a previously logged decision */
+  recordOutcome: protectedProcedure
+    .input(z.object({
+      id:      z.string(),
+      outcome: z.enum(["accepted","rejected","ignored"]),
+    }))
+    .mutation(({ input }) => updateAIDecisionOutcome(input.id, input.outcome)),
+
   /** Aggregate totals for the current user — investor demo metric */
   totals: protectedProcedure
     .query(async ({ ctx }) => {
@@ -88,11 +114,26 @@ export const sessionMetricsRouter = router({
         ? rows.reduce((s, r) => s + (r.mixQualityScore ?? 0), 0) / totalSessions
         : 0;
 
+      // Pull acceptance counts from aiDecisionLog (PRD §15 demo metric)
+      let acceptedSuggestions = 0;
+      let rejectedSuggestions = 0;
+      if (rows.length > 0) {
+        const sessionIds = rows.map(r => r.id);
+        const decisions  = await db
+          .select({ outcome: aiDecisionLog.outcome })
+          .from(aiDecisionLog)
+          .where(inArray(aiDecisionLog.sessionId, sessionIds));
+        acceptedSuggestions = decisions.filter(d => d.outcome === "accepted").length;
+        rejectedSuggestions = decisions.filter(d => d.outcome === "rejected").length;
+      }
+
       return {
         totalSessions,
-        totalMinutesSaved: Math.round(totalTimeSavedS / 60),
-        totalHoursMixed:   Math.round(totalDurationS / 3600 * 10) / 10,
+        totalMinutesSaved:  Math.round(totalTimeSavedS / 60),
+        totalHoursMixed:    Math.round(totalDurationS / 3600 * 10) / 10,
         avgMixQualityScore: Math.round(avgMixQuality * 100) / 100,
+        acceptedSuggestions,
+        rejectedSuggestions,
       };
     }),
 });

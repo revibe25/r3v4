@@ -68,6 +68,7 @@ async function trpcQuery<TOutput>(
 // Get JWT from localStorage (set by authStore.ts on login)
 function getToken(): string | undefined {
   // [wire§8] removed — auth via httpOnly cookie
+  return undefined;
 }
 
 // ── Local snapshot fallback ───────────────────────────────────────────────────

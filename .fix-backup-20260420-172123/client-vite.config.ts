@@ -141,7 +141,7 @@ export default defineConfig(({ mode }): UserConfig => {
     // ── Dev server ────────────────────────────────────────────────────────────
     server: {
       port:       5174,
-      host:       process.env.VITE_HOST_LAN === '1' ? '0.0.0.0' : 'localhost',
+      host:       '0.0.0.0',
       strictPort: true,
 
       hmr: {

@@ -54,7 +54,20 @@ export function useMixSuggestions() {
     bpm: number,
     position: number = 0,
   ) => {
-    mutation.mutate({ tracks, bpm, position });
+    mutation.mutate({
+      tracks: tracks.map(t => ({
+        type:        'audio'  as const,
+        color:       '#a3e635',
+        label:       String((t as Record<string, unknown>).id ?? ''),
+        armed:       false    as const,
+        fxChain:     [] as Array<{ id: string; type: string; params: Record<string, unknown>; enabled: boolean }>,
+        sends:       [] as Array<{ id: string; gain: number }>,
+        inputSource: '',
+        ...t,
+      })),
+      bpm,
+      position,
+    });
   }, [mutation]);
 
   const accept = useCallback((idx: number) => {

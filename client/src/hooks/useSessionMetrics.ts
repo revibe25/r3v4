@@ -6,7 +6,7 @@
  */
 import { useState, useCallback, useRef } from "react";
 import { trpc }  from "@/lib/trpc";
-import type { AutoLevelSessionStats } from "../../shared/auto-level.types";
+import type { AutoLevelSessionStats } from "../../../shared/auto-level.types";
 
 const EMPTY_STATS: AutoLevelSessionStats = {
   sessionStartedAt:             Date.now(),
@@ -25,7 +25,8 @@ export function useSessionMetrics() {
 
   const startMut  = trpc.sessionMetrics.start.useMutation();
   const stopMut   = trpc.sessionMetrics.stop.useMutation();
-  const totalsQ   = trpc.sessionMetrics.totals.useQuery();
+  const totalsQ          = trpc.sessionMetrics.totals.useQuery();
+  const recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
 
   /** Call when the DAW session begins (tracks loaded, transport started). */
   const startSession = useCallback(async (trackIds: string[], bpm: number) => {
@@ -64,13 +65,39 @@ export function useSessionMetrics() {
     }));
   }, []);
 
-  const recordSuggestionAccepted = useCallback(() => {
+  const recordSuggestionAccepted = useCallback((trackId?: string) => {
     setStats(prev => ({ ...prev, acceptedSuggestions: prev.acceptedSuggestions + 1 }));
-  }, []);
+    if (sessionId) {
+      recordDecisionMut.mutate({
+        sessionId,
+        nodeId:              "aiMixEngine",
+        actionType:          "gain_adjust",
+        trackId,
+        inputConfidence:     1,
+        displayedConfidence: 1,
+        decision:            {},
+        outcome:             "accepted",
+        latencyMs:           0,
+      });
+    }
+  }, [sessionId, recordDecisionMut]);
 
-  const recordSuggestionRejected = useCallback(() => {
+  const recordSuggestionRejected = useCallback((trackId?: string) => {
     setStats(prev => ({ ...prev, rejectedSuggestions: prev.rejectedSuggestions + 1 }));
-  }, []);
+    if (sessionId) {
+      recordDecisionMut.mutate({
+        sessionId,
+        nodeId:              "aiMixEngine",
+        actionType:          "gain_adjust",
+        trackId,
+        inputConfidence:     1,
+        displayedConfidence: 1,
+        decision:            {},
+        outcome:             "rejected",
+        latencyMs:           0,
+      });
+    }
+  }, [sessionId, recordDecisionMut]);
 
   return {
     sessionId,
