@@ -95,3 +95,5 @@ archives/*.tar.gz
 archives/*.gz
 archives/*.zip
 client/public/sounds/
+.docs-backup-*/
+.fix-backup-*/
