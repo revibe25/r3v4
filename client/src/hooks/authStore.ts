@@ -82,6 +82,7 @@ async function authFetch<T>(
 export const useAuthStore = create<AuthState>((set, get) => ({
   user:    null,
   token:   null,
+  loading: false,
   // true when a stored token exists — prevents ProtectedRoute redirect
   // before initAuth() has had a chance to validate it. Set to false by
   // initAuth() on completion (success or failure). Never persisted.

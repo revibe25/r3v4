@@ -11,7 +11,6 @@
  */
 
 import { useState } from 'react';
-import { PageNav } from '@/components/page-nav';
 import { VSTBrowser } from '@/components/vst-browser';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 
@@ -30,7 +29,6 @@ export default function VSTPage() {
         overflow:       'hidden',
       }}
     >
-      <PageNav />
       <div style={{ flex: 1, overflow: 'auto', padding: '1rem' }}>
         <VSTBrowser
           onPluginSelect={setSelectedPlugin}

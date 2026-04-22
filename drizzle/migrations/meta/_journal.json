@@ -43,6 +43,13 @@
       "when": 1775715218184,
       "tag": "0005_overjoyed_gambit",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776816555367,
+      "tag": "0006_materialized_views",
+      "breakpoints": true
     }
   ]
 }

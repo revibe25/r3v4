@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently --kill-others-on-fail -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
     "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
-    "dev:client": "pnpm --filter @r3vibe/client dev",
+    "dev:client": "wait-on tcp:3000 && pnpm --filter @r3vibe/client dev",
     "build": "tsc",
     "start": "node dist/index.js",
     "seed": "tsx scripts/seed/index.ts",
@@ -68,7 +68,8 @@
     "turbo": "^2.9.6",
     "typescript": "5.9.3",
     "vite": "^5.4.21",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "wait-on": "^9.0.5"
   },
   "optionalDependencies": {
     "bufferutil": "^4.1.0"

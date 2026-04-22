@@ -43,6 +43,24 @@ export function useDAWEngine(): EngineAPI {
 
   const store = useDAWStore;
 
+  // ── Gesture gate: resume AudioContext on first user interaction ─────────
+  // Tone.js creates its AudioContext on import — browsers block it until a
+  // user gesture fires. This handler resolves the autoplay warning by calling
+  // Tone.start() on the first click or keydown, then removes itself.
+  useEffect(() => {
+    const resume = () => {
+      void Tone.start();
+      document.removeEventListener('click',   resume);
+      document.removeEventListener('keydown', resume);
+    };
+    document.addEventListener('click',   resume, { once: true });
+    document.addEventListener('keydown', resume, { once: true });
+    return () => {
+      document.removeEventListener('click',   resume);
+      document.removeEventListener('keydown', resume);
+    };
+  }, []);
+
   // ── Bootstrap: context resume + Tone Transport sync ─────────────────────
   useEffect(() => {
     // Sync BPM from store → Tone.Transport (reactive)

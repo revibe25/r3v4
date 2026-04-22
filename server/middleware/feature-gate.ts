@@ -194,7 +194,7 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
       // Log but do not fail the request - a missing usage record is preferable
       // to failing a completed AI transition. Monitor for repeated failures
       // as they indicate a schema or DB connectivity issue.
-      console.error('[feature-gate] failed to record AI usage:', err);
+      process.stderr.write(`[feature-gate] failed to record AI usage: ${String(err)}\n`);
     }
 
     return result;
