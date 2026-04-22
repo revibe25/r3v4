@@ -74,6 +74,7 @@ import loopRoutes              from './server/routes/loops';
 import loopProjectRoutes       from './server/routes/loopProjects';
 import midiRoutes              from './server/routes/midi';
 import { loopStationLimiter }  from './server/middleware/rateLimit';
+import { attachCollabServer, getRoomStats } from './server/ws/collab';
 import { ensureDir }           from './server/utils/fileUtils';
 
 const app = express();
@@ -131,6 +132,7 @@ app.get('/health', (_req, res) => {
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function main(): Promise<void> {
   const httpServer = http.createServer(app);
+  attachCollabServer(httpServer);
 
   // ── Loop storage dirs ─────────────────────────────────────────────────────
   // Ensure directories exist before route handlers mount.
