@@ -86,8 +86,12 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 app.use(helmet());
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use(compression());
+const _corsOrigins = process.env.ALLOWED_ORIGINS?.split(',') ??
+  (NODE_ENV === 'production'
+    ? (() => { throw new Error('[startup] ALLOWED_ORIGINS must be set in production'); })()
+    : ['http://localhost:5173']);
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+  origin: _corsOrigins,
   credentials: true,
 }));
 app.use(morgan(NODE_ENV === 'development' ? 'dev' : 'combined'));

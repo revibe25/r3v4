@@ -163,7 +163,7 @@ export default defineConfig(({ mode }): UserConfig => {
         'Cache-Control': 'no-store',
       },
 
-      cors: true,
+      cors: false,
 
       // ── Warmup — only the files the initial route needs ────────────────────
       // Removed the `src/components/**/*.tsx` glob that was pre-transforming

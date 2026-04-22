@@ -18,6 +18,7 @@ import { z } from "zod";
 import { storage } from "../storage";
 import { logger } from "../utils/logger";
 import { requireUser } from "../middleware/requireUser";
+import { randomUUID } from "crypto";
 
 const router = Router();
 
@@ -96,7 +97,7 @@ function signToken(payload: {
   username?: string;
   tier: string;
 }): string {
-  return jwt.sign(payload, JWT_SECRET, {
+  return jwt.sign({ ...payload, jti: randomUUID() }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES,
   } as jwt.SignOptions);
 }
