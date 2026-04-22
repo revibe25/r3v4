@@ -26,3 +26,6 @@ export interface TimeSavingsBreakdown {
     fxRouting: number;
   };
 }
+
+// Alias — production SessionSummaryPanel imports this name
+export type TimeSavedBreakdown = TimeSavingsBreakdown;

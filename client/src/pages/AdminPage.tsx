@@ -6,10 +6,9 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../hooks/authStore';
-import { PageNav } from '../components/page-nav';
 
 const T = {
-  bg: '#080808', surface: '#0d0d0d', border: '#1a1a1a',
+  bg: '#060606', surface: '#0d0d0d', border: '#1c1c1c',
   amber: '#f59e0b', cyan: '#22d3ee', red: '#ef4444',
   green: '#22c55e', dim: '#444', muted: '#666', text: '#e5e5e5',
   font: '"JetBrains Mono", "IBM Plex Mono", monospace',
@@ -92,7 +91,6 @@ export default function AdminPage() {
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100vh',
       background:T.bg, color:T.text, fontFamily:T.font, overflow:'hidden' }}>
-      <PageNav />
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 16px',
         borderBottom:`1px solid ${T.border}`, background:T.surface, flexShrink:0 }}>
         <div style={{ display:'flex', gap:5 }}>

@@ -43,6 +43,8 @@ import { AudioReactiveScene }    from '../components/daw/AudioReactiveScene';
 import { WaveformMesh }          from '../components/daw/WaveformMesh';
 import { SessionChip }           from '../components/session-summary/SessionChip';
 import { SessionSummaryPanel }   from '../components/session-summary/SessionSummaryPanel';
+import { MixSuggestionsPanel }   from '../components/MixSuggestionsPanel';
+import { useMixSuggestions }     from '../hooks/useMixSuggestions';
 
 // ─── Shared mini-components ───────────────────────────────────────────────────
 
@@ -414,7 +416,6 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
                 style={{ display: 'none' }}
                 onChange={e => {
                   const file = e.target.files?.[0];
-                  if (file) console.info('[DAW] upload queued:', file.name);
                   e.target.value = '';
                 }}
               />
@@ -1168,6 +1169,7 @@ const AIPanel = memo(() => {
     setAIThinking, updateMastering, predictionsVisible, setPredictionsVisible,
   } = useDAWStore();
 
+  const mixSuggestions            = useMixSuggestions();
   const [chatInput, setChatInput] = useState('');
   const [aiError,   setAiError]   = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1340,42 +1342,28 @@ const AIPanel = memo(() => {
       <div className="flex-1 overflow-y-auto">
         {/* ── AI Mix Panel (L1) ──────────────────────────────────────────── */}
         {aiPanelTab === 'mix' && (
-          <div className="p-3 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[9px] tracking-widest text-[#555]">LLPTE SUGGESTIONS</span>
-              <Btn className="text-[8px]" onClick={triggerSuggestions}>ANALYSE</Btn>
-            </div>
-
-            {aiThinking && (
-              <div className="flex items-center gap-2 py-2">
-                <div className="flex gap-0.5">
-                  {[0,1,2].map(i => (
-                    <div key={i} className="w-1 h-1 rounded-full bg-amber-500 animate-bounce"
-                         style={{ animationDelay: `${i * 0.15}s` }} />
-                  ))}
-                </div>
-                <span className="text-[9px] text-[#555]">Analysing signal…</span>
-              </div>
-            )}
-
-            {aiSuggestions.filter(s => s.accepted === null).slice(0, 6).map(s => (
-              <AISuggestionCard
-                key={s.id}
-                suggestion={s}
-                onAccept={() => acceptSuggestion(s.id)}
-                onReject={() => rejectSuggestion(s.id)}
-              />
-            ))}
-
-            {aiSuggestions.filter(s => s.accepted === null).length === 0 && !aiThinking && (
-              <div className="text-center py-8">
-                <div className="text-[10px] text-[#333] font-mono">LLPTE READY</div>
-                <div className="text-[9px] text-[#222] mt-1">Click ANALYSE to generate mix suggestions</div>
-              </div>
-            )}
-
+          <div className="p-3">
+            <MixSuggestionsPanel
+              suggestions={mixSuggestions.suggestions}
+              status={mixSuggestions.status}
+              acceptedIds={mixSuggestions.acceptedIds}
+              rejectedIds={mixSuggestions.rejectedIds}
+              acceptRate={mixSuggestions.acceptRate}
+              onAccept={mixSuggestions.accept}
+              onReject={mixSuggestions.reject}
+              onAnalyse={() => {
+                const store = useDAWStore.getState();
+                mixSuggestions.analyse(
+                  store.tracks.map(t => ({
+                    id: t.id, gain: t.gain, pan: t.pan, mute: t.mute, solo: t.solo,
+                  })),
+                  store.bpm,
+                  store.position,
+                );
+              }}
+            />
             {/* L3 Arrangement predictions toggle */}
-            <div className="pt-2 border-t border-[#1c1c1c]">
+            <div className="pt-2 border-t border-[#1c1c1c] mt-3">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] text-[#555] tracking-widest">ARRANGEMENT AI</span>
                 <button
@@ -1386,7 +1374,6 @@ const AIPanel = memo(() => {
                   }`}
                   onClick={() => {
                     if (!predictionsVisible) {
-                      // Generate fake predictions for demo; real impl: llpte-ai inference
                       useDAWStore.getState().setArrangementPredictions([
                         { trackId: 'trk_3', startBeat: 32, suggestedAction: 'introduce', confidence: 0.82, label: 'ADD GHOST' },
                         { trackId: 'trk_5', startBeat: 48, suggestedAction: 'fade',       confidence: 0.71, label: 'FADE OUT' },
@@ -1740,7 +1727,7 @@ export default function DAW() {
     <div
       className="flex flex-col"
       style={{
-        height: 'calc(100vh - var(--nav-h))',
+        height: '100vh',
         background: '#0a0a0a',
         color: '#e5e5e5',
         fontFamily: '"JetBrains Mono", "Fira Code", "Courier New", monospace',

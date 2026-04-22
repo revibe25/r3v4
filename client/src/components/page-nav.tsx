@@ -34,7 +34,7 @@ import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
 export const NAV_HEIGHT_PX = 44;
 
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
-const NAV_HIDDEN_ON: string[] = ['/auth', '/login'];
+const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument', '/daw'];
 
 // ── Admin gate ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'earnestathepco@gmail.com';

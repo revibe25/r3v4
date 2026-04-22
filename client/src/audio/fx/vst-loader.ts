@@ -65,7 +65,7 @@ export interface VSTMetadata {
 
 export class VSTLoader {
   private static workletRegistered = false;
-  private static workletUrl = new URL('../../public/worklets/vst-processor.worklet.js', import.meta.url);
+  private static workletUrl = /* @vite-ignore */ new URL('../../public/worklets/vst-processor.worklet.js', import.meta.url);
 
   static async ensureWorkletRegistered(audioCtx: AudioContext): Promise<void> {
     if (this.workletRegistered) return;

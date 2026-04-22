@@ -110,7 +110,7 @@ export class IRReverbEngine {
 
   setPreGain(gain: number): void {
     this._preG = Math.max(0, Math.min(4, gain));
-    if (this._preGain) this._preGain.gain.setTargetAtTime(this._preG, ctx.currentTime, 0.015);
+    if (this._preGain) this._preGain.gain.setTargetAtTime(this._preG, this._ctx?.currentTime ?? 0, 0.015);
   }
 
   get loaded()   { return this._loaded; }

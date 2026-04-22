@@ -1,17 +1,53 @@
 version: '3.8'
+
 services:
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB:       r3vibe
+      POSTGRES_USER:     r3
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U r3 -d r3vibe"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ── Node server ───────────────────────────────────────────────────────────────
   server:
     build: .
     expose:
-      - "5000"
+      - "3000"
     environment:
-      NODE_ENV: production
-      DATABASE_URL: sqlite:./data/data.db
-    volumes:
-      - ./data:/app/data
-      - ./uploads:/app/uploads
+      NODE_ENV:    production
+      PORT:        3000
+      DATABASE_URL: postgresql://r3:${POSTGRES_PASSWORD}@postgres:5432/r3vibe
+      CLIENT_URL:  ${CLIENT_URL}
+      JWT_SECRET:  ${JWT_SECRET}
+      INTERNAL_SECRET: ${INTERNAL_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      LOG_LEVEL:   info
+      # Stripe (set empty strings if not yet configured)
+      STRIPE_SECRET_KEY:                  ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET:              ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_CREATOR_MONTHLY_PRICE_ID:    ${STRIPE_CREATOR_MONTHLY_PRICE_ID:-}
+      STRIPE_CREATOR_YEARLY_PRICE_ID:     ${STRIPE_CREATOR_YEARLY_PRICE_ID:-}
+      STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID: ${STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID:-}
+      STRIPE_PRO_ARTIST_YEARLY_PRICE_ID:  ${STRIPE_PRO_ARTIST_YEARLY_PRICE_ID:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - ./uploads:/app/uploads
 
+  # ── nginx reverse proxy + static SPA ─────────────────────────────────────────
   nginx:
     image: nginx:alpine
     ports:
@@ -23,19 +59,22 @@ services:
       - server
     restart: unless-stopped
 
-  # ── Python AI Mix sidecar (added by migration) ───────────────────────────
+  # ── Python AI Mix sidecar ─────────────────────────────────────────────────────
   ai-mix:
     build:
-      context: ./services/ai-mix
+      context:    ./services/ai-mix
       dockerfile: Dockerfile
-    ports:
-      - "8001:8001"
+    expose:
+      - "8001"
     environment:
-      - PYTHONUNBUFFERED=1
+      PYTHONUNBUFFERED: "1"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test:         ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval:     10s
+      timeout:      5s
+      retries:      3
       start_period: 15s
     restart: unless-stopped
+
+volumes:
+  postgres_data:

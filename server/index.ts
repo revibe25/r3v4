@@ -43,6 +43,8 @@ import Stripe                 from 'stripe';
 import { createContext }      from './trpc';
 import { appRouter }          from './procedures';
 import { authRouter }         from './routes/auth';
+import { internalRouter }     from './routes/internal';
+import { logger }             from './utils/logger';
 import { trpcAuth }            from './middleware/auth';
 import { attachCollabServer, getRoomStats } from './ws/collab';
 import { db }                 from './db';
@@ -244,6 +246,7 @@ app.use(trpcAuth);
 // ── Auth REST routes ──────────────────────────────────────────────────────────
 
 app.use('/api/auth', authRouter);
+app.use('/api/internal', internalRouter);
 
 // ── tRPC adapter ──────────────────────────────────────────────────────────────
 
@@ -297,15 +300,16 @@ const httpServer = createServer(app);
 attachCollabServer(httpServer);
 
 httpServer.listen(PORT, () => {
-  console.log(`[R3 v4] Server listening on :${PORT}`);
-  console.log(`[R3 v4] tRPC at /trpc`);
-  console.log(`[R3 v4] WebSocket collab at /ws`);
-  console.log(`[R3 v4] Auth at /api/auth`);
+  logger.info('[R3 v4] Server listening', { port: PORT });
+  logger.info('[R3 v4] tRPC at /api/trpc');
+  logger.info('[R3 v4] WebSocket collab at /ws');
+  logger.info('[R3 v4] Auth at /api/auth');
+  logger.info('[R3 v4] Internal at /api/internal');
 });
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('[R3 v4] SIGTERM received — shutting down gracefully');
+  logger.info('[R3 v4] SIGTERM received — shutting down gracefully');
   httpServer.close(() => process.exit(0));
 });
 
