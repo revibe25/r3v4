@@ -75,6 +75,7 @@ import loopProjectRoutes       from './server/routes/loopProjects';
 import midiRoutes              from './server/routes/midi';
 import { loopStationLimiter }  from './server/middleware/rateLimit';
 import { attachCollabServer, getRoomStats } from './server/ws/collab';
+import { internalRouter } from './server/routes/internal';
 import { ensureDir }           from './server/utils/fileUtils';
 
 const app = express();
@@ -156,6 +157,7 @@ async function main(): Promise<void> {
   //   loops.ts        → /save-loop  /loops  /loops/:id
   //   loopProjects.ts → /loopproject/save  /loopproject/:id  /loopprojects
   //   midi.ts         → /midi/mappings
+  app.use('/api/internal', internalRouter);
   app.use('/api', loopStationLimiter, loopStationAuth, loopRoutes);
   app.use('/api', loopStationLimiter, loopStationAuth, loopProjectRoutes);
   app.use('/api', loopStationLimiter, loopStationAuth, midiRoutes);
