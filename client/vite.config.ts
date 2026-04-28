@@ -124,8 +124,6 @@ export default defineConfig(({ mode }): UserConfig => {
     plugins: [
       react({
         jsxRuntime: 'automatic',
-        // Only enable React Fast Refresh on dev; avoids a tiny prod overhead.
-        fastRefresh: isDev,
       }),
     ],
 
@@ -148,7 +146,6 @@ export default defineConfig(({ mode }): UserConfig => {
         protocol:   'ws',
         host:       'localhost',
         port:       5174,
-        clientPort: 5173,
       },
 
       proxy: {
@@ -189,7 +186,10 @@ export default defineConfig(({ mode }): UserConfig => {
       sourcemap: isProd ? 'hidden' : true,
 
       // Target modern browsers — avoids unnecessary legacy polyfills.
-      target: ['es2020', 'chrome90', 'firefox88', 'safari14'],
+      // es2022 required: @floating-ui/core ≥1.7 ships native ES2022 syntax
+      // that esbuild cannot downcompile to es2020. All supported Chromebook
+      // Chrome versions (≥104) fully support ES2022.
+      target: ['es2022', 'chrome104', 'firefox102', 'safari15.4'],
 
       // Raise the warning threshold slightly — audio apps legitimately have
       // large chunks (tone.js alone is ~300 KB gzipped).
@@ -224,6 +224,11 @@ export default defineConfig(({ mode }): UserConfig => {
     // List every dep that would otherwise trigger re-optimization mid-session.
     // Notably excludes audio libs — they load lazily and don't need pre-bundling.
     optimizeDeps: {
+      // Override the dev pre-bundler target. Vite's internal default (~chrome87)
+      // cannot compile @floating-ui/core ≥1.7 which ships ES2022 destructuring.
+      esbuildOptions: {
+        target: 'es2022',
+      },
       include: [
         'react',
         'react-dom',

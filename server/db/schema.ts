@@ -1,25 +1,16 @@
 /**
  * server/db/schema.ts
  *
- * ROOT FIX — Bug 4 (two subscriptions tables):
- * This file previously defined its own `subscriptions` table with a schema that
- * diverged from shared/schema-subscription.ts on every important billing column:
- *   - Old: `plan text`, no stripeCustomerId, stripeSubscriptionId NOT NULL UNIQUE
- *   - New (canonical): `tier enum`, full Stripe billing columns, userId UNIQUE
- * Both targeted the same DB table name "subscriptions", guaranteeing migration
- * conflicts and runtime inconsistency.
+ * ROOT FIX — Bug 4 (two subscriptions tables): removed local subscriptions definition.
+ * ROOT FIX — Bug 3 (users.tier default mismatch): changed default "free" → "explorer".
  *
- * Fix: the local `subscriptions` table definition is removed entirely.
- * stripe-subscription.ts already imports from shared/schema-subscription.ts
- * (the authoritative definition). Callers that previously imported Subscription
- * types from here now import from shared/schema-subscription.ts directly.
- *
- * ROOT FIX — Bug 3 (users.tier default mismatch):
- * `users.tier` defaulted to "free", which is not a valid SubscriptionTier
- * ("explorer" | "creator" | "pro_artist"). Changed to "explorer" for
- * consistency. The canonical tier lives in the subscriptions table; users.tier
- * is a denormalized cache — if you want to remove the duplication entirely,
- * drop this column and always read from subscriptions.
+ * Security patches applied (Mythos audit 2026-04-22):
+ *   F-05 — Added .notNull() to projects.userId and sessions.userId.
+ *           Both columns previously lacked NOT NULL, meaning any code path that
+ *           omits userId on insert silently creates an unowned (orphaned) record.
+ *           The router layer always sets userId, but schema-level enforcement is
+ *           the last line of defence. A migration is required: see
+ *           migrations/0001_add_not_null_ownership.sql
  */
 
 import { sql } from "drizzle-orm";
@@ -72,7 +63,9 @@ export const usage = pgTable("usage", {
 // ==================== SESSIONS ====================
 export const sessions = pgTable("sessions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  // F-05 FIX: Added .notNull(). Sessions must always belong to a user.
+  // Run migration 0001_add_not_null_ownership.sql before deploying this change.
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   name: text("name").notNull(),
   bpm: integer("bpm").notNull().default(120),
   fx: jsonb("fx").notNull().default(sql`'{}'::jsonb`).$type<Record<string, unknown>>(),
@@ -88,7 +81,9 @@ export const sessions = pgTable("sessions", {
 // ==================== PROJECTS ====================
 export const projects = pgTable("projects", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  // F-05 FIX: Added .notNull(). Projects must always belong to a user.
+  // Run migration 0001_add_not_null_ownership.sql before deploying this change.
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   name: text("name").notNull(),
   description: text("description"),
   bpm: integer("bpm").notNull().default(120),
@@ -220,13 +215,13 @@ export const waveformEditsTable = pgTable("waveform_edits", {
 export const aiDecisionLog = pgTable("ai_decision_log", {
   id:                   text("id").primaryKey(),
   sessionId:            text("session_id").notNull(),
-  nodeId:               text("node_id").notNull(),          // 'aiMixEngine' | 'transitionGraph'
-  actionType:           text("action_type").notNull(),      // 'gain_adjust' | 'eq_suggest' | 'transition_generate' | 'conflict_flag'
+  nodeId:               text("node_id").notNull(),
+  actionType:           text("action_type").notNull(),
   trackId:              text("track_id"),
   inputConfidence:      real("input_confidence").notNull(),
   displayedConfidence:  real("displayed_confidence").notNull(),
   decision:             jsonb("decision").notNull(),
-  outcome:              text("outcome").notNull(),           // 'auto_applied' | 'accepted' | 'rejected' | 'ignored' | 'discarded'
+  outcome:              text("outcome").notNull(),
   latencyMs:            integer("latency_ms").notNull(),
   timestamp:            text("timestamp").notNull(),
 });

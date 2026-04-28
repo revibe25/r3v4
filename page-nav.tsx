@@ -2,7 +2,7 @@
  * client/src/components/page-nav.tsx
  * R3 v4 — global navigation bar.
  *
- * Design: acid-hardware strip — IBM Plex Mono, acid-lime accent (#a3e635),
+ * Design: acid-hardware strip — IBM Plex Mono, lime-green accent (#a3e635),
  * emissive active state, tier badge, per-item auth awareness.
  *
  * Key behaviours
@@ -22,7 +22,7 @@
 import { Link, useLocation } from 'wouter';
 import {
   Tag, LogIn, Music, Radio, Repeat2,
-  Plug, Settings, Shield, Layers, Users,
+  Settings, Shield, Layers, Users, Sliders, Plug,
 } from 'lucide-react';
 import { LogoutButton } from '@/components/logout-button';
 import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
@@ -34,14 +34,14 @@ import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
 export const NAV_HEIGHT_PX = 44;
 
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
-const NAV_HIDDEN_ON: string[] = ['/auth', '/login'];
+const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument', '/daw'];
 
 // ── Admin gate ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'earnestathepco@gmail.com';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
-  bg:        '#0d0d0d',
+  bg:        '#0c0c0c',
   border:    '#222',
   accent:    '#a3e635',
   accentDim: '#a3e63522',
@@ -66,7 +66,7 @@ const TIER_STYLE: Record<string, { color: string; border: string }> = {
 //   5. /loopstation — loop recorder console
 //   6. /multitrack  — multitrack DAW (MultiTrackPanel)
 //   7. /collab      — collaborative DAW pro (WaveLab)
-//   8. /vst         — plugin browser (power user)
+//   8. /mixer       — drag & drop mixer view (MultitrackView)
 //
 const PAGES = [
   { href: '/pricing',    label: 'Pricing',    icon: Tag,     authOnly: false, hideWhenAuthed: false },
@@ -76,6 +76,7 @@ const PAGES = [
   { href: '/loopstation',label: 'Loop',       icon: Repeat2, authOnly: true,  hideWhenAuthed: false },
   { href: '/multitrack', label: 'Multitrack', icon: Layers,  authOnly: true,  hideWhenAuthed: false },
   { href: '/collab',     label: 'Collab',     icon: Users,   authOnly: true,  hideWhenAuthed: false },
+  { href: '/mixer',      label: 'Mixer',      icon: Sliders, authOnly: true,  hideWhenAuthed: false },
   { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
 ] as const;
 

@@ -14,8 +14,8 @@
  * Usage in plain hooks (outside React):
  *   const result = await trpcVanilla.daw['project.save'].mutate({ ... });
  *
- * All procedures that require auth read the JWT from localStorage('r3_token').
- * The token is set by authStore.ts on login and cleared on logout.
+ * Auth is handled via httpOnly cookie ([wire§8]).
+ * No token is read from localStorage — credentials are sent automatically by the browser.
  */
 
 import {
@@ -75,10 +75,9 @@ export const trpcVanilla = createTRPCProxyClient<AppRouter>({
     }),
     httpBatchLink({
       url: API_URL,
+      headers: getAuthHeaders,
       fetch: (url: RequestInfo | URL, options?: RequestInit) =>
-
         fetch(url, { ...options, credentials: 'include' }),
-  headers: getAuthHeaders,
     }),
   ],
 });
@@ -100,10 +99,9 @@ export function TRPCProvider({ children }: TRPCProviderProps) {
         }),
         httpBatchLink({
           url: API_URL,
+          headers: getAuthHeaders,
           fetch: (url: RequestInfo | URL, options?: RequestInit) =>
-
             fetch(url, { ...options, credentials: 'include' }),
-  headers: getAuthHeaders,
           // Batch window: up to 10ms to collect concurrent requests
           maxURLLength: 2083,
         }),

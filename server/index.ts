@@ -10,7 +10,7 @@
  *   - Stripe webhook:    POST /api/webhooks/stripe  (raw body, sig verified)
  *   - Static file serve: server/static.ts in production
  *   - WebSocket collab:  ws@8.19.0 at /ws  (attachCollabServer)
- *   - Health check:      GET /health  →  { ok, uptime, rooms }
+ *   - Health check:      GET /health  →  { ok, uptime }
  *
  * All environment variables are read from process.env.
  * In Railway: set via the Railway dashboard.
@@ -27,6 +27,11 @@
  *   CLIENT_URL         — CORS allow-list (default: http://localhost:5173)
  *   JWT_EXPIRES        — default 7d
  *   DATABASE_SSL       — set to 'false' to disable SSL (local dev only)
+ *
+ * Security patches applied (Mythos audit 2026-04-22):
+ *   F-01 — Removed 'unsafe-inline' from CSP scriptSrc (was nullifying XSS protection)
+ *   F-06 — /health no longer leaks version, memory RSS, or collab room stats
+ *   F-07 — Removed duplicate app.use('/api/trpc', trpcAuth) (global trpcAuth is sufficient)
  */
 
 import 'dotenv/config';
@@ -46,7 +51,7 @@ import { authRouter }         from './routes/auth';
 import { internalRouter }     from './routes/internal';
 import { logger }             from './utils/logger';
 import { trpcAuth }            from './middleware/auth';
-import { attachCollabServer, getRoomStats } from './ws/collab';
+import { attachCollabServer } from './ws/collab';
 import { db }                 from './db';
 import { subscriptions }      from '../shared/schema';
 import { eq }                 from 'drizzle-orm';
@@ -71,7 +76,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc:  ["'self'"],
-        scriptSrc:   ["'self'", "'unsafe-inline'"],  // required by Vite HMR in dev
+        // F-01 FIX: 'unsafe-inline' removed — it nullified XSS protection entirely.
+        // If any inline scripts are required, replace with a per-request nonce:
+        //   scriptSrc: ["'self'", (req, res) => `'nonce-${res.locals.cspNonce}'`]
+        scriptSrc:   ["'self'"],
         connectSrc:  ["'self'", 'wss:', 'ws:'],      // WebSocket collab
         workerSrc:   ["'self'", 'blob:'],            // AudioWorklet
         mediaSrc:    ["'self'", 'blob:'],            // MediaRecorder
@@ -137,9 +145,6 @@ const stripe = STRIPE_SECRET
 
 /**
  * Resolves a Stripe price ID to its SubscriptionTier via strict equality.
- * ROOT FIX: Previous substring tier checks matched nothing — replaced with resolveTierFromPriceId
- * against opaque Stripe IDs (e.g. price_1ABC...) — every paid subscription
- * webhook silently fell through to 'explorer' (free tier).
  */
 function resolveTierFromPriceId(priceId: string): SubscriptionTier {
   if (!priceId) return 'explorer';
@@ -184,7 +189,6 @@ app.post(
         case 'customer.subscription.updated': {
           const sub = event.data.object as Stripe.Subscription;
           const customerId = sub.customer as string;
-          // Resolve user by Stripe customer ID stored in subscriptions table
           const [existing] = await db
             .select({ userId: subscriptions.userId })
             .from(subscriptions)
@@ -224,12 +228,10 @@ app.post(
         }
 
         default:
-          // Unhandled event type — not an error
           break;
       }
     } catch (err) {
       console.error('[stripe/webhook] Handler error:', (err as Error).message);
-      // Return 200 to prevent Stripe from retrying — log the failure instead
     }
 
     res.json({ received: true });
@@ -240,7 +242,10 @@ app.post(
 
 app.use(express.json({ limit: '2mb' }));
 
-// Global JWT middleware
+// Global JWT middleware — populates req.user from Bearer token.
+// F-07 FIX: this single global use is sufficient; the duplicate
+// app.use('/api/trpc', trpcAuth) that previously appeared before
+// createExpressMiddleware has been removed.
 app.use(trpcAuth);
 
 // ── Auth REST routes ──────────────────────────────────────────────────────────
@@ -250,15 +255,12 @@ app.use('/api/internal', internalRouter);
 
 // ── tRPC adapter ──────────────────────────────────────────────────────────────
 
-// trpcAuth populates req.user from Bearer token — must precede createContext
-app.use('/api/trpc', trpcAuth);
 app.use(
   '/api/trpc',
   createExpressMiddleware({
     router:        appRouter,
     createContext,
     onError({ path, error }: { path: string | undefined; error: { code: string; message: string } }) {
-      // Only log unexpected errors (not input validation or auth failures)
       if (error.code !== 'BAD_REQUEST' && error.code !== 'UNAUTHORIZED' && error.code !== 'FORBIDDEN') {
         console.error(`[tRPC] /${path} → ${error.message}`);
       }
@@ -268,14 +270,14 @@ app.use(
 
 // ── Health check ──────────────────────────────────────────────────────────────
 
+// F-06 FIX: stripped version, memory RSS, and collab room stats.
+// Version fingerprinting enables N-day targeting; room stats are metadata
+// leakage about user activity. This endpoint is unauthenticated by design
+// (used by Railway health checks) so it must not reveal operational data.
 app.get('/health', (_req, res) => {
-  const rooms = getRoomStats();
   res.json({
-    ok:      true,
-    uptime:  Math.floor(process.uptime()),
-    memory:  process.memoryUsage().rss,
-    collab:  rooms,
-    version: process.env.npm_package_version ?? '4.0.0',
+    ok:     true,
+    uptime: Math.floor(process.uptime()),
   });
 });
 
@@ -296,7 +298,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 const httpServer = createServer(app);
 
-// Attach WebSocket collab server at /ws
 attachCollabServer(httpServer);
 
 httpServer.listen(PORT, () => {

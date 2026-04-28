@@ -26,6 +26,7 @@ interface Props {
   onHarmonyChange: (id: string, mode: HarmonyMode) => void;
   onReverbSend: (id: string, v: number) => void;
   onDelaySend: (id: string, v: number) => void;
+  onChorusSend: (id: string, v: number) => void;
   // FX knob callbacks (M-1)
   onPitchChange:  (id: string, semitones: number) => void;
   onFineChange:   (id: string, cents: number) => void;
@@ -307,7 +308,7 @@ const TrackPadInner: React.FC<Props> = ({
   onPress, onStop, onClear,
   onVolumeChange, onPanChange, onEQChange,
   onMuteToggle, onSoloToggle, onCueToggle,
-  onHarmonyChange, onReverbSend, onDelaySend,
+  onHarmonyChange, onReverbSend, onDelaySend, onChorusSend,
   onPitchChange, onFineChange, onChorusChange,
   onGateChange, onCompChange, onSatChange, onTrimChange,
 }) => {
@@ -539,6 +540,7 @@ const TrackPadInner: React.FC<Props> = ({
       <div style={{ padding: '5px 6px', borderBottom: '1px solid #0f0f0f', display: 'flex', flexDirection: 'column', gap: 4 }}>
         <SendStrip label="REV" value={track.reverbSend} color="#ff6b00" onChange={v => onReverbSend(track.id, v)} />
         <SendStrip label="DLY" value={track.delaySend}  color="#22d3ee" onChange={v => onDelaySend(track.id, v)} />
+        <SendStrip label="CHO" value={track.chorusSend ?? 0} color="#a855f7" onChange={v => onChorusSend(track.id, v)} />
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
           <span style={{ fontSize: 6, color: '#252525', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em', flexShrink: 0 }}>PAN</span>
           <div style={{ flex: 1, position: 'relative', height: 8, background: '#090909', border: '1px solid #141414', cursor: 'ew-resize' }}

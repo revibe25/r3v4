@@ -47,7 +47,6 @@ export type { Clip }    from './clip-store';
 
 // ── Transport ─────────────────────────────────────────────────────────────────
 // Single canonical export — removed the lowercase aliases.
-export { useTransportStore } from './transport-store';
 
 // ── Mixer ─────────────────────────────────────────────────────────────────────
 export { useMixerStore } from './mixer-store';
