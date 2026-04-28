@@ -97,7 +97,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         '/api/auth/login',
         { credential: email.trim().toLowerCase(), password },
       );
-      // [wire§8] removed — auth via httpOnly cookie
+      localStorage.setItem('token', token);
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -117,7 +117,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         '/api/auth/register',
         { email: emailNorm, username, password },
       );
-      // [wire§8] removed — auth via httpOnly cookie
+      localStorage.setItem('token', token);
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -127,7 +127,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // ── logout ─────────────────────────────────────────────────────────────────
   logout: () => {
-    // [wire§8] removed — auth via httpOnly cookie
+    localStorage.removeItem('token');
     set({ user: null, token: null, error: null });
   },
 
@@ -152,7 +152,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ token: stored, user, loading: false });
     } catch (err) {
       // Token expired or invalid — clear silently
-      // [wire§8] removed — auth via httpOnly cookie
+      localStorage.setItem('token', stored);
       set({ token: null, user: null, loading: false });
     }
   },

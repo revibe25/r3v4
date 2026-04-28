@@ -89,6 +89,7 @@ export const sessionMetricsRouter = router({
       outcome:             z.enum(["auto_applied","accepted","rejected","ignored","discarded"]),
       latencyMs:           z.number().int().min(0),
     }))
+    .output(z.string())
     .mutation(({ input }) => logAIDecision(input)),
 
   /** Update outcome of a previously logged decision */

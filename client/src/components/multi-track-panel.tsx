@@ -94,7 +94,7 @@ const AG_STYLES = `
 .ag-page-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: calc(100vh - var(--nav-h, 0px));
   overflow: hidden;
   background: var(--ag-black);
 }

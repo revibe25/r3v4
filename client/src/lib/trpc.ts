@@ -52,8 +52,8 @@ export const queryClient = new QueryClient({
 // ── Token helper ──────────────────────────────────────────────────────────────
 
 function getAuthHeaders(): Record<string, string> {
-  // [wire§8] removed — auth via httpOnly cookie
-  return {};
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 // ── API base URL ──────────────────────────────────────────────────────────────

@@ -1,3 +1,179 @@
+========================================
+ R3 FRONTEND AUDIT DUMP
+========================================
+Working Dir: /home/r3v/Stable
+
+🔍 CHECKING ENTRY POINTS
+
+⚠️  MISSING: index.html
+
+⚠️  MISSING: vite.config.ts
+
+⚠️  MISSING: vite.config.js
+
+🔍 CHECKING ROOT SRC
+
+⚠️  MISSING: src/main.tsx
+
+⚠️  MISSING: src/main.js
+
+⚠️  MISSING: src/index.ts
+
+⚠️  MISSING: src/App.tsx
+
+🔍 CHECKING CLIENT SRC (POTENTIAL DUPLICATE)
+
+----------------------------------------
+FILE: client/src/main.tsx
+REALPATH: /home/r3v/Stable/client/src/main.tsx
+----------------------------------------
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { registerAudioInitTriggers } from './utils/audio';
+import './index.css';
+
+// ── Audio gesture gate ────────────────────────────────────────────────────────
+// Attaches passive document listeners that resume the Web Audio context on
+// the first user interaction. Must run BEFORE render so the listener is active
+// before any component mounts. Does NOT create an AudioContext here.
+registerAudioInitTriggers();
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+----------------------------------------
+FILE: client/src/main.js
+REALPATH: /home/r3v/Stable/client/src/main.js
+----------------------------------------
+/**
+ * Client Entry Point
+ * Initializes audio and application
+ */
+
+import { attachAudioInitTriggers } from './audio-init.js';
+
+// Initialize audio on user gesture
+attachAudioInitTriggers();
+
+console.log('✓ R3 v4 client initialized');
+
+
+----------------------------------------
+FILE: client/src/index.ts
+REALPATH: /home/r3v/Stable/client/src/index.ts
+----------------------------------------
+/**
+ * client/src/index.css
+ *
+ * @config resolves the Tailwind build deadlock documented in the PRD.
+ * The explicit path tells PostCSS where to find tailwind.config.ts
+ * when the monorepo root and client/ roots differ.
+ *
+ * JetBrains Mono is loaded from Google Fonts as the primary monospace
+ * typeface matching the acid-techno hardware aesthetic.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+@config "../../tailwind.config.ts";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global resets ─────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #0a0a0a;
+  color: #e5e5e5;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar styling (dark, minimal) ──────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0d0d0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* ── Range input — vertical fader style ─────────────────────────────────────── */
+
+input[type='range'] {
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  background: #1e1e1e;
+  border-radius: 2px;
+}
+
+/* ── Select ──────────────────────────────────────────────────────────────────── */
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath fill='%23555' d='M4 5L0 0h8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 18px !important;
+  cursor: pointer;
+}
+
+/* ── Utility: emissive glow on accent elements ──────────────────────────────── */
+
+.emissive-amber {
+  box-shadow: 0 0 6px #f59e0b44, 0 0 12px #f59e0b22;
+}
+
+.emissive-cyan {
+  box-shadow: 0 0 6px #22d3ee44, 0 0 12px #22d3ee22;
+}
+
+----------------------------------------
+FILE: client/src/App.tsx
+REALPATH: /home/r3v/Stable/client/src/App.tsx
+----------------------------------------
 /**
  * client/src/App.tsx
  * R3 v4 — root router (Wouter + TRPCProvider + SubscriptionProvider)
@@ -230,14 +406,17 @@ export default function App() {
               </Route>
 
               {/* ── Admin ────────────────────────────────────────────────── */}
-              <Route path="/admin/agents">
-                <ProtectedRoute><AdminAgentSuitePage /></ProtectedRoute>
-              </Route>
               <Route path="/admin">
                 <ProtectedRoute><AdminPage /></ProtectedRoute>
               </Route>
+
               {/* ── 404 ──────────────────────────────────────────────────── */}
-              <Route component={NotFound} />
+              <Route path="/admin/agents">
+  <ProtectedRoute>
+    <AdminAgentSuitePage />
+  </ProtectedRoute>
+</Route>
+<Route component={NotFound} />
             </Switch>
           </div>
         </div>
@@ -246,3 +425,77 @@ export default function App() {
     </TRPCProvider>
   );
 }
+
+🔍 CHECKING AUDIO INIT
+
+⚠️  MISSING: src/audio-init.js
+
+🔍 CHECKING SESSION HOOK (CRITICAL)
+
+⚠️  MISSING: hooks/useSessionLifecycle.ts
+
+⚠️  MISSING: src/hooks/useSessionLifecycle.ts
+
+----------------------------------------
+FILE: client/hooks/useSessionLifecycle.ts
+REALPATH: /home/r3v/Stable/client/hooks/useSessionLifecycle.ts
+----------------------------------------
+import { useCallback } from "react";
+import { trpc } from "../utils/trpc";
+import { useSessionMetricsStore } from "../stores/session-metrics.store";
+
+interface UseSessionLifecycleOptions {
+  trackIds: string[];
+  bpm: number;
+}
+
+/**
+ * Wires play/stop transport actions to the session metrics tRPC layer.
+ * Attach onPlay to your play button and onStop to your stop button.
+ */
+export function useSessionLifecycle({ trackIds, bpm }: UseSessionLifecycleOptions) {
+  const { setSessionId, setActive, setSummary, sessionId } =
+    useSessionMetricsStore();
+
+  const startMutation = trpc.sessions.start.useMutation({
+    onSuccess: (data) => {
+      setSessionId(data.sessionId);
+      setActive(true);
+    },
+    onError: (err) => {
+      console.error("[SessionLifecycle] start failed:", err.message);
+    },
+  });
+
+  const stopMutation = trpc.sessions.stop.useMutation({
+    onSuccess: (data) => {
+      setSummary(data);
+      setActive(false);
+    },
+    onError: (err) => {
+      console.error("[SessionLifecycle] stop failed:", err.message);
+    },
+  });
+
+  const onPlay = useCallback(() => {
+    if (trackIds.length === 0) {
+      console.warn("[SessionLifecycle] onPlay called with no tracks — skipping");
+      return;
+    }
+    startMutation.mutate({ trackIds, bpm });
+  }, [trackIds, bpm, startMutation]);
+
+  const onStop = useCallback(() => {
+    if (!sessionId) {
+      console.warn("[SessionLifecycle] onStop called but no active sessionId — skipping");
+      return;
+    }
+    stopMutation.mutate({ sessionId });
+  }, [sessionId, stopMutation]);
+
+  return { onPlay, onStop };
+}
+
+
+🔍 CHECKING STORES
+
