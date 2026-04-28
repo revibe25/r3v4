@@ -3,6 +3,13 @@
 //
 // React hook that wraps AutoLevelPipeline and exposes a clean
 // API for the MixerWithAI / AILevelAssist components.
+//
+// aiDecisionLog wiring (PRD §15 demo gate):
+//   - accept(trackId) → write row with outcome "accepted"
+//   - reject(trackId) → write row with outcome "rejected"
+//   - Auto-apply (≥0.65 confidence) is NOT yet logged here — requires
+//     AutoLevelPipeline event-shape changes (P1 follow-up).
+// All writes guarded by sessionId from useSessionMetricsStore.
 // ─────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -16,6 +23,8 @@ import type {
 import type { PipelineNodeState } from '../../../packages/llpte-core/src/AutoLevelPipeline';
 import { AutoLevelPipeline } from '../../../packages/llpte-core/src/AutoLevelPipeline';
 import { TrackAnalyzer } from '../../../packages/llpte-signal/src/analyzers/TrackAnalyzer';
+import { trpc } from '@/lib/trpc';
+import { useSessionMetricsStore } from '../stores/session-metrics.store';
 
 // ── Public types ───────────────────────────────────────────────
 
@@ -63,6 +72,8 @@ const DEFAULT_STATS: AutoLevelSessionStats = {
   estimatedMinutesSaved:        0,
 };
 
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
 // ── Hook ───────────────────────────────────────────────────────
 
 export function useAutoLeveling(
@@ -80,6 +91,18 @@ export function useAutoLeveling(
   const [nodeState,           setNodeState]           = useState<PipelineNodeState>(DEFAULT_NODE_STATE);
   const [sessionStats,        setSessionStats]        = useState<AutoLevelSessionStats>(DEFAULT_STATS);
   const [latestRecommendation,setLatestRecommendation]= useState<AutoLevelRecommendation | null>(null);
+
+  // ── aiDecisionLog wiring ─────────────────────────────────────
+  // Refs sync state into the accept/reject closures without forcing them to
+  // re-create on every recommendation (which arrives at analysisHz, e.g. 30Hz).
+  // Stable callbacks prevent <AILevelAssist /> from re-rendering 30 times/sec.
+  const recordDecisionMut    = trpc.sessionMetrics.recordDecision.useMutation();
+  const recordDecisionMutRef = useRef(recordDecisionMut);
+  const latestRecRef         = useRef<AutoLevelRecommendation | null>(latestRecommendation);
+  const nodeStateRef         = useRef<PipelineNodeState>(nodeState);
+  recordDecisionMutRef.current = recordDecisionMut;
+  useEffect(() => { latestRecRef.current = latestRecommendation; }, [latestRecommendation]);
+  useEffect(() => { nodeStateRef.current = nodeState; },           [nodeState]);
 
   useEffect(() => {
     if (!audioContext || !masterAnalyser) return;
@@ -166,11 +189,69 @@ export function useAutoLeveling(
   const accept = useCallback((trackId: TrackId) => {
     pipelineRef.current?.acceptSuggestion(trackId);
     setSessionStats(s => ({ ...s, acceptedSuggestions: s.acceptedSuggestions + 1 }));
+
+    // Log to aiDecisionLog if a session is active.
+    // Reads sessionId via Zustand getState — no re-render dependency.
+    const sessionId = useSessionMetricsStore.getState().sessionId;
+    const rec       = latestRecRef.current;
+    if (sessionId && rec) {
+      const adj = rec.gainAdjustments.find(g => g.trackId === trackId);
+      if (adj) {
+        recordDecisionMutRef.current.mutate(
+          {
+            sessionId,
+            nodeId:              'aiMixEngine',
+            actionType:          'gain_adjust',
+            trackId,
+            inputConfidence:     clamp01(adj.confidence),
+            displayedConfidence: clamp01(adj.confidence),
+            decision: {
+              deltaDb:       adj.deltaDb,
+              confidence:    adj.confidence,
+              eqSuggestions: rec.eqSuggestions.filter(eq => eq.trackId === trackId),
+            },
+            outcome:   'accepted',
+            latencyMs: Math.max(0, Math.round(nodeStateRef.current.lastInferenceMs)),
+          },
+          { onError: (err: unknown) =>
+            console.error('[useAutoLeveling] accept log failed:', err)
+          }
+        );
+      }
+    }
   }, []);
 
   const reject = useCallback((trackId: TrackId) => {
     pipelineRef.current?.rejectSuggestion(trackId);
     setSessionStats(s => ({ ...s, rejectedSuggestions: s.rejectedSuggestions + 1 }));
+
+    const sessionId = useSessionMetricsStore.getState().sessionId;
+    const rec       = latestRecRef.current;
+    if (sessionId && rec) {
+      const adj = rec.gainAdjustments.find(g => g.trackId === trackId);
+      if (adj) {
+        recordDecisionMutRef.current.mutate(
+          {
+            sessionId,
+            nodeId:              'aiMixEngine',
+            actionType:          'gain_adjust',
+            trackId,
+            inputConfidence:     clamp01(adj.confidence),
+            displayedConfidence: clamp01(adj.confidence),
+            decision: {
+              deltaDb:       adj.deltaDb,
+              confidence:    adj.confidence,
+              eqSuggestions: rec.eqSuggestions.filter(eq => eq.trackId === trackId),
+            },
+            outcome:   'rejected',
+            latencyMs: Math.max(0, Math.round(nodeStateRef.current.lastInferenceMs)),
+          },
+          { onError: (err: unknown) =>
+            console.error('[useAutoLeveling] reject log failed:', err)
+          }
+        );
+      }
+    }
   }, []);
 
   const notifyFaderMove = useCallback((trackId: TrackId, newGainLinear: number) => {

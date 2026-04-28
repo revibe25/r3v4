@@ -318,7 +318,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         setStep(latest.step);
         setLastHit({ pad: latest.pad, vel: latest.vel, step: latest.step, id: ++hitIdRef.current });
 
-        const padMap = {};
+        const padMap: Record<number, number> = {};
         due.forEach(v => {
           padMap[v.pad] = v.vel;
           // ── Drive instrument.tsx audio engine + 3D stage ──────────────────

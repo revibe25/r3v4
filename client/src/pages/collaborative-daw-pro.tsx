@@ -1505,37 +1505,11 @@ export default function WaveLabProduction() {
 
               {/* Nav buttons */}
               <div className="ag-controls-block">
-                <Link href="/instrument" className="ag-nav-btn">
-                  🎹 Instrument
-                </Link>
-                <button
-                  className={`ag-nav-btn${transport === 'playing' ? ' active' : ''}`}
-                  onClick={() => actionRef.current.togglePlay()}
-                  title="Play / Pause (Space)"
-                >
-                  {transport === 'playing' ? '⏸ PAUSE' : '▶ PLAY'}
-                </button>
-                <button
-                  className="ag-nav-btn"
-                  onClick={() => actionRef.current.stopReset()}
-                  title="Stop (Esc)"
-                >
-                  ⏹ STOP
-                </button>
-                <button
-                  className={`ag-nav-btn rec-btn${transport === 'recording' ? ' armed' : ''}`}
-                  onClick={() => actionRef.current.record()}
-                  title="Record"
-                >
-                  ⏺ REC
-                </button>
-                <button
-                  className="ag-nav-btn"
-                  onClick={() => setShowSettings(true)}
-                  title="Settings"
-                >
-                  ⚙ CFG
-                </button>
+                <Link href="/daw"        className="ag-nav-btn">🎚 Studio</Link>
+                <Link href="/collab"     className="ag-nav-btn">⬡ Collab</Link>
+                <Link href="/multitrack" className="ag-nav-btn">📼 Multitrack</Link>
+                <Link href="/mixer"      className="ag-nav-btn">⟳ Mixer</Link>
+                <Link href="/instrument" className="ag-nav-btn">🎹 Instrument</Link>
               </div>
 
               <span className="ag-ghost-bpm" aria-hidden="true">{proj.bpm}</span>

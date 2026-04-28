@@ -91,7 +91,7 @@ const STYLES = `
 
 /* ── Shell ─────────────────────────────────────────────────────────────── */
 .ag-shell {
-  height: 100vh;
+  height: calc(100vh - var(--nav-h, 0px));
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1440,8 +1440,10 @@ export default function InstrumentPage({
               </span>
 
               <div className="ag-controls-block">
-                <Link href="/multitrack" className="ag-nav-btn">🎚 DAW</Link>
-
+                <Link href="/daw"        className="ag-nav-btn">🎚 Studio</Link>
+                <Link href="/collab"     className="ag-nav-btn">⬡ Collab</Link>
+                <Link href="/multitrack" className="ag-nav-btn">📼 Multitrack</Link>
+                <Link href="/mixer"      className="ag-nav-btn">⟳ Mixer</Link>
               </div>
             </div>
             <HeaderControls

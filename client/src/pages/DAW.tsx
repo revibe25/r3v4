@@ -1642,7 +1642,7 @@ const DAW_AG_STYLES = `
   --ag-white:  #f0f0f0;
   --ag-rec:    #ef4444;
   --ag-cyan:   #22d3ee;
-  height: 100vh;
+  height: calc(100vh - var(--nav-h, 0px));
   overflow: hidden;
   display: flex;
   flex-direction: column;
