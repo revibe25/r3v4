@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -36,6 +37,7 @@
     "config"
   ],
   "exclude": [
+    "src/setup.ts",
     "src/components/beat-intro (1).tsx",
     "src/index.ts",
     "src/audio/fx/vst-processor.worklet.ts",

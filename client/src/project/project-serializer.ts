@@ -6,26 +6,34 @@
 // IMPORTANT: This module reads from *stores* (plain serialisable data) only.
 // It never touches audio-engine objects (MixerChannel, GainNode …) because
 // those are runtime-only and cannot be JSON-stringified.
+//
+// FIX (2026-04-25): Was reading from useTransportStore which DAW.tsx never
+// writes to. Swapped to useDAWStore — the canonical live transport source.
+// Field renames: currentPosition→position, isLooping→loopEnabled.
+//
+// KNOWN UNIT GAP: TransportState.position is typed in seconds; useDAWStore.position
+// is in beats. Writing beats here for now — a real value beats always-zero.
+// Resolve when position model is unified. Tracked: TODO-position-unit.
 
 import { ProjectData } from "../../../shared/types/project.types";
-import { useMixerStore }     from "../store/mixer-store";
-import { useTransportStore } from "../store/transport-store";
+import { useMixerStore } from "../store/mixer-store";
+import { useDAWStore }   from "../hooks/useDAWStore";
 
 export function serializeProject(): ProjectData {
-  const mixer     = useMixerStore.getState();
-  const transport = useTransportStore.getState();
+  const mixer = useMixerStore.getState();
+  const daw   = useDAWStore.getState();
 
   return {
     version:   1,
     timestamp: Date.now(),
     transport: {
-      playing:   transport.playing,
-      recording: transport.recording,
-      bpm:       transport.bpm,           // ← flat property on store
-      position:  transport.currentPosition,
-      loop:      transport.isLooping,
-      loopStart: transport.loopStart,
-      loopEnd:   transport.loopEnd,
+      playing:   daw.playing,
+      recording: daw.recording,
+      bpm:       daw.bpm,
+      position:  daw.position,  // NOTE: beats, not seconds — see TODO-position-unit
+      loop:      daw.loopEnabled,
+      loopStart: daw.loopStart,
+      loopEnd:   daw.loopEnd,
     },
     tracks: Object.values(mixer.channels).map(ch => ({
       id:     ch.id,

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { count, eq } from "drizzle-orm";
+import { count, eq, and } from "drizzle-orm";
 import { router }             from "../trpc";
 import { protectedProcedure } from "../base-procedures";
 import { db }                 from "../db";
@@ -46,7 +46,7 @@ export const sessionsRouter = router({
       const [session] = await db
         .select({ timeSavedSeconds: sessionMetrics.timeSavedSeconds })
         .from(sessionMetrics)
-        .where(eq(sessionMetrics.id, input.sessionId))
+        .where(and(eq(sessionMetrics.id, input.sessionId), eq(sessionMetrics.userId, ctx.user.id)))
         .limit(1);
 
       if (!session) throw new Error(`Session not found: ${input.sessionId}`);

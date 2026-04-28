@@ -1,0 +1,77 @@
+// worklet-types/audio-worklet-global.d.ts
+//
+// Ambient declarations for the AudioWorklet processor global scope.
+//
+// TypeScript 6 removed AudioWorkletProcessor and related globals from
+// lib.webworker, placing them only in lib.dom. Worklet files must NOT use
+// lib.dom (DOM APIs are unavailable in the audio thread). This file restores
+// exactly the globals required by the three R3 v4 worklet processors.
+//
+// Included via tsconfig.worklet.json only — invisible to the main tsconfig
+// (which uses lib.dom via lib: ["DOM", "DOM.Iterable", "ESNext"]).
+// Prevents duplicate-identifier conflicts with lib.dom.d.ts at the cost of
+// zero source-file changes.
+
+// ─── Static parameter descriptor shape ───────────────────────────────────────
+
+interface AudioParamDescriptor {
+  name: string;
+  defaultValue?: number;
+  minValue?: number;
+  maxValue?: number;
+  automationRate?: 'a-rate' | 'k-rate';
+}
+
+// ─── AudioWorkletNode constructor options ─────────────────────────────────────
+// Passed through to AudioWorkletProcessor constructor as options.processorOptions
+
+interface AudioWorkletNodeOptions {
+  numberOfInputs?: number;
+  numberOfOutputs?: number;
+  outputChannelCount?: number[];
+  parameterData?: Record<string, number>;
+  processorOptions?: Record<string, unknown>;
+  channelCount?: number;
+  channelCountMode?: 'max' | 'clamped-max' | 'explicit';
+  channelInterpretation?: 'speakers' | 'discrete';
+}
+
+// ─── AudioWorkletProcessor base class ────────────────────────────────────────
+// MessagePort is declared in lib.webworker — no re-declaration needed.
+
+declare abstract class AudioWorkletProcessor {
+  /** Communication channel between the processor and the AudioWorkletNode. */
+  readonly port: MessagePort;
+  constructor(options?: AudioWorkletNodeOptions);
+  /**
+   * Called by the audio engine to process a block of audio.
+   * Return true to keep the processor alive; false to allow it to be collected.
+   */
+  process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>,
+  ): boolean;
+}
+
+// ─── AudioWorklet global scope ────────────────────────────────────────────────
+
+/**
+ * Registers a class derived from AudioWorkletProcessor under the given name
+ * so it can be instantiated via `new AudioWorkletNode(ctx, name)`.
+ */
+declare function registerProcessor(
+  name: string,
+  processorCtor: (new (options?: AudioWorkletNodeOptions) => AudioWorkletProcessor) & {
+    parameterDescriptors?: ReadonlyArray<AudioParamDescriptor>;
+  },
+): void;
+
+/** Current sample rate of the audio context (AudioWorkletGlobalScope global). */
+declare const sampleRate: number;
+
+/** Current playback time in seconds (AudioWorkletGlobalScope global). */
+declare const currentTime: number;
+
+/** Current sample frame index (AudioWorkletGlobalScope global). */
+declare const currentFrame: number;

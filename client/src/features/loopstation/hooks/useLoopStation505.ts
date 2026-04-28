@@ -39,6 +39,7 @@ export interface ExtendedTrackState {
   eq:            { low: number; mid: number; high: number };
   reverbSend:    number;
   delaySend:     number;
+  chorusSend:     number;
   overdubLayers: number;
   color:         string;
 }
@@ -83,6 +84,7 @@ const makeInitialState = (): LoopStationUIState => ({
     eq:            { low: 0, mid: 0, high: 0 },
     reverbSend:    0,
     delaySend:     0,
+    chorusSend:     0,
     overdubLayers: 0,
     color:         TRACK_COLORS[i],
   })),
@@ -489,6 +491,10 @@ export function useLoopStation505() {
     if (resonance !== undefined) getLoopEngine().setFilterResonance(resonance);
     setFX(prev => ({ ...prev, filterFreq: freq, ...(resonance !== undefined ? { filterResonance: resonance } : {}) }));
   }, []);
+  const setFilterType = useCallback((type: BiquadFilterType) => {
+    getLoopEngine().setFilterType(type);
+    setFX(prev => ({ ...prev, filterType: type }));
+  }, []);
 
   const setDelay = useCallback((time: string, feedback: number) => {
     getLoopEngine().setGlobalDelay(time, feedback);
@@ -620,6 +626,50 @@ export function useLoopStation505() {
 
   // ── Return API ────────────────────────────────────────────────────────────
 
+
+  const setChorusSend = useCallback((trackId: string, amount: number) => {
+    getLoopEngine().setChorusSend(idxFromId(trackId), amount);
+    setState(prev => ({
+      ...prev,
+      tracks: prev.tracks.map(t =>
+        t.id === trackId ? { ...t, chorusSend: amount } : t
+      ),
+    }));
+  }, []);
+
+
+
+  // ── MIDI clock output ─────────────────────────────────────────────────────
+  const [midiClockEnabled, setMidiClockEnabled] = useState(false);
+  const toggleMidiClock = useCallback(() => {
+    setMidiClockEnabled(prev => {
+      const next = !prev;
+      getLoopEngine().setMidiClockOutput(next);
+      return next;
+    });
+  }, []);
+
+  // ── MIDI input ────────────────────────────────────────────────────────────
+  const [midiInputEnabled, setMidiInputEnabled_state] = useState(false);
+  const [midiInputs, setMidiInputs] = useState<string[]>([]);
+
+  const toggleMidiInput = useCallback(() => {
+    setMidiInputEnabled_state(prev => {
+      const next = !prev;
+      getLoopEngine().setMidiInputEnabled(next);
+      if (next) {
+        setMidiInputs(getLoopEngine().getMidiInputs());
+      }
+      return next;
+    });
+  }, []);
+
+  // selectMidiInput takes an index (confirmed: engine signature is index: number)
+  const selectMidiInputByIndex = useCallback((index: number) => {
+    getLoopEngine().selectMidiInput(index);
+  }, []);
+
+
   return {
     state,
     fx,
@@ -627,6 +677,11 @@ export function useLoopStation505() {
     isError,
     errorMessage,
     midiSync,
+    midiInputEnabled,
+    midiInputs,
+    toggleMidiInput,
+    toggleMidiClock,
+    selectMidiInputByIndex,
     scenes,
     activeScene,
     canUndo,
@@ -657,6 +712,7 @@ export function useLoopStation505() {
     setHarmonyMode,
     setReverbSend,
     setDelaySend,
+    setChorusSend,
     setMasterVolume,
 
     // Tempo
@@ -669,6 +725,7 @@ export function useLoopStation505() {
 
     // FX
     setFilter,
+    setFilterType,
     setDelay,
     setReverb,
     setCompressor,

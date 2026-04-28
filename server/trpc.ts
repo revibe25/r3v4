@@ -1,4 +1,3 @@
-
 /**
  * server/trpc.ts
  *
@@ -13,31 +12,12 @@
  *          the full middleware chain to every protectedProcedure handler.
  * Fix D  — Removed duplicate protectedProcedure export from this file.
  *
- * ROOT CAUSE (duplicate protectedProcedure):
- * This file exported `protectedProcedure = publicProc.use(requireAuth)` while
- * procedures.ts exported the full chain `publicProc.use(requireAuth).use(attachSubscription)`.
- * Any router importing from trpc.ts instead of procedures.ts would silently
- * skip attachSubscription — ctx.subscription would be undefined in handlers
- * that depend on it (requireTier, requireFeature, checkAiTransitionLimit).
- * Fix: protectedProcedure is exported ONLY from procedures.ts.
- * requireAuth remains exported here so procedures.ts can import it without
- * creating a circular dependency.
- *
- * ROOT CAUSE (ctx.subscription missing):
- * feature-gate.ts calls `ctx.subscription?.tier` in three middlewares. TRPCContext
- * never declared a subscription field. TypeScript rejected every access. Adding
- * it here as `UserSubscription | null | undefined` resolves all feature-gate errors.
- *
- * ROOT CAUSE (ctx.user narrowing):
- * requireAuth throws UNAUTHORIZED when user is absent but the return type of
- * `next({ ctx: { ...ctx, user: ctx.user } })` was still TRPCContext with
- * `user?: AuthPayload`. TypeScript saw every downstream ctx.user as possibly
- * undefined. The fix: cast to AuthenticatedContext in the next() call.
- *
- * WHY AuthenticatedContext IS CORRECT:
- * Omit<TRPCContext, 'user'> & { user: AuthPayload } replaces the optional
- * user field with a required one. Any procedure chained after requireAuth
- * receives this type, and ctx.user.id compiles without '!' assertions.
+ * Security patches applied (Mythos audit 2026-04-22):
+ *   C-06 — Removed dead `JWT_SECRET` constant. It was never used (auth.ts
+ *           has its own SECRET) but the inconsistent fallback string
+ *           ('dev-secret-change-in-production' vs auth.ts's longer fallback)
+ *           was a maintenance hazard — a future refactor could accidentally
+ *           use this weaker constant for JWT verification.
  */
 
 /// <reference path="./types/express.d.ts" />
@@ -51,8 +31,6 @@ import {
   mixerEngine,
   djEngine,
 } from './lib/engine-stubs';
-
-const JWT_SECRET = process.env.JWT_SECRET ?? 'dev-secret-change-in-production';
 
 // Express.Request.user is declared in server/types/express.d.ts — single source.
 // Duplicate augmentation removed to prevent TS2717 (conflicting declarations).
@@ -74,6 +52,11 @@ export interface TRPCContext {
    * Required by checkAiTransitionLimit to scope per-session counts.
    * Client contract: set once per recording/mix session, reuse for all
    * AI transition calls. Example: X-Session-Id: <uuid>
+   *
+   * NOTE (SECURITY.md C-03): this value is fully client-controlled.
+   * An authenticated user can rotate this header on every request to
+   * bypass per-session AI transition limits. See SECURITY.md for the
+   * fix plan (server-side session binding or userId-only scoping).
    */
   sessionId: string | undefined;
   /** Audio mixer engine — stub implementation */
@@ -125,14 +108,10 @@ export const requireAuth = middleware(({ ctx, next }) => {
     });
   }
   // Cast to AuthenticatedContext — user is guaranteed non-null after the throw above.
-  // This propagates the narrowed type through the entire subsequent middleware chain.
   return next({ ctx: ctx as unknown as AuthenticatedContext });
 });
 
 // ── protectedProcedure is NOT exported from this file ─────────────────────────
-// The single canonical definition is in procedures.ts:
+// The single canonical definition is in base-procedures.ts:
 //   publicProc.use(requireAuth).use(attachSubscription)
-// Exporting it here (requireAuth only) created two divergent definitions —
-// any router that imported from trpc.ts instead of procedures.ts silently
-// skipped attachSubscription. All routers must import from procedures.ts.
 export const publicProcedure = t.procedure;

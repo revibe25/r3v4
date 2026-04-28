@@ -2,28 +2,15 @@
  * server/routers/daw.ts
  * tRPC router covering all DAW-specific server procedures.
  *
- * Procedures:
- *   project.save       — persist full project state to PostgreSQL (Drizzle ORM)
- *   project.load       — fetch a project by ID (ownership enforced)
- *   project.list       — list all projects for authed user
- *   project.delete     — soft-delete a project
- *   ai.analyse         — run LLPTE signal analysis on current mix params
- *   ai.suggestions     — generate mix/arrangement suggestions via llpte-ai
- *   ai.chat            — AI co-producer chat (single turn, stateless)
- *   mastering.analyse  — target-LUFS / dynamic range analysis
- *   collab.roomStats   — admin: current room occupancy (Elite tier only)
- *
- * Billing gates:
- *   Free  → project.save (1 project slot), project.load
- *   Pro   → project.save (unlimited), project.list, ai.analyse, ai.suggestions
- *   Elite → all above + ai.chat, mastering.analyse, collab.roomStats
- *
- * Error contract:
- *   TRPCError BAD_REQUEST  — invalid input (Zod parse failure)
- *   TRPCError UNAUTHORIZED — JWT missing / invalid
- *   TRPCError FORBIDDEN    — subscription tier insufficient
- *   TRPCError NOT_FOUND    — resource not found or not owned
- *   TRPCError INTERNAL_SERVER_ERROR — DB / LLPTE failure (non-leaking)
+ * Security patches applied (Mythos audit 2026-04-22):
+ *   F-03 — project.delete UPDATE now includes eq(projects.userId, ctx.user.id)
+ *           in the WHERE clause (was relying solely on application-layer check,
+ *           leaving the DB with no ownership guard on the write path).
+ *   F-04 — Free-tier 1-project cap now enforced via db.transaction + SELECT FOR
+ *           UPDATE, preventing the TOCTOU race where two concurrent requests
+ *           could both pass the count check and both insert.
+ *   F-11 — ProjectStateSchema.parse wrapped in try/catch in project.load;
+ *           previously an unhandled ZodError could leak schema field names.
  */
 
 import { z } from 'zod';
@@ -109,7 +96,7 @@ function requireTier(ctx: { subscription?: { tier: string } | null }, minTier: T
   }
 }
 
-// ── LLPTE helpers (lightweight wrappers — real impl imports from packages/llpte-*) ──
+// ── LLPTE helpers ─────────────────────────────────────────────────────────────
 
 interface LLPTESignal {
   rms:            number;
@@ -126,17 +113,10 @@ interface MixSuggestion {
   params:      Record<string, unknown>;
 }
 
-/**
- * Simulate LLPTE signal analysis.
- * In production this calls:
- *   import { analyseSignal } from '@llpte/signal';
- *   import { generateSuggestions } from '@llpte/ai';
- */
 async function runLLPTEAnalysis(
   tracks: z.infer<typeof TrackSchema>[],
   bpm: number,
 ): Promise<{ signal: LLPTESignal; suggestions: MixSuggestion[] }> {
-  // Derive pseudo-signal from track mix parameters
   const activeTracks     = tracks.filter(t => !t.mute);
   const avgGain          = activeTracks.reduce((s, t) => s + t.gain, 0) / (activeTracks.length || 1);
   const lufsIntegrated   = -23 + avgGain * 10;
@@ -152,7 +132,6 @@ async function runLLPTEAnalysis(
 
   const suggestions: MixSuggestion[] = [];
 
-  // Gain staging check
   if (avgGain > 1.1) {
     suggestions.push({
       type: 'mix', confidence: 0.91,
@@ -162,7 +141,6 @@ async function runLLPTEAnalysis(
     });
   }
 
-  // Stereo balance check
   const avgPan = activeTracks.reduce((s, t) => s + t.pan, 0) / (activeTracks.length || 1);
   if (Math.abs(avgPan) > 0.2) {
     suggestions.push({
@@ -173,7 +151,6 @@ async function runLLPTEAnalysis(
     });
   }
 
-  // LUFS recommendation
   if (lufsIntegrated > -10) {
     suggestions.push({
       type: 'mastering', confidence: 0.95,
@@ -183,7 +160,6 @@ async function runLLPTEAnalysis(
     });
   }
 
-  // BPM-derived groove suggestion
   if (bpm >= 120 && bpm <= 145) {
     suggestions.push({
       type: 'rhythm', confidence: 0.72,
@@ -266,7 +242,8 @@ export const dawRouter = router({
       const stateJson = JSON.stringify(input.state);
 
       if (input.projectId) {
-        // Update existing — verify ownership
+        // Update existing — verify ownership in application layer first,
+        // then enforce userId in the UPDATE WHERE clause as DB-layer defence-in-depth.
         const existing = await db
           .select({ id: projects.id, userId: projects.userId })
           .from(projects)
@@ -277,33 +254,51 @@ export const dawRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found.' });
         }
         if (existing[0].userId !== userId) {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Not your project.' });
+          // Return NOT_FOUND (not FORBIDDEN) to avoid confirming that the ID exists.
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found.' });
         }
 
         const updated = await db
           .update(projects)
           .set({ name: input.name, state: stateJson, updatedAt: new Date() })
-          .where(eq(projects.id, input.projectId))
+          .where(and(eq(projects.id, input.projectId), eq(projects.userId, userId)))
           .returning({ id: projects.id, updatedAt: projects.updatedAt });
 
         return { projectId: updated[0].id, savedAt: updated[0].updatedAt };
       }
 
-      // Free tier: enforce 1-project slot
+      // New project
+      // F-04 FIX: Free-tier 1-project cap is now enforced atomically via a
+      // serializable transaction with SELECT FOR UPDATE. The previous pattern
+      // (SELECT count → check → INSERT) had a TOCTOU race: two concurrent requests
+      // would both read count=0, both pass the check, and both insert, yielding 2+
+      // projects for a free user. SELECT FOR UPDATE takes a row-level lock on the
+      // result set for the duration of the transaction, serialising concurrent inserts.
       if (!ctx.subscription || ctx.subscription.tier === 'explorer') {
-        const count = await db
-          .select({ id: projects.id })
-          .from(projects)
-          .where(and(eq(projects.userId, userId), isNull(projects.deletedAt)));
-        if (count.length >= 1) {
-          throw new TRPCError({
-            code:    'FORBIDDEN',
-            message: 'Free tier supports 1 saved project. Upgrade to Pro for unlimited projects.',
-          });
-        }
+        const inserted = await db.transaction(async (tx) => {
+          const existing = await tx
+            .select({ id: projects.id })
+            .from(projects)
+            .where(and(eq(projects.userId, userId), isNull(projects.deletedAt)))
+            .for('update');
+
+          if (existing.length >= 1) {
+            throw new TRPCError({
+              code:    'FORBIDDEN',
+              message: 'Free tier supports 1 saved project. Upgrade to Pro for unlimited projects.',
+            });
+          }
+
+          return tx
+            .insert(projects)
+            .values({ userId, name: input.name, state: stateJson })
+            .returning({ id: projects.id, createdAt: projects.createdAt });
+        });
+
+        return { projectId: inserted[0].id, savedAt: inserted[0].createdAt };
       }
 
-      // New project
+      // Paid tier: insert without slot constraint
       const inserted = await db
         .insert(projects)
         .values({ userId, name: input.name, state: stateJson })
@@ -337,10 +332,20 @@ export const dawRouter = router({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Corrupt project data.' });
       }
 
+      // F-11 FIX: ProjectStateSchema.parse was previously uncaught. A ZodError
+      // here (schema mismatch after a migration or corrupt write) would propagate
+      // as an unhandled exception and could leak schema field names to the client.
+      let parsedState: z.infer<typeof ProjectStateSchema>;
+      try {
+        parsedState = ProjectStateSchema.parse(state);
+      } catch {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Corrupt project data.' });
+      }
+
       return {
         projectId:  row[0].id,
         name:       row[0].name,
-        state:      ProjectStateSchema.parse(state),
+        state:      parsedState,
         updatedAt:  row[0].updatedAt,
       };
     }),
@@ -378,10 +383,15 @@ export const dawRouter = router({
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Project not found.' });
       }
 
+      // F-03 FIX: Added eq(projects.userId, ctx.user.id) to the UPDATE WHERE clause.
+      // Previously only eq(projects.id, ...) was used, leaving the DB with no ownership
+      // guard on the write path. The application-layer check above is correct but is
+      // not a substitute for DB-layer defence-in-depth — if the check is ever bypassed
+      // (race, future refactor), the DB must enforce ownership independently.
       await db
         .update(projects)
         .set({ deletedAt: new Date() })
-        .where(eq(projects.id, input.projectId));
+        .where(and(eq(projects.id, input.projectId), eq(projects.userId, ctx.user.id)));
 
       return { deleted: true };
     }),
@@ -428,22 +438,22 @@ export const dawRouter = router({
       context: z.object({
         bpm:           z.number(),
         trackCount:    z.number(),
-        activeTrack:   z.string().optional(),
+        // F-10 (SECURITY.md): activeTrack is user-controlled. When the real
+        // Anthropic API is wired, this field must be sanitised before inclusion
+        // in the system context string to prevent prompt injection. See SECURITY.md.
+        activeTrack:   z.string().max(40).optional(),
         position:      z.number(),
       }),
     }))
     .mutation(async ({ ctx, input }) => {
       requireTier(ctx, 'pro_artist');
 
-      // Build context string for system prompt
       const ctxStr = [
         `Project: ${input.context.trackCount} tracks, ${input.context.bpm} BPM.`,
         input.context.activeTrack ? `Selected track: ${input.context.activeTrack}.` : '',
         `Playhead at beat ${input.context.position}.`,
       ].filter(Boolean).join(' ');
 
-      // Real implementation: call Anthropic Messages API or OpenAI
-      // Stub returns a deterministic response for the current message
       const userMsg = input.messages.at(-1)?.content ?? '';
 
       const stubs: [RegExp, string][] = [

@@ -253,6 +253,11 @@ export type EngineEventMap = {
   transportPause:    [];
   midiClockStart:    [];
   midiClockStop:     [];
+  // MIDI input events (added 2026-04-25)
+  midiNoteOn:        [trackIndex: number, note: number, velocity: number];
+  midiNoteOff:       [trackIndex: number, note: number];
+  midiCC:            [cc: number, value: number];
+  midiInputEnabled:  [enabled: boolean];
   beatRepeatStart:   [trackIndex: number];
   beatRepeatStop:    [trackIndex: number];
   multibandEnabled:  [enabled: boolean];
@@ -326,7 +331,24 @@ class LoopEngine {
   private _quantMode: QuantMode = '1m';
   private _timeSignature: TimeSignature = '4/4';
   private _midiOutput: MIDIOutput | null = null;
+  private _midiInputPort: MIDIInput | undefined = undefined;
+  private _midiInputEnabled = false;
+  private _midiAccess: MIDIAccess | undefined = undefined;
   private _midiClockScheduleId = -1;
+
+  // ── MIDI Input (added 2026-04-25) ──────────────────────────────────────────
+  private _midiInput:        MIDIInput | null = null;
+  // Default note map: C3–G3 (MIDI 60–64) → tracks 0–4.
+  // Configurable via setMidiNoteMap().
+  private _midiNoteMap: Record<number, number> = {
+    60: 0,  // C3  → track 1
+    62: 1,  // D3  → track 2
+    64: 2,  // E3  → track 3
+    65: 3,  // F3  → track 4
+    67: 4,  // G3  → track 5
+  };
+  // CC-number → normalised-value (0..1) handler. Set via setMidiCCHandler().
+  private _midiCCHandlers: Record<number, (v: number) => void> = {};
 
   // LFOs
   private _lfos: LFOState[] = [];
@@ -841,6 +863,17 @@ class LoopEngine {
       const access  = await navigator.requestMIDIAccess({ sysex: false });
       const outputs = Array.from(access.outputs.values());
       if (outputs.length) this._midiOutput = outputs[0];
+
+      // ── MIDI Input capture (added 2026-04-25) ───────────────────────────
+      this._midiAccess = access;
+      const inputs = Array.from(access.inputs.values());
+      if (inputs.length) {
+        this._midiInput = inputs[0];
+        // setMidiInputEnabled(true) may have been called before MIDI was ready
+        if (this._midiInputEnabled) {
+          this._midiInput.onmidimessage = this._onMidiMessage.bind(this);
+        }
+      }
     } catch { /* no MIDI access */ }
   }
 
@@ -861,6 +894,113 @@ class LoopEngine {
       }
       this._midiOutput?.send([0xFC]);
       this.emit('midiClockStop');
+    }
+  }
+
+  // ── MIDI input handler (added 2026-04-25) ──────────────────────────────────
+
+  private _onMidiMessage(e: MIDIMessageEvent): void {
+    const data = e.data;
+    if (!data || data.length < 1) return;
+    const status = data[0];
+    const type   = status & 0xF0;
+    const note   = data[1] ?? 0;
+    const vel    = data[2] ?? 0;
+
+    // ── System real-time transport bytes ──────────────────────────────────
+    if (status === 0xFA) { this.startTransport(); this.emit('transportStart'); return; }
+    if (status === 0xFC) { this.stopTransport();  this.emit('transportStop');  return; }
+    if (status === 0xFB) { this.startTransport(); this.emit('transportStart'); return; } // continue
+
+    // ── Note On ───────────────────────────────────────────────────────────
+    if (type === 0x90 && vel > 0) {
+      const trackIdx = this._midiNoteMap[note];
+      if (trackIdx !== undefined) this.emit('midiNoteOn', trackIdx, note, vel);
+      return;
+    }
+
+    // ── Note Off (status 0x80, or Note On with vel=0) ─────────────────────
+    if (type === 0x80 || (type === 0x90 && vel === 0)) {
+      const trackIdx = this._midiNoteMap[note];
+      if (trackIdx !== undefined) this.emit('midiNoteOff', trackIdx, note);
+      return;
+    }
+
+    // ── Control Change ────────────────────────────────────────────────────
+    if (type === 0xB0) {
+      const norm = vel / 127;
+      this.emit('midiCC', note, vel);
+      // Custom handler takes priority
+      const handler = this._midiCCHandlers[note];
+      if (handler) { handler(norm); return; }
+      // Default CC map — uses confirmed public Tone.js node properties
+      switch (note) {
+        case 1:   // Mod wheel → global filter cutoff
+        case 74:  // Filter cutoff (MIDI standard)
+          if (this.globalFilter) this.globalFilter.frequency.rampTo(200 + norm * 19800, 0.05);
+          break;
+        case 7:   // Channel volume → master volume
+          this.setMasterVolume(norm * 1.5);
+          break;
+        case 91:  // Reverb send → global reverb wet
+          if (this.globalReverb) this.globalReverb.wet.rampTo(norm, 0.05);
+          break;
+        case 93:  // Chorus send → global chorus wet
+          if (this.globalChorus) (this.globalChorus.wet as any).rampTo(norm, 0.05);
+          break;
+        case 64:  // Sustain pedal → toggle transport
+          if (vel >= 64) this.toggleTransport();
+          break;
+      }
+      return;
+    }
+  }
+
+  /** Enable / disable MIDI note + CC input. Safe to call before init(). */
+  setMidiInputEnabled(enabled: boolean): void {
+    this._midiInputEnabled = enabled;
+    if (this._midiInput) {
+      this._midiInput.onmidimessage = enabled
+        ? this._onMidiMessage.bind(this)
+        : null;
+    }
+    this.emit('midiInputEnabled', enabled);
+  }
+
+  /** Replace the MIDI note → track index map (MIDI note numbers as keys). */
+  setMidiNoteMap(map: Record<number, number>): void {
+    this._midiNoteMap = { ...map };
+  }
+
+  /**
+   * Register a custom handler for a CC number.
+   * Value is normalised 0..1. Overrides the built-in default for that CC.
+   */
+  setMidiCCHandler(cc: number, handler: (normalised: number) => void): void {
+    this._midiCCHandlers[cc] = handler;
+  }
+
+  /** Remove a custom CC handler, restoring built-in default behaviour. */
+  clearMidiCCHandler(cc: number): void {
+    delete this._midiCCHandlers[cc];
+  }
+
+  /** Names of available MIDI input ports. Empty until after init(). */
+  getMidiInputs(): string[] {
+    if (!this._midiAccess) return [];
+    return Array.from(this._midiAccess.inputs.values()).map(i => i.name ?? 'Unknown');
+  }
+
+  /** Switch the active MIDI input port by index into getMidiInputs(). */
+  selectMidiInput(index: number): void {
+    if (!this._midiAccess) return;
+    const inputs = Array.from(this._midiAccess.inputs.values());
+    const input  = inputs[index];
+    if (!input) return;
+    if (this._midiInput) this._midiInput.onmidimessage = null;
+    this._midiInput = input;
+    if (this._midiInputEnabled) {
+      this._midiInput.onmidimessage = this._onMidiMessage.bind(this);
     }
   }
 
@@ -2295,6 +2435,10 @@ class LoopEngine {
     [this._beatScheduleId, this._quantScheduleId, this._midiClockScheduleId]
       .filter(id => id >= 0)
       .forEach(id => _Tone!.Transport.clear(id));
+    // MIDI input teardown (added 2026-04-25)
+    if (this._midiInput) { this._midiInput.onmidimessage = null; this._midiInput = null; }
+    this._midiAccess = null;
+
 
     // LFOs + Scale nodes
     this._lfos.forEach(lfo => {

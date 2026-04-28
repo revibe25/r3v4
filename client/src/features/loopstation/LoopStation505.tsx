@@ -928,6 +928,7 @@ type TimeSig = '4/4' | '3/4' | '5/4' | '6/8' | '7/8';
 export const LoopStation505: React.FC = () => {
   const {
     state, fx, isReady, isError, errorMessage, midiSync,
+    midiInputEnabled, midiInputs, toggleMidiInput, toggleMidiClock, selectMidiInputByIndex,
     scenes, activeScene, canUndo,
     init, togglePlayback, stopPlayback, recordNextTrack,
     pressTrack, stopTrack, clearTrack, clearAll, undo,
@@ -935,9 +936,9 @@ export const LoopStation505: React.FC = () => {
     setTrackGateFX, setTrackCompFX, setTrackSatFX, setTrackTrimFX,
     setTrackVolume, setTrackPan, setTrackEQ,
     toggleMute, toggleSolo, toggleCue,
-    setHarmonyMode, setReverbSend, setDelaySend, setMasterVolume,
+    setHarmonyMode, setReverbSend, setDelaySend, setChorusSend, setMasterVolume,
     setBpm, tapTempo, toggleMetronome,
-    setFilter, setDelay, setReverb, setCompressor, setXY,
+    setFilter, setFilterType, setDelay, setReverb, setCompressor, setXY,
     saveScene, recallScene,
     setSwing: setSwingEngine, setTimeSignature, setQuantMode, setPlaybackMode,
   } = useLoopStation505();
@@ -963,6 +964,12 @@ export const LoopStation505: React.FC = () => {
   const [cAtk,    setCAtk]  = useState(0.05);
   const [cRel,    setCRel]  = useState(0.3);
   const [rDecay,  setRDec]  = useState(0.35);
+  const [preDly,      setPreDly]      = useState(0.1);   // reverb pre-delay  (0‥1 → 0‥0.5 s)
+  const [granDensity, setGranDensity] = useState(0.5);   // granular density  (normalised)
+  const [granSpread,  setGranSpread]  = useState(0.3);   // granular spread   (normalised)
+  const [eqLF,        setEqLF]        = useState(0.5);   // master EQ low     (bipolar → ±12 dB)
+  const [eqHMF,       setEqHMF]       = useState(0.5);   // master EQ mid     (bipolar → ±12 dB)
+  const [eqHF,        setEqHF]        = useState(0.5);   // master EQ high    (bipolar → ±12 dB)
   const [dFeed,   setDFeed] = useState(0.3);
   const [dTime,   setDTime] = useState(0.4);
   const [swing,   setSwingLocal] = useState(0);
@@ -1326,6 +1333,24 @@ export const LoopStation505: React.FC = () => {
               <Panel title="GLOBAL FX" accent={T.acid}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
                   <FXKnob label="FILTER" value={fv}   color={T.acid}   size="md" onChange={v => { setFV(v); setFilter(v * 18000 + 200, v * 8 + 0.5); }} />
+                  <FXKnob label="RESO"  value={Math.min(1, Math.max(0, (fx.filterResonance - 0.5) / 8))}  color={T.acid}  size="md"  onChange={v => setFilter(fv * 18000 + 200, v * 8 + 0.5)} />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                    <span style={{ fontSize: 7, letterSpacing: '.1em', color: T.t5, fontFamily: 'IBM Plex Mono,monospace' }}>TYPE</span>
+                    <div style={{ display: 'flex', gap: 2 }}>
+                      {(['lowpass','highpass','bandpass','notch'] as BiquadFilterType[]).map(t => (
+                        <button key={t} onClick={() => setFilterType(t)} style={{
+                          background: fx.filterType === t ? T.acid : T.b3,
+                          color:      fx.filterType === t ? T.bg0  : T.t4,
+                          border:     `1px solid ${fx.filterType === t ? T.acid : T.b4}`,
+                          borderRadius: 3, fontSize: 7, padding: '2px 4px',
+                          cursor: 'pointer', fontFamily: 'IBM Plex Mono,monospace',
+                          letterSpacing: '.08em', transition: 'all 0.15s',
+                        }}>
+                          {t === 'lowpass' ? 'LP' : t === 'highpass' ? 'HP' : t === 'bandpass' ? 'BP' : 'NOTCH'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                   <FXKnob label="DELAY"  value={dv}   color={T.cyan}   size="md" onChange={v => { setDV(v); setDelay(v > 0.5 ? '4n' : '8n', v * 0.8); }} />
                   <FXKnob label="REVERB" value={rv}   color={T.orange} size="md" onChange={v => { setRV(v); setReverb(v * 8 + 0.5, v); }} />
                   <FXKnob label="DRIVE"  value={drv}  color={T.red}    size="md" onChange={setDrv} />
@@ -1350,7 +1375,7 @@ export const LoopStation505: React.FC = () => {
               <Panel title="REVERB" accent={T.orange}>
                 <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                   <FXKnob label="DECAY"   value={rDecay} color={T.orange} size="sm" onChange={v => { setRDec(v); setReverb(v * 10 + 0.5, rv); }} />
-                  <FXKnob label="PRE-DLY" value={0.1}    color={T.orange} size="sm" onChange={v => { /* TODO: Reverb PRE-DLY engine method not found — implement setReverbPreDelay in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setReverbPreDelay(v * 0.5); }} />
+                  <FXKnob label="PRE-DLY" value={preDly} color={T.orange} size="sm" onChange={v => { setPreDly(v); if (getLoopEngine().initialized) getLoopEngine().setReverbPreDelay(v * 0.5); }} />
                   <FXKnob label="MIX"     value={rv}     color={T.orange} size="sm" onChange={v => { setRV(v); setReverb(rDecay * 10 + 0.5, v); }} />
                 </div>
               </Panel>
@@ -1358,8 +1383,8 @@ export const LoopStation505: React.FC = () => {
               <Panel title="GRANULAR" accent={T.teal} badge={granOn ? 'ACTIVE' : undefined}>
                 <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: 6 }}>
                   <FXKnob label="SIZE"    value={gran} color={T.teal} size="sm" onChange={setGran} />
-                  <FXKnob label="DENSITY" value={0.5}  color={T.teal} size="sm" onChange={v => { /* TODO: Granular SPREAD engine method not found — implement setGranularSpread in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setGranularSpread(v); }} />
-                  <FXKnob label="SPREAD"  value={0.3}  color={T.teal} size="sm" onChange={v => { /* TODO: Granular DENSITY engine method not found — implement setGranularDensity in loopEngine */ if (getLoopEngine().initialized) getLoopEngine().setGranularDensity(v); }} />
+                  <FXKnob label="DENSITY" value={granDensity} color={T.teal} size="sm" onChange={v => { setGranDensity(v); if (getLoopEngine().initialized) getLoopEngine().setGranularDensity(v); }} />
+                  <FXKnob label="SPREAD"  value={granSpread}  color={T.teal} size="sm" onChange={v => { setGranSpread(v);  if (getLoopEngine().initialized) getLoopEngine().setGranularSpread(v);  }} />
                 </div>
                 <button onClick={() => { const next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} style={{
                   width: '100%', height: 20, fontSize: 7, cursor: 'pointer',
@@ -1427,7 +1452,7 @@ export const LoopStation505: React.FC = () => {
                         onPress={pressTrack} onStop={stopTrack} onClear={clearTrack}
                         onVolumeChange={setTrackVolume} onPanChange={setTrackPan} onEQChange={setTrackEQ}
                         onMuteToggle={toggleMute} onSoloToggle={toggleSolo} onCueToggle={toggleCue}
-                        onHarmonyChange={setHarmonyMode} onReverbSend={setReverbSend} onDelaySend={setDelaySend}
+                        onHarmonyChange={setHarmonyMode} onReverbSend={setReverbSend} onDelaySend={setDelaySend} onChorusSend={setChorusSend}
                         onPitchChange={setTrackPitchFX}  onFineChange={setTrackFineTune}
                         onChorusChange={setTrackChorusFX} onGateChange={setTrackGateFX}
                         onCompChange={setTrackCompFX}     onSatChange={setTrackSatFX}
@@ -1479,10 +1504,11 @@ export const LoopStation505: React.FC = () => {
 
               <Panel title="MASTER EQ" accent={T.cyan}>
                 <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                  <FXKnob label="SUB"  value={0.5} color={T.cyan} size="sm" bipolar onChange={() => {}} />
-                  <FXKnob label="LF"   value={0.5} color={T.cyan} size="sm" bipolar onChange={() => {}} />
-                  <FXKnob label="HMF"  value={0.5} color={T.cyan} size="sm" bipolar onChange={() => {}} />
-                  <FXKnob label="HF"   value={0.5} color={T.cyan} size="sm" bipolar onChange={() => {}} />
+                  {/* SUB: engine has no sub-shelf method — wire after adding setSubShelf(gainDb) to loopEngine */}
+                  <FXKnob label="SUB"  value={0.5}  color={T.cyan} size="sm" bipolar onChange={() => {}} />
+                  <FXKnob label="LF"   value={eqLF}  color={T.cyan} size="sm" bipolar onChange={v => { setEqLF(v);  if (getLoopEngine().initialized) getLoopEngine().setMultibandBand('low',  0, 1, (v - 0.5) * 24); }} />
+                  <FXKnob label="HMF"  value={eqHMF} color={T.cyan} size="sm" bipolar onChange={v => { setEqHMF(v); if (getLoopEngine().initialized) getLoopEngine().setMultibandBand('mid',  0, 1, (v - 0.5) * 24); }} />
+                  <FXKnob label="HF"   value={eqHF}  color={T.cyan} size="sm" bipolar onChange={v => { setEqHF(v);  if (getLoopEngine().initialized) getLoopEngine().setMultibandBand('high', 0, 1, (v - 0.5) * 24); }} />
                 </div>
               </Panel>
 
@@ -1514,7 +1540,7 @@ export const LoopStation505: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                   {([
                     ['INT CLOCK', !midiSync],
-                    ['MIDI IN',   midiSync],
+                    ['MIDI IN',   midiInputEnabled],
                     ['LINK',      false],
                     ['MIDI OUT',  false],
                     ['VIDEO',     false],
@@ -1600,6 +1626,71 @@ export const LoopStation505: React.FC = () => {
           <span>{state.tracks.filter(t => t.hasContent).length}/5 LOOPS LOADED</span>
           <span>{Math.round(state.bpm)} BPM</span>
           <span>{midiSync ? '⇄ MIDI SYNC' : '○ INT CLK'}</span>
+          <button
+            onClick={toggleMidiInput}
+            disabled={!isReady}
+            title={midiInputEnabled
+              ? `MIDI IN active${midiInputs.length ? ': ' + midiInputs[0] : ''}`
+              : 'Enable MIDI input — C3/D3/E3/F3/G3 → tracks 1–5'}
+            style={{
+              marginLeft: 8,
+              background: midiInputEnabled ? T.cyan : T.b3,
+              color:      midiInputEnabled ? T.bg0  : T.t3,
+              border:     `1px solid ${midiInputEnabled ? T.cyan : T.b4}`,
+              borderRadius: 3,
+              fontSize: 9,
+              padding: '2px 6px',
+              cursor: isReady ? 'pointer' : 'not-allowed',
+              letterSpacing: '0.1em',
+              fontFamily: 'IBM Plex Mono, monospace',
+              transition: 'all 0.15s',
+            }}
+          >
+            MIDI IN
+          </button>
+          <button
+            onClick={toggleMidiClock}
+            disabled={!isReady}
+            title={midiSync ? 'Disable MIDI clock output' : 'Enable MIDI clock output'}
+            style={{
+              marginLeft: 4,
+              background: midiSync ? T.teal : T.b3,
+              color:      midiSync ? T.bg0  : T.t3,
+              border:     `1px solid ${midiSync ? T.teal : T.b4}`,
+              borderRadius: 3,
+              fontSize: 9,
+              padding: '2px 6px',
+              cursor: isReady ? 'pointer' : 'not-allowed',
+              letterSpacing: '0.1em',
+              fontFamily: 'IBM Plex Mono, monospace',
+              transition: 'all 0.15s',
+            }}
+          >
+            {midiSync ? 'CLK OUT ●' : 'CLK OUT ○'}
+          </button>
+          {midiInputs.length > 1 && (
+            <select
+              value={midiInputs[0]}
+              onChange={e => selectMidiInputByIndex(midiInputs.indexOf(e.target.value))}
+              disabled={!midiInputEnabled}
+              style={{
+                marginLeft: 4,
+                background: T.b3,
+                color: T.t3,
+                border: `1px solid ${T.b4}`,
+                borderRadius: 3,
+                fontSize: 7,
+                padding: '2px 4px',
+                fontFamily: 'IBM Plex Mono,monospace',
+                letterSpacing: '.08em',
+                cursor: midiInputEnabled ? 'pointer' : 'not-allowed',
+              }}
+            >
+              {midiInputs.map((name, i) => (
+                <option key={i} value={name}>{name}</option>
+              ))}
+            </select>
+          )}
           <span>{monoOn ? '⊕ MONO' : '⊞ STEREO'}</span>
           <span>{limOn ? '◼ LIM' : '◻ LIM'}</span>
           {granOn && <span style={{ color: T.teal }}>◉ GRAN FREEZE</span>}
