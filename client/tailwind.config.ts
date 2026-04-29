@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 export default {
-  darkMode: ['class'],
+darkMode: 'class',
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -9,7 +9,27 @@ export default {
     './src/**/*.{ts,tsx}',
   ],
   prefix: '',
-  theme: {
+theme: {
+    extend: {
+      colors: {
+/* r3-neon-tokens */
+        neonLime: "#a3e635",
+        neonLimeDim: "rgba(163,230,53,0.12)",
+        r3Bg: "#0a0a0a",
+        r3Surface: "#0d0d0d",
+        r3Border: "#1c1c1c",
+        r3Text: "#e5e5e5",
+        r3Dim: "#555555",
+        accent: 'var(--neon-lime)',
+        border: 'var(--neon-lime)',
+        panel: 'var(--panel)',
+        background: 'var(--bg)'
+      },
+      boxShadow: {
+        neon: 'var(--glow-md)',
+        neonStrong: 'var(--glow-lg)',
+      },
+    },
     container: {
       center: true,
       padding: '2rem',
