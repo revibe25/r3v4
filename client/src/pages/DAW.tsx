@@ -42,6 +42,7 @@ import { useLoopEngineFFTRef }   from '../hooks/useLoopEngineFFTRef';
 import { AudioReactiveScene }    from '../components/daw/AudioReactiveScene';
 import { WaveformMesh }          from '../components/daw/WaveformMesh';
 import { SessionChip }           from '../components/session-summary/SessionChip';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SessionSummaryPanel }   from '../components/session-summary/SessionSummaryPanel';
 import { MixSuggestionsPanel }   from '../components/MixSuggestionsPanel';
 import { useMixSuggestions }     from '../hooks/useMixSuggestions';
@@ -1990,6 +1991,7 @@ export default function DAW() {
         </Btn>
 
         <div className="ml-auto flex items-center gap-2">
+              <ThemeSwitcher />
               <SessionChip />
           <span className="text-[8px] text-[#333]">ZOOM</span>
           <Btn className="text-[9px]" onClick={() => useDAWStore.getState().setZoom(useDAWStore.getState().zoom * 0.8)}>−</Btn>
