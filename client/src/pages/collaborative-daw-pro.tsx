@@ -1,2126 +1,1595 @@
-/**
- * WaveLabProduction — R3 v4 Multitrack DAW Page
- *
- * Wire.txt Protocol:
- *   FILES READ: instrument.tsx (full 1617 lines), CLAUDE.md, WIRE.txt,
- *               PRIORITIES.md, R3v4_PRD_v4.docx, asi_enhanced.md
- *
- *   FINDINGS:
- *   - instrument.tsx uses --ag-* CSS variables, IBM Plex Mono + Syne fonts,
- *     ag-shell/ag-frame shell, acid (#a3e635) as primary accent, zero border-radius.
- *   - CLAUDE.md: no @ts-nocheck, no any, no console.log, no localStorage,
- *     Zustand state, Wouter routing.
- *   - PRIORITIES.md P4: Mix Suggestion System frontend wiring.
- *   - appRouter has: sessions, sessionMetrics, daw, mixer, dj, aiMix, projects.
- *
- *   CHANGES:
- *   - Adopted ag-shell/ag-frame/ag-header/ag-ticker/ag-content layout exactly.
- *   - Replaced all C.* tokens with --ag-* CSS variables.
- *   - Dual-canvas architecture: staticRef (clips/tracks) + dynRef (playhead RAF).
- *   - Full drag-move + resize-l/r via dragRef (no re-render during drag).
- *   - History via histRef/histIdxRef refs (no stale closures).
- *   - VU meters on 80ms interval during transport.
- *   - Minimap canvas with click-to-scroll.
- *   - Clip Inspector + Activity panels in right column.
- *   - Mix Suggestions panel (LLPTE aiMix route surface — P4).
- *   - All types explicit — zero `any`, zero @ts-nocheck.
- *   - ResizeObserver replaces getBoundingClientRect.
- *   - All keyboard handlers use actionRef pattern (stable, empty deps).
- *
- * @module pages/multitrack
- */
+// collaborative-daw-pro.tsx
+// R3 v4 — Collaborative DAW Pro
+// Enhanced v2.0 — Acid Grid design system, LLPTE integration, full TypeScript
+// Route: /collab (App.tsx)
 
-import {
-  useState, useEffect, useRef, useCallback, useMemo, type ReactNode,
+import React, {
+  useState, useRef, useEffect, useCallback, useMemo, memo
 } from 'react';
-import { Link } from 'wouter';
 import {
-  Activity, Layers, Sliders, Wand2,
+  Play, Pause, Square, Plus, ZoomIn, ZoomOut, SkipBack,
+  User, Download, Upload, Settings, Save, Share2, Undo2, Redo2,
+  Grid3x3, Mic, Volume2, VolumeX, Activity, Wifi, WifiOff,
+  ChevronUp, ChevronDown, Copy, Trash2, Layers, Sliders, X,
+  AlertCircle, CheckCircle, Zap, Radio, Lock, Unlock,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type TrackType = 'audio' | 'midi' | 'bus';
+type TransportMode = 'stopped' | 'playing' | 'paused' | 'recording';
+type CollabStatus = 'active' | 'idle' | 'offline';
+type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
+// PRD §12 aiDecisionLog.outcome: 'auto_applied' | 'accepted' | 'rejected' | 'ignored' | 'discarded'
+type LLPTEDecision = 'auto_applied' | 'accepted' | 'rejected' | 'ignored' | 'discarded';
+
+interface Send { busId: string; level: number; }
+
 interface Track {
-  id: number;
-  index: number;
+  id: string;
   name: string;
-  type: 'audio' | 'synth' | 'fx' | 'midi';
   color: string;
   muted: boolean;
   solo: boolean;
   volume: number;
   pan: number;
+  armed: boolean;
+  type: TrackType;
+  sends: Send[];
+  locked: boolean;
+  fxChain: string[];
 }
 
 interface Clip {
-  id: number;
-  trackId: number;
-  startBeat: number;
-  lenBeats: number;
+  id: string;
+  trackId: string;
+  startBar: number;
+  durationBars: number;
   name: string;
-  color: string;
+  gain: number;
+  fadeIn: number;
+  fadeOut: number;
+  color?: string;
 }
 
 interface Marker {
-  id: number;
-  beat: number;
-  label: string;
-  color: string;
-}
-
-interface LoopRegion {
-  active: boolean;
-  startBeat: number;
-  endBeat: number;
-}
-
-interface Collaborator {
-  id: number;
+  id: string;
+  bar: number;
   name: string;
-  beat: number;
-  color: string;
-}
-
-interface MixSuggestion {
-  id: number;
-  type: 'level' | 'eq' | 'transition' | 'pan';
-  target: string;
-  description: string;
-  confidence: number;
-  applied: boolean;
-}
-
-interface ActivityEntry {
-  id: number;
-  user: string;
-  action: string;
-  ts: number;
+  color?: string;
 }
 
 interface Project {
+  id: string;
+  name: string;
+  tempo: number;
+  timeSignature: [number, number];
   tracks: Track[];
   clips: Clip[];
   markers: Marker[];
-  bpm: number;
-  beatsPerBar: number;
-  scrollX: number;
-  zoom: number;
 }
 
-interface SelectionState {
-  selClipId: number | null;
-  hovClipId: number | null;
+interface Collaborator {
+  id: string;
+  name: string;
+  color: string;
+  cursor: { x: number; y: number };
+  status: CollabStatus;
+  lastAction: string;
+  timestamp: number;
+  editingTrackId?: string;
 }
 
-interface DragState {
-  type: 'move' | 'resize-l' | 'resize-r' | 'scrub';
-  clipId: number;
-  startX: number;
-  startBeat: number;
-  startLen: number;
+interface Activity {
+  id: number;
+  user: string;
+  action: string;
+  timestamp: number;
+  type: 'edit' | 'transport' | 'collab' | 'ai';
+}
+
+interface LLPTESuggestion {
+  id: string;
+  trackId: string;
+  type: 'gain_adjust' | 'eq_suggest' | 'conflict_flag' | 'transition';
+  confidence: number;
+  displayedConfidence: number;
+  decision: Record<string, unknown>;
+  outcome: LLPTEDecision;
+  label: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const TL = {
-  HEADER_H: 28,
-  TRACK_H: 72,
-  LABEL_W: 152,
-  MM_H: 28,
-  MIN_CLIP_PX: 16,
+const C = {
+  void:          '#060606',
+  space:         '#0a0a0a',
+  surface:       '#0d0d0d',
+  surfaceLift:   '#0f0f0f',
+  surfaceHover:  '#161616',
+  border:        '#1c1c1c',
+  borderBright:  '#2a2a2a',
+  neon:          '#a3e635',
+  neonGlow:      'rgba(163,230,53,0.5)',
+  neonDim:       'rgba(163,230,53,0.08)',
+  neonDim2:      'rgba(163,230,53,0.12)',
+  acid2:         '#84cc16',
+  cyan:          '#00F5FF',   // PRD §3 — active state cyan
+  magenta:       '#ff3b3b',
+  yellow:        '#FFBE0B',
+  purple:        '#8338EC',
+  text:          '#f0f0f0',
+  textMuted:     '#555555',
+  textDim:       '#333333',
+  tracks: [
+    '#ff3b3b','#a3e635','#00F5FF','#FFBE0B',
+    '#8338EC','#FB5607','#06FFA5','#F72585','#4CC9F0','#F15BB5',
+  ],
 } as const;
 
-type TransportState = 'stopped' | 'playing' | 'recording';
+const FONT = {
+  display: '"Syne", sans-serif',
+  mono:    '"IBM Plex Mono", monospace',
+} as const;
 
-const SNAP_VALUES = [1, 0.5, 0.25, 0.125] as const;
-type SnapValue = (typeof SNAP_VALUES)[number];
+const TL = {
+  trackHeight:   88,
+  rulerHeight:   44,
+  headerWidth:   232,
+  gridWidth:     112,
+  beatsPerBar:   4,
+  minZoom:       0.25,
+  maxZoom:       5,
+  snapThreshold: 6,
+} as const;
 
-const TICKER_ITEMS = [
-  'MultiTrack DAW', 'LLPTE Pipeline', 'AI Auto-Level', 'Smart Transitions',
-  'Time Savings', 'Mix Suggestions', 'Real-Time Collab', 'Acid Grid',
-  'Web Audio API', 'WebMIDI', 'R3 v4',
+// ─── Initial Data ─────────────────────────────────────────────────────────────
+
+const INIT_PROJECT: Project = {
+  id:            `proj_${Date.now()}`,
+  name:          'Untitled Session',
+  tempo:         128,
+  timeSignature: [4, 4],
+  tracks: [
+    { id:'t1', name:'Kick / Snare', color:C.tracks[0], muted:false, solo:false, volume:0.82, pan:0,    armed:false, type:'audio', sends:[], locked:false, fxChain:['Compressor','EQ'] },
+    { id:'t2', name:'808 Bass',     color:C.tracks[1], muted:false, solo:false, volume:0.76, pan:0,    armed:false, type:'audio', sends:[], locked:false, fxChain:['Compressor','Limiter'] },
+    { id:'t3', name:'Synth Lead',   color:C.tracks[2], muted:false, solo:false, volume:0.71, pan:0.2,  armed:false, type:'audio', sends:[], locked:false, fxChain:['Reverb','Delay'] },
+    { id:'t4', name:'Vox Chop',     color:C.tracks[3], muted:false, solo:false, volume:0.88, pan:-0.1, armed:false, type:'audio', sends:[], locked:false, fxChain:['Reverb','EQ'] },
+    { id:'t5', name:'Pad Texture',  color:C.tracks[4], muted:false, solo:false, volume:0.55, pan:0.3,  armed:false, type:'audio', sends:[], locked:false, fxChain:['Reverb'] },
+  ],
+  clips: [
+    { id:'c1', trackId:'t1', startBar:0,  durationBars:4,  name:'Kick Pattern',   gain:1.0, fadeIn:0,    fadeOut:0   },
+    { id:'c2', trackId:'t1', startBar:4,  durationBars:8,  name:'Full Drums',     gain:1.0, fadeIn:0.1,  fadeOut:0   },
+    { id:'c3', trackId:'t2', startBar:2,  durationBars:10, name:'808 Bass',       gain:0.9, fadeIn:0,    fadeOut:0.2 },
+    { id:'c4', trackId:'t3', startBar:8,  durationBars:4,  name:'Lead A',         gain:1.0, fadeIn:0,    fadeOut:0   },
+    { id:'c5', trackId:'t3', startBar:12, durationBars:4,  name:'Lead Variation', gain:0.8, fadeIn:0,    fadeOut:0   },
+    { id:'c6', trackId:'t4', startBar:4,  durationBars:12, name:'Verse 1',        gain:0.95,fadeIn:0.05, fadeOut:0.1 },
+    { id:'c7', trackId:'t5', startBar:0,  durationBars:16, name:'Pad Atmos',      gain:0.6, fadeIn:0.5,  fadeOut:0.5 },
+  ],
+  markers: [
+    { id:'m1', bar:0,  name:'INTRO',  color:C.neon },
+    { id:'m2', bar:4,  name:'VERSE',  color:C.yellow },
+    { id:'m3', bar:12, name:'CHORUS', color:C.cyan },
+    { id:'m4', bar:20, name:'OUTRO',  color:C.magenta },
+  ],
+};
+
+const INIT_COLLABS: Collaborator[] = [
+  { id:'u1', name:'Alex Martinez', color:'#a3e635', cursor:{x:450,y:180}, status:'active', lastAction:'Editing "Full Drums"',  timestamp:Date.now()-30000,  editingTrackId:'t1' },
+  { id:'u2', name:'Jordan Kim',    color:'#00F5FF', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
+  { id:'u3', name:'Sam Rivera',    color:'#ff3b3b', cursor:{x:580,y:240}, status:'idle',   lastAction:'Added marker',          timestamp:Date.now()-120000 },
 ];
 
-// ─── CSS ──────────────────────────────────────────────────────────────────────
-
-const STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-/* ── Variables (exact match to instrument.tsx) ──────────────────────────── */
-:root {
-  --ag-black:  #060606;
-  --ag-ink:    #0a0a0a;
-  --ag-panel:  #0d0d0d;
-  --ag-card:   #0f0f0f;
-  --ag-border: #1c1c1c;
-  --ag-mute:   #2a2a2a;
-  --ag-dim:    #3a3a3a;
-  --ag-mid:    #666;
-  --ag-soft:   #888;
-  --ag-acid:   #a3e635;
-  --ag-acid2:  #84cc16;
-  --ag-acid-d: #4d6b18;
-  --ag-white:  #f0f0f0;
-  --ag-err:    #ff3b3b;
-  --ag-rec:    #ef4444;
-  --ag-cyan:   #22d3ee;
-  --ag-amber:  #fbbf24;
-  --ag-purp:   #a78bfa;
-  --ag-teal:   #2dd4bf;
-}
-
-/* ── Shell ─────────────────────────────────────────────────────────────── */
-.ag-shell {
-  height: calc(100vh - var(--nav-h, 0px)); overflow: hidden; display: flex; flex-direction: column;
-  background: var(--ag-black);
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.012) 3px, rgba(255,255,255,.012) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,.016) 31px, rgba(255,255,255,.016) 32px);
-  font-family: 'IBM Plex Mono', monospace;
-}
-
-/* ── Frame ─────────────────────────────────────────────────────────────── */
-.ag-frame {
-  width: 100%; height: 100%; display: flex; flex-direction: column;
-  overflow: hidden; position: relative;
-  border-left: 3px solid var(--ag-border);
-  border-right: 3px solid var(--ag-border);
-}
-.ag-frame::before {
-  content: ''; position: absolute; left: -3px; top: 0; bottom: 0; width: 3px;
-  background: var(--ag-acid);
-  box-shadow: 0 0 18px var(--ag-acid), 0 0 40px rgba(163,230,53,.3);
-}
-
-/* ── Header ────────────────────────────────────────────────────────────── */
-.ag-header {
-  border-bottom: 3px solid var(--ag-border); position: relative;
-  overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.6); flex-shrink: 0;
-}
-.ag-header-top { display: flex; align-items: stretch; border-bottom: 1px solid var(--ag-border); }
-
-.ag-ghost-bpm {
-  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(80px, 12vw, 140px); color: transparent;
-  -webkit-text-stroke: 1px rgba(163,230,53,.055);
-  letter-spacing: -.04em; pointer-events: none; user-select: none; z-index: 0;
-}
-
-.ag-wordmark-block {
-  padding: 14px 24px 12px; border-right: 1px solid var(--ag-border);
-  display: flex; flex-direction: column; justify-content: center;
-  min-width: 200px; position: relative; z-index: 1;
-}
-.ag-wordmark {
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px;
-  letter-spacing: -.02em; color: var(--ag-white); line-height: 1;
-}
-.ag-wordmark-slash { color: var(--ag-acid); margin: 0 4px; font-size: 32px; line-height: .9; text-shadow: 0 0 12px var(--ag-acid); }
-.ag-wordmark-sub { font-size: 8px; letter-spacing: .35em; text-transform: uppercase; color: var(--ag-white); margin-top: 5px; }
-
-.ag-status-block {
-  padding: 14px 20px; border-right: 1px solid var(--ag-border);
-  display: flex; flex-direction: column; justify-content: center; gap: 5px; z-index: 1;
-}
-.ag-status-line { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; }
-.ag-cursor-live { display: inline-block; width: 8px; height: 14px; background: var(--ag-acid); box-shadow: 0 0 8px var(--ag-acid); animation: ag-blink 1s step-end infinite; }
-.ag-cursor-rec  { display: inline-block; width: 8px; height: 14px; background: var(--ag-rec); box-shadow: 0 0 8px var(--ag-rec); animation: ag-blink .8s step-end infinite; }
-.ag-cursor-standby { display: inline-block; width: 8px; height: 14px; background: var(--ag-mute); }
-@keyframes ag-blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.ag-status-live-text { color: var(--ag-acid); }
-.ag-status-rec-text  { color: var(--ag-rec); }
-.ag-status-dead-text { color: var(--ag-white); }
-
-.ag-bpm-block { padding: 0 20px; display: flex; align-items: center; gap: 12px; z-index: 1; }
-.ag-bpm-label { font-size: 8px; letter-spacing: .3em; color: var(--ag-white); text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg); }
-.ag-bpm-number {
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 42px;
-  letter-spacing: -.04em; color: var(--ag-acid); line-height: 1;
-  text-shadow: 0 0 20px rgba(163,230,53,.4), 0 0 40px rgba(163,230,53,.15);
-}
-.ag-bpm-input {
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 42px;
-  letter-spacing: -.04em; color: var(--ag-acid); line-height: 1; width: 80px;
-  background: transparent; border: none; outline: none; text-align: center;
-}
-
-.ag-controls-block { flex: 1; padding: 10px 16px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; z-index: 1; justify-content: flex-end; }
-.ag-nav-btn {
-  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
-  background: transparent; border: 1px solid var(--ag-border); padding: 7px 14px;
-  color: var(--ag-white); cursor: pointer; transition: all .1s;
-  text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-}
-.ag-nav-btn:hover { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black); }
-.ag-nav-btn.active { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black); box-shadow: 0 0 12px rgba(163,230,53,.3); }
-.ag-nav-btn.rec-btn.armed { background: var(--ag-rec); border-color: var(--ag-rec); color: var(--ag-white); box-shadow: 0 0 12px rgba(239,68,68,.4); animation: ag-blink .8s step-end infinite; }
-
-/* ── Ticker ─────────────────────────────────────────────────────────────── */
-.ag-ticker-row { padding: 5px 0; background: var(--ag-ink); overflow: hidden; position: relative; flex-shrink: 0; }
-.ag-ticker-row::before, .ag-ticker-row::after {
-  content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 2;
-}
-.ag-ticker-row::before { left: 0; background: linear-gradient(90deg, var(--ag-ink), transparent); }
-.ag-ticker-row::after  { right: 0; background: linear-gradient(-90deg, var(--ag-ink), transparent); }
-.ag-ticker-inner { display: flex; width: max-content; animation: ag-scroll 32s linear infinite; }
-@keyframes ag-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-.ag-ticker-item { font-size: 9px; letter-spacing: .25em; text-transform: uppercase; color: var(--ag-white); padding: 0 24px; white-space: nowrap; display: flex; align-items: center; gap: 12px; }
-.ag-ticker-sep { color: var(--ag-acid); font-size: 11px; }
-
-/* ── Content grid ──────────────────────────────────────────────────────── */
-.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; min-height: 0; }
-@media(min-width:1024px) { .ag-content { grid-template-columns: 1fr 420px; } }
-@media(min-width:1440px) { .ag-content { grid-template-columns: 1fr 480px; } }
-@media(min-width:1800px) { .ag-content { grid-template-columns: 1fr 560px; } }
-
-.ag-left  { display: flex; flex-direction: column; overflow: hidden; min-height: 0; height: 100%; }
-.ag-right { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
-@media(min-width:1024px){ .ag-left { border-right: 3px solid var(--ag-border); } }
-
-.ag-section-strip {
-  background: var(--ag-ink); border-top: 3px solid var(--ag-border);
-  border-bottom: 1px solid var(--ag-border); padding: 5px 20px;
-  display: flex; align-items: center; gap: 10px;
-  border-left: 3px solid var(--ag-acid);
-  box-shadow: inset 0 0 20px rgba(163,230,53,.03); flex-shrink: 0;
-}
-.ag-section-tag { font-size: 8px; letter-spacing: .35em; text-transform: uppercase; color: var(--ag-white); }
-.ag-section-line { flex: 1; height: 1px; background: var(--ag-border); }
-.ag-section-tag-r { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--ag-mid); margin-left: 8px; }
-
-.ag-panel { position: relative; border-bottom: 1px solid var(--ag-border); }
-.ag-panel-ghost {
-  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 72px;
-  color: transparent; -webkit-text-stroke: 1px rgba(163,230,53,.07);
-  line-height: 1; pointer-events: none; user-select: none; z-index: 0;
-}
-.ag-panel-header {
-  background: var(--ag-ink); border-bottom: 1px solid var(--ag-border);
-  padding: 7px 16px; display: flex; align-items: center; gap: 10px;
-  cursor: pointer; transition: background .1s; position: relative; z-index: 1;
-  user-select: none;
-}
-.ag-panel-header:hover { background: var(--ag-acid); color: var(--ag-black); }
-.ag-panel-header:hover .ag-ph-title,
-.ag-panel-header:hover .ag-ph-badge,
-.ag-panel-header:hover svg { color: var(--ag-black) !important; }
-.ag-panel-header.open { border-left: 3px solid var(--ag-acid); box-shadow: inset 0 0 12px rgba(163,230,53,.06); }
-.ag-panel-header.open .ag-ph-title { color: var(--ag-acid); }
-.ag-ph-icon { color: var(--ag-mid); flex-shrink: 0; }
-.ag-ph-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--ag-white); }
-.ag-ph-badge { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: var(--ag-mid); margin-left: auto; }
-.ag-ph-chevron { font-size: 10px; color: var(--ag-mid); margin-left: 8px; transition: transform .15s; }
-.ag-ph-chevron.open { transform: rotate(90deg); color: var(--ag-acid); }
-
-/* ── Timeline canvas area ───────────────────────────────────────────────── */
-.ag-timeline-wrap {
-  flex: 1; position: relative; overflow: hidden; cursor: crosshair;
-  background: var(--ag-black);
-  background-image: repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(163,230,53,.018) 79px, rgba(163,230,53,.018) 80px);
-}
-.ag-canvas-static, .ag-canvas-dyn {
-  position: absolute; top: 0; left: 0; width: 100%;
-}
-.ag-canvas-dyn { pointer-events: none; }
-
-/* ── Scrollbar ──────────────────────────────────────────────────────────── */
-.ag-scroll-row { height: 10px; background: var(--ag-ink); border-top: 1px solid var(--ag-border); flex-shrink: 0; }
-.ag-scroll-row input[type="range"] { width: 100%; height: 10px; margin: 0; accent-color: var(--ag-acid); background: transparent; }
-
-/* ── Minimap ────────────────────────────────────────────────────────────── */
-.ag-minimap { display: block; cursor: pointer; flex-shrink: 0; border-top: 1px solid var(--ag-border); }
-
-/* ── Transport toolbar ──────────────────────────────────────────────────── */
-.ag-transport {
-  background: var(--ag-ink); border-bottom: 1px solid var(--ag-border);
-  padding: 6px 14px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap;
-}
-.ag-t-btn {
-  font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .12em;
-  text-transform: uppercase; background: transparent; border: 1px solid var(--ag-border);
-  color: var(--ag-white); padding: 5px 12px; cursor: pointer; transition: all .08s;
-  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
-}
-.ag-t-btn:hover { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black); }
-.ag-t-btn.active { background: rgba(163,230,53,.12); border-color: var(--ag-acid); color: var(--ag-acid); box-shadow: 0 0 10px rgba(163,230,53,.2); }
-.ag-t-btn.danger  { color: var(--ag-rec); border-color: rgba(239,68,68,.4); }
-.ag-t-btn.danger:hover { background: var(--ag-rec); border-color: var(--ag-rec); color: var(--ag-white); }
-.ag-t-btn.danger.armed { background: rgba(239,68,68,.12); border-color: var(--ag-rec); color: var(--ag-rec); animation: ag-blink .8s step-end infinite; }
-.ag-t-sep { width: 1px; height: 20px; background: var(--ag-border); margin: 0 4px; flex-shrink: 0; }
-.ag-t-display {
-  font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600;
-  color: var(--ag-acid); background: var(--ag-black); padding: 3px 10px;
-  border: 1px solid var(--ag-border); letter-spacing: .08em; min-width: 64px; text-align: center;
-}
-.ag-t-snap-group { display: flex; gap: 0; border: 1px solid var(--ag-border); }
-.ag-t-snap-group .ag-t-btn { border: none; border-right: 1px solid var(--ag-border); }
-.ag-t-snap-group .ag-t-btn:last-child { border-right: none; }
-.ag-t-label { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--ag-mid); }
-.ag-t-spacer { flex: 1; }
-
-/* ── Right panels ───────────────────────────────────────────────────────── */
-.ag-panel-tabs { display: flex; border-bottom: 1px solid var(--ag-border); background: var(--ag-ink); flex-shrink: 0; }
-.ag-tab-btn {
-  flex: 1; padding: 7px 0; font-family: 'IBM Plex Mono', monospace; font-size: 9px;
-  letter-spacing: .12em; text-transform: uppercase; background: transparent;
-  color: var(--ag-mid); border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all .1s;
-}
-.ag-tab-btn:hover { color: var(--ag-white); background: rgba(163,230,53,.04); }
-.ag-tab-btn.active { color: var(--ag-acid); border-bottom-color: var(--ag-acid); background: var(--ag-panel); }
-
-.ag-panel-body { flex: 1; overflow-y: auto; }
-
-/* ── Inspector ──────────────────────────────────────────────────────────── */
-.ag-insp { padding: 14px; }
-.ag-insp-section { margin-bottom: 16px; }
-.ag-insp-title {
-  font-size: 8px; letter-spacing: .3em; text-transform: uppercase;
-  color: var(--ag-acid); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
-}
-.ag-insp-title::after { content:''; flex:1; height:1px; background:var(--ag-acid-d); }
-.ag-field { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.ag-field-label { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ag-mid); width: 64px; flex-shrink: 0; }
-.ag-field-input {
-  flex: 1; font-family: 'IBM Plex Mono', monospace; font-size: 11px;
-  background: var(--ag-black); color: var(--ag-acid); border: 1px solid var(--ag-border);
-  padding: 4px 8px; outline: none; min-width: 0;
-}
-.ag-field-input:focus { border-color: var(--ag-acid); box-shadow: 0 0 0 1px var(--ag-acid); }
-.ag-field-unit { font-size: 9px; color: var(--ag-mid); letter-spacing: .1em; flex-shrink: 0; }
-.ag-color-swatch { width: 20px; height: 20px; cursor: pointer; border: 2px solid transparent; transition: border-color .1s; flex-shrink: 0; }
-.ag-color-swatch.selected { border-color: var(--ag-acid); }
-.ag-insp-empty { color: var(--ag-dim); font-size: 10px; letter-spacing: .08em; text-align: center; padding: 40px 20px; line-height: 1.8; }
-.ag-del-btn {
-  width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .18em;
-  text-transform: uppercase; background: transparent; border: 1px solid var(--ag-err);
-  color: var(--ag-err); padding: 6px; cursor: pointer; margin-top: 12px; transition: all .1s;
-}
-.ag-del-btn:hover { background: var(--ag-err); color: var(--ag-black); }
-
-/* ── Mixer panel ────────────────────────────────────────────────────────── */
-.ag-mixer { padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
-.ag-mx-strip {
-  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-  background: var(--ag-panel); border: 1px solid var(--ag-border); position: relative;
-}
-.ag-mx-strip::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--strip-color, var(--ag-acid-d)); }
-.ag-mx-name { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ag-white); width: 56px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ag-mx-fader { flex: 1; accent-color: var(--ag-acid); height: 4px; }
-.ag-mx-val { font-size: 9px; color: var(--ag-mid); width: 28px; text-align: right; flex-shrink: 0; }
-.ag-mx-mute, .ag-mx-solo {
-  font-size: 8px; letter-spacing: .1em; text-transform: uppercase; padding: 3px 6px;
-  border: 1px solid var(--ag-border); background: transparent; color: var(--ag-mid); cursor: pointer; transition: all .08s; flex-shrink: 0;
-}
-.ag-mx-mute.on  { background: var(--ag-amber); border-color: var(--ag-amber); color: var(--ag-black); }
-.ag-mx-solo.on  { background: var(--ag-acid);  border-color: var(--ag-acid);  color: var(--ag-black); }
-.ag-mx-vu { width: 6px; height: 40px; background: var(--ag-border); position: relative; overflow: hidden; flex-shrink: 0; }
-.ag-mx-vu-fill { position: absolute; bottom: 0; left: 0; right: 0; transition: height .08s; }
-
-/* ── Mix suggestions ────────────────────────────────────────────────────── */
-.ag-suggest { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
-.ag-suggest-card {
-  background: var(--ag-panel); border: 1px solid var(--ag-border);
-  border-left: 3px solid var(--ag-acid-d); padding: 10px 12px; position: relative;
-}
-.ag-suggest-card.applied { border-left-color: var(--ag-mid); opacity: .5; }
-.ag-suggest-card.high-conf { border-left-color: var(--ag-acid); }
-.ag-suggest-type { font-size: 8px; letter-spacing: .25em; text-transform: uppercase; color: var(--ag-acid); margin-bottom: 4px; }
-.ag-suggest-desc { font-size: 10px; color: var(--ag-white); letter-spacing: .05em; line-height: 1.5; margin-bottom: 8px; }
-.ag-suggest-meta { display: flex; align-items: center; gap: 8px; }
-.ag-suggest-conf { font-size: 9px; color: var(--ag-mid); letter-spacing: .1em; }
-.ag-suggest-bar { flex: 1; height: 2px; background: var(--ag-border); }
-.ag-suggest-bar-fill { height: 100%; background: var(--ag-acid); transition: width .3s; }
-.ag-apply-btn {
-  font-size: 8px; letter-spacing: .15em; text-transform: uppercase;
-  background: transparent; border: 1px solid var(--ag-acid-d); color: var(--ag-acid);
-  padding: 3px 10px; cursor: pointer; transition: all .1s; flex-shrink: 0;
-}
-.ag-apply-btn:hover { background: var(--ag-acid); color: var(--ag-black); border-color: var(--ag-acid); }
-.ag-suggest-empty { font-size: 10px; color: var(--ag-dim); text-align: center; padding: 28px; letter-spacing: .08em; line-height: 1.8; }
-.ag-suggest-hdr { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.ag-suggest-hdr-label { font-size: 8px; letter-spacing: .3em; text-transform: uppercase; color: var(--ag-acid); }
-.ag-suggest-hdr-conf { font-size: 8px; letter-spacing: .1em; color: var(--ag-mid); margin-left: auto; }
-
-/* ── Activity feed ──────────────────────────────────────────────────────── */
-.ag-activity { padding: 0; }
-.ag-activity-row { padding: 10px 14px; border-bottom: 1px solid var(--ag-border); }
-.ag-activity-user { font-size: 10px; color: var(--ag-white); letter-spacing: .08em; margin-bottom: 3px; }
-.ag-activity-action { font-size: 9px; color: var(--ag-mid); letter-spacing: .06em; margin-bottom: 2px; }
-.ag-activity-time { font-size: 8px; color: var(--ag-dim); letter-spacing: .1em; }
-
-/* ── Guide ──────────────────────────────────────────────────────────────── */
-.ag-guide { border-top: 3px solid var(--ag-border); background: var(--ag-ink); padding: 14px 16px; flex-shrink: 0; }
-.ag-guide-header { font-size: 8px; letter-spacing: .35em; text-transform: uppercase; color: var(--ag-acid); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-.ag-guide-header::after { content:''; flex:1; height:1px; background:var(--ag-acid-d); }
-.ag-guide-row { display: flex; gap: 0; border-bottom: 1px solid var(--ag-border); }
-.ag-guide-key { font-weight: 600; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ag-white); padding: 6px 10px 6px 0; min-width: 68px; border-right: 1px solid var(--ag-border); margin-right: 10px; flex-shrink: 0; }
-.ag-guide-val { font-size: 9px; letter-spacing: .06em; color: var(--ag-white); padding: 6px 0; }
-.ag-kbd-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ag-border); display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.ag-kbd-row { display: flex; align-items: center; justify-content: space-between; padding: 3px 0; }
-.ag-kbd-label { font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--ag-white); }
-.ag-kbd-tag { font-size: 9px; font-weight: 600; color: var(--ag-acid); background: rgba(163,230,53,.08); border: 1px solid var(--ag-acid-d); padding: 2px 6px; letter-spacing: .05em; }
-
-/* ── Footer ─────────────────────────────────────────────────────────────── */
-.ag-footer {
-  border-top: 3px solid var(--ag-border); background: var(--ag-ink); padding: 8px 20px;
-  display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
-}
-@media(min-width:768px){ .ag-footer { flex-direction: row; align-items: center; justify-content: space-between; } }
-.ag-footer-left { font-size: 8px; letter-spacing: .22em; text-transform: uppercase; color: var(--ag-white); display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
-.ag-footer-feat { display: flex; align-items: center; }
-.ag-footer-feat + .ag-footer-feat::before { content:'/'; color: var(--ag-acid); margin: 0 6px; font-size: 10px; }
-.ag-footer-right { font-size: 8px; letter-spacing: .15em; text-transform: uppercase; color: var(--ag-white); display: flex; align-items: center; gap: 8px; }
-.ag-footer-stat { color: var(--ag-acid); }
-.ag-ver-tag { background: rgba(163,230,53,.08); border: 1px solid var(--ag-acid-d); padding: 2px 8px; font-size: 8px; letter-spacing: .2em; color: var(--ag-acid-d); }
-
-/* ── LLPTE status bar ───────────────────────────────────────────────────── */
-.ag-llpte-bar {
-  display: flex; align-items: center; gap: 0; background: var(--ag-ink);
-  border-top: 1px solid var(--ag-border); flex-shrink: 0; overflow: hidden;
-}
-.ag-llpte-node {
-  flex: 1; padding: 4px 0; text-align: center; font-size: 8px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--ag-mid); border-right: 1px solid var(--ag-border);
-  position: relative; overflow: hidden;
-}
-.ag-llpte-node:last-child { border-right: none; }
-.ag-llpte-node.active { color: var(--ag-acid); }
-.ag-llpte-node.active::before { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--ag-acid); box-shadow:0 0 6px var(--ag-acid); }
-.ag-llpte-arrow { color: var(--ag-acid-d); font-size: 8px; flex-shrink: 0; }
-
-/* ── Global overrides ───────────────────────────────────────────────────── */
-.ag-frame input[type="number"] {
-  background: var(--ag-black) !important; border: 1px solid var(--ag-border) !important;
-  color: var(--ag-acid) !important; font-family: 'IBM Plex Mono', monospace !important;
-  font-size: 11px !important;
-}
-.ag-frame input[type="range"] { accent-color: var(--ag-acid); }
-.ag-frame *:focus-visible { outline: 1px solid var(--ag-acid) !important; outline-offset: 1px !important; box-shadow: none !important; }
-.ag-frame ::-webkit-scrollbar { width: 6px; height: 6px; background: var(--ag-black); }
-.ag-frame ::-webkit-scrollbar-track { background: var(--ag-ink); }
-.ag-frame ::-webkit-scrollbar-thumb { background: var(--ag-border); }
-.ag-frame ::-webkit-scrollbar-thumb:hover { background: var(--ag-acid); }
-.ag-frame canvas { image-rendering: pixelated; }
-
-/* ── Settings modal ─────────────────────────────────────────────────────── */
-.ag-modal-backdrop {
-  position: fixed; inset: 0; background: rgba(6,6,6,.85); z-index: 100;
-  display: flex; align-items: center; justify-content: center;
-}
-.ag-modal {
-  background: var(--ag-ink); border: 2px solid var(--ag-border);
-  border-top: 3px solid var(--ag-acid); width: min(420px, calc(100vw - 40px));
-  max-height: 80vh; overflow-y: auto; animation: ag-box-in .25s ease forwards;
-}
-@keyframes ag-box-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.ag-modal-header { padding: 12px 16px; border-bottom: 1px solid var(--ag-border); display: flex; align-items: center; justify-content: space-between; }
-.ag-modal-title { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--ag-acid); }
-.ag-modal-close { background: transparent; border: none; color: var(--ag-mid); cursor: pointer; font-size: 16px; transition: color .1s; }
-.ag-modal-close:hover { color: var(--ag-err); }
-.ag-modal-body { padding: 14px 16px; }
-.ag-setting-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--ag-border); }
-.ag-setting-label { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ag-mid); }
-
-/* ── Responsive ─────────────────────────────────────────────────────────── */
-@media(max-width:1023px){
-  .ag-left  { height: auto; border-right: none !important; }
-  .ag-right { height: auto; }
-  .ag-content { overflow-y: auto; }
-}
-@media(max-height:600px) and (orientation:landscape){
-  .ag-bpm-number, .ag-bpm-input { font-size: clamp(24px,4vw,36px) !important; }
-  .ag-wordmark { font-size: clamp(16px,2.2vw,22px) !important; }
-}
-`;
-
-// ─── UID factory ─────────────────────────────────────────────────────────────
-
-let _uid = 1;
-const uid = () => _uid++;
-
-// ─── Clip colors ─────────────────────────────────────────────────────────────
-
-const CLIP_COLORS = [
-  '#4d6b18', '#116644', '#4d3d96', '#7a5500', '#0d3d7a', '#7a1a26',
+const INIT_SUGGESTIONS: LLPTESuggestion[] = [
+  { id:'s1', trackId:'t1', type:'gain_adjust',  confidence:0.87, displayedConfidence:0.87, decision:{gain:0.78}, outcome:'auto_applied', label:'Reduce kick gain −2dB' },
+  { id:'s2', trackId:'t2', type:'conflict_flag', confidence:0.74, displayedConfidence:0.74, decision:{band:'80Hz'}, outcome:'ignored',     label:'Freq clash @ 80Hz with t1' },
+  { id:'s3', trackId:'t3', type:'eq_suggest',   confidence:0.61, displayedConfidence:0.61, decision:{cut:'2kHz'}, outcome:'ignored',      label:'Cut 2kHz harshness −3dB' },
 ];
 
-// ─── Initial state ────────────────────────────────────────────────────────────
+// ─── Utilities ────────────────────────────────────────────────────────────────
 
-function makeProject(): Project {
-  const tracks: Track[] = [
-    { id: uid(), index: 0, name: 'Kick',  type: 'audio', color: '#a3e635', muted: false, solo: false, volume: 0.8, pan: 0 },
-    { id: uid(), index: 1, name: 'Snare', type: 'audio', color: '#2dd4bf', muted: false, solo: false, volume: 0.8, pan: 0 },
-    { id: uid(), index: 2, name: 'Bass',  type: 'synth', color: '#a78bfa', muted: false, solo: false, volume: 0.9, pan: 0 },
-    { id: uid(), index: 3, name: 'Lead',  type: 'synth', color: '#fbbf24', muted: false, solo: false, volume: 0.7, pan: 0.2 },
-    { id: uid(), index: 4, name: 'Pad',   type: 'synth', color: '#60a5fa', muted: false, solo: false, volume: 0.6, pan: -0.15 },
-    { id: uid(), index: 5, name: 'FX',    type: 'fx',    color: '#f87171', muted: false, solo: false, volume: 0.5, pan: 0 },
-  ];
-  const [tk, ts, tb, tl, tp, tf] = tracks;
-  const clips: Clip[] = [
-    { id: uid(), trackId: tk.id, startBeat: 0,  lenBeats: 4,  name: 'K-Main',  color: '#4d6b18' },
-    { id: uid(), trackId: tk.id, startBeat: 4,  lenBeats: 4,  name: 'K-Fill',  color: '#4d6b18' },
-    { id: uid(), trackId: tk.id, startBeat: 8,  lenBeats: 8,  name: 'K-Break', color: '#4d6b18' },
-    { id: uid(), trackId: ts.id, startBeat: 0,  lenBeats: 8,  name: 'Sn-Main', color: '#116644' },
-    { id: uid(), trackId: ts.id, startBeat: 8,  lenBeats: 4,  name: 'Sn-Fill', color: '#116644' },
-    { id: uid(), trackId: tb.id, startBeat: 0,  lenBeats: 4,  name: 'Bass A',  color: '#4d3d96' },
-    { id: uid(), trackId: tb.id, startBeat: 4,  lenBeats: 4,  name: 'Bass B',  color: '#4d3d96' },
-    { id: uid(), trackId: tb.id, startBeat: 8,  lenBeats: 8,  name: 'Bass C',  color: '#4d3d96' },
-    { id: uid(), trackId: tl.id, startBeat: 4,  lenBeats: 8,  name: 'Lead',    color: '#7a5500' },
-    { id: uid(), trackId: tp.id, startBeat: 0,  lenBeats: 16, name: 'Pad',     color: '#0d3d7a' },
-    { id: uid(), trackId: tf.id, startBeat: 12, lenBeats: 4,  name: 'Riser',   color: '#7a1a26' },
-  ];
-  const markers: Marker[] = [
-    { id: uid(), beat: 0,  label: 'Intro', color: '#fbbf24' },
-    { id: uid(), beat: 8,  label: 'Drop',  color: '#a3e635' },
-    { id: uid(), beat: 16, label: 'Break', color: '#2dd4bf' },
-  ];
-  return { tracks, clips, markers, bpm: 128, beatsPerBar: 4, scrollX: 0, zoom: 1 };
-}
+const barsToPixels = (bars: number, gw: number) => bars * gw;
+const pixelsToBars = (px: number,   gw: number) => px / gw;
 
-function makeSuggestions(): MixSuggestion[] {
-  return [
-    { id: uid(), type: 'level', target: 'Kick',   description: 'Boost kick 2dB — sitting below the mix at current BPM transients.', confidence: 0.81, applied: false },
-    { id: uid(), type: 'eq',    target: 'Bass',   description: 'High-pass at 40Hz — low-end mud conflicts with kick sub.', confidence: 0.74, applied: false },
-    { id: uid(), type: 'pan',   target: 'Lead',   description: 'Pan lead +15% right — mono centre conflict with bass fundamental.', confidence: 0.67, applied: false },
-    { id: uid(), type: 'level', target: 'Pad',    description: 'Reduce pad 3dB in drop section — masking reverb tail on snare.', confidence: 0.61, applied: false },
-  ];
-}
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-// ─── Pure drawing functions (outside component — no closure captures) ─────────
+const formatTime = (bars: number, tempo: number, bpb: number): string => {
+  const secs = (bars * bpb * 60) / tempo;
+  const m    = Math.floor(secs / 60);
+  const s    = Math.floor(secs % 60);
+  const ms   = Math.floor((secs % 1) * 100);
+  return `${m}:${String(s).padStart(2,'0')}.${String(ms).padStart(2,'0')}`;
+};
 
-function drawWaveform(
-  ctx: CanvasRenderingContext2D,
-  x: number, y: number, w: number, h: number, seed: number,
-): void {
-  const segs = Math.max(4, Math.floor(w / 4));
-  const pts: number[] = [];
-  let rng = seed;
-  for (let i = 0; i <= segs; i++) {
-    rng = ((rng * 1664525 + 1013904223) | 0) >>> 0;
-    pts.push(0.18 + (rng / 0xffffffff) * 0.78);
-  }
-  const mid = y + h / 2;
-  ctx.beginPath();
-  ctx.moveTo(x, mid);
-  for (let i = 0; i <= segs; i++) {
-    ctx.lineTo(x + (i / segs) * w, mid - pts[i] * h * 0.38);
-  }
-  for (let i = segs; i >= 0; i--) {
-    ctx.lineTo(x + (i / segs) * w, mid + pts[i] * h * 0.38);
-  }
-  ctx.closePath();
-}
-
-function drawRuler(
-  ctx: CanvasRenderingContext2D,
-  w: number, h: number, scrollX: number, zoom: number, beatsPerBar: number,
-): void {
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = '#1c1c1c';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(0, h - 0.5); ctx.lineTo(w, h - 0.5); ctx.stroke();
-
-  const pxPerBeat = zoom * 80;
-  const first = Math.floor(scrollX / pxPerBeat);
-  const last  = Math.ceil((scrollX + w) / pxPerBeat) + 1;
-  ctx.font = `10px 'IBM Plex Mono', monospace`;
-  ctx.textBaseline = 'middle';
-
-  for (let b = first; b <= last; b++) {
-    const x = b * pxPerBeat - scrollX + TL.LABEL_W;
-    const isBar = b % beatsPerBar === 0;
-    ctx.strokeStyle = isBar ? '#2a2a2a' : '#1c1c1c';
-    ctx.lineWidth = isBar ? 0.8 : 0.5;
-    ctx.beginPath(); ctx.moveTo(x, isBar ? 0 : h * 0.6); ctx.lineTo(x, h); ctx.stroke();
-    if (isBar) {
-      ctx.fillStyle = '#666';
-      ctx.fillText(`${Math.floor(b / beatsPerBar) + 1}`, x + 3, h / 2);
+const wfCache = new Map<string, number[]>();
+const getWaveform = (id: string, pts: number): number[] => {
+  const key = `${id}_${pts}`;
+  if (!wfCache.has(key)) {
+    const d: number[] = [];
+    for (let i = 0; i < pts; i++) {
+      const t = i / pts;
+      d.push((Math.sin(t * Math.PI * 4 + Math.random()) * 0.6 + (Math.random()-0.5)*0.3) * Math.sin(t*Math.PI) * 0.85 + 0.08);
     }
+    wfCache.set(key, d);
   }
-}
+  return wfCache.get(key)!;
+};
 
-interface DrawAllParams {
-  ctx: CanvasRenderingContext2D;
-  proj: Project;
-  sl: SelectionState;
-  gw: number;
-  gh: number;
-  loop: LoopRegion;
-  vuLevels: Record<number, number>;
-}
+const confidenceColor = (c: number): string => {
+  if (c >= 0.65) return C.neon;
+  if (c >= 0.40) return C.yellow;
+  return C.magenta;
+};
 
-function drawAll({ ctx, proj, sl, gw, gh, loop, vuLevels }: DrawAllParams): void {
-  const { scrollX, zoom, tracks, clips, markers, beatsPerBar } = proj;
-  const pxPerBeat = zoom * 80;
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-  ctx.clearRect(0, 0, gw, gh);
+const AgBtn = memo(({
+  children, onClick, disabled=false, active=false,
+  activeColor=C.neon, title, style: sx,
+}: {
+  children: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
+  active?: boolean;
+  activeColor?: string;
+  title?: string;
+  style?: React.CSSProperties;
+}) => (
+  <button
+    onClick={onClick} disabled={disabled} title={title}
+    style={{
+      background:     active ? activeColor : 'transparent',
+      border:         `1px solid ${active ? activeColor : C.border}`,
+      borderRadius:   0,
+      color:          active ? C.void : C.text,
+      padding:        '5px 9px',
+      cursor:         disabled ? 'not-allowed' : 'pointer',
+      display:        'flex', alignItems:'center', justifyContent:'center', gap:4,
+      transition:     'background .07s, border-color .07s, color .07s',
+      outline:        'none',
+      opacity:        disabled ? 0.3 : 1,
+      fontFamily:     FONT.mono,
+      fontSize:       9,
+      letterSpacing:  '.1em',
+      textTransform:  'uppercase',
+      whiteSpace:     'nowrap',
+      boxShadow:      active ? `0 0 10px ${activeColor}66` : 'none',
+      flexShrink:     0,
+      ...sx,
+    }}
+    onMouseEnter={e => { if (!disabled && !active) { (e.currentTarget as HTMLButtonElement).style.background=C.neon; (e.currentTarget as HTMLButtonElement).style.borderColor=C.neon; (e.currentTarget as HTMLButtonElement).style.color=C.void; }}}
+    onMouseLeave={e => { if (!disabled && !active) { (e.currentTarget as HTMLButtonElement).style.background='transparent'; (e.currentTarget as HTMLButtonElement).style.borderColor=C.border; (e.currentTarget as HTMLButtonElement).style.color=C.text; }}}
+  >
+    {children}
+  </button>
+));
+AgBtn.displayName = 'AgBtn';
 
-  // BG
-  ctx.fillStyle = '#060606';
-  ctx.fillRect(0, 0, gw, gh);
+const AgLabel = ({ children, style: sx }: { children: React.ReactNode; style?: React.CSSProperties }) => (
+  <span style={{ fontSize:8, letterSpacing:'.3em', textTransform:'uppercase', color:C.textMuted, fontFamily:FONT.mono, ...sx }}>
+    {children}
+  </span>
+);
 
-  // Track rows
-  tracks.forEach((tr, i) => {
-    const y = i * TL.TRACK_H + TL.HEADER_H;
-    ctx.fillStyle = i % 2 === 0 ? '#0a0a0a' : '#060606';
-    ctx.fillRect(TL.LABEL_W, y, gw - TL.LABEL_W, TL.TRACK_H);
-    ctx.strokeStyle = '#1c1c1c';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(TL.LABEL_W, y + TL.TRACK_H - 0.5); ctx.lineTo(gw, y + TL.TRACK_H - 0.5); ctx.stroke();
-  });
+const Divider = () => (
+  <div style={{ width:1, alignSelf:'stretch', background:C.border, margin:'0 4px', flexShrink:0 }} />
+);
 
-  // Bar grid lines
-  const firstBar = Math.floor(scrollX / (pxPerBeat * beatsPerBar));
-  const lastBar  = Math.ceil((scrollX + gw) / (pxPerBeat * beatsPerBar)) + 1;
-  for (let b = firstBar; b <= lastBar; b++) {
-    const x = b * beatsPerBar * pxPerBeat - scrollX + TL.LABEL_W;
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(x, TL.HEADER_H); ctx.lineTo(x, gh); ctx.stroke();
-  }
+// VU Meter
+const VUMeter = memo(({ level, color, peaked }: { level: number; color: string; peaked: boolean }) => (
+  <div style={{ display:'flex', flexDirection:'column-reverse', gap:1, height:48, width:6 }}>
+    {Array.from({length:12}).map((_,i) => {
+      const threshold = i / 12;
+      const lit       = level > threshold;
+      const seg       = i > 9 ? C.magenta : i > 7 ? C.yellow : color;
+      return (
+        <div key={i} style={{
+          flex:1, background: lit ? seg : C.border,
+          boxShadow: lit && i > 9 ? `0 0 4px ${C.magenta}` : 'none',
+          transition:'background .06s',
+        }} />
+      );
+    })}
+  </div>
+));
+VUMeter.displayName = 'VUMeter';
 
-  // Loop region
-  if (loop.active) {
-    const x1 = loop.startBeat * pxPerBeat - scrollX + TL.LABEL_W;
-    const x2 = loop.endBeat   * pxPerBeat - scrollX + TL.LABEL_W;
-    if (x2 > TL.LABEL_W && x1 < gw) {
-      ctx.fillStyle = '#2dd4bf';
-      ctx.globalAlpha = 0.06;
-      ctx.fillRect(x1, TL.HEADER_H, x2 - x1, gh - TL.HEADER_H);
-      ctx.globalAlpha = 0.3;
-      ctx.strokeStyle = '#2dd4bf';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(x1, TL.HEADER_H); ctx.lineTo(x1, gh); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x2, TL.HEADER_H); ctx.lineTo(x2, gh); ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
-  }
+// LLPTE confidence badge
+const ConfBadge = ({ confidence, label }: { confidence: number; label: string }) => {
+  const col = confidenceColor(confidence);
+  return (
+    <div style={{
+      display:'flex', alignItems:'center', gap:5,
+      padding:'3px 8px',
+      background:`${col}10`,
+      border:`1px solid ${col}44`,
+      fontSize:8, fontFamily:FONT.mono, letterSpacing:'.1em',
+    }}>
+      <div style={{ width:5, height:5, background:col, boxShadow:`0 0 6px ${col}` }} />
+      <span style={{ color:col, fontWeight:700 }}>{Math.round(confidence*100)}%</span>
+      <span style={{ color:C.textMuted }}>{label}</span>
+    </div>
+  );
+};
 
-  // Clips
-  clips.forEach(clip => {
-    const track = tracks.find(t => t.id === clip.trackId);
-    if (!track) return;
-    const cx = clip.startBeat * pxPerBeat - scrollX + TL.LABEL_W;
-    const cw = Math.max(TL.MIN_CLIP_PX, clip.lenBeats * pxPerBeat);
-    const cy = track.index * TL.TRACK_H + TL.HEADER_H + 1;
-    const ch = TL.TRACK_H - 2;
-    if (cx + cw < TL.LABEL_W || cx > gw) return;
+// ─── Main Component ───────────────────────────────────────────────────────────
 
-    const isSel = sl.selClipId === clip.id;
-    const isHov = sl.hovClipId === clip.id;
+export default function CollabDAWPro() {
 
-    ctx.globalAlpha = isSel ? 1 : isHov ? 0.93 : 0.82;
-
-    // Body
-    ctx.fillStyle = clip.color;
-    ctx.fillRect(cx, cy, cw, ch);
-
-    // Waveform
-    if (cw > 24) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(cx + 1, cy + 1, cw - 2, ch - 2);
-      ctx.clip();
-      ctx.globalAlpha = 0.2;
-      ctx.fillStyle = '#000';
-      drawWaveform(ctx, cx + 2, cy + 3, cw - 4, ch - 6, clip.id * 13337);
-      ctx.fill();
-      ctx.globalAlpha = isSel ? 0.85 : 0.55;
-      ctx.fillStyle = '#fff';
-      drawWaveform(ctx, cx + 2, cy + 3, cw - 4, ch - 6, clip.id * 13337);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    ctx.globalAlpha = 1;
-
-    // Label
-    if (cw > 28) {
-      ctx.font = `500 9px 'IBM Plex Mono', monospace`;
-      ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.textBaseline = 'top';
-      ctx.fillText(clip.name.slice(0, Math.floor(cw / 7)), cx + 5, cy + 4);
-    }
-
-    // Selection border
-    if (isSel) {
-      ctx.strokeStyle = '#a3e635';
-      ctx.lineWidth = 1.5;
-      ctx.shadowBlur = 6;
-      ctx.shadowColor = '#a3e635';
-      ctx.strokeRect(cx, cy, cw, ch);
-      ctx.shadowBlur = 0;
-    }
-
-    // Resize handles
-    if (isSel || isHov) {
-      ctx.fillStyle = isSel ? '#a3e635' : '#888';
-      ctx.globalAlpha = 0.65;
-      ctx.fillRect(cx, cy + 2, 3, ch - 4);
-      ctx.fillRect(cx + cw - 3, cy + 2, 3, ch - 4);
-      ctx.globalAlpha = 1;
-    }
-  });
-
-  // Markers
-  markers.forEach(m => {
-    const x = m.beat * pxPerBeat - scrollX + TL.LABEL_W;
-    if (x < TL.LABEL_W || x > gw) return;
-    ctx.strokeStyle = m.color;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath(); ctx.moveTo(x, TL.HEADER_H); ctx.lineTo(x, gh); ctx.stroke();
-    ctx.setLineDash([]);
-    if (m.label) {
-      ctx.fillStyle = m.color;
-      ctx.font = `9px 'IBM Plex Mono', monospace`;
-      ctx.textBaseline = 'top';
-      ctx.fillText(m.label, x + 3, TL.HEADER_H + 2);
-    }
-  });
-
-  // Ruler
-  drawRuler(ctx, gw, TL.HEADER_H, scrollX, zoom, beatsPerBar);
-
-  // Label column
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, TL.LABEL_W, gh);
-  ctx.strokeStyle = '#2a2a2a';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(TL.LABEL_W, 0); ctx.lineTo(TL.LABEL_W, gh); ctx.stroke();
-
-  tracks.forEach((tr, i) => {
-    const y = i * TL.TRACK_H + TL.HEADER_H;
-
-    ctx.fillStyle = '#0d0d0d';
-    ctx.fillRect(1, y + 1, TL.LABEL_W - 2, TL.TRACK_H - 2);
-
-    // Color stripe
-    ctx.fillStyle = tr.color;
-    ctx.fillRect(1, y + 1, 3, TL.TRACK_H - 2);
-
-    // Name
-    ctx.fillStyle = '#f0f0f0';
-    ctx.font = `500 10px 'IBM Plex Mono', monospace`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(tr.name, 12, y + 8);
-
-    // Type
-    ctx.fillStyle = '#555';
-    ctx.font = `9px 'IBM Plex Mono', monospace`;
-    ctx.fillText(tr.type.toUpperCase(), 12, y + 22);
-
-    // Mute/Solo
-    const muteX = TL.LABEL_W - 46;
-    const soloX = TL.LABEL_W - 26;
-    const btnY  = y + TL.TRACK_H - 19;
-
-    ctx.fillStyle = tr.muted ? '#fbbf24' : '#1c1c1c';
-    ctx.fillRect(muteX, btnY, 18, 14);
-    ctx.fillStyle = tr.muted ? '#060606' : '#666';
-    ctx.font = `8px 'IBM Plex Mono', monospace`;
-    ctx.textBaseline = 'middle';
-    ctx.fillText('M', muteX + 5, btnY + 7);
-
-    ctx.fillStyle = tr.solo ? '#a3e635' : '#1c1c1c';
-    ctx.fillRect(soloX, btnY, 18, 14);
-    ctx.fillStyle = tr.solo ? '#060606' : '#666';
-    ctx.fillText('S', soloX + 5, btnY + 7);
-
-    // VU meter
-    const vuH = TL.TRACK_H - 10;
-    const lvl = vuLevels[tr.id] ?? 0;
-    const fillH = Math.floor(lvl * vuH);
-    ctx.fillStyle = '#1c1c1c';
-    ctx.fillRect(TL.LABEL_W - 8, y + 4, 4, vuH);
-    const vuCol = lvl > 0.85 ? '#f87171' : lvl > 0.6 ? '#fbbf24' : '#a3e635';
-    ctx.fillStyle = vuCol;
-    ctx.fillRect(TL.LABEL_W - 8, y + 4 + vuH - fillH, 4, fillH);
-  });
-}
-
-interface DrawDynParams {
-  ctx: CanvasRenderingContext2D;
-  proj: Project;
-  gw: number;
-  gh: number;
-  barPos: number;
-  collabs: Collaborator[];
-}
-
-function drawDyn({ ctx, proj, gw, gh, barPos, collabs }: DrawDynParams): void {
-  ctx.clearRect(0, 0, gw, gh);
-  const { scrollX, zoom } = proj;
-  const pxPerBeat = zoom * 80;
-
-  // Collaborator cursors
-  collabs.forEach(col => {
-    const x = col.beat * pxPerBeat - scrollX + TL.LABEL_W;
-    if (x < TL.LABEL_W || x > gw) return;
-    ctx.strokeStyle = col.color;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([2, 2]);
-    ctx.beginPath(); ctx.moveTo(x, TL.HEADER_H); ctx.lineTo(x, gh); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = col.color;
-    ctx.font = `8px 'IBM Plex Mono', monospace`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(col.name, x + 2, TL.HEADER_H + 2);
-  });
-
-  // Playhead
-  const px = barPos * pxPerBeat - scrollX + TL.LABEL_W;
-  if (px >= TL.LABEL_W && px <= gw) {
-    ctx.strokeStyle = '#a3e635';
-    ctx.lineWidth = 1.5;
-    ctx.shadowBlur = 6;
-    ctx.shadowColor = '#a3e635';
-    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, gh); ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#a3e635';
-    ctx.beginPath();
-    ctx.moveTo(px - 6, 0);
-    ctx.lineTo(px + 6, 0);
-    ctx.lineTo(px, 10);
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
-interface DrawMinimapParams {
-  ctx: CanvasRenderingContext2D;
-  proj: Project;
-  gw: number;
-  canvasW: number;
-}
-
-function drawMinimap({ ctx, proj, gw, canvasW }: DrawMinimapParams): void {
-  ctx.clearRect(0, 0, gw, TL.MM_H);
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, gw, TL.MM_H);
-
-  const { tracks, clips, zoom, scrollX } = proj;
-  const totalBeats = Math.max(32, ...clips.map(c => c.startBeat + c.lenBeats));
-  const scaleX = (gw - TL.LABEL_W) / (totalBeats * zoom * 80);
-
-  clips.forEach(clip => {
-    const track = tracks.find(t => t.id === clip.trackId);
-    if (!track) return;
-    const x = TL.LABEL_W + clip.startBeat * zoom * 80 * scaleX;
-    const w = Math.max(2, clip.lenBeats * zoom * 80 * scaleX);
-    const y = 2 + (track.index / tracks.length) * (TL.MM_H - 4);
-    const h = Math.max(2, (TL.MM_H - 4) / tracks.length - 1);
-    ctx.fillStyle = clip.color;
-    ctx.globalAlpha = 0.65;
-    ctx.fillRect(x, y, w, h);
-  });
-  ctx.globalAlpha = 1;
-
-  // Viewport indicator
-  const viewW = ((canvasW - TL.LABEL_W) / (totalBeats * zoom * 80)) * (gw - TL.LABEL_W);
-  const viewX = TL.LABEL_W + (scrollX / (totalBeats * zoom * 80)) * (gw - TL.LABEL_W);
-  ctx.strokeStyle = '#a3e635';
-  ctx.lineWidth = 1;
-  ctx.fillStyle = '#a3e635';
-  ctx.globalAlpha = 0.1;
-  ctx.fillRect(viewX, 0, Math.max(8, viewW), TL.MM_H);
-  ctx.globalAlpha = 0.8;
-  ctx.strokeRect(viewX, 0.5, Math.max(8, viewW), TL.MM_H - 1);
-  ctx.globalAlpha = 1;
-
-  ctx.strokeStyle = '#1c1c1c';
-  ctx.lineWidth = 0.5;
-  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(gw, 0); ctx.stroke();
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export default function WaveLabProduction() {
-
-  // ── Core state ──────────────────────────────────────────────────────────
-
-  const [proj, setProj]               = useState<Project>(makeProject);
-  const [transport, setTransport]     = useState<TransportState>('stopped');
-  const [barPos, setBarPos]           = useState(0);
-  const [selClipId, setSelClipId]     = useState<number | null>(null);
-  const [hovClipId, setHovClipId]     = useState<number | null>(null);
-  const [snap, setSnap]               = useState<SnapValue>(1);
-  const [loop, setLoop]               = useState<LoopRegion>({ active: false, startBeat: 0, endBeat: 8 });
-  const [collabs]                     = useState<Collaborator[]>([
-    { id: 1, name: 'Nadia', beat: 5.2, color: '#2dd4bf' },
-    { id: 2, name: 'Erik',  beat: 9.8, color: '#a78bfa' },
+  const [project, setProject]                       = useState<Project>(INIT_PROJECT);
+  const [transport, setTransport]                   = useState<TransportMode>('stopped');
+  const [currentBar, setCurrentBar]                 = useState(0);
+  const [zoom, setZoom]                             = useState(1);
+  const [scrollLeft, setScrollLeft]                 = useState(0);
+  const [scrollTop, setScrollTop]                   = useState(0);
+  const [selectedClipIds, setSelectedClipIds]       = useState<string[]>([]);
+  const [selectedTrackId, setSelectedTrackId]       = useState<string|null>(null);
+  const [collaborators, setCollaborators]           = useState<Collaborator[]>(INIT_COLLABS);
+  const [activities, setActivities]                 = useState<Activity[]>([
+    { id:1, user:'You',           action:'Created session',    timestamp:Date.now()-300000, type:'collab' },
+    { id:2, user:'Alex Martinez', action:'Joined session',     timestamp:Date.now()-240000, type:'collab' },
+    { id:3, user:'Jordan Kim',    action:'Added "808 Bass"',   timestamp:Date.now()-180000, type:'edit'   },
   ]);
-  const [showMinimap, setShowMinimap] = useState(true);
-  const [showSettings, setShowSettings] = useState(false);
-  const [suggestions, setSuggestions] = useState<MixSuggestion[]>(makeSuggestions);
-  const [activity, setActivity]       = useState<ActivityEntry[]>([
-    { id: 1, user: 'Nadia', action: 'edited Pad clip',    ts: Date.now() - 90000 },
-    { id: 2, user: 'Erik',  action: 'added Riser clip',   ts: Date.now() - 45000 },
-    { id: 3, user: 'You',   action: 'opened session',     ts: Date.now() - 5000  },
-  ]);
-  const [rightTab, setRightTab]       = useState<'inspector' | 'mixer' | 'activity'>('inspector');
-  const [canUndo, setCanUndo]         = useState(false);
-  const [canRedo, setCanRedo]         = useState(false);
-  const [vuLevels, setVuLevels]       = useState<Record<number, number>>({});
+  const [showActivity, setShowActivity]             = useState(true);
+  const [showMixer, setShowMixer]                   = useState(false);
+  const [showAI, setShowAI]                         = useState(true);
+  const [connStatus, setConnStatus]                 = useState<ConnectionStatus>('connected');
+  const [metronome, setMetronome]                   = useState(false);
+  const [snapGrid, setSnapGrid]                     = useState(true);
+  const [loopOn, setLoopOn]                         = useState(false);
+  const [loopRegion, setLoopRegion]                 = useState({ start:0, end:16 });
+  const [masterVol, setMasterVol]                   = useState(0.82);
+  const [masterMuted, setMasterMuted]               = useState(false);
+  const [hoveredClipId, setHoveredClipId]           = useState<string|null>(null);
+  const [contextMenu, setContextMenu]               = useState<{x:number;y:number}|null>(null);
+  const [history, setHistory]                       = useState<Project[]>([INIT_PROJECT]);
+  const [historyIdx, setHistoryIdx]                 = useState(0);
+  const [suggestions, setSuggestions]               = useState<LLPTESuggestion[]>(INIT_SUGGESTIONS);
+  const [llpteLatency]                              = useState(10);
+  const [cpuLoad, setCpuLoad]                       = useState(0.38);
+  const [vuLevels, setVuLevels]                     = useState<Record<string,number>>({});
+  const [peakedTracks, setPeakedTracks]             = useState<Set<string>>(new Set());
+  const [toasts, setToasts]                         = useState<{id:number;msg:string;type:'ai'|'info'|'warn'}[]>([]);
+  const [showSettings, setShowSettings]             = useState(false);
 
-  // ── Canvas refs ──────────────────────────────────────────────────────────
+  const canvasRef         = useRef<HTMLCanvasElement|null>(null);
+  const containerRef      = useRef<HTMLDivElement|null>(null);
+  const rafRef            = useRef<number|null>(null);
+  const startTimeRef      = useRef<number|null>(null);
+  const lastRenderRef     = useRef(0);
 
-  const staticRef    = useRef<HTMLCanvasElement>(null);
-  const dynRef       = useRef<HTMLCanvasElement>(null);
-  const mmRef        = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const gwRef        = useRef(800);
-  const ghRef        = useRef(proj.tracks.length * TL.TRACK_H + TL.HEADER_H);
+  const gridWidth = TL.gridWidth * zoom;
 
-  // ── Stable mirrors (for RAF/events — avoid stale closures) ──────────────
-
-  const projRef     = useRef(proj);
-  const slRef       = useRef<SelectionState>({ selClipId, hovClipId });
-  const trRef       = useRef<TransportState>(transport);
-  const barRef      = useRef(barPos);
-  const loopRef     = useRef(loop);
-  const collabsRef  = useRef(collabs);
-  const snapRef     = useRef(snap);
-  const vuRef       = useRef(vuLevels);
-
-  useEffect(() => { projRef.current = proj; }, [proj]);
-  useEffect(() => { slRef.current = { selClipId, hovClipId }; }, [selClipId, hovClipId]);
-  useEffect(() => { trRef.current = transport; }, [transport]);
-  useEffect(() => { barRef.current = barPos; }, [barPos]);
-  useEffect(() => { loopRef.current = loop; }, [loop]);
-  useEffect(() => { collabsRef.current = collabs; }, [collabs]);
-  useEffect(() => { snapRef.current = snap; }, [snap]);
-  useEffect(() => { vuRef.current = vuLevels; }, [vuLevels]);
-
-  // ── History ──────────────────────────────────────────────────────────────
-
-  const histRef    = useRef<Project[]>([proj]);
-  const histIdxRef = useRef(0);
-
-  const pushHistory = useCallback((next: Project) => {
-    const hist = histRef.current.slice(0, histIdxRef.current + 1);
-    hist.push(next);
-    if (hist.length > 80) hist.shift();
-    histRef.current    = hist;
-    histIdxRef.current = hist.length - 1;
-    setCanUndo(histIdxRef.current > 0);
-    setCanRedo(false);
+  // ── Toast helper ────────────────────────────────────────────────────────────
+  const toast = useCallback((msg: string, type: 'ai'|'info'|'warn' = 'info') => {
+    const id = Date.now();
+    setToasts(p => [...p, {id, msg, type}]);
+    setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3500);
   }, []);
 
-  const undo = useCallback(() => {
-    if (histIdxRef.current <= 0) return;
-    histIdxRef.current--;
-    setProj(histRef.current[histIdxRef.current]);
-    setCanUndo(histIdxRef.current > 0);
-    setCanRedo(true);
+  // ── Activity feed ───────────────────────────────────────────────────────────
+  const addActivity = useCallback((action: string, user = 'You', type: Activity['type'] = 'edit') => {
+    setActivities(p => [{id:Date.now(), user, action, timestamp:Date.now(), type}, ...p].slice(0,60));
   }, []);
 
-  const redo = useCallback(() => {
-    if (histIdxRef.current >= histRef.current.length - 1) return;
-    histIdxRef.current++;
-    setProj(histRef.current[histIdxRef.current]);
-    setCanUndo(true);
-    setCanRedo(histIdxRef.current < histRef.current.length - 1);
-  }, []);
+  // ── Transport ────────────────────────────────────────────────────────────────
+  const play = useCallback(() => {
+    setTransport('playing');
+    startTimeRef.current = performance.now() - (currentBar * (60/project.tempo) * TL.beatsPerBar * 1000);
+    addActivity('Started playback', 'You', 'transport');
+  }, [currentBar, project.tempo, addActivity]);
 
-  // ── Drag state (ref — no re-render during drag) ──────────────────────────
+  const pause = useCallback(() => {
+    setTransport('paused');
+    addActivity('Paused', 'You', 'transport');
+  }, [addActivity]);
 
-  const dragRef = useRef<DragState | null>(null);
+  const stop = useCallback(() => {
+    setTransport('stopped');
+    setCurrentBar(0);
+    startTimeRef.current = null;
+    addActivity('Stopped', 'You', 'transport');
+  }, [addActivity]);
 
-  // ── ResizeObserver ───────────────────────────────────────────────────────
+  const togglePlay = useCallback(() => {
+    transport === 'playing' ? pause() : play();
+  }, [transport, pause, play]);
 
-  const triggerStaticRedraw = useCallback(() => {
-    const c = staticRef.current;
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    if (!ctx) return;
-    drawAll({
-      ctx, proj: projRef.current, sl: slRef.current,
-      gw: gwRef.current, gh: ghRef.current,
-      loop: loopRef.current, vuLevels: vuRef.current,
-    });
-  }, []);
-
-  const triggerDynRedraw = useCallback(() => {
-    const c = dynRef.current;
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    if (!ctx) return;
-    drawDyn({ ctx, proj: projRef.current, gw: gwRef.current, gh: ghRef.current, barPos: barRef.current, collabs: collabsRef.current });
-  }, []);
-
-  const triggerMmRedraw = useCallback(() => {
-    const c = mmRef.current;
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    if (!ctx) return;
-    drawMinimap({ ctx, proj: projRef.current, gw: gwRef.current, canvasW: gwRef.current });
-  }, []);
-
+  // Playback loop
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { width } = entry.contentRect;
-        gwRef.current = width;
-        const trackH = projRef.current.tracks.length * TL.TRACK_H + TL.HEADER_H;
-        ghRef.current = trackH;
-        [staticRef, dynRef].forEach(r => {
-          if (!r.current) return;
-          r.current.width  = width;
-          r.current.height = trackH;
-        });
-        if (mmRef.current) {
-          mmRef.current.width  = width;
-          mmRef.current.height = TL.MM_H;
+    if (transport === 'playing') {
+      const tick = () => {
+        const elapsed    = performance.now() - (startTimeRef.current ?? performance.now());
+        const bps        = project.tempo / 60;
+        let bars         = (elapsed / 1000) / TL.beatsPerBar * bps;
+        if (loopOn) {
+          const len = loopRegion.end - loopRegion.start;
+          while (bars >= loopRegion.end) {
+            bars -= len;
+            if (startTimeRef.current !== null)
+              startTimeRef.current += (len * TL.beatsPerBar * 60 / project.tempo * 1000);
+          }
         }
-        triggerStaticRedraw();
-        triggerDynRedraw();
-        triggerMmRedraw();
-      }
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [triggerStaticRedraw, triggerDynRedraw, triggerMmRedraw]);
-
-  // ── Redraw on state changes ──────────────────────────────────────────────
-
-  useEffect(() => { triggerStaticRedraw(); triggerMmRedraw(); }, [proj, selClipId, hovClipId, loop, vuLevels, triggerStaticRedraw, triggerMmRedraw]);
-  useEffect(() => { triggerDynRedraw(); }, [barPos, collabs, triggerDynRedraw]);
-
-  // Bug 3 fix: ResizeObserver only fires on width changes. When tracks are added,
-  // the canvas height attribute updates correctly via React but ghRef.current stays
-  // stale, causing all draw calls to clip against the wrong height.
-  useEffect(() => {
-    const next = proj.tracks.length * TL.TRACK_H + TL.HEADER_H;
-    ghRef.current = next;
-    [staticRef, dynRef].forEach(r => {
-      if (!r.current) return;
-      r.current.height = next;
-    });
-    triggerStaticRedraw();
-    triggerDynRedraw();
-  }, [proj.tracks.length, triggerStaticRedraw, triggerDynRedraw]);
-
-  // ── Transport RAF loop ───────────────────────────────────────────────────
-
-  const rafRef    = useRef<number>(0);
-  const lastTsRef = useRef(0);
-
-  useEffect(() => {
-    if (transport === 'playing' || transport === 'recording') {
-      lastTsRef.current = performance.now();
-      const tick = (now: number) => {
-        if (trRef.current !== 'playing' && trRef.current !== 'recording') return;
-        const dt  = (now - lastTsRef.current) / 1000;
-        lastTsRef.current = now;
-        const bps = projRef.current.bpm / 60;
-        setBarPos(p => {
-          const next = p + bps * dt;
-          const lr   = loopRef.current;
-          if (lr.active && next >= lr.endBeat) return lr.startBeat;
-          return next;
-        });
+        setCurrentBar(bars);
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
+    } else {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     }
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [transport]);
+  }, [transport, project.tempo, loopOn, loopRegion]);
 
-  // ── VU meter animation ───────────────────────────────────────────────────
-
+  // CPU + VU simulation
   useEffect(() => {
-    const id = setInterval(() => {
-      if (trRef.current !== 'playing' && trRef.current !== 'recording') return;
-      setVuLevels(prev => {
-        const next: Record<number, number> = {};
-        projRef.current.tracks.forEach(tr => {
-          const r = Math.random();
-          next[tr.id] = Math.min(1, (prev[tr.id] ?? 0) * 0.7 + (tr.muted ? 0 : r * 0.85));
+    const interval = setInterval(() => {
+      setCpuLoad(transport === 'playing' ? 0.35 + Math.random()*0.25 : 0.08 + Math.random()*0.1);
+      if (transport === 'playing') {
+        const levels: Record<string,number> = {};
+        project.tracks.forEach(t => {
+          if (t.muted) { levels[t.id] = 0; return; }
+          levels[t.id] = clamp((Math.random()*0.7 + 0.2) * t.volume, 0, 1);
         });
-        return next;
-      });
-    }, 80);
-    return () => clearInterval(id);
-  }, []);
-
-  // ── Activity ticker ──────────────────────────────────────────────────────
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setActivity(a => [...a]);
-    }, 3000);
-    return () => clearInterval(id);
-  }, []);
-
-  // ── Beat snapping ────────────────────────────────────────────────────────
-
-  const snapBeat = useCallback((beat: number) => {
-    const s = snapRef.current;
-    return Math.round(beat / s) * s;
-  }, []);
-
-  // ── Hit-test clips ───────────────────────────────────────────────────────
-
-  const hitClip = useCallback((px: number, py: number) => {
-    const p = projRef.current;
-    const pxPerBeat = p.zoom * 80;
-    for (let i = p.clips.length - 1; i >= 0; i--) {
-      const clip  = p.clips[i];
-      const track = p.tracks.find(t => t.id === clip.trackId);
-      if (!track) continue;
-      const cx = clip.startBeat * pxPerBeat - p.scrollX + TL.LABEL_W;
-      const cw = Math.max(TL.MIN_CLIP_PX, clip.lenBeats * pxPerBeat);
-      const cy = track.index * TL.TRACK_H + TL.HEADER_H;
-      if (px >= cx && px <= cx + cw && py >= cy && py <= cy + TL.TRACK_H) {
-        let handle: DragState['type'] | null = null;
-        if (px <= cx + 5)       handle = 'resize-l';
-        else if (px >= cx + cw - 5) handle = 'resize-r';
-        return { clip, handle };
-      }
-    }
-    return null;
-  }, []);
-
-  // ── Canvas pointer handlers ──────────────────────────────────────────────
-
-  const onCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = staticRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-
-    // Ruler scrub
-    if (py < TL.HEADER_H && px > TL.LABEL_W) {
-      const p = projRef.current;
-      const beat = (px - TL.LABEL_W + p.scrollX) / (p.zoom * 80);
-      dragRef.current = { type: 'scrub', clipId: -1, startX: px, startBeat: beat, startLen: 0 };
-      setBarPos(Math.max(0, beat));
-      return;
-    }
-
-    const hit = hitClip(px, py);
-    if (hit) {
-      const { clip, handle } = hit;
-      setSelClipId(clip.id);
-      setRightTab('inspector');
-      dragRef.current = {
-        type: handle ?? 'move',
-        clipId: clip.id,
-        startX: px,
-        startBeat: clip.startBeat,
-        startLen: clip.lenBeats,
-      };
-      e.preventDefault();
-    } else {
-      setSelClipId(null);
-    }
-  }, [hitClip]);
-
-  const onCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = staticRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-
-    if (dragRef.current) {
-      const d = dragRef.current;
-      const p = projRef.current;
-      const pxPerBeat = p.zoom * 80;
-      const dBeats = (px - d.startX) / pxPerBeat;
-
-      if (d.type === 'scrub') {
-        const beat = (px - TL.LABEL_W + p.scrollX) / pxPerBeat;
-        setBarPos(Math.max(0, beat));
-        return;
-      }
-
-      setProj(prev => {
-        const clips = prev.clips.map(c => {
-          if (c.id !== d.clipId) return c;
-          if (d.type === 'move') {
-            return { ...c, startBeat: snapBeat(Math.max(0, d.startBeat + dBeats)) };
-          }
-          if (d.type === 'resize-r') {
-            return { ...c, lenBeats: snapBeat(Math.max(0.25, d.startLen + dBeats)) };
-          }
-          if (d.type === 'resize-l') {
-            const delta    = snapBeat(dBeats);
-            const newStart = Math.max(0, d.startBeat + delta);
-            const newLen   = Math.max(0.25, d.startLen - delta);
-            return { ...c, startBeat: newStart, lenBeats: newLen };
-          }
-          return c;
-        });
-        return { ...prev, clips };
-      });
-      return;
-    }
-
-    // Hover
-    const hit = hitClip(px, py);
-    setHovClipId(hit ? hit.clip.id : null);
-
-    const el = staticRef.current;
-    if (!el) return;
-    if (py < TL.HEADER_H && px > TL.LABEL_W) el.style.cursor = 'col-resize';
-    else if (hit?.handle) el.style.cursor = 'ew-resize';
-    else if (hit)         el.style.cursor = 'grab';
-    else                  el.style.cursor = 'crosshair';
-  }, [hitClip, snapBeat]);
-
-  const onCanvasMouseUp = useCallback(() => {
-    // History push is handled by the global mouseup below to cover
-    // drags that end outside the canvas. Just null the ref here.
-    dragRef.current = null;
-  }, []);
-
-  // Global mouseup — catches drags released outside the canvas element.
-  // Without this, releasing the mouse outside the canvas leaves dragRef set
-  // and the next mousemove resumes the drag uninvited.
-  useEffect(() => {
-    const handler = () => {
-      if (dragRef.current && dragRef.current.type !== 'scrub') {
-        pushHistory(projRef.current);
-      }
-      dragRef.current = null;
-    };
-    window.addEventListener('mouseup', handler);
-    return () => window.removeEventListener('mouseup', handler);
-  }, [pushHistory]);
-
-  const onCanvasDblClick = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const rect = staticRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-    if (py < TL.HEADER_H || hitClip(px, py)) return;
-    const p = projRef.current;
-    const beat = snapBeat((px - TL.LABEL_W + p.scrollX) / (p.zoom * 80));
-    const idx  = Math.floor((py - TL.HEADER_H) / TL.TRACK_H);
-    const track = p.tracks[idx];
-    if (!track) return;
-    const newClip: Clip = {
-      id: uid(), trackId: track.id,
-      startBeat: Math.max(0, beat), lenBeats: 2,
-      name: 'Clip', color: track.color,
-    };
-    const next: Project = { ...projRef.current, clips: [...projRef.current.clips, newClip] };
-    setProj(next);
-    pushHistory(next);
-    setSelClipId(newClip.id);
-    setRightTab('inspector');
-    setActivity(a => [{ id: uid(), user: 'You', action: `added clip on ${track.name}`, ts: Date.now() }, ...a.slice(0, 9)]);
-  }, [hitClip, snapBeat, pushHistory]);
-
-  // Non-passive wheel listener — React registers wheel as passive by default
-  // which silently swallows e.preventDefault(). Must be imperative.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const handler = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.ctrlKey || e.metaKey) {
-        const z = e.deltaY > 0 ? 0.88 : 1.14;
-        setProj(p => ({ ...p, zoom: Math.min(5, Math.max(0.2, p.zoom * z)) }));
+        setVuLevels(levels);
       } else {
-        setProj(p => ({ ...p, scrollX: Math.max(0, p.scrollX + e.deltaX + e.deltaY * 0.6) }));
+        const levels: Record<string,number> = {};
+        project.tracks.forEach(t => { levels[t.id] = 0; });
+        setVuLevels(levels);
       }
-    };
-    el.addEventListener('wheel', handler, { passive: false });
-    return () => el.removeEventListener('wheel', handler);
-  }, []); // setProj is stable
+    }, 80);
+    return () => clearInterval(interval);
+  }, [transport, project.tracks]);
 
-  // ── Keyboard actions via ref (stable, empty deps) ────────────────────────
-
-  const actionRef = useRef({
-    togglePlay: () => {},
-    stopReset:  () => {},
-    record:     () => {},
-    deleteSelected: () => {},
-    undo:       () => {},
-    redo:       () => {},
-  });
-
-  actionRef.current = useMemo(() => ({
-    togglePlay: () => setTransport(t => t === 'playing' ? 'stopped' : 'playing'),
-    stopReset:  () => { setTransport('stopped'); setBarPos(0); },
-    record:     () => setTransport(t => t === 'recording' ? 'stopped' : 'recording'),
-    deleteSelected: () => {
-      const id = slRef.current.selClipId;
-      if (!id) return;
-      const next: Project = { ...projRef.current, clips: projRef.current.clips.filter(c => c.id !== id) };
-      setProj(next);
-      pushHistory(next);
-      setSelClipId(null);
-    },
-    undo,
-    redo,
-  }), [pushHistory, undo, redo]);
-
+  // Simulated collab activity
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.code === 'Space') { e.preventDefault(); actionRef.current.togglePlay(); }
-      if (e.code === 'Escape') actionRef.current.stopReset();
-      if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ' && !e.shiftKey) actionRef.current.undo();
-      if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey))) actionRef.current.redo();
-      if ((e.code === 'Delete' || e.code === 'Backspace') && !(e.target as HTMLElement).isContentEditable) actionRef.current.deleteSelected();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []); // stable via actionRef
+    const interval = setInterval(() => {
+      if (Math.random() > 0.65) {
+        const collab  = INIT_COLLABS[Math.floor(Math.random() * INIT_COLLABS.length)];
+        const actions = ['Adjusted fader','Moved clip','Added FX','Muted track','Set loop'];
+        const action  = actions[Math.floor(Math.random() * actions.length)];
+        addActivity(action, collab.name, 'edit');
+        setCollaborators(p => p.map(c =>
+          c.id === collab.id
+            ? { ...c, cursor:{x:200+Math.random()*800, y:80+Math.random()*400}, lastAction:action, timestamp:Date.now() }
+            : c
+        ));
+      }
+    }, 9000);
+    return () => clearInterval(interval);
+  }, [addActivity]);
 
-  // ── Derived ──────────────────────────────────────────────────────────────
+  // ── History ───────────────────────────────────────────────────────────────────
+  const pushHistory = useCallback((next: Project) => {
+    const h = history.slice(0, historyIdx + 1);
+    h.push(next);
+    setHistory(h);
+    setHistoryIdx(h.length - 1);
+    setProject(next);
+  }, [history, historyIdx]);
 
-  const selClip  = useMemo(() => proj.clips.find(c => c.id === selClipId) ?? null, [proj.clips, selClipId]);
-  const selTrack = useMemo(() => selClip ? proj.tracks.find(t => t.id === selClip.trackId) ?? null : null, [selClip, proj.tracks]);
-  const canvasH  = proj.tracks.length * TL.TRACK_H + TL.HEADER_H;
-
-  const posDisplay = useMemo(() => {
-    const bar  = Math.floor(barPos / proj.beatsPerBar) + 1;
-    const beat = Math.floor(barPos % proj.beatsPerBar) + 1;
-    return `${String(bar).padStart(2, '0')}:${beat}`;
-  }, [barPos, proj.beatsPerBar]);
-
-  // ── Track / clip updaters ────────────────────────────────────────────────
-
-  function updateClip(patch: Partial<Clip>) {
-    if (!selClipId) return;
-    const next: Project = {
-      ...projRef.current,
-      clips: projRef.current.clips.map(c => c.id === selClipId ? { ...c, ...patch } : c),
-    };
-    setProj(next);
-    pushHistory(next);
-  }
-
-  function updateTrack(id: number, patch: Partial<Track>) {
-    setProj(p => {
-      const next = { ...p, tracks: p.tracks.map(t => t.id === id ? { ...t, ...patch } : t) };
-      pushHistory(next);
-      return next;
-    });
-  }
-
-  // ── Relative time ────────────────────────────────────────────────────────
-
-  function relTime(ts: number): string {
-    const s = Math.floor((Date.now() - ts) / 1000);
-    if (s < 60)   return `${s}s ago`;
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    return `${Math.floor(s / 3600)}h ago`;
-  }
-
-  // ── Apply suggestion ─────────────────────────────────────────────────────
-
-  function applySuggestion(id: number) {
-    // Read before any setState — React 18 batching means suggestions.find
-    // inside setActivity would see a pre-update snapshot.
-    const sg = suggestions.find(x => x.id === id);
-    setSuggestions(s => s.map(item => item.id === id ? { ...item, applied: true } : item));
-    setActivity(a => [
-      { id: uid(), user: 'AI', action: `Applied: ${sg?.description.slice(0, 40) ?? '...'}`, ts: Date.now() },
-      ...a.slice(0, 9),
-    ]);
-  }
-
-  // LLPTE nodes — active index cycles on an interval during playback.
-  // Date.now() in render only evaluates once per render and then freezes
-  // until the next state update; an interval drives animation correctly.
-  const llpteNodes = ['inputRouter', 'spectralAnalyzer', 'aiMixEngine', 'transitionGraph', 'outputBus'];
-  const [llpteActive, setLlpteActive] = useState(-1);
-
-  useEffect(() => {
-    if (transport === 'stopped') {
-      setLlpteActive(-1);
-      return;
+  const undo = useCallback(() => {
+    if (historyIdx > 0) {
+      setHistoryIdx(i => i - 1);
+      setProject(history[historyIdx - 1]);
+      addActivity('Undo');
     }
-    const id = setInterval(() => {
-      setLlpteActive(n => (n + 1) % llpteNodes.length);
-    }, 800);
-    return () => clearInterval(id);
-  }, [transport]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [history, historyIdx, addActivity]);
 
-  // Inject styles once on mount — avoids re-injecting ~600 lines of CSS on every render.
-  useEffect(() => {
-    const el = document.createElement('style');
-    el.setAttribute('data-r3-daw', '1');
-    el.textContent = STYLES;
-    document.head.appendChild(el);
-    return () => { el.remove(); };
+  const redo = useCallback(() => {
+    if (historyIdx < history.length - 1) {
+      setHistoryIdx(i => i + 1);
+      setProject(history[historyIdx + 1]);
+      addActivity('Redo');
+    }
+  }, [history, historyIdx, addActivity]);
+
+  // ── Track ops ──────────────────────────────────────────────────────────────────
+  const addTrack = useCallback(() => {
+    const t: Track = {
+      id: `t${Date.now()}`, name:`Track ${project.tracks.length+1}`,
+      color: C.tracks[project.tracks.length % C.tracks.length],
+      muted:false, solo:false, volume:0.8, pan:0, armed:false,
+      type:'audio', sends:[], locked:false, fxChain:['EQ'],
+    };
+    pushHistory({ ...project, tracks:[...project.tracks, t] });
+    addActivity(`Added track "${t.name}"`);
+  }, [project, pushHistory, addActivity]);
+
+  const deleteTrack = useCallback((id: string) => {
+    const t = project.tracks.find(x => x.id === id);
+    pushHistory({ ...project, tracks:project.tracks.filter(x=>x.id!==id), clips:project.clips.filter(c=>c.trackId!==id) });
+    addActivity(`Deleted "${t?.name}"`);
+  }, [project, pushHistory, addActivity]);
+
+  const updateTrack = useCallback((id: string, patch: Partial<Track>) => {
+    pushHistory({ ...project, tracks:project.tracks.map(t => t.id===id ? {...t,...patch} : t) });
+  }, [project, pushHistory]);
+
+  const toggleMute = useCallback((id: string) => {
+    const t = project.tracks.find(x=>x.id===id);
+    if (!t) return;
+    updateTrack(id, { muted: !t.muted });
+    addActivity(`${t.muted?'Unmuted':'Muted'} "${t.name}"`);
+  }, [project.tracks, updateTrack, addActivity]);
+
+  const toggleSolo = useCallback((id: string) => {
+    const t = project.tracks.find(x=>x.id===id);
+    if (!t) return;
+    updateTrack(id, { solo: !t.solo });
+    addActivity(`${t.solo?'Unsoloed':'Soloed'} "${t.name}"`);
+  }, [project.tracks, updateTrack, addActivity]);
+
+  // ── Clip ops ──────────────────────────────────────────────────────────────────
+  const deleteClip = useCallback((id: string) => {
+    const c = project.clips.find(x=>x.id===id);
+    pushHistory({ ...project, clips:project.clips.filter(x=>x.id!==id) });
+    setSelectedClipIds(p => p.filter(x=>x!==id));
+    addActivity(`Deleted "${c?.name}"`);
+  }, [project, pushHistory, selectedClipIds, addActivity]);
+
+  const duplicateClip = useCallback((id: string) => {
+    const c = project.clips.find(x=>x.id===id);
+    if (!c) return;
+    const nc = { ...c, id:`c${Date.now()}`, startBar:c.startBar+c.durationBars, name:`${c.name} (Copy)` };
+    pushHistory({ ...project, clips:[...project.clips, nc] });
+    addActivity(`Duplicated "${c.name}"`);
+  }, [project, pushHistory, addActivity]);
+
+  const updateClip = useCallback((id: string, patch: Partial<Clip>) => {
+    pushHistory({ ...project, clips:project.clips.map(c => c.id===id ? {...c,...patch} : c) });
+  }, [project, pushHistory]);
+
+  // ── AI suggestion ops ──────────────────────────────────────────────────────────
+  // PRD §6: acceptance rate ≥40% tracked via aiDecisionLog.
+  // Every accept/reject stamps outcome + writes to aiMix.submitSuggestionOutcome.
+  const logSuggestionOutcome = useCallback((
+    id: string,
+    outcome: Extract<LLPTEDecision, 'accepted' | 'rejected'>,
+  ): void => {
+    const token   = localStorage.getItem('r3_token');
+    const apiBase = (typeof import.meta !== 'undefined' &&
+      (import.meta as unknown as Record<string, unknown>).env
+        ? ((import.meta as unknown as Record<string, unknown>).env as Record<string, unknown>).VITE_API_URL as string | undefined
+        : undefined) ?? '';
+    fetch(`${apiBase}/trpc/aiMix.submitSuggestionOutcome`, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ json: { decisionId: id, outcome } }),
+    }).catch(() => { /* non-fatal — log write failure does not block UI */ });
   }, []);
 
-  // ─── Render ────────────────────────────────────────────────────────────────
+  const acceptSuggestion = useCallback((id: string) => {
+    const s = suggestions.find(x => x.id === id);
+    if (!s) return;
+    // Stamp outcome on suggestion object before removing from panel
+    setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'accepted' as const } : x));
+    setSuggestions(p => p.filter(x => x.id !== id));
+    logSuggestionOutcome(id, 'accepted');
+    toast(`AI applied: ${s.label}`, 'ai');
+    addActivity(`Accepted AI: ${s.label}`, 'You', 'ai');
+  }, [suggestions, toast, addActivity, logSuggestionOutcome]);
 
+  const rejectSuggestion = useCallback((id: string) => {
+    setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'rejected' as const } : x));
+    setSuggestions(p => p.filter(x => x.id !== id));
+    logSuggestionOutcome(id, 'rejected');
+  }, [logSuggestionOutcome]);
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).matches('input,textarea')) return;
+      const mod = e.metaKey || e.ctrlKey;
+      if (e.code==='Space')               { e.preventDefault(); togglePlay(); }
+      if (e.code==='Escape')              { e.preventDefault(); stop(); }
+      if (mod && e.code==='KeyZ' && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (mod && e.code==='KeyZ' &&  e.shiftKey) { e.preventDefault(); redo(); }
+      if ((e.code==='Delete'||e.code==='Backspace') && selectedClipIds.length) {
+        e.preventDefault(); selectedClipIds.forEach(deleteClip);
+      }
+      if (mod && e.code==='KeyD' && selectedClipIds.length) { e.preventDefault(); selectedClipIds.forEach(duplicateClip); }
+      if (mod && e.code==='KeyA') { e.preventDefault(); setSelectedClipIds(project.clips.map(c=>c.id)); }
+      if (mod && e.code==='Equal') { e.preventDefault(); setZoom(z => Math.min(z+0.2, TL.maxZoom)); }
+      if (mod && e.code==='Minus') { e.preventDefault(); setZoom(z => Math.max(z-0.2, TL.minZoom)); }
+      if (mod && e.code==='Digit0') { e.preventDefault(); setZoom(1); }
+      if (e.code==='KeyM') { e.preventDefault(); setMetronome(v=>!v); }
+      if (e.code==='KeyL') { e.preventDefault(); setLoopOn(v=>!v); }
+      if (e.code==='KeyG') { e.preventDefault(); setSnapGrid(v=>!v); }
+      if (mod && e.code==='KeyT') { e.preventDefault(); addTrack(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [togglePlay, stop, undo, redo, selectedClipIds, deleteClip, duplicateClip, project.clips, addTrack]);
+
+  // ── Canvas rendering ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const now = performance.now();
+    if (now - lastRenderRef.current < 14) return;
+    lastRenderRef.current = now;
+
+    const ctx = canvas.getContext('2d', {alpha:false});
+    if (!ctx) return;
+    const dpr  = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width  = rect.width  * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
+    const W = rect.width, H = rect.height;
+
+    // Background
+    ctx.fillStyle = C.space;
+    ctx.fillRect(0, 0, W, H);
+
+    // Scanlines
+    for (let y = 0; y < H; y += 4) {
+      ctx.fillStyle = 'rgba(255,255,255,0.008)';
+      ctx.fillRect(0, y, W, 1);
+    }
+
+    drawRuler(ctx, W);
+
+    project.tracks.forEach((track, idx) => {
+      const ty = TL.rulerHeight + idx * TL.trackHeight - scrollTop;
+      if (ty + TL.trackHeight < 0 || ty > H) return;
+      drawTrack(ctx, track, ty, W, track.id === selectedTrackId);
+      project.clips
+        .filter(c => c.trackId === track.id)
+        .forEach(c => {
+          const cx = barsToPixels(c.startBar, gridWidth) - scrollLeft;
+          const cw = barsToPixels(c.durationBars, gridWidth);
+          if (cx + cw < 0 || cx > W) return;
+          drawClip(ctx, c, track, ty, selectedClipIds.includes(c.id), c.id === hoveredClipId);
+        });
+    });
+
+    project.markers.forEach(m => drawMarker(ctx, m, H));
+    drawPlayhead(ctx, H);
+    if (loopOn) drawLoop(ctx, H);
+    collaborators.filter(c=>c.status==='active').forEach(c => drawCursor(ctx, c));
+
+  }, [project, currentBar, zoom, scrollLeft, scrollTop, selectedClipIds, selectedTrackId, collaborators, gridWidth, hoveredClipId, loopOn, loopRegion]);
+
+  const drawRuler = (ctx: CanvasRenderingContext2D, W: number) => {
+    ctx.fillStyle = C.surface;
+    ctx.fillRect(0, 0, W, TL.rulerHeight);
+    ctx.fillStyle = C.neon;
+    ctx.fillRect(0, 0, 3, TL.rulerHeight);
+    ctx.fillRect(0, TL.rulerHeight-2, W, 2);
+    ctx.font      = `600 10px ${FONT.mono}`;
+    ctx.textAlign = 'center';
+    const total = Math.ceil((W + scrollLeft) / gridWidth) + 2;
+    const start = Math.floor(scrollLeft / gridWidth);
+    for (let i = start; i < start + total; i++) {
+      const x = i * gridWidth - scrollLeft;
+      ctx.strokeStyle = i % 4 === 0 ? C.borderBright : C.border;
+      ctx.lineWidth   = i % 4 === 0 ? 1.5 : 0.5;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, TL.rulerHeight); ctx.stroke();
+      if (i % 2 === 0) {
+        ctx.fillStyle = C.neon;
+        ctx.fillText(String(i+1), x + gridWidth/2, TL.rulerHeight - 10);
+      }
+      for (let b = 1; b < TL.beatsPerBar; b++) {
+        const bx = x + b * gridWidth / TL.beatsPerBar;
+        ctx.strokeStyle = C.border;
+        ctx.lineWidth   = 0.5;
+        ctx.beginPath(); ctx.moveTo(bx, TL.rulerHeight-8); ctx.lineTo(bx, TL.rulerHeight); ctx.stroke();
+      }
+    }
+  };
+
+  const drawTrack = (ctx: CanvasRenderingContext2D, track: Track, ty: number, W: number, sel: boolean) => {
+    ctx.fillStyle = sel ? C.surfaceLift : C.surface;
+    ctx.fillRect(0, ty, W, TL.trackHeight);
+    ctx.strokeStyle = sel ? C.neon : C.border;
+    ctx.lineWidth   = sel ? 1.5 : 0.5;
+    ctx.beginPath(); ctx.moveTo(0,ty+TL.trackHeight-0.5); ctx.lineTo(W,ty+TL.trackHeight-0.5); ctx.stroke();
+    ctx.fillStyle = track.color;
+    ctx.fillRect(0, ty, 3, TL.trackHeight);
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = C.borderBright;
+    ctx.lineWidth   = 0.5;
+    const ts = Math.floor(scrollLeft/gridWidth), te = Math.ceil((W+scrollLeft)/gridWidth)+2;
+    for (let i=ts; i<te; i++) {
+      const x = i*gridWidth - scrollLeft;
+      ctx.beginPath(); ctx.moveTo(x,ty); ctx.lineTo(x,ty+TL.trackHeight); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    if (track.muted) {
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, ty, W, TL.trackHeight);
+    }
+  };
+
+  const drawClip = (ctx: CanvasRenderingContext2D, clip: Clip, track: Track, ty: number, sel: boolean, hov: boolean) => {
+    const x  = barsToPixels(clip.startBar, gridWidth) - scrollLeft;
+    const cw = barsToPixels(clip.durationBars, gridWidth);
+    const cy = ty + 6;
+    const ch = TL.trackHeight - 12;
+    const g  = ctx.createLinearGradient(x, cy, x, cy+ch);
+    if (sel) {
+      g.addColorStop(0, `${track.color}66`);
+      g.addColorStop(1, `${track.color}22`);
+    } else {
+      g.addColorStop(0, `${track.color}30`);
+      g.addColorStop(1, `${track.color}10`);
+    }
+    ctx.fillStyle = g;
+    ctx.fillRect(x, cy, cw, ch);
+    if (hov || sel) {
+      ctx.shadowColor = track.color;
+      ctx.shadowBlur  = sel ? 12 : 6;
+    }
+    ctx.strokeStyle = sel ? C.neon : track.color;
+    ctx.lineWidth   = sel ? 1.5 : 1;
+    ctx.strokeRect(x+0.5, cy+0.5, cw-1, ch-1);
+    ctx.shadowBlur = 0;
+    const wpts   = Math.max(20, Math.min(180, Math.floor(cw/2)));
+    const wf     = getWaveform(clip.id, wpts);
+    ctx.strokeStyle = `${C.neon}60`;
+    ctx.lineWidth   = 1.2;
+    ctx.beginPath();
+    wf.forEach((a, i) => {
+      const wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
+      i===0 ? ctx.moveTo(wx, wy-wh/2) : ctx.lineTo(wx, wy-wh/2);
+    });
+    ctx.stroke();
+    ctx.beginPath();
+    wf.forEach((a, i) => {
+      const wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
+      i===0 ? ctx.moveTo(wx, wy+wh/2) : ctx.lineTo(wx, wy+wh/2);
+    });
+    ctx.stroke();
+    ctx.lineWidth = 1;
+    if (clip.fadeIn > 0) {
+      const fw = barsToPixels(clip.fadeIn, gridWidth);
+      ctx.fillStyle = `${track.color}25`;
+      ctx.beginPath(); ctx.moveTo(x,cy); ctx.lineTo(x+fw,cy); ctx.lineTo(x+fw,cy+ch); ctx.lineTo(x,cy+ch); ctx.closePath(); ctx.fill();
+    }
+    if (clip.fadeOut > 0) {
+      const fw = barsToPixels(clip.fadeOut, gridWidth);
+      ctx.fillStyle = `${track.color}25`;
+      ctx.beginPath(); ctx.moveTo(x+cw,cy); ctx.lineTo(x+cw-fw,cy); ctx.lineTo(x+cw-fw,cy+ch); ctx.lineTo(x+cw,cy+ch); ctx.closePath(); ctx.fill();
+    }
+    if (cw > 48) {
+      ctx.fillStyle = `${C.surface}D0`;
+      ctx.fillRect(x+8, cy+5, Math.min(cw-16,120), 16);
+      ctx.fillStyle  = C.text;
+      ctx.font       = `500 9px ${FONT.mono}`;
+      ctx.textAlign  = 'left';
+      ctx.fillText(clip.name, x+12, cy+16, cw-24);
+    }
+  };
+
+  const drawMarker = (ctx: CanvasRenderingContext2D, m: Marker, H: number) => {
+    const x   = barsToPixels(m.bar, gridWidth) - scrollLeft;
+    const col = m.color ?? C.yellow;
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(x, TL.rulerHeight); ctx.lineTo(x, H); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(x,TL.rulerHeight); ctx.lineTo(x+10,TL.rulerHeight+6); ctx.lineTo(x,TL.rulerHeight+12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = C.surface;
+    ctx.fillRect(x+12, TL.rulerHeight+1, m.name.length*7+12, 16);
+    ctx.fillStyle  = col;
+    ctx.font       = `700 9px ${FONT.mono}`;
+    ctx.textAlign  = 'left';
+    ctx.fillText(m.name, x+16, TL.rulerHeight+12);
+    ctx.lineWidth = 1;
+  };
+
+  const drawPlayhead = (ctx: CanvasRenderingContext2D, H: number) => {
+    const x = barsToPixels(currentBar, gridWidth) - scrollLeft;
+    ctx.shadowColor = C.neon;
+    ctx.shadowBlur  = 16;
+    ctx.strokeStyle = C.neon;
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, TL.rulerHeight); ctx.lineTo(x, H); ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle  = C.neon;
+    ctx.beginPath(); ctx.moveTo(x-9,TL.rulerHeight); ctx.lineTo(x+9,TL.rulerHeight); ctx.lineTo(x,TL.rulerHeight+14); ctx.closePath(); ctx.fill();
+    const label = formatTime(currentBar, project.tempo, TL.beatsPerBar);
+    ctx.fillStyle = C.surface;
+    ctx.fillRect(x-38, TL.rulerHeight+17, 76, 19);
+    ctx.strokeStyle = C.neon;
+    ctx.lineWidth   = 0.5;
+    ctx.strokeRect(x-38, TL.rulerHeight+17, 76, 19);
+    ctx.fillStyle  = C.neon;
+    ctx.font       = `700 10px ${FONT.mono}`;
+    ctx.textAlign  = 'center';
+    ctx.fillText(label, x, TL.rulerHeight+30);
+    ctx.lineWidth = 1;
+  };
+
+  const drawLoop = (ctx: CanvasRenderingContext2D, H: number) => {
+    const sx = barsToPixels(loopRegion.start, gridWidth) - scrollLeft;
+    const ex = barsToPixels(loopRegion.end,   gridWidth) - scrollLeft;
+    ctx.fillStyle   = `${C.cyan}0E`;
+    ctx.fillRect(sx, TL.rulerHeight, ex-sx, H-TL.rulerHeight);
+    [sx, ex].forEach((x, i) => {
+      ctx.strokeStyle = C.cyan;
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath(); ctx.moveTo(x,TL.rulerHeight); ctx.lineTo(x,H); ctx.stroke();
+      ctx.fillStyle = C.cyan;
+      ctx.beginPath();
+      i===0 ? (ctx.moveTo(x,TL.rulerHeight), ctx.lineTo(x+10,TL.rulerHeight+6), ctx.lineTo(x,TL.rulerHeight+12))
+             : (ctx.moveTo(x,TL.rulerHeight), ctx.lineTo(x-10,TL.rulerHeight+6), ctx.lineTo(x,TL.rulerHeight+12));
+      ctx.closePath(); ctx.fill();
+    });
+    ctx.lineWidth = 1;
+  };
+
+  const drawCursor = (ctx: CanvasRenderingContext2D, c: Collaborator) => {
+    const {x,y} = c.cursor;
+    ctx.fillStyle   = c.color;
+    ctx.shadowColor = c.color;
+    ctx.shadowBlur  = 12;
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+12,y+5); ctx.lineTo(x+5,y+12); ctx.closePath(); ctx.fill();
+    ctx.shadowBlur = 0;
+    const lw = c.name.split(' ').map(n=>n[0]).join('')+'  '+c.name;
+    ctx.fillStyle   = `${c.color}E0`;
+    ctx.fillRect(x+14, y-2, lw.length*6+14, 20);
+    ctx.fillStyle   = C.void;
+    ctx.font        = `700 9px ${FONT.mono}`;
+    ctx.textAlign   = 'left';
+    ctx.fillText(c.name.split(' ').map(n=>n[0]).join('') + '  ' + c.lastAction, x+20, y+12, 160);
+  };
+
+  // ── Canvas interactions ───────────────────────────────────────────────────────
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx   = e.clientX - rect.left + scrollLeft;
+    const cy   = e.clientY - rect.top  + scrollTop;
+    let hit: string|null = null;
+    project.tracks.forEach((t, idx) => {
+      const ty = TL.rulerHeight + idx * TL.trackHeight;
+      project.clips.filter(c=>c.trackId===t.id).forEach(c => {
+        const x=barsToPixels(c.startBar,gridWidth), w=barsToPixels(c.durationBars,gridWidth);
+        if (cx>=x&&cx<=x+w&&cy>=ty+6&&cy<=ty+TL.trackHeight-6) hit=c.id;
+      });
+    });
+    if (hit) {
+      const _h = hit;
+      e.metaKey||e.ctrlKey
+        ? setSelectedClipIds(p => p.includes(_h) ? p.filter(x=>x!==_h) : [...p,_h])
+        : !selectedClipIds.includes(_h) && setSelectedClipIds([_h]);
+    } else {
+      setSelectedClipIds([]);
+    }
+    if (cy < TL.rulerHeight) {
+      let bar = pixelsToBars(cx, gridWidth);
+      if (snapGrid) bar = Math.round(bar);
+      setCurrentBar(bar);
+      if (transport==='playing' && startTimeRef.current!==null)
+        startTimeRef.current = performance.now() - (bar*(60/project.tempo)*TL.beatsPerBar*1000);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx   = e.clientX - rect.left + scrollLeft;
+    const cy   = e.clientY - rect.top  + scrollTop;
+    let hov: string|null = null;
+    project.tracks.forEach((t, idx) => {
+      const ty = TL.rulerHeight + idx * TL.trackHeight;
+      project.clips.filter(c=>c.trackId===t.id).forEach(c => {
+        const x=barsToPixels(c.startBar,gridWidth), w=barsToPixels(c.durationBars,gridWidth);
+        if (cx>=x&&cx<=x+w&&cy>=ty+6&&cy<=ty+TL.trackHeight-6) hov=c.id;
+      });
+    });
+    setHoveredClipId(hov);
+  };
+
+  const totalTH = project.tracks.length * TL.trackHeight + TL.rulerHeight;
+
+  // ─── Render ───────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="ag-shell">
-        <div className="ag-frame">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+        @keyframes ag-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes ag-pulse { 0%,100%{box-shadow:0 0 6px #a3e635} 50%{box-shadow:0 0 18px #a3e635,0 0 30px rgba(163,230,53,.3)} }
+        @keyframes ag-slidein { from{transform:translateY(-8px);opacity:0} to{transform:translateY(0);opacity:1} }
+        @keyframes ag-rec { 0%,100%{background:#ff3b3b} 50%{background:#ff3b3b88} }
+        ::-webkit-scrollbar { width:4px; height:4px; }
+        ::-webkit-scrollbar-track { background:${C.surface}; }
+        ::-webkit-scrollbar-thumb { background:${C.borderBright}; }
+        ::-webkit-scrollbar-thumb:hover { background:${C.neon}; }
+        input[type=range] { -webkit-appearance:none; appearance:none; outline:none; cursor:pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; background:${C.neon}; cursor:pointer; }
+      `}</style>
 
-          {/* ── Header ── */}
-          <header className="ag-header">
-            <div className="ag-header-top">
+      {/* Toast notifications */}
+      <div style={{ position:'fixed', top:80, right:16, zIndex:9999, display:'flex', flexDirection:'column', gap:6, pointerEvents:'none' }}>
+        {toasts.map(t => (
+          <div key={t.id} style={{
+            padding:'8px 14px',
+            background: t.type==='ai' ? `rgba(163,230,53,0.12)` : C.surface,
+            border:`1px solid ${t.type==='ai' ? C.neon : C.border}`,
+            borderLeft:`3px solid ${t.type==='ai' ? C.neon : C.cyan}`,
+            fontFamily:FONT.mono, fontSize:10, color:C.text,
+            animation:'ag-slidein .2s ease',
+            boxShadow:`0 4px 24px rgba(0,0,0,.8)`,
+            maxWidth:320,
+          }}>
+            {t.type==='ai' && <span style={{color:C.neon,marginRight:8}}>⚡ AI</span>}
+            {t.msg}
+          </div>
+        ))}
+      </div>
 
-              {/* Wordmark */}
-              <div className="ag-wordmark-block">
-                <div className="ag-wordmark">
-                  R3<span className="ag-wordmark-slash">/</span>WAVE
-                </div>
-                <div className="ag-wordmark-sub">Multitrack Production v4</div>
-              </div>
+      <div style={{
+        width:'100%',
+        height:'calc(100vh - var(--nav-h, 44px))',
+        background:C.void,
+        display:'flex',
+        flexDirection:'column',
+        fontFamily:FONT.mono,
+        color:C.text,
+        overflow:'hidden',
+        position:'relative',
+      }}>
 
-              {/* Status */}
-              <div className="ag-status-block">
-                <div className="ag-status-line">
-                  {transport === 'playing'   ? <><span className="ag-cursor-live"/><span className="ag-status-live-text">LIVE</span></> :
-                   transport === 'recording' ? <><span className="ag-cursor-rec" /><span className="ag-status-rec-text">REC</span></> :
-                                               <><span className="ag-cursor-standby"/><span className="ag-status-dead-text">STANDBY</span></>}
-                </div>
-                <div className="ag-status-line">
-                  <span style={{ color: 'var(--ag-mid)' }}>{proj.clips.length} CLIPS / {proj.tracks.length} TRACKS</span>
-                </div>
-              </div>
+        {/* Left acid bar */}
+        <div style={{ position:'absolute', left:0, top:0, bottom:0, width:3, background:C.neon, boxShadow:`0 0 20px ${C.neon}`, zIndex:300, pointerEvents:'none' }} />
 
-              {/* BPM */}
-              <div className="ag-bpm-block">
-                <div className="ag-bpm-label">BPM</div>
-                <input
-                  type="number"
-                  className="ag-bpm-input"
-                  value={proj.bpm}
-                  min={40} max={240} step={1}
-                  onChange={e => {
-                    const v = Math.max(40, Math.min(240, +e.target.value || 40));
-                    setProj(p => ({ ...p, bpm: v }));
-                  }}
-                />
-              </div>
+        {/* Scanline overlay */}
+        <div style={{
+          position:'absolute', inset:0, pointerEvents:'none', zIndex:0,
+          background:`repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,0.007) 3px,rgba(255,255,255,0.007) 4px)`,
+        }} />
 
-              {/* Nav buttons */}
-              <div className="ag-controls-block">
-                <Link href="/daw"        className="ag-nav-btn">🎚 Studio</Link>
-                <Link href="/collab"     className="ag-nav-btn">⬡ Collab</Link>
-                <Link href="/multitrack" className="ag-nav-btn">📼 Multitrack</Link>
-                <Link href="/mixer"      className="ag-nav-btn">⟳ Mixer</Link>
-                <Link href="/instrument" className="ag-nav-btn">🎹 Instrument</Link>
-              </div>
+        {/* Ambient glow */}
+        <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:0,
+          background:'radial-gradient(circle at 15% 50%, rgba(163,230,53,0.04) 0%, transparent 55%)',
+        }} />
 
-              <span className="ag-ghost-bpm" aria-hidden="true">{proj.bpm}</span>
+        {/* ── TOP BAR ────────────────────────────────────────────────────────── */}
+        <div style={{
+          height:58, background:C.surface, borderBottom:`2px solid ${C.border}`,
+          display:'flex', alignItems:'stretch',
+          position:'relative', zIndex:100, flexShrink:0,
+          boxShadow:'0 2px 20px rgba(0,0,0,.7)',
+        }}>
+
+          {/* Ghost BPM */}
+          <div style={{
+            position:'absolute', right:-8, top:'50%', transform:'translateY(-50%)',
+            fontFamily:FONT.display, fontWeight:800,
+            fontSize:'clamp(56px,9vw,110px)',
+            color:'transparent',
+            WebkitTextStroke:`1px rgba(163,230,53,0.04)`,
+            letterSpacing:'-0.04em', pointerEvents:'none', userSelect:'none', zIndex:0,
+          }}>{Math.round(project.tempo)}</div>
+
+          {/* R3 Wordmark */}
+          <div style={{
+            padding:'10px 20px', borderRight:`1px solid ${C.border}`,
+            display:'flex', flexDirection:'column', justifyContent:'center',
+            minWidth:180, position:'relative', zIndex:1,
+          }}>
+            <div style={{ fontFamily:FONT.display, fontWeight:800, fontSize:22, letterSpacing:'-0.02em', lineHeight:1, color:C.text }}>
+              R3<span style={{ color:C.neon, margin:'0 2px', textShadow:`0 0 14px ${C.neon}` }}>/</span>COLLAB
             </div>
-
-            {/* Ticker */}
-            <div className="ag-ticker-row">
-              <div className="ag-ticker-inner">
-                {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-                  <span key={i} className="ag-ticker-item">
-                    {item}<span className="ag-ticker-sep">/</span>
-                  </span>
-                ))}
-              </div>
+            <div style={{ fontSize:7, letterSpacing:'.4em', textTransform:'uppercase', color:C.textMuted, marginTop:4 }}>
+              COLLABORATIVE · SESSION
             </div>
-          </header>
+          </div>
 
-          {/* ── Main content ── */}
-          <div className="ag-content">
-
-            {/* ── LEFT — Timeline ── */}
-            <div className="ag-left">
-
-              <div className="ag-section-strip">
-                <span className="ag-section-tag">01 — Timeline</span>
-                <span className="ag-section-line" />
-                <span className="ag-section-tag-r">{Math.round(proj.zoom * 100)}% ZOOM</span>
-              </div>
-
-              {/* Transport toolbar */}
-              <div className="ag-transport">
-                <button className="ag-t-btn" onClick={() => { setBarPos(0); setTransport('stopped'); }} title="Return to start">⏮</button>
-                <button className={`ag-t-btn${transport === 'playing' ? ' active' : ''}`} onClick={() => actionRef.current.togglePlay()} title="Play / Pause (Space)">
-                  {transport === 'playing' ? '⏸' : '▶'}
-                </button>
-                <button className={`ag-t-btn danger${transport === 'recording' ? ' armed' : ''}`} onClick={() => actionRef.current.record()} title="Record">⏺</button>
-
-                <div className="ag-t-sep" />
-
-                <div className="ag-t-display">{posDisplay}</div>
-
-                <div className="ag-t-sep" />
-
-                {/* Snap */}
-                <span className="ag-t-label">SNAP</span>
-                <div className="ag-t-snap-group">
-                  {SNAP_VALUES.map(s => (
-                    <button key={s} className={`ag-t-btn${snap === s ? ' active' : ''}`} onClick={() => setSnap(s)}>
-                      {s === 1 ? '1' : s === 0.5 ? '½' : s === 0.25 ? '¼' : '⅛'}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="ag-t-sep" />
-
-                {/* Loop */}
-                <button className={`ag-t-btn${loop.active ? ' active' : ''}`} onClick={() => setLoop(l => ({ ...l, active: !l.active }))}>
-                  LOOP
-                </button>
-
-                <div className="ag-t-sep" />
-
-                {/* Zoom */}
-                <button className="ag-t-btn" onClick={() => setProj(p => ({ ...p, zoom: Math.max(0.2, p.zoom * 0.8) }))}>−</button>
-                <button className="ag-t-btn" onClick={() => setProj(p => ({ ...p, zoom: Math.min(5, p.zoom * 1.25) }))}>+</button>
-
-                <div className="ag-t-spacer" />
-
-                {/* History */}
-                <button className="ag-t-btn" onClick={undo} title="Undo (Ctrl+Z)" style={{ opacity: canUndo ? 1 : 0.35 }}>↩ UNDO</button>
-                <button className="ag-t-btn" onClick={redo} title="Redo (Ctrl+Y)" style={{ opacity: canRedo ? 1 : 0.35 }}>↪ REDO</button>
-                <button className={`ag-t-btn${showMinimap ? ' active' : ''}`} onClick={() => setShowMinimap(v => !v)}>MAP</button>
-              </div>
-
-              {/* Canvas area */}
-              <div
-                ref={containerRef}
-                className="ag-timeline-wrap"
-                style={{ height: canvasH + 10 }}
-              >
-                <canvas
-                  ref={staticRef}
-                  className="ag-canvas-static"
-                  width={gwRef.current}
-                  height={canvasH}
-                  style={{ height: canvasH }}
-                  onMouseDown={onCanvasMouseDown}
-                  onMouseMove={onCanvasMouseMove}
-                  onMouseUp={onCanvasMouseUp}
-                  onMouseLeave={onCanvasMouseUp}
-                  onDoubleClick={onCanvasDblClick}
-                />
-                <canvas
-                  ref={dynRef}
-                  className="ag-canvas-dyn"
-                  width={gwRef.current}
-                  height={canvasH}
-                  style={{ height: canvasH }}
-                />
-              </div>
-
-              {/* Horizontal scrollbar */}
-              <div className="ag-scroll-row">
-                <input
-                  type="range" min={0} max={6000} step={1}
-                  value={proj.scrollX}
-                  onChange={e => setProj(p => ({ ...p, scrollX: +e.target.value }))}
-                />
-              </div>
-
-              {/* Minimap */}
-              {showMinimap && (
-                <canvas
-                  ref={mmRef}
-                  className="ag-minimap"
-                  width={gwRef.current}
-                  height={TL.MM_H}
-                  style={{ height: TL.MM_H, width: '100%' }}
-                  onClick={e => {
-                    const rect = mmRef.current?.getBoundingClientRect();
-                    if (!rect) return;
-                    const rx = e.clientX - rect.left - TL.LABEL_W;
-                    const totalBeats = Math.max(32, ...proj.clips.map(c => c.startBeat + c.lenBeats));
-                    const frac = Math.max(0, rx / (rect.width - TL.LABEL_W));
-                    setProj(p => ({ ...p, scrollX: frac * totalBeats * p.zoom * 80 }));
-                  }}
-                />
-              )}
-
-              {/* LLPTE pipeline status */}
-              <div className="ag-llpte-bar" title="LLPTE Pipeline — Live">
-                {llpteNodes.map((node, i) => (
-                  <span key={node} className={`ag-llpte-node${i === llpteActive ? ' active' : ''}`} title={node}>
-                    {node.replace(/([A-Z])/g, ' $1').trim().toUpperCase().slice(0, 8)}
-                  </span>
-                ))}
-              </div>
-
-              {/* Keyboard guide */}
-              <div className="ag-guide">
-                <div className="ag-guide-header">Reference</div>
-                {[
-                  ['Double-click', 'Create clip on timeline'],
-                  ['Drag clip',    'Move — handles resize'],
-                  ['Ctrl+scroll',  'Zoom in / out'],
-                  ['Space',        'Play / Pause'],
-                  ['Delete',       'Remove selected clip'],
-                  ['Ctrl+Z',       'Undo / Ctrl+Y Redo'],
-                ].map(([k, v]) => (
-                  <div key={k} className="ag-guide-row">
-                    <span className="ag-guide-key">{k}</span>
-                    <span className="ag-guide-val">{v}</span>
-                  </div>
-                ))}
-                <div className="ag-kbd-section">
-                  {[['Play', 'SPC'], ['Stop', 'ESC'], ['Undo', 'Ctrl+Z'], ['Redo', 'Ctrl+Y']].map(([l, t]) => (
-                    <div key={l} className="ag-kbd-row">
-                      <span className="ag-kbd-label">{l}</span>
-                      <span className="ag-kbd-tag">{t}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Connection + Collabs */}
+          <div style={{ padding:'0 14px', borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', justifyContent:'center', gap:4, zIndex:1 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:8, letterSpacing:'.2em', textTransform:'uppercase', color:connStatus==='connected' ? C.neon : C.magenta }}>
+              {connStatus==='connected'
+                ? <Wifi size={10} color={C.neon} />
+                : <WifiOff size={10} color={C.magenta} />}
+              {connStatus.toUpperCase()}
             </div>
-
-            {/* ── RIGHT — Panels ── */}
-            <div className="ag-right">
-
-              <div className="ag-section-strip">
-                <span className="ag-section-tag">02 — Controls</span>
-                <span className="ag-section-line" />
-              </div>
-
-              {/* Panel: Mixer */}
-              <PanelBlock
-                num="05"
-                title="Mixer"
-                badge={`${proj.tracks.length} TRACKS`}
-                icon={<Sliders size={14} />}
-                defaultOpen
-              >
-                <div className="ag-mixer">
-                  {proj.tracks.map(tr => {
-                    const lvl = vuLevels[tr.id] ?? 0;
-                    const vuFillH = Math.floor(lvl * 40);
-                    const vuCol = lvl > 0.85 ? '#f87171' : lvl > 0.6 ? '#fbbf24' : '#a3e635';
-                    return (
-                      <div
-                        key={tr.id}
-                        className="ag-mx-strip"
-                        style={{ '--strip-color': tr.color } as React.CSSProperties}
-                      >
-                        <div className="ag-mx-vu">
-                          <div className="ag-mx-vu-fill" style={{ height: vuFillH, background: vuCol }} />
-                        </div>
-                        <span className="ag-mx-name" style={{ borderLeft: `3px solid ${tr.color}`, paddingLeft: 6 }}>{tr.name}</span>
-                        <input
-                          type="range" className="ag-mx-fader" min={0} max={1} step={0.01}
-                          value={tr.volume}
-                          onChange={e => updateTrack(tr.id, { volume: +e.target.value })}
-                          title={`${tr.name} volume`}
-                        />
-                        <span className="ag-mx-val">{Math.round(tr.volume * 100)}</span>
-                        <button className={`ag-mx-mute${tr.muted ? ' on' : ''}`} onClick={() => updateTrack(tr.id, { muted: !tr.muted })}>M</button>
-                        <button className={`ag-mx-solo${tr.solo  ? ' on' : ''}`} onClick={() => updateTrack(tr.id, { solo:  !tr.solo  })}>S</button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </PanelBlock>
-
-              {/* Panel: AI Mix Engine (P4) */}
-              <PanelBlock
-                num="06"
-                title="AI Mix Engine"
-                badge="LLPTE"
-                icon={<Wand2 size={14} />}
-                defaultOpen
-              >
-                <div className="ag-suggest">
-                  <div className="ag-suggest-hdr">
-                    <span className="ag-suggest-hdr-label">Suggestions</span>
-                    <span className="ag-suggest-hdr-conf">
-                      Confidence gate: ≥0.40 · Auto-apply: ≥0.65
-                    </span>
-                  </div>
-                  {suggestions.filter(s => !s.applied).length === 0 ? (
-                    <div className="ag-suggest-empty">
-                      All suggestions applied.<br />LLPTE re-analyzing session...
-                    </div>
-                  ) : (
-                    suggestions.map(sg => (
-                      <div
-                        key={sg.id}
-                        className={`ag-suggest-card${sg.applied ? ' applied' : ''}${sg.confidence >= 0.75 ? ' high-conf' : ''}`}
-                      >
-                        <div className="ag-suggest-type">{sg.type.toUpperCase()} — {sg.target}</div>
-                        <div className="ag-suggest-desc">{sg.description}</div>
-                        <div className="ag-suggest-meta">
-                          <span className="ag-suggest-conf">{Math.round(sg.confidence * 100)}%</span>
-                          <div className="ag-suggest-bar">
-                            <div className="ag-suggest-bar-fill" style={{ width: `${sg.confidence * 100}%` }} />
-                          </div>
-                          {!sg.applied && (
-                            <button className="ag-apply-btn" onClick={() => applySuggestion(sg.id)}>APPLY</button>
-                          )}
-                          {sg.applied && <span style={{ fontSize: 8, color: 'var(--ag-mid)', letterSpacing: '.15em' }}>APPLIED</span>}
-                        </div>
-                      </div>
-                    ))
+            <div style={{ display:'flex', alignItems:'center', gap:-4 }}>
+              {collaborators.map((c,i) => (
+                <div key={c.id} title={`${c.name} — ${c.lastAction}`} style={{
+                  width:24, height:24, background:c.color,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  border:`2px solid ${C.surface}`, fontSize:8, fontWeight:700, color:C.void,
+                  position:'relative', cursor:'pointer', zIndex:collaborators.length-i,
+                  marginLeft: i===0 ? 0 : -6,
+                }}>
+                  {c.name.split(' ').map(n=>n[0]).join('')}
+                  {c.status==='active' && (
+                    <div style={{ position:'absolute', bottom:-2, right:-2, width:7, height:7, background:C.neon, border:`1.5px solid ${C.surface}` }} />
                   )}
                 </div>
-              </PanelBlock>
-
-              {/* Panel: Inspector + Activity (tabbed) */}
-              <PanelBlock
-                num="07"
-                title="Inspector"
-                badge={selClip ? selClip.name.toUpperCase() : 'SELECT CLIP'}
-                icon={<Activity size={14} />}
-                defaultOpen
-              >
-                {/* Tab bar */}
-                <div className="ag-panel-tabs">
-                  {(['inspector', 'mixer', 'activity'] as const).map(tab => (
-                    <button
-                      key={tab}
-                      className={`ag-tab-btn${rightTab === tab ? ' active' : ''}`}
-                      onClick={() => setRightTab(tab)}
-                    >
-                      {tab === 'inspector' ? 'CLIP' : tab === 'mixer' ? 'TRACK' : 'ACTIVITY'}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="ag-panel-body">
-
-                  {/* Inspector tab */}
-                  {rightTab === 'inspector' && (
-                    <div className="ag-insp">
-                      {selClip ? (
-                        <>
-                          <div className="ag-insp-section">
-                            <div className="ag-insp-title">Clip</div>
-                            <div className="ag-field">
-                              <span className="ag-field-label">Name</span>
-                              <input className="ag-field-input" value={selClip.name} onChange={e => updateClip({ name: e.target.value })} />
-                            </div>
-                            <div className="ag-field">
-                              <span className="ag-field-label">Start</span>
-                              <input className="ag-field-input" type="number" value={selClip.startBeat.toFixed(2)} step={0.25} min={0}
-                                onChange={e => updateClip({ startBeat: Math.max(0, +e.target.value) })} />
-                              <span className="ag-field-unit">beat</span>
-                            </div>
-                            <div className="ag-field">
-                              <span className="ag-field-label">Length</span>
-                              <input className="ag-field-input" type="number" value={selClip.lenBeats.toFixed(2)} step={0.25} min={0.25}
-                                onChange={e => updateClip({ lenBeats: Math.max(0.25, +e.target.value) })} />
-                              <span className="ag-field-unit">beat</span>
-                            </div>
-                            <div className="ag-field">
-                              <span className="ag-field-label">Color</span>
-                              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                {CLIP_COLORS.map(col => (
-                                  <div
-                                    key={col}
-                                    className={`ag-color-swatch${selClip.color === col ? ' selected' : ''}`}
-                                    style={{ background: col }}
-                                    onClick={() => updateClip({ color: col })}
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-
-                          {selTrack && (
-                            <div className="ag-insp-section">
-                              <div className="ag-insp-title">Track</div>
-                              <div className="ag-field">
-                                <span className="ag-field-label">Volume</span>
-                                <input className="ag-field-input" type="number" value={Math.round(selTrack.volume * 100)} min={0} max={100} step={1}
-                                  onChange={e => updateTrack(selTrack.id, { volume: +e.target.value / 100 })} />
-                                <span className="ag-field-unit">%</span>
-                              </div>
-                              <div className="ag-field">
-                                <span className="ag-field-label">Pan</span>
-                                <input className="ag-field-input" type="number" value={selTrack.pan.toFixed(2)} min={-1} max={1} step={0.05}
-                                  onChange={e => updateTrack(selTrack.id, { pan: Math.max(-1, Math.min(1, +e.target.value)) })} />
-                              </div>
-                              <div className="ag-field">
-                                <span className="ag-field-label">Status</span>
-                                <button
-                                  className="ag-t-btn"
-                                  style={{ flex: 1, borderColor: selTrack.muted ? 'var(--ag-amber)' : 'var(--ag-border)', color: selTrack.muted ? 'var(--ag-amber)' : '' }}
-                                  onClick={() => updateTrack(selTrack.id, { muted: !selTrack.muted })}
-                                >
-                                  {selTrack.muted ? '🔇 MUTED' : '🔊 LIVE'}
-                                </button>
-                                <button
-                                  className="ag-t-btn"
-                                  style={{ borderColor: selTrack.solo ? 'var(--ag-acid)' : 'var(--ag-border)', color: selTrack.solo ? 'var(--ag-acid)' : '' }}
-                                  onClick={() => updateTrack(selTrack.id, { solo: !selTrack.solo })}
-                                >
-                                  {selTrack.solo ? 'SOLO ON' : 'SOLO'}
-                                </button>
-                              </div>
-                            </div>
-                          )}
-
-                          <button
-                            className="ag-del-btn"
-                            onClick={() => actionRef.current.deleteSelected()}
-                          >
-                            DELETE CLIP
-                          </button>
-                        </>
-                      ) : (
-                        <div className="ag-insp-empty">
-                          Select a clip to inspect<br />or double-click the timeline<br />to create one.
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Track mixer tab */}
-                  {rightTab === 'mixer' && (
-                    <div className="ag-insp">
-                      {selTrack ? (
-                        <>
-                          <div className="ag-insp-title">Track · {selTrack.name}</div>
-                          {['volume', 'pan'].map(param => (
-                            <div key={param} className="ag-field">
-                              <span className="ag-field-label">{param.toUpperCase()}</span>
-                              <input
-                                type="range"
-                                style={{ flex: 1, accentColor: 'var(--ag-acid)' }}
-                                min={param === 'pan' ? -1 : 0}
-                                max={param === 'pan' ? 1 : 1}
-                                step={param === 'pan' ? 0.05 : 0.01}
-                                value={selTrack[param as keyof Track] as number}
-                                onChange={e => updateTrack(selTrack.id, { [param]: +e.target.value })}
-                              />
-                              <span className="ag-field-unit" style={{ minWidth: 36, textAlign: 'right' }}>
-                                {param === 'pan'
-                                  ? selTrack.pan === 0 ? 'C' : selTrack.pan > 0 ? `R${Math.round(selTrack.pan * 100)}` : `L${Math.round(-selTrack.pan * 100)}`
-                                  : `${Math.round(selTrack.volume * 100)}%`
-                                }
-                              </span>
-                            </div>
-                          ))}
-                        </>
-                      ) : (
-                        <div className="ag-insp-empty">Select a clip to access<br />its track controls.</div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Activity tab */}
-                  {rightTab === 'activity' && (
-                    <div className="ag-activity">
-                      {activity.map(ev => (
-                        <div key={ev.id} className="ag-activity-row">
-                          <div className="ag-activity-user">{ev.user}</div>
-                          <div className="ag-activity-action">{ev.action}</div>
-                          <div className="ag-activity-time">{relTime(ev.ts)}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </PanelBlock>
-
-              {/* Panel: Session stats */}
-              <PanelBlock
-                num="08"
-                title="Session"
-                badge="METRICS"
-                icon={<Layers size={14} />}
-                defaultOpen={false}
-              >
-                <div className="ag-insp">
-                  <div className="ag-insp-title">Project</div>
-                  {[
-                    ['BPM',     proj.bpm],
-                    ['Clips',   proj.clips.length],
-                    ['Tracks',  proj.tracks.length],
-                    ['Markers', proj.markers.length],
-                    ['Zoom',    `${Math.round(proj.zoom * 100)}%`],
-                    ['Position', posDisplay],
-                  ].map(([k, v]) => (
-                    <div key={String(k)} className="ag-field">
-                      <span className="ag-field-label">{k}</span>
-                      <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'var(--ag-acid)', letterSpacing: '.05em' }}>{v}</span>
-                    </div>
-                  ))}
-
-                  <div className="ag-insp-title" style={{ marginTop: 12 }}>LLPTE</div>
-                  {[
-                    ['Latency p50', '10ms'],
-                    ['Node tick',   '0.8ms'],
-                    ['Active edges','847'],
-                    ['Conf gate',   '≥0.65'],
-                  ].map(([k, v]) => (
-                    <div key={String(k)} className="ag-field">
-                      <span className="ag-field-label">{k}</span>
-                      <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: 'var(--ag-cyan)', letterSpacing: '.05em' }}>{v}</span>
-                    </div>
-                  ))}
-
-                  <button
-                    className="ag-t-btn"
-                    style={{ width: '100%', marginTop: 12, justifyContent: 'center' }}
-                    onClick={() => {
-                      setSuggestions(makeSuggestions());
-                      setActivity(a => [{ id: uid(), user: 'AI', action: 'Re-analyzed session — new suggestions ready', ts: Date.now() }, ...a.slice(0, 9)]);
-                    }}
-                  >
-                    🔄 RE-ANALYZE SESSION
-                  </button>
-                </div>
-              </PanelBlock>
-
-            </div>{/* ag-right */}
-          </div>{/* ag-content */}
-
-          {/* ── Footer ── */}
-          <footer className="ag-footer">
-            <div className="ag-footer-left">
-              {['MultiTrack DAW', 'LLPTE Pipeline', 'AI Auto-Level', 'Smart Transitions', 'Mix Suggestions', 'Real-Time Collab'].map(f => (
-                <span key={f} className="ag-footer-feat">{f}</span>
               ))}
-            </div>
-            <div className="ag-footer-right">
-              <span>Web Audio API · WebMIDI · IndexedDB</span>
-              <span className="ag-footer-stat">{proj.clips.length} clips</span>
-              <span className="ag-ver-tag">v4.0</span>
-            </div>
-          </footer>
-
-        </div>{/* ag-frame */}
-      </div>{/* ag-shell */}
-
-      {/* ── Settings modal ── */}
-      {showSettings && (
-        <div
-          className="ag-modal-backdrop"
-          onClick={e => { if (e.target === e.currentTarget) setShowSettings(false); }}
-        >
-          <div className="ag-modal">
-            <div className="ag-modal-header">
-              <span className="ag-modal-title">Session Configuration</span>
-              <button className="ag-modal-close" onClick={() => setShowSettings(false)}>✕</button>
-            </div>
-            <div className="ag-modal-body">
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">BPM</span>
-                <input
-                  type="number" min={40} max={240} step={1}
-                  className="ag-field-input"
-                  value={proj.bpm}
-                  onChange={e => {
-                    const v = Math.max(40, Math.min(240, +e.target.value || 40));
-                    setProj(p => ({ ...p, bpm: v }));
-                  }}
-                  style={{ width: 72 }}
-                />
-              </div>
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">Time signature</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input
-                    type="number" min={2} max={12} step={1}
-                    className="ag-field-input"
-                    value={proj.beatsPerBar}
-                    onChange={e => setProj(p => ({ ...p, beatsPerBar: +e.target.value }))}
-                    style={{ width: 48 }}
-                  />
-                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--ag-mid)' }}>/4</span>
-                </span>
-              </div>
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">Snap</span>
-                <div style={{ display: 'flex', gap: 3 }}>
-                  {SNAP_VALUES.map(s => (
-                    <button key={s} className={`ag-t-btn${snap === s ? ' active' : ''}`} onClick={() => setSnap(s)}>
-                      {s === 1 ? '1' : s === 0.5 ? '½' : s === 0.25 ? '¼' : '⅛'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">Loop</span>
-                <button className={`ag-t-btn${loop.active ? ' active' : ''}`} onClick={() => setLoop(l => ({ ...l, active: !l.active }))}>
-                  {loop.active ? 'ON' : 'OFF'}
-                </button>
-              </div>
-              {loop.active && (
-                <>
-                  <div className="ag-setting-row">
-                    <span className="ag-setting-label">Loop start</span>
-                    <input type="number" min={0} step={1} className="ag-field-input"
-                      value={loop.startBeat} onChange={e => setLoop(l => ({ ...l, startBeat: +e.target.value }))} style={{ width: 60 }} />
-                  </div>
-                  <div className="ag-setting-row">
-                    <span className="ag-setting-label">Loop end</span>
-                    <input type="number" min={0} step={1} className="ag-field-input"
-                      value={loop.endBeat} onChange={e => setLoop(l => ({ ...l, endBeat: +e.target.value }))} style={{ width: 60 }} />
-                  </div>
-                </>
-              )}
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">Minimap</span>
-                <button className={`ag-t-btn${showMinimap ? ' active' : ''}`} onClick={() => setShowMinimap(v => !v)}>
-                  {showMinimap ? 'ON' : 'OFF'}
-                </button>
-              </div>
-              <div className="ag-setting-row">
-                <span className="ag-setting-label">Add track</span>
-                <button
-                  className="ag-t-btn"
-                  onClick={() => {
-                    const idx = proj.tracks.length;
-                    const newTrack: Track = {
-                      id: uid(), index: idx, name: `Track ${idx + 1}`, type: 'audio',
-                      color: '#2dd4bf', muted: false, solo: false, volume: 0.8, pan: 0,
-                    };
-                    setProj(p => ({ ...p, tracks: [...p.tracks, newTrack] }));
-                  }}
-                >
-                  + ADD TRACK
-                </button>
+              <div style={{ width:24, height:24, background:C.neon, display:'flex', alignItems:'center', justifyContent:'center', border:`2px solid ${C.surface}`, marginLeft:-6 }}>
+                <User size={12} color={C.void} />
               </div>
             </div>
           </div>
-        </div>
-      )}
 
+          <Divider />
+
+          {/* Transport */}
+          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 14px', zIndex:1 }}>
+            <AgBtn onClick={() => setCurrentBar(0)} title="Return to start (Home)"><SkipBack size={14} /></AgBtn>
+            <AgBtn onClick={togglePlay} active={transport==='playing'} title="Play/Pause (Space)">
+              {transport==='playing' ? <Pause size={14} /> : <Play size={14} />}
+            </AgBtn>
+            <AgBtn onClick={stop} title="Stop (Esc)"><Square size={14} /></AgBtn>
+            <AgBtn
+              onClick={() => setTransport(t => t==='recording' ? 'stopped' : 'recording')}
+              active={transport==='recording'}
+              activeColor={C.magenta}
+              title="Record (R)"
+            >
+              <div style={{
+                width:10, height:10,
+                background: transport==='recording' ? C.magenta : C.textMuted,
+                animation: transport==='recording' ? 'ag-rec 1s infinite' : 'none',
+              }} />
+            </AgBtn>
+          </div>
+
+          <Divider />
+
+          {/* BPM */}
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'0 16px', zIndex:1 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+              <AgLabel>BPM</AgLabel>
+              <input
+                type="number" value={project.tempo} min={40} max={240}
+                onChange={e => pushHistory({ ...project, tempo: clamp(Number(e.target.value), 40, 240) })}
+                style={{
+                  background:C.void, border:`1px solid ${C.border}`,
+                  color:C.neon, padding:'2px 6px', fontSize:18, fontFamily:FONT.display,
+                  fontWeight:800, width:62, outline:'none', textAlign:'center', letterSpacing:'-0.03em',
+                }}
+              />
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+              <AgLabel>SIG</AgLabel>
+              <div style={{ fontSize:14, fontWeight:700, color:C.textMuted, fontFamily:FONT.display }}>
+                {project.timeSignature[0]}/{project.timeSignature[1]}
+              </div>
+            </div>
+          </div>
+
+          <Divider />
+
+          {/* Position display */}
+          <div style={{ display:'flex', alignItems:'center', gap:12, padding:'0 14px', zIndex:1 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+              <AgLabel>BAR</AgLabel>
+              <div style={{ fontSize:20, fontWeight:800, fontFamily:FONT.display, color:C.neon, lineHeight:1 }}>
+                {String(Math.floor(currentBar)+1).padStart(3,'0')}
+              </div>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+              <AgLabel>TIME</AgLabel>
+              <div style={{ fontSize:11, fontWeight:600, fontFamily:FONT.mono, color:C.textMuted }}>
+                {formatTime(currentBar, project.tempo, TL.beatsPerBar)}
+              </div>
+            </div>
+          </div>
+
+          <Divider />
+
+          {/* Toggles */}
+          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
+            <AgBtn onClick={()=>setMetronome(v=>!v)} active={metronome} title="Metronome (M)"><Activity size={12} /> MET</AgBtn>
+            <AgBtn onClick={()=>setSnapGrid(v=>!v)}  active={snapGrid}  title="Snap Grid (G)"><Grid3x3 size={12} /> SNAP</AgBtn>
+            <AgBtn onClick={()=>setLoopOn(v=>!v)}     active={loopOn}     activeColor={C.cyan} title="Loop (L)">
+              <div style={{width:10,height:10,border:`2px solid currentColor`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:6,fontWeight:900}}>↺</div>LOOP
+            </AgBtn>
+          </div>
+
+          <Divider />
+
+          {/* Undo / Redo */}
+          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
+            <AgBtn onClick={undo} disabled={historyIdx===0}                  title="Undo (Cmd+Z)"><Undo2 size={12} /></AgBtn>
+            <AgBtn onClick={redo} disabled={historyIdx===history.length-1}   title="Redo (Cmd+Shift+Z)"><Redo2 size={12} /></AgBtn>
+          </div>
+
+          <Divider />
+
+          {/* Zoom */}
+          <div style={{ display:'flex', alignItems:'center', gap:4, padding:'0 10px', zIndex:1 }}>
+            <AgBtn onClick={()=>setZoom(z=>Math.max(z-0.2,TL.minZoom))} title="Zoom out"><ZoomOut size={12} /></AgBtn>
+            <span style={{ fontSize:9, color:C.textMuted, minWidth:32, textAlign:'center', fontWeight:600 }}>
+              {Math.round(zoom*100)}%
+            </span>
+            <AgBtn onClick={()=>setZoom(z=>Math.min(z+0.2,TL.maxZoom))} title="Zoom in"><ZoomIn size={12} /></AgBtn>
+          </div>
+
+          <Divider />
+
+          {/* View toggles */}
+          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
+            <AgBtn onClick={()=>setShowMixer(v=>!v)}   active={showMixer}   title="Mixer"><Sliders size={12} /> MIX</AgBtn>
+            <AgBtn onClick={()=>setShowAI(v=>!v)}       active={showAI}      title="AI Panel"><Zap size={12} /> AI</AgBtn>
+            <AgBtn onClick={()=>setShowActivity(v=>!v)} active={showActivity} title="Activity"><Radio size={12} /> LOG</AgBtn>
+          </div>
+
+          {/* Master vol + CPU — pushed right */}
+          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:12, padding:'0 16px', zIndex:1 }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <AgLabel>CPU</AgLabel>
+                <div style={{ width:60, height:4, background:C.border }}>
+                  <div style={{
+                    height:'100%', width:`${cpuLoad*100}%`,
+                    background: cpuLoad>0.8 ? C.magenta : cpuLoad>0.6 ? C.yellow : C.neon,
+                    transition:'width .2s, background .2s',
+                  }} />
+                </div>
+                <span style={{ fontSize:8, color:C.textMuted, width:28, textAlign:'right' }}>{Math.round(cpuLoad*100)}%</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <AgLabel>LLPTE</AgLabel>
+                <span style={{ fontSize:8, color:C.neon, fontWeight:700, animation:'ag-pulse 2s infinite' }}>
+                  {llpteLatency}ms
+                </span>
+              </div>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              <AgLabel>MASTER</AgLabel>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <button
+                  onClick={()=>setMasterMuted(v=>!v)}
+                  style={{ background:'none', border:'none', cursor:'pointer', color:masterMuted?C.magenta:C.textMuted, padding:2 }}
+                >
+                  {masterMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                </button>
+                <input
+                  type="range" min={0} max={1} step={0.01}
+                  value={masterMuted ? 0 : masterVol}
+                  onChange={e=>setMasterVol(Number(e.target.value))}
+                  style={{ width:70, height:3, accentColor:C.neon }}
+                />
+                <span style={{ fontSize:8, color:C.neon, minWidth:26, textAlign:'right' }}>
+                  {masterMuted ? '—' : `${Math.round(masterVol*100)}%`}
+                </span>
+              </div>
+            </div>
+            <div style={{ display:'flex', gap:3 }}>
+              <AgBtn title="Upload"><Upload size={12} /></AgBtn>
+              <AgBtn title="Export"><Download size={12} /></AgBtn>
+              <AgBtn title="Share"><Share2 size={12} /></AgBtn>
+            </div>
+          </div>
+        </div>
+
+        {/* ── LLPTE STATUS STRIP ──────────────────────────────────────────────── */}
+        <div style={{
+          height:28, background:C.void, borderBottom:`1px solid ${C.border}`,
+          display:'flex', alignItems:'center', gap:0, padding:'0 20px', flexShrink:0,
+          overflowX:'auto', zIndex:90,
+        }}>
+          <AgLabel style={{marginRight:12, flexShrink:0}}>LLPTE PIPELINE</AgLabel>
+          {(['inputRouter','spectralAnalyzer','aiMixEngine','transitionGraph','outputBus'] as const).map((node, i) => (
+            <React.Fragment key={node}>
+              <div style={{
+                padding:'2px 10px',
+                background: i===2 ? C.neonDim2 : 'transparent',
+                border:`1px solid ${i===2 ? C.neon : C.border}`,
+                fontSize:7, letterSpacing:'.15em', textTransform:'uppercase',
+                color: i===2 ? C.neon : C.textMuted,
+                flexShrink:0,
+                boxShadow: i===2 ? `0 0 8px ${C.neonDim}` : 'none',
+              }}>
+                {node}
+                {i===2 && <span style={{marginLeft:6, color:C.neon, fontWeight:700}}>{llpteLatency}ms</span>}
+              </div>
+              {i < 4 && (
+                <div style={{ width:18, height:1, background:`linear-gradient(90deg,${C.neon},${C.border})`, flexShrink:0, animation:'none' }} />
+              )}
+            </React.Fragment>
+          ))}
+          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:8 }}>
+            <span style={{ fontSize:7, letterSpacing:'.2em', textTransform:'uppercase', color:C.textMuted }}>EDGES</span>
+            <span style={{ fontSize:7, color:C.neon, fontWeight:700 }}>847</span>
+            <span style={{ fontSize:7, color:C.textMuted, letterSpacing:'.2em', marginLeft:8 }}>TICK</span>
+            <span style={{ fontSize:7, color:C.neon, fontWeight:700 }}>0.8ms</span>
+            <span style={{ fontSize:7, color:C.textMuted, letterSpacing:'.2em', marginLeft:8 }}>CONF GATE</span>
+            <span style={{ fontSize:7, color:C.neon, fontWeight:700 }}>≥0.65</span>
+          </div>
+        </div>
+
+        {/* ── MAIN BODY ───────────────────────────────────────────────────────── */}
+        <div style={{ display:'flex', flex:1, overflow:'hidden', position:'relative', zIndex:1 }}>
+
+          {/* Track headers */}
+          <div style={{
+            width:TL.headerWidth, flexShrink:0,
+            background:C.surface, borderRight:`2px solid ${C.border}`,
+            display:'flex', flexDirection:'column', overflowY:'hidden',
+          }}>
+            {/* Ruler spacer */}
+            <div style={{
+              height:TL.rulerHeight, background:C.void, borderBottom:`2px solid ${C.neon}`,
+              display:'flex', alignItems:'center', paddingLeft:8,
+            }}>
+              <AgLabel style={{fontSize:7}}>TRACKS</AgLabel>
+            </div>
+
+            {/* Track rows */}
+            <div style={{ flex:1, overflowY:'auto' }}>
+              {project.tracks.map(track => (
+                <div
+                  key={track.id}
+                  onClick={() => setSelectedTrackId(t => t===track.id ? null : track.id)}
+                  style={{
+                    height:TL.trackHeight,
+                    background: selectedTrackId===track.id ? C.surfaceLift : 'transparent',
+                    borderBottom:`1px solid ${C.border}`,
+                    borderLeft:`3px solid ${selectedTrackId===track.id ? C.neon : track.color}`,
+                    cursor:'pointer', display:'flex', flexDirection:'column',
+                    justifyContent:'center', padding:'6px 8px', gap:4, position:'relative',
+                  }}
+                >
+                  {/* Collab indicator */}
+                  {collaborators.filter(c=>c.editingTrackId===track.id&&c.status==='active').map(c => (
+                    <div key={c.id} style={{
+                      position:'absolute', top:4, right:4,
+                      width:8, height:8, background:c.color, boxShadow:`0 0 6px ${c.color}`,
+                    }} title={`${c.name} editing`} />
+                  ))}
+
+                  {/* Name */}
+                  <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                    <div style={{ width:8, height:8, background:track.color, flexShrink:0 }} />
+                    <span style={{ fontSize:9, fontWeight:600, color:C.text, letterSpacing:'.05em', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      {track.name}
+                    </span>
+                    {track.locked && <Lock size={8} color={C.textMuted} />}
+                  </div>
+
+                  {/* Controls row */}
+                  <div style={{ display:'flex', alignItems:'center', gap:3 }}>
+                    <AgBtn onClick={e=>{e.stopPropagation();toggleMute(track.id)}} active={track.muted} activeColor={C.yellow} style={{height:18,padding:'0 5px',fontSize:7}}>M</AgBtn>
+                    <AgBtn onClick={e=>{e.stopPropagation();toggleSolo(track.id)}}  active={track.solo}  activeColor={C.cyan}   style={{height:18,padding:'0 5px',fontSize:7}}>S</AgBtn>
+                    <AgBtn onClick={e=>{e.stopPropagation();updateTrack(track.id,{armed:!track.armed})}} active={track.armed} activeColor={C.magenta} style={{height:18,padding:'0 5px',fontSize:7}}>R</AgBtn>
+                    <div style={{ marginLeft:'auto', display:'flex', gap:2 }}>
+                      <VUMeter level={vuLevels[track.id]??0} color={track.color} peaked={peakedTracks.has(track.id)} />
+                      <VUMeter level={(vuLevels[track.id]??0)*0.9} color={track.color} peaked={peakedTracks.has(track.id)} />
+                    </div>
+                  </div>
+
+                  {/* Volume */}
+                  <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                    <input
+                      type="range" min={0} max={1} step={0.01}
+                      value={track.volume}
+                      onChange={e=>{e.stopPropagation();updateTrack(track.id,{volume:Number(e.target.value)})}}
+                      onClick={e=>e.stopPropagation()}
+                      style={{ flex:1, height:2, accentColor:track.color }}
+                    />
+                    <span style={{ fontSize:7, color:C.textMuted, minWidth:22, textAlign:'right' }}>{Math.round(track.volume*100)}%</span>
+                  </div>
+
+                  {/* FX tags */}
+                  {track.fxChain.length > 0 && (
+                    <div style={{ display:'flex', gap:2, flexWrap:'wrap' }}>
+                      {track.fxChain.slice(0,2).map(fx => (
+                        <span key={fx} style={{ fontSize:6, color:C.textDim, border:`1px solid ${C.border}`, padding:'1px 4px', letterSpacing:'.1em', textTransform:'uppercase' }}>
+                          {fx}
+                        </span>
+                      ))}
+                      {track.fxChain.length > 2 && <span style={{ fontSize:6, color:C.textDim }}>+{track.fxChain.length-2}</span>}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Add track */}
+              <button
+                onClick={addTrack}
+                style={{
+                  width:'100%', height:40, background:'transparent', border:'none',
+                  borderTop:`1px solid ${C.border}`, color:C.neon, cursor:'pointer',
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+                  fontSize:8, fontWeight:700, textTransform:'uppercase', letterSpacing:'.25em',
+                  fontFamily:FONT.mono, transition:'background .1s',
+                }}
+                onMouseEnter={e=>{(e.currentTarget as HTMLButtonElement).style.background=C.neon;(e.currentTarget as HTMLButtonElement).style.color=C.void;}}
+                onMouseLeave={e=>{(e.currentTarget as HTMLButtonElement).style.background='transparent';(e.currentTarget as HTMLButtonElement).style.color=C.neon;}}
+              >
+                <Plus size={12} /> ADD TRACK
+              </button>
+            </div>
+          </div>
+
+          {/* Timeline canvas area */}
+          <div
+            ref={containerRef}
+            onScroll={e => {
+              setScrollLeft((e.currentTarget as HTMLDivElement).scrollLeft);
+              setScrollTop((e.currentTarget as HTMLDivElement).scrollTop);
+            }}
+            style={{ flex:1, position:'relative', overflow:'auto' }}
+          >
+            <div style={{ width:Math.max(3000, project.clips.reduce((acc,c)=>Math.max(acc,c.startBar+c.durationBars),0)*gridWidth+200), height:Math.max(totalTH,400), position:'relative' }}>
+              <canvas
+                ref={canvasRef}
+                onClick={handleCanvasClick}
+                onMouseMove={handleMouseMove}
+                onContextMenu={e=>{ e.preventDefault(); setContextMenu({x:e.clientX,y:e.clientY}); }}
+                style={{ position:'sticky', top:0, left:0, width:'100%', height:'100%', cursor:hoveredClipId?'pointer':'crosshair', display:'block' }}
+              />
+            </div>
+
+            {/* Overlay HUD — selection info */}
+            {selectedClipIds.length > 0 && (
+              <div style={{
+                position:'fixed', bottom:16, left:TL.headerWidth+16,
+                background:C.surface, border:`1px solid ${C.neon}`, borderLeft:`3px solid ${C.neon}`,
+                padding:'5px 12px', fontSize:8, fontFamily:FONT.mono, color:C.neon,
+                letterSpacing:'.15em', textTransform:'uppercase', zIndex:200,
+              }}>
+                {selectedClipIds.length} CLIP{selectedClipIds.length>1?'S':''} SELECTED — DEL to remove · ⌘D duplicate
+              </div>
+            )}
+          </div>
+
+          {/* ── AI SUGGESTIONS PANEL ──────────────────────────────────────────── */}
+          {showAI && (
+            <div style={{
+              width:240, background:C.surface, borderLeft:`2px solid ${C.border}`,
+              display:'flex', flexDirection:'column', flexShrink:0,
+            }}>
+              <div style={{
+                height:TL.rulerHeight+28, padding:'0 12px',
+                borderBottom:`1px solid ${C.border}`, borderLeft:`3px solid ${C.neon}`,
+                display:'flex', alignItems:'center', justifyContent:'space-between',
+                background:C.void,
+              }}>
+                <div>
+                  <div style={{ fontSize:7, letterSpacing:'.3em', textTransform:'uppercase', color:C.neon, marginBottom:2 }}>AI SUGGESTIONS</div>
+                  <div style={{ fontSize:7, color:C.textMuted, letterSpacing:'.1em' }}>LLPTE · {llpteLatency}ms</div>
+                </div>
+                <Zap size={14} color={C.neon} />
+              </div>
+
+              <div style={{ flex:1, overflowY:'auto', padding:8, display:'flex', flexDirection:'column', gap:6 }}>
+                {suggestions.length === 0 ? (
+                  <div style={{ padding:16, textAlign:'center', fontSize:8, color:C.textDim, letterSpacing:'.15em' }}>
+                    NO PENDING SUGGESTIONS
+                  </div>
+                ) : suggestions.map(s => {
+                  const track = project.tracks.find(t=>t.id===s.trackId);
+                  const col   = confidenceColor(s.confidence);
+                  return (
+                    <div key={s.id} style={{
+                      background:C.void, border:`1px solid ${C.border}`,
+                      borderLeft:`2px solid ${col}`, padding:'8px 10px',
+                    }}>
+                      <div style={{ fontSize:7, color:C.textMuted, letterSpacing:'.1em', marginBottom:4, textTransform:'uppercase' }}>
+                        {track?.name ?? s.trackId} · {s.type.replace('_',' ')}
+                      </div>
+                      <div style={{ fontSize:9, color:C.text, marginBottom:6, lineHeight:1.4 }}>{s.label}</div>
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+                          <div style={{ width:5, height:5, background:col, boxShadow:`0 0 5px ${col}` }} />
+                          <span style={{ fontSize:8, color:col, fontWeight:700 }}>{Math.round(s.confidence*100)}%</span>
+                        </div>
+                        <span style={{ fontSize:7, color:C.textMuted, letterSpacing:'.1em', textTransform:'uppercase' }}>
+                          {s.confidence>=0.65?'AUTO':'SUGGEST'}
+                        </span>
+                      </div>
+                      <div style={{ display:'flex', gap:4 }}>
+                        <button
+                          onClick={()=>acceptSuggestion(s.id)}
+                          style={{
+                            flex:1, height:22, background:C.neonDim2, border:`1px solid ${C.neon}`,
+                            color:C.neon, cursor:'pointer', fontSize:7, fontFamily:FONT.mono,
+                            letterSpacing:'.15em', textTransform:'uppercase', fontWeight:700,
+                          }}
+                        >✓ ACCEPT</button>
+                        <button
+                          onClick={()=>rejectSuggestion(s.id)}
+                          style={{
+                            flex:1, height:22, background:'transparent', border:`1px solid ${C.border}`,
+                            color:C.textMuted, cursor:'pointer', fontSize:7, fontFamily:FONT.mono,
+                            letterSpacing:'.15em', textTransform:'uppercase',
+                          }}
+                        >✕ REJECT</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* LLPTE confidence legend */}
+              <div style={{ padding:10, borderTop:`1px solid ${C.border}`, display:'flex', flexDirection:'column', gap:4 }}>
+                <AgLabel style={{marginBottom:4}}>CONFIDENCE GATES</AgLabel>
+                {[
+                  { label:'AUTO APPLY', threshold:'≥0.65', color:C.neon },
+                  { label:'SUGGEST',    threshold:'≥0.40', color:C.yellow },
+                  { label:'DISCARD',    threshold:'<0.40', color:C.magenta },
+                ].map(g => (
+                  <div key={g.label} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                      <div style={{ width:5, height:5, background:g.color }} />
+                      <span style={{ fontSize:7, color:g.color, fontWeight:700, letterSpacing:'.1em' }}>{g.label}</span>
+                    </div>
+                    <span style={{ fontSize:7, color:C.textMuted }}>{g.threshold}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── ACTIVITY FEED ─────────────────────────────────────────────────── */}
+          {showActivity && (
+            <div style={{
+              width:220, background:C.surface, borderLeft:`2px solid ${C.border}`,
+              display:'flex', flexDirection:'column', flexShrink:0,
+            }}>
+              <div style={{
+                height:TL.rulerHeight+28, padding:'0 12px',
+                borderBottom:`1px solid ${C.border}`, borderLeft:`3px solid ${C.neon}`,
+                display:'flex', alignItems:'center', justifyContent:'space-between',
+                background:C.void,
+              }}>
+                <div style={{ fontSize:7, letterSpacing:'.3em', textTransform:'uppercase', color:C.neon }}>
+                  ACTIVITY
+                </div>
+                <div style={{ fontSize:7, color:C.textMuted }}>
+                  {collaborators.filter(c=>c.status==='active').length} ONLINE
+                </div>
+              </div>
+              <div style={{ flex:1, overflowY:'auto', padding:6, display:'flex', flexDirection:'column', gap:4 }}>
+                {activities.map(a => {
+                  const ago  = Date.now() - a.timestamp;
+                  const mins = Math.floor(ago/60000);
+                  const secs = Math.floor((ago%60000)/1000);
+                  const t    = mins>0 ? `${mins}m` : secs>0 ? `${secs}s` : 'now';
+                  const col  = a.type==='ai' ? C.neon : a.type==='transport' ? C.cyan : a.type==='collab' ? C.yellow : C.textMuted;
+                  return (
+                    <div key={a.id} style={{
+                      padding:'6px 8px', background:C.void,
+                      border:`1px solid ${C.border}`, borderLeft:`2px solid ${col}`,
+                    }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}>
+                        <span style={{ fontSize:8, color:C.neon, fontWeight:700 }}>{a.user}</span>
+                        <span style={{ fontSize:7, color:C.textDim }}>{t}</span>
+                      </div>
+                      <div style={{ fontSize:8, color:C.textMuted, letterSpacing:'.05em' }}>{a.action}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── MIXER STRIP (collapsible) ───────────────────────────────────────── */}
+        {showMixer && (
+          <div style={{
+            height:140, background:C.surface, borderTop:`2px solid ${C.border}`,
+            display:'flex', flexShrink:0, overflowX:'auto',
+          }}>
+            <div style={{
+              width:TL.headerWidth, flexShrink:0, borderRight:`2px solid ${C.border}`,
+              display:'flex', alignItems:'center', justifyContent:'center', padding:'0 12px',
+            }}>
+              <div style={{ display:'flex', flexDirection:'column', gap:4, width:'100%' }}>
+                <AgLabel>MASTER FADER</AgLabel>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <input
+                    type="range" min={0} max={1} step={0.01}
+                    value={masterMuted ? 0 : masterVol}
+                    onChange={e=>setMasterVol(Number(e.target.value))}
+                    style={{ flex:1, accentColor:C.neon }}
+                  />
+                  <span style={{ fontSize:10, color:C.neon, fontWeight:700, minWidth:30, textAlign:'right' }}>
+                    {Math.round(masterVol*100)}
+                  </span>
+                </div>
+                <div style={{ display:'flex', gap:4 }}>
+                  <VUMeter level={vuLevels[project.tracks[0]?.id]??0} color={C.neon} peaked={false} />
+                  <VUMeter level={(vuLevels[project.tracks[0]?.id]??0)*0.95} color={C.neon} peaked={false} />
+                </div>
+              </div>
+            </div>
+            {project.tracks.map(track => (
+              <div key={track.id} style={{
+                width:80, flexShrink:0, borderRight:`1px solid ${C.border}`,
+                display:'flex', flexDirection:'column', alignItems:'center',
+                padding:'8px 6px', gap:4,
+                background: selectedTrackId===track.id ? C.surfaceLift : 'transparent',
+                borderTop:`3px solid ${track.color}`,
+              }}>
+                <span style={{ fontSize:7, color:C.textMuted, letterSpacing:'.08em', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', width:'100%' }}>
+                  {track.name}
+                </span>
+                <div style={{ display:'flex', gap:3, marginBottom:2 }}>
+                  <VUMeter level={vuLevels[track.id]??0} color={track.color} peaked={peakedTracks.has(track.id)} />
+                  <VUMeter level={(vuLevels[track.id]??0)*0.88} color={track.color} peaked={peakedTracks.has(track.id)} />
+                </div>
+                <input
+                  type="range" min={0} max={1} step={0.01}
+                  value={track.volume}
+                  onChange={e=>updateTrack(track.id,{volume:Number(e.target.value)})}
+                  style={{ width:60, accentColor:track.color }}
+                />
+                <span style={{ fontSize:7, color:C.textMuted }}>{Math.round(track.volume*100)}</span>
+                <div style={{ display:'flex', gap:2 }}>
+                  <AgBtn onClick={()=>toggleMute(track.id)} active={track.muted} activeColor={C.yellow} style={{height:16,padding:'0 4px',fontSize:6}}>M</AgBtn>
+                  <AgBtn onClick={()=>toggleSolo(track.id)} active={track.solo}  activeColor={C.cyan}   style={{height:16,padding:'0 4px',fontSize:6}}>S</AgBtn>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── STATUS BAR ─────────────────────────────────────────────────────── */}
+        <div style={{
+          height:26, background:C.void, borderTop:`1px solid ${C.border}`,
+          display:'flex', alignItems:'center', padding:'0 16px', gap:24, flexShrink:0,
+        }}>
+          {[
+            ['SPC','Play/Pause'],['ESC','Stop'],['⌘Z','Undo'],['⌘D','Dup'],
+            ['DEL','Remove'],['M','Metro'],['L','Loop'],['G','Snap'],['⌘T','Track'],
+          ].map(([k,v]) => (
+            <div key={k} style={{ display:'flex', alignItems:'center', gap:5 }}>
+              <span style={{ fontSize:7, color:C.neon, fontWeight:700, fontFamily:FONT.mono, padding:'1px 4px', border:`1px solid ${C.border}`, letterSpacing:'.05em' }}>{k}</span>
+              <span style={{ fontSize:7, color:C.textDim, letterSpacing:'.1em', textTransform:'uppercase' }}>{v}</span>
+            </div>
+          ))}
+          <div style={{ marginLeft:'auto', fontSize:7, color:C.textDim, letterSpacing:'.2em' }}>
+            {project.tracks.length} TRACKS · {project.clips.length} CLIPS · {project.markers.length} MARKERS
+          </div>
+        </div>
+
+        {/* Context menu */}
+        {contextMenu && (
+          <>
+            <div style={{ position:'fixed', inset:0, zIndex:998 }} onClick={()=>setContextMenu(null)} />
+            <div style={{
+              position:'fixed', left:contextMenu.x, top:contextMenu.y,
+              background:C.surface, border:`1px solid ${C.border}`, borderTop:`2px solid ${C.neon}`,
+              padding:4, minWidth:160, boxShadow:'0 8px 32px rgba(0,0,0,.9)', zIndex:999,
+            }}>
+              {selectedClipIds.length > 0 ? (
+                <>
+                  <CtxItem onClick={()=>{ selectedClipIds.forEach(duplicateClip); setContextMenu(null); }}><Copy size={11} /> Duplicate</CtxItem>
+                  <CtxItem onClick={()=>{ selectedClipIds.forEach(deleteClip); setContextMenu(null); }}><Trash2 size={11} /> Delete</CtxItem>
+                </>
+              ) : (
+                <>
+                  <CtxItem onClick={()=>{ addTrack(); setContextMenu(null); }}><Plus size={11} /> Add Track</CtxItem>
+                  <CtxItem onClick={()=>setContextMenu(null)}><Upload size={11} /> Import Audio</CtxItem>
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 }
 
-// ─── PanelBlock sub-component ─────────────────────────────────────────────────
-
-interface PanelBlockProps {
-  num: string;
-  title: string;
-  badge?: string;
-  icon?: ReactNode;
-  defaultOpen?: boolean;
-  children: ReactNode;
-}
-
-function PanelBlock({ num, title, badge, icon, defaultOpen = true, children }: PanelBlockProps) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="ag-panel">
-      <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
-      <div
-        className={`ag-panel-header${open ? ' open' : ''}`}
-        onClick={() => setOpen(v => !v)}
-        role="button"
-        aria-expanded={open}
-        tabIndex={0}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(v => !v); } }}
-      >
-        <span className="ag-ph-icon">{icon}</span>
-        <span className="ag-ph-title">{title}</span>
-        {badge && <span className="ag-ph-badge">{badge}</span>}
-        <span className={`ag-ph-chevron${open ? ' open' : ''}`}>▶</span>
-      </div>
-      {open && children}
-    </div>
-  );
-}
+const CtxItem = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+  <div
+    onClick={onClick}
+    style={{
+      padding:'7px 10px', cursor:'pointer', display:'flex', alignItems:'center', gap:8,
+      fontSize:9, fontFamily:FONT.mono, letterSpacing:'.1em', textTransform:'uppercase',
+      color:C.text, transition:'background .07s, color .07s', borderLeft:'2px solid transparent',
+    }}
+    onMouseEnter={e=>{ (e.currentTarget as HTMLDivElement).style.background=C.neon; (e.currentTarget as HTMLDivElement).style.color=C.void; (e.currentTarget as HTMLDivElement).style.borderColor=C.neon; }}
+    onMouseLeave={e=>{ (e.currentTarget as HTMLDivElement).style.background='transparent'; (e.currentTarget as HTMLDivElement).style.color=C.text; (e.currentTarget as HTMLDivElement).style.borderColor='transparent'; }}
+  >
+    {children}
+  </div>
+);

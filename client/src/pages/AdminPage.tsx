@@ -6,10 +6,12 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../hooks/authStore';
+import { PageNav } from '../components/page-nav';
 
 const T = {
   bg: '#060606', surface: '#0d0d0d', border: '#1c1c1c',
-  acid: '#a3e635', amber: '#f59e0b', cyan: '#22d3ee', red: '#ef4444',
+  acid: '#a3e635',
+  amber: '#f59e0b', cyan: '#22d3ee', red: '#ef4444',
   green: '#22c55e', dim: '#444', muted: '#666', text: '#e5e5e5',
   font: '"IBM Plex Mono", "JetBrains Mono", monospace',
 } as const;
@@ -29,13 +31,13 @@ function formatUptime(s: number) {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
-function Led({ on, color = T.amber }: { on: boolean; color?: string }) {
+function Led({ on, color = T.acid }: { on: boolean; color?: string }) {
   return <span style={{ display:'inline-block', width:8, height:8, borderRadius:'50%',
     background: on ? color : '#1a1a1a', border:`1px solid ${on ? color : '#2a2a2a'}`,
     boxShadow: on ? `0 0 6px ${color}88` : 'none', flexShrink:0 }} />;
 }
 
-function Tile({ label, value, unit='', accent=T.amber, sub }:
+function Tile({ label, value, unit='', accent=T.acid, sub }:
   { label:string; value:string|number; unit?:string; accent?:string; sub?:string }) {
   return (
     <div style={{ background:T.surface, border:`1px solid ${T.border}`,
@@ -89,10 +91,12 @@ export default function AdminPage() {
   const dbOk = stats?.db.status === 'ok';
 
   return (
-    <>
-    <style>{`:root{--ag-acid:#a3e635}`}</style>
-    <div style={{ display:'flex', flexDirection:'column', height:'calc(100vh - var(--nav-h, 44px))',
-      background:T.bg, color:T.text, fontFamily:T.font, overflow:'hidden' }}>
+    <div style={{ display:'flex', flexDirection:'column', height:'100vh',
+      background:T.bg,
+      backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,.016) 31px,rgba(255,255,255,.016) 32px)',
+      color:T.text, fontFamily:T.font, overflow:'hidden',
+      borderLeft:'3px solid #a3e635', boxShadow:'inset 3px 0 18px rgba(163,230,53,0.15)' }}>
+      <PageNav />
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 16px',
         borderBottom:`1px solid ${T.border}`, background:T.surface, flexShrink:0 }}>
         <div style={{ display:'flex', gap:5 }}>
@@ -101,7 +105,7 @@ export default function AdminPage() {
           <Led on={!!error} color={T.red} />
         </div>
         <span style={{ fontSize:9, letterSpacing:'0.25em', color:T.dim, flex:1 }}>
-          R3<span style={{color:'var(--ag-acid,#a3e635)',margin:'0 3px'}}>/</span>MONITOR
+          R3 v4 — REMOTE MONITOR
         </span>
         <span style={{ fontSize:8, color:T.dim, letterSpacing:'0.1em' }}>
           {lastPoll ? `LAST SYNC  ${lastPoll}` : 'CONNECTING…'} · POLL #{pollCount}
@@ -118,13 +122,13 @@ export default function AdminPage() {
           <>
             <Section label="SERVER" />
             <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-              <Tile label="UPTIME"      value={formatUptime(stats.uptime)} accent={T.amber} />
+              <Tile label="UPTIME"      value={formatUptime(stats.uptime)} accent={T.acid} />
               <Tile label="ENVIRONMENT" value={stats.env.toUpperCase()} accent={T.dim} />
               <Tile label="NODE"        value={stats.nodeVersion} accent={T.dim} />
             </div>
             <Section label="MEMORY" />
             <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
-              <Tile label="RSS"       value={stats.memory.rss}      unit="MB" accent={T.amber} />
+              <Tile label="RSS"       value={stats.memory.rss}      unit="MB" accent={T.acid} />
               <Tile label="HEAP USED" value={stats.memory.heapUsed} unit="MB" accent={T.cyan}
                 sub={`of ${stats.memory.heapTotal} MB total`} />
               <Tile label="HEAP FREE" value={stats.memory.heapTotal - stats.memory.heapUsed}
@@ -165,6 +169,5 @@ export default function AdminPage() {
         )}
       </div>
     </div>
-    </>
   );
 }

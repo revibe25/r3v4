@@ -33,6 +33,7 @@ export interface FXState {
   flange: boolean;
   reverse: boolean;
   vinyl: boolean;
+  [key: string]: boolean | undefined;
 }
 
 export interface RecordedEvent {

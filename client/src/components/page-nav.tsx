@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { LogoutButton } from '@/components/logout-button';
 import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 
 // ── Layout token ─────────────────────────────────────────────────────────────
 // Exported so App.tsx can inject `--nav-h` as a CSS custom property.
@@ -229,6 +230,12 @@ export function PageNav() {
             ADMIN
           </a>
         )}
+
+        {/* Theme switcher */}
+        <ThemeSwitcher />
+
+        {/* Theme switcher */}
+        <ThemeSwitcher />
 
         {/* Settings — no-op until panel spec is confirmed */}
         <button

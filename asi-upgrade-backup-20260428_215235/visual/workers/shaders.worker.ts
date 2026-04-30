@@ -1,0 +1,2 @@
+// Shaders Worker stub
+export {};
