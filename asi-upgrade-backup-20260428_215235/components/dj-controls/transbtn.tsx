@@ -1,0 +1,57 @@
+import { useState } from 'react';
+import { ACID, DJ_BLACK, DJ_BORDER, DJ_DIM } from './types';
+
+interface TransBtnProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  active?: boolean;
+  color?: string;
+  danger?: boolean;
+  compact?: boolean;
+}
+
+export function TransBtn({
+  icon, label, onClick, active = false, color = ACID, danger = false, compact = false,
+}: TransBtnProps) {
+  const [pressed, setPressed] = useState(false);
+
+  const bg = danger
+    ? (pressed || active ? '#ff2200' : 'transparent')
+    : active ? color : 'transparent';
+  const borderColor = danger ? '#ff2200' : active ? color : DJ_BORDER;
+  const textColor   = danger
+    ? (active || pressed ? DJ_BLACK : '#ff2200')
+    : active ? DJ_BLACK : DJ_DIM;
+
+  return (
+    <button
+      onClick={onClick}
+      onPointerDown={() => setPressed(true)}
+      onPointerUp={() => setPressed(false)}
+      onPointerLeave={() => setPressed(false)}
+      title={label}
+      style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: compact ? 0 : 3,
+        padding: compact ? '6px 8px' : '8px 6px',
+        borderRadius: 0,
+        border: `1px solid ${borderColor}`,
+        background: bg,
+        color: textColor,
+        cursor: 'pointer',
+        minWidth: compact ? 32 : 40,
+        fontFamily: 'inherit',
+      }}
+    >
+      <div style={{ width: compact ? 14 : 18, height: compact ? 14 : 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {icon}
+      </div>
+      {!compact && (
+        <span style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' }}>
+          {label}
+        </span>
+      )}
+    </button>
+  );
+}

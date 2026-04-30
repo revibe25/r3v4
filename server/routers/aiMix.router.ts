@@ -13,6 +13,23 @@ const aiService = new AIMixingService();
 const CONFIDENCE_AUTO_APPLY = 0.65;
 const CONFIDENCE_SUGGEST    = 0.40;
 
+// ── DEPRECATION ──────────────────────────────────────────────────────────────
+// This router is unused. The active mix suggestion path is `daw.ai.suggestions`
+// (server/routers/daw.ts) which the client hook calls directly. Decision logging
+// for that path happens client-side via `sessionMetrics.recordDecision`.
+//
+// Kept for now because:
+//   - aiMix.recordOutcome may have INTERNAL_SECRET callers we haven't audited
+//   - AIMixingService is wired into daw.ai.suggestions (Phase 2) and will
+//     evolve from this surface
+//
+// Do not add new procedures here. Migrate any new client work to daw.* router.
+process.stderr.write(
+  "[deprecation] server/routers/aiMix.router.ts is loaded but unused. " +
+  "Use daw.ai.suggestions instead.\n",
+);
+
+/** @deprecated Use `dawRouter` (`daw.ai.suggestions`) instead. */
 export const aiMixRouter = router({
   analyze: protectedProcedure
     .input(z.object({

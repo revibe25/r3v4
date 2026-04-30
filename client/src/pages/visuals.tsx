@@ -17,11 +17,12 @@
  * ShaderPass API. It is added after Bloom so SSAO is composited first.
  */
 
-import { useRef, useState, Suspense } from 'react';
+import { useRef, useState, Suspense, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import { N8AOPostPass } from 'n8ao';
+import { PageNav } from '@/components/page-nav';
 import { AudioReactiveScene, N8AOBeatController } from '@/components/three/AudioReactiveScene';
 import { WaveformMesh } from '@/components/three/WaveformMesh';
 import { useLoopEngineFFTRef } from '@/hooks/use-loop-engine-fft';
@@ -103,9 +104,15 @@ const IR_PRESETS: IRPreset[] = [
   'smallRoom', 'largeHall', 'cathedral', 'clubRoom', 'plateMedium', 'springReverb',
 ];
 
-function ControlsOverlay() {
-  const [colorBase,   setColorBase]   = useState('#1a0066');
-  const [colorAccent, setColorAccent] = useState('#00ff88');
+interface ControlsOverlayProps {
+  colorBase: string;
+  onColorBaseChange: (v: string) => void;
+  colorAccent: string;
+  onColorAccentChange: (v: string) => void;
+}
+
+function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAccentChange }: ControlsOverlayProps) {
+  // PRD §3 design system: cyan = #00F5FF (active), violet = AI, amber = warning
   const [msWidth,     setMsWidthVal]  = useState(1.0);
   const [open,        setOpen]        = useState(false);
 
@@ -117,14 +124,45 @@ function ControlsOverlay() {
     instrumentEngine.setMSWidth(v);
   };
 
+  // Shared label style
+  const labelStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: '#aaa',
+    fontFamily: '"IBM Plex Mono", monospace',
+  };
+
+  const rangeStyle: React.CSSProperties = {
+    width: '100%',
+    height: 4,
+    background: '#222',
+    appearance: 'none' as const,
+    cursor: 'pointer',
+    accentColor: '#a3e635',
+  };
+
   return (
     <>
       {/* Toggle button */}
       <button
         onClick={() => setOpen(p => !p)}
-        className="fixed bottom-4 right-4 z-20 w-10 h-10 flex items-center justify-center
-                   bg-black/70 border border-[#333] text-[#a3e635] font-mono text-xs
-                   hover:bg-[#111] transition-colors"
+        style={{
+          position:       'fixed',
+          bottom:         16,
+          right:          16,
+          zIndex:         20,
+          width:          40,
+          height:         40,
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          background:     'rgba(0,0,0,0.75)',
+          border:         '1px solid #333',
+          color:          '#a3e635',
+          fontFamily:     '"IBM Plex Mono", monospace',
+          fontSize:       12,
+          cursor:         'pointer',
+          transition:     'background 0.1s',
+        }}
         title="Toggle controls"
       >
         {open ? '✕' : '⚙'}
@@ -132,90 +170,130 @@ function ControlsOverlay() {
 
       {open && (
         <div
-          className="fixed bottom-16 right-4 z-20 w-72 p-4 space-y-4
-                     bg-black/85 border border-[#222] font-mono text-xs text-[#aaa]"
+          style={{
+            position:      'fixed',
+            bottom:        64,
+            right:         16,
+            zIndex:        20,
+            width:         288,
+            padding:       16,
+            background:    'rgba(0,0,0,0.88)',
+            border:        '1px solid #222',
+            fontFamily:    '"IBM Plex Mono", monospace',
+            fontSize:      12,
+            color:         '#aaa',
+            display:       'flex',
+            flexDirection: 'column',
+            gap:           16,
+          }}
         >
-          <p className="text-[#a3e635] font-bold tracking-widest uppercase text-[10px]">
+          <p style={{ color: '#a3e635', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10, margin: 0 }}>
             Visuals Controls
           </p>
 
           {/* Color pickers */}
-          <div className="flex gap-3 items-center">
-            <label className="text-[10px] w-20">Base color</label>
-            <input type="color" value={colorBase}
-              onChange={e => setColorBase(e.target.value)}
-              className="w-8 h-6 bg-transparent border-0 cursor-pointer" />
-            <label className="text-[10px] w-20">Accent</label>
-            <input type="color" value={colorAccent}
-              onChange={e => setColorAccent(e.target.value)}
-              className="w-8 h-6 bg-transparent border-0 cursor-pointer" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={labelStyle}>Base color</span>
+            <input
+              type="color"
+              value={colorBase}
+              onChange={e => onColorBaseChange(e.target.value)}
+              style={{ width: 32, height: 24, background: 'transparent', border: 0, cursor: 'pointer' }}
+            />
+            <span style={labelStyle}>Accent</span>
+            <input
+              type="color"
+              value={colorAccent}
+              onChange={e => onColorAccentChange(e.target.value)}
+              style={{ width: 32, height: 24, background: 'transparent', border: 0, cursor: 'pointer' }}
+            />
           </div>
 
           {/* M/S Width */}
           <div>
-            <div className="flex justify-between mb-1">
-              <span className="text-[10px]">M/S Width</span>
-              <span className="text-[#a3e635]">{msWidth.toFixed(2)}</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={labelStyle}>M/S Width</span>
+              <span style={{ color: '#a3e635', fontFamily: '"IBM Plex Mono", monospace', fontSize: 10 }}>{msWidth.toFixed(2)}</span>
             </div>
-            <input type="range" min="0" max="2" step="0.01"
-              value={msWidth} onChange={e => handleMSWidth(parseFloat(e.target.value))}
-              className="w-full h-1 bg-[#222] appearance-none cursor-pointer" />
-            <div className="flex justify-between text-[9px] text-[#444] mt-0.5">
+            <input
+              type="range" min="0" max="2" step="0.01"
+              value={msWidth}
+              onChange={e => handleMSWidth(parseFloat(e.target.value))}
+              style={rangeStyle}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#444', marginTop: 2 }}>
               <span>mono</span><span>unity</span><span>wide</span>
             </div>
           </div>
 
           {/* Sidechain */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px]">Sidechain Duck</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={labelStyle}>Sidechain Duck</span>
               <button
                 onClick={() => sc.enabled
                   ? sc.disable()
                   : sc.enable({ sourceTrackIndex: 0, amount: 0.75, attack: 0.003, release: 0.15 })
                 }
-                className={`px-2 py-0.5 text-[10px] border transition-colors ${
-                  sc.enabled
-                    ? 'bg-[#a3e635] text-black border-[#a3e635]'
-                    : 'bg-transparent text-[#555] border-[#333] hover:border-[#555]'
-                }`}
+                style={{
+                  padding:         '2px 8px',
+                  fontSize:        10,
+                  fontFamily:      '"IBM Plex Mono", monospace',
+                  border:          sc.enabled ? '1px solid #a3e635' : '1px solid #333',
+                  background:      sc.enabled ? '#a3e635' : 'transparent',
+                  color:           sc.enabled ? '#000' : '#555',
+                  cursor:          'pointer',
+                  transition:      'all 0.1s',
+                }}
               >
                 {sc.enabled ? 'ON' : 'OFF'}
               </button>
             </div>
             {sc.enabled && (
               <div>
-                <div className="flex justify-between text-[9px] mb-1">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 4 }}>
                   <span>Amount</span>
-                  <span className="text-[#a3e635]">{sc.config.amount.toFixed(2)}</span>
+                  <span style={{ color: '#a3e635' }}>{sc.config.amount.toFixed(2)}</span>
                 </div>
-                <input type="range" min="0" max="1" step="0.01"
+                <input
+                  type="range" min="0" max="1" step="0.01"
                   value={sc.config.amount}
                   onChange={e => sc.setAmount(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-[#222] appearance-none cursor-pointer" />
+                  style={rangeStyle}
+                />
               </div>
             )}
           </div>
 
           {/* IR Reverb */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px]">IR Reverb</span>
-              {ir.loading && <span className="text-[9px] text-[#555] animate-pulse">loading…</span>}
-              {ir.error   && <span className="text-[9px] text-red-400" title={ir.error}>error</span>}
-              {ir.loaded  && <span className="text-[9px] text-[#a3e635]">✓ loaded</span>}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <span style={labelStyle}>IR Reverb</span>
+              {ir.loading && <span style={{ fontSize: 9, color: '#555' }}>loading…</span>}
+              {ir.error   && <span style={{ fontSize: 9, color: '#f87171' }} title={ir.error}>error</span>}
+              {ir.loaded  && <span style={{ fontSize: 9, color: '#a3e635' }}>✓ loaded</span>}
             </div>
 
             {/* Preset selector */}
-            <div className="grid grid-cols-2 gap-1 mb-2">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4, marginBottom: 8 }}>
               {IR_PRESETS.map(p => (
-                <button key={p}
+                <button
+                  key={p}
                   onClick={() => ir.loadPreset(p)}
-                  className={`px-1 py-0.5 text-[9px] border transition-colors text-left truncate ${
-                    ir.currentPreset === p
-                      ? 'bg-[#a3e635]/10 border-[#a3e635] text-[#a3e635]'
-                      : 'bg-transparent border-[#333] text-[#555] hover:border-[#555] hover:text-[#888]'
-                  }`}
+                  style={{
+                    padding:        '2px 4px',
+                    fontSize:        9,
+                    fontFamily:     '"IBM Plex Mono", monospace',
+                    border:         ir.currentPreset === p ? '1px solid #a3e635' : '1px solid #333',
+                    background:     ir.currentPreset === p ? 'rgba(163,230,53,0.10)' : 'transparent',
+                    color:          ir.currentPreset === p ? '#a3e635' : '#555',
+                    cursor:         'pointer',
+                    textAlign:      'left',
+                    overflow:       'hidden',
+                    textOverflow:   'ellipsis',
+                    whiteSpace:     'nowrap',
+                    transition:     'all 0.1s',
+                  }}
                   title={p}
                 >
                   {p.replace(/([A-Z])/g, ' $1').trim().toLowerCase()}
@@ -225,19 +303,21 @@ function ControlsOverlay() {
 
             {ir.loaded && (
               <div>
-                <div className="flex justify-between text-[9px] mb-1">
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 4 }}>
                   <span>Wet</span>
-                  <span className="text-[#a3e635]">{ir.wet.toFixed(2)}</span>
+                  <span style={{ color: '#a3e635' }}>{ir.wet.toFixed(2)}</span>
                 </div>
-                <input type="range" min="0" max="1" step="0.01"
+                <input
+                  type="range" min="0" max="1" step="0.01"
                   value={ir.wet}
                   onChange={e => ir.setWet(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-[#222] appearance-none cursor-pointer" />
+                  style={rangeStyle}
+                />
               </div>
             )}
 
             {!ir.loaded && !ir.loading && (
-              <p className="text-[9px] text-[#444] leading-tight">
+              <p style={{ fontSize: 9, color: '#444', lineHeight: 1.5, margin: 0 }}>
                 Place .wav files in client/public/ir/ to enable presets.
                 See README in that directory.
               </p>
@@ -256,10 +336,11 @@ export default function VisualsPage() {
   const [colorAccent, setColorAccent] = useState('#00ff88');
 
   return (
-    <div className="min-h-screen bg-black text-[#f0f0f0] font-mono flex flex-col">
+    <div style={{ minHeight: '100vh', background: '#000000', color: '#f0f0f0', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column' }}>
+      <PageNav />
 
       {/* Full-screen canvas */}
-      <div className="flex-1 relative">
+      <div style={{ flex: 1, position: 'relative' }}>
         <Canvas
           shadows
           dpr={[1, 2]}
@@ -288,8 +369,13 @@ export default function VisualsPage() {
         <BandMeterHUD />
       </div>
 
-      {/* Controls overlay */}
-      <ControlsOverlay />
+      {/* Controls overlay — receives lifted color state so pickers drive the canvas */}
+      <ControlsOverlay
+        colorBase={colorBase}
+        onColorBaseChange={setColorBase}
+        colorAccent={colorAccent}
+        onColorAccentChange={setColorAccent}
+      />
     </div>
   );
 }
@@ -300,11 +386,20 @@ function BandMeterHUD() {
   const fftRef  = useLoopEngineFFTRef();
   const barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const BANDS   = ['sub','low','mid','high','pres','air'] as const;
-  const COLORS  = ['#ff2244','#ff6600','#ffcc00','#00ff88','#00aaff','#aa44ff'];
+  const COLORS  = ['#ff2244','#ff6600','#ffcc00','#00ff88','#00F5FF','#aa44ff']; // PRD §3: cyan #00F5FF
 
   // Animate DOM elements from rAF — zero React re-renders
-  const rafRef  = useRef<number>(0);
+  const rafRef    = useRef<number>(0);
+  const startedRef = useRef(false);
+
+  // Cancel the loop on unmount to avoid stale-ref memory leak
+  useEffect(() => {
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, []);
+
   const startHUD = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
     const tick = () => {
       rafRef.current = requestAnimationFrame(tick);
       const b = fftRef.current.bands;
@@ -317,16 +412,16 @@ function BandMeterHUD() {
     rafRef.current = requestAnimationFrame(tick);
   };
 
-  // useEffect equivalent via ref callback on first bar mount
+  // Ref callback on first bar mount — guards against multiple invocations
   const firstBarRef = (el: HTMLDivElement | null) => {
     barRefs.current[0] = el;
     if (el) startHUD();
   };
 
   return (
-    <div className="absolute bottom-4 left-4 flex gap-1 items-end h-16">
+    <div style={{ position: 'absolute', bottom: 16, left: 16, display: 'flex', gap: 4, alignItems: 'flex-end', height: 64 }}>
       {BANDS.map((band, i) => (
-        <div key={band} className="flex flex-col items-center gap-0.5">
+        <div key={band} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
           <div
             ref={i === 0 ? firstBarRef : (el) => { barRefs.current[i] = el; }}
             style={{ backgroundColor: COLORS[i], width: 12, height: '0%',

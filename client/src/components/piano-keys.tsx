@@ -116,6 +116,7 @@ interface PianoKeysProps {
   onAssignSample: (keyIndex: number, buffer: AudioBuffer, name: string) => void;
   loadSample: (file: File) => Promise<AudioBuffer | null>;
   onEffectChange?: (effects: EffectSettings) => void;
+  disabled?: boolean;
 }
 
 // ============================================================================
@@ -333,7 +334,7 @@ function WhiteKey({
       </span>
 
       {layerCount > 1 && (
-        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-blue-500 text-white text-[8px] font-bold flex items-center justify-center">
+        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-blue-500 text-foreground text-[8px] font-bold flex items-center justify-center">
           {layerCount}
         </div>
       )}
@@ -386,8 +387,8 @@ function BlackKey({
         'flex flex-col items-center justify-end pb-1.5 transition-all duration-75 ease-out',
         'border border-gray-950 select-none touch-none',
         (isActive || isPressed)
-          ? 'bg-black shadow-inner scale-[0.97] translate-y-0.5'
-          : 'bg-black shadow-lg hover:shadow-xl',
+          ? 'bg-background shadow-inner scale-[0.97] translate-y-0.5'
+          : 'bg-background shadow-lg hover:shadow-xl',
         isInScale && !isActive && !isPressed && 'ring-1 ring-lime-400/60 ring-inset',
         isLocked && 'ring-2 ring-orange-400 ring-inset'
       )}
@@ -424,7 +425,7 @@ function BlackKey({
       </span>
 
       {layerCount > 1 && (
-        <div className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-blue-600 text-white text-[7px] font-bold flex items-center justify-center">
+        <div className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-blue-600 text-foreground text-[7px] font-bold flex items-center justify-center">
           {layerCount}
         </div>
       )}
@@ -1041,7 +1042,7 @@ export function PianoKeys({
                 background: 'linear-gradient(135deg, hsl(210, 60%, 50%) 0%, hsl(250, 60%, 45%) 100%)',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.25)',
               }}>
-              <Music className="w-3.5 h-3.5 text-white" />
+              <Music className="w-3.5 h-3.5 text-foreground" />
             </div>
             <div>
               <h3 className="text-xs font-semibold text-foreground/90">Piano Keys</h3>

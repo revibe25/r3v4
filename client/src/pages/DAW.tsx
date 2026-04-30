@@ -42,10 +42,7 @@ import { useLoopEngineFFTRef }   from '../hooks/useLoopEngineFFTRef';
 import { AudioReactiveScene }    from '../components/daw/AudioReactiveScene';
 import { WaveformMesh }          from '../components/daw/WaveformMesh';
 import { SessionChip }           from '../components/session-summary/SessionChip';
-import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SessionSummaryPanel }   from '../components/session-summary/SessionSummaryPanel';
-import { MixSuggestionsPanel }   from '../components/MixSuggestionsPanel';
-import { useMixSuggestions }     from '../hooks/useMixSuggestions';
 
 // ─── Shared mini-components ───────────────────────────────────────────────────
 
@@ -153,7 +150,7 @@ const Btn = memo(({
       ${active
         ? danger
           ? 'bg-red-600/20 border-red-600/60 text-red-400'
-          : 'bg-amber-500/20 border-amber-500/60 text-amber-400'
+          : 'bg-[#a3e635]/10 border-[#a3e635]/40 text-[#a3e635]'
         : dim
           ? 'bg-transparent border-[#2a2a2a] text-[#444] cursor-not-allowed'
           : 'bg-[#1a1a1a] border-[#333] text-[#888] hover:border-[#555] hover:text-[#ccc]'
@@ -192,12 +189,12 @@ const TimeSavingsReadout = memo(() => {
   if (saved === 0) return null;
   return (
     <div
-      className="flex items-center gap-1 px-2 py-0.5 rounded border
-                 border-amber-500/30 bg-amber-500/5"
+      className="flex items-center gap-1 px-2 py-0.5 border
+                 border-[#a3e635]/25 bg-[#a3e635]/5"
       title={`${acceptedCount} AI suggestion${acceptedCount !== 1 ? 's' : ''} accepted — ~${saved} min saved`}
     >
-      <span className="text-[8px] text-amber-500/60 tracking-widest">SAVED</span>
-      <span className="text-[10px] font-mono text-amber-400 font-semibold">{saved}m</span>
+      <span className="text-[8px] text-[#a3e635]/60 tracking-widest">SAVED</span>
+      <span className="text-[10px] font-mono text-[#a3e635] font-semibold">{saved}m</span>
     </div>
   );
 });
@@ -235,7 +232,7 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
         {editingName ? (
           <input
             autoFocus
-            className="bg-[#1a1a1a] border border-amber-500/50 rounded px-1 text-xs text-white w-28"
+            className="bg-[#1a1a1a] border border-[#a3e635]/40 px-1 text-xs text-white w-28"
             value={projectName}
             onChange={e => setProjectName(e.target.value)}
             onBlur={() => setEditingName(false)}
@@ -243,7 +240,7 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
           />
         ) : (
           <span
-            className="text-[11px] tracking-widest text-[#888] cursor-pointer hover:text-amber-400 transition-colors"
+            className="text-[11px] tracking-widest text-[#888] cursor-pointer hover:text-[#a3e635] transition-colors"
             onClick={() => setEditingName(true)}
           >
             {projectName}
@@ -273,7 +270,7 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
       {/* Position display */}
       <div className="font-mono text-sm bg-[#0a0a0a] border border-[#222] rounded px-2 py-1"
            style={{ minWidth: 72, textAlign: 'center' }}>
-        <span className="text-amber-400">{posStr}</span>
+        <span className="text-[#a3e635]">{posStr}</span>
       </div>
 
       <div className="w-px h-8 bg-[#2a2a2a]" />
@@ -281,13 +278,13 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
       {/* BPM */}
       <div className="flex items-center gap-1.5">
         <button
-          className="text-[10px] text-[#555] hover:text-amber-400 px-1 select-none"
+          className="text-[10px] text-[#555] hover:text-[#a3e635] px-1 select-none"
           onClick={() => engine.nudgeBpm(-1)}
         >◀</button>
         {editingBpm ? (
           <input
             autoFocus
-            className="w-14 bg-[#0a0a0a] border border-amber-500/60 rounded text-center text-amber-400 font-mono text-sm"
+            className="w-14 bg-[#0a0a0a] border border-[#a3e635]/40 text-center text-[#a3e635] font-mono text-sm"
             value={bpmInput}
             onChange={e => setBpmInput(e.target.value)}
             onBlur={() => {
@@ -305,14 +302,14 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
           />
         ) : (
           <div
-            className="font-mono text-sm bg-[#0a0a0a] border border-[#222] rounded px-2 py-1 cursor-pointer hover:border-amber-500/40 min-w-[56px] text-center text-amber-400"
+            className="font-mono text-sm bg-[#0a0a0a] border border-[#222] px-2 py-1 cursor-pointer hover:border-[#a3e635]/30 min-w-[56px] text-center text-[#a3e635]"
             onClick={() => { setBpmInput(String(bpm)); setEditingBpm(true); }}
           >
             {bpm.toFixed(1)}
           </div>
         )}
         <button
-          className="text-[10px] text-[#555] hover:text-amber-400 px-1 select-none"
+          className="text-[10px] text-[#555] hover:text-[#a3e635] px-1 select-none"
           onClick={() => engine.nudgeBpm(1)}
         >▶</button>
         <span className="text-[9px] text-[#444] tracking-widest">BPM</span>
@@ -384,7 +381,7 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
             onClick={() => setSidebarTab(tab)}
             className={`flex-1 py-1.5 text-[9px] tracking-widest uppercase font-mono transition-colors ${
               sidebarTab === tab
-                ? 'text-amber-400 border-b border-amber-500'
+                ? 'text-[#a3e635] border-b border-[#a3e635]'
                 : 'text-[#444] hover:text-[#888]'
             }`}
           >
@@ -417,6 +414,7 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
                 style={{ display: 'none' }}
                 onChange={e => {
                   const file = e.target.files?.[0];
+                  if (file) { /* upload queued — wire to engine handler */ }
                   e.target.value = '';
                 }}
               />
@@ -446,7 +444,7 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
                   <input
                     autoFocus
                     placeholder="ROOM ID"
-                    className="w-full bg-[#1a1a1a] border border-[#333] rounded px-2 py-1 text-[11px] text-[#ccc] font-mono"
+                    className="w-full bg-[#1a1a1a] border border-[#a3e635]/30 px-2 py-1 text-[11px] text-[#ccc] font-mono"
                     value={roomInput}
                     onChange={e => setRoomInput(e.target.value.toUpperCase())}
                     onKeyDown={e => {
@@ -671,7 +669,7 @@ const ArrangementView = memo(({
               if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click();
             }}
           >
-            <span className="text-[9px] text-[#2a2a2a] group-hover:text-amber-500/60
+            <span className="text-[9px] text-[#2a2a2a] group-hover:text-[#a3e635]/60
                              tracking-widest transition-colors select-none">
               + ADD TRACK
             </span>
@@ -802,7 +800,7 @@ const TrackLabel = memo(({
       </div>
       <div className="flex flex-col gap-0.5">
         <button
-          className={`text-[8px] font-mono px-1 rounded ${track.mute ? 'text-amber-400 bg-amber-500/20' : 'text-[#444] hover:text-[#888]'}`}
+          className={`text-[8px] font-mono px-1 ${track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[#444] hover:text-[#888]'}`}
           onClick={e => { e.stopPropagation(); updateTrack(track.id, { mute: !track.mute }); }}
         >M</button>
         <button
@@ -881,7 +879,7 @@ const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequen
               key={p.id}
               className={`px-2 py-0.5 rounded text-[9px] font-mono transition-colors ${
                 p.id === activePatternId
-                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                  ? 'bg-[#a3e635]/10 text-[#a3e635] border border-[#a3e635]/40'
                   : 'text-[#444] hover:text-[#888] border border-[#222]'
               }`}
               onClick={() => setActivePattern(p.id)}
@@ -950,9 +948,9 @@ const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequen
                         background: isCurrent
                           ? '#f59e0b22'
                           : active
-                            ? '#f59e0b'
+                            ? '#a3e635'
                             : step % 4 === 0 ? '#151515' : '#0d0d0d',
-                        boxShadow: active ? '0 0 4px #f59e0b55' : 'none',
+                        boxShadow: active ? '0 0 4px rgba(163,230,53,0.35)' : 'none',
                       }}
                       onClick={() => seq.toggleNote(step, pitch, 100)}
                       title={active ? `${seq.getPitchLabel(pitch)} vel:${vel}` : undefined}
@@ -960,7 +958,7 @@ const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequen
                       {active && (
                         <div
                           className="w-full"
-                          style={{ height: `${(vel / 127) * 100}%`, background: '#f59e0b66' }}
+                          style={{ height: `${(vel / 127) * 100}%`, background: 'rgba(163,230,53,0.4)' }}
                         />
                       )}
                     </div>
@@ -1028,7 +1026,7 @@ const MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }
             }}
           />
         </div>
-        <span className="text-[8px] font-mono text-amber-400 mt-1">
+        <span className="text-[8px] font-mono text-[#a3e635] mt-1">
           {Math.round(masterGain * 100)}
         </span>
       </div>
@@ -1085,7 +1083,7 @@ const MixerChannel = memo(({
     <div className="flex gap-0.5">
       <button
         className={`text-[7px] font-mono px-0.5 rounded transition-colors ${
-          track.mute ? 'text-amber-400 bg-amber-500/20' : 'text-[#333] hover:text-[#666]'
+          track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[#333] hover:text-[#666]'
         }`}
         onClick={() => onChange({ mute: !track.mute })}
       >M</button>
@@ -1170,7 +1168,6 @@ const AIPanel = memo(() => {
     setAIThinking, updateMastering, predictionsVisible, setPredictionsVisible,
   } = useDAWStore();
 
-  const mixSuggestions            = useMixSuggestions();
   const [chatInput, setChatInput] = useState('');
   const [aiError,   setAiError]   = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1331,7 +1328,7 @@ const AIPanel = memo(() => {
             onClick={() => setAIPanelTab(tab)}
             className={`flex-1 py-2 text-[8px] tracking-widest uppercase transition-colors ${
               aiPanelTab === tab
-                ? 'text-amber-400 border-b border-amber-500 bg-amber-500/5'
+                ? 'text-[#a3e635] border-b border-[#a3e635] bg-[#a3e635]/5'
                 : 'text-[#444] hover:text-[#777]'
             }`}
           >
@@ -1343,28 +1340,42 @@ const AIPanel = memo(() => {
       <div className="flex-1 overflow-y-auto">
         {/* ── AI Mix Panel (L1) ──────────────────────────────────────────── */}
         {aiPanelTab === 'mix' && (
-          <div className="p-3">
-            <MixSuggestionsPanel
-              suggestions={mixSuggestions.suggestions}
-              status={mixSuggestions.status}
-              acceptedIds={mixSuggestions.acceptedIds}
-              rejectedIds={mixSuggestions.rejectedIds}
-              acceptRate={mixSuggestions.acceptRate}
-              onAccept={mixSuggestions.accept}
-              onReject={mixSuggestions.reject}
-              onAnalyse={() => {
-                const store = useDAWStore.getState();
-                mixSuggestions.analyse(
-                  store.tracks.map(t => ({
-                    id: t.id, gain: t.gain, pan: t.pan, mute: t.mute, solo: t.solo,
-                  })),
-                  store.bpm,
-                  store.position,
-                );
-              }}
-            />
+          <div className="p-3 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[9px] tracking-widest text-[#555]">LLPTE SUGGESTIONS</span>
+              <Btn className="text-[8px]" onClick={triggerSuggestions}>ANALYSE</Btn>
+            </div>
+
+            {aiThinking && (
+              <div className="flex items-center gap-2 py-2">
+                <div className="flex gap-0.5">
+                  {[0,1,2].map(i => (
+                    <div key={i} className="w-1 h-1 rounded-full bg-[#a3e635] animate-bounce"
+                         style={{ animationDelay: `${i * 0.15}s` }} />
+                  ))}
+                </div>
+                <span className="text-[9px] text-[#555]">Analysing signal…</span>
+              </div>
+            )}
+
+            {aiSuggestions.filter(s => s.accepted === null).slice(0, 6).map(s => (
+              <AISuggestionCard
+                key={s.id}
+                suggestion={s}
+                onAccept={() => acceptSuggestion(s.id)}
+                onReject={() => rejectSuggestion(s.id)}
+              />
+            ))}
+
+            {aiSuggestions.filter(s => s.accepted === null).length === 0 && !aiThinking && (
+              <div className="text-center py-8">
+                <div className="text-[10px] text-[#333] font-mono">LLPTE READY</div>
+                <div className="text-[9px] text-[#222] mt-1">Click ANALYSE to generate mix suggestions</div>
+              </div>
+            )}
+
             {/* L3 Arrangement predictions toggle */}
-            <div className="pt-2 border-t border-[#1c1c1c] mt-3">
+            <div className="pt-2 border-t border-[#1c1c1c]">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] text-[#555] tracking-widest">ARRANGEMENT AI</span>
                 <button
@@ -1375,6 +1386,7 @@ const AIPanel = memo(() => {
                   }`}
                   onClick={() => {
                     if (!predictionsVisible) {
+                      // Generate fake predictions for demo; real impl: llpte-ai inference
                       useDAWStore.getState().setArrangementPredictions([
                         { trackId: 'trk_3', startBeat: 32, suggestedAction: 'introduce', confidence: 0.82, label: 'ADD GHOST' },
                         { trackId: 'trk_5', startBeat: 48, suggestedAction: 'fade',       confidence: 0.71, label: 'FADE OUT' },
@@ -1407,7 +1419,7 @@ const AIPanel = memo(() => {
                   <div
                     className={`max-w-[90%] rounded px-2 py-1.5 text-[10px] leading-relaxed ${
                       msg.role === 'user'
-                        ? 'bg-amber-500/20 text-amber-200 border border-amber-500/30'
+                        ? 'bg-[#a3e635]/12 text-[#d0f58a] border border-[#a3e635]/25'
                         : 'bg-[#1a1a1a] text-[#aaa] border border-[#2a2a2a]'
                     }`}
                   >
@@ -1464,7 +1476,7 @@ const AIPanel = memo(() => {
             <div className="space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-[9px] text-[#555]">TARGET LUFS</span>
-                <span className="text-[9px] font-mono text-amber-400">{mastering.targetLUFS} LUFS</span>
+                <span className="text-[9px] font-mono text-[#a3e635]">{mastering.targetLUFS} LUFS</span>
               </div>
               <input
                 type="range" min={-23} max={-6} step={0.5}
@@ -1482,7 +1494,7 @@ const AIPanel = memo(() => {
             <div className="space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-[9px] text-[#555]">TRUE PEAK CEILING</span>
-                <span className="text-[9px] font-mono text-amber-400">{mastering.ceilingDB} dBFS</span>
+                <span className="text-[9px] font-mono text-[#a3e635]">{mastering.ceilingDB} dBFS</span>
               </div>
               <input
                 type="range" min={-3} max={-0.1} step={0.1}
@@ -1503,7 +1515,7 @@ const AIPanel = memo(() => {
                     onClick={() => updateMastering({ dynamicsMode: mode })}
                     className={`flex-1 py-1 rounded border text-[8px] font-mono transition-colors ${
                       mastering.dynamicsMode === mode
-                        ? 'border-amber-500/50 text-amber-400 bg-amber-500/10'
+                        ? 'border-[#a3e635]/40 text-[#a3e635] bg-[#a3e635]/10'
                         : 'border-[#222] text-[#444] hover:border-[#333]'
                     }`}
                   >
@@ -1517,7 +1529,7 @@ const AIPanel = memo(() => {
             <div className="space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-[9px] text-[#555]">STEREO WIDTH</span>
-                <span className="text-[9px] font-mono text-amber-400">×{mastering.stereoWidth.toFixed(1)}</span>
+                <span className="text-[9px] font-mono text-[#a3e635]">×{mastering.stereoWidth.toFixed(1)}</span>
               </div>
               <input
                 type="range" min={0} max={2} step={0.1}
@@ -1544,7 +1556,7 @@ const AIPanel = memo(() => {
                 </div>
                 <div className="flex justify-between text-[9px]">
                   <span className="text-[#555]">TARGET</span>
-                  <span className="font-mono text-amber-400">{mastering.analysisResult.outputLUFS} LUFS</span>
+                  <span className="font-mono text-[#a3e635]">{mastering.analysisResult.outputLUFS} LUFS</span>
                 </div>
                 <div className="flex justify-between text-[9px]">
                   <span className="text-[#555]">DYN RANGE</span>
@@ -1624,182 +1636,6 @@ const AISuggestionCard = memo(({
 AISuggestionCard.displayName = 'AISuggestionCard';
 
 // ─── Main DAW Page ────────────────────────────────────────────────────────────
-
-
-// ── Acid-grid design token injection ─────────────────────────────────────────
-// Ensures --ag-* variables are available and overrides JetBrains Mono → IBM Plex
-// across the DAW surface without touching sub-component styles.
-const DAW_AG_STYLES = `
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-.r3-daw-shell {
-  --ag-black:  #060606;
-  --ag-ink:    #0a0a0a;
-  --ag-panel:  #0d0d0d;
-  --ag-border: #1c1c1c;
-  --ag-acid:   #a3e635;
-  --ag-acid2:  #84cc16;
-  --ag-acid-d: #4d6b18;
-  --ag-white:  #f0f0f0;
-  --ag-rec:    #ef4444;
-  --ag-cyan:   #22d3ee;
-  height: calc(100vh - var(--nav-h, 0px));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: #060606;
-  background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.010) 3px, rgba(255,255,255,.010) 4px),
-    repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,.013) 31px, rgba(255,255,255,.013) 32px);
-  font-family: 'IBM Plex Mono', 'JetBrains Mono', monospace;
-  color: #f0f0f0;
-}
-
-/* Acid-grid header */
-.r3-daw-header {
-  border-bottom: 3px solid var(--ag-border);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0,0,0,.6);
-  flex-shrink: 0;
-  background: #0a0a0a;
-}
-.r3-daw-header::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0; width: 3px;
-  background: var(--ag-acid);
-  box-shadow: 0 0 18px var(--ag-acid), 0 0 40px rgba(163,230,53,.3);
-}
-.r3-daw-header-top {
-  display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--ag-border);
-}
-.r3-daw-wordmark-block {
-  padding: 12px 24px 10px;
-  border-right: 1px solid var(--ag-border);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 200px;
-  position: relative;
-  z-index: 1;
-}
-.r3-daw-wordmark {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 26px;
-  letter-spacing: -0.02em;
-  color: var(--ag-white);
-  line-height: 1;
-}
-.r3-daw-wordmark-slash {
-  color: var(--ag-acid);
-  margin: 0 4px;
-  font-size: 32px;
-  line-height: 0.9;
-  text-shadow: 0 0 12px var(--ag-acid);
-}
-.r3-daw-wordmark-sub {
-  font-size: 8px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--ag-white);
-  margin-top: 5px;
-}
-.r3-daw-status-block {
-  padding: 12px 20px;
-  border-right: 1px solid var(--ag-border);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  z-index: 1;
-}
-.r3-daw-status-line {
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: var(--ag-white);
-}
-.r3-daw-cursor-live     { display:inline-block;width:8px;height:14px;background:var(--ag-acid);box-shadow:0 0 8px var(--ag-acid);animation:ag-daw-blink 1s step-end infinite; }
-.r3-daw-cursor-rec      { display:inline-block;width:8px;height:14px;background:var(--ag-rec);box-shadow:0 0 8px var(--ag-rec);animation:ag-daw-blink .8s step-end infinite; }
-.r3-daw-cursor-standby  { display:inline-block;width:8px;height:14px;background:#2a2a2a; }
-@keyframes ag-daw-blink { 0%,100%{opacity:1} 50%{opacity:0} }
-.r3-daw-status-live { color: var(--ag-acid); }
-.r3-daw-status-rec  { color: var(--ag-rec); }
-.r3-daw-controls-block {
-  flex: 1;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 6px;
-  flex-wrap: wrap;
-  z-index: 1;
-}
-.r3-daw-nav-btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  background: transparent;
-  border: 1px solid var(--ag-border);
-  padding: 6px 12px;
-  color: var(--ag-white);
-  cursor: pointer;
-  transition: all 0.1s;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-.r3-daw-nav-btn:hover { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black, #060606); }
-.r3-daw-nav-btn.active { background: rgba(163,230,53,.1); border-color: var(--ag-acid); color: var(--ag-acid); }
-
-/* Ticker */
-.r3-daw-ticker {
-  padding: 4px 0;
-  background: var(--ag-ink);
-  overflow: hidden;
-  position: relative;
-  flex-shrink: 0;
-}
-.r3-daw-ticker::before,.r3-daw-ticker::after {
-  content:'';position:absolute;top:0;bottom:0;width:40px;z-index:2;
-}
-.r3-daw-ticker::before { left:0;background:linear-gradient(90deg,var(--ag-ink),transparent); }
-.r3-daw-ticker::after  { right:0;background:linear-gradient(-90deg,var(--ag-ink),transparent); }
-.r3-daw-ticker-inner   { display:flex;width:max-content;animation:r3-daw-scroll 30s linear infinite; }
-@keyframes r3-daw-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-.r3-daw-ticker-item {
-  font-size: 9px;letter-spacing:.25em;text-transform:uppercase;
-  color:var(--ag-white);padding:0 20px;white-space:nowrap;
-  display:flex;align-items:center;gap:10px;
-}
-.r3-daw-ticker-sep { color:var(--ag-acid);font-size:11px; }
-
-/* Accent lift — remap structural amber to lime in the DAW shell */
-.r3-daw-shell .text-amber-400 { color: #a3e635 !important; }
-.r3-daw-shell .border-amber-500 { border-color: #a3e635 !important; }
-.r3-daw-shell .bg-amber-500\/20 { background: rgba(163,230,53,0.12) !important; }
-.r3-daw-shell .border-amber-500\/60 { border-color: rgba(163,230,53,0.5) !important; }
-.r3-daw-shell .border-amber-500\/30 { border-color: rgba(163,230,53,0.25) !important; }
-.r3-daw-shell .text-amber-500\/60 { color: rgba(163,230,53,0.6) !important; }
-/* Time position display stays lime */
-.r3-daw-shell .text-amber-400 { color: #a3e635 !important; }
-
-/* scrollbar */
-.r3-daw-shell ::-webkit-scrollbar { width:6px;height:6px;background:#060606; }
-.r3-daw-shell ::-webkit-scrollbar-track { background:#0a0a0a; }
-.r3-daw-shell ::-webkit-scrollbar-thumb { background:#1c1c1c; }
-.r3-daw-shell ::-webkit-scrollbar-thumb:hover { background:#a3e635; }
-`;
 
 export default function DAW() {
   const engine = useDAWEngine();
@@ -1900,64 +1736,20 @@ export default function DAW() {
   //            unnecessary re-registration on every seq ref change.
   }, [engine, sequencerVisible, aiPanelVisible, setSequencerVisible, setAIPanelVisible]);
 
-  const { playing, recording, bpm } = useDAWStore();
-
   return (
-    <>
-    <style>{DAW_AG_STYLES}</style>
-    <div className="r3-daw-shell">
-
-      {/* ── Acid-grid header ─────────────────────────────────────────── */}
-      <header className="r3-daw-header">
-        <div className="r3-daw-header-top">
-
-          {/* Wordmark */}
-          <div className="r3-daw-wordmark-block">
-            <div className="r3-daw-wordmark">
-              R3<span className="r3-daw-wordmark-slash">/</span>STUDIO
-            </div>
-            <div className="r3-daw-wordmark-sub">Production Suite v4</div>
-          </div>
-
-          {/* Status */}
-          <div className="r3-daw-status-block">
-            <div className="r3-daw-status-line">
-              {recording
-                ? <><span className="r3-daw-cursor-rec"/><span className="r3-daw-status-rec">REC</span></>
-                : playing
-                  ? <><span className="r3-daw-cursor-live"/><span className="r3-daw-status-live">LIVE</span></>
-                  : <><span className="r3-daw-cursor-standby"/><span>STANDBY</span></>}
-            </div>
-            <div className="r3-daw-status-line" style={{ color: '#a3e635' }}>
-              {bpm} BPM
-            </div>
-          </div>
-
-          {/* Nav buttons */}
-          <div className="r3-daw-controls-block">
-            <a href="/instrument" className="r3-daw-nav-btn">🎹 Instrument</a>
-            <a href="/multitrack" className="r3-daw-nav-btn">📼 Multitrack</a>
-            <a href="/collab"     className="r3-daw-nav-btn">⬡ Collab</a>
-          </div>
-        </div>
-
-        {/* Ticker */}
-        <div className="r3-daw-ticker">
-          <div className="r3-daw-ticker-inner">
-            {['MultiTrack DAW','AI Co-Producer','LLPTE Pipeline','Smart Transitions',
-              'Mix Suggestions','Real-Time Collab','MIDI Sequencer','Adaptive Mastering',
-              'Web Audio API','WebMIDI','R3 v4',
-              'MultiTrack DAW','AI Co-Producer','LLPTE Pipeline','Smart Transitions',
-              'Mix Suggestions','Real-Time Collab','MIDI Sequencer','Adaptive Mastering',
-              'Web Audio API','WebMIDI','R3 v4'].map((item, i) => (
-              <span key={i} className="r3-daw-ticker-item">
-                {item}<span className="r3-daw-ticker-sep">/</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      </header>
-
+    <div
+      className="flex flex-col"
+      style={{
+        height: '100vh',
+        background: '#060606',
+        backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,.016) 31px,rgba(255,255,255,.016) 32px)',
+        color: '#e5e5e5',
+        fontFamily: '"IBM Plex Mono","JetBrains Mono","Fira Code",monospace',
+        overflow: 'hidden',
+        borderLeft: '3px solid #a3e635',
+        boxShadow: 'inset 3px 0 18px rgba(163,230,53,0.15)',
+      }}
+    >
       <SessionSummaryPanel />
       {/* Transport bar — always visible at top */}
       <TransportBar engine={engine} />
@@ -1991,7 +1783,6 @@ export default function DAW() {
         </Btn>
 
         <div className="ml-auto flex items-center gap-2">
-              <ThemeSwitcher />
               <SessionChip />
           <span className="text-[8px] text-[#333]">ZOOM</span>
           <Btn className="text-[9px]" onClick={() => useDAWStore.getState().setZoom(useDAWStore.getState().zoom * 0.8)}>−</Btn>
@@ -2044,7 +1835,6 @@ export default function DAW() {
         <StatusBar />
       </div>
     </div>
-  </>
   );
 }
 

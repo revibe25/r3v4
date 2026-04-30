@@ -14,6 +14,7 @@ interface TransportControlsProps {
   onUndo: () => void;
   onRedo: () => void;
   onExport: () => void;
+  disabled?: boolean;
 }
 
 export const TransportControls = memo(function TransportControls({
