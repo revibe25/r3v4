@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import type { ButtonProps} from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button"
 
-const _Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
+const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
     role="navigation"
     aria-label="pagination"
@@ -15,7 +15,7 @@ const _Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
 )
 Pagination.displayName = "Pagination"
 
-const _PaginationContent = React.forwardRef<
+const PaginationContent = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
 >(({ className, ...props }, ref) => (
@@ -27,7 +27,7 @@ const _PaginationContent = React.forwardRef<
 ))
 PaginationContent.displayName = "PaginationContent"
 
-const _PaginationItem = React.forwardRef<
+const PaginationItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(({ className, ...props }, ref) => (
@@ -40,7 +40,7 @@ type PaginationLinkProps = {
 } & Pick<ButtonProps, "size"> &
   React.ComponentProps<"a">
 
-const _PaginationLink = ({
+const PaginationLink = ({
   className,
   isActive,
   size = "icon",
@@ -60,7 +60,7 @@ const _PaginationLink = ({
 )
 PaginationLink.displayName = "PaginationLink"
 
-const _PaginationPrevious = ({
+const PaginationPrevious = ({
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
@@ -76,7 +76,7 @@ const _PaginationPrevious = ({
 )
 PaginationPrevious.displayName = "PaginationPrevious"
 
-const _PaginationNext = ({
+const PaginationNext = ({
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) => (
@@ -92,7 +92,7 @@ const _PaginationNext = ({
 )
 PaginationNext.displayName = "PaginationNext"
 
-const _PaginationEllipsis = ({
+const PaginationEllipsis = ({
   className,
   ...props
 }: React.ComponentProps<"span">) => (

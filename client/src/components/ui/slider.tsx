@@ -10,7 +10,7 @@ interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimit
   ledIndicator?: boolean
 }
 
-const _Slider = React.forwardRef<
+const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   SliderProps
 >(({ 
@@ -22,12 +22,12 @@ const _Slider = React.forwardRef<
   ledIndicator,
   ...props 
 }, ref) => {
-  const _value = props.value?.[0] ?? props.defaultValue?.[0] ?? 0
-  const _max = props.max ?? 100
-  const _min = props.min ?? 0
-  const _percentage = ((value - min) / (max - min)) * 100
+  const value = props.value?.[0] ?? props.defaultValue?.[0] ?? 0
+  const max = props.max ?? 100
+  const min = props.min ?? 0
+  const percentage = ((value - min) / (max - min)) * 100
 
-  const _knobSizes = {
+  const knobSizes = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6',
@@ -79,7 +79,7 @@ const _Slider = React.forwardRef<
               vertical ? 'flex-col-reverse' : 'flex-row'
             )}>
               {Array.from({ length: 10 }).map((_, i) => {
-                const _segmentActive = (i + 1) * 10 <= percentage
+                const segmentActive = (i + 1) * 10 <= percentage
                 return (
                   <div
                     key={i}

@@ -3,7 +3,7 @@ import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const _buttonVariants = cva(
+const buttonVariants = cva(
   // Base metal button styles
   `relative inline-flex items-center justify-center gap-2 whitespace-nowrap 
    rounded-md text-sm font-semibold transition-all duration-150 
@@ -127,9 +127,9 @@ export interface ButtonProps
   glow?: boolean
 }
 
-const _Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, active, glow, children, ...props }, ref) => {
-    const _Comp = asChild ? Slot : 'button'
+    const Comp = asChild ? Slot : 'button'
     
     return (
       <Comp
