@@ -1,16 +1,9 @@
 import './index.css';
-import { useAuthStore } from "./stores/auth-store"
-useAuthStore.getState().hydrateFromToken()
 import './styles/theme.css';
-import { useAuthStore } from "./stores/auth-store"
 import React from 'react';
-import { useAuthStore } from "./stores/auth-store"
 import ReactDOM from 'react-dom/client';
-import { useAuthStore } from "./stores/auth-store"
 import App from './App';
-import { useAuthStore } from "./stores/auth-store"
 import { registerAudioInitTriggers } from './utils/audio';
-import { useAuthStore } from "./stores/auth-store"
 
 // ── Audio gesture gate ────────────────────────────────────────────────────────
 // Attaches passive document listeners that resume the Web Audio context on

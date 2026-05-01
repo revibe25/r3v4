@@ -3,9 +3,10 @@
 import argparse
 import shutil
 from pathlib import Path
+from fnmatch import fnmatch
 
 # =========================
-# SAFE DEFAULT TARGETS
+# SAFE RULES
 # =========================
 
 DIR_PATTERNS = [
@@ -25,18 +26,81 @@ FILE_PATTERNS = [
     "*.tmp",
 ]
 
+# NEVER TOUCH THESE
+EXCLUDED_DIRS = {
+    ".git",
+    ".venv",
+    "venv",
+    ".env",
+}
+
 # =========================
-# UTILITIES
+# SAFETY CHECKS
 # =========================
+
+def is_safe_root(root: Path) -> bool:
+    # Prevent catastrophic runs
+    forbidden = Path("/")
+
+    if root == forbidden:
+        return False
+
+    return True
+
 
 def is_python_project(root: Path) -> bool:
     return (root / "pyproject.toml").exists() or (root / "setup.py").exists()
 
 
-def safe_remove(path: Path, dry_run: bool):
+# =========================
+# MATCHING
+# =========================
+
+def match_any(name: str, patterns: list[str]) -> bool:
+    return any(fnmatch(name, p) for p in patterns)
+
+
+def should_skip(path: Path) -> bool:
+    return any(part in EXCLUDED_DIRS for part in path.parts)
+
+
+# =========================
+# COLLECT TARGETS FIRST (IMPORTANT FIX)
+# =========================
+
+def collect_targets(root: Path):
+    dirs_to_delete = []
+    files_to_delete = []
+
+    for path in root.rglob("*"):
+
+        if should_skip(path):
+            continue
+
+        # directories
+        if path.is_dir():
+            if match_any(path.name, DIR_PATTERNS):
+                dirs_to_delete.append(path)
+
+        # files
+        elif path.is_file():
+            if match_any(path.name, FILE_PATTERNS):
+                files_to_delete.append(path)
+
+    # Sort deepest-first so removal is safe
+    dirs_to_delete.sort(key=lambda p: len(p.parts), reverse=True)
+
+    return dirs_to_delete, files_to_delete
+
+
+# =========================
+# DELETE SAFE
+# =========================
+
+def safe_delete(path: Path, dry_run: bool):
     try:
         if dry_run:
-            print(f"[DRY-RUN] Would remove: {path}")
+            print(f"[DRY-RUN] {path}")
             return
 
         if path.is_dir():
@@ -47,39 +111,44 @@ def safe_remove(path: Path, dry_run: bool):
         print(f"Removed: {path}")
 
     except Exception as e:
-        print(f"Failed to remove {path}: {e}")
-
-
-def match_patterns(path: Path, patterns: list[str]) -> bool:
-    from fnmatch import fnmatch
-    return any(fnmatch(path.name, p) for p in patterns)
+        print(f"Failed: {path} -> {e}")
 
 
 # =========================
-# CLEANUP LOGIC
+# MAIN CLEANER
 # =========================
 
 def clean(root: Path, dry_run: bool):
-    print(f"📁 Scanning: {root}")
 
-    # Walk filesystem once (safe + cross-platform)
-    for path in root.rglob("*"):
+    dirs, files = collect_targets(root)
 
-        # Skip .git and hidden system dirs
-        if ".git" in path.parts:
-            continue
+    print("\n🧹 CLEANUP PLAN")
+    print(f"Directories: {len(dirs)}")
+    print(f"Files: {len(files)}\n")
 
-        # Remove matching directories
-        if path.is_dir() and path.name in DIR_PATTERNS:
-            safe_remove(path, dry_run)
+    # Show preview (important safety feature)
+    for d in dirs[:20]:
+        print(f"[DIR ] {d}")
+    for f in files[:20]:
+        print(f"[FILE] {f}")
 
-        # Remove egg-info directories via pattern
-        if path.is_dir() and match_patterns(path, ["*.egg-info"]):
-            safe_remove(path, dry_run)
+    if len(dirs) > 20 or len(files) > 20:
+        print("... (truncated preview)\n")
 
-        # Remove matching files
-        if path.is_file() and match_patterns(path, FILE_PATTERNS):
-            safe_remove(path, dry_run)
+    confirm = input("\nProceed? (y/N): ").strip().lower()
+    if confirm != "y":
+        print("Aborted.")
+        return
+
+    # Delete files first
+    for f in files:
+        safe_delete(f, dry_run)
+
+    # Then directories
+    for d in dirs:
+        safe_delete(d, dry_run)
+
+    print("\n✅ Cleanup complete")
 
 
 # =========================
@@ -87,45 +156,32 @@ def clean(root: Path, dry_run: bool):
 # =========================
 
 def main():
-    parser = argparse.ArgumentParser(description="Safe Python project cleaner")
+    parser = argparse.ArgumentParser(description="Safe Python cleanup tool")
 
-    parser.add_argument(
-        "--path",
-        default=".",
-        help="Project root path (default: current directory)"
-    )
-
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Show what would be deleted without deleting"
-    )
-
-    parser.add_argument(
-        "--yes",
-        action="store_true",
-        help="Skip confirmation prompt"
-    )
+    parser.add_argument("--path", default=".")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--yes", action="store_true")
 
     args = parser.parse_args()
 
     root = Path(args.path).resolve()
 
-    # Safety check
+    # SAFETY GATE #1
+    if not is_safe_root(root):
+        print("❌ Refusing to run on filesystem root")
+        return
+
+    # SAFETY GATE #2
     if not is_python_project(root):
-        print("⚠️ Warning: Not a Python project (no pyproject.toml or setup.py found).")
+        print("⚠️ Warning: Not a detected Python project")
 
-    print(f"🧹 Cleanup target: {root}")
+    print(f"📁 Target: {root}")
 
-    if not args.yes and not args.dry_run:
-        confirm = input("Continue? (y/N): ").strip().lower()
-        if confirm != "y":
-            print("Aborted.")
-            return
+    if args.yes:
+        # bypass confirmation only AFTER preview is still shown
+        pass
 
     clean(root, args.dry_run)
-
-    print("✅ Done.")
 
 
 if __name__ == "__main__":
