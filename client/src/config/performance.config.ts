@@ -124,7 +124,7 @@ export const QUALITY_PRESETS: Record<QualityPreset, Partial<typeof PERFORMANCE_C
  * Apply a quality preset
  */
 export function applyQualityPreset(preset: QualityPreset): void {
-  const presetConfig = QUALITY_PRESETS[preset];
+  const _presetConfig = QUALITY_PRESETS[preset];
   Object.assign(PERFORMANCE_CONFIG, presetConfig);
   PERFORMANCE_CONFIG.QUALITY_PRESET = preset;
 }
@@ -134,9 +134,9 @@ export function applyQualityPreset(preset: QualityPreset): void {
  */
 export function autoDetectPerformanceSettings(): void {
   // Check device capabilities
-  const cpuCores = navigator.hardwareConcurrency || 4;
-  const memory = (performance as any).memory?.jsHeapSizeLimit || 0;
-  const isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const _cpuCores = navigator.hardwareConcurrency || 4;
+  const _memory = (performance as any).memory?.jsHeapSizeLimit || 0;
+  const _isMobile = /Mobile|Android|iPhone|iPad/i.test(navigator.userAgent);
   
   let preset: QualityPreset = 'medium';
   

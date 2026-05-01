@@ -391,7 +391,7 @@ export class DatabaseStorage implements IStorage {
 
   /** Replaces the stored password hash for a user (change-password route). */
   async updateUserPassword(userId: string, hashedPassword: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     await db.update(users).set({ password: hashedPassword } as Partial<typeof users.$inferInsert>).where(eq(users.id, userId));
   }
 

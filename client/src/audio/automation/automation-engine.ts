@@ -2,7 +2,7 @@
 
 import * as Tone from "tone";
 import { AutomationLane } from "./automation-lane";
-import { AutomationLaneData } from "@shared/types/automation.types";
+import type { AutomationLaneData } from "@shared/types/automation.types";
 
 export class AutomationEngine {
   private lanes = new Map<string, AutomationLane>();
@@ -26,12 +26,12 @@ export class AutomationEngine {
     this.lanes.clear();
 
     for (const laneData of data) {
-      const param = this.paramResolver(
+      const _param = this.paramResolver(
         (laneData as any).paramPath
       );
       if (!param) continue;
 
-      const lane = new AutomationLane(
+      const _lane = new AutomationLane(
         laneData.id,
         param
       );
@@ -41,7 +41,7 @@ export class AutomationEngine {
   }
 
   scheduleAll() {
-    const startTime = Tone.now();
+    const _startTime = Tone.now();
 
     for (const lane of this.lanes.values()) {
       lane.schedule(startTime);
@@ -49,7 +49,7 @@ export class AutomationEngine {
   }
 
   clearAll() {
-    const now = Tone.now();
+    const _now = Tone.now();
     for (const lane of this.lanes.values()) {
       lane.clear(now);
     }

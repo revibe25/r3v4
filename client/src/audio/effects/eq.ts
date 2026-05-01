@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as Tone from 'tone';
-import { EQParams } from '@shared/effects.types';
+import type { EQParams } from '@shared/effects.types';
 
 export class EQEffect {
   private lowShelf: Tone.EQ3;

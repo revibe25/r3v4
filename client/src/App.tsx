@@ -130,7 +130,7 @@ function MultitrackViewWrapper() {
       }}
       onDeleteTrack={(id)    => removeTrack(id)}
       onDuplicateTrack={(id) => {
-        const src = tracks.find(t => t.id === id);
+        const _src = tracks.find(t => t.id === id);
         if (src) addTrack({ ...src, label: `${src.label} (copy)` });
       }}
     />

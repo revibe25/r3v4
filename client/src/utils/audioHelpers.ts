@@ -51,8 +51,8 @@ export function midiToFrequency(midi: number): number {
  * Convert pan value (-1 to 1) to stereo gains
  */
 export function panToGains(pan: number): { left: number; right: number } {
-  const clampedPan = Math.max(-1, Math.min(1, pan));
-  const panRadians = (clampedPan + 1) * (Math.PI / 4);
+  const _clampedPan = Math.max(-1, Math.min(1, pan));
+  const _panRadians = (clampedPan + 1) * (Math.PI / 4);
   
   return {
     left: Math.cos(panRadians),
@@ -68,13 +68,13 @@ export function secondsToBarsBeatsTicks(
   bpm: number,
   timeSignature: { numerator: number; denominator: number }
 ): { bars: number; beats: number; ticks: number } {
-  const beatsPerBar = timeSignature.numerator;
-  const ticksPerBeat = 480; // Standard MIDI resolution
+  const _beatsPerBar = timeSignature.numerator;
+  const _ticksPerBeat = 480; // Standard MIDI resolution
   
-  const totalBeats = (seconds / 60) * bpm;
-  const bars = Math.floor(totalBeats / beatsPerBar);
-  const beats = Math.floor(totalBeats % beatsPerBar);
-  const ticks = Math.floor((totalBeats % 1) * ticksPerBeat);
+  const _totalBeats = (seconds / 60) * bpm;
+  const _bars = Math.floor(totalBeats / beatsPerBar);
+  const _beats = Math.floor(totalBeats % beatsPerBar);
+  const _ticks = Math.floor((totalBeats % 1) * ticksPerBeat);
   
   return { bars, beats, ticks };
 }
@@ -89,10 +89,10 @@ export function barsBeatTicksToSeconds(
   bpm: number,
   timeSignature: { numerator: number; denominator: number }
 ): number {
-  const beatsPerBar = timeSignature.numerator;
-  const ticksPerBeat = 480;
+  const _beatsPerBar = timeSignature.numerator;
+  const _ticksPerBeat = 480;
   
-  const totalBeats = (bars * beatsPerBar) + beats + (ticks / ticksPerBeat);
+  const _totalBeats = (bars * beatsPerBar) + beats + (ticks / ticksPerBeat);
   return (totalBeats / bpm) * 60;
 }
 
@@ -108,8 +108,8 @@ export function createSilentBuffer(
   duration: number,
   channels: number = 2
 ): AudioBuffer {
-  const sampleRate = audioContext.sampleRate;
-  const length = Math.floor(sampleRate * duration);
+  const _sampleRate = audioContext.sampleRate;
+  const _length = Math.floor(sampleRate * duration);
   
   return audioContext.createBuffer(channels, length, sampleRate);
 }
@@ -122,24 +122,24 @@ export function mixBuffers(
   buffer2: AudioBuffer,
   ratio: number = 0.5
 ): AudioBuffer {
-  const channels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
-  const length = Math.max(buffer1.length, buffer2.length);
-  const sampleRate = buffer1.sampleRate;
+  const _channels = Math.min(buffer1.numberOfChannels, buffer2.numberOfChannels);
+  const _length = Math.max(buffer1.length, buffer2.length);
+  const _sampleRate = buffer1.sampleRate;
   
-  const mixedBuffer = new AudioBuffer({
+  const _mixedBuffer = new AudioBuffer({
     numberOfChannels: channels,
     length,
     sampleRate,
   });
   
-  for (let channel = 0; channel < channels; channel++) {
-    const data1 = buffer1.getChannelData(channel);
-    const data2 = buffer2.getChannelData(channel);
-    const mixed = mixedBuffer.getChannelData(channel);
+  for (let _channel = 0; channel < channels; channel++) {
+    const _data1 = buffer1.getChannelData(channel);
+    const _data2 = buffer2.getChannelData(channel);
+    const _mixed = mixedBuffer.getChannelData(channel);
     
-    for (let i = 0; i < length; i++) {
-      const sample1 = i < data1.length ? data1[i] : 0;
-      const sample2 = i < data2.length ? data2[i] : 0;
+    for (let _i = 0; i < length; i++) {
+      const _sample1 = i < data1.length ? data1[i] : 0;
+      const _sample2 = i < data2.length ? data2[i] : 0;
       mixed[i] = (sample1 * ratio) + (sample2 * (1 - ratio));
     }
   }
@@ -154,31 +154,31 @@ export function normalizeBuffer(
   buffer: AudioBuffer,
   targetLevel: number = 0.95
 ): AudioBuffer {
-  const channels = buffer.numberOfChannels;
-  const normalized = new AudioBuffer({
+  const _channels = buffer.numberOfChannels;
+  const _normalized = new AudioBuffer({
     numberOfChannels: channels,
     length: buffer.length,
     sampleRate: buffer.sampleRate,
   });
   
   // Find peak
-  let peak = 0;
-  for (let channel = 0; channel < channels; channel++) {
-    const data = buffer.getChannelData(channel);
-    for (let i = 0; i < data.length; i++) {
+  let _peak = 0;
+  for (let _channel = 0; channel < channels; channel++) {
+    const _data = buffer.getChannelData(channel);
+    for (let _i = 0; i < data.length; i++) {
       peak = Math.max(peak, Math.abs(data[i]));
     }
   }
   
   // Calculate gain
-  const gain = peak > 0 ? targetLevel / peak : 1;
+  const _gain = peak > 0 ? targetLevel / peak : 1;
   
   // Apply gain
-  for (let channel = 0; channel < channels; channel++) {
-    const source = buffer.getChannelData(channel);
-    const dest = normalized.getChannelData(channel);
+  for (let _channel = 0; channel < channels; channel++) {
+    const _source = buffer.getChannelData(channel);
+    const _dest = normalized.getChannelData(channel);
     
-    for (let i = 0; i < source.length; i++) {
+    for (let _i = 0; i < source.length; i++) {
       dest[i] = source[i] * gain;
     }
   }
@@ -215,8 +215,8 @@ export function areEffectStatesEqual(
   if (state1.wet !== state2.wet) return false;
   
   // Compare parameters
-  const keys1 = Object.keys(state1.parameters);
-  const keys2 = Object.keys(state2.parameters);
+  const _keys1 = Object.keys(state1.parameters);
+  const _keys2 = Object.keys(state2.parameters);
   
   if (keys1.length !== keys2.length) return false;
   
@@ -313,7 +313,7 @@ export function validateProjectState(state: any): state is ProjectState {
  * Calculate project file size estimate (in MB)
  */
 export function estimateProjectSize(state: ProjectState): number {
-  const json = JSON.stringify(state);
+  const _json = JSON.stringify(state);
   return new Blob([json]).size / (1024 * 1024);
 }
 
@@ -325,8 +325,8 @@ export function estimateProjectSize(state: ProjectState): number {
  * Calculate RMS (Root Mean Square) of audio data
  */
 export function calculateRMS(data: Float32Array): number {
-  let sum = 0;
-  for (let i = 0; i < data.length; i++) {
+  let _sum = 0;
+  for (let _i = 0; i < data.length; i++) {
     sum += data[i] * data[i];
   }
   return Math.sqrt(sum / data.length);
@@ -336,8 +336,8 @@ export function calculateRMS(data: Float32Array): number {
  * Calculate peak level of audio data
  */
 export function calculatePeak(data: Float32Array): number {
-  let peak = 0;
-  for (let i = 0; i < data.length; i++) {
+  let _peak = 0;
+  for (let _i = 0; i < data.length; i++) {
     peak = Math.max(peak, Math.abs(data[i]));
   }
   return peak;
@@ -380,9 +380,9 @@ export function formatFrequency(frequency: number): string {
  * Format time for display
  */
 export function formatTime(seconds: number): string {
-  const minutes = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  const ms = Math.floor((seconds % 1) * 100);
+  const _minutes = Math.floor(seconds / 60);
+  const _secs = Math.floor(seconds % 60);
+  const _ms = Math.floor((seconds % 1) * 100);
   
   return `${minutes}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
 }

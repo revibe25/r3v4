@@ -267,7 +267,7 @@ interface DAWStore {
 }
 
 let _id = 0;
-const uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++_id}`;
+const _uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++_id}`;
 
 const DEFAULT_TRACKS: Track[] = [
   { id: 'trk_1', label: 'KICK',   type: 'audio', color: '#f59e0b', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
@@ -300,7 +300,7 @@ const DEFAULT_PATTERN: MidiPattern = {
   ],
 };
 
-export const useDAWStore = create<DAWStore>()(
+export const _useDAWStore = create<DAWStore>()(
   subscribeWithSelector((set, get) => ({
     // Transport
     playing: false,
@@ -386,7 +386,7 @@ export const useDAWStore = create<DAWStore>()(
 
     // ── Track actions ────────────────────────────────────────────────────────
     addTrack: (track) => {
-      const id = uid('trk');
+      const _id = uid('trk');
       set(s => ({ tracks: [...s.tracks, { ...track, id }] }));
       return id;
     },
@@ -400,7 +400,7 @@ export const useDAWStore = create<DAWStore>()(
     setSelectedTrack: (id) => set({ selectedTrackId: id }),
     setSelectedRegion: (id) => set({ selectedRegionId: id }),
     addRegion: (region) => {
-      const id = uid('reg');
+      const _id = uid('reg');
       set(s => ({ regions: [...s.regions, { ...region, id }] }));
       return id;
     },
@@ -455,7 +455,7 @@ export const useDAWStore = create<DAWStore>()(
       })),
     setSequencerStep: (step) => set({ sequencerStep: step }),
     addMidiPattern: (pattern) => {
-      const id = uid('pat');
+      const _id = uid('pat');
       set(s => ({ midiPatterns: [...s.midiPatterns, { ...pattern, id }] }));
       return id;
     },

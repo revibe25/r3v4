@@ -33,7 +33,7 @@ export interface TrackInput {
 
 export type SuggestionStatus = "idle" | "loading" | "done" | "error" | "tier_locked";
 
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+const _clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 export function useMixSuggestions() {
   const [suggestions, setSuggestions] = useState<MixSuggestion[]>([]);
@@ -45,25 +45,25 @@ export function useMixSuggestions() {
   // for suggestions[idx]. null entries indicate the row write failed or the
   // session was inactive at surface time. Ref (not state) because click
   // handlers must read the latest value without re-rendering on every write.
-  const decisionIdsRef = useRef<(string | null)[]>([]);
+  const _decisionIdsRef = useRef<(string | null)[]>([]);
 
-  const recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
+  const _recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
   const recordOutcomeMut  = trpc.sessionMetrics.recordOutcome.useMutation();
 
   // Capture mutation refs — keeps accept/reject closures stable (empty deps).
-  const recordDecisionMutRef = useRef(recordDecisionMut);
+  const _recordDecisionMutRef = useRef(recordDecisionMut);
   const recordOutcomeMutRef  = useRef(recordOutcomeMut);
   recordDecisionMutRef.current = recordDecisionMut;
   recordOutcomeMutRef.current  = recordOutcomeMut;
 
-  const mutation = trpc.daw["ai.suggestions"].useMutation({
+  const _mutation = trpc.daw["ai.suggestions"].useMutation({
     onMutate: () => {
       setStatus("loading");
       setSuggestions([]);
       decisionIdsRef.current = [];
     },
     onSuccess: async (data) => {
-      const newSuggestions = data.suggestions as MixSuggestion[];
+      const _newSuggestions = data.suggestions as MixSuggestion[];
       // PRD §8.5 — server returns real measured latency for aiDecisionLog
       const latencyMs      = (data as { latencyMs?: number }).latencyMs ?? 0;
       setSuggestions(newSuggestions);
@@ -74,13 +74,13 @@ export function useMixSuggestions() {
       // Surface-event logging: one row per suggestion with outcome "ignored".
       // Click handlers later update each row to "accepted" or "rejected".
       // Suggestions left untouched stay "ignored" — that's the desired signal.
-      const sessionId = useSessionMetricsStore.getState().sessionId;
+      const _sessionId = useSessionMetricsStore.getState().sessionId;
       if (!sessionId || newSuggestions.length === 0) {
         decisionIdsRef.current = newSuggestions.map(() => null);
         return;
       }
 
-      const ids = await Promise.all(
+      const _ids = await Promise.all(
         newSuggestions.map((s) =>
           recordDecisionMutRef.current
             .mutateAsync({
@@ -116,7 +116,7 @@ export function useMixSuggestions() {
     },
   });
 
-  const analyse = useCallback((
+  const _analyse = useCallback((
     tracks: TrackInput[],
     bpm: number,
     position: number = 0,
@@ -137,13 +137,13 @@ export function useMixSuggestions() {
     });
   }, [mutation]);
 
-  const accept = useCallback((idx: number) => {
+  const _accept = useCallback((idx: number) => {
     setAcceptedIds(prev => new Set(prev).add(idx));
-    setRejectedIds(prev => { const s = new Set(prev); s.delete(idx); return s; });
+    setRejectedIds(prev => { const _s = new Set(prev); s.delete(idx); return s; });
 
     // Update the corresponding aiDecisionLog row to "accepted".
     // No-op if surface write failed (id === null) or session was inactive.
-    const id = decisionIdsRef.current[idx];
+    const _id = decisionIdsRef.current[idx];
     if (id) {
       recordOutcomeMutRef.current.mutate(
         { id, outcome: "accepted" },
@@ -154,11 +154,11 @@ export function useMixSuggestions() {
     }
   }, []);
 
-  const reject = useCallback((idx: number) => {
+  const _reject = useCallback((idx: number) => {
     setRejectedIds(prev => new Set(prev).add(idx));
-    setAcceptedIds(prev => { const s = new Set(prev); s.delete(idx); return s; });
+    setAcceptedIds(prev => { const _s = new Set(prev); s.delete(idx); return s; });
 
-    const id = decisionIdsRef.current[idx];
+    const _id = decisionIdsRef.current[idx];
     if (id) {
       recordOutcomeMutRef.current.mutate(
         { id, outcome: "rejected" },
@@ -169,7 +169,7 @@ export function useMixSuggestions() {
     }
   }, []);
 
-  const acceptRate = suggestions.length > 0
+  const _acceptRate = suggestions.length > 0
     ? Math.round((acceptedIds.size / suggestions.length) * 100)
     : 0;
 

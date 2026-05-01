@@ -19,7 +19,7 @@ let PAD_KEYS: string[] = [];
 let PIANO_KEYS: string[] = [];
 
 try {
-  const analysisEngineModule = require('@/lib/audio-engine');
+  const _analysisEngineModule = require('@/lib/audio-engine');
   analysisEngine = analysisEngineModule.analysisEngine;
   AudioState = analysisEngineModule.AudioState;
   PAD_KEYS = analysisEngineModule.PAD_KEYS || ['1', '2', '3', '4', 'q', 'w', 'e', 'r', 'a', 's', 'd', 'f', 'z', 'x', 'c', 'v'];
@@ -82,14 +82,14 @@ export function useAudioEngine(tracks?: Track[]) {
   const [isInitialized, setIsInitialized] = useState(false);
   
   // Store mixer channels
-  const channelsRef = useRef<Map<string, MixerChannel>>(new Map());
-  const rafRef = useRef<number>();
+  const _channelsRef = useRef<Map<string, MixerChannel>>(new Map());
+  const _rafRef = useRef<number>();
 
   /**
    * Initialize audio context and engine
    * Must be called after user interaction (browser policy)
    */
-  const init = useCallback(async () => {
+  const _init = useCallback(async () => {
     try {
       // Initialize audio engine if available
       if (analysisEngine?.init) {
@@ -121,13 +121,13 @@ export function useAudioEngine(tracks?: Track[]) {
   useEffect(() => {
     if (!tracks || tracks.length === 0) return;
 
-    const channels = channelsRef.current;
+    const _channels = channelsRef.current;
     
     // Create new channels for new tracks
     tracks.forEach(track => {
       if (!channels.has(track.id)) {
         try {
-          const channel = new MixerChannel(track.id);
+          const _channel = new MixerChannel(track.id);
           channel.connect(getMasterBus().gainNode);
           
           // Set initial parameters
@@ -153,7 +153,7 @@ export function useAudioEngine(tracks?: Track[]) {
     });
 
     // Remove channels for deleted tracks
-    const trackIds = new Set(tracks.map(t => t.id));
+    const _trackIds = new Set(tracks.map(t => t.id));
     channels.forEach((channel, id) => {
       if (!trackIds.has(id)) {
         channel.disconnect();
@@ -181,7 +181,7 @@ export function useAudioEngine(tracks?: Track[]) {
   useEffect(() => {
     if (!analysisEngine?.subscribe) return;
 
-    const unsubscribe = analysisEngine.subscribe(() => {
+    const _unsubscribe = analysisEngine.subscribe(() => {
       setState(prevState => ({ ...prevState, ...analysisEngine.state }));
     });
 
@@ -199,19 +199,19 @@ export function useAudioEngine(tracks?: Track[]) {
   useEffect(() => {
     if (!isInitialized) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const _handleKeyDown = (e: KeyboardEvent) => {
       // Ignore repeated keys
       if (e.repeat) return;
       
       // Ignore if typing in input fields
-      const tag = document.activeElement?.tagName;
+      const _tag = document.activeElement?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag || '')) return;
 
-      const key = e.key.toLowerCase();
+      const _key = e.key.toLowerCase();
 
       // Check for pad triggers
       if (PAD_KEYS.length > 0) {
-        const padIndex = PAD_KEYS.indexOf(key);
+        const _padIndex = PAD_KEYS.indexOf(key);
         if (padIndex !== -1 && analysisEngine?.triggerPad) {
           e.preventDefault();
           analysisEngine.triggerPad(padIndex);
@@ -221,7 +221,7 @@ export function useAudioEngine(tracks?: Track[]) {
 
       // Check for piano key triggers
       if (PIANO_KEYS.length > 0) {
-        const keyIndex = PIANO_KEYS.indexOf(key);
+        const _keyIndex = PIANO_KEYS.indexOf(key);
         if (keyIndex !== -1 && analysisEngine?.triggerKey) {
           e.preventDefault();
           analysisEngine.triggerKey(keyIndex);
@@ -261,13 +261,13 @@ export function useAudioEngine(tracks?: Track[]) {
   /**
    * Transport Controls
    */
-  const play = useCallback(() => {
+  const _play = useCallback(() => {
     transportEngine?.play?.();
     analysisEngine?.play?.();
     setState(prev => ({ ...prev, isPlaying: true, isRecording: false }));
   }, []);
 
-  const stop = useCallback(() => {
+  const _stop = useCallback(() => {
     transportEngine?.stop?.();
     analysisEngine?.stop?.();
     if (rafRef.current) {
@@ -276,7 +276,7 @@ export function useAudioEngine(tracks?: Track[]) {
     setState(prev => ({ ...prev, isPlaying: false, isRecording: false }));
   }, []);
 
-  const record = useCallback(() => {
+  const _record = useCallback(() => {
     transportEngine?.record?.();
     analysisEngine?.record?.();
     setState(prev => ({ ...prev, isRecording: true, isPlaying: true }));
@@ -285,27 +285,27 @@ export function useAudioEngine(tracks?: Track[]) {
   /**
    * Mixer channel controls
    */
-  const setChannelVolume = useCallback((trackId: string, volume: number) => {
-    const channel = channelsRef.current.get(trackId);
+  const _setChannelVolume = useCallback((trackId: string, volume: number) => {
+    const _channel = channelsRef.current.get(trackId);
     channel?.setVolume?.(volume);
   }, []);
 
-  const setChannelPan = useCallback((trackId: string, pan: number) => {
-    const channel = channelsRef.current.get(trackId);
+  const _setChannelPan = useCallback((trackId: string, pan: number) => {
+    const _channel = channelsRef.current.get(trackId);
     channel?.setPan?.(pan);
   }, []);
 
-  const setChannelMute = useCallback((trackId: string, muted: boolean) => {
-    const channel = channelsRef.current.get(trackId);
+  const _setChannelMute = useCallback((trackId: string, muted: boolean) => {
+    const _channel = channelsRef.current.get(trackId);
     channel?.setMute?.(muted);
   }, []);
 
-  const setChannelSolo = useCallback((trackId: string, solo: boolean) => {
-    const channel = channelsRef.current.get(trackId);
+  const _setChannelSolo = useCallback((trackId: string, solo: boolean) => {
+    const _channel = channelsRef.current.get(trackId);
     channel?.setSolo?.(solo);
   }, []);
 
-  const getChannel = useCallback((trackId: string): MixerChannel | undefined => {
+  const _getChannel = useCallback((trackId: string): MixerChannel | undefined => {
     return channelsRef.current.get(trackId);
   }, []);
 

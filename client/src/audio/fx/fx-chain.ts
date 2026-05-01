@@ -67,7 +67,7 @@ export class FXChain {
       silenceDetection: config.silenceDetection !== false,
     };
 
-    const context = getAudioContext();
+    const _context = getAudioContext();
     this.inputNode = context.createGain();
     this.outputNode = context.createGain();
     this.analyser = context.createAnalyser();
@@ -94,7 +94,7 @@ export class FXChain {
       throw new Error(`Maximum effects limit reached (${this.config.maxEffects})`);
     }
 
-    const id = config?.processor?.id ?? `fx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const _id = config?.processor?.id ?? `fx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const fxNode: FXSlot = {
       id,
       type,
@@ -126,7 +126,7 @@ export class FXChain {
   }
 
   removeEffect(id: string): boolean {
-    const index = this.effects.findIndex(fx => fx.id === id);
+    const _index = this.effects.findIndex(fx => fx.id === id);
     if (index === -1) return false;
     try { this.effects[index].node.disconnect(); } catch (_) {}
     this.effects.splice(index, 1);
@@ -136,7 +136,7 @@ export class FXChain {
   }
 
   toggleEffect(id: string, enabled?: boolean): boolean {
-    const fx = this.effects.find(e => e.id === id);
+    const _fx = this.effects.find(e => e.id === id);
     if (!fx) return false;
     fx.enabled = enabled ?? !fx.enabled;
     this.routingDirty = true;
@@ -145,7 +145,7 @@ export class FXChain {
   }
 
   setWetDryMix(id: string, wet: number): boolean {
-    const fx = this.effects.find(e => e.id === id);
+    const _fx = this.effects.find(e => e.id === id);
     if (!fx) return false;
     fx.wet = Math.max(0, Math.min(1, wet));
     return true;
@@ -156,7 +156,7 @@ export class FXChain {
   private updateRouting(): void {
     if (!this.routingDirty) return;
 
-    const activeEffects = this.effects.filter(fx => fx.enabled && !fx.bypassed);
+    const _activeEffects = this.effects.filter(fx => fx.enabled && !fx.bypassed);
 
     this.inputNode.disconnect();
     this.effects.forEach(fx => { try { fx.node.disconnect(); } catch (_) {} });
@@ -183,16 +183,16 @@ export class FXChain {
   private startMonitoring(): void {
     this.checkIntervalId = window.setInterval(() => {
       this.silenceDetector.getFloatTimeDomainData(this.levelBuffer);
-      let sum = 0;
-      let peak = 0;
-      for (let i = 0; i < this.levelBuffer.length; i++) {
-        const v = this.levelBuffer[i];
+      let _sum = 0;
+      let _peak = 0;
+      for (let _i = 0; i < this.levelBuffer.length; i++) {
+        const _v = this.levelBuffer[i];
         sum += v * v;
         peak = Math.max(peak, Math.abs(v));
       }
-      const rms = Math.sqrt(sum / this.levelBuffer.length);
+      const _rms = Math.sqrt(sum / this.levelBuffer.length);
       this.currentLevel = Math.max(rms, peak);
-      const levelDb = 20 * Math.log10(Math.max(this.currentLevel, 0.00001));
+      const _levelDb = 20 * Math.log10(Math.max(this.currentLevel, 0.00001));
 
       if (levelDb < SILENCE_THRESHOLD) {
         this.consecutiveSilentFrames++;
@@ -203,7 +203,7 @@ export class FXChain {
       }
 
       if (this.config.autoBypass) {
-        const shouldBypass = levelDb < BYPASS_THRESHOLD;
+        const _shouldBypass = levelDb < BYPASS_THRESHOLD;
         this.effects.forEach(fx => {
           if (fx.enabled && fx.bypassed !== shouldBypass) {
             fx.bypassed = shouldBypass;
@@ -225,7 +225,7 @@ export class FXChain {
   getActiveEffectsCount(): number { return this.effects.filter(fx => fx.enabled && !fx.bypassed).length; }
 
   reorderEffect(id: string, newIndex: number): boolean {
-    const currentIndex = this.effects.findIndex(fx => fx.id === id);
+    const _currentIndex = this.effects.findIndex(fx => fx.id === id);
     if (currentIndex === -1) return false;
     const [effect] = this.effects.splice(currentIndex, 1);
     this.effects.splice(newIndex, 0, effect);
@@ -245,12 +245,12 @@ export class FXChain {
   getOutput(): AudioNode { return this.outputNode; }
 
   setBypass(id: string, bypassed: boolean): void {
-    const fx = this.effects.find(e => e.id === id);
+    const _fx = this.effects.find(e => e.id === id);
     if (fx) { fx.bypassed = bypassed; this.routingDirty = true; this.updateRouting(); }
   }
 
   toggleBypass(id: string): void {
-    const fx = this.effects.find(e => e.id === id);
+    const _fx = this.effects.find(e => e.id === id);
     if (fx) { fx.bypassed = !fx.bypassed; this.routingDirty = true; this.updateRouting(); }
   }
 

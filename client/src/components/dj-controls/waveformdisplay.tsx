@@ -9,14 +9,14 @@ export function WaveformDisplay({ active }: WaveformDisplayProps) {
   const [bars, setBars] = useState<number[]>(
     () => Array.from({ length: 64 }, () => Math.random() * 0.8 + 0.1),
   );
-  const posRef = useRef(0);
+  const _posRef = useRef(0);
 
   useEffect(() => {
     if (!active) return;
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       posRef.current = (posRef.current + 1) % bars.length;
       setBars(prev => {
-        const next = [...prev];
+        const _next = [...prev];
         next[posRef.current] = Math.random() * 0.8 + 0.1;
         return next;
       });
@@ -27,7 +27,7 @@ export function WaveformDisplay({ active }: WaveformDisplayProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 1, height: 36 }}>
       {bars.map((h, i) => {
-        const isHead = i === posRef.current;
+        const _isHead = i === posRef.current;
         return (
           <div key={i} style={{
             flex: 1,

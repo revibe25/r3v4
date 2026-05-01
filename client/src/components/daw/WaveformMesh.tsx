@@ -32,52 +32,52 @@ interface Props {
   playing?: boolean;
 }
 
-export const WaveformMesh = memo(({
+export const _WaveformMesh = memo(({
   fftRef,
   color   = '#f59e0b',
   height  = 48,
   mode    = 'waveform',
   playing = false,
 }: Props) => {
-  const mountRef = useRef<HTMLDivElement>(null);
+  const _mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const mount = mountRef.current;
+    const _mount = mountRef.current;
     if (!mount) return;
 
-    const W = mount.clientWidth || 320;
-    const H = height;
+    const _W = mount.clientWidth || 320;
+    const _H = height;
 
     // ── Renderer ────────────────────────────────────────────────────────────
-    const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+    const _renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
     renderer.setPixelRatio(1); // crisp at native res, no supersampling needed
     renderer.setSize(W, H);
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
     // ── Orthographic camera — exact pixel mapping ─────────────────────────
-    const camera = new THREE.OrthographicCamera(
+    const _camera = new THREE.OrthographicCamera(
       -BAR_COUNT / 2, BAR_COUNT / 2,   // left, right
        H / 2,        -H / 2,            // top, bottom (Y flipped for canvas coords)
       0.1, 10,
     );
     camera.position.z = 5;
 
-    const scene = new THREE.Scene();
+    const _scene = new THREE.Scene();
 
     // ── Instanced bar mesh ─────────────────────────────────────────────────
     // BoxGeometry — NOT CapsuleGeometry (r128)
-    const barGeo = new THREE.BoxGeometry(0.7, 1, 0.1);
-    const barMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color) });
+    const _barGeo = new THREE.BoxGeometry(0.7, 1, 0.1);
+    const _barMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(color) });
     const mesh   = new THREE.InstancedMesh(barGeo, barMat, BAR_COUNT);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     scene.add(mesh);
 
-    const dummy = new THREE.Object3D();
+    const _dummy = new THREE.Object3D();
 
     // ── Resize observer ───────────────────────────────────────────────────
-    let currentW = W;
-    const ro = new ResizeObserver(entries => {
+    let _currentW = W;
+    const _ro = new ResizeObserver(entries => {
       for (const entry of entries) {
         currentW = entry.contentRect.width;
         renderer.setSize(currentW, H);
@@ -89,25 +89,25 @@ export const WaveformMesh = memo(({
     ro.observe(mount);
 
     // ── Animation loop ────────────────────────────────────────────────────
-    let raf = 0;
-    const animate = () => {
+    let _raf = 0;
+    const _animate = () => {
       raf = requestAnimationFrame(animate);
 
-      const frame = fftRef.current;
+      const _frame = fftRef.current;
       const data  = mode === 'waveform' ? frame.waveform : frame.fft;
       const barW  = currentW / BAR_COUNT;
 
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const sample = data[i] ?? 0;
+      for (let _i = 0; i < BAR_COUNT; i++) {
+        const _sample = data[i] ?? 0;
         // Map sample to bar height: waveform is [-1,1], fft is [0,1]
         const barH   = mode === 'waveform'
           ? Math.abs(sample) * (H * 0.8)
           : sample * (H * 0.95);
 
         // X position: evenly spread across width
-        const x = (i - BAR_COUNT / 2) * (currentW / BAR_COUNT) + barW / 2;
+        const _x = (i - BAR_COUNT / 2) * (currentW / BAR_COUNT) + barW / 2;
         // Y position: bars extend upward from center (waveform) or bottom (spectrum)
-        const y = mode === 'waveform' ? 0 : -(H / 2) + barH / 2;
+        const _y = mode === 'waveform' ? 0 : -(H / 2) + barH / 2;
 
         dummy.position.set(x * (BAR_COUNT / currentW), y * (H / currentW), 0);
         dummy.scale.set(0.8, Math.max(0.5, barH), 1);
@@ -117,9 +117,9 @@ export const WaveformMesh = memo(({
       mesh.instanceMatrix.needsUpdate = true;
 
       // Color modulation: brighten active bars on beat
-      const beat = frame.beatEnergy;
-      const baseColor = new THREE.Color(color);
-      const brightColor = baseColor.clone().multiplyScalar(1 + beat * 0.5);
+      const _beat = frame.beatEnergy;
+      const _baseColor = new THREE.Color(color);
+      const _brightColor = baseColor.clone().multiplyScalar(1 + beat * 0.5);
       barMat.color.copy(playing ? brightColor : baseColor);
 
       renderer.render(scene, camera);

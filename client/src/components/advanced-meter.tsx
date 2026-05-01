@@ -20,28 +20,28 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
   showPeak = true,
   showDb = false,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Cache ctx and gradient so they're not recreated every frame
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const gradientRef = useRef<CanvasGradient | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const _ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const _gradientRef = useRef<CanvasGradient | null>(null);
+  const _rafRef = useRef<number | null>(null);
 
   // Internal peak hold state — also respect the incoming peak prop
-  const peakHoldRef = useRef<number>(0);
-  const peakHoldTimeRef = useRef<number>(0);
+  const _peakHoldRef = useRef<number>(0);
+  const _peakHoldTimeRef = useRef<number>(0);
 
-  const isVertical = orientation === 'vertical';
+  const _isVertical = orientation === 'vertical';
 
   // Rebuild the gradient whenever canvas dimensions or orientation change.
   // drawLength = the axis along which the meter travels.
-  const buildGradient = useCallback(() => {
-    const ctx = ctxRef.current;
+  const _buildGradient = useCallback(() => {
+    const _ctx = ctxRef.current;
     if (!ctx) return;
 
-    const drawLength = isVertical ? height : width;
+    const _drawLength = isVertical ? height : width;
 
-    const gradient = isVertical
+    const _gradient = isVertical
       ? ctx.createLinearGradient(0, drawLength, 0, 0)
       : ctx.createLinearGradient(0, 0, drawLength, 0);
 
@@ -55,13 +55,13 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
 
   // Initialise (or reinitialise) the canvas whenever dimensions/orientation change.
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
 
     canvas.width  = width;
     canvas.height = height;
 
-    const ctx = canvas.getContext('2d');
+    const _ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctxRef.current = ctx;
 
@@ -69,21 +69,21 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
   }, [width, height, buildGradient]);
 
   // Main draw function — called via RAF so it never blocks the main thread.
-  const draw = useCallback(() => {
-    const canvas = canvasRef.current;
+  const _draw = useCallback(() => {
+    const _canvas = canvasRef.current;
     const ctx    = ctxRef.current;
-    const gradient = gradientRef.current;
+    const _gradient = gradientRef.current;
     if (!canvas || !ctx || !gradient) return;
 
     // Draw length = the axis along which the meter fills.
-    const drawLength = isVertical ? height : width;
+    const _drawLength = isVertical ? height : width;
     // Draw thickness = the perpendicular axis.
     const drawThick  = isVertical ? width  : height;
 
     // ── Peak hold ──────────────────────────────────────────────────────────
-    const now = Date.now();
+    const _now = Date.now();
     // Use the higher of the incoming peak prop and the internally tracked hold.
-    const effectivePeak = Math.max(peak, peakHoldRef.current);
+    const _effectivePeak = Math.max(peak, peakHoldRef.current);
 
     if (level > peakHoldRef.current) {
       peakHoldRef.current     = level;
@@ -97,7 +97,7 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
     ctx.fillRect(0, 0, width, height);
 
     // ── Level bar ─────────────────────────────────────────────────────────
-    const levelPx = Math.min(level, 1) * drawLength;
+    const _levelPx = Math.min(level, 1) * drawLength;
     ctx.fillStyle = gradient;
 
     if (isVertical) {
@@ -109,7 +109,7 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
 
     // ── Peak indicator ────────────────────────────────────────────────────
     if (showPeak && effectivePeak > 0) {
-      const peakPx = effectivePeak * drawLength;
+      const _peakPx = effectivePeak * drawLength;
       ctx.fillStyle = '#ffffff';
 
       if (isVertical) {
@@ -123,9 +123,9 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.lineWidth   = 1;
 
-    const marks = [0, -6, -12, -18, -24, -30];
+    const _marks = [0, -6, -12, -18, -24, -30];
     marks.forEach(db => {
-      const position = ((db + 60) / 60) * drawLength;
+      const _position = ((db + 60) / 60) * drawLength;
 
       ctx.beginPath();
       if (isVertical) {

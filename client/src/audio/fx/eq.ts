@@ -110,7 +110,7 @@ export class EQ extends FXNodeBase {
       airBand:  { ...DEFAULTS.airBand,  ...initialConfig.airBand  },
     };
 
-    const ctx = this.context;
+    const _ctx = this.context;
 
     this.bands = {
       subBand:  ctx.createBiquadFilter(),
@@ -159,7 +159,7 @@ export class EQ extends FXNodeBase {
    * short ramp to prevent clicks.
    */
   setBand(band: EQBand, changes: Partial<EQBandConfig>): void {
-    const next = { ...this.configs[band], ...changes };
+    const _next = { ...this.configs[band], ...changes };
     this.configs[band] = next;
     this.applyConfigToNode(band, next, /* ramp */ true);
     this.emit('bandChanged', { band, config: next });
@@ -196,7 +196,7 @@ export class EQ extends FXNodeBase {
   // ─── Presets ─────────────────────────────────────────────────────────────────
 
   loadPreset(name: string): void {
-    const preset = EQ_PRESETS[name];
+    const _preset = EQ_PRESETS[name];
     if (!preset) throw new Error(`[EQ] Unknown preset "${name}".`);
 
     (Object.keys(preset) as EQBand[]).forEach((band) => {
@@ -223,22 +223,22 @@ export class EQ extends FXNodeBase {
    */
   getFrequencyResponse(frequencies: Float32Array): Float32Array {
     const magOut   = (new Float32Array(frequencies.length) as unknown as Float32Array).fill(1);
-    const phaseOut = new Float32Array(frequencies.length) as unknown as Float32Array;
+    const _phaseOut = new Float32Array(frequencies.length) as unknown as Float32Array;
     const tempMag  = new Float32Array(frequencies.length) as unknown as Float32Array;
     const tempPhase= new Float32Array(frequencies.length) as unknown as Float32Array;
 
     for (const [band, node] of Object.entries(this.bands) as [EQBand, BiquadFilterNode][]) {
       if (!this.configs[band].enabled) continue;
       node.getFrequencyResponse(frequencies, tempMag, tempPhase);
-      for (let i = 0; i < magOut.length; i++) {
+      for (let _i = 0; i < magOut.length; i++) {
         magOut[i] *= tempMag[i]; // multiply magnitudes (linear, not dB)
         phaseOut[i] += tempPhase[i];
       }
     }
 
     // Convert to dB
-    const dbOut = new Float32Array(frequencies.length) as unknown as Float32Array;
-    for (let i = 0; i < dbOut.length; i++) {
+    const _dbOut = new Float32Array(frequencies.length) as unknown as Float32Array;
+    for (let _i = 0; i < dbOut.length; i++) {
       dbOut[i] = 20 * Math.log10(Math.max(magOut[i], 1e-10));
     }
     return dbOut;
@@ -265,7 +265,7 @@ export class EQ extends FXNodeBase {
     config: EQBandConfig,
     ramp: boolean,
   ): void {
-    const node = this.bands[band];
+    const _node = this.bands[band];
     const t    = this.context.currentTime;
     const TAU  = 0.015; // 15 ms smoothing constant
 
@@ -278,7 +278,7 @@ export class EQ extends FXNodeBase {
         : (node.frequency.value = config.frequency);
 
       // gain only affects shelf and peaking filters
-      const hasGain = config.type === 'lowshelf' || config.type === 'highshelf' || config.type === 'peaking';
+      const _hasGain = config.type === 'lowshelf' || config.type === 'highshelf' || config.type === 'peaking';
       if (hasGain) {
         ramp
           ? smoothParam(node.gain, config.gain, t)

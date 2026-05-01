@@ -46,26 +46,26 @@ import { SessionSummaryPanel }   from '../components/session-summary/SessionSumm
 
 // ─── Shared mini-components ───────────────────────────────────────────────────
 
-const Knob = memo(({
+const _Knob = memo(({
   value, min = 0, max = 1, label, onChange, accent = '#a3e635', size = 36,
 }: {
   value: number; min?: number; max?: number; label: string;
   onChange: (v: number) => void; accent?: string; size?: number;
 }) => {
-  const dragStart = useRef<{ y: number; v: number } | null>(null);
-  const pct = (value - min) / (max - min);
-  const angle = -135 + pct * 270;
+  const _dragStart = useRef<{ y: number; v: number } | null>(null);
+  const _pct = (value - min) / (max - min);
+  const _angle = -135 + pct * 270;
 
-  const onMouseDown = (e: React.MouseEvent) => {
+  const _onMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     dragStart.current = { y: e.clientY, v: value };
-    const onMove = (ev: MouseEvent) => {
+    const _onMove = (ev: MouseEvent) => {
       if (!dragStart.current) return;
-      const delta = (dragStart.current.y - ev.clientY) / 120;
+      const _delta = (dragStart.current.y - ev.clientY) / 120;
       const next  = Math.max(min, Math.min(max, dragStart.current.v + delta * (max - min)));
       onChange(Math.round(next * 1000) / 1000);
     };
-    const onUp = () => {
+    const _onUp = () => {
       dragStart.current = null;
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup',   onUp);
@@ -106,16 +106,16 @@ const Knob = memo(({
 });
 Knob.displayName = 'Knob';
 
-const VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = '#f59e0b', clip = '#ef4444' }: {
+const _VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = '#f59e0b', clip = '#ef4444' }: {
   level: number; vertical?: boolean; accent?: string; warn?: string; clip?: string;
 }) => {
-  const bars = 12;
+  const _bars = 12;
   return (
     <div className={`flex ${vertical ? 'flex-col-reverse' : 'flex-row'} gap-px`} style={vertical ? { height: 48 } : { width: 48 }}>
       {Array.from({ length: bars }, (_, i) => {
-        const threshold = i / bars;
-        const active = level > threshold;
-        const color = i >= bars - 2 ? clip : i >= bars - 4 ? warn : accent;
+        const _threshold = i / bars;
+        const _active = level > threshold;
+        const _color = i >= bars - 2 ? clip : i >= bars - 4 ? warn : accent;
         return (
           <div
             key={i}
@@ -134,7 +134,7 @@ const VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = '#f59
 });
 VUMeter.displayName = 'VUMeter';
 
-const Btn = memo(({
+const _Btn = memo(({
   children, onClick, active, danger, dim, className = '', title,
 }: {
   children: React.ReactNode; onClick?: () => void;
@@ -163,7 +163,7 @@ const Btn = memo(({
 ));
 Btn.displayName = 'Btn';
 
-const Led = memo(({ on, color = '#f59e0b', pulse }: { on: boolean; color?: string; pulse?: boolean }) => (
+const _Led = memo(({ on, color = '#f59e0b', pulse }: { on: boolean; color?: string; pulse?: boolean }) => (
   <div
     className={`w-2 h-2 rounded-full ${pulse && on ? 'animate-pulse' : ''}`}
     style={{
@@ -180,8 +180,8 @@ Led.displayName = 'Led';
 //   Fix: Self-contained memo component driven by acceptedCount from store.
 //   4 min/suggestion is the conservative estimate from PRD §8.4.2.
 //   Renders null when count=0 → no layout impact until first acceptance.
-const TimeSavingsReadout = memo(() => {
-  const acceptedCount = useDAWStore(
+const _TimeSavingsReadout = memo(() => {
+  const _acceptedCount = useDAWStore(
     s => s.aiSuggestions.filter((x: { accepted: boolean | null }) => x.accepted === true).length,
   );
   const MINS_PER = 4; // PRD §8.4.2 conservative estimate
@@ -202,7 +202,7 @@ TimeSavingsReadout.displayName = 'TimeSavingsReadout';
 
 // ─── Transport Bar ────────────────────────────────────────────────────────────
 
-const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
+const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
   const {
     playing, recording, bpm, position, timeSignature, loopEnabled,
     metronomeEnabled, masterGain, syncStatus, projectName, collabConnected,
@@ -214,10 +214,10 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
   const [bpmInput,  setBpmInput]    = useState('');
   const [editingName, setEditingName] = useState(false);
 
-  const beats = Math.floor(position);
+  const _beats = Math.floor(position);
   const bar   = Math.floor(beats / timeSignature[0]) + 1;
   const beat  = (beats % timeSignature[0]) + 1;
-  const posStr = `${String(bar).padStart(3,'0')}:${beat}`;
+  const _posStr = `${String(bar).padStart(3,'0')}:${beat}`;
 
   const syncColors: Record<string, string> = {
     idle: '#444', syncing: '#f59e0b', synced: '#22c55e', error: '#ef4444', offline: '#555',
@@ -288,13 +288,13 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
             value={bpmInput}
             onChange={e => setBpmInput(e.target.value)}
             onBlur={() => {
-              const v = parseFloat(bpmInput);
+              const _v = parseFloat(bpmInput);
               if (!isNaN(v)) setBpm(v);
               setEditingBpm(false);
             }}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                const v = parseFloat(bpmInput); if (!isNaN(v)) setBpm(v);
+                const _v = parseFloat(bpmInput); if (!isNaN(v)) setBpm(v);
                 setEditingBpm(false);
               }
               if (e.key === 'Escape') setEditingBpm(false);
@@ -354,16 +354,16 @@ TransportBar.displayName = 'TransportBar';
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }) => {
+const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }) => {
   const { sidebarTab, setSidebarTab, collabUsers, collabConnected, collabEnabled, loadedPlugins } = useDAWStore();
   // PATCH-D01: reactive selector — getState() inside JSX is not reactive
-  const collabRoom = useDAWStore(s => s.collabRoom);
+  const _collabRoom = useDAWStore(s => s.collabRoom);
   const [joining, setJoining] = useState(false);
   const [roomInput, setRoomInput] = useState('');
   const [, navigate]  = useLocation();
   const uploadRef     = useRef<HTMLInputElement>(null);
 
-  const FILES = [
+  const _FILES = [
     { name: 'KICKS/', type: 'folder' },
     { name: 'SNARES/', type: 'folder' },
     { name: 'SYNTHS/', type: 'folder' },
@@ -413,7 +413,7 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
                 accept="audio/*,.wav,.mp3,.aiff,.flac,.ogg"
                 style={{ display: 'none' }}
                 onChange={e => {
-                  const file = e.target.files?.[0];
+                  const _file = e.target.files?.[0];
                   if (file) { /* upload queued — wire to engine handler */ }
                   e.target.value = '';
                 }}
@@ -449,8 +449,8 @@ const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }
                     onChange={e => setRoomInput(e.target.value.toUpperCase())}
                     onKeyDown={e => {
                       if (e.key === 'Enter' && roomInput) {
-                        const userId = crypto.randomUUID().slice(0, 8);
-                        const colors = ['#f59e0b','#22d3ee','#22c55e','#a855f7','#ef4444'];
+                        const _userId = crypto.randomUUID().slice(0, 8);
+                        const _colors = ['#f59e0b','#22d3ee','#22c55e','#a855f7','#ef4444'];
                         const color  = colors[Math.floor(Math.random() * colors.length)];
                         collab.joinRoom(roomInput, userId, `USER_${userId.slice(0,4)}`, color);
                         setJoining(false);
@@ -512,7 +512,7 @@ Sidebar.displayName = 'Sidebar';
 
 const BEAT_WIDTH = 24; // px per beat at zoom=1
 
-const ArrangementView = memo(({
+const _ArrangementView = memo(({
   engine, collab,
 }: {
   engine: ReturnType<typeof useDAWEngine>;
@@ -525,29 +525,29 @@ const ArrangementView = memo(({
     setSelectedTrack, setScrollLeft, setZoom,
     trackHeightMode,
   } = useDAWStore();
-  const setSelectedRegion = useDAWStore(s => s.setSelectedRegion);
+  const _setSelectedRegion = useDAWStore(s => s.setSelectedRegion);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const _containerRef = useRef<HTMLDivElement>(null);
   const TRACK_HEIGHT = trackHeightMode === 'compact' ? 28 : trackHeightMode === 'large' ? 56 : 40;
-  const BPW = BEAT_WIDTH * zoom;  // beats → px with zoom
+  const _BPW = BEAT_WIDTH * zoom;  // beats → px with zoom
 
-  const totalBeats = 128;
-  const totalWidth = totalBeats * BPW;
+  const _totalBeats = 128;
+  const _totalWidth = totalBeats * BPW;
 
   // Playhead position
-  const playheadX = position * BPW - scrollLeft;
+  const _playheadX = position * BPW - scrollLeft;
 
   // Snap to beat grid
-  const snapBeat = useCallback((px: number) => {
-    const rawBeat = (px + scrollLeft) / BPW;
+  const _snapBeat = useCallback((px: number) => {
+    const _rawBeat = (px + scrollLeft) / BPW;
     return Math.round(rawBeat);
   }, [scrollLeft, BPW]);
 
-  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  const _onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollLeft((e.currentTarget as HTMLDivElement).scrollLeft);
   }, [setScrollLeft]);
 
-  const onWheel = useCallback((e: React.WheelEvent) => {
+  const _onWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       setZoom(zoom * (e.deltaY > 0 ? 0.9 : 1.1));
@@ -555,18 +555,18 @@ const ArrangementView = memo(({
   }, [zoom, setZoom]);
 
   // Click on arrangement ruler to seek
-  const onRulerClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-    const beat = snapBeat(e.clientX - rect.left);
+  const _onRulerClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const _rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const _beat = snapBeat(e.clientX - rect.left);
     engine.seekTo(beat);
     collab.broadcastCursor(beat, selectedTrackId);
   }, [snapBeat, engine, collab, selectedTrackId]);
 
   // Beat markers
-  const beatMarkers = useMemo(() => {
+  const _beatMarkers = useMemo(() => {
     const markers: number[] = [];
-    const step = zoom < 1 ? 8 : zoom < 2 ? 4 : 1;
-    for (let b = 0; b <= totalBeats; b += step) {
+    const _step = zoom < 1 ? 8 : zoom < 2 ? 4 : 1;
+    for (let _b = 0; b <= totalBeats; b += step) {
       markers.push(b);
     }
     return markers;
@@ -647,7 +647,7 @@ const ArrangementView = memo(({
                        cursor-pointer hover:bg-[#141414] transition-colors group"
             style={{ height: TRACK_HEIGHT }}
             onClick={() => {
-              const s = useDAWStore.getState();
+              const _s = useDAWStore.getState();
               s.addTrack({
                 label:       `TRACK ${s.tracks.length + 1}`,
                 type:        'audio',
@@ -715,8 +715,8 @@ const ArrangementView = memo(({
 
             {/* Regions */}
             {regions.map(region => {
-              const track = tracks.find(t => t.id === region.trackId);
-              const trackIdx = tracks.findIndex(t => t.id === region.trackId);
+              const _track = tracks.find(t => t.id === region.trackId);
+              const _trackIdx = tracks.findIndex(t => t.id === region.trackId);
               if (!track || trackIdx < 0) return null;
               return (
                 <RegionBlock
@@ -733,7 +733,7 @@ const ArrangementView = memo(({
 
             {/* L3: Arrangement prediction overlays */}
             {predictionsVisible && arrangementPredictions.map((pred, i) => {
-              const trackIdx = tracks.findIndex(t => t.id === pred.trackId);
+              const _trackIdx = tracks.findIndex(t => t.id === pred.trackId);
               if (trackIdx < 0) return null;
               const PRED_COLORS: Record<string, string> = {
                 introduce: '#22c55e33', mute: '#ef444433',
@@ -778,7 +778,7 @@ const ArrangementView = memo(({
 });
 ArrangementView.displayName = 'ArrangementView';
 
-const TrackLabel = memo(({
+const _TrackLabel = memo(({
   track, height, selected, onSelect,
 }: {
   track: Track; height: number; selected: boolean; onSelect: () => void;
@@ -813,7 +813,7 @@ const TrackLabel = memo(({
 });
 TrackLabel.displayName = 'TrackLabel';
 
-const RegionBlock = memo(({
+const _RegionBlock = memo(({
   region, top, height, bpw, selected, onClick,
 }: {
   region: TrackRegion; top: number; height: number; bpw: number;
@@ -852,19 +852,19 @@ const PIANO_PITCHES = [
   72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,
 ];
 
-const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequencer> }) => {
+const _MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequencer> }) => {
   const {
     midiPatterns, activePatternId, sequencerStep, setActivePattern, addMidiPattern,
   } = useDAWStore();
 
-  const pattern = midiPatterns.find(p => p.id === activePatternId);
+  const _pattern = midiPatterns.find(p => p.id === activePatternId);
   const steps   = pattern?.steps ?? 16;
 
-  const hasNote = useCallback((step: number, pitch: number) =>
+  const _hasNote = useCallback((step: number, pitch: number) =>
     pattern?.notes.some(n => n.step === step && n.pitch === pitch) ?? false,
   [pattern]);
 
-  const noteVelocity = useCallback((step: number, pitch: number) =>
+  const _noteVelocity = useCallback((step: number, pitch: number) =>
     pattern?.notes.find(n => n.step === step && n.pitch === pitch)?.velocity ?? 100,
   [pattern]);
 
@@ -912,8 +912,8 @@ const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequen
         {/* Piano keys */}
         <div className="flex-none flex flex-col border-r border-[#1c1c1c]" style={{ width: 36 }}>
           {PIANO_PITCHES.map(pitch => {
-            const name = seq.getPitchLabel(pitch);
-            const isBlack = name.includes('#');
+            const _name = seq.getPitchLabel(pitch);
+            const _isBlack = name.includes('#');
             return (
               <div
                 key={pitch}
@@ -937,7 +937,7 @@ const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequen
               <div key={pitch} className="flex flex-1" style={{ height: `${100 / PIANO_PITCHES.length}%` }}>
                 {Array.from({ length: steps }, (_, step) => {
                   const active    = hasNote(step, pitch);
-                  const isCurrent = step === sequencerStep;
+                  const _isCurrent = step === sequencerStep;
                   const vel       = noteVelocity(step, pitch);
                   return (
                     <div
@@ -976,14 +976,14 @@ MidiSequencerPanel.displayName = 'MidiSequencerPanel';
 
 // ─── Mixer Strip ──────────────────────────────────────────────────────────────
 
-const MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
+const _MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
   const { tracks, masterGain, setMasterGain, updateTrack, setActiveFXTrack, activeFXTrackId } = useDAWStore();
   const [meters, setMeters] = useState<Record<string, number>>({});
 
   // Update meters on rAF
   useEffect(() => {
     let raf: number;
-    const update = () => {
+    const _update = () => {
       const next: Record<string, number> = {};
       for (const t of tracks) next[t.id] = engine.getTrackMeterValue(t.id);
       setMeters(next);
@@ -1040,7 +1040,7 @@ const MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }
 });
 MixerStrip.displayName = 'MixerStrip';
 
-const MixerChannel = memo(({
+const _MixerChannel = memo(({
   track, meterLevel, fxActive, onFXClick, onChange,
 }: {
   track: Track;
@@ -1106,12 +1106,12 @@ MixerChannel.displayName = 'MixerChannel';
 
 const FX_TYPES = ['eq','compressor','reverb','delay','filter','distortion'] as const;
 
-const FXRackInline = memo(({ trackId }: { trackId: string }) => {
+const _FXRackInline = memo(({ trackId }: { trackId: string }) => {
   const { tracks, updateFXSlot, toggleFXSlot } = useDAWStore();
-  const track = tracks.find(t => t.id === trackId);
+  const _track = tracks.find(t => t.id === trackId);
   if (!track) return null;
 
-  const addFX = (type: FXSlot['type']) => {
+  const _addFX = (type: FXSlot['type']) => {
     useDAWStore.getState().updateTrack(trackId, {
       fxChain: [...track.fxChain, {
         id: `fx_${Date.now()}`, type, enabled: true,
@@ -1161,7 +1161,7 @@ FXRackInline.displayName = 'FXRackInline';
 
 // ─── AI Panel (L1 mix + L3 co-producer + L3 mastering) ───────────────────────
 
-const AIPanel = memo(() => {
+const _AIPanel = memo(() => {
   const {
     aiPanelTab, aiSuggestions, aiChat, aiThinking, mastering,
     setAIPanelTab, acceptSuggestion, rejectSuggestion, addAIChat,
@@ -1170,15 +1170,15 @@ const AIPanel = memo(() => {
 
   const [chatInput, setChatInput] = useState('');
   const [aiError,   setAiError]   = useState<string | null>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const _chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [aiChat]);
 
   // ── sendChat: tries server, falls back to local LLPTE stub ──────────────
-  const sendChat = useCallback(async () => {
-    const msg = chatInput.trim();
+  const _sendChat = useCallback(async () => {
+    const _msg = chatInput.trim();
     if (!msg) return;
     addAIChat({ role: 'user', content: msg });
     setChatInput('');
@@ -1191,11 +1191,11 @@ const AIPanel = memo(() => {
       // call the chatWithCoProd function directly on the module-level instance.
       // The actual hook instance is managed in useCloudSync.ts.
       // For a full tRPC integration, call trpc.daw['ai.chat'].mutate() here.
-      const token = localStorage.getItem('r3_token');
-      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const store = useDAWStore.getState();
+      const _token = localStorage.getItem('r3_token');
+      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const _store = useDAWStore.getState();
 
-      const res = await fetch(`${apiBase}/trpc/daw.ai.chat`, {
+      const _res = await fetch(`${apiBase}/trpc/daw.ai.chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1211,16 +1211,16 @@ const AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const data = await res.json() as { result?: { data?: { json?: { reply: string } } } };
-        const reply = data.result?.data?.json?.reply ?? '';
+        const _data = await res.json() as { result?: { data?: { json?: { reply: string } } } };
+        const _reply = data.result?.data?.json?.reply ?? '';
         addAIChat({ role: 'assistant', content: reply });
       } else {
         throw new Error(`HTTP ${res.status}`);
       }
     } catch {
       // Graceful degradation: local response when server unavailable
-      const bpm = useDAWStore.getState().bpm;
-      const localReply = `Analysing your arrangement at ${bpm} BPM. `
+      const _bpm = useDAWStore.getState().bpm;
+      const _localReply = `Analysing your arrangement at ${bpm} BPM. `
         + `I suggest boosting low-mid on BASS around 200Hz, and introducing `
         + `a rhythmic sidechain from KICK at 4:1 ratio. `
         + `Current dynamic range reads approx -12 LUFS — 2dB headroom before ceiling.`;
@@ -1231,15 +1231,15 @@ const AIPanel = memo(() => {
   }, [chatInput, addAIChat, setAIThinking]);
 
   // ── triggerSuggestions: server first, local LLPTE stub as fallback ───────
-  const triggerSuggestions = useCallback(async () => {
+  const _triggerSuggestions = useCallback(async () => {
     setAIThinking(true);
     setAiError(null);
-    const store = useDAWStore.getState();
+    const _store = useDAWStore.getState();
 
     try {
-      const token = localStorage.getItem('r3_token');
-      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const res = await fetch(`${apiBase}/trpc/daw.ai.suggestions`, {
+      const _token = localStorage.getItem('r3_token');
+      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const _res = await fetch(`${apiBase}/trpc/daw.ai.suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1251,10 +1251,10 @@ const AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const data = await res.json() as {
+        const _data = await res.json() as {
           result?: { data?: { json?: { suggestions: { type: string; confidence: number; description: string; params: Record<string, unknown> }[] } } }
         };
-        const suggestions = data.result?.data?.json?.suggestions ?? [];
+        const _suggestions = data.result?.data?.json?.suggestions ?? [];
         for (const s of suggestions) {
           store.addAISuggestion({
             type: s.type as 'mix' | 'arrangement' | 'mastering' | 'harmony' | 'rhythm',
@@ -1275,14 +1275,14 @@ const AIPanel = memo(() => {
   }, [setAIThinking]);
 
   // ── runMasteringAnalysis: server first, local calculation fallback ───────
-  const runMasteringAnalysis = useCallback(async () => {
+  const _runMasteringAnalysis = useCallback(async () => {
     updateMastering({ processing: true });
     const { targetLUFS, ceilingDB, dynamicsMode, stereoWidth } = mastering;
 
     try {
-      const token = localStorage.getItem('r3_token');
-      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const res = await fetch(`${apiBase}/trpc/daw.mastering.analyse`, {
+      const _token = localStorage.getItem('r3_token');
+      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const _res = await fetch(`${apiBase}/trpc/daw.mastering.analyse`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1292,18 +1292,18 @@ const AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const data = await res.json() as { result?: { data?: { json?: {
+        const _data = await res.json() as { result?: { data?: { json?: {
           inputLUFS: number; inputPeak: number; outputLUFS: number;
           dynamicRange: number; recommendation: string;
         } } } };
-        const result = data.result?.data?.json;
+        const _result = data.result?.data?.json;
         if (result) { updateMastering({ processing: false, analysisResult: result }); return; }
       }
     } catch { /* fall through */ }
 
     // Local calculation fallback
-    const inputLUFS = -18.3;
-    const gainNeeded = targetLUFS - inputLUFS;
+    const _inputLUFS = -18.3;
+    const _gainNeeded = targetLUFS - inputLUFS;
     updateMastering({
       processing: false,
       analysisResult: {
@@ -1577,7 +1577,7 @@ const AIPanel = memo(() => {
 });
 AIPanel.displayName = 'AIPanel';
 
-const AISuggestionCard = memo(({
+const _AISuggestionCard = memo(({
   suggestion, onAccept, onReject,
 }: {
   suggestion: AISuggestion;
@@ -1588,7 +1588,7 @@ const AISuggestionCard = memo(({
     mix: '#22d3ee', arrangement: '#f59e0b', mastering: '#22c55e',
     harmony: '#a855f7', rhythm: '#f472b6',
   };
-  const color = TYPE_COLORS[suggestion.type] ?? '#888';
+  const _color = TYPE_COLORS[suggestion.type] ?? '#888';
 
   return (
     <div
@@ -1638,8 +1638,8 @@ AISuggestionCard.displayName = 'AISuggestionCard';
 // ─── Main DAW Page ────────────────────────────────────────────────────────────
 
 export default function DAW() {
-  const engine = useDAWEngine();
-  const collab = useCollabSocket();
+  const _engine = useDAWEngine();
+  const _collab = useCollabSocket();
   const seq    = useMidiSequencer();
 
   const { sequencerVisible, setSequencerVisible, aiPanelVisible, setAIPanelVisible } = useDAWStore();
@@ -1649,10 +1649,10 @@ export default function DAW() {
   //   Fix: write session record to localStorage on mount; stamp endMs on unmount.
   //   Regression: additive — no UI change; quota failure is non-fatal.
   useEffect(() => {
-    const sessionId = crypto.randomUUID();
+    const _sessionId = crypto.randomUUID();
     const startMs   = Date.now();
     try {
-      const prev = JSON.parse(localStorage.getItem('r3v4_sessions') ?? '[]') as unknown[];
+      const _prev = JSON.parse(localStorage.getItem('r3v4_sessions') ?? '[]') as unknown[];
       localStorage.setItem(
         'r3v4_sessions',
         JSON.stringify([...prev.slice(-49), { sessionId, startMs, endMs: null, page: 'DAW' }]),
@@ -1662,7 +1662,7 @@ export default function DAW() {
     return () => {
       try {
         type SessionEntry = { sessionId: string; endMs: number | null };
-        const sessions = JSON.parse(
+        const _sessions = JSON.parse(
           localStorage.getItem('r3v4_sessions') ?? '[]',
         ) as SessionEntry[];
         localStorage.setItem(
@@ -1679,14 +1679,14 @@ export default function DAW() {
 
   // Global keyboard shortcuts — Ctrl+S triggers cloud save
   useEffect(() => {
-    const onKey = async (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement;
+    const _onKey = async (e: KeyboardEvent) => {
+      const _target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
       // Ctrl/Cmd + S → save to localStorage immediately; cloud save async
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        const store = useDAWStore.getState();
+        const _store = useDAWStore.getState();
         store.setSyncStatus('syncing');
         try {
           localStorage.setItem('r3v4_project_snapshot', JSON.stringify({
@@ -1838,7 +1838,7 @@ export default function DAW() {
   );
 }
 
-const StatusBar = memo(() => {
+const _StatusBar = memo(() => {
   const { playing, recording, collabConnected, collabUsers, syncStatus, bpm, timeSignature } = useDAWStore();
   return (
     <>

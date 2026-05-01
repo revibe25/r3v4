@@ -1,11 +1,11 @@
 import { useRef, useEffect } from "react";
 export function VJCanvas({ level = 0, beat = 0 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
+    const _canvas = canvasRef.current!;
+    const _ctx = canvas.getContext("2d")!;
     let anim: number;
-    const draw = () => {
+    const _draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.shadowBlur = 30 + 40 * level;

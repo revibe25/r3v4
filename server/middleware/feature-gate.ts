@@ -34,9 +34,10 @@
 import { TRPCError } from '@trpc/server';
 import { middleware } from '../trpc';
 import { getUserSubscription } from '../services/stripe-subscription';
-import {
+import type {
   SubscriptionTier,
-  TierFeatures,
+  TierFeatures} from '../../shared/subscription.types';
+import {
   tierAtLeast,
   canUseFeature,
   TIER_DEFINITIONS,

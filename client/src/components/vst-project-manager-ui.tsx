@@ -1,14 +1,15 @@
 // client/src/components/vst-project-manager-ui.tsx
 import { useState, useCallback } from 'react';
 import { Save, Upload, Download, Clock, FileJson, RotateCcw } from 'lucide-react';
-import { VSTProjectSerializer, SerializedVSTChain } from '@/audio/fx/vst-project-serializer';
+import type { SerializedVSTChain } from '@/audio/fx/vst-project-serializer';
+import { VSTProjectSerializer } from '@/audio/fx/vst-project-serializer';
 import { format } from 'date-fns';
 
 interface ProjectManagerUIProps { onSave: () => SerializedVSTChain; onLoad: (data: SerializedVSTChain) => Promise<void>; }
 
-const P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const I = "border border-[#2a2a2a] p-2 text-[#f0f0f0] hover:text-[#a3e635] hover:border-[#a3e635]/40 rounded-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
+const _P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _I = "border border-[#2a2a2a] p-2 text-[#f0f0f0] hover:text-[#a3e635] hover:border-[#a3e635]/40 rounded-none transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
 
 export function VSTProjectManagerUI({ onSave, onLoad }: ProjectManagerUIProps) {
   const [projectName,setProjectName]=useState('');

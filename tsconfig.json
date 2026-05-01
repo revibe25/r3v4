@@ -9,6 +9,7 @@
     "dist",
     "**/*.test.ts",
     "client/**/*",
+    "shared/dist",
     "scripts/seed",
     "**/seed/**",
     "../vite.config.ts",

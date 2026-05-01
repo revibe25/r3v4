@@ -41,17 +41,17 @@ class InstrumentProcessor extends AudioWorkletProcessor {
   _rel     = Math.exp(-1 / (0.150 * sampleRate / 128));
 
   _compress(env, sample, threshDB, ratio) {
-    const thresh = Math.pow(10, threshDB / 20);
+    const _thresh = Math.pow(10, threshDB / 20);
     const abs    = Math.abs(sample);
     // Envelope follower
     env = abs > env
       ? this._atk * env + (1 - this._atk) * abs
       : this._rel * env + (1 - this._rel) * abs;
     if (abs <= thresh) return { gr: 1.0, env };
-    const excess = abs - thresh;
+    const _excess = abs - thresh;
     const knee   = thresh * 0.5;
     if (excess < knee) {
-      const blend = excess / knee;
+      const _blend = excess / knee;
       const r     = 1 + (ratio - 1) * blend * 0.5;
       return { gr: (thresh + excess / r) / abs, env };
     }
@@ -60,20 +60,20 @@ class InstrumentProcessor extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters) {
     const input  = inputs[0];
-    const output = outputs[0];
+    const _output = outputs[0];
     if (!input?.length || !output?.length) return true;
 
-    const pv = (name, i) => {
-      const a = parameters[name];
+    const _pv = (name, i) => {
+      const _a = parameters[name];
       return a ? (a.length > 1 ? a[i] : a[0]) : 1.0;
     };
 
     const L  = input[0];
     const R  = input[1] ?? input[0];
-    const oL = output[0];
-    const oR = output[1] ?? output[0];
+    const _oL = output[0];
+    const _oR = output[1] ?? output[0];
 
-    for (let i = 0; i < L.length; i++) {
+    for (let _i = 0; i < L.length; i++) {
       const masterGain   = pv("masterGain",    i);
       const compRatio    = pv("compRatio",     i);
       const compThresh   = pv("compThreshold", i);
@@ -85,7 +85,7 @@ class InstrumentProcessor extends AudioWorkletProcessor {
 
       // M/S encode
       const mid  = (L[i] + R[i]) * 0.5;
-      const side = (L[i] - R[i]) * 0.5;
+      const _side = (L[i] - R[i]) * 0.5;
 
       // Mid channel: compressor + gain
       const midC       = this._compress(this._midEnv,  mid,  midThresh  !== SIDE_THRESHOLD_DEFAULT ? midThresh  : compThresh, compRatio);

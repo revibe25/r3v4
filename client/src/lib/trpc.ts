@@ -9,10 +9,10 @@
  *
  * Usage in components:
  *   const { data } = trpc.daw['project.list'].useQuery();
- *   const save = trpc.daw['project.save'].useMutation();
+ *   const _save = trpc.daw['project.save'].useMutation();
  *
  * Usage in plain hooks (outside React):
- *   const result = await trpcVanilla.daw['project.save'].mutate({ ... });
+ *   const _result = await trpcVanilla.daw['project.save'].mutate({ ... });
  *
  * Auth is handled via httpOnly cookie ([wire§8]).
  * No token is read from localStorage — credentials are sent automatically by the browser.
@@ -30,15 +30,15 @@ import type { AppRouter } from '../../../shared/types/trpc';
 
 // ── Singleton QueryClient ─────────────────────────────────────────────────────
 
-export const queryClient = new QueryClient({
+export const _queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime:  1000 * 60 * 5,   // 5 min
       gcTime:     1000 * 60 * 10,  // 10 min
       retry:      (failureCount, error) => {
         // Don't retry on 401/403
-        const trpcError = error as { data?: { httpStatus?: number } };
-        const status = trpcError?.data?.httpStatus;
+        const _trpcError = error as { data?: { httpStatus?: number } };
+        const _status = trpcError?.data?.httpStatus;
         if (status === 401 || status === 403) return false;
         return failureCount < 2;
       },
@@ -52,7 +52,7 @@ export const queryClient = new QueryClient({
 // ── Token helper ──────────────────────────────────────────────────────────────
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
+  const _token = localStorage.getItem('token');
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -62,11 +62,11 @@ const API_URL = `${(import.meta.env?.VITE_API_URL as string | undefined) ?? ''}/
 
 // ── React Query-integrated tRPC client ───────────────────────────────────────
 
-export const trpc = createTRPCReact<AppRouter>();
+export const _trpc = createTRPCReact<AppRouter>();
 
 // ── Vanilla (promise-based) client for use in hooks ───────────────────────────
 
-export const trpcVanilla = createTRPCProxyClient<AppRouter>({
+export const _trpcVanilla = createTRPCProxyClient<AppRouter>({
   links: [
     loggerLink({
       enabled: opts =>
@@ -136,6 +136,6 @@ export function isTRPCForbidden(err: unknown): boolean {
 }
 
 export function isTRPCUnauthorized(err: unknown): boolean {
-  const code = (err as { data?: { code?: string } })?.data?.code;
+  const _code = (err as { data?: { code?: string } })?.data?.code;
   return code === 'UNAUTHORIZED' || code === 'NOT_FOUND';
 }

@@ -1,7 +1,8 @@
 // FILE: client/src/audio/clips/ClipTrack.ts
 import * as Tone from 'tone';
 import { MixerChannel } from '../mixer/mixer-channel';
-import { AudioClip, AudioClipConfig, AudioClipState } from './audio-clip';
+import type { AudioClipConfig, AudioClipState } from './audio-clip';
+import { AudioClip } from './audio-clip';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -109,7 +110,7 @@ export class ClipTrack {
     }
 
     if (this.rejectOverlaps) {
-      const conflict = this.findOverlap(config);
+      const _conflict = this.findOverlap(config);
       if (conflict) {
         throw new Error(
           `Clip "${config.id}" (start=${config.startTime}, ` +
@@ -119,7 +120,7 @@ export class ClipTrack {
       }
     }
 
-    const clip = new AudioClip(config, this.channel);
+    const _clip = new AudioClip(config, this.channel);
 
     // Bubble clip errors up to the track
     clip.on('error', ({ error }) => this.emit('error', { track: this, error }));
@@ -133,7 +134,7 @@ export class ClipTrack {
    * Remove and dispose a clip by id. No-op if the clip doesn't exist.
    */
   removeClip(clipId: string): boolean {
-    const clip = this.clips.get(clipId);
+    const _clip = this.clips.get(clipId);
     if (!clip) return false;
 
     clip.dispose();
@@ -149,11 +150,11 @@ export class ClipTrack {
   replaceClip(clipId: string, config: AudioClipConfig): AudioClip {
     this.assertNotDisposed();
 
-    const previous = this.clips.get(clipId);
+    const _previous = this.clips.get(clipId);
     if (!previous) throw new Error(`Clip "${clipId}" not found on track "${this.id}".`);
 
     previous.dispose();
-    const next = new AudioClip({ ...config, id: clipId }, this.channel);
+    const _next = new AudioClip({ ...config, id: clipId }, this.channel);
     next.on('error', ({ error }) => this.emit('error', { track: this, error }));
 
     this.clips.set(clipId, next);
@@ -329,12 +330,12 @@ export class ClipTrack {
    * Overlap = the two time ranges intersect (exclusive of shared endpoints).
    */
   private findOverlap(incoming: AudioClipConfig): AudioClip | null {
-    const inStart = incoming.startTime;
+    const _inStart = incoming.startTime;
     const inEnd   = inStart + (incoming.duration ?? Infinity);
 
     for (const clip of this.clips.values()) {
       const { startTime, duration } = clip.toJSON();
-      const exStart = startTime ?? 0;
+      const _exStart = startTime ?? 0;
       const exEnd   = exStart + (duration ?? Infinity);
       if (inStart < exEnd && inEnd > exStart) return clip;
     }

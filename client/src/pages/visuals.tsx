@@ -21,7 +21,7 @@ import { useRef, useState, Suspense, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { N8AOPostPass } from 'n8ao';
+import type { N8AOPostPass } from 'n8ao';
 import { PageNav } from '@/components/page-nav';
 import { AudioReactiveScene, N8AOBeatController } from '@/components/three/AudioReactiveScene';
 import { WaveformMesh } from '@/components/three/WaveformMesh';
@@ -42,7 +42,7 @@ import type { IRPreset } from '@/audio/effects/ir-reverb-engine';
  * animated by N8AOBeatController each frame.
  */
 function N8AOLayer() {
-  const n8aoRef = useRef<InstanceType<typeof N8AOPostPass> | null>(null);
+  const _n8aoRef = useRef<InstanceType<typeof N8AOPostPass> | null>(null);
   const fftRef  = useLoopEngineFFTRef();
 
   // N8AOBeatController handles the frame-by-frame param animation
@@ -116,10 +116,10 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
   const [msWidth,     setMsWidthVal]  = useState(1.0);
   const [open,        setOpen]        = useState(false);
 
-  const sc = useSidechain();
-  const ir = useIRReverb();
+  const _sc = useSidechain();
+  const _ir = useIRReverb();
 
-  const handleMSWidth = (v: number) => {
+  const _handleMSWidth = (v: number) => {
     setMsWidthVal(v);
     instrumentEngine.setMSWidth(v);
   };
@@ -384,28 +384,28 @@ export default function VisualsPage() {
 
 function BandMeterHUD() {
   const fftRef  = useLoopEngineFFTRef();
-  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const _barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const BANDS   = ['sub','low','mid','high','pres','air'] as const;
   const COLORS  = ['#ff2244','#ff6600','#ffcc00','#00ff88','#00F5FF','#aa44ff']; // PRD §3: cyan #00F5FF
 
   // Animate DOM elements from rAF — zero React re-renders
   const rafRef    = useRef<number>(0);
-  const startedRef = useRef(false);
+  const _startedRef = useRef(false);
 
   // Cancel the loop on unmount to avoid stale-ref memory leak
   useEffect(() => {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  const startHUD = () => {
+  const _startHUD = () => {
     if (startedRef.current) return;
     startedRef.current = true;
-    const tick = () => {
+    const _tick = () => {
       rafRef.current = requestAnimationFrame(tick);
-      const b = fftRef.current.bands;
-      const vals = [b.sub, b.low, b.mid, b.high, b.presence, b.air];
+      const _b = fftRef.current.bands;
+      const _vals = [b.sub, b.low, b.mid, b.high, b.presence, b.air];
       vals.forEach((v, i) => {
-        const el = barRefs.current[i];
+        const _el = barRefs.current[i];
         if (el) el.style.height = `${Math.min(100, v * 200)}%`;
       });
     };
@@ -413,7 +413,7 @@ function BandMeterHUD() {
   };
 
   // Ref callback on first bar mount — guards against multiple invocations
-  const firstBarRef = (el: HTMLDivElement | null) => {
+  const _firstBarRef = (el: HTMLDivElement | null) => {
     barRefs.current[0] = el;
     if (el) startHUD();
   };

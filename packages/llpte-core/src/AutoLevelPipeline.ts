@@ -12,7 +12,8 @@
 // This is what the LLPTE Node Graph visualizes in the UI.
 // ─────────────────────────────────────────────────────────────
 
-import { MixAnalyzer, TrackAnalyzer } from '../../llpte-signal/src/analyzers/TrackAnalyzer';
+import type { TrackAnalyzer } from '../../llpte-signal/src/analyzers/TrackAnalyzer';
+import { MixAnalyzer } from '../../llpte-signal/src/analyzers/TrackAnalyzer';
 import { AutoLevelEngine } from '../../llpte-ai/src/AutoLevelEngine';
 import { AutoLevelExecutor } from '../../llpte-execution/src/AutoLevelExecutor';
 import type {

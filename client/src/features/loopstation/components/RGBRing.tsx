@@ -51,8 +51,8 @@ const ScanLine: React.FC = () => (
 );
 
 export const RGBRing: React.FC<Props> = ({ state, bpm }) => {
-  const c = CFG[state] ?? CFG.idle;
-  const spinDuration = c.spin > 0 ? (60 / bpm) * c.spin : 0;
+  const _c = CFG[state] ?? CFG.idle;
+  const _spinDuration = c.spin > 0 ? (60 / bpm) * c.spin : 0;
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ overflow: 'hidden' }}>

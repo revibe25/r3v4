@@ -15,7 +15,7 @@ import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 
 // ─── Design Tokens (Wire.txt §5) ──────────────────────────────────────────────
-const T = {
+const _T = {
   black:   "#060606",
   acid:    "#a3e635",
   cyan:    "#00F5FF",
@@ -148,7 +148,7 @@ const AGENT_KEYS: AgentKey[] = ["spectral", "auth"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function nowTs(): string {
-  const n = new Date();
+  const _n = new Date();
   return (
     n.getHours().toString().padStart(2, "0") + ":" +
     n.getMinutes().toString().padStart(2, "0") + ":" +
@@ -157,7 +157,7 @@ function nowTs(): string {
 }
 
 function parseConfidence(text: string): number | null {
-  const m =
+  const _m =
     text.match(/confidence[:\s]+([0-9]\.[0-9]+)/i) ??
     text.match(/\b(0\.[0-9]+)\b/);
   if (m?.[1]) return Math.min(1, Math.max(0, parseFloat(m[1])));
@@ -184,8 +184,8 @@ function confColor(v: number): string {
 
 // ─── Confidence Bar ───────────────────────────────────────────────────────────
 function ConfBar({ value }: { value: number | null }) {
-  const pct = value !== null ? Math.round(value * 100) : 0;
-  const color = value !== null ? confColor(value) : T.z700;
+  const _pct = value !== null ? Math.round(value * 100) : 0;
+  const _color = value !== null ? confColor(value) : T.z700;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
       <span style={{ fontSize: 11, color: T.z400, minWidth: 70, fontFamily: "'JetBrains Mono', monospace" }}>
@@ -214,7 +214,7 @@ function SLAChip({ label, value, status }: {
   value: string;
   status?: "ok" | "warn" | "fail" | "neutral";
 }) {
-  const statusColor = status === "ok" ? T.emerald : status === "warn" ? T.amber : status === "fail" ? T.red : T.z400;
+  const _statusColor = status === "ok" ? T.emerald : status === "warn" ? T.amber : status === "fail" ? T.red : T.z400;
   return (
     <div style={{
       flex: 1, background: T.z800, borderRadius: 6,
@@ -240,14 +240,14 @@ function AgentCard({
   onRun: (agentKey: AgentKey, task: string) => void;
   loading: boolean;
 }) {
-  const manifest = MANIFESTS[agentKey];
+  const _manifest = MANIFESTS[agentKey];
   const [input, setInput] = useState("");
 
-  const lat = state.latency;
+  const _lat = state.latency;
   const latStatus: "ok" | "warn" | "fail" | "neutral" =
     lat === null ? "neutral" : lat <= manifest.latencySLA ? "ok" : lat <= 25 ? "warn" : "fail";
 
-  const conf = state.confidence;
+  const _conf = state.confidence;
   const confStatus: "ok" | "warn" | "fail" | "neutral" =
     conf === null ? "neutral" : conf >= manifest.confidenceGate ? "ok" : conf >= 0.5 ? "warn" : "fail";
 
@@ -378,7 +378,7 @@ function AgentCard({
             {state.outputLines.length === 0
               ? <span style={{ color: T.z600 }}>awaiting task…</span>
               : state.outputLines.map((line, i) => {
-                  const lineColor =
+                  const _lineColor =
                     line.cls === "ok" ? T.emerald :
                     line.cls === "warn" ? T.amber :
                     line.cls === "err" ? T.red :
@@ -398,8 +398,8 @@ function AgentCard({
 
 // ─── Bus Entry Row ────────────────────────────────────────────────────────────
 function BusRow({ entry }: { entry: BusEntry }) {
-  const dirColor = entry.type === "request" ? T.cyan : entry.type === "response" ? T.emerald : T.amber;
-  const dirLabel = entry.type === "request" ? "REQ →" : entry.type === "response" ? "RES ←" : "BCAST";
+  const _dirColor = entry.type === "request" ? T.cyan : entry.type === "response" ? T.emerald : T.amber;
+  const _dirLabel = entry.type === "request" ? "REQ →" : entry.type === "response" ? "RES ←" : "BCAST";
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
       <span style={{ color: T.z600, flexShrink: 0, minWidth: 52, fontFamily: "'JetBrains Mono', monospace", fontSize: 11 }}>
@@ -431,19 +431,19 @@ export function AgentMeshPanel() {
   }]);
   const [busFiring, setBusFiring] = useState(false);
   const [showDryBanner, setShowDryBanner] = useState(false);
-  const traceCounterRef = useRef(0);
+  const _traceCounterRef = useRef(0);
 
-  const agentChat = trpc.admin.agentChat.useMutation();
+  const _agentChat = trpc.admin.agentChat.useMutation();
 
-  const busEmit = useCallback((from: string, to: string, type: BusEntry["type"], text: string) => {
+  const _busEmit = useCallback((from: string, to: string, type: BusEntry["type"], text: string) => {
     setBusFiring(true);
     setTimeout(() => setBusFiring(false), 400);
     setBusLog(prev => [...prev, { ts: nowTs(), from, to, type, text }]);
   }, []);
 
-  const runAgent = useCallback(async (agentKey: AgentKey, userMsg: string) => {
-    const manifest = MANIFESTS[agentKey];
-    const traceId = `tr-${(++traceCounterRef.current).toString().padStart(4, "0")}`;
+  const _runAgent = useCallback(async (agentKey: AgentKey, userMsg: string) => {
+    const _manifest = MANIFESTS[agentKey];
+    const _traceId = `tr-${(++traceCounterRef.current).toString().padStart(4, "0")}`;
 
     setLoadingKey(agentKey);
     setShowDryBanner(false);
@@ -459,19 +459,19 @@ export function AgentMeshPanel() {
     busEmit("user", manifest.id, "request", `"${userMsg.slice(0, 50)}${userMsg.length > 50 ? "…" : ""}" [${traceId}]`);
 
     try {
-      const result = await agentChat.mutateAsync({
+      const _result = await agentChat.mutateAsync({
         agentId: agentKey,
         systemPrompt: manifest.systemPrompt,
         messages: [{ role: "user", content: userMsg }],
         maxTokens: 1000,
       });
 
-      const rawText = result.content;
-      const simLatency = Math.round(Math.random() * 8 + 4);
-      const conf = parseConfidence(rawText) ?? (Math.random() * 0.25 + 0.70);
+      const _rawText = result.content;
+      const _simLatency = Math.round(Math.random() * 8 + 4);
+      const _conf = parseConfidence(rawText) ?? (Math.random() * 0.25 + 0.70);
 
       if (conf < manifest.confidenceGate) {
-        const peer = manifest.peers[0] ?? "unknown";
+        const _peer = manifest.peers[0] ?? "unknown";
         setAgentStates(prev => ({
           ...prev,
           [agentKey]: {
@@ -486,7 +486,7 @@ export function AgentMeshPanel() {
         }));
         busEmit(manifest.id, peer, "request", `escalation [${traceId}] · conf=${conf.toFixed(2)}`);
       } else {
-        const lines = rawText.split("\n").filter(l => l.trim());
+        const _lines = rawText.split("\n").filter(l => l.trim());
         setAgentStates(prev => ({
           ...prev,
           [agentKey]: {
@@ -503,7 +503,7 @@ export function AgentMeshPanel() {
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "API error";
+      const _msg = err instanceof Error ? err.message : "API error";
       setAgentStates(prev => ({
         ...prev,
         [agentKey]: {

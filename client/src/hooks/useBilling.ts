@@ -6,7 +6,7 @@ import { trpc } from "../lib/trpc";
  * Import this instead of calling trpc.subscription.* directly.
  */
 export function useBilling() {
-  const utils = trpc.useUtils();
+  const _utils = trpc.useUtils();
 
   const { data: subscription, isLoading: loadingSubscription } =
     trpc.subscription.getMySubscription.useQuery(undefined, {
@@ -42,7 +42,7 @@ export function useBilling() {
 
   const isActive    = subscription?.status === "active";
   const isTrialing  = subscription?.status === "trialing";
-  const isCancelled = subscription?.status === "canceled";
+  const _isCancelled = subscription?.status === "canceled";
 
   return {
     subscription,

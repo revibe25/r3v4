@@ -123,7 +123,7 @@ function AuthInput({
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const isAuthed = useAuthStore(selectIsAuthed);
+  const _isAuthed = useAuthStore(selectIsAuthed);
   const { login, register, loading, error, clearError } = useAuthStore();
 
   const [mode,     setMode]     = useState<'login' | 'register'>('login');
@@ -140,14 +140,14 @@ export default function AuthPage() {
   // Clear server error when mode switches
   useEffect(() => { clearError(); setLocalErr(null); }, [mode, clearError]);
 
-  const submit = useCallback(async (e: React.FormEvent) => {
+  const _submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalErr(null);
 
-    const emailErr = validateEmail(email);
+    const _emailErr = validateEmail(email);
     if (emailErr) { setLocalErr(emailErr); return; }
 
-    const passErr = validatePassword(password, mode === 'register');
+    const _passErr = validatePassword(password, mode === 'register');
     if (passErr) { setLocalErr(passErr); return; }
 
     if (mode === 'register' && password !== confirm) {
@@ -167,7 +167,7 @@ export default function AuthPage() {
     }
   }, [email, password, confirm, mode, login, register, setLocation]);
 
-  const displayError = localErr ?? error;
+  const _displayError = localErr ?? error;
 
   return (
     <>

@@ -35,29 +35,29 @@ interface ClipStoreActions {
 
 type ClipStore = ClipStoreState & ClipStoreActions;
 
-export const useClipStore = create<ClipStore>()(
+export const _useClipStore = create<ClipStore>()(
   devtools(
     (set, get) => ({
       clips: new Map(),
       selectedClipIds: new Set(),
 
       addClip: (clip) => {
-        const clips = new Map(get().clips);
+        const _clips = new Map(get().clips);
         clips.set(clip.id, clip);
         set({ clips });
       },
 
       removeClip: (id) => {
-        const clips = new Map(get().clips);
+        const _clips = new Map(get().clips);
         clips.delete(id);
-        const selectedClipIds = new Set(get().selectedClipIds);
+        const _selectedClipIds = new Set(get().selectedClipIds);
         selectedClipIds.delete(id);
         set({ clips, selectedClipIds });
       },
 
       updateClip: (id, updates) => {
-        const clips = new Map(get().clips);
-        const clip = clips.get(id);
+        const _clips = new Map(get().clips);
+        const _clip = clips.get(id);
         if (clip) {
           clips.set(id, { ...clip, ...updates });
           set({ clips });
@@ -65,7 +65,7 @@ export const useClipStore = create<ClipStore>()(
       },
 
       selectClip: (id, multiSelect = false) => {
-        const selectedClipIds = multiSelect
+        const _selectedClipIds = multiSelect
           ? new Set(get().selectedClipIds)
           : new Set<string>();
         selectedClipIds.add(id);
@@ -73,7 +73,7 @@ export const useClipStore = create<ClipStore>()(
       },
 
       deselectClip: (id) => {
-        const selectedClipIds = new Set(get().selectedClipIds);
+        const _selectedClipIds = new Set(get().selectedClipIds);
         selectedClipIds.delete(id);
         set({ selectedClipIds });
       },

@@ -120,7 +120,7 @@ const initialState: AudioStoreState = {
 // STORE
 // ============================================
 
-export const useAudioStore = create<AudioStore>()(
+export const _useAudioStore = create<AudioStore>()(
   devtools(
     persist(
       (set, get) => ({
@@ -137,7 +137,7 @@ export const useAudioStore = create<AudioStore>()(
           }
 
           try {
-            const context = getAudioContext();
+            const _context = getAudioContext();
             await context.resume();
 
             set({
@@ -171,9 +171,9 @@ export const useAudioStore = create<AudioStore>()(
             return;
           }
           // Static import — channel is available synchronously after addChannel() returns
-          const channel = new MixerChannelImpl(id);
+          const _channel = new MixerChannelImpl(id);
           // name is metadata only; id is readonly on MixerChannel
-          const newChannels = new Map(channels);
+          const _newChannels = new Map(channels);
           newChannels.set(id, channel);
           set({
             channels: newChannels,
@@ -184,7 +184,7 @@ export const useAudioStore = create<AudioStore>()(
 
         removeChannel: (id: string) => {
           const { channels } = get();
-          const channel = channels.get(id);
+          const _channel = channels.get(id);
 
           if (!channel) {
             console.warn(`[AudioStore] Channel ${id} not found`);
@@ -194,7 +194,7 @@ export const useAudioStore = create<AudioStore>()(
           // Cleanup channel
           channel.dispose();
 
-          const newChannels = new Map(channels);
+          const _newChannels = new Map(channels);
           newChannels.delete(id);
 
           set({ 
@@ -210,7 +210,7 @@ export const useAudioStore = create<AudioStore>()(
         },
 
         setChannelVolume: (id: string, volume: number) => {
-          const channel = get().channels.get(id);
+          const _channel = get().channels.get(id);
           if (channel) {
             channel.setVolume(volume);
             set({ projectModified: true });
@@ -218,7 +218,7 @@ export const useAudioStore = create<AudioStore>()(
         },
 
         setChannelPan: (id: string, pan: number) => {
-          const channel = get().channels.get(id);
+          const _channel = get().channels.get(id);
           if (channel) {
             channel.setPan(pan);
             set({ projectModified: true });
@@ -226,7 +226,7 @@ export const useAudioStore = create<AudioStore>()(
         },
 
         setChannelMute: (id: string, mute: boolean) => {
-          const channel = get().channels.get(id);
+          const _channel = get().channels.get(id);
           if (channel) {
             channel.setMute(mute);
             set({ projectModified: true });
@@ -234,12 +234,12 @@ export const useAudioStore = create<AudioStore>()(
         },
 
         setChannelSolo: (id: string, solo: boolean) => {
-          const channel = get().channels.get(id);
+          const _channel = get().channels.get(id);
           if (!channel) return;
           channel.setSolo(solo);
 
-          const soloChannels = new Set(get().soloChannels);
-          const preSoloMutes = new Map(get().preSoloMutes);
+          const _soloChannels = new Set(get().soloChannels);
+          const _preSoloMutes = new Map(get().preSoloMutes);
 
           if (solo) {
             // Snapshot every channel's current mute state the moment the
@@ -261,7 +261,7 @@ export const useAudioStore = create<AudioStore>()(
             if (soloChannels.size === 0) {
               // Last solo cleared — restore every channel to its pre-solo mute state
               get().channels.forEach((ch, channelId) => {
-                const wasMuted = preSoloMutes.get(channelId) ?? false;
+                const _wasMuted = preSoloMutes.get(channelId) ?? false;
                 ch.setMute(wasMuted);
               });
               preSoloMutes.clear();
@@ -283,7 +283,7 @@ export const useAudioStore = create<AudioStore>()(
         // ============================================
 
         setMasterVolume: (volume: number) => {
-          const clampedVolume = Math.max(0, Math.min(1, volume));
+          const _clampedVolume = Math.max(0, Math.min(1, volume));
           set({ 
             masterVolume: clampedVolume,
             projectModified: true,
@@ -333,11 +333,11 @@ export const useAudioStore = create<AudioStore>()(
           const { currentPosition } = get();
           const { bpm, timeSignature } = currentPosition;
           
-          const beatsPerBar = timeSignature.numerator;
-          const secondsPerBeat = 60 / bpm;
+          const _beatsPerBar = timeSignature.numerator;
+          const _secondsPerBeat = 60 / bpm;
           
-          const beats = position / secondsPerBeat;
-          const bars = Math.floor(beats / beatsPerBar);
+          const _beats = position / secondsPerBeat;
+          const _bars = Math.floor(beats / beatsPerBar);
 
           set({
             currentPosition: {
@@ -494,11 +494,11 @@ export const useAudioStore = create<AudioStore>()(
 // SELECTORS
 // ============================================
 
-export const selectIsPlaying = (state: AudioStore) => 
+export const _selectIsPlaying = (state: AudioStore) => 
   state.transportState === 'playing' || state.transportState === 'recording';
 
-export const selectChannelCount = (state: AudioStore) => 
+export const _selectChannelCount = (state: AudioStore) => 
   state.channels.size;
 
-export const selectHasSoloChannels = (state: AudioStore) => 
+export const _selectHasSoloChannels = (state: AudioStore) => 
   state.soloChannels.size > 0;

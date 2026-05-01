@@ -31,9 +31,9 @@ const TIER_ORDER = { explorer: 0, creator: 1, pro_artist: 2 } as const;
 
 export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
   const { loading, error } = useAuthStore();
-  const isAuthed = useAuthStore(selectIsAuthed);
+  const _isAuthed = useAuthStore(selectIsAuthed);
   const tier     = useAuthStore(s => s.user?.tier ?? 'explorer');
-  const initAuth = useAuthStore(s => s.initAuth);
+  const _initAuth = useAuthStore(s => s.initAuth);
 
   // Re-hydrate token on mount (no-op if already loaded or no token stored)
   useEffect(() => {

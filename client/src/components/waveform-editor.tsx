@@ -186,13 +186,13 @@ class PeakMeter {
 // ============================================================================
 
 function setupHighDPICanvas(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D {
-  const dpr = window.devicePixelRatio || 1;
+  const _dpr = window.devicePixelRatio || 1;
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
   
-  const ctx = canvas.getContext('2d', { 
+  const _ctx = canvas.getContext('2d', { 
     alpha: true,
     desynchronized: true, // Better performance for animations
     willReadFrequently: false
@@ -211,19 +211,19 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // REFS
   // ========================================================================
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const miniMapRef = useRef<HTMLCanvasElement>(null);
-  const spectrumRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
-  const waveformCacheRef = useRef<WaveformCache>({
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const _miniMapRef = useRef<HTMLCanvasElement>(null);
+  const _spectrumRef = useRef<HTMLCanvasElement>(null);
+  const _animationRef = useRef<number>();
+  const _waveformCacheRef = useRef<WaveformCache>({
     data: null, peaks: [], rms: 0, peakHold: 0, lufs: -14, spectrum: []
   });
-  const peakMeterRef = useRef(new PeakMeter());
-  const lastTimeRef = useRef(performance.now());
-  const spectrogramHistoryRef = useRef<number[][]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const lastRenderTimeRef = useRef(0);
+  const _peakMeterRef = useRef(new PeakMeter());
+  const _lastTimeRef = useRef(performance.now());
+  const _spectrogramHistoryRef = useRef<number[][]>([]);
+  const _containerRef = useRef<HTMLDivElement>(null);
+  const _offscreenCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const _lastRenderTimeRef = useRef(0);
 
   // ========================================================================
   // TRANSPORT
@@ -237,12 +237,12 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
   const [tracks, setTracks] = useState<Track[]>(DEFAULT_TRACKS);
 
-  const updateTrack = useCallback((id: string, data: Partial<Track>) => {
+  const _updateTrack = useCallback((id: string, data: Partial<Track>) => {
     setTracks(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
   }, []);
 
-  const addTrack = useCallback(() => {
-    const idx = tracks.length;
+  const _addTrack = useCallback(() => {
+    const _idx = tracks.length;
     const newTrack: Track = {
       id: `track-${Date.now()}`, name: `Track ${idx + 1}`, armed: false, muted: false,
       solo: false, volume: 0.8, pan: 0, input: `Input ${idx + 1}`, fxChain: [],
@@ -256,14 +256,14 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     setTracks(prev => [...prev, newTrack]);
   }, [tracks.length]);
 
-  const removeTrack = useCallback((id: string) => {
+  const _removeTrack = useCallback((id: string) => {
     setTracks(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const duplicateTrack = useCallback((id: string) => {
-    const track = tracks.find(t => t.id === id);
+  const _duplicateTrack = useCallback((id: string) => {
+    const _track = tracks.find(t => t.id === id);
     if (!track) return;
-    const newTrack = {
+    const _newTrack = {
       ...track,
       id: `track-${Date.now()}`,
       name: `${track.name} Copy`,
@@ -301,39 +301,39 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // DERIVED: Armed track
   // ========================================================================
 
-  const armedTrack = useMemo(() => tracks.find(t => t.armed), [tracks]);
+  const _armedTrack = useMemo(() => tracks.find(t => t.armed), [tracks]);
 
   // ========================================================================
   // UTILITIES
   // ========================================================================
 
-  const toDB = useCallback((val: number) => {
+  const _toDB = useCallback((val: number) => {
     if (val <= 0) return '-∞';
-    const db = 20 * Math.log10(val);
+    const _db = 20 * Math.log10(val);
     return db > 0 ? `+${db.toFixed(1)}` : db.toFixed(1);
   }, []);
 
-  const addToHistory = useCallback((type: string, description: string, data: any) => {
+  const _addToHistory = useCallback((type: string, description: string, data: any) => {
     setHistory(prev => {
-      const newHistory = prev.slice(0, historyIndex + 1);
+      const _newHistory = prev.slice(0, historyIndex + 1);
       newHistory.push({ type, description, timestamp: Date.now(), data });
       return newHistory.slice(-MAX_HISTORY);
     });
     setHistoryIndex(prev => Math.min(prev + 1, MAX_HISTORY - 1));
   }, [historyIndex]);
 
-  const undo = useCallback(() => {
+  const _undo = useCallback(() => {
     if (historyIndex > 0) {
       setHistoryIndex(prev => prev - 1);
-      const entry = history[historyIndex - 1];
+      const _entry = history[historyIndex - 1];
       // Apply undo logic based on entry.type
     }
   }, [historyIndex, history]);
 
-  const redo = useCallback(() => {
+  const _redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(prev => prev + 1);
-      const entry = history[historyIndex + 1];
+      const _entry = history[historyIndex + 1];
       // Apply redo logic
     }
   }, [historyIndex, history]);
@@ -342,23 +342,23 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // WAVEFORM PROCESSING (optimized with caching)
   // ========================================================================
 
-  const processWaveformData = useCallback(() => {
-    const data = getWaveformData();
+  const _processWaveformData = useCallback(() => {
+    const _data = getWaveformData();
     if (!data || data === waveformCacheRef.current.data) return;
 
     waveformCacheRef.current.data = data;
     const peaks: number[] = [];
-    let sumSquares = 0;
-    let maxPeak = 0;
+    let _sumSquares = 0;
+    let _maxPeak = 0;
 
     // Optimized peak calculation with downsampling
-    const samplesPerPeak = Math.max(1, Math.floor(data.length / 2000));
+    const _samplesPerPeak = Math.max(1, Math.floor(data.length / 2000));
     
-    for (let i = 0; i < data.length; i += samplesPerPeak) {
-      let localMax = 0;
-      for (let j = 0; j < samplesPerPeak && i + j < data.length; j++) {
-        const normalized = (data[i + j] - 128) / 128;
-        const abs = Math.abs(normalized);
+    for (let _i = 0; i < data.length; i += samplesPerPeak) {
+      let _localMax = 0;
+      for (let _j = 0; j < samplesPerPeak && i + j < data.length; j++) {
+        const _normalized = (data[i + j] - 128) / 128;
+        const _abs = Math.abs(normalized);
         localMax = Math.max(localMax, abs);
         sumSquares += normalized * normalized;
       }
@@ -366,8 +366,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
       maxPeak = Math.max(maxPeak, localMax);
     }
 
-    const rms = Math.sqrt(sumSquares / data.length);
-    const lufs = -23 + 10 * Math.log10(rms * rms);
+    const _rms = Math.sqrt(sumSquares / data.length);
+    const _lufs = -23 + 10 * Math.log10(rms * rms);
 
     waveformCacheRef.current.peaks = peaks;
     waveformCacheRef.current.rms = rms;
@@ -379,8 +379,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // HIGH-RESOLUTION RENDERING (optimized)
   // ========================================================================
 
-  const drawWaveform = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const now = performance.now();
+  const _drawWaveform = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const _now = performance.now();
     
     // Throttle rendering to 60fps
     if (now - lastRenderTimeRef.current < 16.67) return;
@@ -393,7 +393,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     ctx.clearRect(0, 0, width, height);
 
     // Background gradient
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+    const _bgGradient = ctx.createLinearGradient(0, 0, 0, height);
     bgGradient.addColorStop(0, 'rgba(15, 23, 42, 0.8)');
     bgGradient.addColorStop(1, 'rgba(15, 23, 42, 0.4)');
     ctx.fillStyle = bgGradient;
@@ -403,8 +403,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     if (showGrid) {
       ctx.strokeStyle = 'rgba(71, 85, 105, 0.2)';
       ctx.lineWidth = 0.5;
-      for (let i = 0; i <= GRID_LINES; i++) {
-        const y = (i / GRID_LINES) * height;
+      for (let _i = 0; i <= GRID_LINES; i++) {
+        const _y = (i / GRID_LINES) * height;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(width, y);
@@ -413,15 +413,15 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     }
 
     // Calculate visible range
-    const startIdx = Math.floor((scrollOffset / 100) * peaks.length);
-    const endIdx = Math.ceil(((scrollOffset + 100 / zoomLevel) / 100) * peaks.length);
-    const visiblePeaks = peaks.slice(startIdx, endIdx);
+    const _startIdx = Math.floor((scrollOffset / 100) * peaks.length);
+    const _endIdx = Math.ceil(((scrollOffset + 100 / zoomLevel) / 100) * peaks.length);
+    const _visiblePeaks = peaks.slice(startIdx, endIdx);
 
     // Optimized waveform rendering with adaptive detail
-    const samplesPerPixel = Math.max(1, Math.ceil(visiblePeaks.length / width));
+    const _samplesPerPixel = Math.max(1, Math.ceil(visiblePeaks.length / width));
     
     ctx.beginPath();
-    const waveGradient = ctx.createLinearGradient(0, height / 2, 0, 0);
+    const _waveGradient = ctx.createLinearGradient(0, height / 2, 0, 0);
     waveGradient.addColorStop(0, 'rgba(59, 130, 246, 0.6)');
     waveGradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.8)');
     waveGradient.addColorStop(1, 'rgba(96, 165, 250, 1)');
@@ -430,17 +430,17 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     ctx.lineWidth = 1;
 
     // Draw using path for better performance
-    for (let x = 0; x < width; x++) {
-      const idx = Math.floor((x / width) * visiblePeaks.length);
+    for (let _x = 0; x < width; x++) {
+      const _idx = Math.floor((x / width) * visiblePeaks.length);
       if (idx >= visiblePeaks.length) break;
 
-      let maxAmp = 0;
-      for (let s = 0; s < samplesPerPixel && idx * samplesPerPixel + s < visiblePeaks.length; s++) {
+      let _maxAmp = 0;
+      for (let _s = 0; s < samplesPerPixel && idx * samplesPerPixel + s < visiblePeaks.length; s++) {
         maxAmp = Math.max(maxAmp, visiblePeaks[idx * samplesPerPixel + s] || 0);
       }
 
-      const barHeight = maxAmp * height * 0.9;
-      const y = (height - barHeight) / 2;
+      const _barHeight = maxAmp * height * 0.9;
+      const _y = (height - barHeight) / 2;
 
       if (x === 0) {
         ctx.moveTo(x, height / 2);
@@ -449,17 +449,17 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     }
 
     // Mirror to create symmetric waveform
-    for (let x = width - 1; x >= 0; x--) {
-      const idx = Math.floor((x / width) * visiblePeaks.length);
+    for (let _x = width - 1; x >= 0; x--) {
+      const _idx = Math.floor((x / width) * visiblePeaks.length);
       if (idx >= visiblePeaks.length) continue;
 
-      let maxAmp = 0;
-      for (let s = 0; s < samplesPerPixel && idx * samplesPerPixel + s < visiblePeaks.length; s++) {
+      let _maxAmp = 0;
+      for (let _s = 0; s < samplesPerPixel && idx * samplesPerPixel + s < visiblePeaks.length; s++) {
         maxAmp = Math.max(maxAmp, visiblePeaks[idx * samplesPerPixel + s] || 0);
       }
 
-      const barHeight = maxAmp * height * 0.9;
-      const y = (height + barHeight) / 2;
+      const _barHeight = maxAmp * height * 0.9;
+      const _y = (height + barHeight) / 2;
       ctx.lineTo(x, y);
     }
 
@@ -469,8 +469,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
     // Selection overlay
     if (selection.active && selection.start !== selection.end) {
-      const selStart = ((selection.start - scrollOffset) / (100 / zoomLevel)) * width;
-      const selEnd = ((selection.end - scrollOffset) / (100 / zoomLevel)) * width;
+      const _selStart = ((selection.start - scrollOffset) / (100 / zoomLevel)) * width;
+      const _selEnd = ((selection.end - scrollOffset) / (100 / zoomLevel)) * width;
       
       ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
       ctx.fillRect(selStart, 0, selEnd - selStart, height);
@@ -481,7 +481,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     }
 
     // Playhead
-    const playheadPos = ((transport.position / ((transport as any).duration || 1)) * 100 - scrollOffset) / (100 / zoomLevel) * width;
+    const _playheadPos = ((transport.position / ((transport as any).duration || 1)) * 100 - scrollOffset) / (100 / zoomLevel) * width;
     if (playheadPos >= 0 && playheadPos <= width) {
       ctx.strokeStyle = transport.isPlaying ? 'rgba(16, 185, 129, 0.9)' : 'rgba(248, 113, 113, 0.7)';
       ctx.lineWidth = 2;
@@ -502,8 +502,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
     // Loop markers
     if (loopEnabled) {
-      const loopStartX = ((loopStart - scrollOffset) / (100 / zoomLevel)) * width;
-      const loopEndX = ((loopEnd - scrollOffset) / (100 / zoomLevel)) * width;
+      const _loopStartX = ((loopStart - scrollOffset) / (100 / zoomLevel)) * width;
+      const _loopEndX = ((loopEnd - scrollOffset) / (100 / zoomLevel)) * width;
 
       ctx.fillStyle = 'rgba(168, 85, 247, 0.1)';
       ctx.fillRect(loopStartX, 0, loopEndX - loopStartX, height);
@@ -522,7 +522,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
     // Markers
     markers.forEach(marker => {
-      const markerX = ((marker.position - scrollOffset) / (100 / zoomLevel)) * width;
+      const _markerX = ((marker.position - scrollOffset) / (100 / zoomLevel)) * width;
       if (markerX >= 0 && markerX <= width) {
         ctx.strokeStyle = marker.color;
         ctx.lineWidth = 2;
@@ -542,7 +542,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // MINIMAP RENDERING (optimized)
   // ========================================================================
 
-  const drawMiniMap = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const _drawMiniMap = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
     const { peaks } = waveformCacheRef.current;
     if (!peaks.length) return;
 
@@ -551,25 +551,25 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     ctx.fillRect(0, 0, width, height);
 
     // Downsampled waveform for minimap
-    const samplesPerPixel = Math.max(1, Math.ceil(peaks.length / width));
+    const _samplesPerPixel = Math.max(1, Math.ceil(peaks.length / width));
     
     ctx.fillStyle = 'rgba(71, 85, 105, 0.6)';
-    for (let x = 0; x < width; x++) {
-      const idx = Math.floor((x / width) * peaks.length);
-      let maxAmp = 0;
+    for (let _x = 0; x < width; x++) {
+      const _idx = Math.floor((x / width) * peaks.length);
+      let _maxAmp = 0;
       
-      for (let s = 0; s < samplesPerPixel && idx + s < peaks.length; s++) {
+      for (let _s = 0; s < samplesPerPixel && idx + s < peaks.length; s++) {
         maxAmp = Math.max(maxAmp, peaks[idx + s] || 0);
       }
 
-      const barHeight = maxAmp * height * 0.8;
-      const y = (height - barHeight) / 2;
+      const _barHeight = maxAmp * height * 0.8;
+      const _y = (height - barHeight) / 2;
       ctx.fillRect(x, y, 1, barHeight);
     }
 
     // Viewport indicator
-    const viewStart = (scrollOffset / 100) * width;
-    const viewWidth = (100 / zoomLevel / 100) * width;
+    const _viewStart = (scrollOffset / 100) * width;
+    const _viewWidth = (100 / zoomLevel / 100) * width;
     
     ctx.strokeStyle = 'rgba(59, 130, 246, 0.8)';
     ctx.lineWidth = 1;
@@ -582,7 +582,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // SPECTRUM ANALYZER (optimized)
   // ========================================================================
 
-  const drawSpectrum = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+  const _drawSpectrum = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
     const { spectrum } = waveformCacheRef.current;
     if (!spectrum.length) return;
 
@@ -590,8 +590,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
     ctx.fillRect(0, 0, width, height);
 
-    const barWidth = width / spectrum.length;
-    const gradient = ctx.createLinearGradient(0, height, 0, 0);
+    const _barWidth = width / spectrum.length;
+    const _gradient = ctx.createLinearGradient(0, height, 0, 0);
     gradient.addColorStop(0, 'rgba(16, 185, 129, 0.8)');
     gradient.addColorStop(0.5, 'rgba(59, 130, 246, 0.8)');
     gradient.addColorStop(1, 'rgba(168, 85, 247, 0.8)');
@@ -599,9 +599,9 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     ctx.fillStyle = gradient;
     
     spectrum.forEach((value, i) => {
-      const barHeight = value * height;
-      const x = i * barWidth;
-      const y = height - barHeight;
+      const _barHeight = value * height;
+      const _x = i * barWidth;
+      const _y = height - barHeight;
       ctx.fillRect(x, y, barWidth - 1, barHeight);
     });
   }, []);
@@ -613,40 +613,40 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   useEffect(() => {
     if (!isInitialized) return;
 
-    const animate = () => {
-      const now = performance.now();
-      const dt = (now - lastTimeRef.current) / 1000;
+    const _animate = () => {
+      const _now = performance.now();
+      const _dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
 
       processWaveformData();
 
       // Update meters
-      const cache = waveformCacheRef.current;
+      const _cache = waveformCacheRef.current;
       const { current, peak } = peakMeterRef.current.update(cache.rms, dt);
       setRmsLevel(current);
       setPeakLevel(peak);
       setLufsLevel(cache.lufs);
 
       // Render canvases
-      const canvas = canvasRef.current;
-      const miniMap = miniMapRef.current;
-      const spectrum = spectrumRef.current;
+      const _canvas = canvasRef.current;
+      const _miniMap = miniMapRef.current;
+      const _spectrum = spectrumRef.current;
 
       if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        const ctx = setupHighDPICanvas(canvas, rect.width, rect.height);
+        const _rect = canvas.getBoundingClientRect();
+        const _ctx = setupHighDPICanvas(canvas, rect.width, rect.height);
         drawWaveform(ctx, rect.width, rect.height);
       }
 
       if (miniMap && showMiniMap) {
-        const rect = miniMap.getBoundingClientRect();
-        const ctx = setupHighDPICanvas(miniMap, rect.width, rect.height);
+        const _rect = miniMap.getBoundingClientRect();
+        const _ctx = setupHighDPICanvas(miniMap, rect.width, rect.height);
         drawMiniMap(ctx, rect.width, rect.height);
       }
 
       if (spectrum && showSpectrum) {
-        const rect = spectrum.getBoundingClientRect();
-        const ctx = setupHighDPICanvas(spectrum, rect.width, rect.height);
+        const _rect = spectrum.getBoundingClientRect();
+        const _ctx = setupHighDPICanvas(spectrum, rect.width, rect.height);
         drawSpectrum(ctx, rect.width, rect.height);
       }
 
@@ -666,13 +666,13 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // MOUSE INTERACTION
   // ========================================================================
 
-  const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
+  const _handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const _canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / rect.width) * (100 / zoomLevel) + scrollOffset;
+    const _rect = canvas.getBoundingClientRect();
+    const _x = e.clientX - rect.left;
+    const _percentage = (x / rect.width) * (100 / zoomLevel) + scrollOffset;
 
     if (activeTool === 'select') {
       setSelection({ start: percentage, end: percentage, active: true });
@@ -682,23 +682,23 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
     }
   }, [zoomLevel, scrollOffset, activeTool, addToHistory]);
 
-  const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+  const _handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!selection.active) return;
 
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = (x / rect.width) * (100 / zoomLevel) + scrollOffset;
+    const _rect = canvas.getBoundingClientRect();
+    const _x = e.clientX - rect.left;
+    const _percentage = (x / rect.width) * (100 / zoomLevel) + scrollOffset;
 
     setSelection(prev => ({ ...prev, end: percentage }));
   }, [selection.active, zoomLevel, scrollOffset]);
 
-  const handleCanvasMouseUp = useCallback(() => {
+  const _handleCanvasMouseUp = useCallback(() => {
     if (selection.active) {
-      const start = Math.min(selection.start, selection.end);
-      const end = Math.max(selection.start, selection.end);
+      const _start = Math.min(selection.start, selection.end);
+      const _end = Math.max(selection.start, selection.end);
       setSelection({ start, end, active: false });
     }
   }, [selection]);
@@ -708,7 +708,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // ========================================================================
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const _handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
 
       switch (e.key.toLowerCase()) {
@@ -726,7 +726,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
           break;
         case 'm':
           e.preventDefault();
-          const pos = (transport.position / ((transport as any).duration || 1)) * 100;
+          const _pos = (transport.position / ((transport as any).duration || 1)) * 100;
           setMarkers(prev => [...prev, {
             id: `marker-${Date.now()}`,
             position: pos,
@@ -759,11 +759,11 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // ZOOM CONTROLS
   // ========================================================================
 
-  const handleZoomIn = useCallback(() => {
+  const _handleZoomIn = useCallback(() => {
     setZoomLevel(prev => Math.min(prev * 1.5, MAX_ZOOM));
   }, []);
 
-  const handleZoomOut = useCallback(() => {
+  const _handleZoomOut = useCallback(() => {
     setZoomLevel(prev => Math.max(prev / 1.5, MIN_ZOOM));
   }, []);
 
@@ -771,13 +771,13 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // LEVEL METER COMPONENT
   // ========================================================================
 
-  const LevelMeter = ({ value, peak, width, height }: { value: number; peak: number; width: number; height: number }) => {
-    const segments = Array.from({ length: METER_SEGMENTS }, (_, i) => {
-      const segmentValue = 1 - i / METER_SEGMENTS;
-      const isActive = value >= segmentValue;
-      const isPeak = Math.abs(peak - segmentValue) < 0.03;
+  const _LevelMeter = ({ value, peak, width, height }: { value: number; peak: number; width: number; height: number }) => {
+    const _segments = Array.from({ length: METER_SEGMENTS }, (_, i) => {
+      const _segmentValue = 1 - i / METER_SEGMENTS;
+      const _isActive = value >= segmentValue;
+      const _isPeak = Math.abs(peak - segmentValue) < 0.03;
 
-      let color = 'bg-[#a3e635]';
+      let _color = 'bg-[#a3e635]';
       if (segmentValue > 0.8) color = 'bg-red-500';
       else if (segmentValue > 0.6) color = 'bg-[#ffaa00]';
 

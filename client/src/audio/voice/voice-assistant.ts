@@ -1,9 +1,9 @@
 export function startVoiceAssistant() {
-  const recognition = new webkitSpeechRecognition();
+  const _recognition = new webkitSpeechRecognition();
   recognition.continuous = true;
 
   recognition.onresult = async (event: any) => {
-    const transcript =
+    const _transcript =
       event.results[event.results.length - 1][0].transcript;
 
     await fetch("/agent/voice-command", {

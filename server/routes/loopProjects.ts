@@ -3,7 +3,8 @@
  * File-based project sessions — complements (does NOT replace) the DB-backed /api/projects.
  * POST /api/loopproject/save  GET /api/loopproject/:id  GET /api/loopprojects  DELETE /api/loopproject/:id
  */
-import { Router, Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { safeResolve, writeJSON, readJSON, deleteFile, listFiles } from '../utils/fileUtils';

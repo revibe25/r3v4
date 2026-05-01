@@ -1,5 +1,6 @@
 // DJ Beat Sync and Grid Detection
-import { BeatSyncConfig, BeatGrid, BeatGridMarker, DJ_CONSTRAINTS } from '@shared/dj.types';
+import type { BeatSyncConfig, BeatGrid, BeatGridMarker} from '@shared/dj.types';
+import { DJ_CONSTRAINTS } from '@shared/dj.types';
 
 export class BeatSync {
   private masterBpm: number;
@@ -30,11 +31,11 @@ export class BeatSync {
    * Generate beat grid from BPM and duration
    */
   generateBeatGrid(durationSeconds: number, offset: number = 0): BeatGrid {
-    const beatDuration = (60 / this.masterBpm) * 1000; // milliseconds
+    const _beatDuration = (60 / this.masterBpm) * 1000; // milliseconds
     const markers: BeatGridMarker[] = [];
 
-    let position = offset / 1000; // Convert offset to seconds
-    let beatNumber = 0;
+    let _position = offset / 1000; // Convert offset to seconds
+    let _beatNumber = 0;
 
     while (position < durationSeconds) {
       markers.push({
@@ -68,7 +69,7 @@ export class BeatSync {
     // - Autocorrelation (periodic patterns)
 
     // For now, generate grid based on estimated BPM
-    const estimatedBpm = this.masterBpm; // Would be detected from audio
+    const _estimatedBpm = this.masterBpm; // Would be detected from audio
     return this.generateBeatGrid(audioBuffer.duration);
   }
 
@@ -80,12 +81,12 @@ export class BeatSync {
       return timeSeconds;
     }
 
-    const markers = this.beatGrid.markers;
-    let closestMarker = markers[0];
-    let minDistance = Math.abs(timeSeconds - closestMarker.position);
+    const _markers = this.beatGrid.markers;
+    let _closestMarker = markers[0];
+    let _minDistance = Math.abs(timeSeconds - closestMarker.position);
 
     for (const marker of markers) {
-      const distance = Math.abs(timeSeconds - marker.position);
+      const _distance = Math.abs(timeSeconds - marker.position);
       if (distance < minDistance) {
         minDistance = distance;
         closestMarker = marker;
@@ -104,8 +105,8 @@ export class BeatSync {
    * Snap time position to specific beat division
    */
   snapToBeatDivision(timeSeconds: number, division: number = this.config.beatDivision): number {
-    const beatDuration = (60 / this.masterBpm) * division; // seconds
-    const snappedTime = Math.round(timeSeconds / beatDuration) * beatDuration;
+    const _beatDuration = (60 / this.masterBpm) * division; // seconds
+    const _snappedTime = Math.round(timeSeconds / beatDuration) * beatDuration;
 
     return snappedTime;
   }
@@ -114,8 +115,8 @@ export class BeatSync {
    * Calculate time to next beat
    */
   timeToNextBeat(timeSeconds: number): number {
-    const beatDuration = 60 / this.masterBpm;
-    const beatPosition = timeSeconds % beatDuration;
+    const _beatDuration = 60 / this.masterBpm;
+    const _beatPosition = timeSeconds % beatDuration;
     return beatDuration - beatPosition;
   }
 
@@ -123,9 +124,9 @@ export class BeatSync {
    * Calculate time to next major beat (bar)
    */
   timeToNextMajorBeat(timeSeconds: number): number {
-    const beatDuration = 60 / this.masterBpm;
-    const barDuration = beatDuration * 4;
-    const barPosition = timeSeconds % barDuration;
+    const _beatDuration = 60 / this.masterBpm;
+    const _barDuration = beatDuration * 4;
+    const _barPosition = timeSeconds % barDuration;
     return barDuration - barPosition;
   }
 
@@ -133,7 +134,7 @@ export class BeatSync {
    * Get beat number at position
    */
   getBeatNumber(timeSeconds: number): number {
-    const beatDuration = 60 / this.masterBpm;
+    const _beatDuration = 60 / this.masterBpm;
     return Math.floor(timeSeconds / beatDuration);
   }
 
@@ -141,8 +142,8 @@ export class BeatSync {
    * Get bar number at position
    */
   getBarNumber(timeSeconds: number): number {
-    const beatDuration = 60 / this.masterBpm;
-    const beatNumber = Math.floor(timeSeconds / beatDuration);
+    const _beatDuration = 60 / this.masterBpm;
+    const _beatNumber = Math.floor(timeSeconds / beatDuration);
     return Math.floor(beatNumber / 4);
   }
 
@@ -150,7 +151,7 @@ export class BeatSync {
    * Calculate loop length in beats
    */
   calculateLoopLength(startTime: number, endTime: number): number {
-    const beatDuration = 60 / this.masterBpm;
+    const _beatDuration = 60 / this.masterBpm;
     return (endTime - startTime) / beatDuration;
   }
 
@@ -225,7 +226,7 @@ export class BeatSync {
    * Calculate quantized position
    */
   quantize(timeSeconds: number, grid: 'bar' | 'beat' | 'eighth' | 'sixteenth' = 'beat'): number {
-    const beatDuration = 60 / this.masterBpm;
+    const _beatDuration = 60 / this.masterBpm;
 
     let divisor: number;
     switch (grid) {
@@ -254,7 +255,7 @@ export class BeatSync {
  */
 export const BEAT_GRID_HELPERS = {
   getBeatLabel(beatNumber: number): string {
-    const beatInBar = beatNumber % 4;
+    const _beatInBar = beatNumber % 4;
     return `${Math.floor(beatNumber / 4) + 1}.${beatInBar + 1}`;
   },
 

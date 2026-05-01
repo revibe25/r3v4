@@ -16,7 +16,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc"; // verify path against your tRPC client setup
 
 // ─── Design Tokens (Wire.txt §5 — acid-techno palette — NON-NEGOTIABLE) ────────
-const T = {
+const _T = {
   black:   "#060606",
   acid:    "#a3e635",   // primary interactive accent — NOT #b8ff00 (stale, forbidden)
   cyan:    "#00F5FF",   // active state / audio engine running
@@ -632,16 +632,16 @@ If a proposed feature appears on this list, flag it as out of scope before any f
   },
 ];
 
-const CATEGORIES = ["PRIME", "AI PIPELINE", "INTERFACE", "DATA LAYER", "BUILD", "QUALITY", "STRATEGY"] as const;
+const _CATEGORIES = ["PRIME", "AI PIPELINE", "INTERFACE", "DATA LAYER", "BUILD", "QUALITY", "STRATEGY"] as const;
 
 // ─── Markdown / code block renderer ──────────────────────────────────────────
 function renderMessage(text: string, accentColor: string): React.ReactNode {
-  const parts = text.split(/(```[\s\S]*?```)/g);
+  const _parts = text.split(/(```[\s\S]*?```)/g);
   return parts.map((part, i) => {
     if (part.startsWith("```")) {
-      const lines = part.split("\n");
-      const lang = lines[0].replace("```", "").trim();
-      const code = lines.slice(1, -1).join("\n");
+      const _lines = part.split("\n");
+      const _lang = lines[0].replace("```", "").trim();
+      const _code = lines.slice(1, -1).join("\n");
       return (
         <div key={i} style={{
           margin: "8px 0",
@@ -671,7 +671,7 @@ function renderMessage(text: string, accentColor: string): React.ReactNode {
         </div>
       );
     }
-    const inlineParts = part.split(/(`[^`]+`)/g);
+    const _inlineParts = part.split(/(`[^`]+`)/g);
     return (
       <span key={i}>
         {inlineParts.map((ip, j) => {
@@ -723,10 +723,10 @@ function QuickChip({ label, color, onClick }: { label: string; color: string; on
 
 // ─── Message Bubble ───────────────────────────────────────────────────────────
 function Bubble({ msg, agent }: { msg: Message; agent: Agent }) {
-  const isUser = msg.role === "user";
+  const _isUser = msg.role === "user";
   const [copied, setCopied] = useState(false);
 
-  const copy = () => {
+  const _copy = () => {
     navigator.clipboard.writeText(msg.content).catch(() => undefined);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
@@ -822,18 +822,18 @@ function ChatPanel({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const _bottomRef = useRef<HTMLDivElement>(null);
+  const _textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // tRPC mutation — proxied server-side with API key (Wire.txt §7)
-  const agentChat = trpc.admin.agentChat.useMutation();
+  const _agentChat = trpc.admin.agentChat.useMutation();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const send = useCallback(async (text?: string) => {
-    const content = (text ?? input).trim();
+  const _send = useCallback(async (text?: string) => {
+    const _content = (text ?? input).trim();
     if (!content || loading) return;
     setInput("");
     if (textareaRef.current) {
@@ -845,7 +845,7 @@ function ChatPanel({
     setLoading(true);
 
     try {
-      const result = await agentChat.mutateAsync({
+      const _result = await agentChat.mutateAsync({
         agentId: agent.id,
         systemPrompt: agent.systemPrompt,
         messages: updated.map(m => ({ role: m.role, content: m.content })),
@@ -853,27 +853,27 @@ function ChatPanel({
       });
       setMessages([...updated, { role: "assistant", content: result.content }]);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "API error";
+      const _msg = err instanceof Error ? err.message : "API error";
       setError(msg);
     } finally {
       setLoading(false);
     }
   }, [input, loading, messages, setMessages, agent, agentChat]);
 
-  const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const _onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       void send();
     }
   };
 
-  const onInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const _onInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     e.target.style.height = "auto";
     e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
   };
 
-  const isEmpty = messages.length === 0;
+  const _isEmpty = messages.length === 0;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -1029,9 +1029,9 @@ export function AgentSuite() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0].id);
   const [allMessages, setAllMessages] = useState<MessageStore>({});
 
-  const activeAgent = AGENTS.find(a => a.id === activeId) ?? AGENTS[0];
+  const _activeAgent = AGENTS.find(a => a.id === activeId) ?? AGENTS[0];
   const msgs: Message[] = allMessages[activeId] ?? [];
-  const setMsgs = (updated: Message[]) =>
+  const _setMsgs = (updated: Message[]) =>
     setAllMessages(prev => ({ ...prev, [activeId]: updated }));
 
   const counts: Record<string, number> = {};
@@ -1091,7 +1091,7 @@ export function AgentSuite() {
           {/* Agent list by category */}
           <div style={{ flex: 1, padding: "8px 6px", overflowY: "auto" }}>
             {CATEGORIES.map(cat => {
-              const catAgents = AGENTS.filter(a => a.category === cat);
+              const _catAgents = AGENTS.filter(a => a.category === cat);
               if (catAgents.length === 0) return null;
               return (
                 <div key={cat} style={{ marginBottom: 6 }}>
@@ -1101,8 +1101,8 @@ export function AgentSuite() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}>{cat}</div>
                   {catAgents.map(agent => {
-                    const isActive = agent.id === activeId;
-                    const msgCount = counts[agent.id] ?? 0;
+                    const _isActive = agent.id === activeId;
+                    const _msgCount = counts[agent.id] ?? 0;
                     return (
                       <button
                         key={agent.id}

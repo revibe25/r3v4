@@ -7,22 +7,22 @@ export function useSessionMetricsSync() {
   const { setMetrics } = useSessionMetricsStore()
   useEffect(() => {
     if (!sessionId || !isActive) return
-    let cancelled = false
-    const tick = async () => {
+    let _cancelled = false
+    const _tick = async () => {
       try {
-        const res = await fetch('/api/trpc/sessionMetrics.getBySessionId', {
+        const _res = await fetch('/api/trpc/sessionMetrics.getBySessionId', {
           method: 'POST',
           credentials: 'include',
           body: JSON.stringify({ sessionId }),
         })
-        const json = await res.json()
+        const _json = await res.json()
         if (!cancelled) {
           setMetrics(json.result.data)
         }
       } catch {}
     }
     tick()
-    const interval = setInterval(tick, 2000)
+    const _interval = setInterval(tick, 2000)
     return () => {
       cancelled = true
       clearInterval(interval)

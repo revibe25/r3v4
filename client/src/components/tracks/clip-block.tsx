@@ -28,19 +28,19 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   onStartResize,
   onClick
 }) => {
-  const width = clip.duration * pixelsPerSecond;
-  const left = clip.startTime * pixelsPerSecond;
+  const _width = clip.duration * pixelsPerSecond;
+  const _left = clip.startTime * pixelsPerSecond;
   
-  const defaultColor = clip.type === 'midi' ? '#6366f1' : '#8b5cf6';
-  const selectedColor = clip.type === 'midi' ? '#3b82f6' : '#a78bfa';
+  const _defaultColor = clip.type === 'midi' ? '#6366f1' : '#8b5cf6';
+  const _selectedColor = clip.type === 'midi' ? '#3b82f6' : '#a78bfa';
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const _handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onClick) onClick(clip.id);
     onStartDrag(clip.id, e.clientX);
   };
 
-  const handleResizeMouseDown = (e: React.MouseEvent) => {
+  const _handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onStartResize) {
       onStartResize(clip.id, e.clientX);

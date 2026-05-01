@@ -21,7 +21,7 @@ interface SessionMetricsState {
   reset: () => void;
 }
 
-export const useSessionMetricsStore = create<SessionMetricsState>((set) => ({
+export const _useSessionMetricsStore = create<SessionMetricsState>((set) => ({
   sessionId: null,
   isActive: false,
   summary: null,

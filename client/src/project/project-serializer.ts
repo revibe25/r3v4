@@ -15,12 +15,12 @@
 // is in beats. Writing beats here for now — a real value beats always-zero.
 // Resolve when position model is unified. Tracked: TODO-position-unit.
 
-import { ProjectData } from "../../../shared/types/project.types";
+import type { ProjectData } from "../../../shared/types/project.types";
 import { useMixerStore } from "../store/mixer-store";
 import { useDAWStore }   from "../hooks/useDAWStore";
 
 export function serializeProject(): ProjectData {
-  const mixer = useMixerStore.getState();
+  const _mixer = useMixerStore.getState();
   const daw   = useDAWStore.getState();
 
   return {

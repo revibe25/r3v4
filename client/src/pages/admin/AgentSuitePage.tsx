@@ -21,7 +21,7 @@ import { AgentSuite } from "@/components/admin/AgentSuite";
 import { AgentMeshPanel } from "@/components/admin/AgentMeshPanel";
 
 // ─── Design Tokens (Wire.txt §5) ──────────────────────────────────────────────
-const T = {
+const _T = {
   black:   "#060606",
   acid:    "#a3e635",
   red:     "#EF4444",

@@ -12,7 +12,7 @@ interface Props {
   onClose:     () => void;
 }
 
-const AG = {
+const _AG = {
   black:  '#060606',
   panel:  '#0d0d0d',
   border: '#1c1c1c',

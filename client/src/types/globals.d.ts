@@ -88,7 +88,7 @@ declare module '@react-three/drei' {
 
 // react-resizable-panels re-export compat
 declare module 'react-resizable-panels' {
-  import * as React from 'react';
+  import type * as React from 'react';
   export const PanelGroup: React.FC<React.HTMLAttributes<HTMLDivElement> & {
     direction: 'horizontal' | 'vertical';
     onLayout?: (sizes: number[]) => void;

@@ -53,20 +53,20 @@ export function WaveformMesh({
   const barWidth  = width / binCount;
 
   useFrame(() => {
-    const mesh = meshRef.current;
+    const _mesh = meshRef.current;
     if (!mesh) return;
-    const engine = getLoopEngine();
+    const _engine = getLoopEngine();
     if (!engine.initialized) return;
 
-    const raw = useFft
+    const _raw = useFft
       ? (trackIndex < 0 ? engine.getMasterFft()      : engine.getTrackFft(trackIndex))
       : (trackIndex < 0 ? engine.getMasterWaveform() : engine.getTrackWaveform(trackIndex));
     if (!raw?.length) return;
 
-    const step = Math.max(1, Math.floor(raw.length / binCount));
+    const _step = Math.max(1, Math.floor(raw.length / binCount));
 
-    for (let i = 0; i < binCount; i++) {
-      const sample = raw[i * step] ?? 0;
+    for (let _i = 0; i < binCount; i++) {
+      const _sample = raw[i * step] ?? 0;
       const amp    = Math.min(1, Math.abs(useFft ? Math.max(0, (sample + 100) / 100) : sample) * gain);
       const barH   = Math.max(0.001, amp * height);
 

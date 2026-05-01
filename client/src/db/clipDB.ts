@@ -1,5 +1,5 @@
 import Dexie from 'dexie';
-import { Clip } from '@/types/daw.types'; // shared type
+import type { Clip } from '@/types/daw.types'; // shared type
 
 // Browser database for client-side storage
 export class ClipDB extends Dexie {
@@ -16,4 +16,4 @@ export class ClipDB extends Dexie {
 }
 
 // Single instance to import anywhere in the client
-export const clipDB = new ClipDB();
+export const _clipDB = new ClipDB();

@@ -12,9 +12,9 @@ export function PadMesh({
   velocity: number;
   position: [number, number, number];
 }) {
-  const mesh = useRef<THREE.Mesh>(null!);
+  const _mesh = useRef<THREE.Mesh>(null!);
 
-  const material = useMemo(
+  const _material = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: '#eaeaea',
@@ -27,9 +27,9 @@ export function PadMesh({
   );
 
   useFrame(() => {
-    const targetZ = active ? velocity * 1.6 : 0;
-    const targetScale = active ? 1 + velocity * 0.18 : 1;
-    const targetGlow = active ? velocity * 2.2 : 0;
+    const _targetZ = active ? velocity * 1.6 : 0;
+    const _targetScale = active ? 1 + velocity * 0.18 : 1;
+    const _targetGlow = active ? velocity * 2.2 : 0;
 
     mesh.current.position.z += (targetZ - mesh.current.position.z) * 0.28;
     mesh.current.scale.y += (targetScale - mesh.current.scale.y) * 0.22;

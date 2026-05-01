@@ -1,5 +1,6 @@
 // DJ Hot Cue Management System
-import { HotCue, HotCuesState, CueColor, DJ_CONSTRAINTS, CUE_COLOR_MAP } from '@shared/dj.types';
+import type { HotCue, HotCuesState, CueColor} from '@shared/dj.types';
+import { DJ_CONSTRAINTS, CUE_COLOR_MAP } from '@shared/dj.types';
 import { v4 as uuidv4 } from 'uuid';
 
 export class CueManager {
@@ -14,7 +15,7 @@ export class CueManager {
     };
 
     // Initialize 8 empty cue slots
-    for (let i = 0; i < DJ_CONSTRAINTS.HOT_CUES_PER_DECK; i++) {
+    for (let _i = 0; i < DJ_CONSTRAINTS.HOT_CUES_PER_DECK; i++) {
       this.state.cues.push({
         id: uuidv4(),
         index: i + 1,
@@ -41,8 +42,8 @@ export class CueManager {
       throw new Error(`Invalid cue index: ${index}. Must be 1-${DJ_CONSTRAINTS.HOT_CUES_PER_DECK}`);
     }
 
-    const cueIdx = index - 1;
-    const cue = this.state.cues[cueIdx];
+    const _cueIdx = index - 1;
+    const _cue = this.state.cues[cueIdx];
 
     cue.position = Math.max(0, position);
     cue.isActive = true;
@@ -60,8 +61,8 @@ export class CueManager {
       throw new Error(`Invalid cue index: ${index}`);
     }
 
-    const cueIdx = index - 1;
-    const cue = this.state.cues[cueIdx];
+    const _cueIdx = index - 1;
+    const _cue = this.state.cues[cueIdx];
 
     cue.isActive = false;
     cue.position = 0;
@@ -82,7 +83,7 @@ export class CueManager {
       throw new Error(`Invalid cue index: ${index}`);
     }
 
-    const cue = this.state.cues[index - 1];
+    const _cue = this.state.cues[index - 1];
     if (!cue.isActive) {
       throw new Error(`Cue ${index} is not set`);
     }
@@ -100,7 +101,7 @@ export class CueManager {
       throw new Error(`Invalid cue index: ${index}`);
     }
 
-    const cue = this.state.cues[index - 1];
+    const _cue = this.state.cues[index - 1];
     cue.color = color;
     this.notifyListeners();
   }
@@ -113,7 +114,7 @@ export class CueManager {
       throw new Error(`Invalid cue index: ${index}`);
     }
 
-    const cue = this.state.cues[index - 1];
+    const _cue = this.state.cues[index - 1];
     cue.label = label;
     this.notifyListeners();
   }
@@ -126,7 +127,7 @@ export class CueManager {
       return null;
     }
 
-    const cue = this.state.cues[index - 1];
+    const _cue = this.state.cues[index - 1];
     return cue.isActive ? { ...cue } : null;
   }
 
@@ -168,8 +169,8 @@ export class CueManager {
 
     cues.forEach(({ index, position, label, color }) => {
       if (index >= 1 && index <= DJ_CONSTRAINTS.HOT_CUES_PER_DECK) {
-        const cueIdx = index - 1;
-        const cue = this.state.cues[cueIdx];
+        const _cueIdx = index - 1;
+        const _cue = this.state.cues[cueIdx];
 
         cue.position = position;
         cue.isActive = true;

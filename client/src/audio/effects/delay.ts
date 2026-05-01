@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import { DelayParams } from '@shared/effects.types';
+import type { DelayParams } from '@shared/effects.types';
 
 export class DelayEffect {
   private delay: Tone.FeedbackDelay;

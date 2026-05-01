@@ -33,9 +33,9 @@ import { useState } from 'react';
 
 export function CreateProject() {
   const [name, setName] = useState('');
-  const utils = trpc.useUtils();
+  const _utils = trpc.useUtils();
 
-  const create = trpc.projects.create.useMutation({
+  const _create = trpc.projects.create.useMutation({
     onSuccess: () => {
       setName('');
       // Invalidate the list so ProjectsList auto-refreshes
@@ -79,9 +79,9 @@ interface PresetSelectorProps {
 
 export function PresetSelector({ type, onSelect }: PresetSelectorProps) {
   const { data: presets, isLoading } = trpc.presets.list.useQuery({ type });
-  const utils = trpc.useUtils();
+  const _utils = trpc.useUtils();
 
-  const deletePreset = trpc.presets.delete.useMutation({
+  const _deletePreset = trpc.presets.delete.useMutation({
     onSuccess: () => utils.presets.list.invalidate(),
   });
 

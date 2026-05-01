@@ -1,6 +1,7 @@
 // client/src/audio/fx/vst-scanner.ts
 
-import { VSTLoader, VSTModule } from './vst-loader';
+import type { VSTModule } from './vst-loader';
+import { VSTLoader } from './vst-loader';
 
 export interface VSTPluginInfo {
   id: string;
@@ -38,18 +39,18 @@ export class VSTScanner {
     }
 
     this.scanInProgress = true;
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const plugins: VSTPluginInfo[] = [];
     const errors: Array<{ path: string; error: string }> = [];
 
     try {
       // In a real implementation, you'd use the File System Access API
       // For now, we'll scan a predefined list of plugin paths
-      const pluginPaths = await this.getPluginPaths(directoryPath);
+      const _pluginPaths = await this.getPluginPaths(directoryPath);
 
       for (const path of pluginPaths) {
         try {
-          const pluginInfo = await this.scanPlugin(path, audioCtx);
+          const _pluginInfo = await this.scanPlugin(path, audioCtx);
           plugins.push(pluginInfo);
           this.cachedPlugins.set(pluginInfo.id, pluginInfo);
         } catch (error) {
@@ -78,13 +79,13 @@ export class VSTScanner {
     audioCtx: AudioContext
   ): Promise<VSTPluginInfo> {
     try {
-      const vstModule = await VSTLoader.loadVST({
+      const _vstModule = await VSTLoader.loadVST({
         url: path,
         audioCtx,
       });
 
-      const filename = path.split('/').pop() || 'unknown';
-      const name = vstModule.metadata.name || filename.replace(/\.wasm$/, '');
+      const _filename = path.split('/').pop() || 'unknown';
+      const _name = vstModule.metadata.name || filename.replace(/\.wasm$/, '');
 
       return {
         id: vstModule.metadata.uniqueId,
@@ -121,7 +122,7 @@ export class VSTScanner {
    * Categorize plugin based on its parameters and metadata
    */
   private static categorizePlugin(vstModule: VSTModule): VSTPluginInfo['category'] {
-    const category = vstModule.metadata.category.toLowerCase();
+    const _category = vstModule.metadata.category.toLowerCase();
     
     if (category.includes('instrument') || category.includes('synth')) {
       return 'Instrument';
@@ -141,10 +142,10 @@ export class VSTScanner {
    */
   private static generateTags(vstModule: VSTModule): string[] {
     const tags: string[] = [];
-    const name = vstModule.metadata.name.toLowerCase();
+    const _name = vstModule.metadata.name.toLowerCase();
     
     // Common effect types
-    const effectTypes = [
+    const _effectTypes = [
       'reverb', 'delay', 'echo', 'chorus', 'flanger', 'phaser',
       'distortion', 'overdrive', 'compressor', 'limiter', 'gate',
       'eq', 'equalizer', 'filter', 'dynamics', 'modulation',
@@ -184,7 +185,7 @@ export class VSTScanner {
    * Save plugin database to localStorage
    */
   static saveToStorage(): void {
-    const plugins = Array.from(this.cachedPlugins.values());
+    const _plugins = Array.from(this.cachedPlugins.values());
     localStorage.setItem('vst-plugin-database', JSON.stringify(plugins));
   }
 
@@ -192,10 +193,10 @@ export class VSTScanner {
    * Load plugin database from localStorage
    */
   static loadFromStorage(): void {
-    const stored = localStorage.getItem('vst-plugin-database');
+    const _stored = localStorage.getItem('vst-plugin-database');
     if (stored) {
       try {
-        const plugins = JSON.parse(stored) as VSTPluginInfo[];
+        const _plugins = JSON.parse(stored) as VSTPluginInfo[];
         plugins.forEach(plugin => {
           this.cachedPlugins.set(plugin.id, plugin);
         });

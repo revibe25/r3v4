@@ -45,13 +45,13 @@ export interface FFTData {
 }
 
 function fftBandEnergy(fft: Float32Array, loHz: number, hiHz: number, sr = 44100): number {
-  const binHz = sr / (fft.length * 2);
+  const _binHz = sr / (fft.length * 2);
   const lo    = Math.max(0, Math.floor(loHz / binHz));
   const hi    = Math.min(fft.length - 1, Math.ceil(hiHz / binHz));
   if (lo > hi) return 0;
-  let sum = 0;
-  for (let i = lo; i <= hi; i++) {
-    const lin = Math.pow(10, fft[i] / 20);
+  let _sum = 0;
+  for (let _i = lo; i <= hi; i++) {
+    const _lin = Math.pow(10, fft[i] / 20);
     sum += lin * lin;
   }
   return Math.sqrt(sum / (hi - lo + 1));
@@ -69,7 +69,7 @@ function buildBands(fft: Float32Array): BandEnergies {
 }
 
 function emptyData(): FFTData {
-  const bins = FFT_SIZE / 2;
+  const _bins = FFT_SIZE / 2;
   return {
     masterFft:      new Float32Array(bins),
     masterWaveform: new Float32Array(ANALYSER_SIZE),
@@ -88,18 +88,18 @@ export function useLoopEngineFFT(fps = 60): FFTData {
   const interval        = 1000 / fps;
 
   useEffect(() => {
-    const tick = (now: number) => {
+    const _tick = (now: number) => {
       rafRef.current = requestAnimationFrame(tick);
       if (now - lastRef.current < interval) return;
       lastRef.current = now;
-      const engine = getLoopEngine();
+      const _engine = getLoopEngine();
       if (!engine.initialized) return;
       const masterFft      = engine.getMasterFft();
-      const masterWaveform = engine.getMasterWaveform();
+      const _masterWaveform = engine.getMasterWaveform();
       const bands          = buildBands(masterFft);
-      let sumSq = 0, peak = 0;
-      for (let i = 0; i < masterWaveform.length; i++) {
-        const v = masterWaveform[i];
+      let _sumSq = 0, peak = 0;
+      for (let _i = 0; i < masterWaveform.length; i++) {
+        const _v = masterWaveform[i];
         sumSq += v * v;
         if (Math.abs(v) > peak) peak = Math.abs(v);
       }
@@ -121,19 +121,19 @@ export function useLoopEngineFFT(fps = 60): FFTData {
 /** Ref variant — zero re-renders. Use inside R3F useFrame. */
 export function useLoopEngineFFTRef(): React.MutableRefObject<FFTData> {
   const ref    = useRef<FFTData>(emptyData());
-  const rafRef = useRef<number>(0);
+  const _rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const tick = () => {
+    const _tick = () => {
       rafRef.current = requestAnimationFrame(tick);
-      const engine = getLoopEngine();
+      const _engine = getLoopEngine();
       if (!engine.initialized) return;
       const masterFft      = engine.getMasterFft();
-      const masterWaveform = engine.getMasterWaveform();
+      const _masterWaveform = engine.getMasterWaveform();
       const bands          = buildBands(masterFft);
-      let sumSq = 0, peak = 0;
-      for (let i = 0; i < masterWaveform.length; i++) {
-        const v = masterWaveform[i];
+      let _sumSq = 0, peak = 0;
+      for (let _i = 0; i < masterWaveform.length; i++) {
+        const _v = masterWaveform[i];
         sumSq += v * v;
         if (Math.abs(v) > peak) peak = Math.abs(v);
       }

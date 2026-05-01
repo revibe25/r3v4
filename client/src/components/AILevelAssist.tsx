@@ -22,14 +22,14 @@ import type { PipelineNodeState } from '../../../packages/llpte-core/src/AutoLev
 function gainToAngle(linearGain: number): number {
   // Knob range: 0 to 2.0 linear (0 to +6dB)
   // Mapped to −135° (silence) to +135° (unity/boost)
-  const normalized = Math.min(1, linearGain / 2);
+  const _normalized = Math.min(1, linearGain / 2);
   return -135 + normalized * 270;
 }
 
 /** Format gain in dB for display */
 function gainTodB(linearGain: number): string {
   if (linearGain <= 0) return '-∞';
-  const db = 20 * Math.log10(linearGain);
+  const _db = 20 * Math.log10(linearGain);
   return (db >= 0 ? '+' : '') + db.toFixed(1) + ' dB';
 }
 
@@ -50,7 +50,7 @@ interface GhostKnobProps {
   size?: number;
 }
 
-export const GhostKnob = memo(function GhostKnob({
+export const _GhostKnob = memo(function GhostKnob({
   currentGain,
   suggestedGain,
   confidence,
@@ -58,30 +58,30 @@ export const GhostKnob = memo(function GhostKnob({
   userOverride,
   size = 48,
 }: GhostKnobProps) {
-  const currentAngle = gainToAngle(currentGain);
-  const suggestedAngle = suggestedGain !== null ? gainToAngle(suggestedGain) : null;
+  const _currentAngle = gainToAngle(currentGain);
+  const _suggestedAngle = suggestedGain !== null ? gainToAngle(suggestedGain) : null;
 
-  const center = size / 2;
-  const radius = (size / 2) - 4;
-  const indicatorLength = radius * 0.55;
+  const _center = size / 2;
+  const _radius = (size / 2) - 4;
+  const _indicatorLength = radius * 0.55;
 
   // Indicator line for current position
-  const currentRad = ((currentAngle - 90) * Math.PI) / 180;
-  const currentX = center + Math.sin(currentRad) * indicatorLength;
-  const currentY = center - Math.cos(currentRad) * indicatorLength;
+  const _currentRad = ((currentAngle - 90) * Math.PI) / 180;
+  const _currentX = center + Math.sin(currentRad) * indicatorLength;
+  const _currentY = center - Math.cos(currentRad) * indicatorLength;
 
   // Ghost indicator for AI suggestion
-  let ghostX = 0, ghostY = 0;
+  let _ghostX = 0, ghostY = 0;
   if (suggestedAngle !== null) {
-    const ghostRad = ((suggestedAngle - 90) * Math.PI) / 180;
+    const _ghostRad = ((suggestedAngle - 90) * Math.PI) / 180;
     ghostX = center + Math.sin(ghostRad) * indicatorLength;
     ghostY = center - Math.cos(ghostRad) * indicatorLength;
   }
 
   // Color theme
-  const knobColor = isClipping ? '#ef4444' : userOverride ? '#f59e0b' : '#1e1e2e';
-  const ghostOpacity = confidence !== null ? 0.3 + confidence * 0.5 : 0;
-  const ghostColor = confidence !== null && confidence > 0.8 ? '#a855f7' : '#818cf8';
+  const _knobColor = isClipping ? '#ef4444' : userOverride ? '#f59e0b' : '#1e1e2e';
+  const _ghostOpacity = confidence !== null ? 0.3 + confidence * 0.5 : 0;
+  const _ghostColor = confidence !== null && confidence > 0.8 ? '#a855f7' : '#818cf8';
 
   return (
     <div
@@ -174,9 +174,9 @@ interface ConfidenceBadgeProps {
   confidence: number;  // 0–1
 }
 
-export const ConfidenceBadge = memo(function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
-  const percent = Math.round(confidence * 100);
-  const color =
+export const _ConfidenceBadge = memo(function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
+  const _percent = Math.round(confidence * 100);
+  const _color =
     confidence >= 0.85 ? 'text-violet-400 border-violet-500/40 bg-violet-500/10' :
     confidence >= 0.65 ? 'text-blue-400 border-blue-500/40 bg-blue-500/10' :
                          'text-slate-400 border-slate-500/40 bg-slate-500/10';
@@ -199,8 +199,8 @@ interface TrackAICardProps {
   onReject: (trackId: TrackId) => void;
 }
 
-export const TrackAICard = memo(function TrackAICard({ state, onAccept, onReject }: TrackAICardProps) {
-  const hasSuggestion = state.suggestedGain !== null && !state.userOverride;
+export const _TrackAICard = memo(function TrackAICard({ state, onAccept, onReject }: TrackAICardProps) {
+  const _hasSuggestion = state.suggestedGain !== null && !state.userOverride;
 
   return (
     <div
@@ -277,8 +277,8 @@ interface EQPillProps {
   suggestion: EQSuggestion;
 }
 
-const EQPill = memo(function EQPill({ suggestion }: EQPillProps) {
-  const label =
+const _EQPill = memo(function EQPill({ suggestion }: EQPillProps) {
+  const _label =
     suggestion.band === 'low'
       ? `LP ${suggestion.frequency.toFixed(0)}Hz`
       : suggestion.band === 'low-mid'
@@ -304,8 +304,8 @@ interface LLPTEStatusBarProps {
   enabled: boolean;
 }
 
-export const LLPTEStatusBar = memo(function LLPTEStatusBar({ nodeState, enabled }: LLPTEStatusBarProps) {
-  const nodes = [
+export const _LLPTEStatusBar = memo(function LLPTEStatusBar({ nodeState, enabled }: LLPTEStatusBarProps) {
+  const _nodes = [
     { key: 'inputRouter', label: 'IN' },
     { key: 'spectralAnalyzer', label: 'SPEC' },
     { key: 'aiMixEngine', label: 'AI' },
@@ -316,7 +316,7 @@ export const LLPTEStatusBar = memo(function LLPTEStatusBar({ nodeState, enabled 
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/40 border border-white/5">
       {nodes.map((node, i) => {
-        const status = (nodeState as any)[node.key] as 'idle' | 'active' | 'error';
+        const _status = (nodeState as any)[node.key] as 'idle' | 'active' | 'error';
         return (
           <React.Fragment key={node.key}>
             <div
@@ -376,7 +376,7 @@ interface AILevelAssistProps {
   compact?: boolean;
 }
 
-export const AILevelAssist = memo(function AILevelAssist({
+export const _AILevelAssist = memo(function AILevelAssist({
   enabled,
   onToggle,
   trackStates,
@@ -386,13 +386,13 @@ export const AILevelAssist = memo(function AILevelAssist({
   trackOrder,
   compact = false,
 }: AILevelAssistProps) {
-  const orderedTracks = useMemo(() => {
-    const ids = trackOrder ?? Array.from(trackStates.keys());
+  const _orderedTracks = useMemo(() => {
+    const _ids = trackOrder ?? Array.from(trackStates.keys());
     return ids.map(id => trackStates.get(id)).filter(Boolean) as TrackAILevelState[];
   }, [trackStates, trackOrder]);
 
-  const activeSuggestions = orderedTracks.filter(t => t.suggestedGain !== null && !t.userOverride).length;
-  const clippingCount = orderedTracks.filter(t => t.isClipping).length;
+  const _activeSuggestions = orderedTracks.filter(t => t.suggestedGain !== null && !t.userOverride).length;
+  const _clippingCount = orderedTracks.filter(t => t.isClipping).length;
 
   return (
     <div className="flex flex-col gap-2">

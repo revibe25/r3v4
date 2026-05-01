@@ -32,7 +32,7 @@ const SMOOTHING  = 0.8;
 const PEAK_DECAY = 0.02;
 
 export function useLoopEngineFFTRef(): React.MutableRefObject<FFTFrame> {
-  const frameRef = useRef<FFTFrame>({
+  const _frameRef = useRef<FFTFrame>({
     fft:        new Float32Array(FFT_SIZE),
     rms:        0,
     peak:       0,
@@ -42,11 +42,11 @@ export function useLoopEngineFFTRef(): React.MutableRefObject<FFTFrame> {
 
   useEffect(() => {
     // Tone.FFT — frequency domain
-    const fftNode = new Tone.FFT({ size: FFT_SIZE, smoothing: SMOOTHING });
+    const _fftNode = new Tone.FFT({ size: FFT_SIZE, smoothing: SMOOTHING });
     // Tone.Waveform — time domain
-    const waveformNode = new Tone.Waveform({ size: FFT_SIZE });
+    const _waveformNode = new Tone.Waveform({ size: FFT_SIZE });
     // Tone.Meter — RMS
-    const meterNode = new Tone.Meter({ normalRange: true, smoothing: 0.85 });
+    const _meterNode = new Tone.Meter({ normalRange: true, smoothing: 0.85 });
 
     // Tap into the Tone.Destination (master output) for analysis
     Tone.getDestination().connect(fftNode);
@@ -54,23 +54,23 @@ export function useLoopEngineFFTRef(): React.MutableRefObject<FFTFrame> {
     Tone.getDestination().connect(meterNode);
 
     let peakHold  = 0;
-    let rafHandle = 0;
+    let _rafHandle = 0;
 
-    const tick = () => {
+    const _tick = () => {
       // Frequency domain
       const rawFFT  = fftNode.getValue() as Float32Array;
-      const normFFT = frameRef.current.fft;
-      for (let i = 0; i < FFT_SIZE; i++) {
+      const _normFFT = frameRef.current.fft;
+      for (let _i = 0; i < FFT_SIZE; i++) {
         // rawFFT values are in dB (-100..0); map to [0..1]
         normFFT[i] = Math.max(0, (rawFFT[i] + 100) / 100);
       }
 
       // Waveform
-      const rawWave = waveformNode.getValue() as Float32Array;
+      const _rawWave = waveformNode.getValue() as Float32Array;
       frameRef.current.waveform.set(rawWave);
 
       // RMS
-      const rms = typeof meterNode.getValue() === 'number'
+      const _rms = typeof meterNode.getValue() === 'number'
         ? (meterNode.getValue() as number)
         : ((meterNode.getValue() as number[])[0] ?? 0);
 
@@ -79,8 +79,8 @@ export function useLoopEngineFFTRef(): React.MutableRefObject<FFTFrame> {
       else peakHold = Math.max(0, peakHold - PEAK_DECAY);
 
       // Beat / kick energy: sum of sub-bass bins (bins 0–4 ≈ 0–170 Hz)
-      let beatEnergy = 0;
-      for (let i = 0; i < 5; i++) beatEnergy += normFFT[i];
+      let _beatEnergy = 0;
+      for (let _i = 0; i < 5; i++) beatEnergy += normFFT[i];
       beatEnergy /= 5;
 
       frameRef.current.rms        = rms;

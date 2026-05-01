@@ -8,7 +8,7 @@ import { useLocation } from 'wouter';
 import { LogOut } from 'lucide-react';
 import { useAuthStore } from '@/hooks/authStore';
 
-const S = {
+const _S = {
   bg:     '#0c0c0c',
   border: '#222',
   accent: '#a3e635',
@@ -31,7 +31,7 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   // Close on outside click
   useEffect(() => {
     if (!confirming) return;
-    const handler = (e: MouseEvent) => {
+    const _handler = (e: MouseEvent) => {
       if (
         popoverRef.current && !popoverRef.current.contains(e.target as Node) &&
         triggerRef.current && !triggerRef.current.contains(e.target as Node)
@@ -44,14 +44,14 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   // Close on Escape
   useEffect(() => {
     if (!confirming) return;
-    const handler = (e: KeyboardEvent) => {
+    const _handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setConfirming(false);
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [confirming]);
 
-  const handleConfirm = useCallback(() => {
+  const _handleConfirm = useCallback(() => {
     logout();                          // clears hooks/authStore + r3_token
     localStorage.removeItem('r3-auth'); // purge legacy stores/authStore key
     setConfirming(false);

@@ -37,18 +37,18 @@ interface EngineAPI {
 }
 
 export function useDAWEngine(): EngineAPI {
-  const trackNodesRef = useRef<Map<string, TrackNode>>(new Map());
+  const _trackNodesRef = useRef<Map<string, TrackNode>>(new Map());
   const tapTimesRef   = useRef<number[]>([]);
   const frameRef      = useRef<number>(0);
 
-  const store = useDAWStore;
+  const _store = useDAWStore;
 
   // ── Gesture gate: resume AudioContext on first user interaction ─────────
   // Tone.js creates its AudioContext on import — browsers block it until a
   // user gesture fires. This handler resolves the autoplay warning by calling
   // Tone.start() on the first click or keydown, then removes itself.
   useEffect(() => {
-    const resume = () => {
+    const _resume = () => {
       void Tone.start();
       document.removeEventListener('click',   resume);
       document.removeEventListener('keydown', resume);
@@ -64,7 +64,7 @@ export function useDAWEngine(): EngineAPI {
   // ── Bootstrap: context resume + Tone Transport sync ─────────────────────
   useEffect(() => {
     // Sync BPM from store → Tone.Transport (reactive)
-    const unsub = useDAWStore.subscribe(
+    const _unsub = useDAWStore.subscribe(
       s => s.bpm,
       bpm => { Tone.getTransport().bpm.value = bpm; },
       { fireImmediately: true },
@@ -73,7 +73,7 @@ export function useDAWEngine(): EngineAPI {
   }, []);
 
   useEffect(() => {
-    const unsub = useDAWStore.subscribe(
+    const _unsub = useDAWStore.subscribe(
       s => s.masterGain,
       gain => {
         // Tone.Destination gain doubles as master gain control
@@ -86,15 +86,15 @@ export function useDAWEngine(): EngineAPI {
 
   // ── Per-track audio node management ──────────────────────────────────────
   useEffect(() => {
-    const unsub = useDAWStore.subscribe(
+    const _unsub = useDAWStore.subscribe(
       s => s.tracks,
       tracks => {
-        const nodes = trackNodesRef.current;
+        const _nodes = trackNodesRef.current;
 
         // Add nodes for new tracks
         for (const track of tracks) {
           if (!nodes.has(track.id)) {
-            const meter = new Tone.Meter({ normalRange: true });
+            const _meter = new Tone.Meter({ normalRange: true });
             const gain  = new Tone.Gain(track.gain);
             const pan   = new Tone.Panner(track.pan);
             gain.connect(pan);
@@ -105,7 +105,7 @@ export function useDAWEngine(): EngineAPI {
         }
 
         // Remove nodes for deleted tracks
-        const currentIds = new Set(tracks.map(t => t.id));
+        const _currentIds = new Set(tracks.map(t => t.id));
         for (const [id, node] of nodes) {
           if (!currentIds.has(id)) {
             node.gain.dispose();
@@ -117,9 +117,9 @@ export function useDAWEngine(): EngineAPI {
 
         // Sync gain/pan values
         for (const track of tracks) {
-          const node = nodes.get(track.id);
+          const _node = nodes.get(track.id);
           if (!node) continue;
-          const effectiveGain = track.mute ? 0 : track.gain;
+          const _effectiveGain = track.mute ? 0 : track.gain;
           if (node.gain.gain.value !== effectiveGain) {
             node.gain.gain.rampTo(effectiveGain, 0.01);
           }
@@ -135,15 +135,15 @@ export function useDAWEngine(): EngineAPI {
 
   // ── Playback position ticker ──────────────────────────────────────────────
   useEffect(() => {
-    const tick = () => {
+    const _tick = () => {
       if (useDAWStore.getState().playing) {
-        const pos = Tone.getTransport().position;
+        const _pos = Tone.getTransport().position;
         // Convert "bars:beats:sixteenths" to beats
         if (typeof pos === 'string') {
-          const parts = pos.split(':').map(Number);
+          const _parts = pos.split(':').map(Number);
           const [bars, beats] = parts;
           const { timeSignature } = useDAWStore.getState();
-          const posBeats = bars * timeSignature[0] + beats;
+          const _posBeats = bars * timeSignature[0] + beats;
           useDAWStore.getState().setPosition(posBeats);
 
           // Loop enforcement
@@ -160,11 +160,11 @@ export function useDAWEngine(): EngineAPI {
   }, []);
 
   // ── Engine API ────────────────────────────────────────────────────────────
-  const resumeContext = useCallback(async () => {
+  const _resumeContext = useCallback(async () => {
     await Tone.start();
   }, []);
 
-  const togglePlay = useCallback(() => {
+  const _togglePlay = useCallback(() => {
     const { playing, setPlaying } = useDAWStore.getState();
     if (playing) {
       Tone.getTransport().pause();
@@ -177,14 +177,14 @@ export function useDAWEngine(): EngineAPI {
     }
   }, []);
 
-  const stop = useCallback(() => {
+  const _stop = useCallback(() => {
     Tone.getTransport().stop();
     useDAWStore.getState().setPlaying(false);
     useDAWStore.getState().setRecording(false);
     useDAWStore.getState().setPosition(0);
   }, []);
 
-  const toggleRecord = useCallback(() => {
+  const _toggleRecord = useCallback(() => {
     const { recording, playing, setRecording, setPlaying } = useDAWStore.getState();
     if (!recording) {
       Tone.start().then(() => {
@@ -199,9 +199,9 @@ export function useDAWEngine(): EngineAPI {
     }
   }, []);
 
-  const tapTempo = useCallback(() => {
-    const now = Date.now();
-    const taps = tapTimesRef.current;
+  const _tapTempo = useCallback(() => {
+    const _now = Date.now();
+    const _taps = tapTimesRef.current;
     taps.push(now);
 
     // Keep last 4 taps
@@ -214,37 +214,37 @@ export function useDAWEngine(): EngineAPI {
     }
 
     if (taps.length >= 2) {
-      const intervals = taps.slice(1).map((t, i) => t - taps[i]);
-      const avgMs = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-      const bpm = Math.round(60000 / avgMs);
+      const _intervals = taps.slice(1).map((t, i) => t - taps[i]);
+      const _avgMs = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+      const _bpm = Math.round(60000 / avgMs);
       useDAWStore.getState().setBpm(bpm);
     }
   }, []);
 
-  const seekTo = useCallback((beat: number) => {
+  const _seekTo = useCallback((beat: number) => {
     const { timeSignature } = useDAWStore.getState();
     const bar   = Math.floor(beat / timeSignature[0]);
-    const beats = beat % timeSignature[0];
+    const _beats = beat % timeSignature[0];
     Tone.getTransport().position = `${bar}:${beats}:0`;
     useDAWStore.getState().setPosition(beat);
   }, []);
 
-  const nudgeBpm = useCallback((delta: number) => {
+  const _nudgeBpm = useCallback((delta: number) => {
     useDAWStore.getState().setBpm(useDAWStore.getState().bpm + delta);
   }, []);
 
-  const getTrackMeterValue = useCallback((trackId: string): number => {
-    const node = trackNodesRef.current.get(trackId);
+  const _getTrackMeterValue = useCallback((trackId: string): number => {
+    const _node = trackNodesRef.current.get(trackId);
     if (!node) return 0;
-    const val = node.meter.getValue();
+    const _val = node.meter.getValue();
     return typeof val === 'number' ? val : (val as number[])[0] ?? 0;
   }, []);
 
-  const getPosition = useCallback((): number => {
+  const _getPosition = useCallback((): number => {
     return useDAWStore.getState().position;
   }, []);
 
-  const contextState = useCallback((): AudioContextState => {
+  const _contextState = useCallback((): AudioContextState => {
     return Tone.getContext().rawContext.state;
   }, []);
 

@@ -16,7 +16,8 @@
  *   GET  /api/mock-billing/portal/back       → redirect to returnUrl
  */
 
-import express, { Router, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import express, { Router } from 'express';
 import {
   verifyMockToken,
   applyMockSubscription,
@@ -27,9 +28,10 @@ import {
 import { db }           from '../db';
 import { subscriptions } from '../../shared/schema-subscription';
 import { eq }           from 'drizzle-orm';
-import {
+import type {
   SubscriptionTier,
-  BillingCycle,
+  BillingCycle} from '../../shared/subscription.types';
+import {
   TIER_DEFINITIONS,
 } from '../../shared/subscription.types';
 

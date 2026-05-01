@@ -7,8 +7,8 @@ import type { VSTPerformanceMonitor } from '@/types/audio';
 interface PerformanceMetrics { cpuUsage:number; memoryUsage:number; latency:number; processingTime:number; peakProcessingTime:number; bufferUnderruns:number; }
 interface VSTPerformanceUIProps { monitor:VSTPerformanceMonitor; vstIds:string[]; }
 
-const TL = "w-full grid bg-[#0a0a0a] border-b border-[#1a1a1a] rounded-none h-auto p-0";
-const TT = "rounded-none border-r border-[#1a1a1a] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[#f0f0f0] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
+const _TL = "w-full grid bg-[#0a0a0a] border-b border-[#1a1a1a] rounded-none h-auto p-0";
+const _TT = "rounded-none border-r border-[#1a1a1a] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[#f0f0f0] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
 
 function MonoBar({ value, max=100, warn=50, danger=80 }: { value:number; max?:number; warn?:number; danger?:number }) {
   const pct=Math.min((value/max)*100,100);

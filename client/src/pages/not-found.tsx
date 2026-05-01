@@ -6,7 +6,7 @@
  * IBM Plex Mono + Syne display. --ag-* CSS variables. Lime #a3e635 accent.
  */
 
-const STYLES = `
+const _STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 .r3-404-shell {

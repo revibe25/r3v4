@@ -41,7 +41,7 @@ const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument', '/daw'];
 const ADMIN_EMAIL = 'earnestathepco@gmail.com';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
-const T = {
+const _T = {
   bg:        '#0c0c0c',
   border:    '#222',
   accent:    '#a3e635',
@@ -69,7 +69,7 @@ const TIER_STYLE: Record<string, { color: string; border: string }> = {
 //   7. /collab      — collaborative DAW pro (WaveLab)
 //   8. /mixer       — drag & drop mixer view (MultitrackView)
 //
-const PAGES = [
+const _PAGES = [
   { href: '/pricing',    label: 'Pricing',    icon: Tag,     authOnly: false, hideWhenAuthed: false },
   { href: '/auth',       label: 'Login',      icon: LogIn,   authOnly: false, hideWhenAuthed: true  },
   { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
@@ -85,7 +85,7 @@ const PAGES = [
 
 export function PageNav() {
   const [location] = useLocation();
-  const isAuthenticated = useAuthStore(selectIsAuthed);
+  const _isAuthenticated = useAuthStore(selectIsAuthed);
   const userEmail       = useAuthStore(s => s.user?.email ?? '');
   const tier            = useAuthStore(s => s.user?.tier ?? 'explorer');
   const isAdmin         = userEmail === ADMIN_EMAIL;
@@ -93,7 +93,7 @@ export function PageNav() {
   // Suppress nav entirely on auth/login pages — clean UX, no self-referential links
   if (NAV_HIDDEN_ON.includes(location)) return null;
 
-  const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
+  const _tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
 
   return (
     <nav
@@ -126,7 +126,7 @@ export function PageNav() {
           if (hideWhenAuthed && isAuthenticated) return null;
           if (authOnly && !isAuthenticated) return null;
 
-          const active = location === href;
+          const _active = location === href;
 
           return (
             <Link
@@ -154,14 +154,14 @@ export function PageNav() {
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  const el = e.currentTarget as HTMLAnchorElement;
+                  const _el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dimHover;
                   el.style.borderColor = '#444';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
-                  const el = e.currentTarget as HTMLAnchorElement;
+                  const _el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dim;
                   el.style.borderColor = T.border;
                 }
@@ -216,12 +216,12 @@ export function PageNav() {
               transition:    'color 0.12s, border-color 0.12s',
             }}
             onMouseEnter={e => {
-              const el = e.currentTarget as HTMLAnchorElement;
+              const _el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.accent;
               el.style.color       = T.accent;
             }}
             onMouseLeave={e => {
-              const el = e.currentTarget as HTMLAnchorElement;
+              const _el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.border;
               el.style.color       = T.dim;
             }}
@@ -256,13 +256,13 @@ export function PageNav() {
             transition:     'color 0.12s, border-color 0.12s, background 0.12s',
           }}
           onMouseEnter={e => {
-            const el = e.currentTarget as HTMLButtonElement;
+            const _el = e.currentTarget as HTMLButtonElement;
             el.style.background  = T.accentDim;
             el.style.color       = T.accent;
             el.style.borderColor = T.accent;
           }}
           onMouseLeave={e => {
-            const el = e.currentTarget as HTMLButtonElement;
+            const _el = e.currentTarget as HTMLButtonElement;
             el.style.background  = 'transparent';
             el.style.color       = T.dim;
             el.style.borderColor = T.border;

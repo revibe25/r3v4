@@ -101,7 +101,7 @@ interface LLPTESuggestion {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const C = {
+const _C = {
   void:          '#060606',
   space:         '#0a0a0a',
   surface:       '#0d0d0d',
@@ -127,12 +127,12 @@ const C = {
   ],
 } as const;
 
-const FONT = {
+const _FONT = {
   display: '"Syne", sans-serif',
   mono:    '"IBM Plex Mono", monospace',
 } as const;
 
-const TL = {
+const _TL = {
   trackHeight:   88,
   rulerHeight:   44,
   headerWidth:   232,
@@ -188,26 +188,26 @@ const INIT_SUGGESTIONS: LLPTESuggestion[] = [
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-const barsToPixels = (bars: number, gw: number) => bars * gw;
-const pixelsToBars = (px: number,   gw: number) => px / gw;
+const _barsToPixels = (bars: number, gw: number) => bars * gw;
+const _pixelsToBars = (px: number,   gw: number) => px / gw;
 
-const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+const _clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
-const formatTime = (bars: number, tempo: number, bpb: number): string => {
-  const secs = (bars * bpb * 60) / tempo;
+const _formatTime = (bars: number, tempo: number, bpb: number): string => {
+  const _secs = (bars * bpb * 60) / tempo;
   const m    = Math.floor(secs / 60);
   const s    = Math.floor(secs % 60);
   const ms   = Math.floor((secs % 1) * 100);
   return `${m}:${String(s).padStart(2,'0')}.${String(ms).padStart(2,'0')}`;
 };
 
-const wfCache = new Map<string, number[]>();
-const getWaveform = (id: string, pts: number): number[] => {
-  const key = `${id}_${pts}`;
+const _wfCache = new Map<string, number[]>();
+const _getWaveform = (id: string, pts: number): number[] => {
+  const _key = `${id}_${pts}`;
   if (!wfCache.has(key)) {
     const d: number[] = [];
-    for (let i = 0; i < pts; i++) {
-      const t = i / pts;
+    for (let _i = 0; i < pts; i++) {
+      const _t = i / pts;
       d.push((Math.sin(t * Math.PI * 4 + Math.random()) * 0.6 + (Math.random()-0.5)*0.3) * Math.sin(t*Math.PI) * 0.85 + 0.08);
     }
     wfCache.set(key, d);
@@ -215,7 +215,7 @@ const getWaveform = (id: string, pts: number): number[] => {
   return wfCache.get(key)!;
 };
 
-const confidenceColor = (c: number): string => {
+const _confidenceColor = (c: number): string => {
   if (c >= 0.65) return C.neon;
   if (c >= 0.40) return C.yellow;
   return C.magenta;
@@ -223,7 +223,7 @@ const confidenceColor = (c: number): string => {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const AgBtn = memo(({
+const _AgBtn = memo(({
   children, onClick, disabled=false, active=false,
   activeColor=C.neon, title, style: sx,
 }: {
@@ -265,21 +265,21 @@ const AgBtn = memo(({
 ));
 AgBtn.displayName = 'AgBtn';
 
-const AgLabel = ({ children, style: sx }: { children: React.ReactNode; style?: React.CSSProperties }) => (
+const _AgLabel = ({ children, style: sx }: { children: React.ReactNode; style?: React.CSSProperties }) => (
   <span style={{ fontSize:8, letterSpacing:'.3em', textTransform:'uppercase', color:C.textMuted, fontFamily:FONT.mono, ...sx }}>
     {children}
   </span>
 );
 
-const Divider = () => (
+const _Divider = () => (
   <div style={{ width:1, alignSelf:'stretch', background:C.border, margin:'0 4px', flexShrink:0 }} />
 );
 
 // VU Meter
-const VUMeter = memo(({ level, color, peaked }: { level: number; color: string; peaked: boolean }) => (
+const _VUMeter = memo(({ level, color, peaked }: { level: number; color: string; peaked: boolean }) => (
   <div style={{ display:'flex', flexDirection:'column-reverse', gap:1, height:48, width:6 }}>
     {Array.from({length:12}).map((_,i) => {
-      const threshold = i / 12;
+      const _threshold = i / 12;
       const lit       = level > threshold;
       const seg       = i > 9 ? C.magenta : i > 7 ? C.yellow : color;
       return (
@@ -295,8 +295,8 @@ const VUMeter = memo(({ level, color, peaked }: { level: number; color: string; 
 VUMeter.displayName = 'VUMeter';
 
 // LLPTE confidence badge
-const ConfBadge = ({ confidence, label }: { confidence: number; label: string }) => {
-  const col = confidenceColor(confidence);
+const _ConfBadge = ({ confidence, label }: { confidence: number; label: string }) => {
+  const _col = confidenceColor(confidence);
   return (
     <div style={{
       display:'flex', alignItems:'center', gap:5,
@@ -358,52 +358,52 @@ export default function CollabDAWPro() {
   const startTimeRef      = useRef<number|null>(null);
   const lastRenderRef     = useRef(0);
 
-  const gridWidth = TL.gridWidth * zoom;
+  const _gridWidth = TL.gridWidth * zoom;
 
   // ── Toast helper ────────────────────────────────────────────────────────────
-  const toast = useCallback((msg: string, type: 'ai'|'info'|'warn' = 'info') => {
-    const id = Date.now();
+  const _toast = useCallback((msg: string, type: 'ai'|'info'|'warn' = 'info') => {
+    const _id = Date.now();
     setToasts(p => [...p, {id, msg, type}]);
     setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 3500);
   }, []);
 
   // ── Activity feed ───────────────────────────────────────────────────────────
-  const addActivity = useCallback((action: string, user = 'You', type: Activity['type'] = 'edit') => {
+  const _addActivity = useCallback((action: string, user = 'You', type: Activity['type'] = 'edit') => {
     setActivities(p => [{id:Date.now(), user, action, timestamp:Date.now(), type}, ...p].slice(0,60));
   }, []);
 
   // ── Transport ────────────────────────────────────────────────────────────────
-  const play = useCallback(() => {
+  const _play = useCallback(() => {
     setTransport('playing');
     startTimeRef.current = performance.now() - (currentBar * (60/project.tempo) * TL.beatsPerBar * 1000);
     addActivity('Started playback', 'You', 'transport');
   }, [currentBar, project.tempo, addActivity]);
 
-  const pause = useCallback(() => {
+  const _pause = useCallback(() => {
     setTransport('paused');
     addActivity('Paused', 'You', 'transport');
   }, [addActivity]);
 
-  const stop = useCallback(() => {
+  const _stop = useCallback(() => {
     setTransport('stopped');
     setCurrentBar(0);
     startTimeRef.current = null;
     addActivity('Stopped', 'You', 'transport');
   }, [addActivity]);
 
-  const togglePlay = useCallback(() => {
+  const _togglePlay = useCallback(() => {
     transport === 'playing' ? pause() : play();
   }, [transport, pause, play]);
 
   // Playback loop
   useEffect(() => {
     if (transport === 'playing') {
-      const tick = () => {
+      const _tick = () => {
         const elapsed    = performance.now() - (startTimeRef.current ?? performance.now());
         const bps        = project.tempo / 60;
         let bars         = (elapsed / 1000) / TL.beatsPerBar * bps;
         if (loopOn) {
-          const len = loopRegion.end - loopRegion.start;
+          const _len = loopRegion.end - loopRegion.start;
           while (bars >= loopRegion.end) {
             bars -= len;
             if (startTimeRef.current !== null)
@@ -422,7 +422,7 @@ export default function CollabDAWPro() {
 
   // CPU + VU simulation
   useEffect(() => {
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       setCpuLoad(transport === 'playing' ? 0.35 + Math.random()*0.25 : 0.08 + Math.random()*0.1);
       if (transport === 'playing') {
         const levels: Record<string,number> = {};
@@ -442,10 +442,10 @@ export default function CollabDAWPro() {
 
   // Simulated collab activity
   useEffect(() => {
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       if (Math.random() > 0.65) {
         const collab  = INIT_COLLABS[Math.floor(Math.random() * INIT_COLLABS.length)];
-        const actions = ['Adjusted fader','Moved clip','Added FX','Muted track','Set loop'];
+        const _actions = ['Adjusted fader','Moved clip','Added FX','Muted track','Set loop'];
         const action  = actions[Math.floor(Math.random() * actions.length)];
         addActivity(action, collab.name, 'edit');
         setCollaborators(p => p.map(c =>
@@ -459,15 +459,15 @@ export default function CollabDAWPro() {
   }, [addActivity]);
 
   // ── History ───────────────────────────────────────────────────────────────────
-  const pushHistory = useCallback((next: Project) => {
-    const h = history.slice(0, historyIdx + 1);
+  const _pushHistory = useCallback((next: Project) => {
+    const _h = history.slice(0, historyIdx + 1);
     h.push(next);
     setHistory(h);
     setHistoryIdx(h.length - 1);
     setProject(next);
   }, [history, historyIdx]);
 
-  const undo = useCallback(() => {
+  const _undo = useCallback(() => {
     if (historyIdx > 0) {
       setHistoryIdx(i => i - 1);
       setProject(history[historyIdx - 1]);
@@ -475,7 +475,7 @@ export default function CollabDAWPro() {
     }
   }, [history, historyIdx, addActivity]);
 
-  const redo = useCallback(() => {
+  const _redo = useCallback(() => {
     if (historyIdx < history.length - 1) {
       setHistoryIdx(i => i + 1);
       setProject(history[historyIdx + 1]);
@@ -484,7 +484,7 @@ export default function CollabDAWPro() {
   }, [history, historyIdx, addActivity]);
 
   // ── Track ops ──────────────────────────────────────────────────────────────────
-  const addTrack = useCallback(() => {
+  const _addTrack = useCallback(() => {
     const t: Track = {
       id: `t${Date.now()}`, name:`Track ${project.tracks.length+1}`,
       color: C.tracks[project.tracks.length % C.tracks.length],
@@ -495,59 +495,59 @@ export default function CollabDAWPro() {
     addActivity(`Added track "${t.name}"`);
   }, [project, pushHistory, addActivity]);
 
-  const deleteTrack = useCallback((id: string) => {
-    const t = project.tracks.find(x => x.id === id);
+  const _deleteTrack = useCallback((id: string) => {
+    const _t = project.tracks.find(x => x.id === id);
     pushHistory({ ...project, tracks:project.tracks.filter(x=>x.id!==id), clips:project.clips.filter(c=>c.trackId!==id) });
     addActivity(`Deleted "${t?.name}"`);
   }, [project, pushHistory, addActivity]);
 
-  const updateTrack = useCallback((id: string, patch: Partial<Track>) => {
+  const _updateTrack = useCallback((id: string, patch: Partial<Track>) => {
     pushHistory({ ...project, tracks:project.tracks.map(t => t.id===id ? {...t,...patch} : t) });
   }, [project, pushHistory]);
 
-  const toggleMute = useCallback((id: string) => {
-    const t = project.tracks.find(x=>x.id===id);
+  const _toggleMute = useCallback((id: string) => {
+    const _t = project.tracks.find(x=>x.id===id);
     if (!t) return;
     updateTrack(id, { muted: !t.muted });
     addActivity(`${t.muted?'Unmuted':'Muted'} "${t.name}"`);
   }, [project.tracks, updateTrack, addActivity]);
 
-  const toggleSolo = useCallback((id: string) => {
-    const t = project.tracks.find(x=>x.id===id);
+  const _toggleSolo = useCallback((id: string) => {
+    const _t = project.tracks.find(x=>x.id===id);
     if (!t) return;
     updateTrack(id, { solo: !t.solo });
     addActivity(`${t.solo?'Unsoloed':'Soloed'} "${t.name}"`);
   }, [project.tracks, updateTrack, addActivity]);
 
   // ── Clip ops ──────────────────────────────────────────────────────────────────
-  const deleteClip = useCallback((id: string) => {
-    const c = project.clips.find(x=>x.id===id);
+  const _deleteClip = useCallback((id: string) => {
+    const _c = project.clips.find(x=>x.id===id);
     pushHistory({ ...project, clips:project.clips.filter(x=>x.id!==id) });
     setSelectedClipIds(p => p.filter(x=>x!==id));
     addActivity(`Deleted "${c?.name}"`);
   }, [project, pushHistory, selectedClipIds, addActivity]);
 
-  const duplicateClip = useCallback((id: string) => {
-    const c = project.clips.find(x=>x.id===id);
+  const _duplicateClip = useCallback((id: string) => {
+    const _c = project.clips.find(x=>x.id===id);
     if (!c) return;
-    const nc = { ...c, id:`c${Date.now()}`, startBar:c.startBar+c.durationBars, name:`${c.name} (Copy)` };
+    const _nc = { ...c, id:`c${Date.now()}`, startBar:c.startBar+c.durationBars, name:`${c.name} (Copy)` };
     pushHistory({ ...project, clips:[...project.clips, nc] });
     addActivity(`Duplicated "${c.name}"`);
   }, [project, pushHistory, addActivity]);
 
-  const updateClip = useCallback((id: string, patch: Partial<Clip>) => {
+  const _updateClip = useCallback((id: string, patch: Partial<Clip>) => {
     pushHistory({ ...project, clips:project.clips.map(c => c.id===id ? {...c,...patch} : c) });
   }, [project, pushHistory]);
 
   // ── AI suggestion ops ──────────────────────────────────────────────────────────
   // PRD §6: acceptance rate ≥40% tracked via aiDecisionLog.
   // Every accept/reject stamps outcome + writes to aiMix.submitSuggestionOutcome.
-  const logSuggestionOutcome = useCallback((
+  const _logSuggestionOutcome = useCallback((
     id: string,
     outcome: Extract<LLPTEDecision, 'accepted' | 'rejected'>,
   ): void => {
     const token   = localStorage.getItem('r3_token');
-    const apiBase = (typeof import.meta !== 'undefined' &&
+    const _apiBase = (typeof import.meta !== 'undefined' &&
       (import.meta as unknown as Record<string, unknown>).env
         ? ((import.meta as unknown as Record<string, unknown>).env as Record<string, unknown>).VITE_API_URL as string | undefined
         : undefined) ?? '';
@@ -561,8 +561,8 @@ export default function CollabDAWPro() {
     }).catch(() => { /* non-fatal — log write failure does not block UI */ });
   }, []);
 
-  const acceptSuggestion = useCallback((id: string) => {
-    const s = suggestions.find(x => x.id === id);
+  const _acceptSuggestion = useCallback((id: string) => {
+    const _s = suggestions.find(x => x.id === id);
     if (!s) return;
     // Stamp outcome on suggestion object before removing from panel
     setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'accepted' as const } : x));
@@ -572,7 +572,7 @@ export default function CollabDAWPro() {
     addActivity(`Accepted AI: ${s.label}`, 'You', 'ai');
   }, [suggestions, toast, addActivity, logSuggestionOutcome]);
 
-  const rejectSuggestion = useCallback((id: string) => {
+  const _rejectSuggestion = useCallback((id: string) => {
     setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'rejected' as const } : x));
     setSuggestions(p => p.filter(x => x.id !== id));
     logSuggestionOutcome(id, 'rejected');
@@ -580,9 +580,9 @@ export default function CollabDAWPro() {
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
+    const _onKey = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement).matches('input,textarea')) return;
-      const mod = e.metaKey || e.ctrlKey;
+      const _mod = e.metaKey || e.ctrlKey;
       if (e.code==='Space')               { e.preventDefault(); togglePlay(); }
       if (e.code==='Escape')              { e.preventDefault(); stop(); }
       if (mod && e.code==='KeyZ' && !e.shiftKey) { e.preventDefault(); undo(); }
@@ -606,27 +606,27 @@ export default function CollabDAWPro() {
 
   // ── Canvas rendering ──────────────────────────────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
-    const now = performance.now();
+    const _now = performance.now();
     if (now - lastRenderRef.current < 14) return;
     lastRenderRef.current = now;
 
-    const ctx = canvas.getContext('2d', {alpha:false});
+    const _ctx = canvas.getContext('2d', {alpha:false});
     if (!ctx) return;
     const dpr  = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    const _rect = canvas.getBoundingClientRect();
     canvas.width  = rect.width  * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
-    const W = rect.width, H = rect.height;
+    const _W = rect.width, H = rect.height;
 
     // Background
     ctx.fillStyle = C.space;
     ctx.fillRect(0, 0, W, H);
 
     // Scanlines
-    for (let y = 0; y < H; y += 4) {
+    for (let _y = 0; y < H; y += 4) {
       ctx.fillStyle = 'rgba(255,255,255,0.008)';
       ctx.fillRect(0, y, W, 1);
     }
@@ -634,14 +634,14 @@ export default function CollabDAWPro() {
     drawRuler(ctx, W);
 
     project.tracks.forEach((track, idx) => {
-      const ty = TL.rulerHeight + idx * TL.trackHeight - scrollTop;
+      const _ty = TL.rulerHeight + idx * TL.trackHeight - scrollTop;
       if (ty + TL.trackHeight < 0 || ty > H) return;
       drawTrack(ctx, track, ty, W, track.id === selectedTrackId);
       project.clips
         .filter(c => c.trackId === track.id)
         .forEach(c => {
-          const cx = barsToPixels(c.startBar, gridWidth) - scrollLeft;
-          const cw = barsToPixels(c.durationBars, gridWidth);
+          const _cx = barsToPixels(c.startBar, gridWidth) - scrollLeft;
+          const _cw = barsToPixels(c.durationBars, gridWidth);
           if (cx + cw < 0 || cx > W) return;
           drawClip(ctx, c, track, ty, selectedClipIds.includes(c.id), c.id === hoveredClipId);
         });
@@ -654,7 +654,7 @@ export default function CollabDAWPro() {
 
   }, [project, currentBar, zoom, scrollLeft, scrollTop, selectedClipIds, selectedTrackId, collaborators, gridWidth, hoveredClipId, loopOn, loopRegion]);
 
-  const drawRuler = (ctx: CanvasRenderingContext2D, W: number) => {
+  const _drawRuler = (ctx: CanvasRenderingContext2D, W: number) => {
     ctx.fillStyle = C.surface;
     ctx.fillRect(0, 0, W, TL.rulerHeight);
     ctx.fillStyle = C.neon;
@@ -662,10 +662,10 @@ export default function CollabDAWPro() {
     ctx.fillRect(0, TL.rulerHeight-2, W, 2);
     ctx.font      = `600 10px ${FONT.mono}`;
     ctx.textAlign = 'center';
-    const total = Math.ceil((W + scrollLeft) / gridWidth) + 2;
-    const start = Math.floor(scrollLeft / gridWidth);
-    for (let i = start; i < start + total; i++) {
-      const x = i * gridWidth - scrollLeft;
+    const _total = Math.ceil((W + scrollLeft) / gridWidth) + 2;
+    const _start = Math.floor(scrollLeft / gridWidth);
+    for (let _i = start; i < start + total; i++) {
+      const _x = i * gridWidth - scrollLeft;
       ctx.strokeStyle = i % 4 === 0 ? C.borderBright : C.border;
       ctx.lineWidth   = i % 4 === 0 ? 1.5 : 0.5;
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, TL.rulerHeight); ctx.stroke();
@@ -673,8 +673,8 @@ export default function CollabDAWPro() {
         ctx.fillStyle = C.neon;
         ctx.fillText(String(i+1), x + gridWidth/2, TL.rulerHeight - 10);
       }
-      for (let b = 1; b < TL.beatsPerBar; b++) {
-        const bx = x + b * gridWidth / TL.beatsPerBar;
+      for (let _b = 1; b < TL.beatsPerBar; b++) {
+        const _bx = x + b * gridWidth / TL.beatsPerBar;
         ctx.strokeStyle = C.border;
         ctx.lineWidth   = 0.5;
         ctx.beginPath(); ctx.moveTo(bx, TL.rulerHeight-8); ctx.lineTo(bx, TL.rulerHeight); ctx.stroke();
@@ -682,7 +682,7 @@ export default function CollabDAWPro() {
     }
   };
 
-  const drawTrack = (ctx: CanvasRenderingContext2D, track: Track, ty: number, W: number, sel: boolean) => {
+  const _drawTrack = (ctx: CanvasRenderingContext2D, track: Track, ty: number, W: number, sel: boolean) => {
     ctx.fillStyle = sel ? C.surfaceLift : C.surface;
     ctx.fillRect(0, ty, W, TL.trackHeight);
     ctx.strokeStyle = sel ? C.neon : C.border;
@@ -693,9 +693,9 @@ export default function CollabDAWPro() {
     ctx.globalAlpha = 0.18;
     ctx.strokeStyle = C.borderBright;
     ctx.lineWidth   = 0.5;
-    const ts = Math.floor(scrollLeft/gridWidth), te = Math.ceil((W+scrollLeft)/gridWidth)+2;
+    const _ts = Math.floor(scrollLeft/gridWidth), te = Math.ceil((W+scrollLeft)/gridWidth)+2;
     for (let i=ts; i<te; i++) {
-      const x = i*gridWidth - scrollLeft;
+      const _x = i*gridWidth - scrollLeft;
       ctx.beginPath(); ctx.moveTo(x,ty); ctx.lineTo(x,ty+TL.trackHeight); ctx.stroke();
     }
     ctx.globalAlpha = 1;
@@ -705,11 +705,11 @@ export default function CollabDAWPro() {
     }
   };
 
-  const drawClip = (ctx: CanvasRenderingContext2D, clip: Clip, track: Track, ty: number, sel: boolean, hov: boolean) => {
+  const _drawClip = (ctx: CanvasRenderingContext2D, clip: Clip, track: Track, ty: number, sel: boolean, hov: boolean) => {
     const x  = barsToPixels(clip.startBar, gridWidth) - scrollLeft;
-    const cw = barsToPixels(clip.durationBars, gridWidth);
-    const cy = ty + 6;
-    const ch = TL.trackHeight - 12;
+    const _cw = barsToPixels(clip.durationBars, gridWidth);
+    const _cy = ty + 6;
+    const _ch = TL.trackHeight - 12;
     const g  = ctx.createLinearGradient(x, cy, x, cy+ch);
     if (sel) {
       g.addColorStop(0, `${track.color}66`);
@@ -734,24 +734,24 @@ export default function CollabDAWPro() {
     ctx.lineWidth   = 1.2;
     ctx.beginPath();
     wf.forEach((a, i) => {
-      const wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
+      const _wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
       i===0 ? ctx.moveTo(wx, wy-wh/2) : ctx.lineTo(wx, wy-wh/2);
     });
     ctx.stroke();
     ctx.beginPath();
     wf.forEach((a, i) => {
-      const wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
+      const _wx = x + (i/wf.length)*cw, wy = cy+ch/2, wh = a*(ch*0.65);
       i===0 ? ctx.moveTo(wx, wy+wh/2) : ctx.lineTo(wx, wy+wh/2);
     });
     ctx.stroke();
     ctx.lineWidth = 1;
     if (clip.fadeIn > 0) {
-      const fw = barsToPixels(clip.fadeIn, gridWidth);
+      const _fw = barsToPixels(clip.fadeIn, gridWidth);
       ctx.fillStyle = `${track.color}25`;
       ctx.beginPath(); ctx.moveTo(x,cy); ctx.lineTo(x+fw,cy); ctx.lineTo(x+fw,cy+ch); ctx.lineTo(x,cy+ch); ctx.closePath(); ctx.fill();
     }
     if (clip.fadeOut > 0) {
-      const fw = barsToPixels(clip.fadeOut, gridWidth);
+      const _fw = barsToPixels(clip.fadeOut, gridWidth);
       ctx.fillStyle = `${track.color}25`;
       ctx.beginPath(); ctx.moveTo(x+cw,cy); ctx.lineTo(x+cw-fw,cy); ctx.lineTo(x+cw-fw,cy+ch); ctx.lineTo(x+cw,cy+ch); ctx.closePath(); ctx.fill();
     }
@@ -765,9 +765,9 @@ export default function CollabDAWPro() {
     }
   };
 
-  const drawMarker = (ctx: CanvasRenderingContext2D, m: Marker, H: number) => {
+  const _drawMarker = (ctx: CanvasRenderingContext2D, m: Marker, H: number) => {
     const x   = barsToPixels(m.bar, gridWidth) - scrollLeft;
-    const col = m.color ?? C.yellow;
+    const _col = m.color ?? C.yellow;
     ctx.strokeStyle = col;
     ctx.lineWidth   = 1.5;
     ctx.setLineDash([4,4]);
@@ -784,8 +784,8 @@ export default function CollabDAWPro() {
     ctx.lineWidth = 1;
   };
 
-  const drawPlayhead = (ctx: CanvasRenderingContext2D, H: number) => {
-    const x = barsToPixels(currentBar, gridWidth) - scrollLeft;
+  const _drawPlayhead = (ctx: CanvasRenderingContext2D, H: number) => {
+    const _x = barsToPixels(currentBar, gridWidth) - scrollLeft;
     ctx.shadowColor = C.neon;
     ctx.shadowBlur  = 16;
     ctx.strokeStyle = C.neon;
@@ -794,7 +794,7 @@ export default function CollabDAWPro() {
     ctx.shadowBlur = 0;
     ctx.fillStyle  = C.neon;
     ctx.beginPath(); ctx.moveTo(x-9,TL.rulerHeight); ctx.lineTo(x+9,TL.rulerHeight); ctx.lineTo(x,TL.rulerHeight+14); ctx.closePath(); ctx.fill();
-    const label = formatTime(currentBar, project.tempo, TL.beatsPerBar);
+    const _label = formatTime(currentBar, project.tempo, TL.beatsPerBar);
     ctx.fillStyle = C.surface;
     ctx.fillRect(x-38, TL.rulerHeight+17, 76, 19);
     ctx.strokeStyle = C.neon;
@@ -807,9 +807,9 @@ export default function CollabDAWPro() {
     ctx.lineWidth = 1;
   };
 
-  const drawLoop = (ctx: CanvasRenderingContext2D, H: number) => {
-    const sx = barsToPixels(loopRegion.start, gridWidth) - scrollLeft;
-    const ex = barsToPixels(loopRegion.end,   gridWidth) - scrollLeft;
+  const _drawLoop = (ctx: CanvasRenderingContext2D, H: number) => {
+    const _sx = barsToPixels(loopRegion.start, gridWidth) - scrollLeft;
+    const _ex = barsToPixels(loopRegion.end,   gridWidth) - scrollLeft;
     ctx.fillStyle   = `${C.cyan}0E`;
     ctx.fillRect(sx, TL.rulerHeight, ex-sx, H-TL.rulerHeight);
     [sx, ex].forEach((x, i) => {
@@ -825,14 +825,14 @@ export default function CollabDAWPro() {
     ctx.lineWidth = 1;
   };
 
-  const drawCursor = (ctx: CanvasRenderingContext2D, c: Collaborator) => {
+  const _drawCursor = (ctx: CanvasRenderingContext2D, c: Collaborator) => {
     const {x,y} = c.cursor;
     ctx.fillStyle   = c.color;
     ctx.shadowColor = c.color;
     ctx.shadowBlur  = 12;
     ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+12,y+5); ctx.lineTo(x+5,y+12); ctx.closePath(); ctx.fill();
     ctx.shadowBlur = 0;
-    const lw = c.name.split(' ').map(n=>n[0]).join('')+'  '+c.name;
+    const _lw = c.name.split(' ').map(n=>n[0]).join('')+'  '+c.name;
     ctx.fillStyle   = `${c.color}E0`;
     ctx.fillRect(x+14, y-2, lw.length*6+14, 20);
     ctx.fillStyle   = C.void;
@@ -842,15 +842,15 @@ export default function CollabDAWPro() {
   };
 
   // ── Canvas interactions ───────────────────────────────────────────────────────
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
+  const _handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const _canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
+    const _rect = canvas.getBoundingClientRect();
     const cx   = e.clientX - rect.left + scrollLeft;
     const cy   = e.clientY - rect.top  + scrollTop;
     let hit: string|null = null;
     project.tracks.forEach((t, idx) => {
-      const ty = TL.rulerHeight + idx * TL.trackHeight;
+      const _ty = TL.rulerHeight + idx * TL.trackHeight;
       project.clips.filter(c=>c.trackId===t.id).forEach(c => {
         const x=barsToPixels(c.startBar,gridWidth), w=barsToPixels(c.durationBars,gridWidth);
         if (cx>=x&&cx<=x+w&&cy>=ty+6&&cy<=ty+TL.trackHeight-6) hit=c.id;
@@ -865,7 +865,7 @@ export default function CollabDAWPro() {
       setSelectedClipIds([]);
     }
     if (cy < TL.rulerHeight) {
-      let bar = pixelsToBars(cx, gridWidth);
+      let _bar = pixelsToBars(cx, gridWidth);
       if (snapGrid) bar = Math.round(bar);
       setCurrentBar(bar);
       if (transport==='playing' && startTimeRef.current!==null)
@@ -873,15 +873,15 @@ export default function CollabDAWPro() {
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
+  const _handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const _canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
+    const _rect = canvas.getBoundingClientRect();
     const cx   = e.clientX - rect.left + scrollLeft;
     const cy   = e.clientY - rect.top  + scrollTop;
     let hov: string|null = null;
     project.tracks.forEach((t, idx) => {
-      const ty = TL.rulerHeight + idx * TL.trackHeight;
+      const _ty = TL.rulerHeight + idx * TL.trackHeight;
       project.clips.filter(c=>c.trackId===t.id).forEach(c => {
         const x=barsToPixels(c.startBar,gridWidth), w=barsToPixels(c.durationBars,gridWidth);
         if (cx>=x&&cx<=x+w&&cy>=ty+6&&cy<=ty+TL.trackHeight-6) hov=c.id;
@@ -890,7 +890,7 @@ export default function CollabDAWPro() {
     setHoveredClipId(hov);
   };
 
-  const totalTH = project.tracks.length * TL.trackHeight + TL.rulerHeight;
+  const _totalTH = project.tracks.length * TL.trackHeight + TL.rulerHeight;
 
   // ─── Render ───────────────────────────────────────────────────────────────────
   return (
@@ -1365,7 +1365,7 @@ export default function CollabDAWPro() {
                     NO PENDING SUGGESTIONS
                   </div>
                 ) : suggestions.map(s => {
-                  const track = project.tracks.find(t=>t.id===s.trackId);
+                  const _track = project.tracks.find(t=>t.id===s.trackId);
                   const col   = confidenceColor(s.confidence);
                   return (
                     <div key={s.id} style={{
@@ -1450,8 +1450,8 @@ export default function CollabDAWPro() {
               <div style={{ flex:1, overflowY:'auto', padding:6, display:'flex', flexDirection:'column', gap:4 }}>
                 {activities.map(a => {
                   const ago  = Date.now() - a.timestamp;
-                  const mins = Math.floor(ago/60000);
-                  const secs = Math.floor((ago%60000)/1000);
+                  const _mins = Math.floor(ago/60000);
+                  const _secs = Math.floor((ago%60000)/1000);
                   const t    = mins>0 ? `${mins}m` : secs>0 ? `${secs}s` : 'now';
                   const col  = a.type==='ai' ? C.neon : a.type==='transport' ? C.cyan : a.type==='collab' ? C.yellow : C.textMuted;
                   return (
@@ -1579,7 +1579,7 @@ export default function CollabDAWPro() {
   );
 }
 
-const CtxItem = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
+const _CtxItem = ({ children, onClick }: { children: React.ReactNode; onClick: () => void }) => (
   <div
     onClick={onClick}
     style={{

@@ -41,7 +41,7 @@ const STAT_ITEMS = [
   { value: "∞",      label: "Track length",    Icon: Layers },
 ] as const;
 
-const fadeUp = (delay = 0) => ({
+const _fadeUp = (delay = 0) => ({
   initial:    { opacity: 0, y: 20 },
   animate:    { opacity: 1, y:  0 },
   transition: { delay, duration: 0.45, ease: "easeOut" as const },
@@ -64,7 +64,7 @@ function GridOverlay() {
 }
 
 function ScanLine() {
-  const r = useReducedMotion();
+  const _r = useReducedMotion();
   if (r) return null;
   return (
     <motion.div className="absolute left-0 right-0 h-px pointer-events-none"
@@ -86,7 +86,7 @@ function HeaderGlow() {
 function BillingToggle({ cycle, onToggle, onSet }: {
   cycle: BillingCycle; onToggle: () => void; onSet: (c: BillingCycle) => void;
 }) {
-  const r = useReducedMotion();
+  const _r = useReducedMotion();
   return (
     <div className="inline-flex items-center gap-3" role="group" aria-label="Billing cycle">
       <button onClick={() => onSet("monthly")} className="text-sm font-mono transition-colors"
@@ -122,7 +122,7 @@ function BillingToggle({ cycle, onToggle, onSet }: {
 // ─── PriceDisplay ─────────────────────────────────────────────────────────────
 
 function PriceDisplay({ plan, cycle, accent }: { plan:Plan; cycle:BillingCycle; accent:string }) {
-  const price = useMemo(() => resolvePrice(plan, cycle), [plan, cycle]);
+  const _price = useMemo(() => resolvePrice(plan, cycle), [plan, cycle]);
 
   if (isFree(plan)) return (
     <div className="mb-6">
@@ -156,7 +156,7 @@ function PriceDisplay({ plan, cycle, accent }: { plan:Plan; cycle:BillingCycle; 
 function PlanCta({ plan, accent, isPending, onCheckout }: {
   plan:Plan; accent:string; isPending:boolean; onCheckout:(p:Plan)=>void;
 }) {
-  const click = useCallback(() => { if (!isPending) onCheckout(plan); }, [isPending, onCheckout, plan]);
+  const _click = useCallback(() => { if (!isPending) onCheckout(plan); }, [isPending, onCheckout, plan]);
   return (
     <button onClick={click} disabled={isPending} aria-busy={isPending}
       className="w-full py-2.5 px-4 rounded-lg text-sm font-mono tracking-wide transition-all
@@ -175,8 +175,8 @@ function PlanCta({ plan, accent, isPending, onCheckout }: {
 // ─── FeatureRow ───────────────────────────────────────────────────────────────
 
 function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
-  const cc = feature.included ? COLOR.cyan : COLOR.borderSub;
-  const lc = !feature.included ? COLOR.textGhost
+  const _cc = feature.included ? COLOR.cyan : COLOR.borderSub;
+  const _lc = !feature.included ? COLOR.textGhost
     : feature.highlight ? COLOR.textBody : COLOR.textMuted;
   return (
     <li className="flex items-start gap-2.5 py-[3px]">
@@ -199,8 +199,8 @@ function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
 function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
   plan:Plan; cycle:BillingCycle; index:number; isPending:boolean; onCheckout:(p:Plan)=>void;
 }) {
-  const r = useReducedMotion();
-  const accent = PLAN_ACCENT[plan.id];
+  const _r = useReducedMotion();
+  const _accent = PLAN_ACCENT[plan.id];
   const glow   = PLAN_GLOW[plan.id];
   return (
     <motion.div {...(r ? {} : fadeUp(index * 0.07))}
@@ -273,7 +273,7 @@ function StorageTable() {
       </div>
       <div className="grid grid-cols-3" style={{ background:COLOR.borderSub, gap:"1px" }}>
         {STORAGE_ROWS.map(row => {
-          const accent = PLAN_ACCENT[row.tierKey as PlanId] ?? COLOR.textDim;
+          const _accent = PLAN_ACCENT[row.tierKey as PlanId] ?? COLOR.textDim;
           return (
             <div key={row.tierKey} className="px-6 py-5" style={{ background:COLOR.bgSurface }}>
               <p className="text-[11px] font-mono uppercase tracking-wider mb-3" style={{ color:accent }}>
@@ -297,15 +297,15 @@ function StorageTable() {
 
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const r = useReducedMotion();
-  const toggle = useCallback((i: number) => setOpenIndex(p => p === i ? null : i), []);
+  const _r = useReducedMotion();
+  const _toggle = useCallback((i: number) => setOpenIndex(p => p === i ? null : i), []);
   return (
     <div className="max-w-2xl mx-auto mb-12">
       <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-center mb-6"
          style={{ color:COLOR.textDim }}>Frequently Asked Questions</p>
       <div className="space-y-2">
         {FAQ_ITEMS.map((item, i) => {
-          const open = openIndex === i;
+          const _open = openIndex === i;
           return (
             <div key={i} className="rounded-lg overflow-hidden"
               style={{ border:`1px solid ${open?COLOR.borderMid:COLOR.borderSub}`, background:COLOR.bgSurface }}>
@@ -361,7 +361,7 @@ function ErrorToast({ message, onDismiss }: { message:string; onDismiss:()=>void
 
 export default function PricingPage() {
   const { cycle, setCycle, toggleCycle, checkoutStatus, initiateCheckout, clearError } = usePricing();
-  const pendingPlanId = checkoutStatus.type === "pending" ? checkoutStatus.planId : null;
+  const _pendingPlanId = checkoutStatus.type === "pending" ? checkoutStatus.planId : null;
 
   return (
     <div className="relative min-h-screen overflow-hidden"

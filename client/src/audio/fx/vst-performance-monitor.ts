@@ -1,8 +1,9 @@
 // @ts-nocheck
 // client/src/audio/fx/vst-performance-monitor.ts
-import {
+import type {
   PerformanceMonitor,
-  PerformanceSnapshot,
+  PerformanceSnapshot} from '@/types/audio';
+import {
   CPUMetrics,
   MemoryMetrics,
   LatencyMetrics,
@@ -83,7 +84,7 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
    * Record a processing time measurement
    */
   recordProcessingTime(vstId: string, timeMs: number): void {
-    const measurements = this.measurements.get(vstId);
+    const _measurements = this.measurements.get(vstId);
     if (!measurements) return;
 
     measurements.push(timeMs);
@@ -94,13 +95,13 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
     }
 
     // Update metrics
-    const metrics = this.metrics.get(vstId);
+    const _metrics = this.metrics.get(vstId);
     if (metrics) {
       metrics.processingTime = this.calculateAverage(measurements);
       metrics.peakProcessingTime = Math.max(...measurements);
       
       // Calculate CPU usage (simplified)
-      const bufferDuration = 128 / this.audioContext.sampleRate * 1000;
+      const _bufferDuration = 128 / this.audioContext.sampleRate * 1000;
       metrics.cpuUsage = (metrics.processingTime / bufferDuration) * 100;
     }
   }
@@ -123,7 +124,7 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
    * Get total system CPU usage
    */
   getTotalCPUUsage(): number {
-    let total = 0;
+    let _total = 0;
     this.metrics.forEach(m => {
       total += m.cpuUsage;
     });
@@ -134,7 +135,7 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
    * Get optimization recommendations
    */
   getOptimizationRecommendations(vstId: string): string[] {
-    const metrics = this.metrics.get(vstId);
+    const _metrics = this.metrics.get(vstId);
     if (!metrics) return [];
 
     const recommendations: string[] = [];
@@ -161,8 +162,8 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
   private updateMetrics(): void {
     // Update memory usage (if available)
     if ('memory' in performance && (performance as any).memory) {
-      const memory = (performance as any).memory;
-      const usedMB = memory.usedJSHeapSize / 1024 / 1024;
+      const _memory = (performance as any).memory;
+      const _usedMB = memory.usedJSHeapSize / 1024 / 1024;
       
       this.metrics.forEach(metrics => {
         metrics.memoryUsage = usedMB;
@@ -172,7 +173,7 @@ export class VSTPerformanceMonitor implements PerformanceMonitor {
 
   private calculateAverage(values: number[]): number {
     if (values.length === 0) return 0;
-    const sum = values.reduce((a, b) => a + b, 0);
+    const _sum = values.reduce((a, b) => a + b, 0);
     return sum / values.length;
   }
 
@@ -195,12 +196,12 @@ export function wrapWithPerformanceMonitoring(
   monitor: VSTPerformanceMonitor,
   vstId: string
 ): void {
-  const originalProcess = vstNode.process;
+  const _originalProcess = vstNode.process;
   
   vstNode.process = function(...args: any[]) {
-    const startTime = performance.now();
-    const result = originalProcess.apply(this, args);
-    const endTime = performance.now();
+    const _startTime = performance.now();
+    const _result = originalProcess.apply(this, args);
+    const _endTime = performance.now();
     
     monitor.recordProcessingTime(vstId, endTime - startTime);
     

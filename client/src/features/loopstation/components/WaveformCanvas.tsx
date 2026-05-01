@@ -74,7 +74,7 @@ function drawIdleLine(
   color: string, t: number,
 ): void {
   const mid     = h / 2;
-  const breathe = Math.sin(t * 0.0008) * 0.5 + 0.5;
+  const _breathe = Math.sin(t * 0.0008) * 0.5 + 0.5;
   const alpha   = Math.round(breathe * 22 + 10).toString(16).padStart(2, '0');
   ctx.strokeStyle = `${color}${alpha}`;
   ctx.lineWidth   = 1;
@@ -82,8 +82,8 @@ function drawIdleLine(
   ctx.beginPath();
   // Subtle noise in idle line
   ctx.moveTo(0, mid);
-  for (let i = 0; i < w; i += 4) {
-    const noise = (Math.sin(i * 0.05 + t * 0.002) * 0.5 + Math.sin(i * 0.13 + t * 0.001) * 0.3) * breathe * 0.8;
+  for (let _i = 0; i < w; i += 4) {
+    const _noise = (Math.sin(i * 0.05 + t * 0.002) * 0.5 + Math.sin(i * 0.13 + t * 0.001) * 0.3) * breathe * 0.8;
     ctx.lineTo(i, mid + noise);
   }
   ctx.lineTo(w, mid);
@@ -97,16 +97,16 @@ function drawWaveform(
   w: number, h: number,
   color: string, lw: number, gain: number,
 ): void {
-  const step = w / data.length;
+  const _step = w / data.length;
 
   // Ghost (peak hold) — faint white line
   ctx.strokeStyle = 'rgba(255,255,255,0.07)';
   ctx.lineWidth   = 0.5;
   ctx.shadowBlur  = 0;
   ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const x = i * step;
-    const y = ((data[i] * gain + 1) / 2) * h;
+  for (let _i = 0; i < data.length; i++) {
+    const _x = i * step;
+    const _y = ((data[i] * gain + 1) / 2) * h;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
@@ -117,9 +117,9 @@ function drawWaveform(
   ctx.shadowBlur  = 7;
   ctx.shadowColor = color;
   ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const x = i * step;
-    const y = ((data[i] * gain + 1) / 2) * h;
+  for (let _i = 0; i < data.length; i++) {
+    const _x = i * step;
+    const _y = ((data[i] * gain + 1) / 2) * h;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
@@ -139,10 +139,10 @@ function drawMirror(
   color: string, lw: number, gain: number,
 ): void {
   const mid  = h / 2;
-  const step = w / data.length;
+  const _step = w / data.length;
 
   // Gradient fill — energy-mapped
-  const grad = ctx.createLinearGradient(0, 0, 0, h);
+  const _grad = ctx.createLinearGradient(0, 0, 0, h);
   grad.addColorStop(0,   `${color}44`);
   grad.addColorStop(0.35, `${color}28`);
   grad.addColorStop(0.5,  `${color}10`);
@@ -156,13 +156,13 @@ function drawMirror(
   ctx.shadowColor = color;
 
   ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const amp = Math.abs(data[i]) * mid * 0.92 * gain;
+  for (let _i = 0; i < data.length; i++) {
+    const _amp = Math.abs(data[i]) * mid * 0.92 * gain;
     const x   = i * step;
     if (i === 0) ctx.moveTo(x, mid - amp); else ctx.lineTo(x, mid - amp);
   }
-  for (let i = data.length - 1; i >= 0; i--) {
-    const amp = Math.abs(data[i]) * mid * 0.92 * gain;
+  for (let _i = data.length - 1; i >= 0; i--) {
+    const _amp = Math.abs(data[i]) * mid * 0.92 * gain;
     ctx.lineTo(i * step, mid + amp);
   }
   ctx.closePath();
@@ -174,8 +174,8 @@ function drawMirror(
   ctx.lineWidth   = 0.8;
   ctx.shadowBlur  = 0;
   ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const amp = Math.abs(data[i]) * mid * 0.92 * gain;
+  for (let _i = 0; i < data.length; i++) {
+    const _amp = Math.abs(data[i]) * mid * 0.92 * gain;
     const x   = i * step;
     if (i === 0) ctx.moveTo(x, mid - amp); else ctx.lineTo(x, mid - amp);
   }
@@ -184,7 +184,7 @@ function drawMirror(
 
 // ── MODE: SPECTRUM ────────────────────────────────────────────────────────────
 const peakHold: Float32Array = new Float32Array(512);
-const peakDecay = 0.004;
+const _peakDecay = 0.004;
 
 function drawSpectrum(
   ctx: CanvasRenderingContext2D,
@@ -192,12 +192,12 @@ function drawSpectrum(
   w: number, h: number,
   color: string,
 ): void {
-  const bins = Math.min(data.length, Math.min(256, w));
+  const _bins = Math.min(data.length, Math.min(256, w));
   const bw   = w / bins;
 
   // Grid lines
-  for (let db = 0; db < 100; db += 20) {
-    const y = (1 - db / 100) * h;
+  for (let _db = 0; db < 100; db += 20) {
+    const _y = (1 - db / 100) * h;
     ctx.strokeStyle = '#0e0e0e';
     ctx.lineWidth   = 1;
     ctx.beginPath();
@@ -205,9 +205,9 @@ function drawSpectrum(
     ctx.stroke();
   }
 
-  for (let i = 0; i < bins; i++) {
+  for (let _i = 0; i < bins; i++) {
     const n    = Math.max(0, (data[i] + 100) / 100);
-    const barH = n * h;
+    const _barH = n * h;
 
     // Peak hold
     if (n > peakHold[i]) peakHold[i] = n;
@@ -215,10 +215,10 @@ function drawSpectrum(
 
     // Harmonic colour: fundamental = acid, harmonics shift toward red
     const hue   = 110 - n * 110;
-    const alpha = 0.55 + n * 0.45;
+    const _alpha = 0.55 + n * 0.45;
 
     // Bar body
-    const grad = ctx.createLinearGradient(0, h, 0, h - barH);
+    const _grad = ctx.createLinearGradient(0, h, 0, h - barH);
     grad.addColorStop(0,   hsl(hue, 88, 40, 0.3));
     grad.addColorStop(0.6, hsl(hue, 92, 52, alpha));
     grad.addColorStop(1,   hsl(hue, 100, 68, alpha * 0.8));
@@ -226,7 +226,7 @@ function drawSpectrum(
     ctx.fillRect(i * bw, h - barH, bw - 0.5, barH);
 
     // Peak hold segment
-    const pkH = peakHold[i] * h;
+    const _pkH = peakHold[i] * h;
     if (peakHold[i] > 0.02) {
       ctx.fillStyle = n > 0.8 ? '#ff2244bb' : 'rgba(255,255,255,0.55)';
       ctx.fillRect(i * bw, h - pkH - 1, bw - 0.5, 1.5);
@@ -241,18 +241,18 @@ function drawDots(
   w: number, h: number,
   color: string, gain: number,
 ): void {
-  const step = Math.max(1, Math.floor(data.length / 80));
+  const _step = Math.max(1, Math.floor(data.length / 80));
   ctx.shadowBlur  = 8;
   ctx.shadowColor = color;
 
-  for (let i = 0; i < data.length; i += step) {
-    const norm = Math.abs(data[i]) * gain;
+  for (let _i = 0; i < data.length; i += step) {
+    const _norm = Math.abs(data[i]) * gain;
     const x    = (i / data.length) * w;
     const y    = h / 2 + data[i] * gain * h * 0.44;
     const r    = norm * 5 + 0.4;
 
     // Colour by amplitude: low = color, high = white
-    const brightness = 0.4 + norm * 0.6;
+    const _brightness = 0.4 + norm * 0.6;
     ctx.fillStyle = norm > 0.6
       ? `rgba(255,255,255,${norm * 0.8})`
       : color + Math.round(norm * 180 + 60).toString(16).padStart(2, '0');
@@ -273,8 +273,8 @@ function drawLissajous(
 ): void {
   if (data.length < 4) return;
 
-  const cx = w / 2, cy = h / 2;
-  const scale = Math.min(cx, cy) * 0.88;
+  const _cx = w / 2, cy = h / 2;
+  const _scale = Math.min(cx, cy) * 0.88;
 
   // Reference diamond grid
   ctx.strokeStyle = '#111';
@@ -289,26 +289,26 @@ function drawLissajous(
   ctx.lineTo(cx - scale * 0.7, cy + scale * 0.7);
   ctx.stroke();
 
-  const half = Math.floor(data.length / 2);
+  const _half = Math.floor(data.length / 2);
 
   ctx.shadowBlur  = 6;
   ctx.shadowColor = color;
   ctx.beginPath();
 
-  for (let i = 0; i < half - 1; i++) {
-    const L = data[i]           * gain;
-    const R = data[i + half]    * gain;
+  for (let _i = 0; i < half - 1; i++) {
+    const _L = data[i]           * gain;
+    const _R = data[i + half]    * gain;
 
     // XY scope: X = (L + R) / 2, Y = (L - R) / 2 (mid/side)
-    const px = cx + ((L + R) / 2) * scale;
-    const py = cy - ((L - R) / 2) * scale;
+    const _px = cx + ((L + R) / 2) * scale;
+    const _py = cy - ((L - R) / 2) * scale;
 
     if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
   }
 
   // Color by energy
-  const energy = data.reduce((acc, v) => acc + v * v, 0) / data.length;
-  const hue = energy > 0.1 ? 80 - energy * 100 : 110;
+  const _energy = data.reduce((acc, v) => acc + v * v, 0) / data.length;
+  const _hue = energy > 0.1 ? 80 - energy * 100 : 110;
   ctx.strokeStyle = hsl(hue, 95, 55, 0.7);
   ctx.lineWidth   = 1.2;
   ctx.stroke();
@@ -349,19 +349,19 @@ function drawWaterfall(
     waterfallCanvas.height = h;
     waterfallBuffer = null;
   }
-  const wCtx = waterfallCanvas.getContext('2d')!;
+  const _wCtx = waterfallCanvas.getContext('2d')!;
 
   // Scroll left by 1px
-  const existing = wCtx.getImageData(0, 0, w, h);
+  const _existing = wCtx.getImageData(0, 0, w, h);
   wCtx.putImageData(existing, -1, 0);
 
   // Draw new column on the right edge
-  const bins = Math.min(data.length, h);
-  for (let i = 0; i < bins; i++) {
+  const _bins = Math.min(data.length, h);
+  for (let _i = 0; i < bins; i++) {
     const n     = Math.max(0, (data[i] + 100) / 100);
     const y     = h - Math.round((i / bins) * h) - 1;
     const hue   = 110 - n * 130;   // green → yellow → red
-    const alpha = n * 0.9 + 0.05;
+    const _alpha = n * 0.9 + 0.05;
 
     wCtx.fillStyle = hsl(hue, 90, 45, alpha);
     wCtx.fillRect(w - 1, y, 1, Math.ceil(h / bins) + 1);
@@ -383,7 +383,7 @@ function drawCircular(
   color: string, lw: number, gain: number,
 ): void {
   const cx    = w / 2, cy = h / 2;
-  const rBase = Math.min(cx, cy) * 0.38;
+  const _rBase = Math.min(cx, cy) * 0.38;
   const rMax  = Math.min(cx, cy) * 0.92;
 
   // Background ring
@@ -393,10 +393,10 @@ function drawCircular(
   ctx.lineWidth   = 1;
   ctx.stroke();
 
-  const step = (Math.PI * 2) / data.length;
+  const _step = (Math.PI * 2) / data.length;
 
   // Fill shape
-  const gradR = ctx.createRadialGradient(cx, cy, rBase, cx, cy, rMax);
+  const _gradR = ctx.createRadialGradient(cx, cy, rBase, cx, cy, rMax);
   gradR.addColorStop(0, `${color}00`);
   gradR.addColorStop(1, `${color}33`);
   ctx.fillStyle = gradR;
@@ -407,9 +407,9 @@ function drawCircular(
   ctx.lineWidth   = lw;
 
   ctx.beginPath();
-  for (let i = 0; i < data.length; i++) {
-    const ang = i * step - Math.PI / 2;
-    const amp = Math.abs(data[i]) * gain;
+  for (let _i = 0; i < data.length; i++) {
+    const _ang = i * step - Math.PI / 2;
+    const _amp = Math.abs(data[i]) * gain;
     const r   = rBase + amp * (rMax - rBase);
     const x   = cx + r * Math.cos(ang);
     const y   = cy + r * Math.sin(ang);
@@ -437,9 +437,9 @@ function drawTerrain(
   color: string,
 ): void {
   // Push new row
-  const bins = Math.min(data.length, 128);
+  const _bins = Math.min(data.length, 128);
   const row  = new Float32Array(bins);
-  for (let i = 0; i < bins; i++) row[i] = Math.max(0, (data[i] + 100) / 100);
+  for (let _i = 0; i < bins; i++) row[i] = Math.max(0, (data[i] + 100) / 100);
   terrainHistory.push(row);
   if (terrainHistory.length > TERRAIN_ROWS) terrainHistory.shift();
 
@@ -447,27 +447,27 @@ function drawTerrain(
   const yOff  = rowH * 0.6;  // how much older rows shift up
 
   // Draw from back to front
-  for (let ri = 0; ri < terrainHistory.length; ri++) {
+  for (let _ri = 0; ri < terrainHistory.length; ri++) {
     const r    = terrainHistory[ri];
     const age  = ri / (terrainHistory.length - 1);   // 0 = oldest, 1 = newest
-    const baseY = h - ri * yOff - rowH * 0.5;
+    const _baseY = h - ri * yOff - rowH * 0.5;
 
-    const alpha = age * 0.7 + 0.08;
+    const _alpha = age * 0.7 + 0.08;
     const hue   = 110 - age * 40;
 
     // Fill area under this row
     ctx.beginPath();
     ctx.moveTo(0, baseY);
-    for (let i = 0; i < bins; i++) {
-      const x = (i / (bins - 1)) * w;
-      const y = baseY - r[i] * rowH * 2.5;
+    for (let _i = 0; i < bins; i++) {
+      const _x = (i / (bins - 1)) * w;
+      const _y = baseY - r[i] * rowH * 2.5;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.lineTo(w, baseY);
     ctx.lineTo(0, baseY);
     ctx.closePath();
 
-    const grad = ctx.createLinearGradient(0, baseY - rowH * 2.5, 0, baseY);
+    const _grad = ctx.createLinearGradient(0, baseY - rowH * 2.5, 0, baseY);
     grad.addColorStop(0, hsl(hue, 88, 52, alpha * 0.8));
     grad.addColorStop(1, hsl(hue, 60, 15, alpha * 0.2));
     ctx.fillStyle = grad;
@@ -475,9 +475,9 @@ function drawTerrain(
 
     // Line on top
     ctx.beginPath();
-    for (let i = 0; i < bins; i++) {
-      const x = (i / (bins - 1)) * w;
-      const y = baseY - r[i] * rowH * 2.5;
+    for (let _i = 0; i < bins; i++) {
+      const _x = (i / (bins - 1)) * w;
+      const _y = baseY - r[i] * rowH * 2.5;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     }
     ctx.strokeStyle = hsl(hue, 90, 60, alpha * 0.9);
@@ -496,8 +496,8 @@ function smoothData(
   alpha: number,
 ): Float32Array {
   if (!prev || prev.length !== data.length || alpha <= 0) return data;
-  const out = new Float32Array(data.length);
-  for (let i = 0; i < data.length; i++) {
+  const _out = new Float32Array(data.length);
+  for (let _i = 0; i < data.length; i++) {
     out[i] = alpha * prev[i] + (1 - alpha) * data[i];
   }
   return out;
@@ -523,7 +523,7 @@ export const WaveformCanvas: React.FC<WaveformCanvasProps> = ({
   const rafRef      = useRef<number>(0);
   const dimsRef     = useRef({ w: width, h: height });
   const startTime   = useRef(performance.now());
-  const prevDataRef = useRef<Float32Array | null>(null);
+  const _prevDataRef = useRef<Float32Array | null>(null);
   const flashRef    = useRef(false);
 
   // Beat flash trigger
@@ -536,17 +536,17 @@ export const WaveformCanvas: React.FC<WaveformCanvasProps> = ({
 
   // ── ResizeObserver ─────────────────────────────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
-    const obs = new ResizeObserver(entries => {
+    const _obs = new ResizeObserver(entries => {
       for (const e of entries) {
-        const dpr = window.devicePixelRatio || 1;
+        const _dpr = window.devicePixelRatio || 1;
         const cw  = (e.contentRect.width  || width)  * dpr;
         const ch  = (e.contentRect.height || height) * dpr;
         canvas.width  = Math.round(cw);
         canvas.height = Math.round(ch);
         dimsRef.current = { w: canvas.width, h: canvas.height };
-        const ctx = canvas.getContext('2d');
+        const _ctx = canvas.getContext('2d');
         if (ctx) ctx.scale(dpr, dpr);
         // Reset waterfall buffer on resize
         waterfallCanvas = null;
@@ -559,12 +559,12 @@ export const WaveformCanvas: React.FC<WaveformCanvasProps> = ({
 
   // ── Draw loop ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
 
     if (!isActive) {
       cancelAnimationFrame(rafRef.current);
-      const ctx = canvas.getContext('2d');
+      const _ctx = canvas.getContext('2d');
       if (ctx) {
         const { w, h } = dimsRef.current;
         ctx.clearRect(0, 0, w, h);
@@ -574,15 +574,15 @@ export const WaveformCanvas: React.FC<WaveformCanvasProps> = ({
       return;
     }
 
-    const draw = (now: number) => {
-      const ctx = canvas.getContext('2d');
+    const _draw = (now: number) => {
+      const _ctx = canvas.getContext('2d');
       if (!ctx) { rafRef.current = requestAnimationFrame(draw); return; }
 
       const { w, h } = dimsRef.current;
       const isFft    = mode === 'spectrum' || mode === 'waterfall' || mode === 'terrain';
 
       // ── Frame clear / persistence ────────────────────────────────────────
-      const usePersistence = persistence > 0 &&
+      const _usePersistence = persistence > 0 &&
         (mode === 'waveform' || mode === 'mirror' || mode === 'dots' ||
          mode === 'lissajous' || mode === 'circular');
 
@@ -607,7 +607,7 @@ export const WaveformCanvas: React.FC<WaveformCanvasProps> = ({
       }
 
       // ── Fetch data ───────────────────────────────────────────────────────
-      let raw = isFft
+      let _raw = isFft
         ? getLoopEngine().getTrackFft(trackIndex)
         : getLoopEngine().getTrackWaveform(trackIndex);
 

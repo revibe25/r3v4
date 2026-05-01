@@ -5,20 +5,20 @@ const PIXELS_PER_SECOND = 100;
 const GRID_SIZE = 0.25; // 16th notes at 120 BPM
 
 // Utility functions
-export const snapToGrid = (time: number, gridSize: number): number => {
+export const _snapToGrid = (time: number, gridSize: number): number => {
   return Math.round(time / gridSize) * gridSize;
 };
 
-export const timeToPixels = (time: number): number => {
+export const _timeToPixels = (time: number): number => {
   return time * PIXELS_PER_SECOND;
 };
 
-export const pixelsToTime = (pixels: number): number => {
+export const _pixelsToTime = (pixels: number): number => {
   return pixels / PIXELS_PER_SECOND;
 };
 
 // Hook for clip dragging
-export const useClipDrag = (
+export const _useClipDrag = (
   clipId: string | null,
   initialX: number,
   initialTime: number,
@@ -29,10 +29,10 @@ export const useClipDrag = (
   useEffect(() => {
     if (!clipId) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - initialX;
-      const deltaTime = pixelsToTime(deltaX);
-      let newTime = initialTime + deltaTime;
+    const _handleMouseMove = (e: MouseEvent) => {
+      const _deltaX = e.clientX - initialX;
+      const _deltaTime = pixelsToTime(deltaX);
+      let _newTime = initialTime + deltaTime;
 
       if (snapEnabled) {
         newTime = snapToGrid(newTime, GRID_SIZE);
@@ -41,7 +41,7 @@ export const useClipDrag = (
       onPositionChange(clipId, Math.max(0, newTime));
     };
 
-    const handleMouseUp = () => {
+    const _handleMouseUp = () => {
       onDragEnd();
     };
 
@@ -56,7 +56,7 @@ export const useClipDrag = (
 };
 
 // Clip resize hook
-export const useClipResize = (
+export const _useClipResize = (
   clipId: string | null,
   initialX: number,
   initialDuration: number,
@@ -67,10 +67,10 @@ export const useClipResize = (
   useEffect(() => {
     if (!clipId) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - initialX;
-      const deltaTime = pixelsToTime(deltaX);
-      let newDuration = initialDuration + deltaTime;
+    const _handleMouseMove = (e: MouseEvent) => {
+      const _deltaX = e.clientX - initialX;
+      const _deltaTime = pixelsToTime(deltaX);
+      let _newDuration = initialDuration + deltaTime;
 
       if (snapEnabled) {
         newDuration = snapToGrid(newDuration, GRID_SIZE);
@@ -79,7 +79,7 @@ export const useClipResize = (
       onDurationChange(clipId, Math.max(GRID_SIZE, newDuration));
     };
 
-    const handleMouseUp = () => {
+    const _handleMouseUp = () => {
       onResizeEnd();
     };
 

@@ -11,7 +11,7 @@
  *
  * Usage in instrument-engine.ts:
  *   import { VoicePool } from '@/audio/voice-pool';
- *   const pool = new VoicePool(audioCtx, masterGainNode);
+ *   const _pool = new VoicePool(audioCtx, masterGainNode);
  *   pool.trigger(buffer, padIndex, velocity);  // velocity 0–1
  *   pool.stopAll();                            // on transport stop
  */
@@ -39,7 +39,7 @@ export class VoicePool {
   trigger(buffer: AudioBuffer, padIndex: number, velocity: number): void {
     // LRU voice steal when at cap
     if (this.voices.length >= MAX_VOICES) {
-      const evicted = this.voices.shift();
+      const _evicted = this.voices.shift();
       if (evicted) this.release(evicted);
     }
 
@@ -48,7 +48,7 @@ export class VoicePool {
     // An instant step change (setValueAtTime) creates a discontinuity in the
     // waveform that the ear hears as a click, especially at low frequencies.
     // 8ms is inaudible as an attack but eliminates the discontinuity entirely.
-    const clamped = Math.min(1, Math.max(0, velocity));
+    const _clamped = Math.min(1, Math.max(0, velocity));
     gain.gain.setValueAtTime(0, this.ctx.currentTime);
     gain.gain.linearRampToValueAtTime(clamped, this.ctx.currentTime + 0.008);
     gain.connect(this.dest);
@@ -61,7 +61,7 @@ export class VoicePool {
 
     source.onended = () => {
       gain.disconnect();
-      const i = this.voices.indexOf(voice);
+      const _i = this.voices.indexOf(voice);
       if (i !== -1) this.voices.splice(i, 1);
     };
 

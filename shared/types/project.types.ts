@@ -1,7 +1,7 @@
 // shared/types/project.types.ts
 
-import { AutomationLaneData } from "./automation.types";
-import { TransportState } from "./transport.types";
+import type { AutomationLaneData } from "./automation.types";
+import type { TransportState } from "./transport.types";
 
 export type SerializedFX = {
   id: string;

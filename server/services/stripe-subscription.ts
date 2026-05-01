@@ -24,11 +24,12 @@ import Stripe from 'stripe';
 import { db } from '../db';
 import { subscriptions, stripeEvents } from '../../shared/schema-subscription';
 import { eq } from 'drizzle-orm';
-import {
+import type {
   SubscriptionTier,
   BillingCycle,
   SubscriptionStatus,
-  UserSubscription,
+  UserSubscription} from '../../shared/subscription.types';
+import {
   TIER_DEFINITIONS,
 } from '../../shared/subscription.types';
 

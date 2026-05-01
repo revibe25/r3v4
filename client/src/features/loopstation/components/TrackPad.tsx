@@ -73,10 +73,10 @@ const TRACK_NAMES = ['TRACK 1', 'TRACK 2', 'TRACK 3', 'TRACK 4', 'TRACK 5'];
 // ── Utilities ──────────────────────────────────────────────────────────────────
 function useQPulse(ready: boolean) {
   const [p, setP] = useState(false);
-  const id = useRef(-1);
+  const _id = useRef(-1);
   useEffect(() => {
     if (!ready) return;
-    const e = getLoopEngine();
+    const _e = getLoopEngine();
     id.current = e.scheduleRepeat(() => { setP(true); setTimeout(() => setP(false), 80); }, '1m');
     return () => { e.clearSchedule(id.current); id.current = -1; };
   }, [ready]);
@@ -119,22 +119,22 @@ const Fader: React.FC<{
   value: number; onChange: (v: number) => void;
   color: string; h?: number; label?: string;
 }> = ({ value, onChange, color, h = 80, label }) => {
-  const dragging = useRef(false);
-  const sy = useRef(0);
-  const sv = useRef(value);
-  const tref = useRef<HTMLDivElement>(null);
+  const _dragging = useRef(false);
+  const _sy = useRef(0);
+  const _sv = useRef(value);
+  const _tref = useRef<HTMLDivElement>(null);
 
-  const md = (e: React.MouseEvent) => {
+  const _md = (e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
     sy.current = e.clientY;
     sv.current = value;
-    const mv = (ev: MouseEvent) => {
+    const _mv = (ev: MouseEvent) => {
       if (!dragging.current || !tref.current) return;
-      const ht = tref.current.getBoundingClientRect().height;
+      const _ht = tref.current.getBoundingClientRect().height;
       onChange(Math.min(1, Math.max(0, sv.current - (ev.clientY - sy.current) / ht)));
     };
-    const up = () => {
+    const _up = () => {
       dragging.current = false;
       window.removeEventListener('mousemove', mv);
       window.removeEventListener('mouseup', up);
@@ -144,9 +144,9 @@ const Fader: React.FC<{
   };
 
   // Double-click to reset to unity (0.8)
-  const dblClick = () => onChange(0.8);
-  const capY = `${(1 - value) * (h - 8)}px`;
-  const unityY = `${(1 - 0.8) * (h - 8)}px`;
+  const _dblClick = () => onChange(0.8);
+  const _capY = `${(1 - value) * (h - 8)}px`;
+  const _unityY = `${(1 - 0.8) * (h - 8)}px`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -198,15 +198,15 @@ const Fader: React.FC<{
 const EQMini: React.FC<{
   low: number; mid: number; high: number; color: string;
 }> = ({ low, mid, high, color }) => {
-  const vals = [low, mid, high];
-  const labels = ['L', 'M', 'H'];
+  const _vals = [low, mid, high];
+  const _labels = ['L', 'M', 'H'];
   return (
     <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end', height: 18 }}>
       {vals.map((v, i) => {
-        const norm = (v + 20) / 40; // -20 to +20 → 0 to 1
-        const barH = Math.max(2, Math.round(norm * 16));
-        const midH = 8;
-        const isBoost = norm > 0.5;
+        const _norm = (v + 20) / 40; // -20 to +20 → 0 to 1
+        const _barH = Math.max(2, Math.round(norm * 16));
+        const _midH = 8;
+        const _isBoost = norm > 0.5;
         return (
           <div key={labels[i]} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
             <div style={{
@@ -236,9 +236,9 @@ const EQMini: React.FC<{
 const LoopRing: React.FC<{
   progress: number; color: string; isActive: boolean; size?: number;
 }> = ({ progress, color, isActive, size = 24 }) => {
-  const r = (size - 3) / 2;
-  const circ = 2 * Math.PI * r;
-  const dash = progress * circ;
+  const _r = (size - 3) / 2;
+  const _circ = 2 * Math.PI * r;
+  const _dash = progress * circ;
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#141414" strokeWidth={2} />
@@ -258,17 +258,17 @@ const LoopRing: React.FC<{
 const SendStrip: React.FC<{
   label: string; value: number; color: string; onChange: (v: number) => void;
 }> = ({ label, value, color, onChange }) => {
-  const w = 48;
-  const dragging = useRef(false);
-  const sx = useRef(0), sv2 = useRef(value);
-  const md = (e: React.MouseEvent) => {
+  const _w = 48;
+  const _dragging = useRef(false);
+  const _sx = useRef(0), sv2 = useRef(value);
+  const _md = (e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true; sx.current = e.clientX; sv2.current = value;
-    const mv = (ev: MouseEvent) => {
+    const _mv = (ev: MouseEvent) => {
       if (!dragging.current) return;
       onChange(Math.min(1, Math.max(0, sv2.current + (ev.clientX - sx.current) / 120)));
     };
-    const up = () => { dragging.current = false; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    const _up = () => { dragging.current = false; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
     window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
   };
   return (
@@ -312,8 +312,8 @@ const TrackPadInner: React.FC<Props> = ({
   onPitchChange, onFineChange, onChorusChange,
   onGateChange, onCompChange, onSatChange, onTrimChange,
 }) => {
-  const ctrl = useAnimation();
-  const pulse = useQPulse(isReady);
+  const _ctrl = useAnimation();
+  const _pulse = useQPulse(isReady);
 
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState<'eq' | 'fx' | 'mod' | 'dyn'>('eq');
@@ -321,23 +321,23 @@ const TrackPadInner: React.FC<Props> = ({
   const [ch, setCH] = useState(false);
   const [loopProgress, setLoopProgress] = useState(0);
   const [overdubBlend, setOD] = useState(0.7);
-  const ct = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lpRef = useRef<number>(0);
-  const lastBar = useRef(0);
+  const _ct = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const _lpRef = useRef<number>(0);
+  const _lastBar = useRef(0);
 
-  const isActive = track.state === 'playing' || track.state === 'overdubbing';
-  const isRec = track.state === 'recording';
-  const isWaiting = track.state === 'waiting_record' || track.state === 'waiting_play';
-  const col = SCOL[track.state] ?? '#1a1a1a';
-  const wc = track.state === 'overdubbing' ? '#ff6b00' : track.color;
+  const _isActive = track.state === 'playing' || track.state === 'overdubbing';
+  const _isRec = track.state === 'recording';
+  const _isWaiting = track.state === 'waiting_record' || track.state === 'waiting_play';
+  const _col = SCOL[track.state] ?? '#1a1a1a';
+  const _wc = track.state === 'overdubbing' ? '#ff6b00' : track.color;
 
   // Animate loop progress
   useEffect(() => {
     if (!isActive || !track.loopLength) { setLoopProgress(0); return; }
-    const tick = () => {
-      const pos = beat.bar % (Number(track.loopLength) || 4);
-      const beatInLoop = pos * 4 + beat.beat;
-      const totalBeats = (Number(track.loopLength) || 4) * 4;
+    const _tick = () => {
+      const _pos = beat.bar % (Number(track.loopLength) || 4);
+      const _beatInLoop = pos * 4 + beat.beat;
+      const _totalBeats = (Number(track.loopLength) || 4) * 4;
       setLoopProgress(beatInLoop / totalBeats);
       lpRef.current = requestAnimationFrame(tick);
     };
@@ -364,13 +364,13 @@ const TrackPadInner: React.FC<Props> = ({
     }
   }, [isActive, isRec, isWaiting, beat.beat, pulse, bpm, ctrl]);
 
-  const hCH = useCallback(() => { ct.current = setTimeout(() => setCH(true), 600); }, []);
-  const hCU = useCallback(() => {
+  const _hCH = useCallback(() => { ct.current = setTimeout(() => setCH(true), 600); }, []);
+  const _hCU = useCallback(() => {
     if (ct.current) clearTimeout(ct.current);
     if (ch) { onClear(track.id); setCH(false); } else setCH(false);
   }, [ch, onClear, track.id]);
 
-  const trackBgGrad = isActive
+  const _trackBgGrad = isActive
     ? `radial-gradient(ellipse at 50% 80%, ${col}0d 0%, #060606 100%)`
     : '#070707';
 
@@ -546,14 +546,14 @@ const TrackPadInner: React.FC<Props> = ({
           <div style={{ flex: 1, position: 'relative', height: 8, background: '#090909', border: '1px solid #141414', cursor: 'ew-resize' }}
             onMouseDown={e => {
               e.preventDefault();
-              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-              const sv = track.pan;
-              const sx = e.clientX;
-              const mv = (ev: MouseEvent) => {
-                const newPan = Math.min(1, Math.max(-1, sv + (ev.clientX - sx) / (rect.width / 2)));
+              const _rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              const _sv = track.pan;
+              const _sx = e.clientX;
+              const _mv = (ev: MouseEvent) => {
+                const _newPan = Math.min(1, Math.max(-1, sv + (ev.clientX - sx) / (rect.width / 2)));
                 onPanChange(track.id, newPan);
               };
-              const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+              const _up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
               window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
             }}
             onDoubleClick={() => onPanChange(track.id, 0)}
@@ -722,4 +722,4 @@ const TrackPadInner: React.FC<Props> = ({
   );
 };
 
-export const TrackPad = React.memo(TrackPadInner);
+export const _TrackPad = React.memo(TrackPadInner);

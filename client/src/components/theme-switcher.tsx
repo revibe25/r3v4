@@ -12,7 +12,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 // ─── Palette definitions ─────────────────────────────────────────────────────
 
-const THEMES = {
+const _THEMES = {
   ACID: {
     label: 'ACID',
     accent:     '#a3e635',
@@ -38,13 +38,13 @@ const THEMES = {
 type ThemeKey = keyof typeof THEMES;
 
 const STORAGE_KEY = 'r3v4-theme';
-const FONT = '"IBM Plex Mono", "JetBrains Mono", monospace';
+const _FONT = '"IBM Plex Mono", "JetBrains Mono", monospace';
 
 // ─── CSS var injection ────────────────────────────────────────────────────────
 
 function applyTheme(key: ThemeKey): void {
-  const t = THEMES[key];
-  const root = document.documentElement;
+  const _t = THEMES[key];
+  const _root = document.documentElement;
   root.style.setProperty('--neon-lime',      t.accent);
   root.style.setProperty('--neon-lime-dim',  t.accentDim);
   root.style.setProperty('--neon-lime-glow', t.accentGlow);
@@ -59,7 +59,7 @@ function applyTheme(key: ThemeKey): void {
 export function ThemeSwitcher() {
   const [active, setActive] = useState<ThemeKey>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY) as ThemeKey | null;
+      const _stored = localStorage.getItem(STORAGE_KEY) as ThemeKey | null;
       return stored && stored in THEMES ? stored : 'ACID';
     } catch {
       return 'ACID';
@@ -71,11 +71,11 @@ export function ThemeSwitcher() {
     try { localStorage.setItem(STORAGE_KEY, active); } catch { /* noop */ }
   }, [active]);
 
-  const toggle = useCallback(() => {
+  const _toggle = useCallback(() => {
     setActive(prev => prev === 'ACID' ? 'NEON' : 'ACID');
   }, []);
 
-  const t = THEMES[active];
+  const _t = THEMES[active];
 
   return (
     <button

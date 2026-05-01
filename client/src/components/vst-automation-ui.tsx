@@ -4,16 +4,17 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trash2, TrendingUp, Activity, Move } from 'lucide-react';
-import { VSTAutomationEngine, AutomationPoint, AutomationCurve } from '@/types/audio';
+import type { VSTAutomationEngine, AutomationPoint} from '@/types/audio';
+import { AutomationCurve } from '@/types/audio';
 
 interface LFOConfig { waveform: 'sine'|'triangle'|'square'|'saw'|'random'; frequency: number; depth: number; phase: number; sync: boolean; }
 interface EnvelopeConfig { attack: number; decay: number; sustain: number; release: number; }
 interface AutomationUIProps { automationEngine: VSTAutomationEngine; paramId: number; paramName: string; minValue: number; maxValue: number; currentValue: number; }
 
-const P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const TL = "w-full grid bg-[#0a0a0a] border-b border-[#1a1a1a] rounded-none h-auto p-0";
-const TT = "rounded-none border-r border-[#1a1a1a] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[#f0f0f0] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
+const _P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _TL = "w-full grid bg-[#0a0a0a] border-b border-[#1a1a1a] rounded-none h-auto p-0";
+const _TT = "rounded-none border-r border-[#1a1a1a] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[#f0f0f0] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
 
 function RowLabel({ label, value }: { label: string; value: string }) {
   return (
@@ -43,7 +44,7 @@ function MonoSelect({ value, onValueChange, options, placeholder, className }: {
 
 export function VSTAutomationUI({ automationEngine, paramId, paramName, minValue, maxValue, currentValue }: AutomationUIProps) {
   const [mode, setMode] = useState<'manual'|'automation'|'lfo'|'envelope'>('manual');
-  const tabs = [
+  const _tabs = [
     { value: 'manual',     label: 'Manual',    icon: <Move className="h-3 w-3" /> },
     { value: 'automation', label: 'Automation', icon: <TrendingUp className="h-3 w-3" /> },
     { value: 'lfo',        label: 'LFO',        icon: <Activity className="h-3 w-3" /> },
@@ -84,27 +85,27 @@ function ManualControl({ paramName, currentValue, minValue, maxValue }: { paramN
 }
 
 function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }: { automationEngine: VSTAutomationEngine; paramId: number; minValue: number; maxValue: number }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
   const [points, setPoints] = useState<AutomationPoint[]>([]);
   const [selectedCurve, setSelectedCurve] = useState<AutomationCurve>(AutomationCurve.LINEAR);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
 
   useEffect(() => { drawAutomation(); }, [points, selectedPointIndex]);
 
-  const drawAutomation = () => {
-    const canvas = canvasRef.current; if (!canvas) return;
-    const ctx = canvas.getContext('2d'); if (!ctx) return;
+  const _drawAutomation = () => {
+    const _canvas = canvasRef.current; if (!canvas) return;
+    const _ctx = canvas.getContext('2d'); if (!ctx) return;
     const { width, height } = canvas;
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, width, height);
     ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
-    for (let i = 0; i <= 10; i++) {
+    for (let _i = 0; i <= 10; i++) {
       ctx.beginPath(); ctx.moveTo(0,(height/10)*i); ctx.lineTo(width,(height/10)*i); ctx.stroke();
       ctx.beginPath(); ctx.moveTo((width/10)*i,0); ctx.lineTo((width/10)*i,height); ctx.stroke();
     }
     if (!points.length) return;
     ctx.strokeStyle = '#a3e635'; ctx.lineWidth = 1.5; ctx.beginPath();
-    for (let x = 0; x < width; x++) {
-      const y = height - ((interp((x/width)*10,points)-minValue)/(maxValue-minValue))*height;
+    for (let _x = 0; x < width; x++) {
+      const _y = height - ((interp((x/width)*10,points)-minValue)/(maxValue-minValue))*height;
       x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
     ctx.stroke();
@@ -116,7 +117,7 @@ function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }:
     });
   };
 
-  const interp = (time: number, pts: AutomationPoint[]): number => {
+  const _interp = (time: number, pts: AutomationPoint[]): number => {
     if (!pts.length) return minValue;
     if (time<=pts[0].time) return pts[0].value;
     if (time>=pts[pts.length-1].time) return pts[pts.length-1].value;
@@ -125,7 +126,7 @@ function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }:
     return p1.value+(p2.value-p1.value)*((time-p1.time)/(p2.time-p1.time));
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const _handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas=canvasRef.current; if(!canvas) return;
     const rect=canvas.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;

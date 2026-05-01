@@ -105,13 +105,13 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   useEffect(() => {
     if (!contextMenu) return;
 
-    const onKey = (e: KeyboardEvent) => {
+    const _onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
         setContextMenu(null);
       }
     };
-    const onOutside = (e: MouseEvent) => {
+    const _onOutside = (e: MouseEvent) => {
       if (
         contextMenuRef.current &&
         !contextMenuRef.current.contains(e.target as Node)
@@ -133,10 +133,10 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   //   Keyed on `tracks` reference — Zustand guarantees stability for
   //   unmodified arrays.
   const { visibleTracks, groupedTracks } = useMemo(() => {
-    const visible = tracks.filter(t => !t.hidden);
-    const grouped = new Map<string, Track[]>();
+    const _visible = tracks.filter(t => !t.hidden);
+    const _grouped = new Map<string, Track[]>();
     visible.forEach(track => {
-      const groupId = track.groupId ?? 'ungrouped';
+      const _groupId = track.groupId ?? 'ungrouped';
       if (!grouped.has(groupId)) grouped.set(groupId, []);
       grouped.get(groupId)!.push(track);
     });
@@ -144,7 +144,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   }, [tracks]);
 
   // Drag handlers
-  const handleDragStart = useCallback((
+  const _handleDragStart = useCallback((
     e: React.DragEvent, 
     source: 'fx' | 'track', 
     trackId: string, 
@@ -158,7 +158,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     }
   }, []);
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const _handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   }, []);
@@ -166,7 +166,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   // PATCH-M03: explicit branches for same-track reorder vs cross-track drop.
   //   Root cause: cross-track drop silent no-op contradicts 'move' cursor.
   //   Future extension point: expose onMoveFX(fromTrack, fromIdx, toTrack, toIdx).
-  const handleDropFX = useCallback((
+  const _handleDropFX = useCallback((
     e: React.DragEvent,
     targetTrackId: string,
     targetIndex: number,
@@ -200,7 +200,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     }
   }, [dragState, onReorderFX]);
 
-  const handleDropTrack = useCallback((
+  const _handleDropTrack = useCallback((
     e: React.DragEvent, 
     targetTrackId: string
   ) => {
@@ -221,9 +221,9 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     }
   }, [dragState, onReorderTracks]);
 
-  const toggleGroup = useCallback((groupId: string) => {
+  const _toggleGroup = useCallback((groupId: string) => {
     setExpandedGroups(prev => {
-      const newSet = new Set(prev);
+      const _newSet = new Set(prev);
       if (newSet.has(groupId)) {
         newSet.delete(groupId);
       } else {
@@ -240,7 +240,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   const [meterLevels, setMeterLevels] = useState<Record<string, number>>({});
   const meterPeaks     = useRef<Record<string, number>>({});
   // RA-03: last RAF timestamp — persists across renders in a ref
-  const meterLastTsRef = useRef<number>(0);
+  const _meterLastTsRef = useRef<number>(0);
   const meterRafRef    = useRef<number>(0);
 
   useEffect(() => {
@@ -248,17 +248,17 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
     //   15 dB/s × elapsed_seconds is correct at 30/60/90/120/144 Hz.
     const DECAY_DB_PER_SEC = 15;
 
-    const animate = (timestamp: number) => {
+    const _animate = (timestamp: number) => {
       // delta_s: 0 on first frame (lastTs == 0 after effect restart)
       const delta_s = meterLastTsRef.current === 0
         ? 0
         : (timestamp - meterLastTsRef.current) / 1000;
       meterLastTsRef.current = timestamp;
-      const decay = DECAY_DB_PER_SEC * delta_s;
+      const _decay = DECAY_DB_PER_SEC * delta_s;
 
       setMeterLevels(prev => {
         const next: Record<string, number> = {};
-        let changed = false;
+        let _changed = false;
         for (const track of tracks) {
           const liveLevel  = track.meter ?? 0;
           const heldPeak   = meterPeaks.current[track.id] ?? 0;
@@ -281,10 +281,10 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   }, [tracks]); // re-init when track list changes
 
   // Format timecode
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 100);
+  const _formatTime = (seconds: number): string => {
+    const _mins = Math.floor(seconds / 60);
+    const _secs = Math.floor(seconds % 60);
+    const _ms = Math.floor((seconds % 1) * 100);
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
   };
 
@@ -352,8 +352,8 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
       {/* Tracks Container */}
       <div className="flex-1 overflow-auto" ref={trackListRef}>
         {Array.from(groupedTracks.entries()).map(([groupId, groupTracks]) => {
-          const isExpanded = groupId === 'ungrouped' || expandedGroups.has(groupId);
-          const isGroup = groupId !== 'ungrouped';
+          const _isExpanded = groupId === 'ungrouped' || expandedGroups.has(groupId);
+          const _isGroup = groupId !== 'ungrouped';
 
           return (
             <div key={groupId}>
