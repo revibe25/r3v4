@@ -1,5 +1,5 @@
 // =============================================================================
-// [INFO] This is the canonical loaded component as of 2026-04-28. Modular version is dead code.
+// [INFO] This is the canonical loaded component as of 2026-04-29. Modular version is dead code.
 // =============================================================================
 // This is the original monolithic MultiTrackPanel (~1600 lines).
 // It has been superseded by the modular refactor at:
@@ -7,13 +7,13 @@
 //   components/multi-track-panel/multi-track-panel.tsx
 //   components/multi-track-panel/index.ts    ← App.tsx imports from here
 //
-// [INFO] This is the canonical loaded component as of 2026-04-28. Modular version is dead code.
+// [INFO] This is the canonical loaded component as of 2026-04-29. Modular version is dead code.
 // reference only and should be deleted once the modular version is confirmed
 // stable in production.
 //
 // Tracked: Bug M-4 (R3 v4 Advanced Audit)
 // =============================================================================
-// [INFO] This is the canonical loaded component as of 2026-04-28. Modular version is dead code.
+// [INFO] This is the canonical loaded component as of 2026-04-29. Modular version is dead code.
 
 // @ts-nocheck
 /**
