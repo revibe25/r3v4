@@ -13,7 +13,7 @@ export const Playhead: React.FC<PlayheadProps> = ({
   height = '100%',
   color = 'bg-red-500'
 }) => {
-  const _left = position * pixelsPerSecond;
+  const left = position * pixelsPerSecond;
 
   return (
     <div

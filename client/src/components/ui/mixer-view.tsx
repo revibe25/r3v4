@@ -3,7 +3,7 @@ import "@/store/mixer-store"
 import { MixerStrip } from "./mixer-strip";
 
 export function MixerView() {
-  const _channels = useMixerStore(state =>
+  const channels = useMixerStore(state =>
     Object.keys(state.channels)
   );
 

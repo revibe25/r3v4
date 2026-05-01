@@ -13,11 +13,11 @@ export function MixerStrip({ id }: { id: string }) {
     channels,
   } = useMixerStore();
 
-  const _meter = useMeterStore(state =>
+  const meter = useMeterStore(state =>
     state.readMeter(id)
   );
 
-  const _ch = channels[id];
+  const ch = channels[id];
   if (!ch) return null;
 
   return (

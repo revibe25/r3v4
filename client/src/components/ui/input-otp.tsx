@@ -4,7 +4,7 @@ import { Dot } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
-const _InputOTP = React.forwardRef<
+const InputOTP = React.forwardRef<
   React.ElementRef<typeof OTPInput>,
   React.ComponentPropsWithoutRef<typeof OTPInput>
 >(({ className, containerClassName, ...props }, ref) => (
@@ -20,7 +20,7 @@ const _InputOTP = React.forwardRef<
 ))
 InputOTP.displayName = "InputOTP"
 
-const _InputOTPGroup = React.forwardRef<
+const InputOTPGroup = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => (
@@ -28,11 +28,11 @@ const _InputOTPGroup = React.forwardRef<
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
 
-const _InputOTPSlot = React.forwardRef<
+const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
-  const _inputOTPContext = React.useContext(OTPInputContext)
+  const inputOTPContext = React.useContext(OTPInputContext)
   const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
 
   return (
@@ -56,7 +56,7 @@ const _InputOTPSlot = React.forwardRef<
 })
 InputOTPSlot.displayName = "InputOTPSlot"
 
-const _InputOTPSeparator = React.forwardRef<
+const InputOTPSeparator = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >(({ ...props }, ref) => (
