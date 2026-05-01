@@ -1,0 +1,38 @@
+import create from "zustand"
+
+export type SessionState = {
+  sessionId: string | null
+  isActive: boolean
+  startSession: () => Promise<void>
+  endSession: () => Promise<void>
+}
+
+export const useSessionStore = create<SessionState>((set, get) => ({
+  sessionId: null,
+  isActive: false,
+  startSession: async () => {
+    if (get().isActive) return
+    const res = await fetch('/api/trpc/sessions.startSession', {
+      method: 'POST',
+      credentials: 'include',
+    })
+    const data = await res.json()
+    set({
+      sessionId: data.result.data.sessionId,
+      isActive: true,
+    })
+  },
+  endSession: async () => {
+    const { sessionId } = get()
+    if (!sessionId) return
+    await fetch('/api/trpc/sessions.endSession', {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({ sessionId }),
+    })
+    set({
+      sessionId: null,
+      isActive: false,
+    })
+  },
+}))

@@ -1,0 +1,17 @@
+import create from "zustand"
+
+export type SessionMetricsState = {
+  metrics: {
+    aiActionsCount: number
+    acceptanceRate: number
+    timeSavedMs: number
+  } | null
+  setMetrics: (metrics: SessionMetricsState['metrics']) => void
+  reset: () => void
+}
+
+export const useSessionMetricsStore = create<SessionMetricsState>((set) => ({
+  metrics: null,
+  setMetrics: (metrics) => set({ metrics }),
+  reset: () => set({ metrics: null }),
+}))

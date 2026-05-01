@@ -1,0 +1,31 @@
+import { useSessionStore } from '../stores/session-store'
+import { useSessionMetricsStore } from '../stores/session-metrics-store'
+import { useEffect } from 'react'
+
+export function useSessionMetricsSync() {
+  const { sessionId, isActive } = useSessionStore()
+  const { setMetrics } = useSessionMetricsStore()
+  useEffect(() => {
+    if (!sessionId || !isActive) return
+    let cancelled = false
+    const tick = async () => {
+      try {
+        const res = await fetch('/api/trpc/sessionMetrics.getBySessionId', {
+          method: 'POST',
+          credentials: 'include',
+          body: JSON.stringify({ sessionId }),
+        })
+        const json = await res.json()
+        if (!cancelled) {
+          setMetrics(json.result.data)
+        }
+      } catch {}
+    }
+    tick()
+    const interval = setInterval(tick, 2000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [sessionId, isActive])
+}

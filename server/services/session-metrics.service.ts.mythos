@@ -1,0 +1,37 @@
+
+export async function recordAIDecisionMetric({
+  sessionId,
+  outcome,
+  timeSavedMsDelta = 0,
+}: {
+  sessionId: string
+  outcome: 'accepted' | 'rejected' | 'ignored'
+  timeSavedMsDelta?: number
+}) {
+  const existing = await db.query.sessionMetrics.findFirst({
+    where: eq(sessionMetrics.sessionId, sessionId),
+  })
+  const aiActionsCount = (existing?.aiActionsCount ?? 0) + 1
+  const acceptedCount = (existing?.acceptedCount ?? 0) + (outcome === 'accepted' ? 1 : 0)
+  const acceptanceRate = aiActionsCount === 0 ? 0 : acceptedCount / aiActionsCount
+  const timeSavedMs = (existing?.timeSavedMs ?? 0) + timeSavedMsDelta
+  if (!existing) {
+    await db.insert(sessionMetrics).values({
+      sessionId,
+      aiActionsCount: 1,
+      acceptedCount,
+      acceptanceRate,
+      timeSavedMs,
+    })
+    return
+  }
+  await db
+    .update(sessionMetrics)
+    .set({
+      aiActionsCount,
+      acceptedCount,
+      acceptanceRate,
+      timeSavedMs,
+    })
+    .where(eq(sessionMetrics.sessionId, sessionId))
+}
