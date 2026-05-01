@@ -26,11 +26,11 @@ export function useSessionMetrics() {
   const startMut  = trpc.sessionMetrics.start.useMutation();
   const stopMut   = trpc.sessionMetrics.stop.useMutation();
   const totalsQ          = trpc.sessionMetrics.totals.useQuery();
-  const recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
+  const _recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
 
   /** Call when the DAW session begins (tracks loaded, transport started). */
-  const startSession = useCallback(async (trackIds: string[], bpm: number) => {
-    const res = await startMut.mutateAsync({ trackIds, bpm });
+  const _startSession = useCallback(async (trackIds: string[], bpm: number) => {
+    const _res = await startMut.mutateAsync({ trackIds, bpm });
     setSessionId(res.sessionId);
     startedAtRef.current = Date.now();
     setStats({ ...EMPTY_STATS, sessionStartedAt: startedAtRef.current });
@@ -38,9 +38,9 @@ export function useSessionMetrics() {
   }, [startMut]);
 
   /** Call on transport stop / page unload. Returns persisted summary. */
-  const stopSession = useCallback(async () => {
+  const _stopSession = useCallback(async () => {
     if (!sessionId) return null;
-    const summary = await stopMut.mutateAsync({ sessionId });
+    const _summary = await stopMut.mutateAsync({ sessionId });
     setStats(prev => ({
       ...prev,
       estimatedMinutesSaved: Math.round(summary.timeSavedSeconds / 60),
@@ -50,22 +50,22 @@ export function useSessionMetrics() {
   }, [sessionId, stopMut]);
 
   /** Increment counters in real-time from LLPTE events (no server round-trip). */
-  const recordAIAdjustment = useCallback(() => {
+  const _recordAIAdjustment = useCallback(() => {
     setStats(prev => ({ ...prev, totalAIAdjustments: prev.totalAIAdjustments + 1 }));
   }, []);
 
-  const recordManualAdjustment = useCallback(() => {
+  const _recordManualAdjustment = useCallback(() => {
     setStats(prev => ({ ...prev, totalManualAdjustments: prev.totalManualAdjustments + 1 }));
   }, []);
 
-  const recordClippingPrevented = useCallback(() => {
+  const _recordClippingPrevented = useCallback(() => {
     setStats(prev => ({
       ...prev,
       clippingEventsPreventedCount: prev.clippingEventsPreventedCount + 1,
     }));
   }, []);
 
-  const recordSuggestionAccepted = useCallback((trackId?: string) => {
+  const _recordSuggestionAccepted = useCallback((trackId?: string) => {
     setStats(prev => ({ ...prev, acceptedSuggestions: prev.acceptedSuggestions + 1 }));
     if (sessionId) {
       recordDecisionMut.mutate({
@@ -82,7 +82,7 @@ export function useSessionMetrics() {
     }
   }, [sessionId, recordDecisionMut]);
 
-  const recordSuggestionRejected = useCallback((trackId?: string) => {
+  const _recordSuggestionRejected = useCallback((trackId?: string) => {
     setStats(prev => ({ ...prev, rejectedSuggestions: prev.rejectedSuggestions + 1 }));
     if (sessionId) {
       recordDecisionMut.mutate({

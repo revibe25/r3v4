@@ -16,7 +16,7 @@ import type {
   VSTAutomationEngine,
   MixerChannel,
 } from '@/types/audio';
-import { SidechainRouter }  from '@/audio/fx/vst-sidechain';
+import type { SidechainRouter }  from '@/audio/fx/vst-sidechain';
 import { getAudioContext } from '@/audio/core/audio-context';
 
 // ============================================
@@ -115,15 +115,15 @@ function VSTMasterPanel({
   const [activeTab, setActiveTab] = useState('project');
 
   // Lazy AudioContext for serializer (only needed for sampleRate)
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const getAudioCtx = () => {
+  const _audioCtxRef = useRef<AudioContext | null>(null);
+  const _getAudioCtx = () => {
     if (!audioCtxRef.current) audioCtxRef.current = getAudioContext();
     return audioCtxRef.current;
   };
 
-  const handleSaveProject = async () => {
+  const _handleSaveProject = async () => {
     try {
-      const projectData = await onProjectSave();
+      const _projectData = await onProjectSave();
       console.log('Project saved:', projectData);
       return projectData;
     } catch (error) {
@@ -132,7 +132,7 @@ function VSTMasterPanel({
     }
   };
 
-  const handleLoadProject = async (data: ProjectData) => {
+  const _handleLoadProject = async (data: ProjectData) => {
     setLoadingProject(true);
     try {
       await onProjectLoad(data);
@@ -204,7 +204,7 @@ function VSTMasterPanel({
             <VSTProjectManagerUI
               onSave={() => {
                 // Build chains Map directly from channel fxChains
-                const chains = new Map<string, FXChain>();
+                const _chains = new Map<string, FXChain>();
                 channels.forEach(ch => chains.set(ch.id, ch.fxChain));
                 return VSTProjectSerializer.serializeProject(
                   chains,
@@ -213,8 +213,8 @@ function VSTMasterPanel({
                 );
               }}
               onLoad={async (data: SerializedVSTChain) => {
-                const audioCtx = getAudioCtx();
-                const restoredChains = await VSTProjectSerializer.deserializeProject(
+                const _audioCtx = getAudioCtx();
+                const _restoredChains = await VSTProjectSerializer.deserializeProject(
                   data,
                   audioCtx
                 );

@@ -105,13 +105,13 @@ export class VSTLoader {
     await this.ensureWorkletRegistered(audioCtx);
 
     try {
-      const vstUrl = new URL(url, window.location.href);
+      const _vstUrl = new URL(url, window.location.href);
 
       // Fetch with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const _controller = new AbortController();
+      const _timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const response = await fetch(vstUrl.href, {
+      const _response = await fetch(vstUrl.href, {
         signal: controller.signal,
         headers: { Accept: 'application/wasm' },
       });
@@ -128,8 +128,8 @@ export class VSTLoader {
           getSampleRate: () => sampleRate || audioCtx.sampleRate,
           getCurrentTime: () => audioCtx.currentTime,
           consoleLog: (ptr: number, len: number, memory: WebAssembly.Memory) => {
-            const bytes = new Uint8Array(memory.buffer, ptr, len);
-            const str = new TextDecoder().decode(bytes);
+            const _bytes = new Uint8Array(memory.buffer, ptr, len);
+            const _str = new TextDecoder().decode(bytes);
             console.log('[VST]', str);
           },
           sin: Math.sin,
@@ -148,8 +148,8 @@ export class VSTLoader {
       };
 
       // Instantiate WASM
-      const result = await WebAssembly.instantiateStreaming(response, enhancedImports);
-      const vstExports = result.instance.exports as VSTExports;
+      const _result = await WebAssembly.instantiateStreaming(response, enhancedImports);
+      const _vstExports = result.instance.exports as VSTExports;
 
       if (!vstExports.memory) {
         throw new Error('VST module must export memory');
@@ -161,13 +161,13 @@ export class VSTLoader {
       }
 
       // Get parameter information
-      const parameters = await this.probeParameters(vstExports, parameterCount);
+      const _parameters = await this.probeParameters(vstExports, parameterCount);
 
       // Get latency
-      const latency = vstExports.getLatency ? vstExports.getLatency() : 0;
+      const _latency = vstExports.getLatency ? vstExports.getLatency() : 0;
 
       // Extract metadata (if available)
-      const metadata = await this.extractMetadata(vstExports, url);
+      const _metadata = await this.extractMetadata(vstExports, url);
 
       const vstModule: VSTModule = {
         module: result.module,
@@ -206,10 +206,10 @@ export class VSTLoader {
   ): Promise<VSTParameterInfo[]> {
     const parameters: VSTParameterInfo[] = [];
 
-    const paramCount = exports.getParameterCount ? exports.getParameterCount() : maxParams;
+    const _paramCount = exports.getParameterCount ? exports.getParameterCount() : maxParams;
 
-    for (let i = 0; i < paramCount; i++) {
-      const defaultValue = exports.getParameter ? exports.getParameter(i) : 0;
+    for (let _i = 0; i < paramCount; i++) {
+      const _defaultValue = exports.getParameter ? exports.getParameter(i) : 0;
 
       parameters.push({
         id: i,
@@ -229,8 +229,8 @@ export class VSTLoader {
     exports: VSTExports,
     url: string
   ): Promise<VSTMetadata> {
-    const filename = url.split('/').pop() || 'unknown';
-    const name = filename.replace(/\.wasm$/, '');
+    const _filename = url.split('/').pop() || 'unknown';
+    const _name = filename.replace(/\.wasm$/, '');
 
     return {
       name,

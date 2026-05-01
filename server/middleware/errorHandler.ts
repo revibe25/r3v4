@@ -3,7 +3,7 @@
  * Handles ZodError (422) and AppError shapes.
  * Response shape is backward-compatible with existing R3 error format.
  */
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger } from '../lib/logger';
 

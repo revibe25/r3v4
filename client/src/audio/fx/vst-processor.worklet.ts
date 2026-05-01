@@ -48,7 +48,7 @@ class VSTProcessor extends AudioWorkletProcessor {
   constructor(options: AudioWorkletNodeOptions) {
     super();
     
-    const processorOptions = options.processorOptions as VSTProcessorOptions;
+    const _processorOptions = options.processorOptions as VSTProcessorOptions;
     this.inputChannels = processorOptions.inputChannels || 2;
     this.outputChannels = processorOptions.outputChannels || 2;
     
@@ -64,7 +64,7 @@ class VSTProcessor extends AudioWorkletProcessor {
   private async initializeWasm(options: VSTProcessorOptions): Promise<void> {
     try {
       // Import WASM with audio-specific imports
-      const imports = {
+      const _imports = {
         env: {
           getSampleRate: () => sampleRate,
           getCurrentTime: () => currentTime,
@@ -90,9 +90,9 @@ class VSTProcessor extends AudioWorkletProcessor {
       this.wasmMemory = options.wasmMemory || this.wasmExports.memory;
 
       // Allocate audio buffers in WASM memory
-      const bytesPerSample = 4; // Float32
-      const inputBufferSize = this.blockSize * this.inputChannels * bytesPerSample;
-      const outputBufferSize = this.blockSize * this.outputChannels * bytesPerSample;
+      const _bytesPerSample = 4; // Float32
+      const _inputBufferSize = this.blockSize * this.inputChannels * bytesPerSample;
+      const _outputBufferSize = this.blockSize * this.outputChannels * bytesPerSample;
       
       // Simple allocation at specific offsets (in production, use proper allocator)
       this.inputBufferPtr = 1024; // Start after initial WASM data
@@ -109,7 +109,7 @@ class VSTProcessor extends AudioWorkletProcessor {
       }
 
       // Initialize parameters
-      for (let i = 0; i < (options.parameterCount || 32); i++) {
+      for (let _i = 0; i < (options.parameterCount || 32); i++) {
         if (this.wasmExports.getParameter) {
           this.parameters.set(i, this.wasmExports.getParameter(i));
         } else {
@@ -190,8 +190,8 @@ class VSTProcessor extends AudioWorkletProcessor {
 
   private applyAutomation(currentFrame: number): void {
     this.automationData.forEach((values, paramId) => {
-      const index = currentFrame % values.length;
-      const value = values[index];
+      const _index = currentFrame % values.length;
+      const _value = values[index];
       this.setParameter(paramId, value);
     });
   }
@@ -202,7 +202,7 @@ class VSTProcessor extends AudioWorkletProcessor {
   ): Promise<void> {
     try {
       // Save current state
-      const currentState = new Map(this.parameters);
+      const _currentState = new Map(this.parameters);
       
       // Suspend old instance
       if (this.wasmExports?.suspend) {
@@ -215,7 +215,7 @@ class VSTProcessor extends AudioWorkletProcessor {
       }
 
       // Initialize new instance
-      const imports = {
+      const _imports = {
         env: {
           getSampleRate: () => sampleRate,
           getCurrentTime: () => currentTime,
@@ -240,7 +240,7 @@ class VSTProcessor extends AudioWorkletProcessor {
       }
 
       // Restore state or apply preset
-      const stateToApply = preset || Object.fromEntries(currentState);
+      const _stateToApply = preset || Object.fromEntries(currentState);
       Object.entries(stateToApply).forEach(([paramId, value]) => {
         this.setParameter(Number(paramId), value);
       });
@@ -270,7 +270,7 @@ class VSTProcessor extends AudioWorkletProcessor {
   ): boolean {
     if (!this.isInitialized || !this.wasmExports || !this.wasmMemory) {
       // Pass through
-      for (let ch = 0; ch < outputs[0].length; ch++) {
+      for (let _ch = 0; ch < outputs[0].length; ch++) {
         if (inputs[0]?.[ch]) {
           outputs[0][ch].set(inputs[0][ch]);
         }
@@ -278,9 +278,9 @@ class VSTProcessor extends AudioWorkletProcessor {
       return true;
     }
 
-    const input = inputs[0];
-    const output = outputs[0];
-    const frameCount = output[0].length;
+    const _input = inputs[0];
+    const _output = outputs[0];
+    const _frameCount = output[0].length;
 
     // Apply automation
     this.applyAutomation(this.automationPosition);
@@ -288,7 +288,7 @@ class VSTProcessor extends AudioWorkletProcessor {
 
     if (this.isBypassed) {
       // Bypass: copy input to output
-      for (let ch = 0; ch < output.length; ch++) {
+      for (let _ch = 0; ch < output.length; ch++) {
         if (input?.[ch]) {
           output[ch].set(input[ch]);
         }
@@ -298,12 +298,12 @@ class VSTProcessor extends AudioWorkletProcessor {
 
     try {
       // Interleave input channels into WASM memory
-      const memoryView = new Float32Array(this.wasmMemory.buffer);
-      const inputOffset = this.inputBufferPtr / 4;
+      const _memoryView = new Float32Array(this.wasmMemory.buffer);
+      const _inputOffset = this.inputBufferPtr / 4;
       
-      for (let frame = 0; frame < frameCount; frame++) {
-        for (let ch = 0; ch < this.inputChannels; ch++) {
-          const sample = input[ch]?.[frame] || 0;
+      for (let _frame = 0; frame < frameCount; frame++) {
+        for (let _ch = 0; ch < this.inputChannels; ch++) {
+          const _sample = input[ch]?.[frame] || 0;
           memoryView[inputOffset + frame * this.inputChannels + ch] = sample;
         }
       }
@@ -318,11 +318,11 @@ class VSTProcessor extends AudioWorkletProcessor {
       );
 
       // Deinterleave output from WASM memory
-      const outputOffset = this.outputBufferPtr / 4;
+      const _outputOffset = this.outputBufferPtr / 4;
       
-      for (let frame = 0; frame < frameCount; frame++) {
-        for (let ch = 0; ch < this.outputChannels; ch++) {
-          const sample = memoryView[outputOffset + frame * this.outputChannels + ch];
+      for (let _frame = 0; frame < frameCount; frame++) {
+        for (let _ch = 0; ch < this.outputChannels; ch++) {
+          const _sample = memoryView[outputOffset + frame * this.outputChannels + ch];
           output[ch][frame] = sample;
         }
       }
@@ -330,7 +330,7 @@ class VSTProcessor extends AudioWorkletProcessor {
       console.error('VST processing error:', error);
       
       // Pass through on error
-      for (let ch = 0; ch < output.length; ch++) {
+      for (let _ch = 0; ch < output.length; ch++) {
         if (input?.[ch]) {
           output[ch].set(input[ch]);
         }

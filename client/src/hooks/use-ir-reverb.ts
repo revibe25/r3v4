@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IRReverbEngine, IRPreset, IR_CATALOG } from "../audio/effects/ir-reverb-engine";
+import type { IRPreset} from "../audio/effects/ir-reverb-engine";
+import { IRReverbEngine, IR_CATALOG } from "../audio/effects/ir-reverb-engine";
 import { getLoopEngine } from "../features/loopstation/engine/loopEngine";
 
 export interface IRReverbHookState {
@@ -32,29 +33,29 @@ export function useIRReverb(): IRReverbHookState {
   const [wet,     setWetState]= useState(0.35);
   const [currentPreset, setCurrentPreset] = useState<IRPreset | null>(null);
 
-  const wire = useCallback(() => {
+  const _wire = useCallback(() => {
     if (wiredRef.current) return;
     import("tone").then(Tone => {
-      const rawCtx = Tone.getContext().rawContext as AudioContext;
+      const _rawCtx = Tone.getContext().rawContext as AudioContext;
       engineRef.current.init(rawCtx);
-      const le = getLoopEngine();
+      const _le = getLoopEngine();
       if (le.initialized) { engineRef.current.patchIntoLoopEngine(le); wiredRef.current = true; }
       if (pendingRef.current) {
-        const url = pendingRef.current; pendingRef.current = null;
+        const _url = pendingRef.current; pendingRef.current = null;
         void loadUrl(url);
       }
     }).catch(e => setError(String(e)));
-  }, []); // eslint-disable-line
+  }, []);  
 
   useEffect(() => {
-    const le = getLoopEngine();
+    const _le = getLoopEngine();
     if (le.initialized) { wire(); return; }
     return le.on("ready", wire);
   }, [wire]);
 
   useEffect(() => () => engineRef.current.dispose(), []);
 
-  const loadUrl = async (url: string) => {
+  const _loadUrl = async (url: string) => {
     setLoading(true); setError(null);
     try {
       if (!wiredRef.current) { pendingRef.current = url; return; }
@@ -64,19 +65,19 @@ export function useIRReverb(): IRReverbHookState {
     finally     { setLoading(false); }
   };
 
-  const loadFromUrl = useCallback(async (url: string) => {
+  const _loadFromUrl = useCallback(async (url: string) => {
     setCurrentPreset(null); await loadUrl(url);
-  }, []); // eslint-disable-line
+  }, []);  
 
-  const loadPreset = useCallback(async (preset: IRPreset) => {
+  const _loadPreset = useCallback(async (preset: IRPreset) => {
     setCurrentPreset(preset); await loadUrl(IR_CATALOG[preset]);
-  }, []); // eslint-disable-line
+  }, []);  
 
-  const setWet = useCallback((w: number) => {
+  const _setWet = useCallback((w: number) => {
     engineRef.current.setWet(w); setWetState(w);
   }, []);
 
-  const setPreGain = useCallback((g: number) => { engineRef.current.setPreGain(g); }, []);
+  const _setPreGain = useCallback((g: number) => { engineRef.current.setPreGain(g); }, []);
   const dispose    = useCallback(() => { engineRef.current.dispose(); setLoaded(false); }, []);
 
   return { loaded, loading, error, wet, currentPreset, loadPreset, loadFromUrl, setWet, setPreGain, dispose };

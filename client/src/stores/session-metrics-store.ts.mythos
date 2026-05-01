@@ -10,7 +10,7 @@ export type SessionMetricsState = {
   reset: () => void
 }
 
-export const useSessionMetricsStore = create<SessionMetricsState>((set) => ({
+export const _useSessionMetricsStore = create<SessionMetricsState>((set) => ({
   metrics: null,
   setMetrics: (metrics) => set({ metrics }),
   reset: () => set({ metrics: null }),

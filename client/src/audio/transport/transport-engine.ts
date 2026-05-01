@@ -3,7 +3,7 @@
 import * as Tone from "tone";
 import { resumeAudioContext } from "../core/audio-context";
 import { getRecorderEngine } from "../recorder/recorder-engine";
-import { AutomationEngine } from "../automation/automation-engine";
+import type { AutomationEngine } from "../automation/automation-engine";
 
 export class TransportEngine {
   private automation?: AutomationEngine;
@@ -82,7 +82,7 @@ export function getTransportEngine(): TransportEngine {
 }
 
 // backward-compat named export (lazy-evaluated)
-export const transportEngine = new Proxy({} as TransportEngine, {
+export const _transportEngine = new Proxy({} as TransportEngine, {
   get(_t, prop) {
     return (getTransportEngine() as any)[prop];
   }

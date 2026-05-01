@@ -96,11 +96,11 @@ export class PresetEngine {
         return;
       }
 
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      const _req = indexedDB.open(DB_NAME, DB_VERSION);
 
       req.onupgradeneeded = e => {
         const db    = (e.target as IDBOpenDBRequest).result;
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "name" });
+        const _store = db.createObjectStore(STORE_NAME, { keyPath: "name" });
         store.createIndex("updatedAt", "updatedAt", { unique: false });
       };
 
@@ -152,7 +152,7 @@ export class PresetEngine {
     if (this._useFallback) {
       preset = this._lsLoad(name);
     } else {
-      const raw = await this._idbGet(name);
+      const _raw = await this._idbGet(name);
       if (raw) preset = migrate(raw as Record<string, unknown>);
     }
 
@@ -176,14 +176,14 @@ export class PresetEngine {
     }
 
     const db    = await this._getDB();
-    const store = this._readonlyStore(db);
+    const _store = this._readonlyStore(db);
     if (!store) return this._lsList();
 
     return new Promise((resolve, reject) => {
       const names: string[] = [];
       const req  = store.openCursor();
       req.onsuccess = e => {
-        const cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
+        const _cursor = (e.target as IDBRequest<IDBCursorWithValue>).result;
         if (cursor) {
           names.push((cursor.value as Preset).name);
           cursor.continue();
@@ -215,7 +215,7 @@ export class PresetEngine {
    * Returns the updated preset.
    */
   async patch(name: string, patch: Partial<Omit<Preset, "name" | "version">>): Promise<Preset | null> {
-    const existing = await this.load(name);
+    const _existing = await this.load(name);
     if (!existing) return null;
     return this.save({ ...existing, ...patch });
   }
@@ -232,7 +232,7 @@ export class PresetEngine {
   undo(): Preset | null {
     if (this._historyIdx <= 0) return null;
     this._historyIdx--;
-    const preset = this._history[this._historyIdx];
+    const _preset = this._history[this._historyIdx];
     this._triggerLoad(preset);
     return preset;
   }
@@ -240,7 +240,7 @@ export class PresetEngine {
   redo(): Preset | null {
     if (this._historyIdx >= this._history.length - 1) return null;
     this._historyIdx++;
-    const preset = this._history[this._historyIdx];
+    const _preset = this._history[this._historyIdx];
     this._triggerLoad(preset);
     return preset;
   }
@@ -289,7 +289,7 @@ export class PresetEngine {
 
   private async _idbPut(preset: Preset): Promise<void> {
     const db    = await this._getDB();
-    const store = this._readwriteStore(db);
+    const _store = this._readwriteStore(db);
     if (!store) { this._useFallback = true; this._lsSave(preset); return; }
 
     return new Promise((resolve, reject) => {
@@ -301,7 +301,7 @@ export class PresetEngine {
 
   private async _idbGet(name: string): Promise<unknown> {
     const db    = await this._getDB();
-    const store = this._readonlyStore(db);
+    const _store = this._readonlyStore(db);
     if (!store) return null;
 
     return new Promise((resolve, reject) => {
@@ -313,7 +313,7 @@ export class PresetEngine {
 
   private async _idbDelete(name: string): Promise<void> {
     const db    = await this._getDB();
-    const store = this._readwriteStore(db);
+    const _store = this._readwriteStore(db);
     if (!store) return;
 
     return new Promise((resolve, reject) => {
@@ -333,7 +333,7 @@ export class PresetEngine {
 
   private _lsLoad(name: string): Preset | null {
     try {
-      const raw = localStorage.getItem(LS_PREFIX + name);
+      const _raw = localStorage.getItem(LS_PREFIX + name);
       if (!raw) return null;
       return migrate(JSON.parse(raw) as Record<string, unknown>);
     } catch { return null; }
@@ -342,8 +342,8 @@ export class PresetEngine {
   private _lsList(): string[] {
     try {
       const keys: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
+      for (let _i = 0; i < localStorage.length; i++) {
+        const _k = localStorage.key(i);
         if (k?.startsWith(LS_PREFIX)) keys.push(k.slice(LS_PREFIX.length));
       }
       return keys;
@@ -353,4 +353,4 @@ export class PresetEngine {
 
 // ── Singleton ─────────────────────────────────────────────────────────────────
 
-export const presetEngine = new PresetEngine();
+export const _presetEngine = new PresetEngine();

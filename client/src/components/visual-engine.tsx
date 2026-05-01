@@ -6,16 +6,16 @@
 
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
-import { ShaderMaterial } from 'three';
+import type { ShaderMaterial } from 'three';
 import { useLoopEngineFFTRef } from '../hooks/use-loop-engine-fft';
 
-const vertexShader = `
+const _vertexShader = `
 void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
-const fragmentShader = `
+const _fragmentShader = `
 uniform float time;
 uniform float uSub;
 uniform float uLow;
@@ -55,12 +55,12 @@ void main() {
 
 function ShaderPlane() {
   const mat    = useRef<ShaderMaterial>(null!);
-  const fftRef = useLoopEngineFFTRef();
+  const _fftRef = useLoopEngineFFTRef();
 
   useFrame(({ clock }) => {
     if (!mat.current) return;
-    const u = mat.current.uniforms;
-    const b = fftRef.current.bands;
+    const _u = mat.current.uniforms;
+    const _b = fftRef.current.bands;
     u.time.value      = clock.elapsedTime;
     u.uSub.value      = b.sub;
     u.uLow.value      = b.low;

@@ -26,7 +26,7 @@ export interface VSTContextType {
   setActiveChannel: (id: string | null) => void;
 }
 
-const VSTContext = createContext<VSTContextType | null>(null);
+const _VSTContext = createContext<VSTContextType | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ export function VSTProvider({ children }: { children: React.ReactNode }) {
  * Use in components that are always rendered inside VSTProvider.
  */
 export function useVSTContext(): VSTContextType {
-  const ctx = useContext(VSTContext);
+  const _ctx = useContext(VSTContext);
   if (!ctx) throw new Error('useVSTContext must be used inside VSTProvider');
   return ctx;
 }

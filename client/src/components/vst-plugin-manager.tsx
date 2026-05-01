@@ -46,7 +46,7 @@ export function VSTPluginManager({
     manufacturer: '',
   });
 
-  const handleAddPlugin = () => {
+  const _handleAddPlugin = () => {
     if (!newPlugin.name || !newPlugin.path) {
       return;
     }
@@ -65,7 +65,7 @@ export function VSTPluginManager({
     setShowAddForm(false);
   };
 
-  const handleScanPlugins = async () => {
+  const _handleScanPlugins = async () => {
     // Placeholder for VST scanning functionality
     console.log('Scanning for VST plugins...');
     // In a real implementation, this would call a backend API or Electron IPC

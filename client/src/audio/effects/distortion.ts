@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import { DistortionParams } from '@shared/effects.types';
+import type { DistortionParams } from '@shared/effects.types';
 
 export class DistortionEffect {
   private distortion: Tone.Distortion;

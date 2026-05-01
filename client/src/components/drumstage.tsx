@@ -26,7 +26,7 @@ function padPosition(i: number): [number, number, number] {
 
 // ── Reflective metallic floor ─────────────────────────────────────────────────
 function MetallicFloor() {
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const _matRef = useRef<THREE.MeshStandardMaterial>(null);
   useFrame(({ clock }) => {
     if (matRef.current) {
       matRef.current.envMapIntensity =
@@ -48,13 +48,13 @@ function MetallicFloor() {
 
 // ── Faint grid lines on the floor ────────────────────────────────────────────
 function FloorGrid() {
-  const geo = useMemo(() => {
+  const _geo = useMemo(() => {
     const pts: number[] = [];
-    for (let i = -10; i <= 10; i++) {
+    for (let _i = -10; i <= 10; i++) {
       pts.push(i * 1.6, -0.175, -18,   i * 1.6, -0.175,  18);
       pts.push(-18, -0.175, i * 1.6,   18, -0.175, i * 1.6);
     }
-    const g = new THREE.BufferGeometry();
+    const _g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     return g;
   }, []);
@@ -78,7 +78,7 @@ function StagePlatform() {
 
 // ── Truss frame (4 corner posts + 4 overhead crossbeams) ─────────────────────
 function StageRails() {
-  const mat = (
+  const _mat = (
     <meshStandardMaterial color="#1a1a1a" metalness={0.88} roughness={0.22} />
   );
 
@@ -104,8 +104,8 @@ function StageRails() {
       ))}
       {beams.map(([s, e], i) => {
         const mid: [number,number,number] = [(s[0]+e[0])/2, (s[1]+e[1])/2, (s[2]+e[2])/2];
-        const len = Math.hypot(e[0]-s[0], e[2]-s[2]);
-        const ang = Math.atan2(e[2]-s[2], e[0]-s[0]);
+        const _len = Math.hypot(e[0]-s[0], e[2]-s[2]);
+        const _ang = Math.atan2(e[2]-s[2], e[0]-s[0]);
         return (
           <mesh key={`beam-${i}`} position={mid} rotation={[0, -ang, Math.PI/2]} castShadow>
             <cylinderGeometry args={[0.026, 0.026, len, 6]} />
@@ -119,11 +119,11 @@ function StageRails() {
 
 // ── LED edge strips (front bright, others dimmer) ─────────────────────────────
 function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
-  const frontRef = useRef<THREE.MeshStandardMaterial>(null);
-  const sideRefs = [useRef<THREE.MeshStandardMaterial>(null), useRef<THREE.MeshStandardMaterial>(null)];
+  const _frontRef = useRef<THREE.MeshStandardMaterial>(null);
+  const _sideRefs = [useRef<THREE.MeshStandardMaterial>(null), useRef<THREE.MeshStandardMaterial>(null)];
 
   useFrame(({ clock }) => {
-    const total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
+    const _total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
     const idle  = 0.08 + Math.sin(clock.elapsedTime * 1.8) * 0.025;
     const hit   = Math.min(total * 3, 4.0);
     if (frontRef.current) frontRef.current.emissiveIntensity = total > 0 ? hit : idle;
@@ -177,15 +177,15 @@ function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
 
 // ── Per-pad reactive point lights ─────────────────────────────────────────────
 function PadLights({ pads, velocities }: { pads: any[]; velocities: Map<number, number> }) {
-  const refs = useRef<(THREE.PointLight | null)[]>([]);
+  const _refs = useRef<(THREE.PointLight | null)[]>([]);
 
   useFrame(() => {
     pads.forEach((pad, i) => {
-      const light = refs.current[i];
+      const _light = refs.current[i];
       if (!light) return;
       const vel    = velocities.get(i) ?? 0;
-      const active = pad.isActive || vel > 0;
-      const target = active ? vel * 5.5 + 0.6 : 0;
+      const _active = pad.isActive || vel > 0;
+      const _target = active ? vel * 5.5 + 0.6 : 0;
       light.intensity = THREE.MathUtils.lerp(light.intensity, target, 0.22);
     });
   });
@@ -260,10 +260,10 @@ function PadNamePlates({ pads }: { pads: any[] }) {
 
 // ── Invisible emissive plane that feeds Bloom post-processing ─────────────────
 function GroundHalo({ velocities }: { velocities: Map<number, number> }) {
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const _matRef = useRef<THREE.MeshStandardMaterial>(null);
   useFrame(() => {
     if (!matRef.current) return;
-    const total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
+    const _total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
     matRef.current.emissiveIntensity = THREE.MathUtils.lerp(
       matRef.current.emissiveIntensity, total * 0.45, 0.12
     );

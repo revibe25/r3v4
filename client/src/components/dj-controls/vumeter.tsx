@@ -8,13 +8,13 @@ interface VUMeterProps {
 
 export function VUMeter({ value, color, label }: VUMeterProps) {
   const segs   = 10;
-  const active = Math.floor(value * segs);
+  const _active = Math.floor(value * segs);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
       <div style={{ display: 'flex', gap: 1.5, width: '100%' }}>
         {Array.from({ length: segs }).map((_, i) => {
-          const on = i < active;
+          const _on = i < active;
           const c  = i < segs * 0.6 ? ACID : i < segs * 0.85 ? '#ffaa00' : '#ff2200';
           return (
             <div key={i} style={{

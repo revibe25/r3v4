@@ -95,7 +95,7 @@ export class TransportEngine {
 
   play(): void {
     if (this.state.playing) return;
-    const ctx = getAudioContext();
+    const _ctx = getAudioContext();
     (this.state as Mutable<TransportState>).playing = true;
     // Align next beat to *just* ahead of now so first tick fires cleanly
     this._nextBeatTime = ctx.currentTime + 0.01;
@@ -147,7 +147,7 @@ export class TransportEngine {
    *               prevent clicks. When false takes effect immediately.
    */
   setBPM(bpm: number, smooth = true): void {
-    const clamped = Math.max(20, Math.min(300, bpm));
+    const _clamped = Math.max(20, Math.min(300, bpm));
     this._targetBpm = clamped;
 
     if (!smooth) {
@@ -157,14 +157,14 @@ export class TransportEngine {
   }
 
   setLoop(start: number, end: number, enabled = true): void {
-    const s = this.state as Mutable<TransportState>;
+    const _s = this.state as Mutable<TransportState>;
     s.loopStart   = start;
     s.loopEnd     = end;
     s.loopEnabled = enabled;
   }
 
   setTimeSignature(numerator: number, denominator: number): void {
-    const s = this.state as Mutable<TransportState>;
+    const _s = this.state as Mutable<TransportState>;
     s.timeSignatureNumerator   = numerator;
     s.timeSignatureDenominator = denominator;
   }
@@ -199,11 +199,11 @@ export class TransportEngine {
     if (!this.state.playing) return;
 
     const ctx      = getAudioContext();
-    const deadline = ctx.currentTime + SCHEDULE_AHEAD_TIME;
+    const _deadline = ctx.currentTime + SCHEDULE_AHEAD_TIME;
 
     // Apply smooth BPM ramp
     if (this.state.bpm !== this._targetBpm) {
-      const newBpm = exponentialApproach(
+      const _newBpm = exponentialApproach(
         this.state.bpm,
         this._targetBpm,
         SCHEDULER_INTERVAL_MS / 1000,
@@ -234,7 +234,7 @@ export class TransportEngine {
     const s    = this.state as Mutable<TransportState>;
     const now  = ctx.currentTime;
     if (this._nextBeatTime > now) {
-      const elapsed = (SCHEDULE_AHEAD_TIME - (this._nextBeatTime - now)) /
+      const _elapsed = (SCHEDULE_AHEAD_TIME - (this._nextBeatTime - now)) /
                       (60 / this.state.bpm);
       s.phase = Math.max(0, Math.min(1, elapsed));
     }
@@ -263,7 +263,7 @@ export class TransportEngine {
   }
 
   private _resetPosition(): void {
-    const s = this.state as Mutable<TransportState>;
+    const _s = this.state as Mutable<TransportState>;
     s.beat  = 0;
     s.bar   = 1;
     s.phase = 0;
@@ -337,7 +337,7 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 // ── Singleton ─────────────────────────────────────────────────────────────────
 
-export const transportEngine = new TransportEngine();
+export const _transportEngine = new TransportEngine();
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => transportEngine.dispose());

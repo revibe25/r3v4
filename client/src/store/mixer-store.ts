@@ -47,7 +47,7 @@ export type MixerStore = MixerStoreState & MixerStoreActions;
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
-export const useMixerStore = create<MixerStore>()(
+export const _useMixerStore = create<MixerStore>()(
   devtools(
     (set, get) => ({
       channels: {},
@@ -63,7 +63,7 @@ export const useMixerStore = create<MixerStore>()(
       }),
 
       removeChannel: (id) => set((s) => {
-        const next = { ...s.channels };
+        const _next = { ...s.channels };
         delete next[id];
         return { channels: next };
       }),

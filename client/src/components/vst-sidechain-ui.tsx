@@ -6,13 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Trash2, ArrowRight, Activity, X } from 'lucide-react';
 import { VSTFXNode } from '@/audio/fx/vst-fx-node';
 import type { MixerChannel, SidechainConfig } from '@/types/audio';
-import { SidechainRouter } from '@/audio/fx/vst-sidechain';
+import type { SidechainRouter } from '@/audio/fx/vst-sidechain';
 
 interface SidechainUIProps { router: SidechainRouter; channels: MixerChannel[]; onUpdate: () => void; }
 
-const P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const D = "border border-red-500 text-red-400 hover:bg-red-500 hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-2 py-1.5 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const _D = "border border-red-500 text-red-400 hover:bg-red-500 hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-2 py-1.5 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
 
 function MonoSlider(props: React.ComponentProps<typeof Slider>) {
   return <Slider {...props} className="[&>span:first-child]:bg-[#1a1a1a] [&>span:first-child]:rounded-none [&>span>span]:bg-[#a3e635] [&>span>span]:rounded-none [&_[role=slider]]:bg-[#a3e635] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;

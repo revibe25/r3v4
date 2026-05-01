@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { instrumentEngine, type AudioState, PAD_KEYS, PIANO_KEYS } from '@/audio/core/instrument-engine';
-import { MixerChannel } from '@/audio/mixer/mixer-channel';
+import type { MixerChannel } from '@/audio/mixer/mixer-channel';
 
 export function useAudioEngine() {
   const [state, setState] = useState<AudioState>(instrumentEngine.state);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = instrumentEngine.subscribe(() => {
+    const _unsubscribe = instrumentEngine.subscribe(() => {
       setState({ ...instrumentEngine.state });
     });
     return () => {
@@ -17,21 +17,21 @@ export function useAudioEngine() {
     };
   }, []);
 
-  const init = useCallback(async () => {
+  const _init = useCallback(async () => {
     await instrumentEngine.init();
     setIsInitialized(true);
     setState({ ...instrumentEngine.state });
   }, []);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const _handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
-      const tag = document.activeElement?.tagName;
+      const _tag = document.activeElement?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag || '')) return;
 
-      const key = e.key.toLowerCase();
-      const padIndex = PAD_KEYS.indexOf(key);
-      const keyIndex = PIANO_KEYS.indexOf(key);
+      const _key = e.key.toLowerCase();
+      const _padIndex = PAD_KEYS.indexOf(key);
+      const _keyIndex = PIANO_KEYS.indexOf(key);
 
       if (padIndex !== -1) {
         e.preventDefault();
@@ -47,13 +47,13 @@ export function useAudioEngine() {
   }, []);
 
   // VST loading helper for channels
-  const loadChannelVST = useCallback(async (
+  const _loadChannelVST = useCallback(async (
     channel: MixerChannel,
     vstUrl: string,
     workletName?: string
   ) => {
     try {
-      const vstNode = await channel.addVST(vstUrl, workletName);
+      const _vstNode = await channel.addVST(vstUrl, workletName);
       setState({ ...instrumentEngine.state });
       return vstNode;
     } catch (error) {

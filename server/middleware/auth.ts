@@ -14,7 +14,7 @@
 
 /// <reference path="../types/express.d.ts" />
 import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../lib/logger';
 import type { SubscriptionTier } from '../../shared/subscription.types';
 

@@ -7,16 +7,16 @@ export type SessionState = {
   endSession: () => Promise<void>
 }
 
-export const useSessionStore = create<SessionState>((set, get) => ({
+export const _useSessionStore = create<SessionState>((set, get) => ({
   sessionId: null,
   isActive: false,
   startSession: async () => {
     if (get().isActive) return
-    const res = await fetch('/api/trpc/sessions.startSession', {
+    const _res = await fetch('/api/trpc/sessions.startSession', {
       method: 'POST',
       credentials: 'include',
     })
-    const data = await res.json()
+    const _data = await res.json()
     set({
       sessionId: data.result.data.sessionId,
       isActive: true,

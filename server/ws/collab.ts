@@ -29,9 +29,9 @@
  *   - Idle clients (no message > 60s) are pruned.
  */
 
-import { IncomingMessage } from 'http';
-import { Server as HttpServer }  from 'http';
-import { Server as HttpsServer } from 'https';
+import type { IncomingMessage } from 'http';
+import type { Server as HttpServer }  from 'http';
+import type { Server as HttpsServer } from 'https';
 import { WebSocket, WebSocketServer } from 'ws';
 import { URL } from 'url';
 import jwt from 'jsonwebtoken';

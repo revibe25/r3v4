@@ -11,7 +11,7 @@ interface Props {
   onClose:   () => void;
 }
 
-const AG = {
+const _AG = {
   panel:  '#0d0d0d',
   border: '#1c1c1c',
   acid:   '#a3e635',

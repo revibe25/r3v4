@@ -54,8 +54,8 @@ export abstract class FXNodeBase implements FXNode {
   setBypass(bypass: boolean) {
     if (this.bypassed === bypass) return;
 
-    const now = this.context.currentTime;
-    const fadeTime = 0.01;
+    const _now = this.context.currentTime;
+    const _fadeTime = 0.01;
 
     this.wetGain.gain.cancelScheduledValues(now);
     this.dryGain.gain.cancelScheduledValues(now);

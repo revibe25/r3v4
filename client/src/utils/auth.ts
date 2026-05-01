@@ -32,7 +32,7 @@ export interface AuthError {
   status?: number;
 }
 
-let initializationLock = false;
+let _initializationLock = false;
 
 /**
  * MOCK LOGIN - For testing until real backend is found
@@ -116,11 +116,11 @@ export function getAuthToken(): string | null {
  * Get stored user
  */
 export function getStoredUser(): User | null {
-  const userStr = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
+  const _userStr = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
   if (!userStr) return null;
 
   try {
-    const user = JSON.parse(userStr) as User;
+    const _user = JSON.parse(userStr) as User;
     if (user.id && user.email) {
       return user;
     }
@@ -137,8 +137,8 @@ export function getStoredUser(): User | null {
  * Check if authenticated
  */
 export function isAuthenticated(): boolean {
-  const token = getAuthToken();
-  const user = getStoredUser();
+  const _token = getAuthToken();
+  const _user = getStoredUser();
   return !!token && !!user;
 }
 
@@ -147,7 +147,7 @@ export function isAuthenticated(): boolean {
  */
 export function validateEmail(email: string): boolean {
   if (!email || typeof email !== 'string') return false;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const _emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
@@ -194,7 +194,7 @@ export function createAuthHeaders(ignoreCache = false): Record<string, string> {
     return { ...cachedHeaders };
   }
 
-  const token = getAuthToken();
+  const _token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

@@ -24,7 +24,7 @@ import { getLoopEngine } from './engine/loopEngine';
 import { getAudioContext } from '@/audio/core/audio-context';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
-const T = {
+const _T = {
   acid:   '#32cd32', cyan:   '#22d3ee', orange: '#ff6b00', red:    '#ff1a1a',
   purple: '#c084fc', yellow: '#f5d000', pink:   '#f472b6', blue:   '#3b82f6',
   teal:   '#14b8a6', lime:   '#84cc16',
@@ -165,13 +165,13 @@ const SegDisplay: React.FC<{
 const BeatDots: React.FC<{ beat: number; bar: number; isPlaying: boolean; sig?: string }> = ({
   beat, bar, isPlaying, sig = '4/4',
 }) => {
-  const beatCount = sig === '3/4' ? 3 : sig === '5/4' ? 5 : sig === '6/8' ? 6 : sig === '7/8' ? 7 : 4;
+  const _beatCount = sig === '3/4' ? 3 : sig === '5/4' ? 5 : sig === '6/8' ? 6 : sig === '7/8' ? 7 : 4;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
       <div style={{ display: 'flex', gap: 4 }}>
         {Array.from({ length: beatCount }, (_, i) => {
-          const active = i === (beat % beatCount) && isPlaying;
-          const isOne = i === 0;
+          const _active = i === (beat % beatCount) && isPlaying;
+          const _isOne = i === 0;
           return (
             <div key={i} style={{
               width: isOne ? 11 : 9, height: isOne ? 11 : 9,
@@ -197,48 +197,48 @@ const BeatDots: React.FC<{ beat: number; bar: number; isPlaying: boolean; sig?: 
 
 // ── Spectrum ──────────────────────────────────────────────────────────────────
 const Spectrum: React.FC<{ isReady: boolean; h?: number }> = ({ isReady, h = 56 }) => {
-  const cr = useRef<HTMLCanvasElement>(null);
-  const rf = useRef<number>(0);
+  const _cr = useRef<HTMLCanvasElement>(null);
+  const _rf = useRef<number>(0);
   const [mode, setMode] = useState<'bars' | 'fill' | 'line' | 'scope'>('bars');
-  const histRef = useRef<Float32Array[]>([]);
+  const _histRef = useRef<Float32Array[]>([]);
 
   useEffect(() => {
     if (!isReady) return;
-    const cv = cr.current; if (!cv) return;
-    const draw = () => {
-      const ctx = cv.getContext('2d'); if (!ctx) { rf.current = requestAnimationFrame(draw); return; }
+    const _cv = cr.current; if (!cv) return;
+    const _draw = () => {
+      const _ctx = cv.getContext('2d'); if (!ctx) { rf.current = requestAnimationFrame(draw); return; }
       const { width: w, height: h2 } = cv;
 
       if (mode === 'scope') {
         ctx.fillStyle = 'rgba(3,3,3,.6)'; ctx.fillRect(0, 0, w, h2);
-        const wf = getLoopEngine().getMasterFft();
+        const _wf = getLoopEngine().getMasterFft();
         ctx.beginPath(); ctx.strokeStyle = T.acid; ctx.lineWidth = 1.5;
         ctx.shadowBlur = 6; ctx.shadowColor = T.acid;
-        for (let i = 0; i < wf.length; i++) {
-          const x = (i / wf.length) * w;
-          const y = h2 / 2 + ((wf[i] + 60) / 60) * h2 * 0.4;
+        for (let _i = 0; i < wf.length; i++) {
+          const _x = (i / wf.length) * w;
+          const _y = h2 / 2 + ((wf[i] + 60) / 60) * h2 * 0.4;
           if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         }
         ctx.stroke();
       } else {
         ctx.fillStyle = 'rgba(3,3,3,.52)'; ctx.fillRect(0, 0, w, h2);
-        const data = getLoopEngine().getMasterFft();
-        const bins = Math.min(data.length, w);
-        const bw = w / bins;
+        const _data = getLoopEngine().getMasterFft();
+        const _bins = Math.min(data.length, w);
+        const _bw = w / bins;
 
         // Grid lines
         ctx.strokeStyle = '#0f0f0f'; ctx.lineWidth = 1;
-        for (let db = 0; db < 100; db += 20) {
-          const y = (db / 100) * h2;
+        for (let _db = 0; db < 100; db += 20) {
+          const _y = (db / 100) * h2;
           ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
         }
 
         if (mode === 'bars') {
-          for (let i = 0; i < bins; i++) {
-            const n = Math.max(0, (data[i] + 100) / 100);
-            const bh = n * h2;
-            const hue = 100 - n * 80;
-            const alpha = 0.55 + n * 0.45;
+          for (let _i = 0; i < bins; i++) {
+            const _n = Math.max(0, (data[i] + 100) / 100);
+            const _bh = n * h2;
+            const _hue = 100 - n * 80;
+            const _alpha = 0.55 + n * 0.45;
             ctx.fillStyle = `hsla(${hue},90%,52%,${alpha})`;
             ctx.fillRect(i * bw, h2 - bh, bw - 0.5, bh);
             if (n > 0.65) {
@@ -248,13 +248,13 @@ const Spectrum: React.FC<{ isReady: boolean; h?: number }> = ({ isReady, h = 56 
           }
         } else {
           ctx.beginPath();
-          for (let i = 0; i < bins; i++) {
-            const n = Math.max(0, (data[i] + 100) / 100);
+          for (let _i = 0; i < bins; i++) {
+            const _n = Math.max(0, (data[i] + 100) / 100);
             if (i === 0) ctx.moveTo(0, h2 - n * h2); else ctx.lineTo(i * bw, h2 - n * h2);
           }
           if (mode === 'fill') {
             ctx.lineTo(w, h2); ctx.lineTo(0, h2); ctx.closePath();
-            const g = ctx.createLinearGradient(0, 0, 0, h2);
+            const _g = ctx.createLinearGradient(0, 0, 0, h2);
             g.addColorStop(0, 'rgba(57,255,20,.42)'); g.addColorStop(1, 'rgba(57,255,20,.02)');
             ctx.fillStyle = g; ctx.fill();
           }
@@ -293,11 +293,11 @@ const Spectrum: React.FC<{ isReady: boolean; h?: number }> = ({ isReady, h = 56 
 // ── Master Bar ────────────────────────────────────────────────────────────────
 const MasterBar: React.FC<{ isReady: boolean }> = ({ isReady }) => {
   const [lev, setLev] = useState(0), [pk, setPk] = useState(0);
-  const rf = useRef<number>(0), sm = useRef(0), p = useRef(0), pa = useRef(0);
+  const _rf = useRef<number>(0), sm = useRef(0), p = useRef(0), pa = useRef(0);
   useEffect(() => {
     if (!isReady) return;
-    const tick = (now: number) => {
-      const v = getLoopEngine().getMasterLevel();
+    const _tick = (now: number) => {
+      const _v = getLoopEngine().getMasterLevel();
       sm.current = v >= sm.current ? v : Math.max(0, sm.current - 0.015);
       if (sm.current >= p.current) { p.current = sm.current; pa.current = now; }
       else if (now - pa.current > 2400) p.current = Math.max(0, p.current - 0.008);
@@ -308,16 +308,16 @@ const MasterBar: React.FC<{ isReady: boolean }> = ({ isReady }) => {
     return () => cancelAnimationFrame(rf.current);
   }, [isReady]);
 
-  const SEGS = 36;
-  const filled = Math.round(lev * SEGS);
-  const pkSeg = Math.round(pk * SEGS) - 1;
+  const _SEGS = 36;
+  const _filled = Math.round(lev * SEGS);
+  const _pkSeg = Math.round(pk * SEGS) - 1;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
       <div style={{ display: 'flex', gap: 1, height: 9 }}>
         {Array.from({ length: SEGS }, (_, i) => {
-          const lit = i < filled, isPk = i === pkSeg;
-          const pct = i / SEGS;
-          const bg = isPk ? '#fff' : !lit ? T.bg3 : pct > 0.91 ? T.red : pct > 0.77 ? T.orange : pct > 0.63 ? T.yellow : T.acid;
+          const _lit = i < filled, isPk = i === pkSeg;
+          const _pct = i / SEGS;
+          const _bg = isPk ? '#fff' : !lit ? T.bg3 : pct > 0.91 ? T.red : pct > 0.77 ? T.orange : pct > 0.63 ? T.yellow : T.acid;
           return <div key={i} style={{ width: 5, height: '100%', background: bg, boxShadow: lit ? `0 0 4px ${bg}55` : 'none', transition: lit ? 'none' : 'background 80ms' }} />;
         })}
       </div>
@@ -338,9 +338,9 @@ const SceneBtn: React.FC<{
   onSave: () => void; onRecall: () => void;
 }> = ({ label, hasData, isActive, color = T.acid, onSave, onRecall }) => {
   const [holding, setH] = useState(false);
-  const t = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const down = () => { t.current = setTimeout(() => { setH(true); onSave(); setTimeout(() => setH(false), 280); }, 600); };
-  const up = () => { if (t.current) clearTimeout(t.current); if (!holding) onRecall(); };
+  const _t = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const _down = () => { t.current = setTimeout(() => { setH(true); onSave(); setTimeout(() => setH(false), 280); }, 600); };
+  const _up = () => { if (t.current) clearTimeout(t.current); if (!holding) onRecall(); };
   return (
     <button
       onMouseDown={down} onMouseUp={up}
@@ -372,18 +372,18 @@ const Sequencer32: React.FC<{
   tracks: Array<{ id: string; color: string; index: number }>;
   beat: number; isPlaying: boolean; bpm: number;
 }> = ({ tracks, beat, isPlaying, bpm }) => {
-  const STEPS = 32;
+  const _STEPS = 32;
   const [steps, setSteps] = useState<boolean[][]>(() => Array(5).fill(null).map(() => Array(STEPS).fill(false)));
   const [prob, setProb] = useState<number[][]>(() => Array(5).fill(null).map(() => Array(STEPS).fill(1)));
   const [at, setAT] = useState(0);
   const [showProb, setShowProb] = useState(false);
   const [resolution, setResolution] = useState<16 | 32>(16);
-  const cur = isPlaying ? beat % resolution : -1;
+  const _cur = isPlaying ? beat % resolution : -1;
 
-  const toggle = (ti: number, si: number) => setSteps(p => { const n = p.map(r => [...r]); n[ti][si] = !n[ti][si]; return n; });
-  const clear = (ti: number) => setSteps(p => { const n = p.map(r => [...r]); n[ti] = Array(STEPS).fill(false); return n; });
-  const toggleProb = (ti: number, si: number) => setProb(p => {
-    const n = p.map(r => [...r]);
+  const _toggle = (ti: number, si: number) => setSteps(p => { const _n = p.map(r => [...r]); n[ti][si] = !n[ti][si]; return n; });
+  const _clear = (ti: number) => setSteps(p => { const _n = p.map(r => [...r]); n[ti] = Array(STEPS).fill(false); return n; });
+  const _toggleProb = (ti: number, si: number) => setProb(p => {
+    const _n = p.map(r => [...r]);
     n[ti][si] = n[ti][si] < 1 ? Math.min(1, n[ti][si] + 0.25) : 0.25;
     return n;
   });
@@ -428,8 +428,8 @@ const Sequencer32: React.FC<{
 
         {Object.entries(PATS).slice(0, 6).map(([name, pat]) => (
           <button key={name} onClick={() => {
-            const extended = resolution === 32 ? [...pat, ...pat.map(p => p + 16)] : pat;
-            setSteps(prev => { const n = prev.map(r => [...r]); n[at] = Array(STEPS).fill(false).map((_, i) => extended.includes(i)); return n; });
+            const _extended = resolution === 32 ? [...pat, ...pat.map(p => p + 16)] : pat;
+            setSteps(prev => { const _n = prev.map(r => [...r]); n[at] = Array(STEPS).fill(false).map((_, i) => extended.includes(i)); return n; });
           }} style={{
             padding: '2px 7px', fontSize: 6, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em',
             background: T.bg2, border: `1px solid ${T.b2}`, color: T.t3, cursor: 'pointer',
@@ -478,11 +478,11 @@ const Sequencer32: React.FC<{
                 }}>T{tr.index + 1}</span>
               </div>
               {Array.from({ length: resolution }, (_, si) => {
-                const on = steps[ti][si];
-                const isCur = si === cur;
-                const isBeat = si % 8 === 0;
-                const isHalf = si % 4 === 0;
-                const p2 = prob[ti][si];
+                const _on = steps[ti][si];
+                const _isCur = si === cur;
+                const _isBeat = si % 8 === 0;
+                const _isHalf = si % 4 === 0;
+                const _p2 = prob[ti][si];
                 return (
                   <button key={si} onClick={() => toggle(ti, si)} style={{
                     width: 16, height: 18, flexShrink: 0,
@@ -511,7 +511,7 @@ const Sequencer32: React.FC<{
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginTop: 2 }}>
                 <div style={{ width: 48 }} />
                 {Array.from({ length: resolution }, (_, si) => {
-                  const p2 = prob[ti][si];
+                  const _p2 = prob[ti][si];
                   return (
                     <div key={si} onClick={() => toggleProb(ti, si)} style={{
                       width: 16, height: 6, cursor: 'pointer',
@@ -567,17 +567,17 @@ const ClipLauncher: React.FC<{
     queued:    '⟳',
   };
 
-  const launch = (row: number, col: number) => {
-    const engine = getLoopEngine();
+  const _launch = (row: number, col: number) => {
+    const _engine = getLoopEngine();
     setClips(prev => {
-      const n = prev.map(r => [...r]);
+      const _n = prev.map(r => [...r]);
       if (n[row][col] === 'empty') {
         n[row][col] = 'recording';
       } else if (n[row][col] === 'loaded') {
         n[row][col] = 'queued';
         if (engine.initialized) engine.launchClip(col, row);
         setTimeout(() => {
-          setClips(p => { const m = p.map(r => [...r]); m[row][col] = 'playing'; return m; });
+          setClips(p => { const _m = p.map(r => [...r]); m[row][col] = 'playing'; return m; });
           setActiveRow(row);
         }, 200);
       } else if (n[row][col] === 'playing') {
@@ -596,10 +596,10 @@ const ClipLauncher: React.FC<{
     });
   };
 
-  const stopRow = (row: number) => {
-    const engine = getLoopEngine();
+  const _stopRow = (row: number) => {
+    const _engine = getLoopEngine();
     setClips(prev => {
-      const n = prev.map(r => [...r]);
+      const _n = prev.map(r => [...r]);
       n[row] = n[row].map((s, col) => {
         if (s === 'playing') { if (engine.initialized) engine.stopClip(col, row); return 'loaded'; }
         return s;
@@ -628,8 +628,8 @@ const ClipLauncher: React.FC<{
       {Array.from({ length: CLIP_ROWS }, (_, row) => (
         <div key={row} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {tracks.map((tr, col) => {
-            const state = clips[row][col];
-            const isActive = state === 'playing' || state === 'recording';
+            const _state = clips[row][col];
+            const _isActive = state === 'playing' || state === 'recording';
             return (
               <button key={col} onClick={() => isReady && launch(row, col)} style={{
                 flex: 1, height: 40,
@@ -702,11 +702,11 @@ const MacroPanel: React.FC = () => {
   );
   const [selected, setSelected] = useState(0);
 
-  const upd = (idx: number, patch: Partial<MacroState>) =>
+  const _upd = (idx: number, patch: Partial<MacroState>) =>
     setMacros(prev => {
-      const next = prev.map((m, j) => j === idx ? { ...m, ...patch } : m);
-      const m = next[idx];
-      const engine = getLoopEngine();
+      const _next = prev.map((m, j) => j === idx ? { ...m, ...patch } : m);
+      const _m = next[idx];
+      const _engine = getLoopEngine();
       if (engine.initialized) {
         if ('value'  in patch) engine.setMacro(idx, m.value);
         if ('target' in patch) engine.setMacroTarget(idx, m.target as any);
@@ -723,7 +723,7 @@ const MacroPanel: React.FC = () => {
       return next;
     });
 
-  const m = macros[selected];
+  const _m = macros[selected];
 
   return (
     <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -839,7 +839,7 @@ const BeatRepeat: React.FC = () => {
   const [len, setLen] = useState(0.5);
 
   useEffect(() => {
-    const engine = getLoopEngine();
+    const _engine = getLoopEngine();
     if (!engine.initialized) return;
     engine.setBeatRepeat({
       enabled, trackIndex: 0, division: div,
@@ -983,15 +983,15 @@ export const LoopStation505: React.FC = () => {
   const [tapF,   setTapF]  = useState(false);
   const [caheld, setCAH]   = useState(false);
   const [specH,  setSpecH] = useState(40);
-  const caT = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const _caT = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const flashTap = useCallback(() => { setTapF(true); setTimeout(() => setTapF(false), 120); tapTempo(); }, [tapTempo]);
-  const handleMG = useCallback((v: number) => { setMG(v); setMasterVolume(v); }, [setMasterVolume]);
-  const beat0 = state.beat.beat === 0 && state.isPlaying && isReady;
+  const _flashTap = useCallback(() => { setTapF(true); setTimeout(() => setTapF(false), 120); tapTempo(); }, [tapTempo]);
+  const _handleMG = useCallback((v: number) => { setMG(v); setMasterVolume(v); }, [setMasterVolume]);
+  const _beat0 = state.beat.beat === 0 && state.isPlaying && isReady;
 
   // Keyboard shortcuts for views
   useEffect(() => {
-    const h = (e: KeyboardEvent) => {
+    const _h = (e: KeyboardEvent) => {
       if ((e.target as HTMLElement)?.tagName === 'INPUT') return;
       if (e.key === 'F1') setView('perform');
       if (e.key === 'F2') setView('mixer');
@@ -1163,7 +1163,7 @@ export const LoopStation505: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <span style={{ fontSize: 6, color: T.t5, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em', whiteSpace: 'nowrap' }}>SWING</span>
               <input type="range" min={0} max={100} value={Math.round(swing * 100)}
-                onChange={e => { const v = Number(e.target.value) / 100; setSwingLocal(v); setSwingEngine(v); }}
+                onChange={e => { const _v = Number(e.target.value) / 100; setSwingLocal(v); setSwingEngine(v); }}
                 style={{ width: 60, accentColor: T.acid, cursor: 'pointer', height: 2 }} />
               <span style={{ fontSize: 6, color: swing > 0.05 ? T.acid : T.t5, fontFamily: 'IBM Plex Mono,monospace', width: 20 }}>
                 {Math.round(swing * 100)}%
@@ -1194,9 +1194,9 @@ export const LoopStation505: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 2 }}>
               <HWBtn label="METRO" active={fx.metronomeOn} ac={T.cyan}   onClick={toggleMetronome} w={52} h={28} />
-              <HWBtn label="MONO"  active={monoOn}         ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={44} h={28} />
-              <HWBtn label="LIMIT" active={limOn}          ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={44} h={28} />
-              <HWBtn label="GRAN"  active={granOn}         ac={T.teal}   onClick={() => { const next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} w={44} h={28} />
+              <HWBtn label="MONO"  active={monoOn}         ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const _next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={44} h={28} />
+              <HWBtn label="LIMIT" active={limOn}          ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const _next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={44} h={28} />
+              <HWBtn label="GRAN"  active={granOn}         ac={T.teal}   onClick={() => { const _next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} w={44} h={28} />
             </div>
             <div style={{ display: 'flex', gap: 2 }}>
               <HWBtn label="↺ UNDO" onClick={undo} disabled={!canUndo} w={58} h={26} />
@@ -1248,12 +1248,12 @@ export const LoopStation505: React.FC = () => {
             }}
             onMouseDown={e => {
               e.preventDefault();
-              const startY = e.clientY;
-              const startH = specH;
-              const onMove = (ev: MouseEvent) => {
+              const _startY = e.clientY;
+              const _startH = specH;
+              const _onMove = (ev: MouseEvent) => {
                 setSpecH(Math.min(120, Math.max(24, startH + (ev.clientY - startY))));
               };
-              const onUp = () => {
+              const _onUp = () => {
                 window.removeEventListener('mousemove', onMove);
                 window.removeEventListener('mouseup', onUp);
               };
@@ -1386,7 +1386,7 @@ export const LoopStation505: React.FC = () => {
                   <FXKnob label="DENSITY" value={granDensity} color={T.teal} size="sm" onChange={v => { setGranDensity(v); if (getLoopEngine().initialized) getLoopEngine().setGranularDensity(v); }} />
                   <FXKnob label="SPREAD"  value={granSpread}  color={T.teal} size="sm" onChange={v => { setGranSpread(v);  if (getLoopEngine().initialized) getLoopEngine().setGranularSpread(v);  }} />
                 </div>
-                <button onClick={() => { const next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} style={{
+                <button onClick={() => { const _next = !granOn; setGranOn(next); if (getLoopEngine().initialized) getLoopEngine().setGranularFreeze(next); }} style={{
                   width: '100%', height: 20, fontSize: 7, cursor: 'pointer',
                   background: granOn ? 'rgba(20,184,166,.1)' : T.bg2,
                   border: `1px solid ${granOn ? T.teal : T.b2}`,
@@ -1520,8 +1520,8 @@ export const LoopStation505: React.FC = () => {
                   </div>
                   <VUMeter trackIndex={0} isActive={isReady} showScale height={64} showGr showCorr />
                   <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <HWBtn label="MONO"  active={monoOn} ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={52} h={22} />
-                    <HWBtn label="LIMIT" active={limOn}  ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={52} h={22} />
+                    <HWBtn label="MONO"  active={monoOn} ac={T.purple} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const _next = !monoOn; setMono(next); if (getLoopEngine().initialized) getLoopEngine().setMono(next); }} w={52} h={22} />
+                    <HWBtn label="LIMIT" active={limOn}  ac={T.orange} onClick={() => { const _ctx = getAudioContext(); if (!_ctx || _ctx.state !== 'running') return; const _next = !limOn; setLim(next); if (getLoopEngine().initialized) getLoopEngine().enableLimiter(next); }}  w={52} h={22} />
                   </div>
                 </div>
               </Panel>

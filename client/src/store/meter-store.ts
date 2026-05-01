@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MeterData } from '@shared/types/meter.types';
+import type { MeterData } from '@shared/types/meter.types';
 
 interface MeterStore {
   meters: Record<string, MeterData>;
@@ -19,7 +19,7 @@ const EMPTY_METER: MeterData = {
   timestamp: 0,
 };
 
-export const useMeterStore = create<MeterStore>((set, get) => ({
+export const _useMeterStore = create<MeterStore>((set, get) => ({
   meters: {},
 
   updateMeter: (id, meter) => {
@@ -33,7 +33,7 @@ export const useMeterStore = create<MeterStore>((set, get) => ({
 
   clearMeter: (id) => {
     set((s) => {
-      const copy = { ...s.meters };
+      const _copy = { ...s.meters };
       delete copy[id];
       return { meters: copy };
     });

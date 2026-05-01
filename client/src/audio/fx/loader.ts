@@ -1,6 +1,7 @@
 // @ts-nocheck
 // FILE: client/src/audio/fx/loader.ts
-import { VSTFXNode, VSTFXConfig } from './vst-fx-node';
+import type { VSTFXConfig } from './vst-fx-node';
+import { VSTFXNode } from './vst-fx-node';
 import { getAudioContext } from '../core/audio-context';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ type Listener<K extends keyof VSTLoaderEventMap> = (
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return reject(new DOMException('Aborted', 'AbortError'));
-    const id = setTimeout(resolve, ms);
+    const _id = setTimeout(resolve, ms);
     signal?.addEventListener('abort', () => {
       clearTimeout(id);
       reject(new DOMException('Aborted', 'AbortError'));
@@ -80,12 +81,12 @@ function makeId(vstUrl: string, workletName?: string): string {
  * Manages loading, caching, and lifecycle of VSTFXNode instances.
  *
  * @example
- * const loader = new VSTLoader();
+ * const _loader = new VSTLoader();
  *
- * const node = await loader.load('/plugins/reverb.js', { workletName: 'reverb-processor' });
+ * const _node = await loader.load('/plugins/reverb.js', { workletName: 'reverb-processor' });
  *
  * // Same URL returns cached node — no double-load
- * const same = await loader.load('/plugins/reverb.js');
+ * const _same = await loader.load('/plugins/reverb.js');
  *
  * loader.on('ready', ({ entry }) => console.log('Loaded:', entry.id));
  *
@@ -121,18 +122,18 @@ export class VSTLoader {
       signal,
     } = options;
 
-    const id = makeId(vstUrl, workletName);
+    const _id = makeId(vstUrl, workletName);
 
     // ── Return cached entry if already ready ──
-    const existing = this.registry.get(id);
+    const _existing = this.registry.get(id);
     if (existing?.status === 'ready') return existing.node;
 
     // ── Coalesce parallel requests for the same plugin ──
-    const inFlight = this.inFlight.get(id);
+    const _inFlight = this.inFlight.get(id);
     if (inFlight) return inFlight;
 
     // ── New load ──
-    const promise = this.loadWithRetry(id, vstUrl, {
+    const _promise = this.loadWithRetry(id, vstUrl, {
       audioContext,
       workletName,
       config,
@@ -144,7 +145,7 @@ export class VSTLoader {
     this.inFlight.set(id, promise);
 
     try {
-      const node = await promise;
+      const _node = await promise;
       return node;
     } finally {
       this.inFlight.delete(id);
@@ -157,7 +158,7 @@ export class VSTLoader {
     opts: Required<Omit<VSTLoadOptions, 'audioContext'>> & { audioContext?: AudioContext },
   ): Promise<VSTFXNode> {
     const { retries, retryDelay, signal } = opts;
-    const maxAttempts = Math.max(1, retries);
+    const _maxAttempts = Math.max(1, retries);
 
     // Register as pending
     this.registry.set(id, {
@@ -170,12 +171,12 @@ export class VSTLoader {
 
     let lastError: Error = new Error('Unknown error');
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (let _attempt = 1; attempt <= maxAttempts; attempt++) {
       signal?.throwIfAborted?.();
 
       try {
         const ctx  = opts.audioContext ?? getAudioContext();
-        const node = new VSTFXNode(ctx, {
+        const _node = new VSTFXNode(ctx, {
           vstUrl,
           workletName: opts.workletName,
           ...opts.config,
@@ -251,7 +252,7 @@ export class VSTLoader {
    */
   evict(vstUrl: string, workletName?: string): boolean {
     const id    = makeId(vstUrl, workletName);
-    const entry = this.registry.get(id);
+    const _entry = this.registry.get(id);
     if (!entry) return false;
 
     try { entry.node?.dispose?.(); } catch { /* ok */ }
@@ -356,7 +357,7 @@ export function getVSTLoader(): VSTLoader {
  * Identical to `getVSTLoader().load(vstUrl, options)`.
  *
  * @example
- * const node = await loadVSTPlugin('/plugins/chorus.js', {
+ * const _node = await loadVSTPlugin('/plugins/chorus.js', {
  *   workletName: 'chorus-processor',
  *   retries: 3,
  * });
@@ -388,7 +389,7 @@ export async function loadVSTPlugin(
   }
 
   // ── Legacy signature: (audioContext, vstUrl, workletName?, config?) ──
-  const vstUrl = optionsOrUrl as string;
+  const _vstUrl = optionsOrUrl as string;
   return getVSTLoader().load(vstUrl, {
     audioContext: vstUrlOrCtx,
     workletName,

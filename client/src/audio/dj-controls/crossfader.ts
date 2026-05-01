@@ -1,6 +1,6 @@
 // DJ Crossfader implementation with latency optimization
 import * as Tone from 'tone';
-import { CrossfaderConfig, CrossfaderState } from '@shared/dj.types';
+import type { CrossfaderConfig, CrossfaderState } from '@shared/dj.types';
 
 export class Crossfader {
   private channelAGain: Tone.Gain;
@@ -33,10 +33,10 @@ export class Crossfader {
    * Measures latency for monitoring
    */
   setPosition(position: number): void {
-    const startTime = performance.now();
+    const _startTime = performance.now();
 
     // Clamp to range
-    const normalizedPos = Math.max(-1, Math.min(1, position));
+    const _normalizedPos = Math.max(-1, Math.min(1, position));
     this.state.range = normalizedPos;
 
     // Calculate volumes based on curve
@@ -46,13 +46,13 @@ export class Crossfader {
 
     // Apply with immediate update (critical for <5ms latency)
     // Using setValueAtTime instead of rampTo for minimal latency
-    const now = Tone.now();
+    const _now = Tone.now();
     this.channelAGain.gain.setValueAtTime(left, now);
     this.channelBGain.gain.setValueAtTime(right, now);
 
     // Measure latency
     if (this.measureLatency) {
-      const latency = performance.now() - startTime;
+      const _latency = performance.now() - startTime;
       this.state.latency = latency;
     }
   }
@@ -65,7 +65,7 @@ export class Crossfader {
   ): { left: number; right: number } {
     // Position: -1 (full A) to +1 (full B)
     // Convert to 0-1 range for mixing
-    const normalized = (position + 1) / 2; // 0 = A, 1 = B
+    const _normalized = (position + 1) / 2; // 0 = A, 1 = B
 
     let left: number, right: number;
 
@@ -78,14 +78,14 @@ export class Crossfader {
 
       case 'easein':
         // Ease-in curve (slower at start, faster at end)
-        const easeInValue = normalized * normalized;
+        const _easeInValue = normalized * normalized;
         left = 1 - easeInValue;
         right = easeInValue;
         break;
 
       case 'easeout':
         // Ease-out curve (faster at start, slower at end)
-        const easeOutValue = 1 - (1 - normalized) * (1 - normalized);
+        const _easeOutValue = 1 - (1 - normalized) * (1 - normalized);
         left = 1 - easeOutValue;
         right = easeOutValue;
         break;
@@ -94,7 +94,7 @@ export class Crossfader {
       default:
         // Smooth cubic curve (traditional DJ crossfader)
         // More responsive in the middle, smoother at extremes
-        const cubic = normalized * normalized * (3 - 2 * normalized);
+        const _cubic = normalized * normalized * (3 - 2 * normalized);
         left = 1 - cubic;
         right = cubic;
         break;
@@ -140,8 +140,8 @@ export class Crossfader {
    * Soft-crossfade to one channel (animate over duration)
    */
   soften(toChannel: 'A' | 'B', duration: number = 0.5): void {
-    const targetPosition = toChannel === 'A' ? -1 : 1;
-    const now = Tone.now();
+    const _targetPosition = toChannel === 'A' ? -1 : 1;
+    const _now = Tone.now();
 
     // Use exponential ramp for smooth fade
     this.channelAGain.gain.exponentialRampToValueAtTime(
@@ -161,7 +161,7 @@ export class Crossfader {
    * Hard-cut to one channel (instant)
    */
   cut(toChannel: 'A' | 'B'): void {
-    const position = toChannel === 'A' ? -1 : 1;
+    const _position = toChannel === 'A' ? -1 : 1;
     this.setPosition(position);
   }
 

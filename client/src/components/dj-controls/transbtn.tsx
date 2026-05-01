@@ -16,10 +16,10 @@ export function TransBtn({
 }: TransBtnProps) {
   const [pressed, setPressed] = useState(false);
 
-  const bg = danger
+  const _bg = danger
     ? (pressed || active ? '#ff2200' : 'transparent')
     : active ? color : 'transparent';
-  const borderColor = danger ? '#ff2200' : active ? color : DJ_BORDER;
+  const _borderColor = danger ? '#ff2200' : active ? color : DJ_BORDER;
   const textColor   = danger
     ? (active || pressed ? DJ_BLACK : '#ff2200')
     : active ? DJ_BLACK : DJ_DIM;

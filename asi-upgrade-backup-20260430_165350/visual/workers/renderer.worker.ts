@@ -1,2 +1,0 @@
-// Renderer Worker stub
-export {};

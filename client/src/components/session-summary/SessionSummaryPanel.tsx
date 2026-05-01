@@ -10,10 +10,10 @@ export function SessionSummaryPanel() {
 
   if (!summary) return null;
 
-  const mins = Math.floor(summary.durationSeconds / 60);
-  const secs = summary.durationSeconds % 60;
-  const savedMins = Math.floor(summary.timeSavedSeconds / 60);
-  const savedSecs = summary.timeSavedSeconds % 60;
+  const _mins = Math.floor(summary.durationSeconds / 60);
+  const _secs = summary.durationSeconds % 60;
+  const _savedMins = Math.floor(summary.timeSavedSeconds / 60);
+  const _savedSecs = summary.timeSavedSeconds % 60;
 
   return (
     <div className="session-summary-panel" role="dialog" aria-label="Session Summary">

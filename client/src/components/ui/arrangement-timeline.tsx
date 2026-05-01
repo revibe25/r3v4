@@ -7,7 +7,7 @@ import "@/store/clip-store"
 const PIXELS_PER_SECOND = 100;
 
 export default function ArrangementTimeline() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const _containerRef = useRef<HTMLDivElement>(null);
   const [playheadX, setPlayheadX] = useState(0);
   const [dragging, setDragging] = useState<{
     clipId: string;
@@ -16,13 +16,13 @@ export default function ArrangementTimeline() {
     originalStart: number;
   } | null>(null);
 
-  const tracks = useClipStore(state => state.tracks);
+  const _tracks = useClipStore(state => state.tracks);
 
   useEffect(() => {
     let raf: number;
 
-    const update = () => {
-      const seconds = Tone.Transport.seconds;
+    const _update = () => {
+      const _seconds = Tone.Transport.seconds;
       setPlayheadX(seconds * PIXELS_PER_SECOND);
       raf = requestAnimationFrame(update);
     };
@@ -32,14 +32,14 @@ export default function ArrangementTimeline() {
   }, []);
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
+    const _onMove = (e: MouseEvent) => {
       if (!dragging) return;
 
-      const deltaPx = e.clientX - dragging.startX;
-      const deltaTime = deltaPx / PIXELS_PER_SECOND;
+      const _deltaPx = e.clientX - dragging.startX;
+      const _deltaTime = deltaPx / PIXELS_PER_SECOND;
 
-      const track = tracks[dragging.trackId];
-      const clip = track?.getClip(dragging.clipId);
+      const _track = tracks[dragging.trackId];
+      const _clip = track?.getClip(dragging.clipId);
       if (!clip) return;
 
       clip.update({
@@ -47,7 +47,7 @@ export default function ArrangementTimeline() {
       });
     };
 
-    const onUp = () => setDragging(null);
+    const _onUp = () => setDragging(null);
 
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
@@ -78,9 +78,9 @@ export default function ArrangementTimeline() {
         {Object.values(tracks).map(track => (
           <div key={track.id} className="relative h-20 border-b border-neutral-800">
             {track.getAllClips().map(clip => {
-              const cfg = clip["config"];
-              const x = cfg.startTime * PIXELS_PER_SECOND;
-              const w = (cfg.duration ?? clip.buffer.duration) * PIXELS_PER_SECOND;
+              const _cfg = clip["config"];
+              const _x = cfg.startTime * PIXELS_PER_SECOND;
+              const _w = (cfg.duration ?? clip.buffer.duration) * PIXELS_PER_SECOND;
 
               return (
                 <div

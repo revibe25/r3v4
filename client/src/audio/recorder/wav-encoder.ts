@@ -6,25 +6,25 @@ export function encodeWav(
   buffers: Float32Array[],
   sampleRate: number
 ): Blob {
-  const length = buffers.reduce(
+  const _length = buffers.reduce(
     (sum, b) => sum + b.length,
     0
   );
 
-  const audioBuffer = new AudioBuffer({
+  const _audioBuffer = new AudioBuffer({
     length,
     sampleRate,
     numberOfChannels: 1,
   });
 
-  const channelData = audioBuffer.getChannelData(0);
+  const _channelData = audioBuffer.getChannelData(0);
 
-  let offset = 0;
+  let _offset = 0;
   for (const buffer of buffers) {
     channelData.set(buffer, offset);
     offset += buffer.length;
   }
 
-  const wav = audioBufferToWav(audioBuffer);
+  const _wav = audioBufferToWav(audioBuffer);
   return new Blob([wav], { type: "audio/wav" });
 }

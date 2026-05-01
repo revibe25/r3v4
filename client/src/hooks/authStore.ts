@@ -51,14 +51,14 @@ interface AuthState {
 
 // ── API helpers ───────────────────────────────────────────────────────────────
 
-const API = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+const _API = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
 
 async function authFetch<T>(
   path: string,
   body?: Record<string, string>,
   token?: string,
 ): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  const _res = await fetch(`${API}${path}`, {
     method:  body ? 'POST' : 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -67,10 +67,10 @@ async function authFetch<T>(
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  const data = await res.json() as Record<string, unknown>;
+  const _data = await res.json() as Record<string, unknown>;
 
   if (!res.ok) {
-    const msg = (data.message ?? data.error ?? `HTTP ${res.status}`) as string;
+    const _msg = (data.message ?? data.error ?? `HTTP ${res.status}`) as string;
     throw new Error(msg);
   }
 
@@ -79,7 +79,7 @@ async function authFetch<T>(
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const _useAuthStore = create<AuthState>((set, get) => ({
   user:    null,
   token:   null,
   loading: false,
@@ -109,9 +109,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (email, password) => {
     set({ loading: true, error: null });
     try {
-      const emailNorm = email.trim().toLowerCase();
+      const _emailNorm = email.trim().toLowerCase();
       // Derive username from email prefix — server requires /^[a-zA-Z0-9_-]+$/, min 3 chars.
-      const rawPrefix = emailNorm.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '_');
+      const _rawPrefix = emailNorm.split('@')[0].replace(/[^a-zA-Z0-9_-]/g, '_');
       const username  = (rawPrefix.length >= 3 ? rawPrefix : rawPrefix + '_r3').slice(0, 32);
       const { token, user } = await authFetch<{ token: string; user: AuthUser }>(
         '/api/auth/register',
@@ -139,7 +139,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // get() is in scope from create<AuthState>((set, get) => ...) closure.
     if (get().user) return;
 
-    const stored = localStorage.getItem('token');
+    const _stored = localStorage.getItem('token');
     if (!stored) return;
 
     set({ loading: true });
@@ -161,5 +161,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 }));
 
 // ── Selector helpers (stable references, safe in selector callbacks) ──────────
-export const selectIsAuthed = (s: AuthState): boolean => !!s.user && !!s.token;
+export const _selectIsAuthed = (s: AuthState): boolean => !!s.user && !!s.token;
 export const selectTier     = (s: AuthState): AuthUser['tier'] => s.user?.tier ?? 'explorer';

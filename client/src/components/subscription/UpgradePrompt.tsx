@@ -4,8 +4,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react';
-import { useSubscription, GateError } from '../../hooks/useSubscription';
-import { SubscriptionTier, TIER_DEFINITIONS } from '../../../../shared/subscription.types';
+import type { GateError } from '../../hooks/useSubscription';
+import { useSubscription } from '../../hooks/useSubscription';
+import type { SubscriptionTier} from '../../../../shared/subscription.types';
+import { TIER_DEFINITIONS } from '../../../../shared/subscription.types';
 
 interface UpgradePromptProps {
   gateError?: GateError | null;
@@ -32,16 +34,16 @@ export function UpgradePrompt({
   const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
 
-  const requiredTier =
+  const _requiredTier =
     gateError?.requiredTier ?? requiredTierProp ?? 'creator';
-  const message =
+  const _message =
     gateError?.message ??
     `Upgrade to ${TIER_DEFINITIONS[requiredTier].displayName} to unlock this feature.`;
 
-  const tierDef = TIER_DEFINITIONS[requiredTier as Exclude<SubscriptionTier, 'explorer'>];
-  const color = TIER_COLORS[requiredTier];
-  const monthlyCents = tierDef.monthlyPriceCents;
-  const annualCents = tierDef.annualPriceCents;
+  const _tierDef = TIER_DEFINITIONS[requiredTier as Exclude<SubscriptionTier, 'explorer'>];
+  const _color = TIER_COLORS[requiredTier];
+  const _monthlyCents = tierDef.monthlyPriceCents;
+  const _annualCents = tierDef.annualPriceCents;
 
   async function handleUpgrade() {
     if (requiredTier === 'explorer') return;
@@ -253,7 +255,7 @@ export function FeatureGate({
   fallback,
 }: FeatureGateProps) {
   const { can } = useSubscription();
-  const allowed = can(feature);
+  const _allowed = can(feature);
 
   if (allowed) return <>{children}</>;
 

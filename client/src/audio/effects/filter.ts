@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import { FilterParams } from '@shared/effects.types';
+import type { FilterParams } from '@shared/effects.types';
 
 export class FilterEffect {
   private filter: Tone.Filter;

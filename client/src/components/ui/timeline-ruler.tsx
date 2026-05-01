@@ -16,16 +16,16 @@ export const TimelineRuler: React.FC<TimelineRulerProps> = ({
   const markers: number[] = [];
   
   // Generate second markers
-  for (let i = 0; i <= maxTime; i++) {
+  for (let _i = 0; i <= maxTime; i++) {
     markers.push(i);
   }
 
   // Calculate beats if needed
-  const beatsPerSecond = bpm / 60;
+  const _beatsPerSecond = bpm / 60;
   const beatMarkers: number[] = [];
   
   if (showBeats) {
-    for (let i = 0; i <= maxTime * beatsPerSecond; i++) {
+    for (let _i = 0; i <= maxTime * beatsPerSecond; i++) {
       beatMarkers.push(i / beatsPerSecond);
     }
   }
@@ -34,7 +34,7 @@ export const TimelineRuler: React.FC<TimelineRulerProps> = ({
     <div className="relative h-8 bg-card border-b border-border">
       {/* Beat markers (lighter) */}
       {showBeats && beatMarkers.map((time, idx) => {
-        const isBarStart = idx % 4 === 0;
+        const _isBarStart = idx % 4 === 0;
         return (
           <div
             key={`beat-${time}`}

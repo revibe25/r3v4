@@ -151,8 +151,8 @@ const AI_GROOVE_PATTERNS: Record<string, { label: string; pattern: boolean[] }> 
 };
 
 // Velocity curve function
-const applyVelocityCurve = (v: number, curve: VelocityCurve): number => {
-  const c = Math.max(0, Math.min(1, v));
+const _applyVelocityCurve = (v: number, curve: VelocityCurve): number => {
+  const _c = Math.max(0, Math.min(1, v));
   switch (curve) {
     case 'exponential': return Math.pow(c, 2);
     case 'logarithmic': return Math.sqrt(c);
@@ -163,12 +163,12 @@ const applyVelocityCurve = (v: number, curve: VelocityCurve): number => {
 };
 
 // Get hit zone from click position relative to pad element
-const getHitZone = (
+const _getHitZone = (
   clientX: number, clientY: number, rect: DOMRect
 ): HitZone => {
-  const dx = (clientX - rect.left) / rect.width - 0.5;
-  const dy = (clientY - rect.top) / rect.height - 0.5;
-  const dist = Math.sqrt(dx * dx + dy * dy) * 2; // normalized 0–1
+  const _dx = (clientX - rect.left) / rect.width - 0.5;
+  const _dy = (clientY - rect.top) / rect.height - 0.5;
+  const _dist = Math.sqrt(dx * dx + dy * dy) * 2; // normalized 0–1
   if (dist < 0.28) return 'center';
   if (dist < 0.72) return 'edge';
   return 'rim';
@@ -178,7 +178,7 @@ const getHitZone = (
 const ZONE_VELOCITY: Record<HitZone, number> = { center: 1.0, edge: 0.75, rim: 0.55 };
 
 // Typed deep-clone for pattern arrays — replaces JSON.parse/stringify throughout
-const clonePattern = (p: number[][]): number[][] => p.map(row => [...row]);
+const _clonePattern = (p: number[][]): number[][] => p.map(row => [...row]);
 
 // ── Rotary Knob — replaces per-pad volume slider ──────────────────────────
 function PadKnob({
@@ -186,24 +186,24 @@ function PadKnob({
 }: {
   value: number; onChange: (v: number) => void; hue: number; label?: string;
 }) {
-  const startY = useRef<number | null>(null);
-  const startVal = useRef(0);
+  const _startY = useRef<number | null>(null);
+  const _startVal = useRef(0);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+  const _handlePointerDown = useCallback((e: React.PointerEvent) => {
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     startY.current = e.clientY;
     startVal.current = value;
   }, [value]);
 
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+  const _handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (startY.current === null) return;
     e.stopPropagation();
-    const delta = (startY.current - e.clientY) / 80;
+    const _delta = (startY.current - e.clientY) / 80;
     onChange(Math.max(0, Math.min(1, startVal.current + delta)));
   }, [onChange]);
 
-  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+  const _handlePointerUp = useCallback((e: React.PointerEvent) => {
     e.stopPropagation();
     startY.current = null;
   }, []);
@@ -214,17 +214,17 @@ function PadKnob({
   const angle   = MIN_DEG + value * SWEEP;
   const toRad   = (d: number) => (d * Math.PI) / 180;
 
-  const cx = 14; const cy = 14; const r = 10;
+  const _cx = 14; const _cy = 14; const _r = 10;
   // Track arc (full)
-  const arcStart = { x: cx + r * Math.cos(toRad(MIN_DEG)), y: cy + r * Math.sin(toRad(MIN_DEG)) };
+  const _arcStart = { x: cx + r * Math.cos(toRad(MIN_DEG)), y: cy + r * Math.sin(toRad(MIN_DEG)) };
   const arcEnd   = { x: cx + r * Math.cos(toRad(MIN_DEG + SWEEP)), y: cy + r * Math.sin(toRad(MIN_DEG + SWEEP)) };
   // Value arc
   const valEnd   = { x: cx + r * Math.cos(toRad(angle)), y: cy + r * Math.sin(toRad(angle)) };
   // Indicator line tip
-  const tipX = cx + (r - 2) * Math.cos(toRad(angle));
-  const tipY = cy + (r - 2) * Math.sin(toRad(angle));
+  const _tipX = cx + (r - 2) * Math.cos(toRad(angle));
+  const _tipY = cy + (r - 2) * Math.sin(toRad(angle));
 
-  const pct = Math.round(value * 100);
+  const _pct = Math.round(value * 100);
 
   return (
     <div
@@ -285,28 +285,28 @@ export function DrumPads({
   disabled = false,
 }: DrumPadsProps) {
   // Refs
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const kitImportRef = useRef<HTMLInputElement>(null);
-  const dragOverlayRef = useRef<HTMLDivElement>(null);
-  const hueRef = useRef<number[]>(
+  const _fileInputRef = useRef<HTMLInputElement>(null);
+  const _kitImportRef = useRef<HTMLInputElement>(null);
+  const _dragOverlayRef = useRef<HTMLDivElement>(null);
+  const _hueRef = useRef<number[]>(
     Array.from({ length: pads.length }, (_, i) => COLOR_THEMES.rainbow(i))
   );
-  const animationFrameRef = useRef<number | null>(null);
-  const velocityRef = useRef<Map<number, number>>(new Map());
-  const lastTapTimeRef = useRef<Map<number, number>>(new Map());
-  const touchStartTimeRef = useRef<Map<number, number>>(new Map());
-  const waveformCanvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
-  const audioContextRef = useRef<AudioContext | null>(null);
+  const _animationFrameRef = useRef<number | null>(null);
+  const _velocityRef = useRef<Map<number, number>>(new Map());
+  const _lastTapTimeRef = useRef<Map<number, number>>(new Map());
+  const _touchStartTimeRef = useRef<Map<number, number>>(new Map());
+  const _waveformCanvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const _audioContextRef = useRef<AudioContext | null>(null);
   // Ref mirror of pressedPads so the animation loop never restarts on every hit
-  const pressedPadsRef = useRef<Set<number>>(new Set());
+  const _pressedPadsRef = useRef<Set<number>>(new Set());
 
   // UI State
   const [selectedPad, setSelectedPad] = useState<string>('0');
   const [pressedPads, setPressedPads] = useState<Set<number>>(new Set());
   // Keep ref in sync so the rAF animation loop can read without being a dep
-  const updatePressedPads = useCallback((updater: (prev: Set<number>) => Set<number>) => {
+  const _updatePressedPads = useCallback((updater: (prev: Set<number>) => Set<number>) => {
     setPressedPads(prev => {
-      const next = updater(prev);
+      const _next = updater(prev);
       pressedPadsRef.current = next;
       return next;
     });
@@ -338,7 +338,7 @@ export function DrumPads({
   // ── Sequencer state ────────────────────────────────────────────────────────
   // patterns[slot][pad][step] = velocity 0–127 (0 = off)
   const [patterns, setPatterns] = useState<Record<PatternSlot, number[][]>>(() => {
-    const empty = (): number[][] => Array.from({ length: 16 }, () => Array(SEQ_STEPS).fill(0));
+    const _empty = (): number[][] => Array.from({ length: 16 }, () => Array(SEQ_STEPS).fill(0));
     return { A: empty(), B: empty(), C: empty(), D: empty() };
   });
   const [activePatternSlot, setActivePatternSlot] = useState<PatternSlot>('A');
@@ -348,7 +348,7 @@ export function DrumPads({
   const [seqSwing, setSeqSwing]       = useState(0);   // 0–50 (percentage swing)
   const [showSequencer, setShowSequencer] = useState(false);
   const [seqPadOffset, setSeqPadOffset]   = useState(0); // which 4 pads to show (0 or 4, etc.)
-  const seqIntervalRef = useRef<number | null>(null);
+  const _seqIntervalRef = useRef<number | null>(null);
   const seqStepRef     = useRef(0);
 
   // ── Pro-grade state ────────────────────────────────────────────────────────
@@ -380,23 +380,23 @@ export function DrumPads({
   // Pad controls tray open/closed
   const [showPadControls, setShowPadControls] = useState(true);
   // Round-robin counter per pad
-  const rrCounterRef = useRef<Map<number, number>>(new Map());
+  const _rrCounterRef = useRef<Map<number, number>>(new Map());
   const midiAccessRef   = useRef<MIDIAccess | null>(null);
   const midiOutputRef   = useRef<MIDIOutput | null>(null);
   const [midiAvailable, setMidiAvailable] = useState(false);
 
 
-  const sequenceStartTimeRef = useRef<number | null>(null);
+  const _sequenceStartTimeRef = useRef<number | null>(null);
 
-  const selectedPadIndex = Number(selectedPad);
-  const isLoading = loadingPadIndex !== null;
+  const _selectedPadIndex = Number(selectedPad);
+  const _isLoading = loadingPadIndex !== null;
 
   // Initialize audio context — resume on user gesture (iOS/Chrome require it)
   useEffect(() => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
-    const resume = () => { audioContextRef.current?.resume(); };
+    const _resume = () => { audioContextRef.current?.resume(); };
     document.addEventListener('click', resume, { once: true });
     document.addEventListener('keydown', resume, { once: true });
     return () => {
@@ -411,11 +411,11 @@ export function DrumPads({
     if (typeof navigator !== 'undefined' && 'requestMIDIAccess' in navigator) {
       (navigator as any).requestMIDIAccess({ sysex: false }).then((access: MIDIAccess) => {
         midiAccessRef.current = access;
-        const outputs = Array.from(access.outputs.values());
+        const _outputs = Array.from(access.outputs.values());
         midiOutputRef.current = outputs[0] ?? null;
         setMidiAvailable(outputs.length > 0);
         access.onstatechange = () => {
-          const outs = Array.from(access.outputs.values());
+          const _outs = Array.from(access.outputs.values());
           midiOutputRef.current = outs[0] ?? null;
           setMidiAvailable(outs.length > 0);
         };
@@ -424,19 +424,19 @@ export function DrumPads({
   }, []);
 
   // Keep a ref to latest tickSeq so the setInterval never holds a stale closure
-  const tickSeqRef = useRef<() => void>(() => {});
+  const _tickSeqRef = useRef<() => void>(() => {});
 
   // Memoized color calculation
-  const getPadColor = useCallback((index: number) => {
+  const _getPadColor = useCallback((index: number) => {
     return COLOR_THEMES[colorTheme](index);
   }, [colorTheme]);
 
 
   // MIDI note sender (channel 10 = drums in General MIDI)
-  const sendMidi = useCallback((padIndex: number, velocity: number, noteOn: boolean) => {
-    const midi = midiOutputRef.current;
+  const _sendMidi = useCallback((padIndex: number, velocity: number, noteOn: boolean) => {
+    const _midi = midiOutputRef.current;
     if (!midi || padIndex >= PAD_MIDI_NOTES.length) return;
-    const note = PAD_MIDI_NOTES[padIndex];
+    const _note = PAD_MIDI_NOTES[padIndex];
     const vel  = Math.max(0, Math.min(127, Math.round(velocity * 127)));
     try {
       // Channel 10 (0x99 = note-on ch10, 0x89 = note-off ch10)
@@ -446,62 +446,62 @@ export function DrumPads({
 
   // Play a pad locally through a Web Audio FX chain.
   // Returns true when it handled playback (so caller can skip calling onTrigger for audio).
-  const playPadWithFx = useCallback((padIndex: number, velocity: number): boolean => {
-    const pad = pads[padIndex];
+  const _playPadWithFx = useCallback((padIndex: number, velocity: number): boolean => {
+    const _pad = pads[padIndex];
     if (!pad.sample) return false;
-    const ac = audioContextRef.current;
+    const _ac = audioContextRef.current;
     if (!ac) return false;
     if (ac.state === 'suspended') ac.resume();
 
     const fx  = padFxSettings.get(padIndex) ?? { ...DEFAULT_FX };
-    const vol = (padVolumes.get(padIndex) ?? 1) * Math.max(0, Math.min(1, velocity));
+    const _vol = (padVolumes.get(padIndex) ?? 1) * Math.max(0, Math.min(1, velocity));
 
     // Round-robin micro-pitch variation (subtle ±2 cents per hit)
-    const rrCount = rrCounterRef.current.get(padIndex) ?? 0;
-    const microPitch = fx.pitchShift + (((rrCount % 4) - 1.5) * 0.02); // ±0.03 semi
+    const _rrCount = rrCounterRef.current.get(padIndex) ?? 0;
+    const _microPitch = fx.pitchShift + (((rrCount % 4) - 1.5) * 0.02); // ±0.03 semi
     rrCounterRef.current.set(padIndex, rrCount + 1);
 
     // Source
-    const source = ac.createBufferSource();
+    const _source = ac.createBufferSource();
     source.buffer = pad.sample;
     source.playbackRate.value = Math.pow(2, microPitch / 12);
 
     // Gain
-    const gainNode = ac.createGain();
+    const _gainNode = ac.createGain();
     gainNode.gain.value = vol;
 
     // Low-pass filter (filterCutoff 0→1 maps to 200–18200 Hz)
-    const filter = ac.createBiquadFilter();
+    const _filter = ac.createBiquadFilter();
     filter.type = 'lowpass';
     filter.frequency.value = 200 + fx.filterCutoff * 18000;
     filter.Q.value = 0.8;
 
     // Saturation waveshaper
-    const shaper = ac.createWaveShaper();
-    const n = 512;
-    const shapeCurve = new Float32Array(n);
-    const k = fx.saturation * 150;
-    for (let i = 0; i < n; i++) {
-      const x = (i * 2) / n - 1;
+    const _shaper = ac.createWaveShaper();
+    const _n = 512;
+    const _shapeCurve = new Float32Array(n);
+    const _k = fx.saturation * 150;
+    for (let _i = 0; i < n; i++) {
+      const _x = (i * 2) / n - 1;
       shapeCurve[i] = k === 0 ? x : ((1 + k / 100) * x) / (1 + (k / 100) * Math.abs(x));
     }
     shaper.curve = shapeCurve;
     shaper.oversample = '4x';
 
     // Reverb — parallel delay network (simple but musical)
-    const dryGain = ac.createGain();
+    const _dryGain = ac.createGain();
     dryGain.gain.value = 1;
 
-    const revWet = ac.createGain();
+    const _revWet = ac.createGain();
     revWet.gain.value = fx.reverbSend * 0.85;
 
-    const delay1 = ac.createDelay(3);
-    const delay2 = ac.createDelay(3);
+    const _delay1 = ac.createDelay(3);
+    const _delay2 = ac.createDelay(3);
     delay1.delayTime.value = 0.117;
     delay2.delayTime.value = 0.253;
-    const fbGain = ac.createGain();
+    const _fbGain = ac.createGain();
     fbGain.gain.value = Math.min(0.55, fx.reverbSend * 0.7);
-    const revLp = ac.createBiquadFilter();
+    const _revLp = ac.createBiquadFilter();
     revLp.type = 'lowpass';
     revLp.frequency.value = 4000;
 
@@ -525,13 +525,13 @@ export function DrumPads({
     source.start(ac.currentTime);
 
     // Cleanup nodes after sample ends
-    const cleanup = () => {
+    const _cleanup = () => {
       [source, gainNode, filter, shaper, dryGain, revWet, delay1, delay2, fbGain, revLp]
         .forEach(n => { try { n.disconnect(); } catch {} });
     };
     source.onended = cleanup;
     // Safety timeout (sample duration + max reverb tail)
-    const safeguard = setTimeout(cleanup, (pad.sample.duration + 3) * 1000);
+    const _safeguard = setTimeout(cleanup, (pad.sample.duration + 3) * 1000);
     source.onended = () => { clearTimeout(safeguard); cleanup(); };
 
     // MIDI note-on
@@ -549,16 +549,16 @@ export function DrumPads({
 
   // Enhanced RGB animation with multiple modes
   useEffect(() => {
-    let frameCount = 0;
+    let _frameCount = 0;
     
-    const animatePads = () => {
+    const _animatePads = () => {
       frameCount++;
       
       hueRef.current = hueRef.current.map((hue, i) => {
         // Read from ref — no re-subscribe needed when pads are hit
         if (pads[i]?.isActive || pressedPadsRef.current.has(i)) {
-          const baseHue = getPadColor(i);
-          const velocity = velocityRef.current.get(i) || 1;
+          const _baseHue = getPadColor(i);
+          const _velocity = velocityRef.current.get(i) || 1;
           return (baseHue + velocity * 10) % 360;
         }
         
@@ -587,18 +587,18 @@ export function DrumPads({
   }, [pads, getPadColor, animationMode]);
 
   // Draw waveform visualization
-  const drawWaveform = useCallback((canvas: HTMLCanvasElement, buffer: AudioBuffer, hue: number) => {
-    const ctx = canvas.getContext('2d');
+  const _drawWaveform = useCallback((canvas: HTMLCanvasElement, buffer: AudioBuffer, hue: number) => {
+    const _ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const data = buffer.getChannelData(0);
-    const step = Math.ceil(data.length / width);
+    const _width = canvas.width;
+    const _height = canvas.height;
+    const _data = buffer.getChannelData(0);
+    const _step = Math.ceil(data.length / width);
     
     ctx.clearRect(0, 0, width, height);
     
-    const gradient = ctx.createLinearGradient(0, 0, width, 0);
+    const _gradient = ctx.createLinearGradient(0, 0, width, 0);
     gradient.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.8)`);
     gradient.addColorStop(1, `hsla(${hue + 30}, 70%, 60%, 0.8)`);
     
@@ -608,36 +608,36 @@ export function DrumPads({
 
     switch (waveformStyle) {
       case 'bars':
-        for (let i = 0; i < width; i++) {
-          const chunk = data.subarray(i * step, (i + 1) * step);
-          let min = 1, max = -1;
-          for (let j = 0; j < chunk.length; j++) {
+        for (let _i = 0; i < width; i++) {
+          const _chunk = data.subarray(i * step, (i + 1) * step);
+          let _min = 1, max = -1;
+          for (let _j = 0; j < chunk.length; j++) {
             if (chunk[j] < min) min = chunk[j];
             if (chunk[j] > max) max = chunk[j];
           }
-          const barHeight = Math.max(1, (max - min) * height / 2);
+          const _barHeight = Math.max(1, (max - min) * height / 2);
           ctx.fillRect(i, (height - barHeight) / 2, 1, barHeight);
         }
         break;
       
       case 'line':
         ctx.beginPath();
-        for (let i = 0; i < width; i++) {
-          const chunk = data.subarray(i * step, (i + 1) * step);
-          let sum = 0;
-          for (let j = 0; j < chunk.length; j++) sum += chunk[j];
-          const y = (1 - sum / chunk.length) * height / 2;
+        for (let _i = 0; i < width; i++) {
+          const _chunk = data.subarray(i * step, (i + 1) * step);
+          let _sum = 0;
+          for (let _j = 0; j < chunk.length; j++) sum += chunk[j];
+          const _y = (1 - sum / chunk.length) * height / 2;
           i === 0 ? ctx.moveTo(i, y) : ctx.lineTo(i, y);
         }
         ctx.stroke();
         break;
       
       case 'dots':
-        for (let i = 0; i < width; i += 2) {
-          const chunk = data.subarray(i * step, (i + 1) * step);
-          let sum = 0;
-          for (let j = 0; j < chunk.length; j++) sum += chunk[j];
-          const y = (1 - sum / chunk.length) * height / 2;
+        for (let _i = 0; i < width; i += 2) {
+          const _chunk = data.subarray(i * step, (i + 1) * step);
+          let _sum = 0;
+          for (let _j = 0; j < chunk.length; j++) sum += chunk[j];
+          const _y = (1 - sum / chunk.length) * height / 2;
           ctx.fillRect(i, y - 1, 2, 2);
         }
         break;
@@ -645,11 +645,11 @@ export function DrumPads({
       case 'filled':
         ctx.beginPath();
         ctx.moveTo(0, height / 2);
-        for (let i = 0; i < width; i++) {
-          const chunk = data.subarray(i * step, (i + 1) * step);
-          let sum = 0;
-          for (let j = 0; j < chunk.length; j++) sum += chunk[j];
-          const y = (1 - sum / chunk.length) * height / 2;
+        for (let _i = 0; i < width; i++) {
+          const _chunk = data.subarray(i * step, (i + 1) * step);
+          let _sum = 0;
+          for (let _j = 0; j < chunk.length; j++) sum += chunk[j];
+          const _y = (1 - sum / chunk.length) * height / 2;
           ctx.lineTo(i, y);
         }
         ctx.lineTo(width, height / 2);
@@ -665,7 +665,7 @@ export function DrumPads({
     
     pads.forEach((pad, index) => {
       if (pad.sample && waveformCanvasRefs.current.has(index)) {
-        const canvas = waveformCanvasRefs.current.get(index)!;
+        const _canvas = waveformCanvasRefs.current.get(index)!;
         drawWaveform(canvas, pad.sample, padHues[index]);
       }
     });
@@ -674,23 +674,23 @@ export function DrumPads({
   // Auto-dismiss messages
   useEffect(() => {
     if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000);
+      const _timer = setTimeout(() => setSuccess(null), 3000);
       return () => clearTimeout(timer);
     }
   }, [success]);
 
   useEffect(() => {
     if (error) {
-      const timer = setTimeout(() => setError(null), 5000);
+      const _timer = setTimeout(() => setError(null), 5000);
       return () => clearTimeout(timer);
     }
   }, [error]);
 
   // Undo/Redo - DEFINED BEFORE handleKey to avoid hoisting issues
-  const handleUndo = useCallback(() => {
+  const _handleUndo = useCallback(() => {
     if (historyIndex < 0) return;
     
-    const historyItem = history[historyIndex];
+    const _historyItem = history[historyIndex];
     if (historyItem.buffer) {
       onAssignSample(historyItem.padIndex, historyItem.buffer, historyItem.name);
     } else if (onClearSample) {
@@ -701,10 +701,10 @@ export function DrumPads({
     setSuccess({ padIndex: historyItem.padIndex, fileName: 'Undo' });
   }, [history, historyIndex, onAssignSample, onClearSample]);
 
-  const handleRedo = useCallback(() => {
+  const _handleRedo = useCallback(() => {
     if (historyIndex >= history.length - 1) return;
     
-    const historyItem = history[historyIndex + 1];
+    const _historyItem = history[historyIndex + 1];
     if (historyItem.buffer) {
       onAssignSample(historyItem.padIndex, historyItem.buffer, historyItem.name);
     } else if (onClearSample) {
@@ -716,25 +716,25 @@ export function DrumPads({
   }, [history, historyIndex, onAssignSample, onClearSample]);
 
   // toggleSeqStep and recordToSeq must be defined BEFORE handlePadMouseDown (which calls recordToSeq)
-  const toggleSeqStep = useCallback((padIdx: number, step: number, vel = 100) => {
+  const _toggleSeqStep = useCallback((padIdx: number, step: number, vel = 100) => {
     setPatterns(prev => {
-      const next = { ...prev };
-      const slot = clonePattern(prev[activePatternSlot]);
+      const _next = { ...prev };
+      const _slot = clonePattern(prev[activePatternSlot]);
       slot[padIdx][step] = slot[padIdx][step] > 0 ? 0 : vel;
       next[activePatternSlot] = slot;
       return next;
     });
   }, [activePatternSlot]);
 
-  const recordToSeq = useCallback((padIdx: number, vel: number) => {
+  const _recordToSeq = useCallback((padIdx: number, vel: number) => {
     if (!seqPlaying) return;
-    const step = seqStepRef.current;
+    const _step = seqStepRef.current;
     toggleSeqStep(padIdx, step, Math.round(vel * 127));
   }, [seqPlaying, toggleSeqStep]);
 
 
   // Enhanced keyboard handler with velocity simulation
-  const handleKey = useCallback((e: KeyboardEvent, type: 'down' | 'up') => {
+  const _handleKey = useCallback((e: KeyboardEvent, type: 'down' | 'up') => {
     // Check for modifier keys for shortcuts
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'z' && type === 'down' && !e.repeat) {
@@ -749,7 +749,7 @@ export function DrumPads({
       }
     }
 
-    const padIndex = PAD_KEYS.indexOf(e.key.toLowerCase());
+    const _padIndex = PAD_KEYS.indexOf(e.key.toLowerCase());
     if (padIndex === -1 || padIndex >= pads.length) return;
     e.preventDefault();
 
@@ -759,20 +759,20 @@ export function DrumPads({
     if (type === 'down' && !e.repeat) {
       updatePressedPads((prev) => new Set(prev).add(padIndex));
       
-      const velocity = 1.0;
+      const _velocity = 1.0;
       velocityRef.current.set(padIndex, velocity);
       setPadVelocities(new Map(velocityRef.current));
       
       // Apply pad volume
-      const played = playPadWithFx(padIndex, velocity);
+      const _played = playPadWithFx(padIndex, velocity);
       if (!played) {
-        const padVolume = padVolumes.get(padIndex) ?? 1;
+        const _padVolume = padVolumes.get(padIndex) ?? 1;
         onTrigger(padIndex, velocity * padVolume);
       }
       
       // Record if in free-record mode
       if (recordingMode && sequenceStartTimeRef.current) {
-        const time = Date.now() - sequenceStartTimeRef.current;
+        const _time = Date.now() - sequenceStartTimeRef.current;
         setRecordedSequence(prev => [...prev, { pad: padIndex, time, velocity }]);
       }
       // Also record into live sequencer step if seq is running
@@ -789,7 +789,7 @@ export function DrumPads({
       }, ANIMATION_DURATION);
     } else if (type === 'up') {
       updatePressedPads((prev) => {
-        const next = new Set(prev);
+        const _next = new Set(prev);
         next.delete(padIndex);
         return next;
       });
@@ -797,8 +797,8 @@ export function DrumPads({
   }, [pads.length, onTrigger, padVolumes, padMutes, soloedPad, recordingMode, handleUndo, handleRedo, updatePressedPads, playPadWithFx, recordToSeq]);
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => handleKey(e, 'down');
-    const up = (e: KeyboardEvent) => handleKey(e, 'up');
+    const _down = (e: KeyboardEvent) => handleKey(e, 'down');
+    const _up = (e: KeyboardEvent) => handleKey(e, 'up');
 
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
@@ -809,7 +809,7 @@ export function DrumPads({
   }, [handleKey]);
 
   // Enhanced mouse/touch handlers
-  const handlePadMouseDown = useCallback((index: number, event: React.MouseEvent | React.TouchEvent) => {
+  const _handlePadMouseDown = useCallback((index: number, event: React.MouseEvent | React.TouchEvent) => {
     if (padMutes.has(index) || (soloedPad !== null && soloedPad !== index)) return;
 
     updatePressedPads((prev) => new Set(prev).add(index));
@@ -817,7 +817,7 @@ export function DrumPads({
     let clientX: number, clientY: number;
     
     if ('touches' in event) {
-      const touch = event.touches[0];
+      const _touch = event.touches[0];
       clientX = touch.clientX;
       clientY = touch.clientY;
       touchStartTimeRef.current.set(index, Date.now());
@@ -827,49 +827,49 @@ export function DrumPads({
     }
     
     // ── Pro: Multi-zone hit detection ─────────────────────────────────────────
-    const rect = event.currentTarget.getBoundingClientRect();
-    const zone = getHitZone(clientX, clientY, rect);
-    const zoneVelMod = ZONE_VELOCITY[zone];
-    setPadHitZones(prev => { const n = new Map(prev); n.set(index, zone); return n; });
+    const _rect = event.currentTarget.getBoundingClientRect();
+    const _zone = getHitZone(clientX, clientY, rect);
+    const _zoneVelMod = ZONE_VELOCITY[zone];
+    setPadHitZones(prev => { const _n = new Map(prev); n.set(index, zone); return n; });
 
     // Base velocity from distance to center
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    const distanceX = Math.abs(clientX - centerX);
-    const distanceY = Math.abs(clientY - centerY);
-    const maxDistance = Math.sqrt(rect.width ** 2 + rect.height ** 2) / 2;
-    const distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
+    const _centerX = rect.left + rect.width / 2;
+    const _centerY = rect.top + rect.height / 2;
+    const _distanceX = Math.abs(clientX - centerX);
+    const _distanceY = Math.abs(clientY - centerY);
+    const _maxDistance = Math.sqrt(rect.width ** 2 + rect.height ** 2) / 2;
+    const _distance = Math.sqrt(distanceX ** 2 + distanceY ** 2);
     
-    const rawVelocity = Math.max(0.3, 1 - (distance / maxDistance) * 0.7);
-    const touchMult = 'touches' in event ? TOUCH_VELOCITY_MULTIPLIER : 1;
+    const _rawVelocity = Math.max(0.3, 1 - (distance / maxDistance) * 0.7);
+    const _touchMult = 'touches' in event ? TOUCH_VELOCITY_MULTIPLIER : 1;
 
     // ── Pro: Apply velocity curve ──────────────────────────────────────────────
-    const curve = padVelocityCurves.get(index) ?? 'linear';
-    const curvedVelocity = applyVelocityCurve(rawVelocity * touchMult, curve);
-    const velocity = Math.min(1, curvedVelocity * zoneVelMod);
+    const _curve = padVelocityCurves.get(index) ?? 'linear';
+    const _curvedVelocity = applyVelocityCurve(rawVelocity * touchMult, curve);
+    const _velocity = Math.min(1, curvedVelocity * zoneVelMod);
 
     // ── Pro: Round-robin counter increment ─────────────────────────────────────
-    const rrCount = (rrCounterRef.current.get(index) ?? 0) + 1;
+    const _rrCount = (rrCounterRef.current.get(index) ?? 0) + 1;
     rrCounterRef.current.set(index, rrCount);
     
     velocityRef.current.set(index, velocity);
     setPadVelocities(new Map(velocityRef.current));
     
-    const played = playPadWithFx(index, velocity);
+    const _played = playPadWithFx(index, velocity);
     if (!played) {
-      const padVolume = padVolumes.get(index) ?? 1;
+      const _padVolume = padVolumes.get(index) ?? 1;
       onTrigger(index, velocity * padVolume);
     }
     
     if (recordingMode && sequenceStartTimeRef.current) {
-      const time = Date.now() - sequenceStartTimeRef.current;
+      const _time = Date.now() - sequenceStartTimeRef.current;
       setRecordedSequence(prev => [...prev, { pad: index, time, velocity }]);
     }
 
     // track velocity history
     setVelHistory(prev => {
-      const next = new Map(prev);
-      const hist = [...(prev.get(index) ?? []), Math.round(velocity * 127)];
+      const _next = new Map(prev);
+      const _hist = [...(prev.get(index) ?? []), Math.round(velocity * 127)];
       next.set(index, hist.slice(-8));
       return next;
     });
@@ -887,31 +887,31 @@ export function DrumPads({
     }, ANIMATION_DURATION);
   }, [onTrigger, padVolumes, padMutes, soloedPad, recordingMode, padVelocityCurves, updatePressedPads, playPadWithFx, recordToSeq]);
 
-  const handlePadMouseUp = useCallback((index: number) => {
+  const _handlePadMouseUp = useCallback((index: number) => {
     updatePressedPads((prev) => {
-      const next = new Set(prev);
+      const _next = new Set(prev);
       next.delete(index);
       return next;
     });
     touchStartTimeRef.current.delete(index);
   }, []);
 
-  const handlePadMouseLeave = useCallback((index: number) => {
+  const _handlePadMouseLeave = useCallback((index: number) => {
     updatePressedPads((prev) => {
-      const next = new Set(prev);
+      const _next = new Set(prev);
       next.delete(index);
       return next;
     });
   }, []);
 
-  const handlePadDoubleClick = useCallback((index: number) => {
+  const _handlePadDoubleClick = useCallback((index: number) => {
     // onDoubleClick already filters for native double-click timing — just toggle solo
     setSoloedPad(prev => prev === index ? null : index);
   }, []);
 
   // File handling
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const _handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.type.startsWith('audio/')) {
@@ -931,7 +931,7 @@ export function DrumPads({
     setError(null);
 
     try {
-      const buffer = await loadSample(file);
+      const _buffer = await loadSample(file);
       if (buffer) {
         setUploadedFile({ buffer, name: file.name });
         setSuccess({ padIndex: selectedPadIndex, fileName: `Loaded: ${file.name}` });
@@ -950,14 +950,14 @@ export function DrumPads({
     }
   }, [selectedPadIndex, loadSample]);
 
-  const handleUploadClick = useCallback(() => {
+  const _handleUploadClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
 
-  const handleAssign = useCallback(() => {
+  const _handleAssign = useCallback(() => {
     if (!uploadedFile) return;
 
-    const currentPad = pads[selectedPadIndex];
+    const _currentPad = pads[selectedPadIndex];
     setHistory(prev => [
       ...prev.slice(0, historyIndex + 1),
       { padIndex: selectedPadIndex, buffer: currentPad.sample, name: currentPad.name }
@@ -969,10 +969,10 @@ export function DrumPads({
     setUploadedFile(null);
   }, [uploadedFile, selectedPadIndex, onAssignSample, pads, historyIndex]);
 
-  const handleClearSample = useCallback((index: number) => {
+  const _handleClearSample = useCallback((index: number) => {
     if (!onClearSample || !pads[index].sample) return;
 
-    const currentPad = pads[index];
+    const _currentPad = pads[index];
     setHistory(prev => [
       ...prev.slice(0, historyIndex + 1),
       { padIndex: index, buffer: currentPad.sample, name: currentPad.name }
@@ -983,32 +983,32 @@ export function DrumPads({
     setSuccess({ padIndex: index, fileName: `Cleared pad ${index + 1}` });
   }, [onClearSample, pads, historyIndex]);
 
-  const handleCopySample = useCallback((index: number) => {
+  const _handleCopySample = useCallback((index: number) => {
     if (!pads[index].sample) return;
     setCopySourcePad(index);
     setSuccess({ padIndex: index, fileName: `Copied pad ${index + 1}` });
   }, [pads]);
 
-  const handlePasteSample = useCallback((targetIndex: number) => {
+  const _handlePasteSample = useCallback((targetIndex: number) => {
     if (copySourcePad === null || !pads[copySourcePad].sample) return;
 
-    const sourcePad = pads[copySourcePad];
+    const _sourcePad = pads[copySourcePad];
     onAssignSample(targetIndex, sourcePad.sample!, sourcePad.name);
     setSuccess({ padIndex: targetIndex, fileName: `Pasted to pad ${targetIndex + 1}` });
     setCopySourcePad(null);
   }, [copySourcePad, pads, onAssignSample]);
 
-  const handleVolumeChange = useCallback((index: number, volume: number) => {
+  const _handleVolumeChange = useCallback((index: number, volume: number) => {
     setPadVolumes(prev => {
-      const next = new Map(prev);
+      const _next = new Map(prev);
       next.set(index, volume);
       return next;
     });
   }, []);
 
-  const handleToggleMute = useCallback((index: number) => {
+  const _handleToggleMute = useCallback((index: number) => {
     setPadMutes(prev => {
-      const next = new Set(prev);
+      const _next = new Set(prev);
       if (next.has(index)) {
         next.delete(index);
       } else {
@@ -1018,7 +1018,7 @@ export function DrumPads({
     });
   }, []);
 
-  const handleToggleRecording = useCallback(() => {
+  const _handleToggleRecording = useCallback(() => {
     if (recordingMode) {
       setRecordingMode(false);
       sequenceStartTimeRef.current = null;
@@ -1030,16 +1030,16 @@ export function DrumPads({
     }
   }, [recordingMode, recordedSequence.length]);
 
-  const handlePlaySequence = useCallback(() => {
+  const _handlePlaySequence = useCallback(() => {
     if (recordedSequence.length === 0 || isPlayingSequence) return;
     
     setIsPlayingSequence(true);
     
     recordedSequence.forEach(({ pad, time, velocity }) => {
       setTimeout(() => {
-        const played = playPadWithFx(pad, velocity);
+        const _played = playPadWithFx(pad, velocity);
         if (!played) {
-          const padVolume = padVolumes.get(pad) ?? 1;
+          const _padVolume = padVolumes.get(pad) ?? 1;
           onTrigger(pad, velocity * padVolume);
         }
         updatePressedPads(prev => new Set(prev).add(pad));
@@ -1048,7 +1048,7 @@ export function DrumPads({
         
         setTimeout(() => {
           updatePressedPads(prev => {
-            const next = new Set(prev);
+            const _next = new Set(prev);
             next.delete(pad);
             return next;
           });
@@ -1058,13 +1058,13 @@ export function DrumPads({
       }, time);
     });
     
-    const maxTime = recordedSequence.reduce((m, s) => Math.max(m, s.time), 0) + ANIMATION_DURATION;
+    const _maxTime = recordedSequence.reduce((m, s) => Math.max(m, s.time), 0) + ANIMATION_DURATION;
     setTimeout(() => {
       setIsPlayingSequence(false);
     }, maxTime);
   }, [recordedSequence, isPlayingSequence, onTrigger, padVolumes, playPadWithFx, updatePressedPads]);
 
-  const handleClearSequence = useCallback(() => {
+  const _handleClearSequence = useCallback(() => {
     setRecordedSequence([]);
     setSuccess({ padIndex: -1, fileName: 'Sequence cleared' });
   }, []);
@@ -1072,48 +1072,48 @@ export function DrumPads({
   // ── Sequencer engine ───────────────────────────────────────────────────────
 
   // getMorphedPattern must be defined BEFORE tickSeq (which calls it)
-  const getMorphedPattern = useCallback((): number[][] => {
+  const _getMorphedPattern = useCallback((): number[][] => {
     if (patternMorphAmount === 0) return patterns[activePatternSlot];
-    const src = patterns[activePatternSlot];
-    const tgt = patterns[patternMorphTarget];
+    const _src = patterns[activePatternSlot];
+    const _tgt = patterns[patternMorphTarget];
     return src.map((row, ri) =>
       row.map((vel, si) => {
-        const tgtVel = tgt[ri]?.[si] ?? 0;
-        const morphed = vel * (1 - patternMorphAmount) + tgtVel * patternMorphAmount;
+        const _tgtVel = tgt[ri]?.[si] ?? 0;
+        const _morphed = vel * (1 - patternMorphAmount) + tgtVel * patternMorphAmount;
         return Math.round(morphed);
       })
     );
   }, [patterns, activePatternSlot, patternMorphTarget, patternMorphAmount]);
 
-  const tickSeq = useCallback(() => {
-    const step = seqStepRef.current;
-    const morphedPattern = getMorphedPattern();
-    const rowCounts = rowStepCounts;
+  const _tickSeq = useCallback(() => {
+    const _step = seqStepRef.current;
+    const _morphedPattern = getMorphedPattern();
+    const _rowCounts = rowStepCounts;
     // Apply swing: delay odd 16th-note steps by a fraction of the 16th-note interval
-    const baseInterval = 60000 / seqBpm / 4;
-    const swingDelay = (step % 2 === 1) ? (seqSwing / 50) * (baseInterval * 0.5) : 0;
+    const _baseInterval = 60000 / seqBpm / 4;
+    const _swingDelay = (step % 2 === 1) ? (seqSwing / 50) * (baseInterval * 0.5) : 0;
 
-    const fire = () => {
+    const _fire = () => {
       morphedPattern.forEach((padRow, padIdx) => {
         // ── Pro: Polyrhythm – each row has its own step count ────────────────
-        const rowSteps = rowCounts[padIdx] ?? SEQ_STEPS;
-        const rowStep = step % rowSteps;
-        const vel = padRow[rowStep];
+        const _rowSteps = rowCounts[padIdx] ?? SEQ_STEPS;
+        const _rowStep = step % rowSteps;
+        const _vel = padRow[rowStep];
         if (vel > 0 && !padMutes.has(padIdx) && !(soloedPad !== null && soloedPad !== padIdx)) {
-          const v = vel / 127;
-          const played = playPadWithFx(padIdx, v);
+          const _v = vel / 127;
+          const _played = playPadWithFx(padIdx, v);
           if (!played) onTrigger(padIdx, v);
           updatePressedPads(prev => new Set(prev).add(padIdx));
           velocityRef.current.set(padIdx, v);
           setPadVelocities(new Map(velocityRef.current));
           setVelHistory(prev => {
-            const next = new Map(prev);
-            const hist = [...(prev.get(padIdx) ?? []), vel];
+            const _next = new Map(prev);
+            const _hist = [...(prev.get(padIdx) ?? []), vel];
             next.set(padIdx, hist.slice(-8));
             return next;
           });
           setTimeout(() => {
-            updatePressedPads(prev => { const n = new Set(prev); n.delete(padIdx); return n; });
+            updatePressedPads(prev => { const _n = new Set(prev); n.delete(padIdx); return n; });
             velocityRef.current.delete(padIdx);
             setPadVelocities(new Map(velocityRef.current));
           }, ANIMATION_DURATION);
@@ -1134,16 +1134,16 @@ export function DrumPads({
   // Keep tickSeqRef always pointing to latest tickSeq (fixes stale closure in setInterval)
   useEffect(() => { tickSeqRef.current = tickSeq; }, [tickSeq]);
 
-  const startSeq = useCallback(() => {
+  const _startSeq = useCallback(() => {
     if (seqPlaying) return;
     seqStepRef.current = 0;
     setSeqStep(0);
     setSeqPlaying(true);
-    const interval = 60000 / seqBpm / 4; // 16th note interval
+    const _interval = 60000 / seqBpm / 4; // 16th note interval
     seqIntervalRef.current = window.setInterval(() => tickSeqRef.current(), interval);
   }, [seqPlaying, seqBpm, tickSeq]);
 
-  const stopSeq = useCallback(() => {
+  const _stopSeq = useCallback(() => {
     if (seqIntervalRef.current) { clearInterval(seqIntervalRef.current); seqIntervalRef.current = null; }
     setSeqPlaying(false);
     setSeqStep(0);
@@ -1154,21 +1154,21 @@ export function DrumPads({
   useEffect(() => {
     if (!seqPlaying) return;
     if (seqIntervalRef.current) clearInterval(seqIntervalRef.current);
-    const interval = 60000 / seqBpm / 4;
+    const _interval = 60000 / seqBpm / 4;
     seqIntervalRef.current = window.setInterval(() => tickSeqRef.current(), interval);
     return () => { if (seqIntervalRef.current) clearInterval(seqIntervalRef.current); };
   }, [seqBpm, tickSeq, seqPlaying]);
 
   useEffect(() => () => { if (seqIntervalRef.current) clearInterval(seqIntervalRef.current); }, []);
 
-  const clearPattern = useCallback((slot: PatternSlot) => {
+  const _clearPattern = useCallback((slot: PatternSlot) => {
     setPatterns(prev => ({
       ...prev,
       [slot]: Array.from({ length: 16 }, () => Array(SEQ_STEPS).fill(0)),
     }));
   }, []);
 
-  const copyPattern = useCallback((from: PatternSlot, to: PatternSlot) => {
+  const _copyPattern = useCallback((from: PatternSlot, to: PatternSlot) => {
     setPatterns(prev => ({
       ...prev,
       [to]: clonePattern(prev[from]),
@@ -1179,14 +1179,14 @@ export function DrumPads({
   // ── Pro-grade functions ────────────────────────────────────────────────────
 
   // Humanize: adds subtle velocity & timing micro-variation to current pattern
-  const humanizePattern = useCallback(() => {
+  const _humanizePattern = useCallback(() => {
     setPatterns(prev => {
-      const next = { ...prev };
+      const _next = { ...prev };
       const slot: number[][] = clonePattern(prev[activePatternSlot]);
       slot.forEach(row => {
         row.forEach((vel, step) => {
           if (vel > 0) {
-            const variation = (Math.random() - 0.5) * 2 * humanizeAmount;
+            const _variation = (Math.random() - 0.5) * 2 * humanizeAmount;
             row[step] = Math.max(1, Math.min(127, Math.round(vel + variation)));
           }
         });
@@ -1198,12 +1198,12 @@ export function DrumPads({
   }, [activePatternSlot, humanizeAmount]);
 
   // Apply groove template: sets swing and re-maps velocities on active pattern
-  const applyGrooveTemplate = useCallback((templateKey: string) => {
-    const template = GROOVE_TEMPLATES[templateKey];
+  const _applyGrooveTemplate = useCallback((templateKey: string) => {
+    const _template = GROOVE_TEMPLATES[templateKey];
     if (!template) return;
     setSeqSwing(template.swing);
     setPatterns(prev => {
-      const next = { ...prev };
+      const _next = { ...prev };
       const slot: number[][] = clonePattern(prev[activePatternSlot]);
       slot.forEach(row => {
         row.forEach((vel, step) => {
@@ -1220,11 +1220,11 @@ export function DrumPads({
   }, [activePatternSlot]);
 
   // Apply AI groove suggestion to a specific pad row
-  const applyAiGroove = useCallback((padIdx: number, patternKey: string) => {
-    const suggestion = AI_GROOVE_PATTERNS[patternKey];
+  const _applyAiGroove = useCallback((padIdx: number, patternKey: string) => {
+    const _suggestion = AI_GROOVE_PATTERNS[patternKey];
     if (!suggestion) return;
     setPatterns(prev => {
-      const next = { ...prev };
+      const _next = { ...prev };
       const slot: number[][] = clonePattern(prev[activePatternSlot]);
       slot[padIdx] = suggestion.pattern.map(on => on ? 100 : 0);
       next[activePatternSlot] = slot;
@@ -1235,33 +1235,33 @@ export function DrumPads({
 
   // Pattern morph: compute morphed pattern between active slot and morph target
   // Update per-pad FX setting
-  const updatePadFx = useCallback((padIdx: number, key: keyof PadFxSettings, value: number) => {
+  const _updatePadFx = useCallback((padIdx: number, key: keyof PadFxSettings, value: number) => {
     setPadFxSettings(prev => {
-      const next = new Map(prev);
-      const existing = prev.get(padIdx) ?? { ...DEFAULT_FX };
+      const _next = new Map(prev);
+      const _existing = prev.get(padIdx) ?? { ...DEFAULT_FX };
       next.set(padIdx, { ...existing, [key]: value });
       return next;
     });
   }, []);
 
   // Update velocity curve
-  const setPadVelocityCurve = useCallback((padIdx: number, curve: VelocityCurve) => {
+  const _setPadVelocityCurve = useCallback((padIdx: number, curve: VelocityCurve) => {
     setPadVelocityCurves(prev => {
-      const next = new Map(prev);
+      const _next = new Map(prev);
       next.set(padIdx, curve);
       return next;
     });
   }, []);
 
   // Apply macro value across all active pads (only when enabled)
-  const applyMacro = useCallback((value: number) => {
+  const _applyMacro = useCallback((value: number) => {
     setMacroValue(value);
     if (!macroEnabled) return;
     pads.forEach((_, idx) => {
       setPadFxSettings(prev => {
-        const next = new Map(prev);
-        const existing = prev.get(idx) ?? { ...DEFAULT_FX };
-        const updated = { ...existing };
+        const _next = new Map(prev);
+        const _existing = prev.get(idx) ?? { ...DEFAULT_FX };
+        const _updated = { ...existing };
         if (macroParams.has('filter'))    updated.filterCutoff = value;
         if (macroParams.has('reverb'))    updated.reverbSend   = value;
         if (macroParams.has('saturation')) updated.saturation  = value * 0.8;
@@ -1272,34 +1272,34 @@ export function DrumPads({
   }, [pads, macroParams, macroEnabled]);
 
   // Toggle macro param
-  const toggleMacroParam = useCallback((param: MacroParam) => {
+  const _toggleMacroParam = useCallback((param: MacroParam) => {
     setMacroParams(prev => {
-      const next = new Set(prev);
+      const _next = new Set(prev);
       if (next.has(param)) next.delete(param); else next.add(param);
       return next;
     });
   }, []);
 
   // Adjust row step count for polyrhythm
-  const setRowStepCount = useCallback((rowIdx: number, count: number) => {
+  const _setRowStepCount = useCallback((rowIdx: number, count: number) => {
     setRowStepCounts(prev => {
-      const next = [...prev];
+      const _next = [...prev];
       next[rowIdx] = count;
       return next;
     });
   }, []);
 
   // Increment step velocity on scroll in sequencer
-  const handleStepScroll = useCallback((
+  const _handleStepScroll = useCallback((
     e: React.WheelEvent, padIdx: number, step: number
   ) => {
     e.preventDefault();
     setPatterns(prev => {
-      const next = { ...prev };
+      const _next = { ...prev };
       const slot: number[][] = clonePattern(prev[activePatternSlot]);
-      const cur = slot[padIdx][step];
+      const _cur = slot[padIdx][step];
       if (cur === 0) return prev; // don't activate inactive steps
-      const delta = e.deltaY < 0 ? 10 : -10;
+      const _delta = e.deltaY < 0 ? 10 : -10;
       slot[padIdx][step] = Math.max(1, Math.min(127, cur + delta));
       next[activePatternSlot] = slot;
       return next;
@@ -1308,27 +1308,27 @@ export function DrumPads({
 
   // Record pad hits into sequencer step (nearest step when seq is running)
   // Drag and drop
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const _handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   }, []);
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const _handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     setDragTargetPad(null);
   }, []);
 
-  const handleDrop = useCallback(async (e: React.DragEvent, padIndex?: number) => {
+  const _handleDrop = useCallback(async (e: React.DragEvent, padIndex?: number) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     setDragTargetPad(null);
 
-    const files = Array.from(e.dataTransfer.files);
-    const audioFile = files.find(f => f.type.startsWith('audio/'));
+    const _files = Array.from(e.dataTransfer.files);
+    const _audioFile = files.find(f => f.type.startsWith('audio/'));
     
     if (!audioFile) {
       setError({ padIndex: -1, message: 'Please drop an audio file' });
@@ -1343,11 +1343,11 @@ export function DrumPads({
       return;
     }
 
-    const targetIndex = padIndex ?? selectedPadIndex;
+    const _targetIndex = padIndex ?? selectedPadIndex;
     setLoadingPadIndex(targetIndex);
 
     try {
-      const buffer = await loadSample(audioFile);
+      const _buffer = await loadSample(audioFile);
       if (buffer) {
         onAssignSample(targetIndex, buffer, audioFile.name);
         setSuccess({ padIndex: targetIndex, fileName: `Dropped: ${audioFile.name}` });
@@ -1365,18 +1365,18 @@ export function DrumPads({
     }
   }, [selectedPadIndex, loadSample, onAssignSample]);
 
-  const handlePadDragOver = useCallback((e: React.DragEvent, index: number) => {
+  const _handlePadDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
     setDragTargetPad(index);
   }, []);
 
-  const handlePadDrop = useCallback((e: React.DragEvent, index: number) => {
+  const _handlePadDrop = useCallback((e: React.DragEvent, index: number) => {
     handleDrop(e, index);
   }, [handleDrop]);
 
-  const handleKitImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const _handleKitImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = e.target.files?.[0];
     if (!file || !onImportKit) return;
 
     try {
@@ -1393,7 +1393,7 @@ export function DrumPads({
   }, [onImportKit]);
 
   // Memoized pad grid
-  const padGrid = useMemo(() => (
+  const _padGrid = useMemo(() => (
     <div 
       className={clsx(
         'grid gap-2',
@@ -1404,19 +1404,19 @@ export function DrumPads({
       onDrop={handleDrop}
     >
       {pads.map((pad, i) => {
-        const isLoaded = pad.sample !== null;
-        const isTriggered = pressedPads.has(i) || pad.isActive;
-        const velocity = padVelocities.get(i) || 1;
-        const hue = padHues[i] || 0;
-        const volume = padVolumes.get(i) ?? 1;
-        const isMuted = padMutes.has(i);
-        const isSoloed = soloedPad === i;
-        const isInactive = soloedPad !== null && soloedPad !== i;
-        const isDragTarget = dragTargetPad === i;
+        const _isLoaded = pad.sample !== null;
+        const _isTriggered = pressedPads.has(i) || pad.isActive;
+        const _velocity = padVelocities.get(i) || 1;
+        const _hue = padHues[i] || 0;
+        const _volume = padVolumes.get(i) ?? 1;
+        const _isMuted = padMutes.has(i);
+        const _isSoloed = soloedPad === i;
+        const _isInactive = soloedPad !== null && soloedPad !== i;
+        const _isDragTarget = dragTargetPad === i;
         
-        const saturation = isTriggered ? 80 : 60;
-        const lightness = isTriggered ? 65 : 50;
-        const rgbColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        const _saturation = isTriggered ? 80 : 60;
+        const _lightness = isTriggered ? 65 : 50;
+        const _rgbColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
         return (
           <div 
@@ -2053,10 +2053,10 @@ export function DrumPads({
                 </div>
                 <div className="grid grid-cols-4 md:grid-cols-8 gap-1">
                   {pads.map((pad, i) => {
-                    const fx = padFxSettings.get(i) ?? DEFAULT_FX;
-                    const curve = padVelocityCurves.get(i) ?? 'linear';
-                    const hue = padHues[i] ?? 0;
-                    const isOpen = openFxPad === i;
+                    const _fx = padFxSettings.get(i) ?? DEFAULT_FX;
+                    const _curve = padVelocityCurves.get(i) ?? 'linear';
+                    const _hue = padHues[i] ?? 0;
+                    const _isOpen = openFxPad === i;
                     return (
                       <div key={i} className="relative">
                         <button
@@ -2151,7 +2151,7 @@ export function DrumPads({
                     <button
                       key={key}
                       onClick={() => {
-                        const padIdx = parseInt(selectedPad);
+                        const _padIdx = parseInt(selectedPad);
                         applyAiGroove(padIdx, key);
                         if (!showSequencer) setShowSequencer(true);
                       }}
@@ -2255,11 +2255,11 @@ export function DrumPads({
             {/* Step grid */}
             <div className="p-2 space-y-1">
               {Array.from({ length: 4 }).map((_, rowOffset) => {
-                const padIdx = seqPadOffset + rowOffset;
+                const _padIdx = seqPadOffset + rowOffset;
                 if (padIdx >= pads.length) return null;
-                const pad = pads[padIdx];
-                const row = patterns[activePatternSlot][padIdx] ?? Array(SEQ_STEPS).fill(0);
-                const cat = PAD_CATEGORIES[padIdx];
+                const _pad = pads[padIdx];
+                const _row = patterns[activePatternSlot][padIdx] ?? Array(SEQ_STEPS).fill(0);
+                const _cat = PAD_CATEGORIES[padIdx];
                 return (
                   <div key={padIdx} className="flex items-center gap-1">
                     {/* Row label */}
@@ -2273,11 +2273,11 @@ export function DrumPads({
                     <div className="flex gap-0.5 flex-1">
                       {row.map((vel, step) => {
                         // ── Pro: Use polyrhythm step count per row ────────────
-                        const rowSteps = rowStepCounts[padIdx] ?? SEQ_STEPS;
-                        const isInRange = step < rowSteps;
-                        const isCurrentStep = seqPlaying && step === seqStep && isInRange;
-                        const isOn = vel > 0 && isInRange;
-                        const hue = padHues[padIdx] ?? 0;
+                        const _rowSteps = rowStepCounts[padIdx] ?? SEQ_STEPS;
+                        const _isInRange = step < rowSteps;
+                        const _isCurrentStep = seqPlaying && step === seqStep && isInRange;
+                        const _isOn = vel > 0 && isInRange;
+                        const _hue = padHues[padIdx] ?? 0;
                         return (
                           <button
                             key={step}
@@ -2489,12 +2489,12 @@ export function DrumPads({
 
               {/* ── Knob strip ─────────────────────────────────────────── */}
               {(() => {
-                const padHue = padHues[selectedPadIndex] ?? 200;
-                const fx = padFxSettings.get(selectedPadIndex) ?? { ...DEFAULT_FX };
-                const vol = padVolumes.get(selectedPadIndex) ?? 1;
-                const pitchNorm = (fx.pitchShift + 12) / 24;
+                const _padHue = padHues[selectedPadIndex] ?? 200;
+                const _fx = padFxSettings.get(selectedPadIndex) ?? { ...DEFAULT_FX };
+                const _vol = padVolumes.get(selectedPadIndex) ?? 1;
+                const _pitchNorm = (fx.pitchShift + 12) / 24;
 
-                const knobs = [
+                const _knobs = [
                   { label: 'VOL',  val: vol,             onChange: (v: number) => handleVolumeChange(selectedPadIndex, v),                          hue: padHue },
                   { label: 'FILT', val: fx.filterCutoff, onChange: (v: number) => updatePadFx(selectedPadIndex, 'filterCutoff', v),                   hue: (padHue + 40) % 360 },
                   { label: 'REV',  val: fx.reverbSend,   onChange: (v: number) => updatePadFx(selectedPadIndex, 'reverbSend', v),                     hue: (padHue + 80) % 360 },

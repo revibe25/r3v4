@@ -43,7 +43,7 @@ interface FXConfig {
 // ICONS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ReverbIcon = ({ size = 16 }: { size?: number }) => (
+const _ReverbIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12c0-3 2.5-6 6-6s6 3 6 6-2.5 6-6 6" />
     <path d="M8 12c0-2 1.5-4 4-4s4 2 4 4-1.5 4-4 4" opacity="0.6" />
@@ -51,7 +51,7 @@ const ReverbIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const DelayIcon = ({ size = 16 }: { size?: number }) => (
+const _DelayIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <rect x="3" y="8" width="4" height="8" rx="1" />
     <rect x="10" y="10" width="4" height="6" rx="1" opacity="0.6" />
@@ -59,21 +59,21 @@ const DelayIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const FlangerIcon = ({ size = 16 }: { size?: number }) => (
+const _FlangerIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12 Q 6 6, 8 12 T 14 12 T 20 12" />
     <path d="M2 12 Q 6 16, 10 12 T 18 12" opacity="0.4" />
   </svg>
 );
 
-const ReverseIcon = ({ size = 16 }: { size?: number }) => (
+const _ReverseIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <polyline points="11 17 6 12 11 7" />
     <path d="M6 12h12" /><path d="M18 7v10" />
   </svg>
 );
 
-const VinylIcon = ({ size = 16 }: { size?: number }) => (
+const _VinylIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <circle cx="12" cy="12" r="9" />
     <circle cx="12" cy="12" r="3.5" />
@@ -81,14 +81,14 @@ const VinylIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const ChorusIcon = ({ size = 16 }: { size?: number }) => (
+const _ChorusIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M4 12 Q 8 8, 12 12 T 20 12" />
     <path d="M4 12 Q 8 16, 12 12 T 20 12" opacity="0.5" />
   </svg>
 );
 
-const PhaserIcon = ({ size = 16 }: { size?: number }) => (
+const _PhaserIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <circle cx="12" cy="12" r="8" opacity="0.3" />
     <circle cx="12" cy="12" r="5" opacity="0.5" />
@@ -96,26 +96,26 @@ const PhaserIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const BitcrusherIcon = ({ size = 16 }: { size?: number }) => (
+const _BitcrusherIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M3 12h3v3h3v-6h3v8h3v-10h3v12h3" />
   </svg>
 );
 
-const DistortionIcon = ({ size = 16 }: { size?: number }) => (
+const _DistortionIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <path d="M2 12 L 6 8 L 10 16 L 14 4 L 18 18 L 22 12" />
   </svg>
 );
 
-const CompressorIcon = ({ size = 16 }: { size?: number }) => (
+const _CompressorIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M3 20 L 8 15 L 12 15 L 21 6" />
     <path d="M3 4 L 21 4" opacity="0.3" />
   </svg>
 );
 
-const TremoloIcon = ({ size = 16 }: { size?: number }) => (
+const _TremoloIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12 L 5 8 L 8 12 L 11 8 L 14 12 L 17 8 L 20 12 L 23 8" />
   </svg>
@@ -156,11 +156,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function SpectrumAnalyzer({ activeCount, height = 48 }: { activeCount: number; height?: number }) {
-  const bars = 32;
+  const _bars = 32;
   const [heights, setHeights] = useState<number[]>(Array(bars).fill(0));
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       setHeights(Array.from({ length: bars }, () => Math.random() * (activeCount > 0 ? 0.85 : 0.25)));
     }, 60);
     return () => clearInterval(interval);
@@ -231,7 +231,7 @@ function ModeSwitcher({ mode, onChange }: { mode: PanelMode; onChange: (m: Panel
 // FX BUTTON VARIANTS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const _FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   return (
     <button
@@ -279,7 +279,7 @@ const FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfig
   );
 });
 
-const FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const _FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   const [wetDry, setWetDry] = useState(70);
   const [showSlider, setShowSlider] = useState(false);
@@ -376,7 +376,7 @@ const FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig;
   );
 });
 
-const FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const _FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   const [wetDry, setWetDry] = useState(70);
   const [depth, setDepth] = useState(50);
@@ -465,7 +465,7 @@ const FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; is
 // MAIN FX PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProps) => {
+export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProps) => {
   const [fxState, setFxState] = useState<FXState>({});
   const [mode, setMode] = useState<PanelMode>('normal');
   const [collapsed, setCollapsed] = useState(false);
@@ -473,9 +473,9 @@ export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProp
   const [masterMix, setMasterMix] = useState(100);
   const [showAnalyzer, setShowAnalyzer] = useState(true);
 
-  const fx = fxProp ?? fxState;
+  const _fx = fxProp ?? fxState;
 
-  const onToggle = useCallback((key: string) => {
+  const _onToggle = useCallback((key: string) => {
     if (onToggleProp) {
       onToggleProp(key);
     } else {
@@ -483,20 +483,20 @@ export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProp
     }
   }, [onToggleProp]);
 
-  const activeCount = useMemo(() => FX_CONFIG.filter(c => fx[c.key]).length, [fx]);
-  const activeFX = useMemo(() => FX_CONFIG.filter(c => fx[c.key]), [fx]);
+  const _activeCount = useMemo(() => FX_CONFIG.filter(c => fx[c.key]).length, [fx]);
+  const _activeFX = useMemo(() => FX_CONFIG.filter(c => fx[c.key]), [fx]);
 
-  const panelGlow = useMemo(() => {
-    const colors = activeFX.map(c => c.color);
+  const _panelGlow = useMemo(() => {
+    const _colors = activeFX.map(c => c.color);
     if (!colors.length) return 'none';
     return colors.slice(0, 3).map(c => `0 0 40px ${c}14`).join(', ');
   }, [activeFX]);
 
-  const filteredFX = selectedCategory
+  const _filteredFX = selectedCategory
     ? FX_CONFIG.filter(c => c.category === selectedCategory)
     : FX_CONFIG;
 
-  const gridCols = mode === 'compact' ? 'repeat(auto-fill, minmax(58px, 1fr))' :
+  const _gridCols = mode === 'compact' ? 'repeat(auto-fill, minmax(58px, 1fr))' :
                    mode === 'normal'  ? 'repeat(auto-fill, minmax(88px, 1fr))' :
                                         '1fr';
 
@@ -634,7 +634,7 @@ export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProp
               </span>
               <div style={{ display: 'flex', gap: 4 }}>
                 {Object.entries(CATEGORY_COLORS).map(([cat, color]) => {
-                  const active = FX_CONFIG.filter(c => c.category === cat && fx[c.key]).length;
+                  const _active = FX_CONFIG.filter(c => c.category === cat && fx[c.key]).length;
                   return active > 0 ? (
                     <div key={cat} style={{
                       width: 8, height: 8, borderRadius: '50%',
@@ -753,7 +753,7 @@ export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProp
           }}>
             <button
               onClick={() => {
-                const keys = Object.fromEntries(FX_CONFIG.map(c => [c.key, false]));
+                const _keys = Object.fromEntries(FX_CONFIG.map(c => [c.key, false]));
                 setFxState(keys);
               }}
               style={{

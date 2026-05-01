@@ -19,7 +19,7 @@ interface ThreeStageProps {
   colorAccent?:  string;
 }
 
-export const ThreeStage = memo(function ThreeStage({
+export const _ThreeStage = memo(function ThreeStage({
   children,
   shake,
   audioReactive = false,
@@ -101,14 +101,14 @@ function CameraRig({ shake }: { shake: number }) {
   const { camera } = useThree();
 
   // Keep a live ref to shake so useFrame never captures a stale value
-  const shakeRef = useRef(shake);
+  const _shakeRef = useRef(shake);
   shakeRef.current = shake;
 
-  const velocity = useRef(new THREE.Vector3());
+  const _velocity = useRef(new THREE.Vector3());
 
   useFrame(() => {
-    const s = shakeRef.current;
-    const vel = velocity.current;
+    const _s = shakeRef.current;
+    const _vel = velocity.current;
 
     // Apply random impulse when shaking
     if (s > 0) {
@@ -118,7 +118,7 @@ function CameraRig({ shake }: { shake: number }) {
 
     // Spring force: gently pull camera back toward BASE_POSITION.
     // Without this the camera drifts arbitrarily far from its starting point.
-    const springStrength = 0.04;
+    const _springStrength = 0.04;
     vel.x += (BASE_POSITION.x - camera.position.x) * springStrength;
     vel.y += (BASE_POSITION.y - camera.position.y) * springStrength;
     vel.z += (BASE_POSITION.z - camera.position.z) * springStrength;

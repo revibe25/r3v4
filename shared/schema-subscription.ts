@@ -8,14 +8,13 @@
 import {
   pgTable,
   text,
-  integer,
   boolean,
   timestamp,
   pgEnum,
   index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+// import { relations } from 'drizzle-orm';
 import { SUBSCRIPTION_TIERS, SUBSCRIPTION_STATUSES, BILLING_CYCLES } from './subscription.types';
 
 // ── Enums ────────────────────────────────────────────────────────────────────

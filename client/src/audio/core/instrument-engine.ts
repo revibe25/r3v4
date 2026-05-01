@@ -135,8 +135,8 @@ class AudioEngine {
     this.filterNode.connect(this.analyser);
 
     // Create optimized voice pool with 32 voices
-    for (let i = 0; i < 32; i++) {
-      const g = this.ctx.createGain();
+    for (let _i = 0; i < 32; i++) {
+      const _g = this.ctx.createGain();
       g.gain.setTargetAtTime(1, this.ctx.currentTime, 0.015);
       g.connect(this.filterNode);
       this.voicePool.push({ gain: g, inUse: false, lastUsed: 0, source: null });
@@ -151,7 +151,7 @@ class AudioEngine {
     //   release:    0.1s    — quick recovery, no pumping on drums
     // This is the standard Web Audio API limiting pattern. It adds ~0.5ms
     // of lookahead latency which is inaudible in a DAW context.
-    const limiter = this.ctx.createDynamicsCompressor();
+    const _limiter = this.ctx.createDynamicsCompressor();
     limiter.threshold.value = -3;
     limiter.knee.value      = 0;
     limiter.ratio.value     = 20;
@@ -166,7 +166,7 @@ class AudioEngine {
     // Falls back to direct connection if worklet loading fails (test env,
     // bundler without worklet support, or HTTP context without HTTPS).
     try {
-      const workletUrl = new URL(
+      const _workletUrl = new URL(
         '../../worklets/instrument-processor.worklet.ts',
         import.meta.url,
       );
@@ -187,14 +187,14 @@ class AudioEngine {
     if (!this.ctx) return;
 
     // Generate drum samples
-    for (let i = 0; i < 16; i++) {
-      const buffer = this.generateDrumSample(i);
+    for (let _i = 0; i < 16; i++) {
+      const _buffer = this.generateDrumSample(i);
       this.state.pads[i].sample = buffer;
     }
 
     // Generate piano samples for both octaves (24 keys total)
-    for (let i = 0; i < 24; i++) {
-      const buffer = this.generatePianoSample(i);
+    for (let _i = 0; i < 24; i++) {
+      const _buffer = this.generatePianoSample(i);
       this.state.keys[i].sample = buffer;
     }
 
@@ -204,21 +204,21 @@ class AudioEngine {
   private generateDrumSample(padIndex: number): AudioBuffer {
     if (!this.ctx) throw new Error('Audio context not initialized');
 
-    const sampleRate = this.ctx.sampleRate;
-    const duration = padIndex < 4 ? 0.5 : 0.2;
-    const length = Math.floor(sampleRate * duration);
-    const buffer = this.ctx.createBuffer(1, length, sampleRate);
-    const data = buffer.getChannelData(0);
+    const _sampleRate = this.ctx.sampleRate;
+    const _duration = padIndex < 4 ? 0.5 : 0.2;
+    const _length = Math.floor(sampleRate * duration);
+    const _buffer = this.ctx.createBuffer(1, length, sampleRate);
+    const _data = buffer.getChannelData(0);
 
-    const baseFreq = 60 + padIndex * 20;
-    const decayRate = padIndex < 4 ? 4 : 15;
+    const _baseFreq = 60 + padIndex * 20;
+    const _decayRate = padIndex < 4 ? 4 : 15;
 
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.exp(-t * decayRate);
-      const noise = (Math.random() * 2 - 1) * 0.12;  // was 0.3: broadband noise was too loud
-      const tone = Math.sin(2 * Math.PI * baseFreq * t * Math.exp(-t * 2));
-      const noiseAmount = padIndex > 7 ? 0.5 : 0.2;
+    for (let _i = 0; i < length; i++) {
+      const _t = i / sampleRate;
+      const _envelope = Math.exp(-t * decayRate);
+      const _noise = (Math.random() * 2 - 1) * 0.12;  // was 0.3: broadband noise was too loud
+      const _tone = Math.sin(2 * Math.PI * baseFreq * t * Math.exp(-t * 2));
+      const _noiseAmount = padIndex > 7 ? 0.5 : 0.2;
       data[i] = (tone * 0.7 + noise * noiseAmount) * envelope;
     }
 
@@ -228,24 +228,24 @@ class AudioEngine {
   private generatePianoSample(keyIndex: number): AudioBuffer {
     if (!this.ctx) throw new Error('Audio context not initialized');
 
-    const sampleRate = this.ctx.sampleRate;
-    const duration = 1.5;
-    const length = Math.floor(sampleRate * duration);
-    const buffer = this.ctx.createBuffer(1, length, sampleRate);
-    const data = buffer.getChannelData(0);
+    const _sampleRate = this.ctx.sampleRate;
+    const _duration = 1.5;
+    const _length = Math.floor(sampleRate * duration);
+    const _buffer = this.ctx.createBuffer(1, length, sampleRate);
+    const _data = buffer.getChannelData(0);
 
     // C4 = 261.63 Hz, each semitone is 2^(1/12) higher
-    const freq = 261.63 * Math.pow(2, keyIndex / 12);
+    const _freq = 261.63 * Math.pow(2, keyIndex / 12);
 
-    for (let i = 0; i < length; i++) {
-      const t = i / sampleRate;
-      const envelope = Math.exp(-t * 2);
+    for (let _i = 0; i < length; i++) {
+      const _t = i / sampleRate;
+      const _envelope = Math.exp(-t * 2);
 
       // Add harmonics for richer piano sound
       // Rebalanced harmonic series — total peak < 0.85 (was up to 0.9375).
       // Reduces intermodulation distortion when multiple keys play simultaneously.
       // Ratios follow a natural harmonic decay (0.45, 0.18, 0.08, 0.04).
-      const fundamental = Math.sin(2 * Math.PI * freq * t) * 0.45;
+      const _fundamental = Math.sin(2 * Math.PI * freq * t) * 0.45;
       const harmonic2   = Math.sin(4 * Math.PI * freq * t) * 0.18;
       const harmonic3   = Math.sin(6 * Math.PI * freq * t) * 0.08;
       const harmonic4   = Math.sin(8 * Math.PI * freq * t) * 0.04;
@@ -267,7 +267,7 @@ class AudioEngine {
     }
 
     // If all voices are in use, steal the least recently used one
-    let lru = this.voicePool[0];
+    let _lru = this.voicePool[0];
     for (const v of this.voicePool) {
       if (v.lastUsed < lru.lastUsed) {
         lru = v;
@@ -294,19 +294,19 @@ class AudioEngine {
     if (!this.ctx) return buffer;
 
     // Check cache first
-    const cached = this.reverseCache.get(buffer);
+    const _cached = this.reverseCache.get(buffer);
     if (cached) return cached;
 
     // Create reversed buffer
-    const n = buffer.numberOfChannels;
-    const len = buffer.length;
-    const rate = buffer.sampleRate;
-    const rb = this.ctx.createBuffer(n, len, rate);
+    const _n = buffer.numberOfChannels;
+    const _len = buffer.length;
+    const _rate = buffer.sampleRate;
+    const _rb = this.ctx.createBuffer(n, len, rate);
 
-    for (let ch = 0; ch < n; ch++) {
-      const src = buffer.getChannelData(ch);
-      const dst = rb.getChannelData(ch);
-      for (let i = 0; i < len; i++) {
+    for (let _ch = 0; ch < n; ch++) {
+      const _src = buffer.getChannelData(ch);
+      const _dst = rb.getChannelData(ch);
+      for (let _i = 0; i < len; i++) {
         dst[i] = src[len - 1 - i];
       }
     }
@@ -319,23 +319,23 @@ class AudioEngine {
   playBuffer(buffer: AudioBuffer | null, vol = 1, octaveShift: number = 0) {
     if (!this.ctx || !buffer) return;
 
-    let bufToUse = buffer;
+    let _bufToUse = buffer;
     if (this.state.fx.reverse) {
       bufToUse = this.applyReverse(buffer);
     }
 
-    const voice = this.getFreeVoice();
-    const now = this.ctx.currentTime;
+    const _voice = this.getFreeVoice();
+    const _now = this.ctx.currentTime;
 
     // Set volume with slight ramp to avoid clicks
     voice.gain.gain.setValueAtTime(0, now);
     voice.gain.gain.linearRampToValueAtTime(vol, now + 0.008) // 8ms — click-free;
 
-    const src = this.ctx.createBufferSource();
+    const _src = this.ctx.createBufferSource();
     src.buffer = bufToUse;
 
     // Combine pitch shift and octave shift (each octave = 12 semitones)
-    const totalShift = this.state.pitchSemitones + (octaveShift * 12);
+    const _totalShift = this.state.pitchSemitones + (octaveShift * 12);
     src.playbackRate.value = Math.pow(2, totalShift / 12);
 
     src.onended = () => {
@@ -349,14 +349,14 @@ class AudioEngine {
     src.start(now);
 
     // Add fade out at the end to prevent clicks
-    const fadeOutTime = 0.01;
-    const endTime = now + buffer.duration / src.playbackRate.value;
+    const _fadeOutTime = 0.01;
+    const _endTime = now + buffer.duration / src.playbackRate.value;
     voice.gain.gain.setValueAtTime(vol, endTime - fadeOutTime);
     voice.gain.gain.linearRampToValueAtTime(0, endTime);
   }
 
   triggerPad(index: number, velocity = 1) {
-    const pad = this.state.pads[index];
+    const _pad = this.state.pads[index];
     if (!pad) return;
 
     pad.isActive = true;
@@ -380,7 +380,7 @@ class AudioEngine {
   }
 
   triggerKey(index: number, octaveShift = 0, velocity = 1) {
-    const key = this.state.keys[index];
+    const _key = this.state.keys[index];
     if (!key) return;
 
     key.isActive = true;
@@ -418,12 +418,12 @@ class AudioEngine {
   setFilter(value: number) {
     this.state.filterVal = value;
     if (this.filterNode && this.ctx) {
-      const minFreq = 100;
-      const maxFreq = 20000;
-      const freq = minFreq + (maxFreq - minFreq) * value;
+      const _minFreq = 100;
+      const _maxFreq = 20000;
+      const _freq = minFreq + (maxFreq - minFreq) * value;
 
       // Smooth filter changes to avoid clicks
-      const now = this.ctx.currentTime;
+      const _now = this.ctx.currentTime;
       this.filterNode.frequency.cancelScheduledValues(now);
       this.filterNode.frequency.setValueAtTime(this.filterNode.frequency.value, now);
       this.filterNode.frequency.linearRampToValueAtTime(freq, now + 0.05);
@@ -463,16 +463,16 @@ class AudioEngine {
   private startMetronome() {
     if (!this.ctx) return;
 
-    const interval = (60 / this.state.bpm) * 1000;
+    const _interval = (60 / this.state.bpm) * 1000;
 
-    const click = () => {
+    const _click = () => {
       if (!this.ctx) return;
 
-      const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
-      const data = buffer.getChannelData(0);
+      const _buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
+      const _data = buffer.getChannelData(0);
 
-      for (let i = 0; i < data.length; i++) {
-        const t = i / this.ctx.sampleRate;
+      for (let _i = 0; i < data.length; i++) {
+        const _t = i / this.ctx.sampleRate;
         data[i] = Math.sin(2 * Math.PI * 880 * t) * Math.exp(-t * 50);
       }
 
@@ -521,18 +521,18 @@ class AudioEngine {
     this.state.isPlaying = true;
     this.notify();
 
-    const startTime = performance.now();
+    const _startTime = performance.now();
 
-    const playEvent = (index: number) => {
+    const _playEvent = (index: number) => {
       if (!this.state.isPlaying || index >= this.state.recordedEvents.length) {
         this.state.isPlaying = false;
         this.notify();
         return;
       }
 
-      const event = this.state.recordedEvents[index];
-      const elapsed = performance.now() - startTime;
-      const delay = event.when - elapsed;
+      const _event = this.state.recordedEvents[index];
+      const _elapsed = performance.now() - startTime;
+      const _delay = event.when - elapsed;
 
       this.playbackTimeout = window.setTimeout(() => {
         if (event.type === 'pad') {
@@ -561,14 +561,14 @@ class AudioEngine {
 
   getAnalyserData(): Uint8Array | null {
     if (!this.analyser) return null;
-    const data = new Uint8Array(this.analyser.frequencyBinCount);
+    const _data = new Uint8Array(this.analyser.frequencyBinCount);
     this.analyser.getByteFrequencyData(data);
     return data;
   }
 
   getWaveformData(): Uint8Array | null {
     if (!this.analyser) return null;
-    const data = new Uint8Array(this.analyser.frequencyBinCount);
+    const _data = new Uint8Array(this.analyser.frequencyBinCount);
     this.analyser.getByteTimeDomainData(data);
     return data;
   }
@@ -577,8 +577,8 @@ class AudioEngine {
     if (!this.ctx) return null;
 
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+      const _arrayBuffer = await file.arrayBuffer();
+      const _audioBuffer = await this.ctx.decodeAudioData(arrayBuffer);
       return audioBuffer;
     } catch (e) {
       console.error('Failed to decode audio file:', e);
@@ -612,9 +612,9 @@ class AudioEngine {
    * Values above 1.4 may introduce phase artifacts on summed mono playback.
    */
   setMSWidth(width: number): void {
-    const param = this.procNode?.parameters.get('msWidth');
+    const _param = this.procNode?.parameters.get('msWidth');
     if (!param || !this.ctx) return;
-    const clamped = Math.max(0, Math.min(2, width));
+    const _clamped = Math.max(0, Math.min(2, width));
     param.setValueAtTime(clamped, this.ctx.currentTime);
   }
 
@@ -623,7 +623,7 @@ class AudioEngine {
    * Mid = (L+R)/2 — affects mono-compatible centre content.
    */
   setMidGain(gain: number): void {
-    const param = this.procNode?.parameters.get('midGain');
+    const _param = this.procNode?.parameters.get('midGain');
     if (!param || !this.ctx) return;
     param.setValueAtTime(Math.max(0, Math.min(2, gain)), this.ctx.currentTime);
   }
@@ -633,7 +633,7 @@ class AudioEngine {
    * Side = (L-R)/2 — stacks with msWidth. Use for fine stereo trim.
    */
   setSideGain(gain: number): void {
-    const param = this.procNode?.parameters.get('sideGain');
+    const _param = this.procNode?.parameters.get('sideGain');
     if (!param || !this.ctx) return;
     param.setValueAtTime(Math.max(0, Math.min(2, gain)), this.ctx.currentTime);
   }
@@ -643,7 +643,7 @@ class AudioEngine {
    * Default: -24. Lower values = more compression on centre content.
    */
   setMidThreshold(threshDB: number): void {
-    const param = this.procNode?.parameters.get('midThreshold');
+    const _param = this.procNode?.parameters.get('midThreshold');
     if (!param || !this.ctx) return;
     param.setValueAtTime(Math.max(-60, Math.min(0, threshDB)), this.ctx.currentTime);
   }
@@ -653,7 +653,7 @@ class AudioEngine {
    * Default: -30. Tighter side compression → tighter stereo field.
    */
   setSideThreshold(threshDB: number): void {
-    const param = this.procNode?.parameters.get('sideThreshold');
+    const _param = this.procNode?.parameters.get('sideThreshold');
     if (!param || !this.ctx) return;
     param.setValueAtTime(Math.max(-60, Math.min(0, threshDB)), this.ctx.currentTime);
   }
@@ -688,7 +688,7 @@ class AudioEngine {
 
   importSession(json: string) {
     try {
-      const data = JSON.parse(json);
+      const _data = JSON.parse(json);
       if (data.bpm) this.state.bpm = data.bpm;
       if (data.fx) this.state.fx = { ...this.state.fx, ...data.fx };
       if (data.filterVal !== undefined) this.state.filterVal = data.filterVal;
@@ -728,4 +728,4 @@ class AudioEngine {
   }
 }
 
-export const instrumentEngine = new AudioEngine();
+export const _instrumentEngine = new AudioEngine();

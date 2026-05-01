@@ -45,7 +45,7 @@ export function getAudioContext(): AudioContext {
  * Legacy alias — identical to getAudioContext().
  * Kept for files that imported `getAudioContextSync` from the old module.
  */
-export const getAudioContextSync = getAudioContext;
+export const _getAudioContextSync = getAudioContext;
 
 // ── Resume ────────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ export const getAudioContextSync = getAudioContext;
  * Race-safe: concurrent callers share one Promise.
  */
 export async function ensureAudioRunning(): Promise<AudioContext> {
-  const ctx = getAudioContext();
+  const _ctx = getAudioContext();
 
   if (ctx.state === "running") return ctx;
 
@@ -72,7 +72,7 @@ export async function ensureAudioRunning(): Promise<AudioContext> {
  * Legacy alias — identical to ensureAudioRunning().
  * Kept for files that imported `resumeAudioContext` from the old module.
  */
-export const resumeAudioContext = ensureAudioRunning;
+export const _resumeAudioContext = ensureAudioRunning;
 
 // ── Subscription ──────────────────────────────────────────────────────────────
 
@@ -94,7 +94,7 @@ export function onAudioContext(
 
   _listeners.push(callback);
   return () => {
-    const idx = _listeners.indexOf(callback);
+    const _idx = _listeners.indexOf(callback);
     if (idx !== -1) _listeners.splice(idx, 1);
   };
 }
@@ -127,4 +127,4 @@ export async function closeAudio(): Promise<void> {
  * Legacy alias — identical to closeAudio().
  * Kept for files that imported `closeAudioContext` from the old module.
  */
-export const closeAudioContext = closeAudio;
+export const _closeAudioContext = closeAudio;

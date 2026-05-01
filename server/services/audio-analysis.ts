@@ -23,7 +23,7 @@ import { analyzeAudio } from '@llpte/llpte-signal';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let AudioContext: any = null;  // typed any: node-web-audio-api ships no .d.ts
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+   
   ({ AudioContext } = require('node-web-audio-api'));
 } catch {
   AudioContext = null;

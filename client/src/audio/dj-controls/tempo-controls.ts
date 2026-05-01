@@ -1,6 +1,7 @@
 // DJ Tempo and Pitch Control
 import * as Tone from 'tone';
-import { TempoControlState, DJ_CONSTRAINTS } from '@shared/dj.types';
+import type { TempoControlState} from '@shared/dj.types';
+import { DJ_CONSTRAINTS } from '@shared/dj.types';
 
 export class TempoControl {
   private playbackRate: number = 1;
@@ -24,7 +25,7 @@ export class TempoControl {
    * Set tempo in BPM
    */
   setBpm(bpm: number): void {
-    const clampedBpm = Math.max(
+    const _clampedBpm = Math.max(
       DJ_CONSTRAINTS.MIN_BPM,
       Math.min(DJ_CONSTRAINTS.MAX_BPM, bpm)
     );
@@ -38,7 +39,7 @@ export class TempoControl {
    * Set relative tempo (±50%)
    */
   setTempoRatio(ratio: number): void {
-    const clampedRatio = Math.max(0.5, Math.min(2, ratio));
+    const _clampedRatio = Math.max(0.5, Math.min(2, ratio));
     this.state.tempoRatio = clampedRatio;
 
     // Recalculate BPM based on ratio
@@ -55,7 +56,7 @@ export class TempoControl {
    * Independent of tempo
    */
   setPitchShift(semitones: number): void {
-    const clampedShift = Math.max(
+    const _clampedShift = Math.max(
       DJ_CONSTRAINTS.MIN_PITCH_SHIFT,
       Math.min(DJ_CONSTRAINTS.MAX_PITCH_SHIFT, semitones)
     );
@@ -69,7 +70,7 @@ export class TempoControl {
    * Adjust tempo by relative percentage
    */
   adjustTempo(percentage: number): void {
-    const newRatio = this.state.tempoRatio * (1 + percentage / 100);
+    const _newRatio = this.state.tempoRatio * (1 + percentage / 100);
     this.setTempoRatio(newRatio);
   }
 
@@ -77,8 +78,8 @@ export class TempoControl {
    * Adjust pitch by relative percentage
    */
   adjustPitch(percentage: number): void {
-    const currentCents = this.state.pitchShift * 100; // Convert to cents
-    const newShift = (currentCents + percentage) / 100;
+    const _currentCents = this.state.pitchShift * 100; // Convert to cents
+    const _newShift = (currentCents + percentage) / 100;
     this.setPitchShift(newShift);
   }
 
@@ -117,7 +118,7 @@ export class TempoControl {
    */
   private updatePlaybackRate(): void {
     // Tempo ratio * pitch shift factor
-    const pitchRatio = Math.pow(2, this.state.pitchShift / 12); // semitones to frequency ratio
+    const _pitchRatio = Math.pow(2, this.state.pitchShift / 12); // semitones to frequency ratio
     this.playbackRate = this.state.tempoRatio * pitchRatio;
   }
 
@@ -183,15 +184,15 @@ export class TempoControl {
    * Accelerate/decelerate to target tempo
    */
   accelerateToTempo(targetBpm: number, durationMs: number): void {
-    const startBpm = this.state.bpm;
-    const steps = 30; // 30 frames for smooth acceleration
-    const stepDuration = durationMs / steps;
+    const _startBpm = this.state.bpm;
+    const _steps = 30; // 30 frames for smooth acceleration
+    const _stepDuration = durationMs / steps;
 
-    let currentStep = 0;
-    const interval = setInterval(() => {
+    let _currentStep = 0;
+    const _interval = setInterval(() => {
       currentStep++;
-      const progress = currentStep / steps;
-      const newBpm = startBpm + (targetBpm - startBpm) * progress;
+      const _progress = currentStep / steps;
+      const _newBpm = startBpm + (targetBpm - startBpm) * progress;
       this.setBpm(newBpm);
 
       if (currentStep >= steps) {

@@ -49,9 +49,9 @@ interface InstrumentPageProps {
 }
 
 // ── Lazy panels (code-split: only loaded when the FX panel opens) ─────────
-const WaveformEditor = lazy(() =>
+const _WaveformEditor = lazy(() =>
   import('@/components/waveform-editor').then(m => ({ default: m.WaveformEditor })));
-const LoopStation505 = lazy(() =>
+const _LoopStation505 = lazy(() =>
   import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ const KEYBOARD_SHORTCUTS = {
 // STYLES
 // ─────────────────────────────────────────────────────────────────────────────
 
-const STYLES = `
+const _STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* ── Variables ─────────────────────────────────────────────────────────── */
@@ -1167,7 +1167,7 @@ export default function InstrumentPage({
   const { toast } = useToast();
   const [initError, setInitError] = useState<string | null>(null);
   const [isLoading,  setIsLoading]  = useState(false);
-  const tapTimesRef = useRef<number[]>([]);
+  const _tapTimesRef = useRef<number[]>([]);
   const [tapFlash,   setTapFlash]   = useState(false);
   const {
     state, isInitialized, init,
@@ -1177,15 +1177,15 @@ export default function InstrumentPage({
     assignPadSample, assignKeySample, exportSession, importSession,
   } = useAudioEngine();
 
-  const handleTapTempo = useCallback(() => {
+  const _handleTapTempo = useCallback(() => {
     const now   = performance.now();
-    const fresh = tapTimesRef.current.filter(t => now - t < 3000);
+    const _fresh = tapTimesRef.current.filter(t => now - t < 3000);
     fresh.push(now);
     tapTimesRef.current = fresh.slice(-8);
     if (fresh.length >= 2) {
-      const intervals = fresh.slice(1).map((t, i) => t - fresh[i]);
-      const avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
-      const bpm = Math.round(60000 / avg);
+      const _intervals = fresh.slice(1).map((t, i) => t - fresh[i]);
+      const _avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
+      const _bpm = Math.round(60000 / avg);
       if (bpm >= 20 && bpm <= 999) setBpm(bpm);
     }
     setTapFlash(true);
@@ -1195,7 +1195,7 @@ export default function InstrumentPage({
   // ── Init ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const go = async () => {
+    const _go = async () => {
       if (isInitialized) return;
       try {
         setIsLoading(true); setInitError(null);
@@ -1203,14 +1203,14 @@ export default function InstrumentPage({
         if (defaultBpm !== 120) setBpm(defaultBpm);
         toast({ title: 'Audio Engine Initialized', description: 'Ready to make music!' });
       } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Unknown error';
+        const _msg = e instanceof Error ? e.message : 'Unknown error';
         setInitError(msg);
         toast({ variant: 'destructive', title: 'Initialization Failed', description: msg });
       } finally { setIsLoading(false); }
     };
     if (autoInitialize) { go(); return; }
     const onClick   = () => { if (!isInitialized && !isLoading) go(); };
-    const onKeyDown = () => { if (!isInitialized && !isLoading) go(); };
+    const _onKeyDown = () => { if (!isInitialized && !isLoading) go(); };
     window.addEventListener('click',   onClick,   { once: true });
     window.addEventListener('keydown', onKeyDown, { once: true });
     return () => { window.removeEventListener('click', onClick); window.removeEventListener('keydown', onKeyDown); };
@@ -1220,12 +1220,12 @@ export default function InstrumentPage({
 
   useEffect(() => {
     if (!isInitialized) return;
-    const h = (e: KeyboardEvent) => {
+    const _h = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const k = e.key.toUpperCase();
-      const pi = KEYBOARD_SHORTCUTS.pads.indexOf(k);
+      const _k = e.key.toUpperCase();
+      const _pi = KEYBOARD_SHORTCUTS.pads.indexOf(k);
       if (pi !== -1 && state.pads[pi]) { e.preventDefault(); triggerPad(pi); return; }
-      const ki = KEYBOARD_SHORTCUTS.keys.indexOf(k);
+      const _ki = KEYBOARD_SHORTCUTS.keys.indexOf(k);
       if (ki !== -1 && state.keys[ki]) { e.preventDefault(); triggerKey(ki); return; }
       if (e.ctrlKey || e.metaKey) {
         if (k === 'A') { e.preventDefault(); arm(); }
@@ -1244,7 +1244,7 @@ export default function InstrumentPage({
   //    pad hit (playPadWithFx fires once from drum-pads MIDI handler,
   //    once from triggerPad here).
   // ────────────────────────────────────────────────────────────
-  const handleMidiKey = useCallback(
+  const _handleMidiKey = useCallback(
     (index: number, octaveShift: number, velocity: number) => {
       // triggerKey(index, octaveShift, velocity) — 3 params confirmed on engine.
       // index   : MIDI note - 60 (0-based key index into state.keys[])
@@ -1265,10 +1265,10 @@ export default function InstrumentPage({
 
   // ── Session ──────────────────────────────────────────────────────────────
 
-  const handleSave = useCallback(() => {
+  const _handleSave = useCallback(() => {
     try {
-      const json = exportSession();
-      const blob = new Blob([json], { type: 'application/json' });
+      const _json = exportSession();
+      const _blob = new Blob([json], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
       const ts   = new Date().toISOString().replace(/[:.]/g, '-');
       const fn   = `r3vibe-session-${ts}.json`;
@@ -1282,10 +1282,10 @@ export default function InstrumentPage({
     }
   }, [exportSession, toast]);
 
-  const handleLoad = useCallback(async (file: File) => {
+  const _handleLoad = useCallback(async (file: File) => {
     try {
       setIsLoading(true);
-      const text = await file.text();
+      const _text = await file.text();
       try { JSON.parse(text); } catch { throw new Error('Invalid JSON file'); }
       await importSession(text);
       toast({ title: 'Session Loaded', description: `Loaded ${file.name}` });
@@ -1294,12 +1294,12 @@ export default function InstrumentPage({
     } finally { setIsLoading(false); }
   }, [importSession, toast]);
 
-  const handleExport = useCallback(() => handleSave(), [handleSave]);
+  const _handleExport = useCallback(() => handleSave(), [handleSave]);
 
   // ── handleLoadJson — accepts the JSON string HeaderControls passes ────────
   //    HeaderControls reads the file itself and calls onLoad(jsonString).
   //    handleLoad(file: File) is kept for the direct file-input path.
-  const handleLoadJson = useCallback(async (json: string) => {
+  const _handleLoadJson = useCallback(async (json: string) => {
     try {
       setIsLoading(true);
       try { JSON.parse(json); } catch { throw new Error('Invalid JSON'); }
@@ -1310,7 +1310,7 @@ export default function InstrumentPage({
     } finally { setIsLoading(false); }
   }, [importSession, toast]);
 
-  const getSessionData = useCallback((): SessionData => ({
+  const _getSessionData = useCallback((): SessionData => ({
     bpm: state.bpm,
     fx:  state.fx as unknown as Record<string, boolean>,
     filterVal: state.filterVal,
@@ -1322,7 +1322,7 @@ export default function InstrumentPage({
   // ── IndexedDB Auto-Save (2 s debounce)
   //    exportSession() confirmed on useAudioEngine hook.
   // ────────────────────────────────────────────────────────────
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const _autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!isInitialized) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -1339,19 +1339,19 @@ export default function InstrumentPage({
   // ── Mic / Samples ─────────────────────────────────────────────────────────
 
   const handleMicrophoneData  = useCallback((data: Float32Array) => {
-    const rms = Math.sqrt(data.reduce((s, x) => s + x * x, 0) / data.length);
+    const _rms = Math.sqrt(data.reduce((s, x) => s + x * x, 0) / data.length);
     if (rms > 0.5) { /* visual hook */ }
   }, []);
 
-  const handleMicrophoneError = useCallback((error: Error) => {
+  const _handleMicrophoneError = useCallback((error: Error) => {
     toast({ variant: 'destructive', title: 'Microphone Error', description: error.message });
   }, [toast]);
 
-  const handleLoadSample = useCallback(async (file: File) => {
+  const _handleLoadSample = useCallback(async (file: File) => {
     try {
       if (!file.type.startsWith('audio/')) throw new Error('Please select an audio file');
       if (file.size > 50 * 1024 * 1024) throw new Error('File size exceeds 50MB limit');
-      const buffer = await loadSample(file);
+      const _buffer = await loadSample(file);
       toast({ title: 'Sample Loaded', description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` });
       return buffer;
     } catch (err) {
@@ -1362,7 +1362,7 @@ export default function InstrumentPage({
 
   // ── Ticker ───────────────────────────────────────────────────────────────
 
-  const TICKER = ['Polyphony','Web Audio API','Offline-First','MIDI Support','Accessible',
+  const _TICKER = ['Polyphony','Web Audio API','Offline-First','MIDI Support','Accessible',
     'MultiTrack DAW','VST System','IndexedDB','Mobile-Friendly','R3 Native','Designed by Ernesto'];
 
   // ── Render ────────────────────────────────────────────────────────────────

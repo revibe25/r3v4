@@ -14,7 +14,8 @@
  *   useVSTStore channel integration
  */
 
-import { useState, useEffect, useMemo, useCallback, CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { VSTScanner } from '@/audio/fx/vst-scanner';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 import { Search, Star, TrendingUp, Grid, List, RefreshCw, Package } from 'lucide-react';
@@ -23,7 +24,7 @@ import { useVSTStore } from '@/store/vst-store';
 
 // ── Acid Grid design tokens ───────────────────────────────────────────────────
 // Mirrors the CSS custom properties in instrument.tsx STYLES block.
-const AG = {
+const _AG = {
   black:   '#060606',
   ink:     '#0a0a0a',
   panel:   '#0d0d0d',
@@ -60,7 +61,7 @@ const CAT_COLOR: Record<string, string> = {
   chorus:     '#e879f9',
   modulation: '#38bdf8',
 };
-const catAccent = (cat = '') => CAT_COLOR[cat.toLowerCase()] ?? AG.soft;
+const _catAccent = (cat = '') => CAT_COLOR[cat.toLowerCase()] ?? AG.soft;
 
 // ── Shared style helpers ──────────────────────────────────────────────────────
 const mono: CSSProperties = { fontFamily: AG.font };
@@ -71,7 +72,7 @@ const tag: CSSProperties  = {
 };
 
 // Keyframes injected once
-const KEYFRAMES = `
+const _KEYFRAMES = `
   @keyframes vst-spin  { to { transform: rotate(360deg); } }
   @keyframes vst-sweep { from { left: -60%; } to { left: 100%; } }
   @keyframes vst-pulse { from { opacity: 0.5; } to { opacity: 1; } }
@@ -88,7 +89,7 @@ interface VSTBrowserProps {
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
-  const addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
+  const _addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
 
   const [plugins,     setPlugins]     = useState<VSTPluginInfo[]>([]);
   const [recentIds,   setRecentIds]   = useState<string[]>([]);
@@ -106,13 +107,13 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Scan ─────────────────────────────────────────────────────────────────
-  const handleScan = useCallback(async () => {
+  const _handleScan = useCallback(async () => {
     setIsScanning(true);
     setScanMsg('INITIALIZING SCANNER...');
     try {
-      const audioCtx = getAudioContext();
+      const _audioCtx = getAudioContext();
       setScanMsg('SCANNING /PLUGINS...');
-      const result = await VSTScanner.scanDirectory('/plugins', audioCtx);
+      const _result = await VSTScanner.scanDirectory('/plugins', audioCtx);
       setPlugins(result.plugins);
       VSTScanner.saveToStorage();
       setScanMsg(`FOUND ${result.plugins.length} PLUGIN${result.plugins.length !== 1 ? 'S' : ''}`);
@@ -127,7 +128,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Select ───────────────────────────────────────────────────────────────
-  const handlePluginSelect = useCallback((plugin: VSTPluginInfo) => {
+  const _handlePluginSelect = useCallback((plugin: VSTPluginInfo) => {
     setLoadingId(plugin.id);
     setRecentIds(prev =>
       [plugin.id, ...prev.filter(id => id !== plugin.id)].slice(0, 10)
@@ -138,7 +139,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, [channelId, addPluginToChannel, onPluginSelect]);
 
   // ── Favorite toggle ───────────────────────────────────────────────────────
-  const toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
+  const _toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPlugins(prev =>
       prev.map(p => p.id === pluginId ? { ...p, isFavorite: !p.isFavorite } : p)
@@ -147,18 +148,18 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Derived data ──────────────────────────────────────────────────────────
-  const categories = useMemo(
+  const _categories = useMemo(
     () => Array.from(new Set(plugins.map(p => p.category))).sort(),
     [plugins],
   );
 
-  const filteredPlugins = useMemo(() => {
+  const _filteredPlugins = useMemo(() => {
     return plugins.filter(plugin => {
       if (selectedCat === 'favorites') return !!plugin.isFavorite;
       if (selectedCat === 'recent')    return recentIds.includes(plugin.id);
       if (selectedCat !== 'all' && plugin.category !== selectedCat) return false;
       if (searchQuery) {
-        const q = searchQuery.toLowerCase();
+        const _q = searchQuery.toLowerCase();
         return (
           plugin.name.toLowerCase().includes(q) ||
           plugin.vendor.toLowerCase().includes(q) ||
@@ -169,7 +170,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
     });
   }, [plugins, searchQuery, selectedCat, recentIds]);
 
-  const TABS = [
+  const _TABS = [
     { id: 'all',       label: 'ALL',    icon: null,                           accent: AG.white },
     { id: 'favorites', label: 'FAV',    icon: <Star size={9} />,              accent: '#f59e0b' },
     { id: 'recent',    label: 'RECENT', icon: <TrendingUp size={9} />,        accent: AG.cyan },
@@ -230,7 +231,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
 
         {/* View toggle: grid / list */}
         {(['grid', 'list'] as const).map(mode => {
-          const active = viewMode === mode;
+          const _active = viewMode === mode;
           return (
             <button
               key={mode}
@@ -338,7 +339,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
         scrollbarWidth: 'none' as const,
       }}>
         {TABS.map(({ id, label, icon, accent }) => {
-          const active = selectedCat === id;
+          const _active = selectedCat === id;
           return (
             <button
               key={id}
@@ -486,7 +487,7 @@ function PluginCard({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const accent = catAccent(plugin.category);
+  const _accent = catAccent(plugin.category);
 
   return (
     <div
@@ -595,7 +596,7 @@ function PluginListItem({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const accent = catAccent(plugin.category);
+  const _accent = catAccent(plugin.category);
 
   return (
     <div

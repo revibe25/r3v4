@@ -2,7 +2,8 @@
  * routes/midi.ts
  * POST /api/midi/mappings  GET /api/midi/mappings
  */
-import { Router, Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
 import { z } from 'zod';
 import { safeResolve, writeJSON, readJSON } from '../utils/fileUtils';
 import { logger } from '../lib/logger';

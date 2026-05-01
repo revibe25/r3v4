@@ -64,12 +64,12 @@ export function MixerWithAI({ audioContext, masterAnalyser, tracks }: MixerWithA
   });
 
   // Track order for the ghost knob grid (matches your visual track order)
-  const trackOrder = tracks.map(t => t.id);
+  const _trackOrder = tracks.map(t => t.id);
 
   // ── 3. Fader change handler — notify AI of manual moves ────
-  const handleFaderChange = useCallback((trackId: string, newGainLinear: number) => {
+  const _handleFaderChange = useCallback((trackId: string, newGainLinear: number) => {
     // Update your existing gain node (your existing code)
-    const track = tracks.find(t => t.id === trackId);
+    const _track = tracks.find(t => t.id === trackId);
     if (track) {
       track.gainNode.gain.setTargetAtTime(newGainLinear, audioContext.currentTime, 0.01);
     }
@@ -142,8 +142,8 @@ interface TrackStripProps {
 function TrackStrip({ track, onGainChange }: TrackStripProps) {
   const [gain, setGain] = useState(1.0);
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newGain = parseFloat(e.target.value);
+  const _handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const _newGain = parseFloat(e.target.value);
     setGain(newGain);
     onGainChange(track.id, newGain);
   };

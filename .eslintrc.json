@@ -6,18 +6,51 @@
     "ecmaVersion": 2022,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "react-hooks"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:react-hooks/recommended"
   ],
   "rules": {
     "no-console": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-floating-promises": "error"
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "fixToUnknown": false,
+        "disallowTypeAnnotations": true
+      }
+    ],
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   },
-  "ignorePatterns": ["dist/", "build/", "node_modules/", "*.js"]
+  "overrides": [
+    {
+      "files": ["**/*.d.ts", "**/generated/**", "**/codegen/**", "server/db/schema.ts"],
+      "rules": {
+        "@typescript-eslint/consistent-type-imports": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "dist/",
+    "build/",
+    ".next/",
+    "*.d.ts",
+    "**/dist/**",
+    "**/build/**",
+    "**/*.bak",
+    "**/*.bak-*",
+    "**/node_modules/**",
+    ".pnpm/",
+    "shared/dist/",
+    "scripts/seed/"
+  ]
 }

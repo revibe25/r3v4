@@ -24,17 +24,17 @@ export type Track = {
 export function useMultitrack(initialTracks: Track[] = []) {
   const [tracks, setTracks] = useState<Track[]>(initialTracks);
 
-  const updateTrack = useCallback((id: string, data: Partial<Track>) => {
+  const _updateTrack = useCallback((id: string, data: Partial<Track>) => {
     setTracks(prev => prev.map(t => (t.id === id ? { ...t, ...data } : t)));
   }, []);
 
-  const deleteTrack = useCallback((id: string) => {
+  const _deleteTrack = useCallback((id: string) => {
     setTracks(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const duplicateTrack = useCallback((id: string) => {
+  const _duplicateTrack = useCallback((id: string) => {
     setTracks(prev => {
-      const track = prev.find(t => t.id === id);
+      const _track = prev.find(t => t.id === id);
       if (!track) return prev;
       return [
         ...prev,
@@ -47,19 +47,19 @@ export function useMultitrack(initialTracks: Track[] = []) {
     });
   }, []);
 
-  const armTrack = useCallback((id: string) => {
+  const _armTrack = useCallback((id: string) => {
     setTracks(prev =>
       prev.map(t => (t.id === id ? { ...t, armed: !t.armed } : t))
     );
   }, []);
 
-  const toggleMute = useCallback((id: string) => {
+  const _toggleMute = useCallback((id: string) => {
     setTracks(prev =>
       prev.map(t => (t.id === id ? { ...t, muted: !t.muted } : t))
     );
   }, []);
 
-  const toggleSolo = useCallback((id: string) => {
+  const _toggleSolo = useCallback((id: string) => {
     setTracks(prev =>
       prev.map(t =>
         t.id === id
@@ -71,7 +71,7 @@ export function useMultitrack(initialTracks: Track[] = []) {
     );
   }, []);
 
-  const addFX = useCallback((trackId: string, fxType: FXType) => {
+  const _addFX = useCallback((trackId: string, fxType: FXType) => {
     setTracks(prev =>
       prev.map(t =>
         t.id === trackId
@@ -81,7 +81,7 @@ export function useMultitrack(initialTracks: Track[] = []) {
     );
   }, []);
 
-  const removeFX = useCallback((trackId: string, fxIndex: number) => {
+  const _removeFX = useCallback((trackId: string, fxIndex: number) => {
     setTracks(prev =>
       prev.map(t =>
         t.id === trackId
@@ -94,12 +94,12 @@ export function useMultitrack(initialTracks: Track[] = []) {
     );
   }, []);
 
-  const reorderFX = useCallback(
+  const _reorderFX = useCallback(
     (trackId: string, fromIdx: number, toIdx: number) => {
       setTracks(prev =>
         prev.map(t => {
           if (t.id !== trackId) return t;
-          const newChain = [...t.fxChain];
+          const _newChain = [...t.fxChain];
           const [removed] = newChain.splice(fromIdx, 1);
           newChain.splice(toIdx, 0, removed);
           return { ...t, fxChain: newChain };
@@ -109,12 +109,12 @@ export function useMultitrack(initialTracks: Track[] = []) {
     []
   );
 
-  const reorderTracks = useCallback((fromId: string, toId: string) => {
+  const _reorderTracks = useCallback((fromId: string, toId: string) => {
     setTracks(prev => {
-      const fromIdx = prev.findIndex(t => t.id === fromId);
-      const toIdx = prev.findIndex(t => t.id === toId);
+      const _fromIdx = prev.findIndex(t => t.id === fromId);
+      const _toIdx = prev.findIndex(t => t.id === toId);
       if (fromIdx === -1 || toIdx === -1) return prev;
-      const newTracks = [...prev];
+      const _newTracks = [...prev];
       const [moved] = newTracks.splice(fromIdx, 1);
       newTracks.splice(toIdx, 0, moved);
       return newTracks;
@@ -153,11 +153,11 @@ export function useTransportState() {
     position: 0,
   });
 
-  const togglePlay = useCallback(() => {
+  const _togglePlay = useCallback(() => {
     setTransport(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
   }, []);
 
-  const toggleRecord = useCallback(() => {
+  const _toggleRecord = useCallback(() => {
     setTransport(prev => ({
       ...prev,
       isRecording: !prev.isRecording,
@@ -166,11 +166,11 @@ export function useTransportState() {
     }));
   }, []);
 
-  const setPosition = useCallback((position: number) => {
+  const _setPosition = useCallback((position: number) => {
     setTransport(prev => ({ ...prev, position }));
   }, []);
 
-  const stop = useCallback(() => {
+  const _stop = useCallback(() => {
     setTransport(prev => ({
       ...prev,
       isPlaying: false,
@@ -182,7 +182,7 @@ export function useTransportState() {
   useEffect(() => {
     if (!transport.isPlaying) return;
 
-    const interval = setInterval(() => {
+    const _interval = setInterval(() => {
       setTransport(prev => ({
         ...prev,
         position: prev.position + 0.016, // ~60fps

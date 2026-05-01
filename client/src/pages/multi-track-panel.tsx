@@ -536,13 +536,13 @@ function VUMeter({
 }: {
   level: number; peak: number; height?: number; stereo?: boolean; label?: string;
 }) {
-  const getColor = (val: number) => {
+  const _getColor = (val: number) => {
     if (val > 0.9)  return 'bg-red-500';
     if (val > 0.75) return 'bg-yellow-400';
     return 'bg-emerald-400';
   };
 
-  const MeterBar = ({ val, pk }: { val: number; pk: number }) => (
+  const _MeterBar = ({ val, pk }: { val: number; pk: number }) => (
     <div className="relative flex-1 bg-black/60 rounded-sm overflow-hidden border border-white/5" style={{ height }}>
       {[0.75, 0.5, 0.25].map(mark => (
         <div key={mark} className="absolute w-full border-t border-white/10" style={{ bottom: `${mark * 100}%` }} />
@@ -581,7 +581,7 @@ function TrackStrip({
 }) {
   const [expanded, setExpanded] = useState(false);
   const dbVal  = gainToDb(track.volume).toFixed(1);
-  const panVal = track.pan === 0 ? 'C' : track.pan > 0
+  const _panVal = track.pan === 0 ? 'C' : track.pan > 0
     ? `R${Math.round(track.pan * 100)}`
     : `L${Math.round(Math.abs(track.pan) * 100)}`;
 
@@ -718,7 +718,7 @@ function MasterStrip({
 }: {
   volume: number; meter: number; peak: number; onVolumeChange: (v: number) => void;
 }) {
-  const dbVal = gainToDb(volume).toFixed(1);
+  const _dbVal = gainToDb(volume).toFixed(1);
   return (
     <div className="flex flex-col flex-shrink-0 w-20 border-l border-primary/20"
       style={{ background: 'linear-gradient(180deg, rgba(163,230,53,.04) 0%, rgba(163,230,53,.02) 100%)' }}>
@@ -754,7 +754,7 @@ function ClipBlock({
   clip: AudioClip; trackColor: string; pixelsPerSecond: number;
   trackHeight: number; isSelected: boolean; onClick: () => void;
 }) {
-  const width = Math.max(clip.duration * pixelsPerSecond, 20);
+  const _width = Math.max(clip.duration * pixelsPerSecond, 20);
   const left  = clip.startTime * pixelsPerSecond;
   return (
     <div
@@ -789,7 +789,7 @@ function ClipBlock({
 function TimelineRuler({ zoom, duration = 300, tempo = 120, timeFormat = 'bars' }: {
   zoom: number; duration?: number; tempo?: number; timeFormat?: string;
 }) {
-  const pixelsPerSecond = 50 * zoom;
+  const _pixelsPerSecond = 50 * zoom;
   const totalWidth      = duration * pixelsPerSecond;
   const beatsPerSecond  = tempo / 60;
   const barSeconds      = 4 / beatsPerSecond;
@@ -799,7 +799,7 @@ function TimelineRuler({ zoom, duration = 300, tempo = 120, timeFormat = 'bars' 
     <div className="relative h-7 border-b border-border overflow-hidden flex-shrink-0"
       style={{ width: totalWidth, background: 'linear-gradient(180deg, #0c0c0c, #080808)' }}>
       {Array.from({ length: marks }, (_, i) => {
-        const x = i * barSeconds * pixelsPerSecond;
+        const _x = i * barSeconds * pixelsPerSecond;
         return (
           <div key={i} className="absolute top-0 flex flex-col items-center" style={{ left: x }}>
             <div className="w-px h-3" style={{ background: i % 4 === 0 ? 'var(--ag-acid)' : 'var(--ag-border)' }} />
@@ -810,7 +810,7 @@ function TimelineRuler({ zoom, duration = 300, tempo = 120, timeFormat = 'bars' 
       })}
       {Array.from({ length: marks * 4 }, (_, i) => {
         if (i % 4 === 0) return null;
-        const x = (i / 4) * barSeconds * pixelsPerSecond;
+        const _x = (i / 4) * barSeconds * pixelsPerSecond;
         return (
           <div key={`beat-${i}`} className="absolute top-0 w-px h-1.5"
             style={{ left: x, background: 'var(--ag-border)', opacity: 0.5 }} />
@@ -843,7 +843,7 @@ function TransportDisplay({ position, tempo, timeSignature, timeFormat }: {
 // INITIAL STATE
 // ============================================================
 
-const createInitialTransport = (): TransportState => ({
+const _createInitialTransport = (): TransportState => ({
   isPlaying: false,
   isRecording: false,
   position: 0,
@@ -854,7 +854,7 @@ const createInitialTransport = (): TransportState => ({
   timeSignature: '4/4',
 });
 
-const createInitialTrack = (index: number, type: 'audio' | 'midi' | 'aux' = 'audio'): AdvancedTrack => ({
+const _createInitialTrack = (index: number, type: 'audio' | 'midi' | 'aux' = 'audio'): AdvancedTrack => ({
   id: generateId(),
   name: type === 'aux' ? `Bus ${index + 1}` : `Track ${index + 1}`,
   type,
@@ -876,7 +876,7 @@ const createInitialTrack = (index: number, type: 'audio' | 'midi' | 'aux' = 'aud
   cpuUsage: 0,
 });
 
-const createInitialProject = (): ProjectState => ({
+const _createInitialProject = (): ProjectState => ({
   title: 'Untitled Session',
   tracks: [
     ...Array.from({ length: 6 }, (_, i) => createInitialTrack(i, 'audio')),
@@ -890,7 +890,7 @@ const createInitialProject = (): ProjectState => ({
   cpuUsage: 0,
 });
 
-const createInitialPreferences = (): Preferences => ({
+const _createInitialPreferences = (): Preferences => ({
   theme: 'dark',
   mixerView: 'medium',
   timeFormat: 'bars',
@@ -907,7 +907,7 @@ const createInitialPreferences = (): Preferences => ({
 // ============================================================
 
 export default function MultiTrackPanel() {
-  const vstContext = useVSTContextOptional();
+  const _vstContext = useVSTContextOptional();
 
   const [project, setProject]           = useState<ProjectState>(createInitialProject);
   const [preferences, setPreferences]   = useState<Preferences>(createInitialPreferences);
@@ -930,12 +930,12 @@ export default function MultiTrackPanel() {
   const lastUpdateTimeRef  = useRef<number>(Date.now());
   const timelineScrollRef  = useRef<HTMLDivElement>(null);
 
-  const pixelsPerSecond = 50 * zoom;
+  const _pixelsPerSecond = 50 * zoom;
 
   // ── AUDIO ENGINE ────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const engine = audioEngineRef.current;
+    const _engine = audioEngineRef.current;
     engine.initialize().catch(console.error);
     return () => {
       if (typeof engine.cleanup === 'function') engine.cleanup();
@@ -954,24 +954,24 @@ export default function MultiTrackPanel() {
       return;
     }
 
-    const update = () => {
+    const _update = () => {
       const now   = Date.now();
-      const delta = (now - lastUpdateTimeRef.current) / 1000;
+      const _delta = (now - lastUpdateTimeRef.current) / 1000;
       lastUpdateTimeRef.current = now;
 
       setProject(prev => {
-        let pos = prev.transport.position + delta;
+        let _pos = prev.transport.position + delta;
         if (prev.transport.loopEnabled && pos >= prev.transport.loopEnd) pos = prev.transport.loopStart;
 
-        const soloActive = prev.tracks.some(t => t.solo);
+        const _soloActive = prev.tracks.some(t => t.solo);
         const newTracks  = prev.tracks.map(t => {
           const isAudible   = !t.muted && (!soloActive || t.solo);
-          const targetLevel = isAudible ? (Math.random() * 0.4 + t.volume * 0.5) : 0;
+          const _targetLevel = isAudible ? (Math.random() * 0.4 + t.volume * 0.5) : 0;
           const level       = t.meter * METER_DECAY + targetLevel * (1 - METER_DECAY);
           const peak        = Math.max(level, t.peak * 0.98);
           return { ...t, meter: level, peak };
         });
-        const masterLevel = newTracks.reduce((s, t) => s + t.meter, 0) / newTracks.length;
+        const _masterLevel = newTracks.reduce((s, t) => s + t.meter, 0) / newTracks.length;
         return {
           ...prev,
           transport:   { ...prev.transport, position: pos },
@@ -993,7 +993,7 @@ export default function MultiTrackPanel() {
   // ── KEYBOARD SHORTCUTS ──────────────────────────────────────────────────────
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
+    const _handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
       switch (e.code) {
         case 'Space':        e.preventDefault(); handlePlayPause(); break;
@@ -1013,56 +1013,56 @@ export default function MultiTrackPanel() {
 
   // ── TRANSPORT ───────────────────────────────────────────────────────────────
 
-  const handlePlayPause = useCallback(() => {
+  const _handlePlayPause = useCallback(() => {
     setProject(p => ({ ...p, transport: { ...p.transport, isPlaying: !p.transport.isPlaying } }));
   }, []);
 
-  const handleStop = useCallback(() => {
+  const _handleStop = useCallback(() => {
     setProject(p => ({ ...p, transport: { ...p.transport, isPlaying: false, isRecording: false, position: 0 } }));
   }, []);
 
-  const handleRecord = useCallback(() => {
+  const _handleRecord = useCallback(() => {
     setProject(p => ({ ...p, transport: { ...p.transport, isRecording: !p.transport.isRecording, isPlaying: true } }));
   }, []);
 
   const handleSkipBack    = useCallback(() => setProject(p => ({ ...p, transport: { ...p.transport, position: 0 } })), []);
-  const handleSkipForward = useCallback(() => setProject(p => ({ ...p, transport: { ...p.transport, position: p.transport.loopEnd } })), []);
+  const _handleSkipForward = useCallback(() => setProject(p => ({ ...p, transport: { ...p.transport, position: p.transport.loopEnd } })), []);
   const handleToggleLoop  = useCallback(() => setProject(p => ({ ...p, transport: { ...p.transport, loopEnabled: !p.transport.loopEnabled } })), []);
-  const handleTempoChange = useCallback((tempo: number) => setProject(p => ({ ...p, transport: { ...p.transport, tempo } })), []);
+  const _handleTempoChange = useCallback((tempo: number) => setProject(p => ({ ...p, transport: { ...p.transport, tempo } })), []);
 
   // ── TRACK MANAGEMENT ────────────────────────────────────────────────────────
 
-  const updateTrack = useCallback((id: string, updates: Partial<AdvancedTrack>) => {
+  const _updateTrack = useCallback((id: string, updates: Partial<AdvancedTrack>) => {
     setProject(p => ({ ...p, tracks: p.tracks.map(t => t.id === id ? { ...t, ...updates } : t) }));
   }, []);
 
-  const addTrack = useCallback((type: 'audio' | 'midi' | 'aux' = 'audio') => {
+  const _addTrack = useCallback((type: 'audio' | 'midi' | 'aux' = 'audio') => {
     setProject(p => {
       if (p.tracks.length >= MAX_TRACKS) return p;
       return { ...p, tracks: [...p.tracks, createInitialTrack(p.tracks.length, type)] };
     });
   }, []);
 
-  const removeTrack = useCallback((id: string) => {
+  const _removeTrack = useCallback((id: string) => {
     setProject(p => ({ ...p, tracks: p.tracks.filter(t => t.id !== id) }));
     if (selectedTrackId === id) setSelectedTrackId(null);
   }, [selectedTrackId]);
 
-  const soloExclusive = useCallback((id: string) => {
+  const _soloExclusive = useCallback((id: string) => {
     setProject(p => ({ ...p, tracks: p.tracks.map(t => ({ ...t, solo: t.id === id ? !t.solo : false })) }));
   }, []);
 
   const muteAll   = useCallback(() => setProject(p => ({ ...p, tracks: p.tracks.map(t => ({ ...t, muted: true  })) })), []);
-  const unmuteAll = useCallback(() => setProject(p => ({ ...p, tracks: p.tracks.map(t => ({ ...t, muted: false })) })), []);
+  const _unmuteAll = useCallback(() => setProject(p => ({ ...p, tracks: p.tracks.map(t => ({ ...t, muted: false })) })), []);
 
   // ── FILE IMPORT ─────────────────────────────────────────────────────────────
 
-  const handleFileImport = useCallback(async (trackId: string, file: File) => {
+  const _handleFileImport = useCallback(async (trackId: string, file: File) => {
     try {
       const engine      = audioEngineRef.current;
-      const audioBuffer = await engine.loadAudioFile(file);
+      const _audioBuffer = await engine.loadAudioFile(file);
       if (!audioBuffer) return;
-      const waveformData = engine.generateWaveformData(audioBuffer);
+      const _waveformData = engine.generateWaveformData(audioBuffer);
       const newClip: AudioClip = {
         id: generateId(), trackId,
         startTime: project.transport.position,
@@ -1080,15 +1080,15 @@ export default function MultiTrackPanel() {
 
   // ── PROJECT SAVE/LOAD ───────────────────────────────────────────────────────
 
-  const handleSaveProject = useCallback(() => {
-    const json = serializeProject(project);
+  const _handleSaveProject = useCallback(() => {
+    const _json = serializeProject(project);
     downloadFile(json, `${project.title.replace(/\s+/g, '_')}.dawproject`);
   }, [project]);
 
-  const handleLoadProject = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const _handleLoadProject = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
+    const _reader = new FileReader();
     reader.onload = ev => {
       try { setProject(JSON.parse(ev.target?.result as string)); }
       catch (err) { console.error('[MultiTrackPanel] Load failed:', err); }
@@ -1099,29 +1099,29 @@ export default function MultiTrackPanel() {
   // ── ZOOM ────────────────────────────────────────────────────────────────────
 
   const handleZoomIn  = useCallback(() => setZoom(z => Math.min(4, z + 0.25)), []);
-  const handleZoomOut = useCallback(() => setZoom(z => Math.max(0.25, z - 0.25)), []);
+  const _handleZoomOut = useCallback(() => setZoom(z => Math.max(0.25, z - 0.25)), []);
 
   // ── SECTION COLLAPSE ────────────────────────────────────────────────────────
 
-  const toggleSection = useCallback((key: keyof typeof sectionCollapsed) => {
+  const _toggleSection = useCallback((key: keyof typeof sectionCollapsed) => {
     setSectionCollapsed(s => ({ ...s, [key]: !s[key] }));
   }, []);
 
   // ── COMPUTED ────────────────────────────────────────────────────────────────
 
-  const selectedTrack = useMemo(
+  const _selectedTrack = useMemo(
     () => project.tracks.find(t => t.id === selectedTrackId),
     [project.tracks, selectedTrackId]
   );
 
-  const totalClips = useMemo(
+  const _totalClips = useMemo(
     () => project.tracks.reduce((s, t) => s + t.clips.length, 0),
     [project.tracks]
   );
 
   const TICKER_ITEMS = ['MultiTrack DAW','Web Audio API','VST System','8 Tracks','Loop Engine','MIDI Ready','Offline-First','R3 Native'];
 
-  const transportStatus = project.transport.isRecording ? 'recording'
+  const _transportStatus = project.transport.isRecording ? 'recording'
     : project.transport.isPlaying ? 'playing'
     : 'stopped';
 
@@ -1295,7 +1295,7 @@ export default function MultiTrackPanel() {
             <button onClick={muteAll}   className="text-[9px] px-2 py-0.5 bg-muted hover:bg-yellow-500/20 text-muted-foreground transition-colors border border-border/30">Mute All</button>
             <button onClick={unmuteAll} className="text-[9px] px-2 py-0.5 bg-muted hover:bg-emerald-500/20 text-muted-foreground transition-colors border border-border/30">Unmute All</button>
             <input id="audio-import" type="file" accept="audio/*" multiple onChange={e => {
-              const files = Array.from(e.target.files || []);
+              const _files = Array.from(e.target.files || []);
               const tid   = selectedTrackId ?? project.tracks[0]?.id;
               if (tid) files.forEach(f => handleFileImport(tid, f));
             }} className="hidden" />

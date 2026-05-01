@@ -221,10 +221,10 @@ function frequencyToMidi(frequency: number): number {
 function generateEuclideanRhythm(steps: number, pulses: number): boolean[] {
   const pattern: boolean[] = new Array(steps).fill(false);
   if (pulses >= steps) return pattern.fill(true);
-  const slope = pulses / steps;
-  let previous = 0;
-  for (let i = 0; i < steps; i++) {
-    const current = Math.floor((i + 1) * slope);
+  const _slope = pulses / steps;
+  let _previous = 0;
+  for (let _i = 0; i < steps; i++) {
+    const _current = Math.floor((i + 1) * slope);
     pattern[i] = current !== previous;
     previous = current;
   }
@@ -233,10 +233,10 @@ function generateEuclideanRhythm(steps: number, pulses: number): boolean[] {
 
 function detectChord(activeNotes: Set<number>): string {
   if (activeNotes.size < 2) return '';
-  const notesMod = Array.from(activeNotes).map(n => n % 12).sort((a, b) => a - b);
+  const _notesMod = Array.from(activeNotes).map(n => n % 12).sort((a, b) => a - b);
   for (const root of notesMod) {
     for (const pat of CHORD_PATTERNS) {
-      const shifted = pat.intervals.map(i => (i + root) % 12).sort((a, b) => a - b);
+      const _shifted = pat.intervals.map(i => (i + root) % 12).sort((a, b) => a - b);
       if (shifted.length === notesMod.length && shifted.every((n, i) => n === notesMod[i])) {
         return PIANO_NOTES[root] + pat.suffix;
       }
@@ -260,30 +260,30 @@ function WhiteKey({
 }) {
   const [isPressed, setIsPressed] = useState(false);
   const [localVelocity, setLocalVelocity] = useState(0);
-  const pressTimerRef = useRef<NodeJS.Timeout>();
+  const _pressTimerRef = useRef<NodeJS.Timeout>();
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const _handleMouseDown = (e: React.MouseEvent) => {
     setIsPressed(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const relativeY = (e.clientY - rect.top) / rect.height;
+    const _rect = e.currentTarget.getBoundingClientRect();
+    const _relativeY = (e.clientY - rect.top) / rect.height;
     setLocalVelocity(clamp(1 - relativeY * 0.5, 0.5, 1.0));
     pressTimerRef.current = setTimeout(() => onLongPress(keyIdx), 500);
   };
 
-  const handleMouseUp = () => {
+  const _handleMouseUp = () => {
     setIsPressed(false);
     if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
     onTrigger(keyIdx);
     setLocalVelocity(0);
   };
 
-  const handleMouseLeave = () => {
+  const _handleMouseLeave = () => {
     setIsPressed(false);
     if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
     setLocalVelocity(0);
   };
 
-  const displayVelocity = isPressed ? localVelocity : (isActive ? velocity : 0);
+  const _displayVelocity = isPressed ? localVelocity : (isActive ? velocity : 0);
 
   return (
     <button
@@ -353,24 +353,24 @@ function BlackKey({
 }) {
   const [isPressed, setIsPressed] = useState(false);
   const [localVelocity, setLocalVelocity] = useState(0);
-  const pressTimerRef = useRef<NodeJS.Timeout>();
+  const _pressTimerRef = useRef<NodeJS.Timeout>();
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const _handleMouseDown = (e: React.MouseEvent) => {
     setIsPressed(true);
-    const rect = e.currentTarget.getBoundingClientRect();
-    const relativeY = (e.clientY - rect.top) / rect.height;
+    const _rect = e.currentTarget.getBoundingClientRect();
+    const _relativeY = (e.clientY - rect.top) / rect.height;
     setLocalVelocity(clamp(1 - relativeY * 0.3, 0.5, 1.0));
     pressTimerRef.current = setTimeout(() => onLongPress(keyIdx), 500);
   };
 
-  const handleMouseUp = () => {
+  const _handleMouseUp = () => {
     setIsPressed(false);
     if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
     onTrigger(keyIdx);
     setLocalVelocity(0);
   };
 
-  const displayVelocity = isPressed ? localVelocity : (isActive ? velocity : 0);
+  const _displayVelocity = isPressed ? localVelocity : (isActive ? velocity : 0);
 
   return (
     <button
@@ -485,15 +485,15 @@ export function PianoKeys({
   // REFS
   // ========================================================================
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const arpIntervalRef = useRef<NodeJS.Timeout>();
-  const recordingStartTimeRef = useRef<number>(0);
-  const sustainedKeysRef = useRef<Set<number>>(new Set());
-  const pressedKeysRef = useRef<Set<string>>(new Set());
-  const audioContextRef = useRef<AudioContext>();
-  const analyserRef = useRef<AnalyserNode>();
-  const waveformCanvasRef = useRef<HTMLCanvasElement>(null);
-  const animationFrameRef = useRef<number>();
+  const _fileInputRef = useRef<HTMLInputElement>(null);
+  const _arpIntervalRef = useRef<NodeJS.Timeout>();
+  const _recordingStartTimeRef = useRef<number>(0);
+  const _sustainedKeysRef = useRef<Set<number>>(new Set());
+  const _pressedKeysRef = useRef<Set<string>>(new Set());
+  const _audioContextRef = useRef<AudioContext>();
+  const _analyserRef = useRef<AnalyserNode>();
+  const _waveformCanvasRef = useRef<HTMLCanvasElement>(null);
+  const _animationFrameRef = useRef<number>();
 
   // ========================================================================
   // AUDIO CONTEXT SETUP
@@ -516,14 +516,14 @@ export function PianoKeys({
   // WAVEFORM VISUALIZATION
   // ========================================================================
 
-  const drawWaveform = useCallback(() => {
+  const _drawWaveform = useCallback(() => {
     if (!analyserRef.current || !waveformCanvasRef.current) return;
-    const canvas = waveformCanvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const _canvas = waveformCanvasRef.current;
+    const _ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const bufferLength = analyserRef.current.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
+    const _bufferLength = analyserRef.current.frequencyBinCount;
+    const _dataArray = new Uint8Array(bufferLength);
     analyserRef.current.getByteTimeDomainData(dataArray);
 
     ctx.fillStyle = 'rgb(15, 23, 42)';
@@ -532,10 +532,10 @@ export function PianoKeys({
     ctx.strokeStyle = 'rgb(59, 130, 246)';
     ctx.beginPath();
 
-    const sliceWidth = canvas.width / bufferLength;
-    for (let i = 0; i < bufferLength; i++) {
-      const v = dataArray[i] / 128.0;
-      const y = (v * canvas.height) / 2;
+    const _sliceWidth = canvas.width / bufferLength;
+    for (let _i = 0; i < bufferLength; i++) {
+      const _v = dataArray[i] / 128.0;
+      const _y = (v * canvas.height) / 2;
       if (i === 0) ctx.moveTo(i * sliceWidth, y);
       else ctx.lineTo(i * sliceWidth, y);
     }
@@ -571,10 +571,10 @@ export function PianoKeys({
       return;
     }
 
-    const sortedKeys = Array.from(heldKeys).sort((a, b) => a - b);
-    let currentIndex = 0;
-    let direction = 1;
-    const intervalMs = (60000 / arpeggiator.speed) / 4;
+    const _sortedKeys = Array.from(heldKeys).sort((a, b) => a - b);
+    let _currentIndex = 0;
+    let _direction = 1;
+    const _intervalMs = (60000 / arpeggiator.speed) / 4;
 
     arpIntervalRef.current = setInterval(() => {
       if (Math.random() > arpeggiator.probability) return;
@@ -614,7 +614,7 @@ export function PianoKeys({
           keyToPlay = sortedKeys[0];
       }
 
-      const actualKey = keyToPlay + transpose;
+      const _actualKey = keyToPlay + transpose;
       onTrigger(actualKey, octaveShift, velocity * VELOCITY_CURVES[velocityCurve].curve(0.8) * arpeggiator.gate);
     }, intervalMs);
 
@@ -627,21 +627,21 @@ export function PianoKeys({
   // RECORDING & PLAYBACK
   // ========================================================================
 
-  const startRecording = useCallback(() => {
+  const _startRecording = useCallback(() => {
     setIsRecording(true);
     setRecordedNotes([]);
     recordingStartTimeRef.current = performance.now();
   }, []);
 
-  const stopRecording = useCallback(() => {
+  const _stopRecording = useCallback(() => {
     setIsRecording(false);
   }, []);
 
-  const startPlayback = useCallback(() => {
+  const _startPlayback = useCallback(() => {
     if (recordedNotes.length === 0) return;
     setIsPlaying(true);
 
-    const sortedNotes = [...recordedNotes].sort((a, b) => a.timestamp - b.timestamp);
+    const _sortedNotes = [...recordedNotes].sort((a, b) => a.timestamp - b.timestamp);
     sortedNotes.forEach(note => {
       setTimeout(() => {
         onTrigger(note.keyIndex, octaveShift, note.velocity);
@@ -649,7 +649,7 @@ export function PianoKeys({
         if (note.duration) {
           setTimeout(() => {
             setActiveKeys(prev => {
-              const newSet = new Set(prev);
+              const _newSet = new Set(prev);
               newSet.delete(note.keyIndex);
               return newSet;
             });
@@ -658,38 +658,38 @@ export function PianoKeys({
       }, note.timestamp);
     });
 
-    const totalDuration = sortedNotes[sortedNotes.length - 1].timestamp + (sortedNotes[sortedNotes.length - 1].duration || 0);
+    const _totalDuration = sortedNotes[sortedNotes.length - 1].timestamp + (sortedNotes[sortedNotes.length - 1].duration || 0);
     setTimeout(() => {
       setIsPlaying(false);
       setActiveKeys(new Set());
     }, totalDuration);
   }, [recordedNotes, onTrigger, octaveShift]);
 
-  const stopPlayback = useCallback(() => {
+  const _stopPlayback = useCallback(() => {
     setIsPlaying(false);
     setActiveKeys(new Set());
   }, []);
 
-  const clearRecording = useCallback(() => {
+  const _clearRecording = useCallback(() => {
     setRecordedNotes([]);
   }, []);
 
-  const exportRecording = useCallback(() => {
+  const _exportRecording = useCallback(() => {
     if (recordedNotes.length === 0) return;
-    const data = { notes: recordedNotes, tempo: 120, timeSignature: '4/4', exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const _data = { notes: recordedNotes, tempo: 120, timeSignature: '4/4', exportedAt: new Date().toISOString() };
+    const _blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const _url = URL.createObjectURL(blob);
+    const _a = document.createElement('a');
     a.href = url;
     a.download = `recording-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [recordedNotes]);
 
-  const quantizeRecording = useCallback(() => {
+  const _quantizeRecording = useCallback(() => {
     if (!quantizeEnabled || recordedNotes.length === 0) return;
-    const quantizeMs = (60000 / 120) * (4 / quantizeGrid);
-    const quantized = recordedNotes.map(note => ({
+    const _quantizeMs = (60000 / 120) * (4 / quantizeGrid);
+    const _quantized = recordedNotes.map(note => ({
       ...note,
       timestamp: Math.round(note.timestamp / quantizeMs) * quantizeMs,
     }));
@@ -700,16 +700,16 @@ export function PianoKeys({
   // KEY TRIGGERING
   // ========================================================================
 
-  const triggerKey = useCallback((keyIndex: number) => {
-    const adjustedIndex = keyIndex + transpose;
-    const currentVelocity = velocity * VELOCITY_CURVES[velocityCurve].curve(Math.random() * 0.2 + 0.8);
+  const _triggerKey = useCallback((keyIndex: number) => {
+    const _adjustedIndex = keyIndex + transpose;
+    const _currentVelocity = velocity * VELOCITY_CURVES[velocityCurve].curve(Math.random() * 0.2 + 0.8);
 
     onTrigger(adjustedIndex, octaveShift, currentVelocity);
     setActiveKeys(prev => new Set(prev).add(keyIndex));
     setKeyVelocities(prev => new Map(prev).set(keyIndex, currentVelocity));
 
     if (isRecording) {
-      const timestamp = performance.now() - recordingStartTimeRef.current;
+      const _timestamp = performance.now() - recordingStartTimeRef.current;
       setRecordedNotes(prev => [...prev, {
         keyIndex, timestamp, velocity: currentVelocity, released: false,
       }]);
@@ -718,12 +718,12 @@ export function PianoKeys({
     setTimeout(() => {
       if (!sustain && !sustainedKeysRef.current.has(keyIndex)) {
         setActiveKeys(prev => {
-          const newSet = new Set(prev);
+          const _newSet = new Set(prev);
           newSet.delete(keyIndex);
           return newSet;
         });
         setKeyVelocities(prev => {
-          const newMap = new Map(prev);
+          const _newMap = new Map(prev);
           newMap.delete(keyIndex);
           return newMap;
         });
@@ -735,9 +735,9 @@ export function PianoKeys({
   // FILE HANDLING
   // ========================================================================
 
-  const handleFileSelect = useCallback(
+  const _handleFileSelect = useCallback(
     async (keyIndex: number, event: React.ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
+      const _file = event.target.files?.[0];
       if (!file) return;
 
       if (!VALID_AUDIO_TYPES.includes(file.type)) {
@@ -746,7 +746,7 @@ export function PianoKeys({
       }
 
       try {
-        const buffer = await loadSample(file);
+        const _buffer = await loadSample(file);
         if (buffer) {
           const newAssignment: KeyAssignment = {
             keyIndex, buffer, name: file.name, velocity: 1,
@@ -758,8 +758,8 @@ export function PianoKeys({
           };
 
           setAssignments(prev => {
-            const newMap = new Map(prev);
-            const existing = newMap.get(keyIndex) || [];
+            const _newMap = new Map(prev);
+            const _existing = newMap.get(keyIndex) || [];
             newMap.set(keyIndex, [...existing, newAssignment]);
             return newMap;
           });
@@ -776,21 +776,21 @@ export function PianoKeys({
     [loadSample, onAssignSample]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const _handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
   }, []);
 
-  const handleDrop = useCallback(
+  const _handleDrop = useCallback(
     async (keyIndex: number, e: React.DragEvent) => {
       e.preventDefault();
-      const file = e.dataTransfer.files[0];
+      const _file = e.dataTransfer.files[0];
       if (!file || !VALID_AUDIO_TYPES.includes(file.type)) {
         alert('Please drop a valid audio file');
         return;
       }
 
       try {
-        const buffer = await loadSample(file);
+        const _buffer = await loadSample(file);
         if (buffer) {
           const newAssignment: KeyAssignment = {
             keyIndex, buffer, name: file.name, velocity: 1,
@@ -802,8 +802,8 @@ export function PianoKeys({
           };
 
           setAssignments(prev => {
-            const newMap = new Map(prev);
-            const existing = newMap.get(keyIndex) || [];
+            const _newMap = new Map(prev);
+            const _existing = newMap.get(keyIndex) || [];
             newMap.set(keyIndex, [...existing, newAssignment]);
             return newMap;
           });
@@ -822,10 +822,10 @@ export function PianoKeys({
   // ========================================================================
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const _handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
-      const key = e.key.toLowerCase();
+      const _key = e.key.toLowerCase();
       if (pressedKeysRef.current.has(key)) return;
       pressedKeysRef.current.add(key);
 
@@ -846,7 +846,7 @@ export function PianoKeys({
         return;
       }
 
-      const keyIndex = KEYBOARD_MAP[key];
+      const _keyIndex = KEYBOARD_MAP[key];
       if (keyIndex !== undefined) {
         e.preventDefault();
         if (arpeggiator.enabled) setHeldKeys(prev => new Set(prev).add(keyIndex));
@@ -854,15 +854,15 @@ export function PianoKeys({
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase();
+    const _handleKeyUp = (e: KeyboardEvent) => {
+      const _key = e.key.toLowerCase();
       pressedKeysRef.current.delete(key);
 
       if (e.code === 'Space' && sustain) {
         setSustain(false);
         sustainedKeysRef.current.forEach(keyIndex => {
           setActiveKeys(prev => {
-            const newSet = new Set(prev);
+            const _newSet = new Set(prev);
             newSet.delete(keyIndex);
             return newSet;
           });
@@ -871,11 +871,11 @@ export function PianoKeys({
         return;
       }
 
-      const keyIndex = KEYBOARD_MAP[key];
+      const _keyIndex = KEYBOARD_MAP[key];
       if (keyIndex !== undefined) {
         if (arpeggiator.enabled) {
           setHeldKeys(prev => {
-            const newSet = new Set(prev);
+            const _newSet = new Set(prev);
             newSet.delete(keyIndex);
             return newSet;
           });
@@ -896,21 +896,21 @@ export function PianoKeys({
   // EFFECTS & PRESETS
   // ========================================================================
 
-  const handleEffectChange = useCallback(
+  const _handleEffectChange = useCallback(
     (effectName: keyof EffectSettings, value: number) => {
-      const newEffects = { ...effects, [effectName]: value };
+      const _newEffects = { ...effects, [effectName]: value };
       setEffects(newEffects);
       onEffectChange?.(newEffects);
     },
     [effects, onEffectChange]
   );
 
-  const resetEffects = useCallback(() => {
+  const _resetEffects = useCallback(() => {
     setEffects(DEFAULT_EFFECTS);
     onEffectChange?.(DEFAULT_EFFECTS);
   }, [onEffectChange]);
 
-  const handleSavePreset = useCallback(() => {
+  const _handleSavePreset = useCallback(() => {
     const preset: PerformancePreset = {
       id: `preset-${Date.now()}`,
       name: currentPresetName,
@@ -931,7 +931,7 @@ export function PianoKeys({
     setCurrentPresetDescription('');
   }, [currentPresetName, currentPresetDescription, assignments, effects, octaveShift, velocity, arpeggiator, recordedNotes]);
 
-  const handleLoadPreset = useCallback((preset: PerformancePreset) => {
+  const _handleLoadPreset = useCallback((preset: PerformancePreset) => {
     setAssignments(new Map(preset.assignments));
     setEffects(preset.effects);
     setOctaveShift(preset.octaveShift);
@@ -945,55 +945,55 @@ export function PianoKeys({
     onEffectChange?.(preset.effects);
   }, [onEffectChange]);
 
-  const handleDeletePreset = useCallback((presetId: string) => {
+  const _handleDeletePreset = useCallback((presetId: string) => {
     setPresets(prev => prev.filter(p => p.id !== presetId));
   }, []);
 
-  const handleExportPreset = useCallback((preset: PerformancePreset) => {
-    const exportData = {
+  const _handleExportPreset = useCallback((preset: PerformancePreset) => {
+    const _exportData = {
       ...preset,
       assignments: Array.from(preset.assignments.entries()).map(([key, layers]) => ({
         key, layers: layers.map(l => ({ ...l, buffer: null })),
       })),
     };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const _blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const _url = URL.createObjectURL(blob);
+    const _a = document.createElement('a');
     a.href = url;
     a.download = `preset-${preset.name.toLowerCase().replace(/\s+/g, '-')}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, []);
 
-  const toggleKeyLock = useCallback((keyIndex: number) => {
+  const _toggleKeyLock = useCallback((keyIndex: number) => {
     setLockedKeys(prev => {
-      const newSet = new Set(prev);
+      const _newSet = new Set(prev);
       newSet.has(keyIndex) ? newSet.delete(keyIndex) : newSet.add(keyIndex);
       return newSet;
     });
   }, []);
 
-  const handleDuplicateKey = useCallback((fromKey: number, toKey: number) => {
-    const layers = assignments.get(fromKey);
+  const _handleDuplicateKey = useCallback((fromKey: number, toKey: number) => {
+    const _layers = assignments.get(fromKey);
     if (!layers) return;
     setAssignments(prev => {
-      const newMap = new Map(prev);
+      const _newMap = new Map(prev);
       newMap.set(toKey, [...layers]);
       return newMap;
     });
   }, [assignments]);
 
-  const clearAllAssignments = useCallback(() => {
+  const _clearAllAssignments = useCallback(() => {
     if (confirm('Clear all key assignments?')) setAssignments(new Map());
   }, []);
 
-  const applyEnvelopePreset = useCallback((preset: typeof envelopePreset) => {
+  const _applyEnvelopePreset = useCallback((preset: typeof envelopePreset) => {
     setEnvelopePreset(preset);
     setAssignments(prev => {
-      const newMap = new Map(prev);
+      const _newMap = new Map(prev);
       newMap.forEach((layers, key) => {
-        const updated = layers.map(layer => {
-          const envelopes = {
+        const _updated = layers.map(layer => {
+          const _envelopes = {
             pluck: { attack: 0.001, decay: 0.3, sustain: 0.1, release: 0.5 },
             pad: { attack: 0.5, decay: 0.3, sustain: 0.8, release: 1.5 },
             organ: { attack: 0.01, decay: 0, sustain: 1, release: 0.1 },
@@ -1011,18 +1011,18 @@ export function PianoKeys({
   // KEYBOARD LAYOUT
   // ========================================================================
 
-  const getKeyboardLayout = useMemo(() => {
+  const _getKeyboardLayout = useMemo(() => {
     const layout: Array<{ type: 'white' | 'black'; index: number; note: string }> = [];
-    for (let i = 0; i < 24; i++) {
-      const noteIndex = i % 12;
-      const note = PIANO_NOTES[noteIndex];
+    for (let _i = 0; i < 24; i++) {
+      const _noteIndex = i % 12;
+      const _note = PIANO_NOTES[noteIndex];
       layout.push({ type: note.includes('#') ? 'black' : 'white', index: i, note });
     }
     return layout;
   }, []);
 
-  const whiteKeys = useMemo(() => getKeyboardLayout.filter(k => k.type === 'white'), [getKeyboardLayout]);
-  const blackKeys = useMemo(() => getKeyboardLayout.filter(k => k.type === 'black'), [getKeyboardLayout]);
+  const _whiteKeys = useMemo(() => getKeyboardLayout.filter(k => k.type === 'white'), [getKeyboardLayout]);
+  const _blackKeys = useMemo(() => getKeyboardLayout.filter(k => k.type === 'black'), [getKeyboardLayout]);
 
   // ========================================================================
   // RENDER
@@ -1112,18 +1112,18 @@ export function PianoKeys({
                 style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 100%)' }}>
                 <div className="flex justify-center gap-0.5">
                   {whiteKeys.map((keyData, idx) => {
-                    const keyIndex = keyData.index;
-                    const note = keyData.note;
-                    const octave = 4 + Math.floor(keyIndex / 12);
-                    const layers = assignments.get(keyIndex) || [];
-                    const keyLabel = Object.entries(KEYBOARD_MAP).find(([, v]) => v === keyIndex)?.[0]?.toUpperCase() || '';
-                    const isActive = activeKeys.has(keyIndex);
-                    const currentVelocity = keyVelocities.get(keyIndex) || 0;
-                    const scaleIntervals = SCALES[scaleType]?.intervals ?? [];
-                    const isInScale = scaleIntervals.length > 0
+                    const _keyIndex = keyData.index;
+                    const _note = keyData.note;
+                    const _octave = 4 + Math.floor(keyIndex / 12);
+                    const _layers = assignments.get(keyIndex) || [];
+                    const _keyLabel = Object.entries(KEYBOARD_MAP).find(([, v]) => v === keyIndex)?.[0]?.toUpperCase() || '';
+                    const _isActive = activeKeys.has(keyIndex);
+                    const _currentVelocity = keyVelocities.get(keyIndex) || 0;
+                    const _scaleIntervals = SCALES[scaleType]?.intervals ?? [];
+                    const _isInScale = scaleIntervals.length > 0
                       ? scaleIntervals.includes((keyIndex - scaleRoot + 120) % 12)
                       : false;
-                    const nextKeyIsBlack = idx < whiteKeys.length - 1 &&
+                    const _nextKeyIsBlack = idx < whiteKeys.length - 1 &&
                       blackKeys.some(bk => bk.index === whiteKeys[idx + 1].index - 1);
 
                     return (
@@ -1150,8 +1150,8 @@ export function PianoKeys({
                 <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none">
                   <div className="flex gap-0.5">
                     {whiteKeys.map((whiteKey, idx) => {
-                      const nextWhiteKeyIndex = whiteKeys[idx + 1]?.index;
-                      const blackKeyBetween = blackKeys.find(bk => bk.index > whiteKey.index && bk.index < nextWhiteKeyIndex);
+                      const _nextWhiteKeyIndex = whiteKeys[idx + 1]?.index;
+                      const _blackKeyBetween = blackKeys.find(bk => bk.index > whiteKey.index && bk.index < nextWhiteKeyIndex);
 
                       return (
                         <div key={whiteKey.index} className="relative w-8 md:w-10">
@@ -1171,7 +1171,7 @@ export function PianoKeys({
                                 onTrigger={triggerKey}
                                 onLongPress={setKeyToEdit}
                                 isInScale={(() => {
-                                  const intervals = SCALES[scaleType]?.intervals ?? [];
+                                  const _intervals = SCALES[scaleType]?.intervals ?? [];
                                   return intervals.length > 0 ? intervals.includes((blackKeyBetween.index - scaleRoot + 120) % 12) : false;
                                 })()}
                               />
@@ -1907,8 +1907,8 @@ export function PianoKeys({
                             <SelectContent>
                               {Array.from({ length: 24 }).map((_, i) => {
                                 if (i === keyToEdit) return null;
-                                const note = PIANO_NOTES[i % 12];
-                                const octave = 4 + Math.floor(i / 12);
+                                const _note = PIANO_NOTES[i % 12];
+                                const _octave = 4 + Math.floor(i / 12);
                                 return (
                                   <SelectItem key={i} value={i.toString()}>
                                     {note}{octave}
@@ -1936,7 +1936,7 @@ export function PianoKeys({
                           variant="destructive"
                           size="sm"
                           onClick={() => {
-                            const newAssignments = new Map(assignments);
+                            const _newAssignments = new Map(assignments);
                             newAssignments.delete(keyToEdit);
                             setAssignments(newAssignments);
                             setKeyToEdit(null);

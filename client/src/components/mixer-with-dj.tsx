@@ -9,7 +9,7 @@ import { SpectrumAnalyzer } from "./SpectrumAnalyzer";
 import { VUMeter } from "./vumeter";
 import { Slider } from "@/components/ui/slider";
 import { defaultChannel } from "./utils";
-import { ChannelState, MasterState } from "./types";
+import type { ChannelState, MasterState } from "./types";
 
 export default function MixerWithDJ() {
   // same logic as before
@@ -34,20 +34,20 @@ export default function MixerWithDJ() {
   const [pitchSemitones, setPitchSemitones] = useState(0);
   const [crossfade, setCrossfade] = useState(0);
 
-  const updateChannel = useCallback((id: number, updates: Partial<ChannelState>) => {
+  const _updateChannel = useCallback((id: number, updates: Partial<ChannelState>) => {
     setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   }, []);
 
-  const duplicateChannel = (id: number) => {
+  const _duplicateChannel = (id: number) => {
     setChannels((prev) => {
-      const base = prev.find((c) => c.id === id);
+      const _base = prev.find((c) => c.id === id);
       if (!base) return prev;
-      const newId = Math.max(...prev.map((p) => p.id)) + 1;
+      const _newId = Math.max(...prev.map((p) => p.id)) + 1;
       return [...prev, { ...base, id: newId, name: `${base.name} Copy` }];
     });
   };
 
-  const deleteChannel = (id: number) => setChannels((prev) => prev.filter((c) => c.id !== id));
+  const _deleteChannel = (id: number) => setChannels((prev) => prev.filter((c) => c.id !== id));
 
   useEffect(() => {
     setChannels((prev) => prev.map((c) => ({ ...c, reverb: Math.round(filterVal * 50) })));

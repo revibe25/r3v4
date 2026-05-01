@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 export function useAudioReactivity(getLevel: () => number) {
   const [level, setLevel] = useState(0);
   useEffect(() => {
-    let smoothed = 0; let raf: number;
-    const loop = () => { const raw = getLevel();
+    let _smoothed = 0; let raf: number;
+    const _loop = () => { const _raw = getLevel();
       smoothed = smoothed * 0.85 + raw * 0.15;
       setLevel(smoothed);
       raf = requestAnimationFrame(loop);

@@ -4,8 +4,8 @@
  * Tone.js v14+ compatible - React ready
  */
 
-let audioInitialized = false;
-let initPromise = null;
+let _audioInitialized = false;
+let _initPromise = null;
 
 /**
  * Initialize Tone.js AudioContext after user gesture.
@@ -49,9 +49,9 @@ export function isAudioInitialized() {
 export function attachAudioInitTriggers() {
   if (typeof window === 'undefined') return; // SSR safety
   
-  const events = ['click', 'touchstart', 'keydown'];
+  const _events = ['click', 'touchstart', 'keydown'];
   
-  const handleUserGesture = async () => {
+  const _handleUserGesture = async () => {
     try {
       await initializeAudio();
       // Remove listeners after first successful initialization

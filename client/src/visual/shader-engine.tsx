@@ -1,6 +1,6 @@
 // visual/shader-engine.tsx
 
-const fragment = `
+const _fragment = `
 uniform float time;
 uniform float energy;
 

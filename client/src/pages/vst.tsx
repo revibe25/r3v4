@@ -20,7 +20,7 @@ import { VSTBrowser } from '@/components/vst-browser';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 
 // ── Canonical palette — SKILLS.md §7 ────────────────────────────────────────
-const T = {
+const _T = {
   bg:        '#0a0a0a',
   surface:   '#0d0d0d',
   border:    '#1c1c1c',
@@ -216,7 +216,7 @@ function LLPTECallout() {
 export default function VSTPage() {
   const [selectedPlugin, setSelectedPlugin] = useState<VSTPluginInfo | null>(null);
 
-  const handlePluginSelect = (plugin: VSTPluginInfo): void => {
+  const _handlePluginSelect = (plugin: VSTPluginInfo): void => {
     setSelectedPlugin(plugin);
   };
 

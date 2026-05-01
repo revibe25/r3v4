@@ -49,7 +49,7 @@ export async function saveSession(data: unknown): Promise<void> {
 
 export async function loadSession(): Promise<unknown | null> {
   try {
-    const entry = await db.sessions.get(AUTO_KEY);
+    const _entry = await db.sessions.get(AUTO_KEY);
     if (!entry) return null;
     return JSON.parse(entry.value);
   } catch {

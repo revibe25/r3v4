@@ -70,10 +70,10 @@ const MIDI_CMD = {
 } as const;
 
 function parseMessage(data: Uint8Array, deviceName: string): MIDIEvent {
-  const statusByte = data[0];
-  const isChannelMsg = statusByte < 0xF0;
+  const _statusByte = data[0];
+  const _isChannelMsg = statusByte < 0xF0;
 
-  const cmdByte = isChannelMsg ? statusByte & 0xF0 : statusByte;
+  const _cmdByte = isChannelMsg ? statusByte & 0xF0 : statusByte;
   const channel  = isChannelMsg ? (statusByte & 0x0F) + 1 : 0; // 1-indexed
 
   const base: MIDIEvent = {
@@ -86,7 +86,7 @@ function parseMessage(data: Uint8Array, deviceName: string): MIDIEvent {
 
   switch (cmdByte) {
     case MIDI_CMD.NOTE_ON: {
-      const vel = data[2];
+      const _vel = data[2];
       // Some devices send NOTE_ON with vel=0 as NOTE_OFF
       if (vel === 0) {
         return { ...base, type: 'noteOff', note: data[1], velocity: 0 };
@@ -102,8 +102,8 @@ function parseMessage(data: Uint8Array, deviceName: string): MIDIEvent {
 
     case MIDI_CMD.PITCH_BEND: {
       // 14-bit value, center = 8192
-      const raw = (data[2] << 7) | data[1];
-      const normalized = (raw - 8192) / 8192;
+      const _raw = (data[2] << 7) | data[1];
+      const _normalized = (raw - 8192) / 8192;
       return { ...base, type: 'pitchBend', pitchBend: normalized };
     }
 
@@ -132,7 +132,7 @@ function deviceFromPort(port: MIDIInput): MIDIDevice {
 }
 
 export function initMIDI(options: MIDIOptions): MIDIController {
-  const isSupported = typeof navigator !== 'undefined' && !!navigator.requestMIDIAccess;
+  const _isSupported = typeof navigator !== 'undefined' && !!navigator.requestMIDIAccess;
 
   if (!isSupported) {
     options.onError?.(new Error('Web MIDI API is not supported in this browser.'));
@@ -149,20 +149,20 @@ export function initMIDI(options: MIDIOptions): MIDIController {
     sysex = false,
   } = options;
 
-  const channelSet = new Set(channels);
+  const _channelSet = new Set(channels);
 
   // Returns a snapshot of currently connected inputs as MIDIDevice[]
-  const getDevices = (): MIDIDevice[] => {
+  const _getDevices = (): MIDIDevice[] => {
     if (!access) return [];
     const devices: MIDIDevice[] = [];
     access.inputs.forEach((input) => devices.push(deviceFromPort(input)));
     return devices;
   };
 
-  const handleMessage = (input: MIDIInput) => (msg: MIDIMessageEvent) => {
+  const _handleMessage = (input: MIDIInput) => (msg: MIDIMessageEvent) => {
     if (!msg.data || msg.data.length === 0) return;
 
-    const event = parseMessage(msg.data, input.name ?? 'Unknown');
+    const _event = parseMessage(msg.data, input.name ?? 'Unknown');
 
     // Channel filter — skip if we're filtering and this channel isn't in the set
     if (channelSet.size > 0 && event.channel > 0 && !channelSet.has(event.channel)) return;
@@ -188,7 +188,7 @@ export function initMIDI(options: MIDIOptions): MIDIController {
   };
 
   // Attach listeners to all current inputs
-  const bindInputs = () => {
+  const _bindInputs = () => {
     if (!access) return;
     access.inputs.forEach((input) => {
       input.onmidimessage = handleMessage(input);
@@ -196,7 +196,7 @@ export function initMIDI(options: MIDIOptions): MIDIController {
   };
 
   // Re-bind when devices are added/removed
-  const handleStateChange = () => {
+  const _handleStateChange = () => {
     bindInputs();
     onDeviceChange?.(getDevices());
   };
@@ -207,11 +207,11 @@ export function initMIDI(options: MIDIOptions): MIDIController {
     bindInputs();
     onDeviceChange?.(getDevices());
   }).catch((err: unknown) => {
-    const error = err instanceof Error ? err : new Error(String(err));
+    const _error = err instanceof Error ? err : new Error(String(err));
     onError?.(error);
   });
 
-  const destroy = () => {
+  const _destroy = () => {
     if (!access) return;
     access.inputs.forEach((input) => { input.onmidimessage = null; });
     access.onstatechange = null;

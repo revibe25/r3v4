@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { KnobProps } from "./types";
+import type { KnobProps } from "./types";
 
 export function Knob({
   value,
@@ -14,13 +14,13 @@ export function Knob({
 }: KnobProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const startYRef = useRef(0);
-  const startValueRef = useRef(0);
+  const _startYRef = useRef(0);
+  const _startValueRef = useRef(0);
 
-  const normalizedValue = (value - min) / (max - min || 1);
-  const rotation = -135 + normalizedValue * 270;
+  const _normalizedValue = (value - min) / (max - min || 1);
+  const _rotation = -135 + normalizedValue * 270;
 
-  const handlePointerDown = (e: React.PointerEvent) => {
+  const _handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     startYRef.current = e.clientY;
     startValueRef.current = value;
@@ -28,27 +28,27 @@ export function Knob({
     e.preventDefault();
   };
 
-  const handlePointerMove = (ev: PointerEvent) => {
+  const _handlePointerMove = (ev: PointerEvent) => {
     if (!isDragging) return;
-    const deltaY = startYRef.current - ev.clientY;
-    const range = max - min;
-    const sensitivity = (range || 1) / 150;
-    let newValue = startValueRef.current + deltaY * sensitivity;
+    const _deltaY = startYRef.current - ev.clientY;
+    const _range = max - min;
+    const _sensitivity = (range || 1) / 150;
+    let _newValue = startValueRef.current + deltaY * sensitivity;
     newValue = Math.min(max, Math.max(min, newValue));
     if (step) newValue = Math.round(newValue / step) * step;
     onChange(newValue);
   };
 
-  const handlePointerUp = (ev: PointerEvent) => {
+  const _handlePointerUp = (ev: PointerEvent) => {
     setIsDragging(false);
     (ev.target as Element).releasePointerCapture?.((ev as any).pointerId);
   };
 
-  const handleDoubleClick = () => onChange(defaultValue);
+  const _handleDoubleClick = () => onChange(defaultValue);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    const range = max - min;
-    const keyStep = step || range / 100;
+  const _handleKeyDown = (e: React.KeyboardEvent) => {
+    const _range = max - min;
+    const _keyStep = step || range / 100;
     switch (e.key) {
       case "ArrowUp":
       case "ArrowRight":

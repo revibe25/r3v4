@@ -1,5 +1,5 @@
 import * as Tone from 'tone';
-import { ReverbParams } from '@shared/effects.types';
+import type { ReverbParams } from '@shared/effects.types';
 
 export class ReverbEffect {
   private reverb: Tone.Reverb;

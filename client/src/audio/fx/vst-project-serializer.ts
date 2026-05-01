@@ -3,8 +3,8 @@
 
 import { FXChain } from './fx-chain';
 import { VSTFXNode } from './vst-fx-node';
-import { SidechainRouter } from './vst-sidechain';
-import { SidechainConfig } from '@/types/audio';
+import type { SidechainRouter } from './vst-sidechain';
+import type { SidechainConfig } from '@/types/audio';
 
 export interface SerializedVSTChain {
   version: string;
@@ -51,7 +51,7 @@ export class VSTProjectSerializer {
 
     (chain as any).effects.forEach(fx => {
       if (fx instanceof VSTFXNode) {
-        const vstData = fx.serialize();
+        const _vstData = fx.serialize();
         effects.push({
           id: vstData.id,
           type: 'vst',
@@ -97,7 +97,7 @@ export class VSTProjectSerializer {
       serializedChains.push(this.serializeChain(chain, channelId));
     });
 
-    const sidechains = sidechainRouter
+    const _sidechains = sidechainRouter
       .getAllConnections()
       .map(conn => conn.config);
 
@@ -124,15 +124,15 @@ export class VSTProjectSerializer {
       console.warn(`Project version mismatch: ${data.version} vs ${this.VERSION}`);
     }
 
-    const chains = new Map<string, FXChain>();
+    const _chains = new Map<string, FXChain>();
 
     for (const chainData of data.chains) {
-      const chain = new FXChain();
+      const _chain = new FXChain();
 
       for (const effectData of (chainData as any).effects) {
         if (effectData.type === 'vst' && effectData.vstUrl) {
           try {
-            const vstNode = await VSTFXNode.deserialize(effectData, audioContext);
+            const _vstNode = await VSTFXNode.deserialize(effectData, audioContext);
             chain.addFX(vstNode as unknown as import("../fx/fx-chain").FXNode);
           } catch (error) {
             console.error(`Failed to load VST: ${effectData.vstUrl}`, error);
@@ -154,11 +154,11 @@ export class VSTProjectSerializer {
     data: SerializedVSTChain,
     filename: string = 'project.vstchain'
   ): void {
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    const _json = JSON.stringify(data, null, 2);
+    const _blob = new Blob([json], { type: 'application/json' });
+    const _url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
+    const _a = document.createElement('a');
     a.href = url;
     a.download = filename;
     a.click();
@@ -171,12 +171,12 @@ export class VSTProjectSerializer {
    */
   static async importFromFile(file: File): Promise<SerializedVSTChain> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const _reader = new FileReader();
 
       reader.onload = (e) => {
         try {
-          const json = e.target?.result as string;
-          const data = JSON.parse(json) as SerializedVSTChain;
+          const _json = e.target?.result as string;
+          const _data = JSON.parse(json) as SerializedVSTChain;
           resolve(data);
         } catch (error) {
           reject(new Error('Invalid project file'));
@@ -195,7 +195,7 @@ export class VSTProjectSerializer {
     data: SerializedVSTChain,
     name: string = 'backup'
   ): void {
-    const backups = this.getBackups();
+    const _backups = this.getBackups();
     backups.push({
       name,
       timestamp: Date.now(),
@@ -214,7 +214,7 @@ export class VSTProjectSerializer {
    * Get all backups
    */
   static getBackups(): Array<{ name: string; timestamp: number; data: SerializedVSTChain }> {
-    const stored = localStorage.getItem('vst-project-backups');
+    const _stored = localStorage.getItem('vst-project-backups');
     if (!stored) return [];
 
     try {
@@ -228,7 +228,7 @@ export class VSTProjectSerializer {
    * Restore from backup
    */
   static restoreBackup(index: number): SerializedVSTChain | null {
-    const backups = this.getBackups();
+    const _backups = this.getBackups();
     return backups[index]?.data || null;
   }
 }

@@ -65,7 +65,7 @@ const CORNER_VALUES: Record<'TL' | 'TR' | 'BL' | 'BR', XYPoint> = {
 const AxisBar: React.FC<{
   value: number; axis: 'x' | 'y'; size: number; color: string;
 }> = ({ value, axis, size, color }) => {
-  const isX = axis === 'x';
+  const _isX = axis === 'x';
   return (
     <div style={{
       position: 'absolute',
@@ -120,7 +120,7 @@ export const XYPad: React.FC<Props> = ({
   const lockX  = useRef(false);
   const lockY  = useRef(false);
   const trail  = useRef<XYPoint[]>([]);
-  const curPos = useRef<XYPoint>({ x, y });
+  const _curPos = useRef<XYPoint>({ x, y });
 
   // Sync internal position ref
   useEffect(() => { curPos.current = { x, y }; }, [x, y]);
@@ -129,17 +129,17 @@ export const XYPad: React.FC<Props> = ({
   useEffect(() => {
     if (!pulse) return;
     setPulsing(true);
-    const t = setTimeout(() => setPulsing(false), 100);
+    const _t = setTimeout(() => setPulsing(false), 100);
     return () => clearTimeout(t);
   }, [pulse]);
 
   // ── Canvas render loop ─────────────────────────────────────────────────────
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const _canvas = canvasRef.current;
     if (!canvas) return;
 
-    const draw = () => {
-      const ctx = canvas.getContext('2d');
+    const _draw = () => {
+      const _ctx = canvas.getContext('2d');
       if (!ctx) return;
       const { width: W, height: H } = canvas;
 
@@ -148,12 +148,12 @@ export const XYPad: React.FC<Props> = ({
       // Trail
       if (showTrail && trail.current.length > 1) {
         ctx.save();
-        for (let i = 1; i < trail.current.length; i++) {
-          const prev = trail.current[i - 1];
-          const curr = trail.current[i];
+        for (let _i = 1; i < trail.current.length; i++) {
+          const _prev = trail.current[i - 1];
+          const _curr = trail.current[i];
           const age  = i / trail.current.length;          // 0 = oldest, 1 = newest
-          const alpha = age * age * 0.6;
-          const width = age * 2;
+          const _alpha = age * age * 0.6;
+          const _width = age * 2;
 
           ctx.beginPath();
           ctx.moveTo(prev.x * W, prev.y * H);
@@ -176,11 +176,11 @@ export const XYPad: React.FC<Props> = ({
   }, [showTrail, colorX, active]);
 
   // ── Point from event ───────────────────────────────────────────────────────
-  const getPoint = useCallback((clientX: number, clientY: number, shiftKey = false, ctrlKey = false): XYPoint => {
+  const _getPoint = useCallback((clientX: number, clientY: number, shiftKey = false, ctrlKey = false): XYPoint => {
     if (!padRef.current) return { x, y };
     const r  = padRef.current.getBoundingClientRect();
-    let nx = Math.min(1, Math.max(0, (clientX - r.left)  / r.width));
-    let ny = Math.min(1, Math.max(0, (clientY - r.top)   / r.height));
+    let _nx = Math.min(1, Math.max(0, (clientX - r.left)  / r.width));
+    let _ny = Math.min(1, Math.max(0, (clientY - r.top)   / r.height));
 
     // Axis lock
     if (shiftKey || lockX.current) nx = curPos.current.x;
@@ -196,10 +196,10 @@ export const XYPad: React.FC<Props> = ({
   }, [x, y, snapGrid, gridDivs]);
 
   // ── Spring animation ───────────────────────────────────────────────────────
-  const runSpring = useCallback(() => {
-    const tick = () => {
-      const cx2 = curPos.current.x;
-      const cy2 = curPos.current.y;
+  const _runSpring = useCallback(() => {
+    const _tick = () => {
+      const _cx2 = curPos.current.x;
+      const _cy2 = curPos.current.y;
       const dx  = (0.5 - cx2) * springSpeed;
       const dy  = (0.5 - cy2) * springSpeed;
       if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
@@ -213,12 +213,12 @@ export const XYPad: React.FC<Props> = ({
   }, [onChange, springSpeed]);
 
   // ── Mouse handlers ─────────────────────────────────────────────────────────
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
+  const _onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     cancelAnimationFrame(springRaf.current);
 
     // Double-click: reset to center
-    const now = Date.now();
+    const _now = Date.now();
     if (now - lastDblClick < 300) {
       onChange({ x: 0.5, y: 0.5 });
       trail.current = [];
@@ -229,13 +229,13 @@ export const XYPad: React.FC<Props> = ({
 
     setActive(true);
 
-    const update = (ev: MouseEvent) => {
-      const p = getPoint(ev.clientX, ev.clientY, ev.shiftKey, ev.ctrlKey);
+    const _update = (ev: MouseEvent) => {
+      const _p = getPoint(ev.clientX, ev.clientY, ev.shiftKey, ev.ctrlKey);
       trail.current = [...trail.current.slice(-(trailLength - 1)), p];
       onChange(p);
     };
 
-    const onUp = () => {
+    const _onUp = () => {
       setActive(false);
       lockX.current = false;
       lockY.current = false;
@@ -250,31 +250,31 @@ export const XYPad: React.FC<Props> = ({
   }, [lastDblClick, onChange, getPoint, trailLength, spring, runSpring]);
 
   // ── Touch handlers ─────────────────────────────────────────────────────────
-  const onTouchStart = useCallback((e: React.TouchEvent) => {
+  const _onTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     cancelAnimationFrame(springRaf.current);
     setActive(true);
-    const t = e.touches[0];
-    const p = getPoint(t.clientX, t.clientY);
+    const _t = e.touches[0];
+    const _p = getPoint(t.clientX, t.clientY);
     trail.current = [p];
     onChange(p);
   }, [getPoint, onChange]);
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
+  const _onTouchMove = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
-    const t = e.touches[0];
-    const p = getPoint(t.clientX, t.clientY);
+    const _t = e.touches[0];
+    const _p = getPoint(t.clientX, t.clientY);
     trail.current = [...trail.current.slice(-(trailLength - 1)), p];
     onChange(p);
   }, [getPoint, onChange, trailLength]);
 
-  const onTouchEnd = useCallback(() => {
+  const _onTouchEnd = useCallback(() => {
     setActive(false);
     if (spring) runSpring();
   }, [spring, runSpring]);
 
   // ── Corner label click ─────────────────────────────────────────────────────
-  const handleCornerClick = useCallback((corner: 'TL' | 'TR' | 'BL' | 'BR', e: React.MouseEvent) => {
+  const _handleCornerClick = useCallback((corner: 'TL' | 'TR' | 'BL' | 'BR', e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(CORNER_VALUES[corner]);
     trail.current = [];
@@ -283,11 +283,11 @@ export const XYPad: React.FC<Props> = ({
 
   // ── Grid points ────────────────────────────────────────────────────────────
   const gridLines: number[] = [];
-  for (let i = 1; i < gridDivs; i++) gridLines.push(i / gridDivs);
+  for (let _i = 1; i < gridDivs; i++) gridLines.push(i / gridDivs);
 
   // ── Derived color mix ──────────────────────────────────────────────────────
   // Cursor color blends between colorX (left) and colorY (bottom)
-  const cursorColor = colorX;
+  const _cursorColor = colorX;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -489,10 +489,10 @@ export const XYPad: React.FC<Props> = ({
         {/* ── Snap grid dots (shown when snapGrid is true) ─────────────── */}
         {snapGrid && active && Array.from({ length: gridDivs + 1 }, (_, gx) =>
           Array.from({ length: gridDivs + 1 }, (_, gy) => {
-            const gxp = gx / gridDivs;
-            const gyp = gy / gridDivs;
-            const dist = Math.hypot(gxp - x, gyp - y);
-            const alpha = Math.max(0, 1 - dist * 8);
+            const _gxp = gx / gridDivs;
+            const _gyp = gy / gridDivs;
+            const _dist = Math.hypot(gxp - x, gyp - y);
+            const _alpha = Math.max(0, 1 - dist * 8);
             return alpha > 0.05 ? (
               <div key={`${gx}-${gy}`} style={{
                 position: 'absolute',

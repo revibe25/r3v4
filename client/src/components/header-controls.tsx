@@ -52,7 +52,7 @@ const THEMES: Record<string, { label: string; description: string }> = {
 };
 
 // ─── Design tokens — mirrors waveform-editor.tsx exactly ──────────────────────
-const S = {
+const _S = {
   bg:         '#000000',
   bgPanel:    '#0c0c0c',
   border:     '#222',
@@ -64,7 +64,7 @@ const S = {
 } as const;
 
 // Tiny reusable styled button (matches waveform-editor ghost button pattern)
-const BarButton = React.forwardRef<
+const _BarButton = React.forwardRef<
   HTMLButtonElement,
   {
     onClick: () => void;
@@ -72,7 +72,7 @@ const BarButton = React.forwardRef<
     children: React.ReactNode;
     title?: string;
   }
->(function BarButton({ onClick, active = false, children, title }, ref) {
+>(function BarButton({ onClick, active = false, children, title }, _ref) {
   return (
     <button
       ref={ref}
@@ -98,7 +98,7 @@ const BarButton = React.forwardRef<
   );
 });
 
-const tipStyle = {
+const _tipStyle = {
   background:   '#0c0c0c',
   border:       '1px solid #222',
   borderRadius: 0,
@@ -108,7 +108,7 @@ const tipStyle = {
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-export const HeaderControls = memo(function HeaderControls({
+export const _HeaderControls = memo(function HeaderControls({
   bpm,
   onBpmChange,
   metronomeOn,
@@ -118,7 +118,7 @@ export const HeaderControls = memo(function HeaderControls({
   getSessionData,
 }: HeaderControlsProps) {
   const { theme, setTheme, themes, themeMetadata } = useTheme();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const _fileInputRef = useRef<HTMLInputElement>(null);
   const [saveDialogOpen, setSaveDialogOpen]         = useState(false);
   const [loadDialogOpen, setLoadDialogOpen]         = useState(false);
   const [sessionName, setSessionName]               = useState('');
@@ -135,14 +135,14 @@ export const HeaderControls = memo(function HeaderControls({
   });
 
   // TanStack v5 — no onError in useQuery; handle via isError
-  const prevErr = useRef(false);
+  const _prevErr = useRef(false);
   if (sessionsError && !prevErr.current) {
     prevErr.current = true;
     toast({ title: 'Sessions unavailable', variant: 'default' });
   }
   if (!sessionsError) prevErr.current = false;
 
-  const createSessionMutation = useMutation({
+  const _createSessionMutation = useMutation({
     mutationFn: async (data: any) =>
       apiRequest('POST', '/api/sessions', data).then(r => r.json()),
     onSuccess: () => {
@@ -155,7 +155,7 @@ export const HeaderControls = memo(function HeaderControls({
     onError: () => toast({ title: 'Save failed', variant: 'destructive' }),
   });
 
-  const filteredSessions = useMemo(
+  const _filteredSessions = useMemo(
     () => sessions.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())),
     [sessions, searchQuery],
   );
@@ -163,8 +163,8 @@ export const HeaderControls = memo(function HeaderControls({
   const ThemeIcon  = THEME_ICONS[theme] ?? Moon;
   const msPerBeat  = useMemo(() => (60_000 / bpm).toFixed(0), [bpm]);
 
-  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const _handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const _file = e.target.files?.[0];
     if (!file) return;
     try {
       onLoad(await file.text());
@@ -176,11 +176,11 @@ export const HeaderControls = memo(function HeaderControls({
     }
   }, [onLoad, toast]);
 
-  const handleThemeChange = useCallback((t: string) => {
+  const _handleThemeChange = useCallback((t: string) => {
     if (themes.includes(t as any)) setTheme(t as any);
   }, [themes, setTheme]);
 
-  const handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
+  const _handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -335,7 +335,7 @@ export const HeaderControls = memo(function HeaderControls({
                 {themes.map(t => {
                   const Icon   = THEME_ICONS[t] ?? Moon;
                   const meta   = THEMES[t] ?? {};
-                  const active = t === theme;
+                  const _active = t === theme;
                   return (
                     <DropdownMenuRadioItem
                       key={t}

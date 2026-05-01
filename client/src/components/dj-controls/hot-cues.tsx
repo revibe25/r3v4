@@ -6,7 +6,7 @@
 import { ReverbEffect } from '../../audio/effects/reverb';
 import { DelayEffect } from '../../audio/effects/delay';
 import { FilterEffect } from '../../audio/effects/filter';
-import { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
+import type { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -100,11 +100,11 @@ const EffectNode: React.FC<EffectNodeProps> = ({
 };
 
 // TODO: Implement ReverbControls, DelayControls, etc.
-const ReverbControls = ({ params, onChange }: any) => (
+const _ReverbControls = ({ params, onChange }: any) => (
   <div className="text-xs text-muted-foreground">Reverb controls coming...</div>
 );
 
-const DelayControls = ({ params, onChange }: any) => (
+const _DelayControls = ({ params, onChange }: any) => (
   <div className="text-xs text-muted-foreground">Delay controls coming...</div>
 );
 
@@ -119,7 +119,7 @@ interface CrossfaderProps {
 }
 
 export const Crossfader: React.FC<CrossfaderProps> = ({ state, onChange }) => {
-  const handleChange = useCallback(
+  const _handleChange = useCallback(
     (values: number[]) => {
       onChange(values[0]);
     },
@@ -170,7 +170,7 @@ export const Crossfader: React.FC<CrossfaderProps> = ({ state, onChange }) => {
 // src/components/dj-controls/hot-cues.tsx
 // ============================================================================
 
-import { HotCue } from '@shared/dj.types';
+import type { HotCue } from '@shared/dj.types';
 import { cn } from '@/lib/utils';
 
 interface HotCuesProps {
@@ -246,13 +246,13 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   onSelectionChange,
   currentPosition,
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const _canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current || !audioBuffer) return;
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const _canvas = canvasRef.current;
+    const _ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Clear canvas
@@ -267,45 +267,45 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     // Draw selection
     if (selection.isActive) {
       ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-      const startX = selection.start * state.config.pixelsPerSecond;
-      const endX = selection.end * state.config.pixelsPerSecond;
+      const _startX = selection.start * state.config.pixelsPerSecond;
+      const _endX = selection.end * state.config.pixelsPerSecond;
       ctx.fillRect(startX, 0, endX - startX, canvas.height);
     }
 
     // Draw playhead
     ctx.strokeStyle = state.config.progressColor;
     ctx.lineWidth = 2;
-    const playheadX = currentPosition * state.config.pixelsPerSecond;
+    const _playheadX = currentPosition * state.config.pixelsPerSecond;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
     ctx.lineTo(playheadX, canvas.height);
     ctx.stroke();
   }, [audioBuffer, state, selection, currentPosition]);
 
-  const drawWaveform = (
+  const _drawWaveform = (
     ctx: CanvasRenderingContext2D,
     buffer: AudioBuffer,
     state: unknown
   ) => {
-    const rawData = buffer.getChannelData(0);
-    const samples = rawData.length;
-    const blockSize = Math.floor(samples / (state.config.width * state.config.pixelsPerSecond));
+    const _rawData = buffer.getChannelData(0);
+    const _samples = rawData.length;
+    const _blockSize = Math.floor(samples / (state.config.width * state.config.pixelsPerSecond));
 
     ctx.beginPath();
     ctx.moveTo(0, state.config.height / 2);
 
-    for (let i = 0; i < samples; i += blockSize) {
-      const blockEnd = Math.min(i + blockSize, samples);
-      let sum = 0;
+    for (let _i = 0; i < samples; i += blockSize) {
+      const _blockEnd = Math.min(i + blockSize, samples);
+      let _sum = 0;
 
-      for (let j = i; j < blockEnd; j++) {
+      for (let _j = i; j < blockEnd; j++) {
         sum += Math.abs(rawData[j]);
       }
 
-      const avg = sum / (blockEnd - i);
-      const canvasHeight = avg * state.config.height;
-      const x = (i / blockSize / state.config.pixelsPerSecond) % state.config.width;
-      const y = state.config.height / 2 - canvasHeight / 2;
+      const _avg = sum / (blockEnd - i);
+      const _canvasHeight = avg * state.config.height;
+      const _x = (i / blockSize / state.config.pixelsPerSecond) % state.config.width;
+      const _y = state.config.height / 2 - canvasHeight / 2;
 
       ctx.lineTo(x, y);
     }
@@ -321,9 +321,9 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         height={state.config.height}
         className="w-full cursor-crosshair"
         onMouseDown={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const startTime = x / state.config.pixelsPerSecond;
+          const _rect = e.currentTarget.getBoundingClientRect();
+          const _x = e.clientX - rect.left;
+          const _startTime = x / state.config.pixelsPerSecond;
           onSelectionChange(startTime, startTime);
         }}
       />

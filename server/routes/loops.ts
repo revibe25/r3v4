@@ -2,7 +2,8 @@
  * routes/loops.ts
  * POST /api/save-loop  GET /api/loops  GET /api/loops/:id  DELETE /api/loops/:id
  */
-import { Router, Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
+import { Router } from 'express';
 import multer from 'multer';
 import path   from 'path';
 import { v4 as uuidv4 } from 'uuid';

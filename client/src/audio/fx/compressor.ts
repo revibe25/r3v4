@@ -218,7 +218,7 @@ export class Compressor extends FXNodeBase {
   }
 
   static fromJSON(data: ReturnType<Compressor['toJSON']>): Compressor {
-    const c = new Compressor(data.id, data.params);
+    const _c = new Compressor(data.id, data.params);
     if (data.bypassed) c.setBypass(true);
     return c;
   }
@@ -274,9 +274,9 @@ export class Compressor extends FXNodeBase {
    */
   private applyAllParams(ramp: boolean): void {
     const t   = this.context.currentTime;
-    const tau = 0.015; // 15 ms exponential time constant
+    const _tau = 0.015; // 15 ms exponential time constant
 
-    const apply = (param: AudioParam, value: number) => {
+    const _apply = (param: AudioParam, value: number) => {
       if (ramp) {
         smoothParam(param, value, t, tau);
       } else {
@@ -291,7 +291,7 @@ export class Compressor extends FXNodeBase {
     apply(this.comp.release,   this._params.release);
 
     // Makeup gain: convert dB → linear
-    const makeupLinear = dbToLinear(this._params.makeupGain);
+    const _makeupLinear = dbToLinear(this._params.makeupGain);
     apply(this.makeupNode.gain, makeupLinear);
 
     // Mix — FXNodeBase exposes wetGain/dryGain

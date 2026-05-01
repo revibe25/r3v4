@@ -11,7 +11,7 @@ export type {
   BillingCycle,
 } from '../../../../shared/subscription.types';
 
-export const COLOR = {
+export const _COLOR = {
   // ── Backgrounds — matches instrument shell exactly ──────────────────────
   bgBase:    "#060606",
   bgSurface: "#0a0a0a",

@@ -8,7 +8,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../hooks/authStore';
 import { PageNav } from '../components/page-nav';
 
-const T = {
+const _T = {
   bg: '#060606', surface: '#0d0d0d', border: '#1c1c1c',
   acid: '#a3e635',
   amber: '#f59e0b', cyan: '#22d3ee', red: '#ef4444',
@@ -25,9 +25,9 @@ interface AdminStats {
 }
 
 function formatUptime(s: number) {
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
+  const _h = Math.floor(s / 3600);
+  const _m = Math.floor((s % 3600) / 60);
+  const _sec = s % 60;
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
@@ -62,20 +62,20 @@ function Section({ label }: { label:string }) {
 }
 
 export default function AdminPage() {
-  const token = useAuthStore(s => s.token);
+  const _token = useAuthStore(s => s.token);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastPoll, setLastPoll] = useState('');
   const [pollCount, setPollCount] = useState(0);
 
-  const poll = useCallback(async () => {
+  const _poll = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/admin/stats', {
+      const _res = await fetch('/api/admin/stats', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
+        const _d = await res.json().catch(() => ({}));
         setError(d.error ?? `HTTP ${res.status}`);
         return;
       }
@@ -86,9 +86,9 @@ export default function AdminPage() {
     } catch { setError('Network error'); }
   }, [token]);
 
-  useEffect(() => { poll(); const id = setInterval(poll, 5000); return () => clearInterval(id); }, [poll]);
+  useEffect(() => { poll(); const _id = setInterval(poll, 5000); return () => clearInterval(id); }, [poll]);
 
-  const dbOk = stats?.db.status === 'ok';
+  const _dbOk = stats?.db.status === 'ok';
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100vh',
