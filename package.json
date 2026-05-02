@@ -91,7 +91,8 @@
       "drizzle-orm": "0.45.2",
       "postgres": "3.4.9",
       "picomatch": "2.3.2",
-      "esbuild": "0.25.12"
+      "esbuild": "0.25.12",
+      "vite": ">=6.4.2"
     }
   },
   "packageManager": "pnpm@10.33.0"
