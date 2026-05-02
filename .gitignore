@@ -97,3 +97,4 @@ archives/*.zip
 client/public/sounds/
 .docs-backup-*/
 .fix-backup-*/
+client/MYTHOS_AUDIT.*.txt
