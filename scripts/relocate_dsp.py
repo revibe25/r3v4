@@ -109,7 +109,7 @@ if not DRY_RUN and os.path.exists(core_path):
         target = os.path.join(DSP_DST, imp + ".ts")
         exists = os.path.exists(target)
         status = "✓" if exists else "✗ MISSING"
-        log(f"  ./{{imp}} → {{status}}")
+        log(f"  ./{imp} → {status}")
         if not exists: all_ok = False
     if not all_ok:
         print("\nERROR: unresolved imports after relocation — check manually")
