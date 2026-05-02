@@ -17,6 +17,7 @@ export class GainComputer {
     this.lde = new LDE(sampleRate, 'hybrid');
   }
   setTargetDb(db: number) { this.config.targetDb = db; }
+  reset() { this.currentGainDb = 0; this.lde.reset(); }
 
   apply(block: Float32Array): Float32Array {
     // 1. Compute level
