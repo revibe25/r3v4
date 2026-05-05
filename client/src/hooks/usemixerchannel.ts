@@ -78,8 +78,8 @@ export function useMixerChannel(
   const [effects, setEffects] = useState<AudioEffect[]>([]);
 
   // Refs
-  const _animationFrameRef = useRef<number>();
-  const _vuUpdateIntervalRef = useRef<number>();
+  const animationFrameRef = useRef<number>();
+  const vuUpdateIntervalRef = useRef<number>();
 
   /**
    * Initialize channel
@@ -143,10 +143,10 @@ export function useMixerChannel(
   /**
    * Set channel volume
    */
-  const _setVolume = useCallback((value: number) => {
+  const setVolume = useCallback((value: number) => {
     if (!channel) return;
 
-    const _clampedValue = Math.max(0, Math.min(1, value));
+    const clampedValue = Math.max(0, Math.min(1, value));
     channel.setVolume(clampedValue);
     setVolumeState(clampedValue);
     onVolumeChange?.(clampedValue);
@@ -155,10 +155,10 @@ export function useMixerChannel(
   /**
    * Set channel pan
    */
-  const _setPan = useCallback((value: number) => {
+  const setPan = useCallback((value: number) => {
     if (!channel) return;
 
-    const _clampedValue = Math.max(-1, Math.min(1, value));
+    const clampedValue = Math.max(-1, Math.min(1, value));
     channel.setPan(clampedValue);
     setPanState(clampedValue);
     onPanChange?.(clampedValue);
@@ -167,7 +167,7 @@ export function useMixerChannel(
   /**
    * Set channel mute
    */
-  const _setMute = useCallback((muted: boolean) => {
+  const setMute = useCallback((muted: boolean) => {
     if (!channel) return;
 
     channel.setMute(muted);
@@ -178,7 +178,7 @@ export function useMixerChannel(
   /**
    * Set channel solo
    */
-  const _setSolo = useCallback((solo: boolean) => {
+  const setSolo = useCallback((solo: boolean) => {
     if (!channel) return;
 
     channel.setSolo(solo);
@@ -189,7 +189,7 @@ export function useMixerChannel(
   /**
    * Add effect to channel
    */
-  const _addEffect = useCallback((effect: AudioEffect) => {
+  const addEffect = useCallback((effect: AudioEffect) => {
     if (!channel) return;
 
     try {
@@ -203,7 +203,7 @@ export function useMixerChannel(
   /**
    * Remove effect from channel
    */
-  const _removeEffect = useCallback((effectId: string) => {
+  const removeEffect = useCallback((effectId: string) => {
     if (!channel) return;
 
     try {
@@ -217,7 +217,7 @@ export function useMixerChannel(
   /**
    * Cleanup function
    */
-  const _cleanup = useCallback(() => {
+  const cleanup = useCallback(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -258,7 +258,7 @@ export function useCreateMixerChannel(
   useEffect(() => {
     // Import and create channel
     import('@/audio/mixer/mixer-channel').then(({ MixerChannel }) => {
-      const _newChannel = new MixerChannel(config.id);
+      const newChannel = new MixerChannel(config.id);
       
       // Apply config
       if (config.name) newChannel.name = config.name;

@@ -25,12 +25,12 @@ export class SidechainRouterState {
     sourceNode: AudioNode,
     targetVST: VSTFXNode
   ): string {
-    const _connectionId = `${config.sourceChannelId}_to_${config.targetVSTId}`;
+    const connectionId = `${config.sourceChannelId}_to_${config.targetVSTId}`;
 
-    const _sidechainGain = this.audioContext.createGain();
+    const sidechainGain = this.audioContext.createGain();
     sidechainGain.gain.setTargetAtTime(config.gainCompensation, this.audioContext.currentTime, 0.015);
 
-    const _analyzer = this.audioContext.createAnalyser();
+    const analyzer = this.audioContext.createAnalyser();
     analyzer.fftSize = 2048;
 
     sourceNode.connect(sidechainGain);
@@ -56,21 +56,21 @@ export class SidechainRouterState {
   }
 
   enableConnection(connectionId: string): void {
-    const _connection = this.connections.get(connectionId);
+    const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.enabled = true;
     connection.sidechainGain.gain.setTargetAtTime(connection.config.gainCompensation, this.audioContext.currentTime, 0.015);
   }
 
   disableConnection(connectionId: string): void {
-    const _connection = this.connections.get(connectionId);
+    const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.enabled = false;
     connection.sidechainGain.gain.setTargetAtTime(0, this.audioContext.currentTime, 0.015);
   }
 
   removeConnection(connectionId: string): void {
-    const _connection = this.connections.get(connectionId);
+    const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.sidechainGain.disconnect();
     connection.analyzer.disconnect();
@@ -78,15 +78,15 @@ export class SidechainRouterState {
   }
 
   getSidechainLevel(connectionId: string): number {
-    const _connection = this.connections.get(connectionId);
+    const connection = this.connections.get(connectionId);
     if (!connection) return 0;
 
-    const _dataArray = new Uint8Array(connection.analyzer.frequencyBinCount);
+    const dataArray = new Uint8Array(connection.analyzer.frequencyBinCount);
     connection.analyzer.getByteTimeDomainData(dataArray);
 
-    let _sum = 0;
-    for (let _i = 0; i < dataArray.length; i++) {
-      const _normalized = (dataArray[i] - 128) / 128;
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      const normalized = (dataArray[i] - 128) / 128;
       sum += normalized * normalized;
     }
 
@@ -94,7 +94,7 @@ export class SidechainRouterState {
   }
 
   setSidechainGain(connectionId: string, gain: number): void {
-    const _connection = this.connections.get(connectionId);
+    const connection = this.connections.get(connectionId);
     if (!connection) return;
     connection.config.gainCompensation = gain;
     if (connection.enabled) {

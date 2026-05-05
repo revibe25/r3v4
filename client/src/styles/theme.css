@@ -15,3 +15,154 @@
 .neon-panel { background: var(--panel); border: 1px solid var(--neon-lime); box-shadow: var(--glow-sm);}
 @keyframes neonPulse {0%,100%{box-shadow:var(--glow-sm);}50%{box-shadow:var(--glow-lg);}}
 .neon-pulse { animation: neonPulse 2s infinite ease-in-out; }
+/* ─────────────────────────────────────────────────────────────────────────────
+   P0 REMEDIATION — DAW/Looper core tokens
+   Append this block to client/src/styles/theme.css (inside :root).
+   These replace all hardcoded hex in DJ_*, RED/SURF/etc, T-object b1-b4,
+   and the inline _BLACK/_SURFACE/_BORDER blocks.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Surface / background ramp ─────────────────────────────────── */
+  --dj-black:     #000000;   /* absolute black — all primary looper bg */
+  --dj-surface:   #0c0c0c;   /* DJ_SURFACE / SURF / _SURFACE           */
+  --dj-surface2:  #111111;   /* DJ_SURFACE2 / SURF2 / _SURFACE2        */
+  --dj-surface3:  #161616;   /* SURF3 only                             */
+  --dj-border:    #222222;   /* DJ_BORDER / BORDER / _BORDER           */
+  --dj-dim:       #444444;   /* DJ_DIM / DIM                           */
+  --dj-dimmer:    #333333;   /* DJ_DIMMER / DIMMER                     */
+  --dj-muted:     #666666;   /* MUTED                                  */
+
+  /* ── T-object background shades (looper timeline / live session) ─ */
+  --t-b1:  #0f0f0f;
+  --t-b2:  #141414;
+  --t-b3:  #1e1e1e;
+  --t-b4:  #282828;
+
+  /* ── VU / signal semantic (meter only, not general UI) ─────────── */
+  --signal-clip:  #ff2200;   /* RED — overload / clip indicator        */
+  --signal-warn:  #ffaa00;   /* AMBER — near-clip / warning zone       */
+
+  /* ── Looper track accent palette (TRACK_COLORS, T-object accents) ─ */
+  --looper-acid:    #39ff14;   /* playing / active / solo               */
+  --looper-acid-2:  #32cd32;   /* T-object acid, subtle playing alt     */
+  --looper-acid-dim:#4d6b18;   /* ACID_DIM — Three.js scene (ref only)  */
+  --looper-cyan:    #22d3ee;   /* cue / headphone monitor               */
+  --looper-orange:  #ff6b00;   /* mute / overdub                        */
+  --looper-red:     #ff1a1a;   /* record / clear / waiting_record       */
+  --looper-purple:  #c084fc;   /* MIDI / pitch / harmony                */
+  --looper-yellow:  #f5d000;   /* scene / snapshot                      */
+  --looper-pink:    #f472b6;   /* PAD / creative FX                     */
+  --looper-blue:    #3b82f6;   /* delay / time-based FX                 */
+  --looper-teal:    #14b8a6;   /* stereo width                          */
+  --looper-lime:    #84cc16;   /* bitcrusher / tone FX / creator accent */
+}
+
+/* ── P0: DAW/Looper core tokens ───────────────────────────── */
+:root {
+  --dj-black:     #000000;
+  --dj-surface:   #0c0c0c;
+  --dj-surface2:  #111111;
+  --dj-surface3:  #161616;
+  --dj-border:    #222222;
+  --dj-dim:       #444444;
+  --dj-dimmer:    #333333;
+  --dj-muted:     #666666;
+  --t-b1:         #0f0f0f;
+  --t-b2:         #141414;
+  --t-b3:         #1e1e1e;
+  --t-b4:         #282828;
+  --signal-clip:  #ff2200;
+  --signal-warn:  #ffaa00;
+  --looper-acid:    #39ff14;
+  --looper-acid-2:  #32cd32;
+  --looper-acid-dim:#4d6b18;
+  --looper-cyan:    #22d3ee;
+  --looper-orange:  #ff6b00;
+  --looper-red:     #ff1a1a;
+  --looper-purple:  #c084fc;
+  --looper-yellow:  #f5d000;
+  --looper-pink:    #f472b6;
+  --looper-blue:    #3b82f6;
+  --looper-teal:    #14b8a6;
+  --looper-lime:    #84cc16;
+}
+
+/* ── P0 addendum: waveform-editor track palette ── */
+:root {
+  --track-pink:   #ec4899;
+  --track-cyan:   #06b6d4;
+  --track-orange: #f97316;
+  --track-indigo: #6366f1;
+}
+
+/* ── P1: subscription tier accent palette ── */
+:root {
+  --tier-explorer:   #3A7D44;
+  --tier-creator:    #1A3C5E;
+  --tier-pro-artist: #B35A00;
+}
+
+/* ── P3: inline literal tokens ────────────────────────────── */
+:root {
+  /* Near-black surface ramp (fills gaps between existing t-b* tokens) */
+  --void:   #060606;   /* absolute darkest — primary DAW bg */
+  --t-b0:   #090909;   /* near-black layer 0 */
+  --t-b0x:  #080808;   /* near-black layer 0 alt */
+  --t-b0xx: #070707;   /* near-black layer 0 alt2 */
+  --t-b2x:  #1a1a1a;   /* between t-b2/t-b3 — heavy use in collab DAW */
+  --t-b3x:  #252525;   /* between t-b3/t-b4 */
+  --z950:   #09090b;   /* zinc-950 — timeline / node canvas bg */
+
+  /* Text */
+  --daw-fg:    #f0f0f0;  /* primary DAW text */
+  --white:     #ffffff;  /* pure white — button labels, active states */
+  --daw-sub:   #aaaaaa;  /* secondary text */
+  --daw-ghost: #cccccc;  /* ghost / disabled */
+
+  /* Accent extensions */
+  --accent-violet:      #a855f7;  /* violet-500 — AI ghost notes, MIDI */
+  --accent-violet-soft: #a78bfa;  /* violet-400 — soft AI overlay */
+  --accent-amber:       #fbbf24;  /* amber-400 — automation lanes, cues */
+  --accent-green:       #22c55e;  /* green-500 — active LED, plugin enabled */
+  --accent-neon-green:  #00ff88;  /* neon green — 3D scene accent */
+  --signal-clip-alt:    #ff2244;  /* clip indicator variant */
+  --signal-clip-hard:   #ff0033;  /* hard clip */
+}
+
+/* ── P4: remaining unmapped values ──────────────────────────── */
+:root {
+  --panel:        #050505;   /* PRD appendix --panel token (was missing) */
+  --panel-deep:   #040404;   /* deepest panel layer */
+  --b8lime:       #b8ff00;   /* neon lime variant (≠ bfff00, used in AG theme) */
+  --zinc-600:     #52525b;
+  --zinc-700:     #3f3f46;
+  --zinc-800:     #27272a;
+  --zinc-400:     #a1a1aa;
+  --slate-400:    #94a3b8;
+  --green-400:    #4ade80;
+  --neutral-700:  #3a3a3a;
+  --amber-500:    #eab308;
+  --orange-400:   #fb923c;
+  --acid-dim:     #4d6b18;   /* looper-acid-dim (Three.js only — do not CSS-var in JSX) */
+}
+
+/* theme-config accent tokens — P3 remediation */
+:root {
+  --accent-indigo: #4f46e5;
+  --accent-fuchsia: #d946ef;
+}
+
+/* p_final_patch — bulk accent tokens */
+:root {
+  --accent-orange:      #ff6600;
+  --accent-yellow:      #ffcc00;
+  --accent-blue:        #0088ff;
+  --accent-pink:        #f72585;
+  --accent-neon:        #39ff14;
+  --accent-neon-teal:   #06ffa5;
+  --accent-neon-lime:   #d4ff40;
+  --accent-blue-deep:   #003366;
+  --status-ok-dim:      #3d7c00;
+  --panel-void:         #000000;
+}

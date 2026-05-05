@@ -17,13 +17,13 @@ interface ThemeContextType {
   resolvedTheme: Theme;
 }
 
-const _ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       try {
-        const _stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+        const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
         if (stored && AVAILABLE_THEMES.includes(stored)) return stored;
       } catch (err) {
         console.error('Error reading theme from localStorage:', err);
@@ -44,7 +44,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
-  const _setTheme = useCallback((newTheme: Theme) => {
+  const setTheme = useCallback((newTheme: Theme) => {
     if (!AVAILABLE_THEMES.includes(newTheme)) {
       console.warn(`Invalid theme "${newTheme}", falling back to dark.`);
       newTheme = 'dark';
@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     if (typeof window !== 'undefined') {
       try {
-        const _root = document.documentElement;
+        const root = document.documentElement;
         AVAILABLE_THEMES.forEach((t) => root.classList.remove(t));
         root.classList.add(newTheme);
         localStorage.setItem(STORAGE_KEY, newTheme);
@@ -65,25 +65,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const _toggleTheme = useCallback(() => {
-    const _currentIsDark = THEMES[theme].isDark;
-    const _candidates = currentIsDark
+  const toggleTheme = useCallback(() => {
+    const currentIsDark = THEMES[theme].isDark;
+    const candidates = currentIsDark
       ? AVAILABLE_THEMES.filter(t => !THEMES[t].isDark)
       : AVAILABLE_THEMES.filter(t => THEMES[t].isDark);
     if (candidates.length > 0) setTheme(candidates[0]);
   }, [theme, setTheme]);
 
-  const _nextTheme = useCallback(() => {
-    const _idx = AVAILABLE_THEMES.indexOf(theme);
+  const nextTheme = useCallback(() => {
+    const idx = AVAILABLE_THEMES.indexOf(theme);
     setTheme(AVAILABLE_THEMES[(idx + 1) % AVAILABLE_THEMES.length]);
   }, [theme, setTheme]);
 
-  const _previousTheme = useCallback(() => {
-    const _idx = AVAILABLE_THEMES.indexOf(theme);
+  const previousTheme = useCallback(() => {
+    const idx = AVAILABLE_THEMES.indexOf(theme);
     setTheme(AVAILABLE_THEMES[(idx - 1 + AVAILABLE_THEMES.length) % AVAILABLE_THEMES.length]);
   }, [theme, setTheme]);
 
-  const _getThemesByCategory = useCallback((category: 'dark' | 'light') => {
+  const getThemesByCategory = useCallback((category: 'dark' | 'light') => {
     return AVAILABLE_THEMES.filter(t => THEMES[t].isDark === (category === 'dark'));
   }, []);
 
@@ -92,8 +92,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (!mounted || typeof window === 'undefined') return;
 
     try {
-      const _root = document.documentElement;
-      const _themeData = THEMES[theme];
+      const root = document.documentElement;
+      const themeData = THEMES[theme];
 
       // Remove all theme classes
       AVAILABLE_THEMES.forEach(t => root.classList.remove(t));
@@ -123,9 +123,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme, mounted]);
 
-  const _themeMetadata = THEMES[theme];
-  const _isDark = themeMetadata.isDark;
-  const _isLight = !themeMetadata.isDark;
+  const themeMetadata = THEMES[theme];
+  const isDark = themeMetadata.isDark;
+  const isLight = !themeMetadata.isDark;
 
   if (!mounted) return null;
 
@@ -151,7 +151,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export function useTheme(): ThemeContextType {
-  const _context = useContext(ThemeContext);
+  const context = useContext(ThemeContext);
   if (!context) throw new Error('useTheme must be used within a ThemeProvider');
   return context;
 }

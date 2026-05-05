@@ -18,7 +18,7 @@ export const ClipContextMenu: React.FC<Props> = ({
   onClose,
 }) => {
   useEffect(() => {
-    const _close = () => onClose();
+    const close = () => onClose();
     window.addEventListener("click", close);
     return () => window.removeEventListener("click", close);
   }, [onClose]);

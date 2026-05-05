@@ -21,19 +21,19 @@ import { AgentSuite } from "@/components/admin/AgentSuite";
 import { AgentMeshPanel } from "@/components/admin/AgentMeshPanel";
 
 // ─── Design Tokens (Wire.txt §5) ──────────────────────────────────────────────
-const _T = {
-  black:   "#060606",
+const T = {
+  black:   "var(--void)",
   acid:    "#a3e635",
   red:     "#EF4444",
-  z950:    "#09090b",
-  z900:    "#18181b",
-  z800:    "#27272a",
-  z700:    "#3f3f46",
-  z600:    "#52525b",
-  z400:    "#a1a1aa",
-  cyan:    "#00F5FF",
-  violet:  "#8B5CF6",
-  amber:   "#F59E0B",
+  z950:    "var(--z950)",
+  z900:    "var(--panel)",
+  z800:    "var(--zinc-800)",
+  z700:    "var(--zinc-700)",
+  z600:    "var(--zinc-600)",
+  z400:    "var(--zinc-400)",
+  cyan:    "var(--accent-cyan)",
+  violet:  "var(--accent-purple)",
+  amber:   "var(--status-warn)",
 } as const;
 
 type AdminTab = "agents" | "mesh";

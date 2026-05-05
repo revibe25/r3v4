@@ -23,4 +23,4 @@ export class DrumClassifier {
   dispose() {}
 }
 
-export const _drumClassifier = new DrumClassifier();
+export const drumClassifier = new DrumClassifier();

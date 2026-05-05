@@ -11,32 +11,32 @@ interface LFOConfig { waveform: 'sine'|'triangle'|'square'|'saw'|'random'; frequ
 interface EnvelopeConfig { attack: number; decay: number; sustain: number; release: number; }
 interface AutomationUIProps { automationEngine: VSTAutomationEngine; paramId: number; paramName: string; minValue: number; maxValue: number; currentValue: number; }
 
-const _P = "bg-[#a3e635] hover:bg-[#84cc16] text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const _G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[#060606] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
-const _TL = "w-full grid bg-[#0a0a0a] border-b border-[#1a1a1a] rounded-none h-auto p-0";
-const _TT = "rounded-none border-r border-[#1a1a1a] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[#f0f0f0] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
+const P = "bg-[#a3e635] hover:bg-[var(--looper-lime)] text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+const TL = "w-full grid bg-[#0a0a0a] border-b border-[var(--t-b2x)] rounded-none h-auto p-0";
+const TT = "rounded-none border-r border-[var(--t-b2x)] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[var(--daw-fg)] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
 
 function RowLabel({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center mb-1">
-      <span className="text-[10px] tracking-widest uppercase text-[#f0f0f0]">{label}</span>
+      <span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">{label}</span>
       <span className="text-xs font-mono text-[#a3e635]">{value}</span>
     </div>
   );
 }
 
 function MonoSlider(props: React.ComponentProps<typeof Slider>) {
-  return <Slider {...props} className="[&>span:first-child]:bg-[#1a1a1a] [&>span:first-child]:rounded-none [&>span>span]:bg-[#a3e635] [&>span>span]:rounded-none [&_[role=slider]]:bg-[#a3e635] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
+  return <Slider {...props} className="[&>span:first-child]:bg-[var(--t-b2x)] [&>span:first-child]:rounded-none [&>span>span]:bg-[#a3e635] [&>span>span]:rounded-none [&_[role=slider]]:bg-[#a3e635] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
 }
 
 function MonoSelect({ value, onValueChange, options, placeholder, className }: { value: string; onValueChange: (v: any) => void; options: {value:string;label:string}[]; placeholder?: string; className?: string; }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[#f0f0f0] font-mono text-xs tracking-wider focus:ring-0 focus:border-[#a3e635] ${className ?? ''}`}>
+      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[var(--daw-fg)] font-mono text-xs tracking-wider focus:ring-0 focus:border-[#a3e635] ${className ?? ''}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="rounded-none border-[#2a2a2a] bg-[#0d0d0d] font-mono text-xs">
-        {options.map(o => <SelectItem key={o.value} value={o.value} className="text-[#f0f0f0] tracking-wider focus:bg-[#1a1a1a] focus:text-[#a3e635]">{o.label}</SelectItem>)}
+        {options.map(o => <SelectItem key={o.value} value={o.value} className="text-[var(--daw-fg)] tracking-wider focus:bg-[var(--t-b2x)] focus:text-[#a3e635]">{o.label}</SelectItem>)}
       </SelectContent>
     </Select>
   );
@@ -44,16 +44,16 @@ function MonoSelect({ value, onValueChange, options, placeholder, className }: {
 
 export function VSTAutomationUI({ automationEngine, paramId, paramName, minValue, maxValue, currentValue }: AutomationUIProps) {
   const [mode, setMode] = useState<'manual'|'automation'|'lfo'|'envelope'>('manual');
-  const _tabs = [
+  const tabs = [
     { value: 'manual',     label: 'Manual',    icon: <Move className="h-3 w-3" /> },
     { value: 'automation', label: 'Automation', icon: <TrendingUp className="h-3 w-3" /> },
     { value: 'lfo',        label: 'LFO',        icon: <Activity className="h-3 w-3" /> },
     { value: 'envelope',   label: 'Envelope',   icon: <Activity className="h-3 w-3" /> },
   ];
   return (
-    <div className="w-full bg-[#060606] text-[#f0f0f0] font-mono">
-      <div className="flex items-center justify-between mb-4 border-b border-[#1a1a1a] pb-3">
-        <span className="text-xs tracking-widest uppercase text-[#f0f0f0]">{paramName} Automation</span>
+    <div className="w-full bg-[var(--void)] text-[var(--daw-fg)] font-mono">
+      <div className="flex items-center justify-between mb-4 border-b border-[var(--t-b2x)] pb-3">
+        <span className="text-xs tracking-widest uppercase text-[var(--daw-fg)]">{paramName} Automation</span>
         <span className="text-[10px] border border-[#2a2a2a] px-2 py-0.5 text-[#a3e635] tracking-widest">PARAM {paramId}</span>
       </div>
       <Tabs value={mode} onValueChange={(v: any) => setMode(v)}>
@@ -85,39 +85,39 @@ function ManualControl({ paramName, currentValue, minValue, maxValue }: { paramN
 }
 
 function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }: { automationEngine: VSTAutomationEngine; paramId: number; minValue: number; maxValue: number }) {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [points, setPoints] = useState<AutomationPoint[]>([]);
   const [selectedCurve, setSelectedCurve] = useState<AutomationCurve>(AutomationCurve.LINEAR);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
 
   useEffect(() => { drawAutomation(); }, [points, selectedPointIndex]);
 
-  const _drawAutomation = () => {
-    const _canvas = canvasRef.current; if (!canvas) return;
-    const _ctx = canvas.getContext('2d'); if (!ctx) return;
+  const drawAutomation = () => {
+    const canvas = canvasRef.current; if (!canvas) return;
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
     const { width, height } = canvas;
     ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, width, height);
-    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
-    for (let _i = 0; i <= 10; i++) {
+    ctx.strokeStyle = 'var(--t-b2x)'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 10; i++) {
       ctx.beginPath(); ctx.moveTo(0,(height/10)*i); ctx.lineTo(width,(height/10)*i); ctx.stroke();
       ctx.beginPath(); ctx.moveTo((width/10)*i,0); ctx.lineTo((width/10)*i,height); ctx.stroke();
     }
     if (!points.length) return;
     ctx.strokeStyle = '#a3e635'; ctx.lineWidth = 1.5; ctx.beginPath();
-    for (let _x = 0; x < width; x++) {
-      const _y = height - ((interp((x/width)*10,points)-minValue)/(maxValue-minValue))*height;
+    for (let x = 0; x < width; x++) {
+      const y = height - ((interp((x/width)*10,points)-minValue)/(maxValue-minValue))*height;
       x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
     ctx.stroke();
     ctx.fillStyle = 'rgba(163,230,53,0.06)'; ctx.lineTo(width,height); ctx.lineTo(0,height); ctx.closePath(); ctx.fill();
     points.forEach((p,i) => {
       const x=(p.time/10)*width, y=height-((p.value-minValue)/(maxValue-minValue))*height;
-      ctx.fillStyle = i===selectedPointIndex ? '#ffffff' : '#a3e635';
+      ctx.fillStyle = i===selectedPointIndex ? 'var(--white)' : '#a3e635';
       ctx.fillRect(x-4,y-4,8,8);
     });
   };
 
-  const _interp = (time: number, pts: AutomationPoint[]): number => {
+  const interp = (time: number, pts: AutomationPoint[]): number => {
     if (!pts.length) return minValue;
     if (time<=pts[0].time) return pts[0].value;
     if (time>=pts[pts.length-1].time) return pts[pts.length-1].value;
@@ -126,7 +126,7 @@ function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }:
     return p1.value+(p2.value-p1.value)*((time-p1.time)/(p2.time-p1.time));
   };
 
-  const _handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas=canvasRef.current; if(!canvas) return;
     const rect=canvas.getBoundingClientRect();
     const x=e.clientX-rect.left, y=e.clientY-rect.top;
@@ -152,7 +152,7 @@ function AutomationLaneEditor({ automationEngine, paramId, minValue, maxValue }:
           <button onClick={()=>{setPoints([]);setSelectedPointIndex(null);}} className={G}>Clear</button>
         </div>
       </div>
-      <div className="border border-[#1a1a1a]">
+      <div className="border border-[var(--t-b2x)]">
         <canvas ref={canvasRef} width={800} height={200} className="w-full cursor-crosshair block" onClick={handleClick} />
       </div>
       <p className="text-[10px] tracking-wider text-[#555]">CLICK — Add point · Click point — Select · Del Point — Remove</p>
@@ -183,12 +183,12 @@ function EnvelopeEditor({ automationEngine, paramId }: { automationEngine: VSTAu
       <div><RowLabel label="Decay"   value={`${cfg.decay.toFixed(3)} s`}        /><MonoSlider value={[cfg.decay]}   min={0.001} max={2} step={0.001} onValueChange={([v])=>upd({decay:v})}   /></div>
       <div><RowLabel label="Sustain" value={`${(cfg.sustain*100).toFixed(0)}%`} /><MonoSlider value={[cfg.sustain]} min={0}     max={1} step={0.01}  onValueChange={([v])=>upd({sustain:v})} /></div>
       <div><RowLabel label="Release" value={`${cfg.release.toFixed(3)} s`}      /><MonoSlider value={[cfg.release]} min={0.001} max={5} step={0.001} onValueChange={([v])=>upd({release:v})} /></div>
-      <div className="border border-[#1a1a1a] h-16 relative overflow-hidden">
+      <div className="border border-[var(--t-b2x)] h-16 relative overflow-hidden">
         <svg viewBox="0 0 200 60" className="w-full h-full" preserveAspectRatio="none">
           <polyline fill="rgba(163,230,53,0.08)" stroke="#a3e635" strokeWidth="1.5"
             points={`0,60 ${cfg.attack*40},0 ${cfg.attack*40+cfg.decay*30},${(1-cfg.sustain)*60} ${cfg.attack*40+cfg.decay*30+40},${(1-cfg.sustain)*60} 200,60`} />
         </svg>
-        <span className="absolute bottom-1 left-1 text-[9px] text-[#333] tracking-widest">ADSR</span>
+        <span className="absolute bottom-1 left-1 text-[9px] text-[var(--dj-dimmer)] tracking-widest">ADSR</span>
       </div>
       <div className="flex gap-2 pt-1">
         <button onClick={()=>automationEngine.triggerEnvelope(`env_${paramId}`)} className={`${P} flex-1 justify-center`}>Trigger</button>

@@ -35,7 +35,15 @@ fi
 # 3. Get last known good commit (explicit)
 # ───────────────────────────────────────────────
 
-GOOD_COMMIT=$(git log --pretty=format:"%H %s" -- "$TARGET" | grep "pre-ui-system-enforcement" | head -n 1 | cut -d' ' -f1)
+GOOD_COMMIT=$(# Stable checkpoint: use git tag instead of commit-message grep
+# To set: git tag ui-checkpoint <sha>  (run once, then push tags)
+if git rev-parse ui-checkpoint >/dev/null 2>&1; then
+  GOOD_COMMIT=$(git rev-parse ui-checkpoint)
+else
+  echo "[enforce-ui] ERROR: 'ui-checkpoint' tag not found."
+  echo "  Set it once with: git tag ui-checkpoint <safe-sha> && git push --tags"
+  exit 1
+fi | head -n 1 | cut -d' ' -f1)
 
 if [[ -z "$GOOD_COMMIT" ]]; then
   echo "❌ Could not locate safe UI checkpoint commit"

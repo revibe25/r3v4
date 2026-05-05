@@ -98,9 +98,9 @@ export class AudioClipLoader {
   /** Load from a File object (drag-and-drop / file picker). */
   async loadFromFile(file: File): Promise<LoadedClip> {
     validateMimeType(file.type);
-    const _id = fileId(file);
+    const id = fileId(file);
     return this.load(id, async () => {
-      const _data = await file.arrayBuffer();
+      const data = await file.arrayBuffer();
       return this.decodeAndStore({
         id,
         name:      file.name,
@@ -119,7 +119,7 @@ export class AudioClipLoader {
     return this.load(url, async () => {
       let data!: ArrayBuffer;
 
-      for (let _attempt = 0; attempt <= this.opts.maxRetries; attempt++) {
+      for (let attempt = 0; attempt <= this.opts.maxRetries; attempt++) {
         try {
           data = await this.fetchWithProgress(url);
           break;
@@ -156,7 +156,7 @@ export class AudioClipLoader {
 
   /** Retrieve a cached clip without triggering a load. */
   get(id: string): LoadedClip | null {
-    const _clip = this.cache.get(id) ?? null;
+    const clip = this.cache.get(id) ?? null;
     if (clip) this.touch(id);
     return clip;
   }
@@ -173,7 +173,7 @@ export class AudioClipLoader {
 
   /** Evict a specific clip from the cache. */
   evict(id: string): boolean {
-    const _had = this.cache.delete(id);
+    const had = this.cache.delete(id);
     this.lruOrder.delete(id);
     if (had) this.emit('evicted', { id });
     return had;
@@ -181,7 +181,7 @@ export class AudioClipLoader {
 
   /** Remove all cached clips. */
   clear(): void {
-    const _ids = [...this.cache.keys()];
+    const ids = [...this.cache.keys()];
     this.cache.clear();
     this.lruOrder.clear();
     ids.forEach((id) => this.emit('evicted', { id }));
@@ -247,24 +247,24 @@ export class AudioClipLoader {
    */
   private load(id: string, loader: () => Promise<LoadedClip>): Promise<LoadedClip> {
     // Cache hit
-    const _cached = this.cache.get(id);
+    const cached = this.cache.get(id);
     if (cached) {
       this.touch(id);
       return Promise.resolve(cached);
     }
 
     // In-flight dedup — multiple callers waiting for the same id
-    const _existing = this.inflight.get(id);
+    const existing = this.inflight.get(id);
     if (existing) return existing;
 
-    const _promise = loader().then(
+    const promise = loader().then(
       (clip) => {
         this.inflight.delete(id);
         return clip;
       },
       (err: unknown) => {
         this.inflight.delete(id);
-        const _error = toError(err);
+        const error = toError(err);
         this.emit('error', { id, error });
         throw error;
       },
@@ -290,7 +290,7 @@ export class AudioClipLoader {
       // slice(0) so the original ArrayBuffer isn't detached
       buffer = await this.context.decodeAudioData(data.slice(0));
     } catch (err) {
-      const _error = new Error(
+      const error = new Error(
         `Failed to decode audio "${name}": ${toError(err).message}`,
       );
       this.emit('progress', { id, downloadProgress: 1, phase: 'error', error });
@@ -321,26 +321,26 @@ export class AudioClipLoader {
 
   /** Fetch a URL and report download progress events. */
   private async fetchWithProgress(url: string): Promise<ArrayBuffer> {
-    const _id = url;
-    const _res = await fetch(url);
+    const id = url;
+    const res = await fetch(url);
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status} ${res.statusText} — ${url}`);
     }
 
-    const _contentLength = Number(res.headers.get('content-length') ?? 0);
-    const _reader = res.body?.getReader();
+    const contentLength = Number(res.headers.get('content-length') ?? 0);
+    const reader = res.body?.getReader();
 
     // If streaming isn't available, fall back to a single read
     if (!reader || contentLength === 0) {
       this.emit('progress', { id, downloadProgress: 0.5, phase: 'downloading' });
-      const _data = await res.arrayBuffer();
+      const data = await res.arrayBuffer();
       this.emit('progress', { id, downloadProgress: 1,   phase: 'downloading' });
       return data;
     }
 
     const chunks: Uint8Array[] = [];
-    let _received = 0;
+    let received = 0;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -355,8 +355,8 @@ export class AudioClipLoader {
     }
 
     // Combine chunks into one ArrayBuffer
-    const _merged = new Uint8Array(received);
-    let _offset = 0;
+    const merged = new Uint8Array(received);
+    let offset = 0;
     for (const chunk of chunks) {
       merged.set(chunk, offset);
       offset += chunk.byteLength;
@@ -374,13 +374,13 @@ export class AudioClipLoader {
    * (maxCacheSize and maxCacheDurationSeconds).
    */
   private enforceQuotas(): void {
-    const _byLru = [...this.lruOrder.entries()].sort((a, b) => a[1] - b[1]);
+    const byLru = [...this.lruOrder.entries()].sort((a, b) => a[1] - b[1]);
 
     while (
       this.cache.size > this.opts.maxCacheSize ||
       this.totalCachedDuration > this.opts.maxCacheDurationSeconds
     ) {
-      const _oldest = byLru.shift();
+      const oldest = byLru.shift();
       if (!oldest) break;
       this.evict(oldest[0]);
     }
@@ -395,7 +395,7 @@ function fileId(file: File): string {
 
 function urlBasename(url: string): string {
   try {
-    const _pathname = new URL(url).pathname;
+    const pathname = new URL(url).pathname;
     return decodeURIComponent(pathname.split('/').pop() ?? url);
   } catch {
     return url;
@@ -409,7 +409,7 @@ function sanitizeName(name: string): string {
 
 function validateMimeType(type: string): void {
   if (!type) return; // browser didn't report a type — allow it through
-  const _ok = VALID_AUDIO_TYPES.some((prefix) => type.startsWith(prefix));
+  const ok = VALID_AUDIO_TYPES.some((prefix) => type.startsWith(prefix));
   if (!ok) {
     throw new Error(`Unsupported file type "${type}". Expected an audio file.`);
   }
@@ -425,4 +425,4 @@ function delay(ms: number): Promise<void> {
 
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
-export const _audioClipLoader = new AudioClipLoader();
+export const audioClipLoader = new AudioClipLoader();

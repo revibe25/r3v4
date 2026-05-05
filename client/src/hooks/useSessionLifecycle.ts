@@ -15,7 +15,7 @@ export function useSessionLifecycle({ trackIds, bpm }: UseSessionLifecycleOption
   const { setSessionId, setActive, setSummary, sessionId } =
     useSessionMetricsStore();
 
-  const _startMutation = trpc.sessions.start.useMutation({
+  const startMutation = trpc.sessions.start.useMutation({
     onSuccess: (data) => {
       setSessionId(data.sessionId);
       setActive(true);
@@ -25,7 +25,7 @@ export function useSessionLifecycle({ trackIds, bpm }: UseSessionLifecycleOption
     },
   });
 
-  const _stopMutation = trpc.sessions.stop.useMutation({
+  const stopMutation = trpc.sessions.stop.useMutation({
     onSuccess: (data) => {
       setSummary(data);
       setActive(false);
@@ -35,7 +35,7 @@ export function useSessionLifecycle({ trackIds, bpm }: UseSessionLifecycleOption
     },
   });
 
-  const _onPlay = useCallback(() => {
+  const onPlay = useCallback(() => {
     if (trackIds.length === 0) {
       console.warn("[SessionLifecycle] onPlay called with no tracks — skipping");
       return;
@@ -43,7 +43,7 @@ export function useSessionLifecycle({ trackIds, bpm }: UseSessionLifecycleOption
     startMutation.mutate({ trackIds, bpm });
   }, [trackIds, bpm, startMutation]);
 
-  const _onStop = useCallback(() => {
+  const onStop = useCallback(() => {
     if (!sessionId) {
       console.warn("[SessionLifecycle] onStop called but no active sessionId — skipping");
       return;

@@ -72,7 +72,7 @@ const DEFAULT_STATS: AutoLevelSessionStats = {
   estimatedMinutesSaved:        0,
 };
 
-const _clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 // ── Hook ───────────────────────────────────────────────────────
 
@@ -84,7 +84,7 @@ export function useAutoLeveling(
 ): UseAutoLevelingResult {
   const { autoStart = false, analysisHz = 30 } = options;
 
-  const _pipelineRef = useRef<AutoLevelPipeline | null>(null);
+  const pipelineRef = useRef<AutoLevelPipeline | null>(null);
 
   const [enabled,             setEnabled]             = useState(false);
   const [trackStates,         setTrackStates]         = useState<Map<TrackId, TrackAILevelState>>(new Map());
@@ -97,7 +97,7 @@ export function useAutoLeveling(
   // re-create on every recommendation (which arrives at analysisHz, e.g. 30Hz).
   // Stable callbacks prevent <AILevelAssist /> from re-rendering 30 times/sec.
   const recordDecisionMut    = trpc.sessionMetrics.recordDecision.useMutation();
-  const _recordDecisionMutRef = useRef(recordDecisionMut);
+  const recordDecisionMutRef = useRef(recordDecisionMut);
   const latestRecRef         = useRef<AutoLevelRecommendation | null>(latestRecommendation);
   const nodeStateRef         = useRef<PipelineNodeState>(nodeState);
   recordDecisionMutRef.current = recordDecisionMut;
@@ -107,24 +107,24 @@ export function useAutoLeveling(
   useEffect(() => {
     if (!audioContext || !masterAnalyser) return;
 
-    const _pipeline = new AutoLevelPipeline(masterAnalyser, audioContext.sampleRate, { analysisHz });
+    const pipeline = new AutoLevelPipeline(masterAnalyser, audioContext.sampleRate, { analysisHz });
     pipelineRef.current = pipeline;
 
     for (const ref of trackRefs) {
-      const _analyzer = new TrackAnalyzer({ trackId: ref.trackId, analyserNode: ref.analyserNode });
+      const analyzer = new TrackAnalyzer({ trackId: ref.trackId, analyserNode: ref.analyserNode });
       pipeline.registerTrack(analyzer, ref.gainNode, audioContext, ref.eqNodes);
     }
 
-    const _unsubEvents = pipeline.subscribe((event: AutoLevelEvent) => {
+    const unsubEvents = pipeline.subscribe((event: AutoLevelEvent) => {
       if (event.type === 'recommendation') {
-        const _rec = event.data as AutoLevelRecommendation;
+        const rec = event.data as AutoLevelRecommendation;
         setLatestRecommendation(rec);
         setSessionStats({ ...pipeline.stats });
 
         setTrackStates(prev => {
-          const _next = new Map(prev);
+          const next = new Map(prev);
           for (const adj of rec.gainAdjustments) {
-            const _existing = next.get(adj.trackId);
+            const existing = next.get(adj.trackId);
             next.set(adj.trackId, {
               trackId:       adj.trackId,
               currentGain:   1,
@@ -150,7 +150,7 @@ export function useAutoLeveling(
 
       if (event.type === 'override_set' && event.trackId) {
         setTrackStates(prev => {
-          const _next = new Map(prev);
+          const next = new Map(prev);
           const ex   = next.get(event.trackId!);
           if (ex) next.set(event.trackId!, { ...ex, userOverride: true });
           return next;
@@ -159,7 +159,7 @@ export function useAutoLeveling(
 
       if (event.type === 'adjustment_accepted' && event.trackId) {
         setTrackStates(prev => {
-          const _next = new Map(prev);
+          const next = new Map(prev);
           const ex   = next.get(event.trackId!);
           if (ex) next.set(event.trackId!, { ...ex, userOverride: false });
           return next;
@@ -167,7 +167,7 @@ export function useAutoLeveling(
       }
     });
 
-    const _unsubNodeState = pipeline.subscribeNodeState(setNodeState);
+    const unsubNodeState = pipeline.subscribeNodeState(setNodeState);
 
     if (autoStart) { pipeline.start(); setEnabled(true); }
 
@@ -179,23 +179,23 @@ export function useAutoLeveling(
     };
   }, [audioContext, masterAnalyser]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const _toggle = useCallback(() => {
-    const _p = pipelineRef.current;
+  const toggle = useCallback(() => {
+    const p = pipelineRef.current;
     if (!p) return;
     if (p.running) { p.stop(); setEnabled(false); }
     else           { p.start(); setEnabled(true);  }
   }, []);
 
-  const _accept = useCallback((trackId: TrackId) => {
+  const accept = useCallback((trackId: TrackId) => {
     pipelineRef.current?.acceptSuggestion(trackId);
     setSessionStats(s => ({ ...s, acceptedSuggestions: s.acceptedSuggestions + 1 }));
 
     // Log to aiDecisionLog if a session is active.
     // Reads sessionId via Zustand getState — no re-render dependency.
-    const _sessionId = useSessionMetricsStore.getState().sessionId;
+    const sessionId = useSessionMetricsStore.getState().sessionId;
     const rec       = latestRecRef.current;
     if (sessionId && rec) {
-      const _adj = rec.gainAdjustments.find(g => g.trackId === trackId);
+      const adj = rec.gainAdjustments.find(g => g.trackId === trackId);
       if (adj) {
         recordDecisionMutRef.current.mutate(
           {
@@ -221,14 +221,14 @@ export function useAutoLeveling(
     }
   }, []);
 
-  const _reject = useCallback((trackId: TrackId) => {
+  const reject = useCallback((trackId: TrackId) => {
     pipelineRef.current?.rejectSuggestion(trackId);
     setSessionStats(s => ({ ...s, rejectedSuggestions: s.rejectedSuggestions + 1 }));
 
-    const _sessionId = useSessionMetricsStore.getState().sessionId;
+    const sessionId = useSessionMetricsStore.getState().sessionId;
     const rec       = latestRecRef.current;
     if (sessionId && rec) {
-      const _adj = rec.gainAdjustments.find(g => g.trackId === trackId);
+      const adj = rec.gainAdjustments.find(g => g.trackId === trackId);
       if (adj) {
         recordDecisionMutRef.current.mutate(
           {
@@ -254,7 +254,7 @@ export function useAutoLeveling(
     }
   }, []);
 
-  const _notifyFaderMove = useCallback((trackId: TrackId, newGainLinear: number) => {
+  const notifyFaderMove = useCallback((trackId: TrackId, newGainLinear: number) => {
     pipelineRef.current?.notifyUserFaderMove(trackId, newGainLinear);
     setSessionStats(s => ({ ...s, totalManualAdjustments: s.totalManualAdjustments + 1 }));
   }, []);

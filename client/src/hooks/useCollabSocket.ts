@@ -34,16 +34,16 @@ export interface CollabAPI {
 
 export function useCollabSocket(): CollabAPI {
   const wsRef        = useRef<WebSocket | null>(null);
-  const _reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pingRef      = useRef<ReturnType<typeof setInterval> | null>(null);
   const backoffRef   = useRef(1000);
   const activeRef    = useRef(false);
   const sessionRef   = useRef<{ userId: string; name: string; color: string; roomId: string } | null>(null);
 
-  const _connect = useCallback((roomId: string, userId: string, name: string, color: string) => {
+  const connect = useCallback((roomId: string, userId: string, name: string, color: string) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const _ws = new WebSocket(`${WS_URL}?room=${encodeURIComponent(roomId)}`);
+    const ws = new WebSocket(`${WS_URL}?room=${encodeURIComponent(roomId)}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -59,8 +59,8 @@ export function useCollabSocket(): CollabAPI {
 
     ws.onmessage = (evt) => {
       try {
-        const _msg = JSON.parse(evt.data as string) as Record<string, unknown>;
-        const _store = useDAWStore.getState();
+        const msg = JSON.parse(evt.data as string) as Record<string, unknown>;
+        const store = useDAWStore.getState();
 
         switch (msg.type) {
           case 'users':
@@ -111,15 +111,15 @@ export function useCollabSocket(): CollabAPI {
       if (activeRef.current && sessionRef.current) {
         reconnectRef.current = setTimeout(() => {
           backoffRef.current = Math.min(backoffRef.current * 1.5, 30_000);
-          const _s = sessionRef.current!;
+          const s = sessionRef.current!;
           connect(s.roomId, s.userId, s.name, s.color);
         }, backoffRef.current);
       }
     };
   }, []);
 
-  const _applyRemoteAction = (action: Record<string, unknown>) => {
-    const _store = useDAWStore.getState();
+  const applyRemoteAction = (action: Record<string, unknown>) => {
+    const store = useDAWStore.getState();
     // Only apply non-destructive remote actions (mute/solo/gain/pan)
     switch (action.type) {
       case 'trackMute':
@@ -134,7 +134,7 @@ export function useCollabSocket(): CollabAPI {
     }
   };
 
-  const _joinRoom = useCallback((roomId: string, userId: string, name: string, color: string) => {
+  const joinRoom = useCallback((roomId: string, userId: string, name: string, color: string) => {
     activeRef.current = true;
     sessionRef.current = { roomId, userId, name, color };
     useDAWStore.getState().setCollabRoom(roomId);
@@ -142,11 +142,11 @@ export function useCollabSocket(): CollabAPI {
     connect(roomId, userId, name, color);
   }, [connect]);
 
-  const _leaveRoom = useCallback(() => {
+  const leaveRoom = useCallback(() => {
     activeRef.current = false;
     sessionRef.current = null;
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      const _userId = useDAWStore.getState().collabUsers.find(u => u.id)?.id;
+      const userId = useDAWStore.getState().collabUsers.find(u => u.id)?.id;
       if (userId) wsRef.current.send(JSON.stringify({ type: 'leave', userId }));
       wsRef.current.close();
     }
@@ -158,9 +158,9 @@ export function useCollabSocket(): CollabAPI {
     useDAWStore.getState().setCollabUsers([]);
   }, []);
 
-  const _broadcastCursor = useCallback((beat: number, trackId: string | null) => {
+  const broadcastCursor = useCallback((beat: number, trackId: string | null) => {
     if (wsRef.current?.readyState !== WebSocket.OPEN) return;
-    const _s = sessionRef.current;
+    const s = sessionRef.current;
     if (!s) return;
     wsRef.current.send(JSON.stringify({
       type: 'presence',
@@ -172,14 +172,14 @@ export function useCollabSocket(): CollabAPI {
     }));
   }, []);
 
-  const _broadcastAction = useCallback((action: Record<string, unknown>) => {
+  const broadcastAction = useCallback((action: Record<string, unknown>) => {
     if (wsRef.current?.readyState !== WebSocket.OPEN) return;
-    const _s = sessionRef.current;
+    const s = sessionRef.current;
     if (!s) return;
     wsRef.current.send(JSON.stringify({ type: 'action', userId: s.userId, action }));
   }, []);
 
-  const _isConnected = useCallback(() =>
+  const isConnected = useCallback(() =>
     wsRef.current?.readyState === WebSocket.OPEN,
   []);
 

@@ -136,7 +136,7 @@ export class LinkEngine {
 
     this._bpmDebounceTimer = setTimeout(() => {
       if (this._link && this._pendingBpm !== null) {
-        const _clamped = Math.min(999, Math.max(20, this._pendingBpm));
+        const clamped = Math.min(999, Math.max(20, this._pendingBpm));
         try { this._link.bpm = clamped; } catch { /* guard */ }
       }
       this._pendingBpm       = null;
@@ -248,7 +248,7 @@ export class LinkEngine {
       return;
     }
 
-    const _delay = RETRY_BASE_MS * Math.pow(2, this._retryCount);
+    const delay = RETRY_BASE_MS * Math.pow(2, this._retryCount);
     this._retryCount++;
 
     this._retryTimer = setTimeout(() => {
@@ -262,7 +262,7 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 // ── Singleton ─────────────────────────────────────────────────────────────────
 
-export const _linkEngine = new LinkEngine();
+export const linkEngine = new LinkEngine();
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => linkEngine.dispose());

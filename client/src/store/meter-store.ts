@@ -19,7 +19,7 @@ const EMPTY_METER: MeterData = {
   timestamp: 0,
 };
 
-export const _useMeterStore = create<MeterStore>((set, get) => ({
+export const useMeterStore = create<MeterStore>((set, get) => ({
   meters: {},
 
   updateMeter: (id, meter) => {
@@ -33,7 +33,7 @@ export const _useMeterStore = create<MeterStore>((set, get) => ({
 
   clearMeter: (id) => {
     set((s) => {
-      const _copy = { ...s.meters };
+      const copy = { ...s.meters };
       delete copy[id];
       return { meters: copy };
     });

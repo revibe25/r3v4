@@ -7,7 +7,7 @@ export function enforceThemeUsage(className?: string) {
     /bg-black/,
     /text-white/,
     /#[0-9a-fA-F]{3,8}/,
-    /var\(--color-[^)]+\)/,
+  // REMOVED: var(--color-*) rule was a false positive — correct token usage flagged
   ];
 
   for (const rule of violations) {

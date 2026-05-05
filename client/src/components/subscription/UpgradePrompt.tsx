@@ -18,9 +18,9 @@ interface UpgradePromptProps {
 }
 
 const TIER_COLORS: Record<SubscriptionTier, string> = {
-  explorer: '#3A7D44',
-  creator: '#1A3C5E',
-  pro_artist: '#B35A00',
+  explorer:   'var(--tier-explorer)',
+  creator:    'var(--tier-creator)',
+  pro_artist: 'var(--tier-pro-artist)',
 };
 
 export function UpgradePrompt({
@@ -34,16 +34,16 @@ export function UpgradePrompt({
   const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
 
-  const _requiredTier =
+  const requiredTier =
     gateError?.requiredTier ?? requiredTierProp ?? 'creator';
-  const _message =
+  const message =
     gateError?.message ??
     `Upgrade to ${TIER_DEFINITIONS[requiredTier].displayName} to unlock this feature.`;
 
-  const _tierDef = TIER_DEFINITIONS[requiredTier as Exclude<SubscriptionTier, 'explorer'>];
-  const _color = TIER_COLORS[requiredTier];
-  const _monthlyCents = tierDef.monthlyPriceCents;
-  const _annualCents = tierDef.annualPriceCents;
+  const tierDef = TIER_DEFINITIONS[requiredTier as Exclude<SubscriptionTier, 'explorer'>];
+  const color = TIER_COLORS[requiredTier];
+  const monthlyCents = tierDef.monthlyPriceCents;
+  const annualCents = tierDef.annualPriceCents;
 
   async function handleUpgrade() {
     if (requiredTier === 'explorer') return;
@@ -69,14 +69,14 @@ export function UpgradePrompt({
           fontSize: '13px',
         }}
       >
-        <span style={{ flex: 1, color: '#333' }}>{message}</span>
+        <span style={{ flex: 1, color: 'var(--fg)' }}>{message}</span>
         <button
           onClick={handleUpgrade}
           disabled={loading}
           style={{
             padding: '6px 14px',
             background: color,
-            color: '#fff',
+            color: 'var(--white)',
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
@@ -94,13 +94,13 @@ export function UpgradePrompt({
   return (
     <div
       style={{
-        background: '#fff',
+        background: 'var(--dj-surface)',
         border: `2px solid ${color}`,
         borderRadius: '16px',
         padding: '32px',
         maxWidth: '420px',
         width: '100%',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
         fontFamily: 'Arial, sans-serif',
         position: 'relative',
       }}
@@ -116,7 +116,7 @@ export function UpgradePrompt({
             border: 'none',
             fontSize: '18px',
             cursor: 'pointer',
-            color: '#999',
+            color: 'var(--dj-muted)',
             lineHeight: 1,
           }}
           aria-label="Dismiss"
@@ -129,7 +129,7 @@ export function UpgradePrompt({
         style={{
           display: 'inline-block',
           background: color,
-          color: '#fff',
+          color: 'var(--white)',
           padding: '4px 12px',
           borderRadius: '20px',
           fontSize: '12px',
@@ -142,10 +142,10 @@ export function UpgradePrompt({
         {tierDef.displayName}
       </div>
 
-      <h3 style={{ margin: '0 0 8px', fontSize: '20px', color: '#1a1a1a' }}>
+      <h3 style={{ margin: '0 0 8px', fontSize: '20px', color: 'var(--fg)' }}>
         Unlock this feature
       </h3>
-      <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#555', lineHeight: 1.6 }}>
+      <p style={{ margin: '0 0 24px', fontSize: '14px', color: 'var(--dj-muted)', lineHeight: 1.6 }}>
         {message}
       </p>
 
@@ -155,7 +155,7 @@ export function UpgradePrompt({
           <div
             style={{
               display: 'flex',
-              background: '#f3f4f6',
+              background: 'var(--dj-surface2)',
               borderRadius: '8px',
               padding: '3px',
               marginBottom: '20px',
@@ -174,8 +174,8 @@ export function UpgradePrompt({
                   cursor: 'pointer',
                   fontWeight: billing === cycle ? 700 : 400,
                   fontSize: '13px',
-                  background: billing === cycle ? '#fff' : 'transparent',
-                  color: billing === cycle ? '#1a1a1a' : '#666',
+                  background: billing === cycle ? 'var(--dj-surface3)' : 'transparent',
+                  color: billing === cycle ? 'var(--fg)' : 'var(--dj-muted)',
                   boxShadow: billing === cycle ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
                   transition: 'all 0.15s',
                 }}
@@ -186,17 +186,17 @@ export function UpgradePrompt({
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <span style={{ fontSize: '32px', fontWeight: 700, color: '#1a1a1a' }}>
+            <span style={{ fontSize: '32px', fontWeight: 700, color: 'var(--fg)' }}>
               ${billing === 'monthly' ? (monthlyCents / 100).toFixed(0) : (annualCents / 100).toFixed(0)}
             </span>
-            <span style={{ fontSize: '14px', color: '#888' }}> / month</span>
+            <span style={{ fontSize: '14px', color: 'var(--dj-muted)' }}> / month</span>
             {billing === 'annual' && (
               <span
                 style={{
                   marginLeft: '8px',
                   fontSize: '12px',
-                  background: '#e8f5e9',
-                  color: '#2e7d32',
+                  background: 'rgba(46,125,50,0.18)',
+                  color: 'var(--looper-lime)',
                   padding: '2px 8px',
                   borderRadius: '10px',
                   fontWeight: 600,
@@ -213,8 +213,8 @@ export function UpgradePrompt({
             style={{
               width: '100%',
               padding: '14px',
-              background: loading ? '#ccc' : color,
-              color: '#fff',
+              background: loading ? 'var(--dj-dim)' : color,
+              color: 'var(--white)',
               border: 'none',
               borderRadius: '10px',
               cursor: loading ? 'not-allowed' : 'pointer',
@@ -228,7 +228,7 @@ export function UpgradePrompt({
               : `Start 7-day free trial — then $${billing === 'monthly' ? (monthlyCents / 100).toFixed(0) : (annualCents / 100).toFixed(0)}/mo`}
           </button>
 
-          <p style={{ marginTop: '12px', fontSize: '11px', color: '#aaa', textAlign: 'center' }}>
+          <p style={{ marginTop: '12px', fontSize: '11px', color: 'var(--dj-muted)', textAlign: 'center' }}>
             Cancel any time · No commitment · Secure checkout via Stripe
           </p>
         </>
@@ -255,7 +255,7 @@ export function FeatureGate({
   fallback,
 }: FeatureGateProps) {
   const { can } = useSubscription();
-  const _allowed = can(feature);
+  const allowed = can(feature);
 
   if (allowed) return <>{children}</>;
 

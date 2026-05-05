@@ -100,11 +100,11 @@ const EffectNode: React.FC<EffectNodeProps> = ({
 };
 
 // TODO: Implement ReverbControls, DelayControls, etc.
-const _ReverbControls = ({ params, onChange }: any) => (
+const ReverbControls = ({ params, onChange }: any) => (
   <div className="text-xs text-muted-foreground">Reverb controls coming...</div>
 );
 
-const _DelayControls = ({ params, onChange }: any) => (
+const DelayControls = ({ params, onChange }: any) => (
   <div className="text-xs text-muted-foreground">Delay controls coming...</div>
 );
 
@@ -119,7 +119,7 @@ interface CrossfaderProps {
 }
 
 export const Crossfader: React.FC<CrossfaderProps> = ({ state, onChange }) => {
-  const _handleChange = useCallback(
+  const handleChange = useCallback(
     (values: number[]) => {
       onChange(values[0]);
     },
@@ -209,7 +209,7 @@ export const HotCues: React.FC<HotCuesProps> = ({
             )}
             style={
               cue.isActive
-                ? { backgroundColor: cue.color, color: '#fff' }
+                ? { backgroundColor: cue.color, color: 'var(--white)' }
                 : undefined
             }
           >
@@ -246,13 +246,13 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   onSelectionChange,
   currentPosition,
 }) => {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current || !audioBuffer) return;
 
-    const _canvas = canvasRef.current;
-    const _ctx = canvas.getContext('2d');
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     // Clear canvas
@@ -267,45 +267,45 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     // Draw selection
     if (selection.isActive) {
       ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-      const _startX = selection.start * state.config.pixelsPerSecond;
-      const _endX = selection.end * state.config.pixelsPerSecond;
+      const startX = selection.start * state.config.pixelsPerSecond;
+      const endX = selection.end * state.config.pixelsPerSecond;
       ctx.fillRect(startX, 0, endX - startX, canvas.height);
     }
 
     // Draw playhead
     ctx.strokeStyle = state.config.progressColor;
     ctx.lineWidth = 2;
-    const _playheadX = currentPosition * state.config.pixelsPerSecond;
+    const playheadX = currentPosition * state.config.pixelsPerSecond;
     ctx.beginPath();
     ctx.moveTo(playheadX, 0);
     ctx.lineTo(playheadX, canvas.height);
     ctx.stroke();
   }, [audioBuffer, state, selection, currentPosition]);
 
-  const _drawWaveform = (
+  const drawWaveform = (
     ctx: CanvasRenderingContext2D,
     buffer: AudioBuffer,
     state: unknown
   ) => {
-    const _rawData = buffer.getChannelData(0);
-    const _samples = rawData.length;
-    const _blockSize = Math.floor(samples / (state.config.width * state.config.pixelsPerSecond));
+    const rawData = buffer.getChannelData(0);
+    const samples = rawData.length;
+    const blockSize = Math.floor(samples / (state.config.width * state.config.pixelsPerSecond));
 
     ctx.beginPath();
     ctx.moveTo(0, state.config.height / 2);
 
-    for (let _i = 0; i < samples; i += blockSize) {
-      const _blockEnd = Math.min(i + blockSize, samples);
-      let _sum = 0;
+    for (let i = 0; i < samples; i += blockSize) {
+      const blockEnd = Math.min(i + blockSize, samples);
+      let sum = 0;
 
-      for (let _j = i; j < blockEnd; j++) {
+      for (let j = i; j < blockEnd; j++) {
         sum += Math.abs(rawData[j]);
       }
 
-      const _avg = sum / (blockEnd - i);
-      const _canvasHeight = avg * state.config.height;
-      const _x = (i / blockSize / state.config.pixelsPerSecond) % state.config.width;
-      const _y = state.config.height / 2 - canvasHeight / 2;
+      const avg = sum / (blockEnd - i);
+      const canvasHeight = avg * state.config.height;
+      const x = (i / blockSize / state.config.pixelsPerSecond) % state.config.width;
+      const y = state.config.height / 2 - canvasHeight / 2;
 
       ctx.lineTo(x, y);
     }
@@ -321,9 +321,9 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         height={state.config.height}
         className="w-full cursor-crosshair"
         onMouseDown={(e) => {
-          const _rect = e.currentTarget.getBoundingClientRect();
-          const _x = e.clientX - rect.left;
-          const _startTime = x / state.config.pixelsPerSecond;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const startTime = x / state.config.pixelsPerSecond;
           onSelectionChange(startTime, startTime);
         }}
       />

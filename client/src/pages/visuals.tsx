@@ -42,7 +42,7 @@ import type { IRPreset } from '@/audio/effects/ir-reverb-engine';
  * animated by N8AOBeatController each frame.
  */
 function N8AOLayer() {
-  const _n8aoRef = useRef<InstanceType<typeof N8AOPostPass> | null>(null);
+  const n8aoRef = useRef<InstanceType<typeof N8AOPostPass> | null>(null);
   const fftRef  = useLoopEngineFFTRef();
 
   // N8AOBeatController handles the frame-by-frame param animation
@@ -59,7 +59,7 @@ function SceneContent({ colorBase, colorAccent }: { colorBase: string; colorAcce
         colorBase={colorBase}
         colorAccent={colorAccent}
         showRing
-        ringColor="#00aaff"
+        ringColor="var(--accent-blue)"
         animateCamera
       />
 
@@ -73,7 +73,7 @@ function SceneContent({ colorBase, colorAccent }: { colorBase: string; colorAcce
         depth={0.03}
         gain={1.8}
         colorLow={colorAccent}
-        colorHigh="#ff3366"
+        colorHigh="var(--status-error)"
         position={[0, -3, -1]}
         rotation={[0, 0, 0]}
       />
@@ -87,8 +87,8 @@ function SceneContent({ colorBase, colorAccent }: { colorBase: string; colorAcce
         height={0.5}
         depth={0.02}
         gain={2.0}
-        colorLow="#003366"
-        colorHigh="#0088ff"
+        colorLow="var(--accent-blue-deep)"
+        colorHigh="var(--accent-blue)"
         position={[0, -3.8, -2]}
       />
 
@@ -112,14 +112,14 @@ interface ControlsOverlayProps {
 }
 
 function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAccentChange }: ControlsOverlayProps) {
-  // PRD §3 design system: cyan = #00F5FF (active), violet = AI, amber = warning
+  // PRD §3 design system: cyan = var(--accent-cyan) (active), violet = AI, amber = warning
   const [msWidth,     setMsWidthVal]  = useState(1.0);
   const [open,        setOpen]        = useState(false);
 
-  const _sc = useSidechain();
-  const _ir = useIRReverb();
+  const sc = useSidechain();
+  const ir = useIRReverb();
 
-  const _handleMSWidth = (v: number) => {
+  const handleMSWidth = (v: number) => {
     setMsWidthVal(v);
     instrumentEngine.setMSWidth(v);
   };
@@ -127,14 +127,14 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
   // Shared label style
   const labelStyle: React.CSSProperties = {
     fontSize: 10,
-    color: '#aaa',
+    color: 'var(--daw-sub)',
     fontFamily: '"IBM Plex Mono", monospace',
   };
 
   const rangeStyle: React.CSSProperties = {
     width: '100%',
     height: 4,
-    background: '#222',
+    background: 'var(--dj-border)',
     appearance: 'none' as const,
     cursor: 'pointer',
     accentColor: '#a3e635',
@@ -156,7 +156,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
           alignItems:     'center',
           justifyContent: 'center',
           background:     'rgba(0,0,0,0.75)',
-          border:         '1px solid #333',
+          border:         '1px solid var(--dj-dimmer)',
           color:          '#a3e635',
           fontFamily:     '"IBM Plex Mono", monospace',
           fontSize:       12,
@@ -178,10 +178,10 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
             width:         288,
             padding:       16,
             background:    'rgba(0,0,0,0.88)',
-            border:        '1px solid #222',
+            border:        '1px solid var(--dj-border)',
             fontFamily:    '"IBM Plex Mono", monospace',
             fontSize:      12,
-            color:         '#aaa',
+            color:         'var(--daw-sub)',
             display:       'flex',
             flexDirection: 'column',
             gap:           16,
@@ -221,7 +221,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
               onChange={e => handleMSWidth(parseFloat(e.target.value))}
               style={rangeStyle}
             />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#444', marginTop: 2 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--dj-dim)', marginTop: 2 }}>
               <span>mono</span><span>unity</span><span>wide</span>
             </div>
           </div>
@@ -239,9 +239,9 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
                   padding:         '2px 8px',
                   fontSize:        10,
                   fontFamily:      '"IBM Plex Mono", monospace',
-                  border:          sc.enabled ? '1px solid #a3e635' : '1px solid #333',
+                  border:          sc.enabled ? '1px solid #a3e635' : '1px solid var(--dj-dimmer)',
                   background:      sc.enabled ? '#a3e635' : 'transparent',
-                  color:           sc.enabled ? '#000' : '#555',
+                  color:           sc.enabled ? 'var(--dj-black)' : '#555',
                   cursor:          'pointer',
                   transition:      'all 0.1s',
                 }}
@@ -270,7 +270,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={labelStyle}>IR Reverb</span>
               {ir.loading && <span style={{ fontSize: 9, color: '#555' }}>loading…</span>}
-              {ir.error   && <span style={{ fontSize: 9, color: '#f87171' }} title={ir.error}>error</span>}
+              {ir.error   && <span style={{ fontSize: 9, color: 'var(--status-error-soft)' }} title={ir.error}>error</span>}
               {ir.loaded  && <span style={{ fontSize: 9, color: '#a3e635' }}>✓ loaded</span>}
             </div>
 
@@ -284,7 +284,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
                     padding:        '2px 4px',
                     fontSize:        9,
                     fontFamily:     '"IBM Plex Mono", monospace',
-                    border:         ir.currentPreset === p ? '1px solid #a3e635' : '1px solid #333',
+                    border:         ir.currentPreset === p ? '1px solid #a3e635' : '1px solid var(--dj-dimmer)',
                     background:     ir.currentPreset === p ? 'rgba(163,230,53,0.10)' : 'transparent',
                     color:          ir.currentPreset === p ? '#a3e635' : '#555',
                     cursor:         'pointer',
@@ -317,7 +317,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
             )}
 
             {!ir.loaded && !ir.loading && (
-              <p style={{ fontSize: 9, color: '#444', lineHeight: 1.5, margin: 0 }}>
+              <p style={{ fontSize: 9, color: 'var(--dj-dim)', lineHeight: 1.5, margin: 0 }}>
                 Place .wav files in client/public/ir/ to enable presets.
                 See README in that directory.
               </p>
@@ -332,11 +332,11 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function VisualsPage() {
-  const [colorBase,   setColorBase]   = useState('#1a0066');
-  const [colorAccent, setColorAccent] = useState('#00ff88');
+  const [colorBase,   setColorBase]   = useState('var(--accent-blue-deep)');
+  const [colorAccent, setColorAccent] = useState('var(--accent-neon-green)');
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000000', color: '#f0f0f0', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--dj-black)', color: 'var(--daw-fg)', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column' }}>
       <PageNav />
 
       {/* Full-screen canvas */}
@@ -346,9 +346,9 @@ export default function VisualsPage() {
           dpr={[1, 2]}
           camera={{ position: [0, 2, 6], fov: 50 }}
           gl={{ antialias: true, powerPreference: 'high-performance', alpha: false }}
-          style={{ background: '#000' }}
+          style={{ background: 'var(--dj-black)' }}
         >
-          <color attach="background" args={['#000000']} />
+          <color attach="background" args={['var(--dj-black)']} />
 
           <Suspense fallback={null}>
             <SceneContent colorBase={colorBase} colorAccent={colorAccent} />
@@ -384,28 +384,28 @@ export default function VisualsPage() {
 
 function BandMeterHUD() {
   const fftRef  = useLoopEngineFFTRef();
-  const _barRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const BANDS   = ['sub','low','mid','high','pres','air'] as const;
-  const COLORS  = ['#ff2244','#ff6600','#ffcc00','#00ff88','#00F5FF','#aa44ff']; // PRD §3: cyan #00F5FF
+  const COLORS  = ['var(--signal-clip-alt)','var(--accent-orange)','var(--accent-yellow)','var(--accent-neon-green)','var(--accent-cyan)','var(--accent-purple)']; // PRD §3: cyan var(--accent-cyan)
 
   // Animate DOM elements from rAF — zero React re-renders
   const rafRef    = useRef<number>(0);
-  const _startedRef = useRef(false);
+  const startedRef = useRef(false);
 
   // Cancel the loop on unmount to avoid stale-ref memory leak
   useEffect(() => {
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, []);
 
-  const _startHUD = () => {
+  const startHUD = () => {
     if (startedRef.current) return;
     startedRef.current = true;
-    const _tick = () => {
+    const tick = () => {
       rafRef.current = requestAnimationFrame(tick);
-      const _b = fftRef.current.bands;
-      const _vals = [b.sub, b.low, b.mid, b.high, b.presence, b.air];
+      const b = fftRef.current.bands;
+      const vals = [b.sub, b.low, b.mid, b.high, b.presence, b.air];
       vals.forEach((v, i) => {
-        const _el = barRefs.current[i];
+        const el = barRefs.current[i];
         if (el) el.style.height = `${Math.min(100, v * 200)}%`;
       });
     };
@@ -413,7 +413,7 @@ function BandMeterHUD() {
   };
 
   // Ref callback on first bar mount — guards against multiple invocations
-  const _firstBarRef = (el: HTMLDivElement | null) => {
+  const firstBarRef = (el: HTMLDivElement | null) => {
     barRefs.current[0] = el;
     if (el) startHUD();
   };

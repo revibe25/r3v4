@@ -40,14 +40,14 @@ export function usePricing(): UsePricingReturn {
   const [cycle, setCycle]           = useState<BillingCycle>("annual");
   const [checkoutStatus, setStatus] = useState<CheckoutStatus>({ type: "idle" });
   const inFlightRef                 = useRef(false);
-  const _checkoutMutation = trpc.subscription.createCheckout.useMutation();
+  const checkoutMutation = trpc.subscription.createCheckout.useMutation();
 
-  const _toggleCycle = useCallback(() =>
+  const toggleCycle = useCallback(() =>
     setCycle(p => p === "monthly" ? "annual" : "monthly"), []);
 
-  const _clearError = useCallback(() => setStatus({ type: "idle" }), []);
+  const clearError = useCallback(() => setStatus({ type: "idle" }), []);
 
-  const _initiateCheckout = useCallback(async (plan: Plan): Promise<void> => {
+  const initiateCheckout = useCallback(async (plan: Plan): Promise<void> => {
     // Explorer is always free — no checkout flow
     if (isFree(plan)) {
       window.location.href = "/";
@@ -59,7 +59,7 @@ export function usePricing(): UsePricingReturn {
     setStatus({ type: "pending", planId: plan.id });
 
     try {
-      const _result = await checkoutMutation.mutateAsync({
+      const result = await checkoutMutation.mutateAsync({
         tier: plan.id as 'creator' | 'pro_artist',
         billingCycle: cycle,
       });

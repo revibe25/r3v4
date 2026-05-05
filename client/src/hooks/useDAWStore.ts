@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: Store default track state color — initial channel strip warning threshold
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * useDAWStore.ts
  * Central Zustand store for R3 v4 DAW state.
@@ -266,25 +271,25 @@ interface DAWStore {
   setTrackHeightMode: (m: 'compact' | 'normal' | 'large') => void;
 }
 
-let _id = 0;
-const _uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++_id}`;
+let id = 0;
+const uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++_id}`;
 
 const DEFAULT_TRACKS: Track[] = [
-  { id: 'trk_1', label: 'KICK',   type: 'audio', color: '#f59e0b', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_1', label: 'KICK',   type: 'audio', color: 'var(--status-warn)', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
   { id: 'trk_2', label: 'SNARE',  type: 'audio', color: '#ef4444', gain: 0.75,pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
-  { id: 'trk_3', label: 'HI-HAT', type: 'audio', color: '#22c55e', gain: 0.6, pan: 0.3,  mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
-  { id: 'trk_4', label: 'BASS',   type: 'midi',  color: '#22d3ee', gain: 0.9, pan: -0.1, mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
-  { id: 'trk_5', label: 'SYNTH',  type: 'midi',  color: '#a855f7', gain: 0.7, pan: 0.2,  mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
-  { id: 'trk_6', label: 'PAD',    type: 'midi',  color: '#f472b6', gain: 0.5, pan: -0.2, mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
-  { id: 'trk_7', label: 'FX BUS', type: 'bus',   color: '#64748b', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_3', label: 'HI-HAT', type: 'audio', color: 'var(--accent-green)', gain: 0.6, pan: 0.3,  mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_4', label: 'BASS',   type: 'midi',  color: 'var(--looper-cyan)', gain: 0.9, pan: -0.1, mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_5', label: 'SYNTH',  type: 'midi',  color: 'var(--accent-violet)', gain: 0.7, pan: 0.2,  mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_6', label: 'PAD',    type: 'midi',  color: 'var(--looper-pink)', gain: 0.5, pan: -0.2, mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
+  { id: 'trk_7', label: 'FX BUS', type: 'bus',   color: 'var(--text-dim)', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},
 ];
 
 const DEFAULT_REGIONS: TrackRegion[] = [
-  { id: 'reg_1', trackId: 'trk_1', startBeat: 0,  lengthBeats: 16, clipId: 'c1', label: 'INTRO',  color: '#f59e0b' },
-  { id: 'reg_2', trackId: 'trk_1', startBeat: 16, lengthBeats: 32, clipId: 'c2', label: 'LOOP A', color: '#f59e0b' },
+  { id: 'reg_1', trackId: 'trk_1', startBeat: 0,  lengthBeats: 16, clipId: 'c1', label: 'INTRO',  color: 'var(--status-warn)' },
+  { id: 'reg_2', trackId: 'trk_1', startBeat: 16, lengthBeats: 32, clipId: 'c2', label: 'LOOP A', color: 'var(--status-warn)' },
   { id: 'reg_3', trackId: 'trk_2', startBeat: 4,  lengthBeats: 28, clipId: 'c3', label: 'GROOVE', color: '#ef4444' },
-  { id: 'reg_4', trackId: 'trk_4', startBeat: 0,  lengthBeats: 48, clipId: 'c4', label: 'BASS A', color: '#22d3ee' },
-  { id: 'reg_5', trackId: 'trk_5', startBeat: 16, lengthBeats: 16, clipId: 'c5', label: 'ARP',    color: '#a855f7' },
+  { id: 'reg_4', trackId: 'trk_4', startBeat: 0,  lengthBeats: 48, clipId: 'c4', label: 'BASS A', color: 'var(--looper-cyan)' },
+  { id: 'reg_5', trackId: 'trk_5', startBeat: 16, lengthBeats: 16, clipId: 'c5', label: 'ARP',    color: 'var(--accent-violet)' },
 ];
 
 const DEFAULT_PATTERN: MidiPattern = {
@@ -300,7 +305,7 @@ const DEFAULT_PATTERN: MidiPattern = {
   ],
 };
 
-export const _useDAWStore = create<DAWStore>()(
+export const useDAWStore = create<DAWStore>()(
   subscribeWithSelector((set, get) => ({
     // Transport
     playing: false,
@@ -386,7 +391,7 @@ export const _useDAWStore = create<DAWStore>()(
 
     // ── Track actions ────────────────────────────────────────────────────────
     addTrack: (track) => {
-      const _id = uid('trk');
+      const id = uid('trk');
       set(s => ({ tracks: [...s.tracks, { ...track, id }] }));
       return id;
     },
@@ -400,7 +405,7 @@ export const _useDAWStore = create<DAWStore>()(
     setSelectedTrack: (id) => set({ selectedTrackId: id }),
     setSelectedRegion: (id) => set({ selectedRegionId: id }),
     addRegion: (region) => {
-      const _id = uid('reg');
+      const id = uid('reg');
       set(s => ({ regions: [...s.regions, { ...region, id }] }));
       return id;
     },
@@ -455,7 +460,7 @@ export const _useDAWStore = create<DAWStore>()(
       })),
     setSequencerStep: (step) => set({ sequencerStep: step }),
     addMidiPattern: (pattern) => {
-      const _id = uid('pat');
+      const id = uid('pat');
       set(s => ({ midiPatterns: [...s.midiPatterns, { ...pattern, id }] }));
       return id;
     },

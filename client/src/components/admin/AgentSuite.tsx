@@ -16,22 +16,22 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc"; // verify path against your tRPC client setup
 
 // ─── Design Tokens (Wire.txt §5 — acid-techno palette — NON-NEGOTIABLE) ────────
-const _T = {
-  black:   "#060606",
-  acid:    "#a3e635",   // primary interactive accent — NOT #b8ff00 (stale, forbidden)
-  cyan:    "#00F5FF",   // active state / audio engine running
-  violet:  "#8B5CF6",  // AI actions / LLPTE overlay / suggestions
-  amber:   "#F59E0B",  // warning / VU amber zone
+const T = {
+  black:   "var(--void)",
+  acid:    "#a3e635",   // primary interactive accent — NOT var(--b8lime) (stale, forbidden)
+  cyan:    "var(--accent-cyan)",   // active state / audio engine running
+  violet:  "var(--accent-purple)",  // AI actions / LLPTE overlay / suggestions
+  amber:   "var(--status-warn)",  // warning / VU amber zone
   red:     "#EF4444",  // danger / VU clip / armed record
-  emerald: "#10B981",  // output bus / active effects / confirmed OK
-  z950:    "#09090b",  // dominant zone background (timeline, node canvas)
-  z900:    "#18181b",  // sidebar backgrounds
-  z800:    "#27272a",  // card backgrounds / border color
-  z700:    "#3f3f46",  // inactive controls
-  z600:    "#52525b",
-  z500:    "#71717a",
-  z400:    "#a1a1aa",  // secondary text / labels
-  z100:    "#f4f4f5",  // active / selected text
+  emerald: "var(--status-ok)",  // output bus / active effects / confirmed OK
+  z950:    "var(--z950)",  // dominant zone background (timeline, node canvas)
+  z900:    "var(--panel)",  // sidebar backgrounds
+  z800:    "var(--zinc-800)",  // card backgrounds / border color
+  z700:    "var(--zinc-700)",  // inactive controls
+  z600:    "var(--zinc-600)",
+  z500:    "var(--text-dim)",
+  z400:    "var(--zinc-400)",  // secondary text / labels
+  z100:    "var(--text-primary)",  // active / selected text
 } as const;
 
 // ─── Types ───────────────────────────────────────────────────────────────────────
@@ -275,21 +275,21 @@ RECOMMENDED FIRST AGENTS: @llpte/spectral and @r3vibe/auth — clearest scope bo
     systemPrompt: `You are the Design Oracle — definitive authority on R3 v4's UI architecture and design system. Knowledge derived EXCLUSIVELY from Wire.txt §4 and §5.
 
 TOKEN TABLE (Wire.txt §5):
-  #060606 (--ag-black)  = Absolute black. ALL primary backgrounds.
-  #a3e635 (--ag-acid)   = Acid green. Primary interactive accent. (NOT #b8ff00 — stale, forbidden)
-  #00F5FF               = Cyan. Active state. Audio engine running. Playhead.
-  #8B5CF6               = Violet. AI actions. LLPTE overlay. Suggestions.
-  #F59E0B               = Amber. Warning. VU amber zone. Inference timeout.
+  var(--void) (--ag-black)  = Absolute black. ALL primary backgrounds.
+  #a3e635 (--ag-acid)   = Acid green. Primary interactive accent. (NOT var(--b8lime) — stale, forbidden)
+  var(--accent-cyan)               = Cyan. Active state. Audio engine running. Playhead.
+  var(--accent-purple)               = Violet. AI actions. LLPTE overlay. Suggestions.
+  var(--status-warn)               = Amber. Warning. VU amber zone. Inference timeout.
   #EF4444               = Red. Danger. VU clip. Armed record. Incompatible key.
-  #10B981               = Emerald. Output bus. Active effects. Confirmed OK.
-  zinc-950 (#09090b)    = Dominant zone background
+  var(--status-ok)               = Emerald. Output bus. Active effects. Confirmed OK.
+  zinc-950 (var(--z950))    = Dominant zone background
   zinc-900              = Sidebar backgrounds
   zinc-800              = Card backgrounds, border color
   zinc-700              = Inactive controls
   zinc-400              = Secondary text, labels
   zinc-100              = Active/selected text
 
-FORBIDDEN: #b8ff00 · purple gradients on non-AI surfaces · accent color semantic swaps.
+FORBIDDEN: var(--b8lime) · purple gradients on non-AI surfaces · accent color semantic swaps.
 
 TYPOGRAPHY CONTRACT:
   BPM, dB, ms, Hz, latency readouts → JetBrains Mono
@@ -632,20 +632,20 @@ If a proposed feature appears on this list, flag it as out of scope before any f
   },
 ];
 
-const _CATEGORIES = ["PRIME", "AI PIPELINE", "INTERFACE", "DATA LAYER", "BUILD", "QUALITY", "STRATEGY"] as const;
+const CATEGORIES = ["PRIME", "AI PIPELINE", "INTERFACE", "DATA LAYER", "BUILD", "QUALITY", "STRATEGY"] as const;
 
 // ─── Markdown / code block renderer ──────────────────────────────────────────
 function renderMessage(text: string, accentColor: string): React.ReactNode {
-  const _parts = text.split(/(```[\s\S]*?```)/g);
+  const parts = text.split(/(```[\s\S]*?```)/g);
   return parts.map((part, i) => {
     if (part.startsWith("```")) {
-      const _lines = part.split("\n");
-      const _lang = lines[0].replace("```", "").trim();
-      const _code = lines.slice(1, -1).join("\n");
+      const lines = part.split("\n");
+      const lang = lines[0].replace("```", "").trim();
+      const code = lines.slice(1, -1).join("\n");
       return (
         <div key={i} style={{
           margin: "8px 0",
-          background: "#09090b",
+          background: "var(--z950)",
           border: `1px solid ${T.z700}`,
           borderRadius: 6,
           overflow: "hidden",
@@ -671,7 +671,7 @@ function renderMessage(text: string, accentColor: string): React.ReactNode {
         </div>
       );
     }
-    const _inlineParts = part.split(/(`[^`]+`)/g);
+    const inlineParts = part.split(/(`[^`]+`)/g);
     return (
       <span key={i}>
         {inlineParts.map((ip, j) => {
@@ -723,10 +723,10 @@ function QuickChip({ label, color, onClick }: { label: string; color: string; on
 
 // ─── Message Bubble ───────────────────────────────────────────────────────────
 function Bubble({ msg, agent }: { msg: Message; agent: Agent }) {
-  const _isUser = msg.role === "user";
+  const isUser = msg.role === "user";
   const [copied, setCopied] = useState(false);
 
-  const _copy = () => {
+  const copy = () => {
     navigator.clipboard.writeText(msg.content).catch(() => undefined);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
@@ -822,18 +822,18 @@ function ChatPanel({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const _bottomRef = useRef<HTMLDivElement>(null);
-  const _textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // tRPC mutation — proxied server-side with API key (Wire.txt §7)
-  const _agentChat = trpc.admin.agentChat.useMutation();
+  const agentChat = trpc.admin.agentChat.useMutation();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
 
-  const _send = useCallback(async (text?: string) => {
-    const _content = (text ?? input).trim();
+  const send = useCallback(async (text?: string) => {
+    const content = (text ?? input).trim();
     if (!content || loading) return;
     setInput("");
     if (textareaRef.current) {
@@ -845,7 +845,7 @@ function ChatPanel({
     setLoading(true);
 
     try {
-      const _result = await agentChat.mutateAsync({
+      const result = await agentChat.mutateAsync({
         agentId: agent.id,
         systemPrompt: agent.systemPrompt,
         messages: updated.map(m => ({ role: m.role, content: m.content })),
@@ -853,27 +853,27 @@ function ChatPanel({
       });
       setMessages([...updated, { role: "assistant", content: result.content }]);
     } catch (err: unknown) {
-      const _msg = err instanceof Error ? err.message : "API error";
+      const msg = err instanceof Error ? err.message : "API error";
       setError(msg);
     } finally {
       setLoading(false);
     }
   }, [input, loading, messages, setMessages, agent, agentChat]);
 
-  const _onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       void send();
     }
   };
 
-  const _onInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     e.target.style.height = "auto";
     e.target.style.height = Math.min(e.target.scrollHeight, 160) + "px";
   };
 
-  const _isEmpty = messages.length === 0;
+  const isEmpty = messages.length === 0;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -1029,9 +1029,9 @@ export function AgentSuite() {
   const [activeId, setActiveId] = useState<string>(AGENTS[0].id);
   const [allMessages, setAllMessages] = useState<MessageStore>({});
 
-  const _activeAgent = AGENTS.find(a => a.id === activeId) ?? AGENTS[0];
+  const activeAgent = AGENTS.find(a => a.id === activeId) ?? AGENTS[0];
   const msgs: Message[] = allMessages[activeId] ?? [];
-  const _setMsgs = (updated: Message[]) =>
+  const setMsgs = (updated: Message[]) =>
     setAllMessages(prev => ({ ...prev, [activeId]: updated }));
 
   const counts: Record<string, number> = {};
@@ -1048,7 +1048,7 @@ export function AgentSuite() {
         ::-webkit-scrollbar{width:3px;height:3px;}
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:2px;}
-        ::placeholder{color:#52525b;}
+        ::placeholder{color:var(--zinc-600);}
       `}</style>
 
       <div style={{
@@ -1091,7 +1091,7 @@ export function AgentSuite() {
           {/* Agent list by category */}
           <div style={{ flex: 1, padding: "8px 6px", overflowY: "auto" }}>
             {CATEGORIES.map(cat => {
-              const _catAgents = AGENTS.filter(a => a.category === cat);
+              const catAgents = AGENTS.filter(a => a.category === cat);
               if (catAgents.length === 0) return null;
               return (
                 <div key={cat} style={{ marginBottom: 6 }}>
@@ -1101,8 +1101,8 @@ export function AgentSuite() {
                     fontFamily: "'JetBrains Mono', monospace",
                   }}>{cat}</div>
                   {catAgents.map(agent => {
-                    const _isActive = agent.id === activeId;
-                    const _msgCount = counts[agent.id] ?? 0;
+                    const isActive = agent.id === activeId;
+                    const msgCount = counts[agent.id] ?? 0;
                     return (
                       <button
                         key={agent.id}

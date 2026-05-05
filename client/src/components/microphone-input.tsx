@@ -3,17 +3,17 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const ACID       = "#a3e635";
-const RED        = "#ff2200";
-const AMBER      = "#ffaa00";
-const BLK        = "#000000";
-const SURF       = "#0c0c0c";
-const SURF2      = "#111111";
-const SURF3      = "#161616";
-const BORDER     = "#222222";
+const RED        = "var(--signal-clip)";
+const AMBER      = "var(--signal-warn)";
+const BLK        = "var(--dj-black)";
+const SURF       = "var(--dj-surface)";
+const SURF2      = "var(--dj-surface2)";
+const SURF3      = "var(--dj-surface3)";
+const BORDER     = "var(--dj-border)";
 const BORDER2    = "#2a2a2a";
-const DIM        = "#444444";
-const DIMMER     = "#333333";
-const MUTED      = "#666666";
+const DIM        = "var(--dj-dim)";
+const DIMMER     = "var(--dj-dimmer)";
+const MUTED      = "var(--dj-muted)";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ActiveTab   = "signal" | "process" | "record" | "route";
@@ -75,8 +75,8 @@ const EMPTY_STATS: AudioStats = { currentDb: -60, peakDb: -60, avgDb: -60, lufs:
 // ─── Utilities ────────────────────────────────────────────────────────────────
 const clamp   = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 const dbNorm  = (db: number) => clamp((db + 60) * (100 / 60), 0, 100);
-const _fmtTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2,"0")}:${(s % 60).toFixed(0).padStart(2,"0")}`;
-const _fmtSize = (kb: number) => kb < 1024 ? `${kb.toFixed(0)} KB` : `${(kb/1024).toFixed(1)} MB`;
+const fmtTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2,"0")}:${(s % 60).toFixed(0).padStart(2,"0")}`;
+const fmtSize = (kb: number) => kb < 1024 ? `${kb.toFixed(0)} KB` : `${(kb/1024).toFixed(1)} MB`;
 
 function levelColor(pct: number): string {
   if (pct > 90) return RED;
@@ -86,39 +86,39 @@ function levelColor(pct: number): string {
 
 /** Autocorrelation pitch detection — returns Hz or null */
 function detectPitch(buf: Float32Array, sampleRate: number): number | null {
-  const _SIZE = buf.length;
-  let _rms = 0;
-  for (let _i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
   if (rms < 0.01) return null;
 
-  let _r1 = 0, r2 = SIZE - 1;
-  for (let _i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < 0.2) { r1 = i; break; } }
-  for (let _i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < 0.2) { r2 = SIZE - i; break; } }
-  const _trimmed = buf.slice(r1, r2);
-  const _N = trimmed.length;
-  const _c = new Float32Array(N);
-  for (let _lag = 0; lag < N; lag++) {
-    let _s = 0;
-    for (let _i = 0; i < N - lag; i++) s += trimmed[i] * trimmed[i + lag];
+  let r1 = 0, r2 = SIZE - 1;
+  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) < 0.2) { r1 = i; break; } }
+  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) < 0.2) { r2 = SIZE - i; break; } }
+  const trimmed = buf.slice(r1, r2);
+  const N = trimmed.length;
+  const c = new Float32Array(N);
+  for (let lag = 0; lag < N; lag++) {
+    let s = 0;
+    for (let i = 0; i < N - lag; i++) s += trimmed[i] * trimmed[i + lag];
     c[lag] = s;
   }
-  let _d = 0;
+  let d = 0;
   while (d < N && c[d] > c[d + 1]) d++;
-  let _maxVal = -Infinity, maxPos = -1;
-  for (let _i = d; i < N; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
+  let maxVal = -Infinity, maxPos = -1;
+  for (let i = d; i < N; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
   if (maxPos < 1 || maxVal < c[0] * 0.5) return null;
-  const _x1 = c[maxPos - 1], x2 = c[maxPos], x3 = c[maxPos + 1] ?? 0;
-  const _interp = maxPos + (x3 - x1) / (2 * (2 * x2 - x1 - x3));
+  const x1 = c[maxPos - 1], x2 = c[maxPos], x3 = c[maxPos + 1] ?? 0;
+  const interp = maxPos + (x3 - x1) / (2 * (2 * x2 - x1 - x3));
   return sampleRate / interp;
 }
 
 function freqToNote(hz: number): { note: string; octave: number; cents: number } {
-  const _semitones = 12 * Math.log2(hz / 440) + 69;
-  const _midi = Math.round(semitones);
-  const _cents = Math.round((semitones - midi) * 100);
-  const _note = NOTE_NAMES[((midi % 12) + 12) % 12];
-  const _octave = Math.floor(midi / 12) - 1;
+  const semitones = 12 * Math.log2(hz / 440) + 69;
+  const midi = Math.round(semitones);
+  const cents = Math.round((semitones - midi) * 100);
+  const note = NOTE_NAMES[((midi % 12) + 12) % 12];
+  const octave = Math.floor(midi / 12) - 1;
   return { note, octave, cents };
 }
 
@@ -139,12 +139,12 @@ function Tab({ label, active, onClick }: { label: string; active: boolean; onCli
 function Knob({ value, min = 0, max = 100, onChange, disabled = false, label, fmt, size = 56 }:
   { value: number; min?: number; max?: number; onChange: (v: number) => void;
     disabled?: boolean; label: string; fmt: string; size?: number }) {
-  const _drag = useRef(false), startY = useRef(0), startV = useRef(0);
-  const _pct = (value - min) / (max - min);
-  const _angle = pct * 270 - 135;
-  const _cx = size / 2, cy = size / 2 + 2, r = size / 2 - 5;
-  const _sa = -225 * (Math.PI / 180);
-  const _ea = (-225 + pct * 270) * (Math.PI / 180);
+  const drag = useRef(false), startY = useRef(0), startV = useRef(0);
+  const pct = (value - min) / (max - min);
+  const angle = pct * 270 - 135;
+  const cx = size / 2, cy = size / 2 + 2, r = size / 2 - 5;
+  const sa = -225 * (Math.PI / 180);
+  const ea = (-225 + pct * 270) * (Math.PI / 180);
   const [x1, y1] = [cx + r * Math.cos(sa), cy + r * Math.sin(sa)];
   const [x2, y2] = [cx + r * Math.cos(ea), cy + r * Math.sin(ea)];
 
@@ -152,7 +152,7 @@ function Knob({ value, min = 0, max = 100, onChange, disabled = false, label, fm
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
       <svg width={size} height={size + 4} style={{ cursor: disabled ? "not-allowed" : "ns-resize", opacity: disabled ? 0.3 : 1, touchAction: "none" }}
         onPointerDown={e => { if (disabled) return; drag.current = true; startY.current = e.clientY; startV.current = value; e.currentTarget.setPointerCapture(e.pointerId); }}
-        onPointerMove={e => { if (!drag.current) return; const _d = startY.current - e.clientY; onChange(clamp(Math.round(startV.current + (d / 160) * (max - min)), min, max)); }}
+        onPointerMove={e => { if (!drag.current) return; const d = startY.current - e.clientY; onChange(clamp(Math.round(startV.current + (d / 160) * (max - min)), min, max)); }}
         onPointerUp={() => { drag.current = false; }}>
         <circle cx={cx} cy={cy} r={r} fill="none" stroke={SURF2} strokeWidth={3} strokeDasharray="2 3" />
         {pct > 0.01 && <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${pct > 0.5 ? 1 : 0} 1 ${x2} ${y2}`} fill="none" stroke={pct > 0.88 ? AMBER : ACID} strokeWidth={3} strokeLinecap="butt" />}
@@ -170,7 +170,7 @@ function Toggle({ label, sub, checked, onChange, disabled = false }:
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", opacity: disabled ? 0.3 : 1 }}>
       <div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "#aaa", letterSpacing: 1, textTransform: "uppercase" }}>{label}</div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--daw-sub)", letterSpacing: 1, textTransform: "uppercase" }}>{label}</div>
         {sub && <div style={{ fontSize: 9, color: DIM, marginTop: 1, letterSpacing: 0.5 }}>{sub}</div>}
       </div>
       <div role="switch" aria-checked={checked} tabIndex={0}
@@ -187,19 +187,19 @@ function Toggle({ label, sub, checked, onChange, disabled = false }:
 // ── Scope: Waveform ──
 function WaveScope({ node, active, muted, w = 560, h = 72 }:
   { node: AnalyserNode | null; active: boolean; muted: boolean; w?: number; h?: number }) {
-  const _ref = useRef<HTMLCanvasElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
   const af  = useRef<number | null>(null);
   useEffect(() => {
-    const _c = ref.current; if (!c) return;
-    const _ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d")!;
     if (!node || !active) {
       ctx.clearRect(0, 0, w, h);
       ctx.strokeStyle = "rgba(100,116,139,0.15)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
       return;
     }
-    const _buf = new Uint8Array(node.frequencyBinCount);
-    const _draw = () => {
+    const buf = new Uint8Array(node.frequencyBinCount);
+    const draw = () => {
       node.getByteTimeDomainData(buf);
       ctx.clearRect(0, 0, w, h);
       // Grid lines
@@ -209,9 +209,9 @@ function WaveScope({ node, active, muted, w = 560, h = 72 }:
       ctx.shadowColor = muted ? RED : ACID; ctx.shadowBlur = 6;
       ctx.strokeStyle = muted ? "rgba(255,34,0,0.9)" : "rgba(184,255,0,0.9)"; ctx.lineWidth = 1.5;
       ctx.beginPath();
-      const _step = w / buf.length;
-      for (let _i = 0; i < buf.length; i++) {
-        const _y = ((buf[i] / 128) - 1) * (h * 0.45) + h / 2;
+      const step = w / buf.length;
+      for (let i = 0; i < buf.length; i++) {
+        const y = ((buf[i] / 128) - 1) * (h * 0.45) + h / 2;
         i === 0 ? ctx.moveTo(0, y) : ctx.lineTo(i * step, y);
       }
       ctx.stroke(); ctx.shadowBlur = 0;
@@ -228,27 +228,27 @@ function SpectrumScope({ node, active, w = 560, h = 72 }:
   { node: AnalyserNode | null; active: boolean; w?: number; h?: number }) {
   const ref  = useRef<HTMLCanvasElement>(null);
   const af   = useRef<number | null>(null);
-  const _peak = useRef<number[]>([]);
+  const peak = useRef<number[]>([]);
   useEffect(() => {
-    const _c = ref.current; if (!c) return;
-    const _ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d")!;
     if (!node || !active) { ctx.clearRect(0, 0, w, h); return; }
-    const _BARS = 80;
+    const BARS = 80;
     peak.current = Array(BARS).fill(0);
-    const _buf = new Uint8Array(node.frequencyBinCount);
-    const _step = Math.floor(buf.length / BARS);
-    const _barW = w / BARS - 1;
-    const _draw = () => {
+    const buf = new Uint8Array(node.frequencyBinCount);
+    const step = Math.floor(buf.length / BARS);
+    const barW = w / BARS - 1;
+    const draw = () => {
       node.getByteFrequencyData(buf);
       ctx.clearRect(0, 0, w, h);
-      for (let _i = 0; i < BARS; i++) {
-        let _avg = 0;
-        for (let _j = 0; j < step; j++) avg += buf[i * step + j];
-        const _val = (avg / step) / 255;
-        const _bh = val * h;
-        const _x = i * (barW + 1);
+      for (let i = 0; i < BARS; i++) {
+        let avg = 0;
+        for (let j = 0; j < step; j++) avg += buf[i * step + j];
+        const val = (avg / step) / 255;
+        const bh = val * h;
+        const x = i * (barW + 1);
         // Bar
-        const _g = ctx.createLinearGradient(0, h, 0, h - bh);
+        const g = ctx.createLinearGradient(0, h, 0, h - bh);
         g.addColorStop(0, `rgba(184,255,0,${0.4 + val * 0.5})`);
         g.addColorStop(1, `rgba(184,255,0,${0.1 + val * 0.3})`);
         ctx.fillStyle = g;
@@ -272,17 +272,17 @@ function SpectrumScope({ node, active, w = 560, h = 72 }:
 // ── Scope: Phase / Lissajous ──
 function PhaseScope({ left, right, active, w = 560, h = 100 }:
   { left: AnalyserNode | null; right: AnalyserNode | null; active: boolean; w?: number; h?: number }) {
-  const _ref = useRef<HTMLCanvasElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
   const af  = useRef<number | null>(null);
   useEffect(() => {
-    const _c = ref.current; if (!c) return;
-    const _ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d")!;
     if (!left || !active) { ctx.clearRect(0, 0, w, h); return; }
-    const _size = left.frequencyBinCount;
-    const _lBuf = new Uint8Array(size);
-    const _rBuf = new Uint8Array(right ? size : size);
-    const _cx = w / 2, cy = h / 2, scale = Math.min(w, h) * 0.44;
-    const _draw = () => {
+    const size = left.frequencyBinCount;
+    const lBuf = new Uint8Array(size);
+    const rBuf = new Uint8Array(right ? size : size);
+    const cx = w / 2, cy = h / 2, scale = Math.min(w, h) * 0.44;
+    const draw = () => {
       left.getByteTimeDomainData(lBuf);
       if (right) right.getByteTimeDomainData(rBuf); else rBuf.set(lBuf);
       ctx.clearRect(0, 0, w, h);
@@ -294,10 +294,10 @@ function PhaseScope({ left, right, active, w = 560, h = 100 }:
       ctx.strokeStyle = "rgba(184,255,0,0.5)"; ctx.lineWidth = 1;
       ctx.shadowColor = ACID; ctx.shadowBlur = 3;
       ctx.beginPath();
-      const _step = Math.max(1, Math.floor(size / 256));
-      for (let _i = 0; i < size; i += step) {
-        const _x = cx + ((lBuf[i] - 128) / 128) * scale;
-        const _y = cy - ((rBuf[i] - 128) / 128) * scale;
+      const step = Math.max(1, Math.floor(size / 256));
+      for (let i = 0; i < size; i += step) {
+        const x = cx + ((lBuf[i] - 128) / 128) * scale;
+        const y = cy - ((rBuf[i] - 128) / 128) * scale;
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.stroke(); ctx.shadowBlur = 0;
@@ -312,42 +312,42 @@ function PhaseScope({ left, right, active, w = 560, h = 100 }:
 // ── EQ Frequency Response Curve ──
 function EQCurve({ bands, nodes, w = 560, h = 100 }:
   { bands: EQBand[]; nodes: BiquadFilterNode[]; w?: number; h?: number }) {
-  const _ref = useRef<HTMLCanvasElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const _c = ref.current; if (!c) return;
-    const _ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d")!;
     ctx.clearRect(0, 0, w, h);
     if (!nodes.length) return;
-    const _POINTS = w;
-    const _freqs = new Float32Array(POINTS);
-    const _FMIN = 20, FMAX = 20000;
-    for (let _i = 0; i < POINTS; i++) freqs[i] = FMIN * Math.pow(FMAX / FMIN, i / POINTS);
-    const _combined = new Float32Array(POINTS).fill(0);
+    const POINTS = w;
+    const freqs = new Float32Array(POINTS);
+    const FMIN = 20, FMAX = 20000;
+    for (let i = 0; i < POINTS; i++) freqs[i] = FMIN * Math.pow(FMAX / FMIN, i / POINTS);
+    const combined = new Float32Array(POINTS).fill(0);
     nodes.forEach((n, idx) => {
       if (!n) return;
-      const _mag = new Float32Array(POINTS);
-      const _phase = new Float32Array(POINTS);
+      const mag = new Float32Array(POINTS);
+      const phase = new Float32Array(POINTS);
       try { n.getFrequencyResponse(freqs, mag, phase); } catch { return; }
-      for (let _i = 0; i < POINTS; i++) combined[i] += 20 * Math.log10(Math.max(mag[i], 1e-5));
+      for (let i = 0; i < POINTS; i++) combined[i] += 20 * Math.log10(Math.max(mag[i], 1e-5));
     });
     // Grid
     ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
     [-12,-6,0,6,12].forEach(db => {
-      const _y = h / 2 - (db / 20) * (h * 0.4);
+      const y = h / 2 - (db / 20) * (h * 0.4);
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     });
     // 0dB line
     ctx.strokeStyle = "rgba(255,255,255,0.12)"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
     // Curve fill
-    const _path = new Path2D();
-    for (let _i = 0; i < POINTS; i++) {
-      const _y = clamp(h / 2 - (combined[i] / 20) * (h * 0.4), 0, h);
+    const path = new Path2D();
+    for (let i = 0; i < POINTS; i++) {
+      const y = clamp(h / 2 - (combined[i] / 20) * (h * 0.4), 0, h);
       i === 0 ? path.moveTo(i, y) : path.lineTo(i, y);
     }
-    const _fillPath = new Path2D(path);
+    const fillPath = new Path2D(path);
     fillPath.lineTo(w, h); fillPath.lineTo(0, h); fillPath.closePath();
-    const _grad = ctx.createLinearGradient(0, 0, 0, h);
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
     grad.addColorStop(0, "rgba(184,255,0,0.2)");
     grad.addColorStop(1, "rgba(184,255,0,0)");
     ctx.fillStyle = grad; ctx.fill(fillPath);
@@ -357,7 +357,7 @@ function EQCurve({ bands, nodes, w = 560, h = 100 }:
     // Freq labels
     ctx.fillStyle = "rgba(255,255,255,0.2)"; ctx.font = "8px monospace";
     [100,500,1000,5000,10000].forEach(f => {
-      const _x = (Math.log10(f / FMIN) / Math.log10(FMAX / FMIN)) * w;
+      const x = (Math.log10(f / FMIN) / Math.log10(FMAX / FMIN)) * w;
       ctx.fillText(f >= 1000 ? `${f/1000}k` : `${f}`, x - 8, h - 2);
     });
   }, [bands, nodes, w, h]);
@@ -366,14 +366,14 @@ function EQCurve({ bands, nodes, w = 560, h = 100 }:
 
 // ── Clip Waveform Mini Preview ──
 function ClipPreview({ data, w = 120, h = 28 }: { data: number[]; w?: number; h?: number }) {
-  const _ref = useRef<HTMLCanvasElement>(null);
+  const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const _c = ref.current; if (!c) return;
-    const _ctx = c.getContext("2d")!;
+    const c = ref.current; if (!c) return;
+    const ctx = c.getContext("2d")!;
     ctx.clearRect(0, 0, w, h);
-    const _barW = w / data.length;
+    const barW = w / data.length;
     data.forEach((v, i) => {
-      const _bh = v * h * 0.9;
+      const bh = v * h * 0.9;
       ctx.fillStyle = `rgba(184,255,0,${0.4 + v * 0.5})`;
       ctx.fillRect(i * barW, (h - bh) / 2, Math.max(1, barW - 0.5), bh);
     });
@@ -383,8 +383,8 @@ function ClipPreview({ data, w = 120, h = 28 }: { data: number[]; w?: number; h?
 
 // ── Tuner Display ──
 function Tuner({ note, octave, cents, active }: { note: string; octave: number; cents: number; active: boolean }) {
-  const _inTune = Math.abs(cents) < 5;
-  const _needleAngle = clamp(cents * 1.2, -70, 70);
+  const inTune = Math.abs(cents) < 5;
+  const needleAngle = clamp(cents * 1.2, -70, 70);
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", gap: 4 }}>
       <div style={{ fontSize: 7, fontWeight: 700, color: DIM, letterSpacing: 3, textTransform: "uppercase" }}>CHROMATIC TUNER</div>
@@ -397,7 +397,7 @@ function Tuner({ note, octave, cents, active }: { note: string; octave: number; 
         <svg width={140} height={28} style={{ overflow: "visible" }}>
           {/* Scale marks */}
           {[-50,-25,0,25,50].map(v => {
-            const _x = 70 + v * 1.2;
+            const x = 70 + v * 1.2;
             return <line key={v} x1={x} y1={20} x2={x} y2={v === 0 ? 8 : 14} stroke={v === 0 ? "rgba(255,255,255,0.3)" : BORDER2} strokeWidth={v === 0 ? 2 : 1} />;
           })}
           {/* Needle */}
@@ -479,7 +479,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   const rightAnRef   = useRef<AnalyserNode | null>(null);
   const splitRef     = useRef<ChannelSplitterNode | null>(null);
   const monGainRef   = useRef<GainNode | null>(null);
-  const _streamDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
+  const streamDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
   const lastNodeRef  = useRef<AudioNode | null>(null);
   const animRef      = useRef<number | null>(null);
   const peakTORef    = useRef<number | null>(null);
@@ -500,15 +500,15 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   const midiRef      = useRef<MIDIAccess | null>(null);
 
   // ── Gate State Machine Refs ────────────────────────────────────────────────
-  const _gateStateRef = useRef<"open" | "hold" | "closed">("closed");
+  const gateStateRef = useRef<"open" | "hold" | "closed">("closed");
   const gateHoldRef  = useRef<number | null>(null);
 
   // ─── Device Enumeration ──────────────────────────────────────────────────
   useEffect(() => {
-    const _scan = async () => {
+    const scan = async () => {
       try {
-        const _all = await navigator.mediaDevices.enumerateDevices();
-        const _ins = all.filter(d => d.kind === "audioinput" && d.deviceId);
+        const all = await navigator.mediaDevices.enumerateDevices();
+        const ins = all.filter(d => d.kind === "audioinput" && d.deviceId);
         setDevices(ins);
         if (ins.length && !selDevice) setSelDevice(ins[0].deviceId);
         if (!ins.length) setWarning("No audio input detected.");
@@ -524,7 +524,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     if (!midiOn) { setMidiStatus("Disabled"); return; }
     navigator.requestMIDIAccess?.({ sysex: false }).then(access => {
       midiRef.current = access;
-      const _ins = Array.from(access.inputs.values());
+      const ins = Array.from(access.inputs.values());
       if (!ins.length) { setMidiStatus("No devices found"); return; }
       setMidiStatus(`${ins.length} device${ins.length > 1 ? "s" : ""} connected`);
       ins.forEach(i => { i.onmidimessage = ev => onMidiMessage?.(ev); });
@@ -540,32 +540,32 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     const fAn  = freqAnRef.current;
     const lAn  = leftAnRef.current;
     const rAn  = rightAnRef.current;
-    const _gRef = gateGainRef.current;
-    const _cRef = compRef.current;
+    const gRef = gateGainRef.current;
+    const cRef = compRef.current;
 
     const wBuf  = new Float32Array(wAn.frequencyBinCount);
-    const _wBufU = new Uint8Array(wAn.frequencyBinCount);
+    const wBufU = new Uint8Array(wAn.frequencyBinCount);
     const _fBufU = fAn ? new Uint8Array(fAn.frequencyBinCount) : null;
     const lBuf  = lAn ? new Uint8Array(lAn.frequencyBinCount) : null;
     const rBuf  = rAn ? new Uint8Array(rAn.frequencyBinCount) : null;
 
-    let _lufsTickRef = { val: 0 };
+    let lufsTickRef = { val: 0 };
 
-    const _tick = () => {
+    const tick = () => {
       wAn.getFloatTimeDomainData(wBuf);
       wAn.getByteTimeDomainData(wBufU);
 
       // RMS + dB
-      let _sum = 0;
-      for (let _i = 0; i < wBuf.length; i++) sum += wBuf[i] * wBuf[i];
-      const _rms = Math.sqrt(sum / wBuf.length);
+      let sum = 0;
+      for (let i = 0; i < wBuf.length; i++) sum += wBuf[i] * wBuf[i];
+      const rms = Math.sqrt(sum / wBuf.length);
       const db  = 20 * Math.log10(Math.max(rms, 1e-5));
-      const _norm = dbNorm(db);
+      const norm = dbNorm(db);
 
       // History
-      const _dh = dbHistRef.current;
+      const dh = dbHistRef.current;
       dh.push(db); if (dh.length > DB_HIST_LEN) dh.shift();
-      const _avg = dh.reduce((a,b) => a+b,0) / dh.length;
+      const avg = dh.reduce((a,b) => a+b,0) / dh.length;
       const pk  = Math.max(...dh);
 
       // LUFS (simplified: RMS energy rolling window)
@@ -574,37 +574,37 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
         lufsHistRef.current.push(rms);
         if (lufsHistRef.current.length > LUFS_WIN) lufsHistRef.current.shift();
       }
-      const _lufsRms = lufsHistRef.current.length
+      const lufsRms = lufsHistRef.current.length
         ? Math.sqrt(lufsHistRef.current.reduce((a,b) => a+b*b,0) / lufsHistRef.current.length)
         : 1e-5;
-      const _lufs = 20 * Math.log10(Math.max(lufsRms, 1e-5)) - 0.7;
+      const lufs = 20 * Math.log10(Math.max(lufsRms, 1e-5)) - 0.7;
 
       // Pitch detection
-      let _note = "—", cents = 0, frequency = "—";
+      let note = "—", cents = 0, frequency = "—";
       if (rms > 0.008) {
-        const _hz = detectPitch(wBuf, ctxRef.current!.sampleRate);
+        const hz = detectPitch(wBuf, ctxRef.current!.sampleRate);
         if (hz && hz > 60 && hz < 2000) {
           frequency = `${Math.round(hz)} Hz`;
-          const _r = freqToNote(hz);
+          const r = freqToNote(hz);
           note = `${r.note}${r.octave}`; cents = r.cents;
         }
       }
 
       // L/R meters
-      let _leftDb = -60, rightDb = -60;
+      let leftDb = -60, rightDb = -60;
       if (lBuf && lAn) {
         lAn.getByteTimeDomainData(lBuf);
-        let _ls = 0; for (let _i = 0; i < lBuf.length; i++) { const _n = (lBuf[i]-128)/128; ls += n*n; }
+        let ls = 0; for (let i = 0; i < lBuf.length; i++) { const n = (lBuf[i]-128)/128; ls += n*n; }
         leftDb = 20 * Math.log10(Math.max(Math.sqrt(ls/lBuf.length), 1e-5));
       }
       if (rBuf && rAn) {
         rAn.getByteTimeDomainData(rBuf);
-        let _rs = 0; for (let _i = 0; i < rBuf.length; i++) { const _n = (rBuf[i]-128)/128; rs += n*n; }
+        let rs = 0; for (let i = 0; i < rBuf.length; i++) { const n = (rBuf[i]-128)/128; rs += n*n; }
         rightDb = 20 * Math.log10(Math.max(Math.sqrt(rs/rBuf.length), 1e-5));
       }
 
       // Gate
-      let _gateOpen = true;
+      let gateOpen = true;
       if (gRef && gate.enabled) {
         if (db > gate.threshold) {
           if (gateStateRef.current !== "open") {
@@ -625,7 +625,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
       }
 
       // Compressor GR
-      const _gr = cRef && comp.enabled ? Math.abs(cRef.reduction) : 0;
+      const gr = cRef && comp.enabled ? Math.abs(cRef.reduction) : 0;
 
       setStats({ currentDb: Math.round(db*10)/10, peakDb: Math.round(pk*10)/10,
         avgDb: Math.round(avg*10)/10, lufs: Math.round(lufs*10)/10,
@@ -656,8 +656,8 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
       }
 
       onAudioData && (() => {
-        const _out = new Float32Array(wBuf.length);
-        for (let _i = 0; i < wBuf.length; i++) out[i] = wBuf[i];
+        const out = new Float32Array(wBuf.length);
+        for (let i = 0; i < wBuf.length; i++) out[i] = wBuf[i];
         onAudioData(out);
       })();
 
@@ -672,18 +672,18 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   }, [isActive, gate, comp, isRec, autoSplit, splitSilDb, splitSilMs, peakNorm, onAudioData]);
 
   // ─── Build Audio Graph ───────────────────────────────────────────────────
-  const _buildGraph = useCallback(async () => {
-    const _ctx = ctxRef.current!;
+  const buildGraph = useCallback(async () => {
+    const ctx = ctxRef.current!;
     if (ctx.state === "suspended") await ctx.resume();
-    const _stream = streamRef.current!;
+    const stream = streamRef.current!;
 
-    const _source = ctx.createMediaStreamSource(stream);
-    const _gainNode = ctx.createGain(); gainNode.gain.value = (inputGain / 100) * 3;
-    const _gateGain = ctx.createGain(); gateGain.gain.value = 1;
+    const source = ctx.createMediaStreamSource(stream);
+    const gainNode = ctx.createGain(); gainNode.gain.value = (inputGain / 100) * 3;
+    const gateGain = ctx.createGain(); gateGain.gain.value = 1;
 
     // EQ filters
-    const _filters = DEFAULT_EQ_BANDS.map((b, i) => {
-      const _f = ctx.createBiquadFilter();
+    const filters = DEFAULT_EQ_BANDS.map((b, i) => {
+      const f = ctx.createBiquadFilter();
       f.type = b.type; f.frequency.value = b.frequency;
       f.gain.value = eqBands[i]?.gain ?? 0;
       f.Q.value = b.q;
@@ -691,7 +691,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     });
 
     // Compressor
-    const _compNode = ctx.createDynamicsCompressor();
+    const compNode = ctx.createDynamicsCompressor();
     compNode.threshold.value = comp.threshold;
     compNode.ratio.value     = comp.ratio;
     compNode.attack.value    = comp.attack / 1000;
@@ -699,13 +699,13 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     compNode.knee.value      = comp.knee;
 
     // Analysers
-    const _waveAn = ctx.createAnalyser(); waveAn.fftSize = 4096; waveAn.smoothingTimeConstant = 0.8;
-    const _freqAn = ctx.createAnalyser(); freqAn.fftSize = 2048; freqAn.smoothingTimeConstant = 0.85;
-    const _splitter = ctx.createChannelSplitter(2);
+    const waveAn = ctx.createAnalyser(); waveAn.fftSize = 4096; waveAn.smoothingTimeConstant = 0.8;
+    const freqAn = ctx.createAnalyser(); freqAn.fftSize = 2048; freqAn.smoothingTimeConstant = 0.85;
+    const splitter = ctx.createChannelSplitter(2);
     const leftAn  = ctx.createAnalyser(); leftAn.fftSize = 1024;
-    const _rightAn = ctx.createAnalyser(); rightAn.fftSize = 1024;
-    const _monGain = ctx.createGain(); monGain.gain.value = monitoring && !isMuted ? 1 : 0;
-    const _streamDest = ctx.createMediaStreamDestination();
+    const rightAn = ctx.createAnalyser(); rightAn.fftSize = 1024;
+    const monGain = ctx.createGain(); monGain.gain.value = monitoring && !isMuted ? 1 : 0;
+    const streamDest = ctx.createMediaStreamDestination();
 
     // Wire: source → gain → [eq filters] → gateGain → [compressor] → waveAn → freqAn → splitter → L/R analysers → monGain → dest + streamDest
     let last: AudioNode = source;
@@ -732,11 +732,11 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   }, [inputGain, eqBands, eqEnable, comp, monitoring, isMuted]);
 
   // ─── Start Microphone ────────────────────────────────────────────────────
-  const _startMicrophone = useCallback(async () => {
+  const startMicrophone = useCallback(async () => {
     try {
       setError(""); setWarning("");
       if (!ctxRef.current) ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const _stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: { ...(selDevice ? { deviceId: { exact: selDevice } } : {}), echoCancellation: echoCxl, noiseSuppression: noiseSupp, autoGainControl: autoGain, channelCount: 2 },
       });
       streamRef.current = stream;
@@ -744,7 +744,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
       setIsActive(true);
       gateStateRef.current = "closed";
     } catch (err) {
-      const _e = err as DOMException;
+      const e = err as DOMException;
       if (e.name === "NotAllowedError")  setError("Microphone permission denied.");
       else if (e.name === "NotFoundError") setError("No microphone found.");
       else if (e.name === "NotReadableError") setError("Microphone in use by another app.");
@@ -753,7 +753,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   }, [selDevice, echoCxl, noiseSupp, autoGain, buildGraph]);
 
   // ─── Stop Microphone ─────────────────────────────────────────────────────
-  const _stopMicrophone = useCallback(() => {
+  const stopMicrophone = useCallback(() => {
     if (isRec) stopRecording();
     streamRef.current?.getTracks().forEach(t => t.stop()); streamRef.current = null;
     [sourceRef, gainRef, gateGainRef, compRef, waveAnRef, freqAnRef, leftAnRef, rightAnRef, monGainRef].forEach(r => {
@@ -767,16 +767,16 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   }, [isRec]);
 
   // ─── Recording ───────────────────────────────────────────────────────────
-  const _startRecording = useCallback(() => {
+  const startRecording = useCallback(() => {
     if (!streamDestRef.current || isRec) return;
-    const _dest = streamDestRef.current;
-    const _mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+    const dest = streamDestRef.current;
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
       ? "audio/webm;codecs=opus" : "audio/webm";
-    const _rec = new MediaRecorder(dest.stream, { mimeType });
+    const rec = new MediaRecorder(dest.stream, { mimeType });
     chunksRef.current = []; recPeakRef.current = -60; previewBufRef.current = [];
     rec.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data); };
     rec.onstop = () => {
-      const _blob = new Blob(chunksRef.current, { type: mimeType });
+      const blob = new Blob(chunksRef.current, { type: mimeType });
       const dur  = (Date.now() - recStartRef.current) / 1000;
       const clip: RecordedClip = {
         id: `clip-${Date.now()}`, name: `Take ${Date.now().toString().slice(-5)}`,
@@ -797,15 +797,15 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     // Preview waveform sampling
     previewTimerRef.current = window.setInterval(() => {
       if (!waveAnRef.current) return;
-      const _buf = new Uint8Array(waveAnRef.current.frequencyBinCount);
+      const buf = new Uint8Array(waveAnRef.current.frequencyBinCount);
       waveAnRef.current.getByteTimeDomainData(buf);
-      let _s = 0; for (let _i = 0; i < buf.length; i++) { const _n = (buf[i]-128)/128; s += n*n; }
+      let s = 0; for (let i = 0; i < buf.length; i++) { const n = (buf[i]-128)/128; s += n*n; }
       previewBufRef.current.push(Math.sqrt(s / buf.length));
       if (previewBufRef.current.length > PREVIEW_BINS) previewBufRef.current.shift();
     }, 100);
   }, [isRec, onClipRecorded]);
 
-  const _stopRecording = useCallback(() => {
+  const stopRecording = useCallback(() => {
     if (!recorderRef.current || !isRec) return;
     try { recorderRef.current.stop(); } catch {}
     recorderRef.current = null;
@@ -815,51 +815,51 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     setIsRec(false);
   }, [isRec]);
 
-  const _deleteClip = (id: string) => setClips(prev => {
-    const _c = prev.find(x => x.id === id);
+  const deleteClip = (id: string) => setClips(prev => {
+    const c = prev.find(x => x.id === id);
     if (c) URL.revokeObjectURL(c.url);
     return prev.filter(x => x.id !== id);
   });
 
-  const _downloadClip = (c: RecordedClip) => {
-    const _a = document.createElement("a"); a.href = c.url;
+  const downloadClip = (c: RecordedClip) => {
+    const a = document.createElement("a"); a.href = c.url;
     a.download = `${c.name.replace(/\s+/g,"_")}.webm`; a.click();
   };
 
   // ─── Live Gain Control ───────────────────────────────────────────────────
-  const _handleGain = useCallback((v: number) => {
+  const handleGain = useCallback((v: number) => {
     setInputGain(v);
     if (gainRef.current) gainRef.current.gain.value = (v / 100) * 3;
   }, []);
 
   // ─── Monitoring Toggle ───────────────────────────────────────────────────
-  const _toggleMonitor = useCallback(() => {
-    const _next = !monitoring; setMonitoring(next);
+  const toggleMonitor = useCallback(() => {
+    const next = !monitoring; setMonitoring(next);
     if (monGainRef.current) monGainRef.current.gain.value = next && !isMuted ? 1 : 0;
   }, [monitoring, isMuted]);
 
-  const _toggleMute = useCallback(() => {
-    const _next = !isMuted; setIsMuted(next);
+  const toggleMute = useCallback(() => {
+    const next = !isMuted; setIsMuted(next);
     if (monGainRef.current) monGainRef.current.gain.value = !next && monitoring ? 1 : 0;
   }, [isMuted, monitoring]);
 
   // ─── EQ Band Update ──────────────────────────────────────────────────────
-  const _updateEQBand = useCallback((idx: number, gain: number) => {
+  const updateEQBand = useCallback((idx: number, gain: number) => {
     setEqBands(prev => prev.map((b, i) => i === idx ? { ...b, gain } : b));
-    const _node = eqNodesRef.current[idx];
+    const node = eqNodesRef.current[idx];
     if (node) node.gain.value = gain;
   }, []);
 
-  const _applyEQPreset = useCallback((key: EQPresetKey) => {
-    const _gains = EQ_PRESETS[key].bands;
+  const applyEQPreset = useCallback((key: EQPresetKey) => {
+    const gains = EQ_PRESETS[key].bands;
     setEqBands(prev => prev.map((b, i) => ({ ...b, gain: gains[i] ?? 0 })));
     eqNodesRef.current.forEach((n, i) => { if (n) n.gain.value = gains[i] ?? 0; });
   }, []);
 
   // ─── Compressor Live Update ───────────────────────────────────────────────
-  const _updateComp = useCallback((patch: Partial<CompCfg>) => {
+  const updateComp = useCallback((patch: Partial<CompCfg>) => {
     setComp(prev => {
-      const _next = { ...prev, ...patch };
+      const next = { ...prev, ...patch };
       if (compRef.current) {
         if (patch.threshold !== undefined) compRef.current.threshold.value = patch.threshold;
         if (patch.ratio !== undefined)     compRef.current.ratio.value = patch.ratio;
@@ -880,7 +880,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   // Bound to the root div via onKeyDown — NOT window — so Space/R/M only fire
   // when the mic panel itself (or a child) holds focus. This prevents collision
   // with the instrument page's global Space→play() and Ctrl+R→record() bindings.
-  const _handlePanelKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handlePanelKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (["INPUT","TEXTAREA","SELECT"].includes((e.target as HTMLElement)?.tagName)) return;
     if (e.key === " ") { e.preventDefault(); isActive ? stopMicrophone() : startMicrophone(); }
     if ((e.key === "r" || e.key === "R") && !e.ctrlKey && !e.metaKey) {
@@ -896,7 +896,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     clips.forEach(c => URL.revokeObjectURL(c.url));
   }, []);
 
-  const _status = useMemo(() => {
+  const status = useMemo(() => {
     if (isRec)              return { color: RED,   label: `REC ${fmtTime(recTime)}`, pulse: true };
     if (isActive && isMuted) return { color: RED,   label: "MUTED", pulse: false };
     if (isActive && monitoring) return { color: ACID, label: "MONITORING", pulse: true };
@@ -905,30 +905,30 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   }, [isActive, isMuted, monitoring, isRec, recTime]);
 
   // ─── Dual Level Meter ──────────────────────────────────────────────────────
-  const _DualMeter = ({ label, pct, peak }: { label: string; pct: number; peak: number }) => (
+  const DualMeter = ({ label, pct, peak }: { label: string; pct: number; peak: number }) => (
     <div style={{ flex: 1 }}>
       <div style={{ fontSize: 7, color: DIM, letterSpacing: 2, marginBottom: 3, textAlign: "center" }}>{label}</div>
       <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column-reverse", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
         {Array.from({ length: 24 }).map((_, i) => {
-          const _segPct = (i / 24) * 100;
-          const _active = segPct <= pct;
-          const _isPeak = segPct <= peak && segPct > pct;
-          return <div key={i} style={{ flex: 1, background: active ? levelColor(segPct) : isPeak ? AMBER : "#1a1a1a", transition: "background 0.05s" }} />;
+          const segPct = (i / 24) * 100;
+          const active = segPct <= pct;
+          const isPeak = segPct <= peak && segPct > pct;
+          return <div key={i} style={{ flex: 1, background: active ? levelColor(segPct) : isPeak ? AMBER : "var(--t-b2x)", transition: "background 0.05s" }} />;
         })}
       </div>
     </div>
   );
 
   // ─── GR Meter ─────────────────────────────────────────────────────────────
-  const _GRMeter = ({ gr }: { gr: number }) => {
-    const _grPct = clamp((gr / 20) * 100, 0, 100);
+  const GRMeter = ({ gr }: { gr: number }) => {
+    const grPct = clamp((gr / 20) * 100, 0, 100);
     return (
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 7, color: DIM, letterSpacing: 2, marginBottom: 3, textAlign: "center" }}>GR</div>
         <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
           {Array.from({ length: 24 }).map((_, i) => {
-            const _segPct = ((23 - i) / 24) * 100;
-            return <div key={i} style={{ flex: 1, background: segPct <= grPct ? (grPct > 60 ? RED : AMBER) : "#1a1a1a", transition: "background 0.06s" }} />;
+            const segPct = ((23 - i) / 24) * 100;
+            return <div key={i} style={{ flex: 1, background: segPct <= grPct ? (grPct > 60 ? RED : AMBER) : "var(--t-b2x)", transition: "background 0.06s" }} />;
           })}
         </div>
       </div>
@@ -942,7 +942,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
     <div style={{ fontFamily: "'IBM Plex Mono','JetBrains Mono',monospace" }}>
       <style>{`
         @keyframes mic-pulse { 0%,100%{opacity:1}50%{opacity:0.35} }
-        .mic-root select option { background:#0c0c0c; color:#a3e635; }
+        .mic-root select option { background:var(--dj-surface); color:#a3e635; }
         .mic-root * { box-sizing:border-box; }
         .mic-root button:focus-visible { outline:1px solid ${ACID}; outline-offset:1px; }
         .clip-row:hover { background:rgba(184,255,0,0.03) !important; }
@@ -953,13 +953,13 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
         {/* ── Header ── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: SURF, borderBottom: `1px solid ${BORDER}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 24, height: 24, background: isActive && !isMuted ? (isRec ? RED : ACID) : isMuted ? RED : "#1a1a1a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <div style={{ width: 24, height: 24, background: isActive && !isMuted ? (isRec ? RED : ACID) : isMuted ? RED : "var(--t-b2x)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isActive ? BLK : DIM} strokeWidth="2.5" strokeLinecap="round">
                 <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", letterSpacing: 3, textTransform: "uppercase" }}>MICROPHONE INPUT</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--white)", letterSpacing: 3, textTransform: "uppercase" }}>MICROPHONE INPUT</div>
               <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
                 <div style={{ width: 4, height: 4, background: status.color, animation: status.pulse ? "mic-pulse 1.5s infinite" : "none" }} />
                 <span style={{ fontSize: 8, fontWeight: 700, color: status.color, letterSpacing: 2 }}>{status.label}</span>
@@ -1006,10 +1006,10 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
 
         {/* ── Alerts ── */}
         {error && (
-          <div style={{ margin: "8px 12px", padding: "7px 10px", background: "rgba(255,34,0,0.07)", border: "1px solid rgba(255,34,0,0.25)", fontSize: 10, color: "#ff6644", letterSpacing: 0.5 }}>⚠ {error}</div>
+          <div style={{ margin: "8px 12px", padding: "7px 10px", background: "rgba(255,34,0,0.07)", border: "1px solid rgba(255,34,0,0.25)", fontSize: 10, color: "var(--accent-orange)", letterSpacing: 0.5 }}>⚠ {error}</div>
         )}
         {warning && !error && (
-          <div style={{ margin: "8px 12px", padding: "7px 10px", background: "rgba(255,170,0,0.05)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 10, color: "#ffcc44", letterSpacing: 0.5 }}>⚠ {warning}</div>
+          <div style={{ margin: "8px 12px", padding: "7px 10px", background: "rgba(255,170,0,0.05)", border: "1px solid rgba(255,170,0,0.2)", fontSize: 10, color: "var(--accent-yellow)", letterSpacing: 0.5 }}>⚠ {warning}</div>
         )}
 
         {/* ── Tabs ── */}
@@ -1060,8 +1060,8 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
                 {[
                   { l: "NOW",  v: `${stats.currentDb} dB`, c: ACID },
                   { l: "PEAK", v: `${stats.peakDb} dB`,    c: stats.peakDb > -6 ? RED : AMBER },
-                  { l: "AVG",  v: `${stats.avgDb} dB`,     c: "#aaa" },
-                  { l: "LUFS", v: `${stats.lufs}`,         c: stats.lufs > -14 ? AMBER : "#aaa" },
+                  { l: "AVG",  v: `${stats.avgDb} dB`,     c: "var(--daw-sub)" },
+                  { l: "LUFS", v: `${stats.lufs}`,         c: stats.lufs > -14 ? AMBER : "var(--daw-sub)" },
                   { l: "FREQ", v: stats.frequency,         c: DIM },
                   { l: "GATE", v: stats.gateOpen ? "OPEN" : "CLOSED", c: stats.gateOpen ? ACID : DIM },
                 ].map((s,i) => (
@@ -1081,11 +1081,11 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
               </div>
               <div style={{ height: 20, background: SURF, border: `1px solid ${BORDER}`, display: "flex", gap: 1, padding: "2px 3px", position: "relative" }}>
                 {Array.from({ length: BAR_COUNT }).map((_, i) => {
-                  const _p = (i / BAR_COUNT) * 100;
-                  return <div key={i} style={{ flex: 1, background: p <= levelL ? levelColor(p) : p <= peakNorm && p > levelL ? "#ff6600" : "#1a1a1a", transition: "background 0.06s" }} />;
+                  const p = (i / BAR_COUNT) * 100;
+                  return <div key={i} style={{ flex: 1, background: p <= levelL ? levelColor(p) : p <= peakNorm && p > levelL ? "var(--accent-orange)" : "var(--t-b2x)", transition: "background 0.06s" }} />;
                 })}
                 <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 5px", pointerEvents: "none" }}>
-                  {["-60","-30","-12","-6","0 dB"].map(l => <span key={l} style={{ fontSize: 7, color: "#333", fontFamily: "inherit" }}>{l}</span>)}
+                  {["-60","-30","-12","-6","0 dB"].map(l => <span key={l} style={{ fontSize: 7, color: "var(--dj-dimmer)", fontFamily: "inherit" }}>{l}</span>)}
                 </div>
               </div>
             </div>
@@ -1133,7 +1133,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
               <div style={{ display: "flex", gap: 4, marginTop: 10 }}>
                 {(Object.entries(EQ_PRESETS) as [EQPresetKey, typeof EQ_PRESETS[EQPresetKey]][]).map(([k, p]) => (
                   <button key={k} onClick={() => applyEQPreset(k)} disabled={!eqEnable}
-                    style={{ flex: 1, height: 26, border: `1px solid ${BORDER}`, background: "transparent", color: eqEnable ? "#888" : DIM, fontSize: 7, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, textTransform: "uppercase" }}>
+                    style={{ flex: 1, height: 26, border: `1px solid ${BORDER}`, background: "transparent", color: eqEnable ? "var(--text-dim)" : DIM, fontSize: 7, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, textTransform: "uppercase" }}>
                     {p.label}
                   </button>
                 ))}
@@ -1234,7 +1234,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
                 <div key={c.id} className="clip-row" style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderBottom: `1px solid ${BORDER}` }}>
                   <ClipPreview data={c.wavePreview.length > 0 ? c.wavePreview : Array(PREVIEW_BINS).fill(0.1)} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#ccc", letterSpacing: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "var(--daw-ghost)", letterSpacing: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
                     <div style={{ fontSize: 8, color: DIM, marginTop: 2, display: "flex", gap: 8 }}>
                       <span>{fmtTime(c.duration)}</span>
                       <span>{fmtSize(c.sizeKb)}</span>
@@ -1270,7 +1270,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
             <div style={{ background: SURF, border: `1px solid ${BORDER}`, padding: "10px 12px" }}>
               <label style={{ fontSize: 8, fontWeight: 700, color: DIM, letterSpacing: 3, display: "block", marginBottom: 6, textTransform: "uppercase" }}>Input Device</label>
               <select value={selDevice || ""} onChange={e => { setSelDevice(e.target.value); if (isActive) { stopMicrophone(); setTimeout(startMicrophone, 150); } }} disabled={isActive}
-                style={{ width: "100%", height: 34, padding: "0 10px", background: SURF2, border: `1px solid ${BORDER}`, color: isActive ? DIM : "#aaa", fontSize: 10, fontFamily: "inherit", cursor: isActive ? "not-allowed" : "pointer", appearance: "none", outline: "none", opacity: isActive ? 0.5 : 1 }}>
+                style={{ width: "100%", height: 34, padding: "0 10px", background: SURF2, border: `1px solid ${BORDER}`, color: isActive ? DIM : "var(--daw-sub)", fontSize: 10, fontFamily: "inherit", cursor: isActive ? "not-allowed" : "pointer", appearance: "none", outline: "none", opacity: isActive ? 0.5 : 1 }}>
                 {devices.length === 0 && <option value="">No devices found</option>}
                 {devices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || `Microphone ${d.deviceId.slice(0,8)}`}</option>)}
               </select>
@@ -1301,7 +1301,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
               ].map((s,i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: `1px solid ${BORDER}` }}>
                   <span style={{ fontSize: 8, color: DIM, letterSpacing: 1 }}>{s.l}</span>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: "#ccc", fontFamily: "inherit" }}>{s.v}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "var(--daw-ghost)", fontFamily: "inherit" }}>{s.v}</span>
                 </div>
               ))}
             </div>

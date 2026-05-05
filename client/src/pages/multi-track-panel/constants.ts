@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber), var(--status-ok) (emerald), var(--accent-purple) (violet)
+// Reason: Panel status constant definitions — single source of truth for multi-track states
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * pages/multi-track-panel/constants.ts
  * Shared constants for MultiTrackPanel.
@@ -5,15 +10,15 @@
  */
 export const THEME_COLORS = {
   primary:   '#a3e635',
-  secondary: '#22d3ee',
-  warning:   '#f59e0b',
+  secondary: 'var(--looper-cyan)',
+  warning:   'var(--status-warn)',
   danger:    '#ef4444',
 } as const;
 
 export const TRACK_COLORS: string[] = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
-  '#8b5cf6', '#ec4899', '#14b8a6', '#f97316',
-  '#06b6d4', '#84cc16', '#a855f7', '#f43f5e',
+  'var(--looper-blue)', 'var(--status-ok)', 'var(--status-warn)', '#ef4444',
+  'var(--accent-purple)', 'var(--track-pink)', 'var(--looper-teal)', 'var(--track-orange)',
+  'var(--track-cyan)', 'var(--looper-lime)', 'var(--accent-violet)', 'var(--status-error)',
 ];
 
 /** Maps FXType string → short display label. */

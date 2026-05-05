@@ -28,15 +28,15 @@ export interface SequencerAPI {
 }
 
 const MIDI_NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const _getPitchLabel = (midi: number): string => {
+const getPitchLabel = (midi: number): string => {
   const name   = MIDI_NOTE_NAMES[midi % 12];
-  const _octave = Math.floor(midi / 12) - 1;
+  const octave = Math.floor(midi / 12) - 1;
   return `${name}${octave}`;
 };
 
 // Synth for sequencer preview (monophonic, acid-flavored)
 let previewSynth: Tone.MonoSynth | null = null;
-const _getPreviewSynth = () => {
+const getPreviewSynth = () => {
   if (!previewSynth) {
     previewSynth = new Tone.MonoSynth({
       oscillator: { type: 'sawtooth' },
@@ -52,17 +52,17 @@ const _getPreviewSynth = () => {
 };
 
 export function useMidiSequencer(): SequencerAPI {
-  const _sequenceRef = useRef<Tone.Sequence | null>(null);
+  const sequenceRef = useRef<Tone.Sequence | null>(null);
   const midiOutRef  = useRef<WebMidi.MIDIOutput | null>(null);
 
   // ── Wire up MIDI output ───────────────────────────────────────────────────
   useEffect(() => {
     if (!navigator.requestMIDIAccess) return;
     navigator.requestMIDIAccess({ sysex: false }).then(access => {
-      const _outputs = Array.from(access.outputs.values());
+      const outputs = Array.from(access.outputs.values());
       if (outputs.length > 0) midiOutRef.current = outputs[0] as unknown as WebMidi.MIDIOutput;
       access.onstatechange = () => {
-        const _updated = Array.from(access.outputs.values());
+        const updated = Array.from(access.outputs.values());
         midiOutRef.current = (updated[0] ?? null) as unknown as WebMidi.MIDIOutput | null;
       };
     }).catch(() => { /* WebMIDI unavailable — degrade gracefully */ });
@@ -70,9 +70,9 @@ export function useMidiSequencer(): SequencerAPI {
 
   // ── Rebuild Tone.Sequence whenever pattern changes ────────────────────────
   useEffect(() => {
-    const _rebuild = () => {
+    const rebuild = () => {
       const { activePatternId, midiPatterns } = useDAWStore.getState();
-      const _pattern = midiPatterns.find(p => p.id === activePatternId);
+      const pattern = midiPatterns.find(p => p.id === activePatternId);
       if (!pattern) return;
 
       // Dispose previous
@@ -88,23 +88,23 @@ export function useMidiSequencer(): SequencerAPI {
         stepMap.get(note.step)!.push(note);
       }
 
-      const _steps = Array.from({ length: pattern.steps }, (_, i) => stepMap.get(i) ?? []);
+      const steps = Array.from({ length: pattern.steps }, (_, i) => stepMap.get(i) ?? []);
 
-      const _seq = new Tone.Sequence(
+      const seq = new Tone.Sequence(
         (time, notesAtStep) => {
-          const _step = (seq as unknown as { _index: number })._index ?? 0;
+          const step = (seq as unknown as { _index: number })._index ?? 0;
           useDAWStore.getState().setSequencerStep(step);
 
           for (const note of (notesAtStep as unknown as MidiNote[])) {
             const freq  = Tone.Frequency(note.pitch, 'midi').toFrequency();
-            const _durSec = Tone.Time('16n').toSeconds() * note.duration;
+            const durSec = Tone.Time('16n').toSeconds() * note.duration;
             getPreviewSynth().triggerAttackRelease(freq, durSec, time, note.velocity / 127);
 
             // MIDI out
-            const _midi = midiOutRef.current;
+            const midi = midiOutRef.current;
             if (midi) {
               const noteOnDelay  = Math.max(0, (time - Tone.now()) * 1000);
-              const _noteOffDelay = noteOnDelay + durSec * 1000;
+              const noteOffDelay = noteOnDelay + durSec * 1000;
               midi.send([0x90, note.pitch, note.velocity], performance.now() + noteOnDelay);
               midi.send([0x80, note.pitch, 0],             performance.now() + noteOffDelay);
             }
@@ -122,7 +122,7 @@ export function useMidiSequencer(): SequencerAPI {
     };
 
     rebuild();
-    const _unsub = useDAWStore.subscribe(
+    const unsub = useDAWStore.subscribe(
       s => [s.activePatternId, s.midiPatterns] as [string | null, MidiPattern[]],
       rebuild,
     );
@@ -134,7 +134,7 @@ export function useMidiSequencer(): SequencerAPI {
 
   // ── Sync sequence start/stop with transport ───────────────────────────────
   useEffect(() => {
-    const _unsub = useDAWStore.subscribe(
+    const unsub = useDAWStore.subscribe(
       s => s.playing,
       playing => {
         if (!sequenceRef.current) return;
@@ -150,13 +150,13 @@ export function useMidiSequencer(): SequencerAPI {
   }, []);
 
   // ── API ───────────────────────────────────────────────────────────────────
-  const _toggleNote = useCallback((step: number, pitch: number, velocity = 100) => {
+  const toggleNote = useCallback((step: number, pitch: number, velocity = 100) => {
     const { activePatternId, midiPatterns, addMidiNote, removeMidiNote } = useDAWStore.getState();
     if (!activePatternId) return;
-    const _pattern = midiPatterns.find(p => p.id === activePatternId);
+    const pattern = midiPatterns.find(p => p.id === activePatternId);
     if (!pattern) return;
 
-    const _existing = pattern.notes.find(n => n.step === step && n.pitch === pitch);
+    const existing = pattern.notes.find(n => n.step === step && n.pitch === pitch);
     if (existing) {
       removeMidiNote(activePatternId, existing.id);
     } else {
@@ -164,22 +164,22 @@ export function useMidiSequencer(): SequencerAPI {
     }
   }, []);
 
-  const _clearPattern = useCallback(() => {
+  const clearPattern = useCallback(() => {
     const { activePatternId, midiPatterns } = useDAWStore.getState();
     if (!activePatternId) return;
-    const _pattern = midiPatterns.find(p => p.id === activePatternId);
+    const pattern = midiPatterns.find(p => p.id === activePatternId);
     if (!pattern) return;
     for (const note of [...pattern.notes]) {
       useDAWStore.getState().removeMidiNote(activePatternId, note.id);
     }
   }, []);
 
-  const _setPatternLength = useCallback((steps: 16 | 32 | 64) => {
+  const setPatternLength = useCallback((steps: 16 | 32 | 64) => {
     const { activePatternId } = useDAWStore.getState();
     if (!activePatternId) return;
     // Slice notes that exceed new length
-    const _store = useDAWStore.getState();
-    const _pattern = store.midiPatterns.find(p => p.id === activePatternId);
+    const store = useDAWStore.getState();
+    const pattern = store.midiPatterns.find(p => p.id === activePatternId);
     if (!pattern) return;
     for (const note of pattern.notes) {
       if (note.step >= steps) store.removeMidiNote(activePatternId, note.id);
@@ -187,27 +187,27 @@ export function useMidiSequencer(): SequencerAPI {
     // Update steps count via partial pattern mutation — expose via store if needed
   }, []);
 
-  const _nudgePitch = useCallback((noteId: string, delta: number) => {
+  const nudgePitch = useCallback((noteId: string, delta: number) => {
     const { activePatternId, updateMidiNote } = useDAWStore.getState();
     if (!activePatternId) return;
-    const _pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
     const note    = pattern?.notes.find(n => n.id === noteId);
     if (!note) return;
     updateMidiNote(activePatternId, noteId, { pitch: Math.max(0, Math.min(127, note.pitch + delta)) });
   }, []);
 
-  const _nudgeVelocity = useCallback((noteId: string, delta: number) => {
+  const nudgeVelocity = useCallback((noteId: string, delta: number) => {
     const { activePatternId, updateMidiNote } = useDAWStore.getState();
     if (!activePatternId) return;
-    const _pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
     const note    = pattern?.notes.find(n => n.id === noteId);
     if (!note) return;
     updateMidiNote(activePatternId, noteId, { velocity: Math.max(1, Math.min(127, note.velocity + delta)) });
   }, []);
 
-  const _duplicate = useCallback(() => {
+  const duplicate = useCallback(() => {
     const { activePatternId, midiPatterns, addMidiPattern } = useDAWStore.getState();
-    const _pattern = midiPatterns.find(p => p.id === activePatternId);
+    const pattern = midiPatterns.find(p => p.id === activePatternId);
     if (!pattern) return;
     addMidiPattern({ ...pattern, name: `${pattern.name} COPY`, notes: pattern.notes.map(n => ({ ...n })) });
   }, []);

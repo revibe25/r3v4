@@ -1,6 +1,6 @@
 import type { ChannelState } from "./types";
 
-export const _defaultChannel = (id: number, color = "#06b6d4"): ChannelState => ({
+export const defaultChannel = (id: number, color = "var(--track-cyan)"): ChannelState => ({
   id,
   name: `Ch ${id}`,
   color,

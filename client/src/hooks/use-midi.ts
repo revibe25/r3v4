@@ -50,25 +50,25 @@ export interface UseMidiOptions {
 }
 
 export function useMidi({ onPad, onKey, enabled = true }: UseMidiOptions = {}) {
-  const _accessRef = useRef<MIDIAccess | null>(null);
+  const accessRef = useRef<MIDIAccess | null>(null);
   const [midiStatus,     setStatus] = useState<MidiStatus>('idle');
   const [midiInputCount, setCount]  = useState(0);
 
   // Stable refs — callback identity changes don't re-subscribe the device
-  const _onPadRef = useRef(onPad);
-  const _onKeyRef = useRef(onKey);
+  const onPadRef = useRef(onPad);
+  const onKeyRef = useRef(onKey);
   useEffect(() => { onPadRef.current = onPad; });
   useEffect(() => { onKeyRef.current = onKey; });
 
-  const _handleMessage = useCallback((event: MIDIMessageEvent) => {
+  const handleMessage = useCallback((event: MIDIMessageEvent) => {
     const { data } = event;
     if (!data || data.length < 3) return;
     const cmd      = data[0] & 0xf0;
     const note     = data[1];
-    const _velocity = data[2];
+    const velocity = data[2];
     // Note-on only (velocity 0 = note-off in running status)
     if (cmd !== 0x90 || velocity === 0) return;
-    const _vel = velocity / 127;
+    const vel = velocity / 127;
 
     if (note >= PAD_MIN && note <= PAD_MAX) {
       onPadRef.current?.(note - PAD_MIN, vel);
@@ -79,7 +79,7 @@ export function useMidi({ onPad, onKey, enabled = true }: UseMidiOptions = {}) {
     }
   }, []);
 
-  const _wireInput = useCallback((input: MIDIInput) => {
+  const wireInput = useCallback((input: MIDIInput) => {
     input.onmidimessage = handleMessage as EventListener;
   }, [handleMessage]);
 
@@ -90,7 +90,7 @@ export function useMidi({ onPad, onKey, enabled = true }: UseMidiOptions = {}) {
       return;
     }
 
-    let _cancelled = false;
+    let cancelled = false;
 
     navigator.requestMIDIAccess({ sysex: false })
       .then((access: MIDIAccess) => {
@@ -101,7 +101,7 @@ export function useMidi({ onPad, onKey, enabled = true }: UseMidiOptions = {}) {
         setStatus(access.inputs.size > 0 ? 'active' : 'idle');
 
         access.onstatechange = (e: MIDIConnectionEvent) => {
-          const _port = e.port;
+          const port = e.port;
           if (port && port.type === 'input') {
             if (port && port.state === 'connected') wireInput(port as MIDIInput);
             else (port as MIDIInput).onmidimessage = null;

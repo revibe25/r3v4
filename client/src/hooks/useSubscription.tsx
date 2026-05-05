@@ -47,14 +47,14 @@ interface SubscriptionContextValue {
   openPortal: () => Promise<void>;
 }
 
-const _SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
+const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
   // Gate query on Zustand auth store token — avoids a guaranteed 401
   // on every page load for unauthenticated visitors.
-  const _hasToken = useAuthStore(s => Boolean(s.token));
+  const hasToken = useAuthStore(s => Boolean(s.token));
 
   const { data, isLoading } = trpc.subscription.getMySubscription.useQuery(undefined, {
     enabled: hasToken,
@@ -66,12 +66,12 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     },
   });
 
-  const _checkoutMutation = trpc.subscription.createCheckout.useMutation();
-  const _portalMutation = trpc.subscription.createPortal.useMutation();
+  const checkoutMutation = trpc.subscription.createCheckout.useMutation();
+  const portalMutation = trpc.subscription.createPortal.useMutation();
 
   const tier: SubscriptionTier = data?.tier ?? 'explorer';
 
-  const _value = useMemo<SubscriptionContextValue>(
+  const value = useMemo<SubscriptionContextValue>(
     () => ({
       subscription: data
         ? {
@@ -92,14 +92,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       isTrialing: data?.status === 'trialing',
       tierDisplayName: TIER_DEFINITIONS[tier].displayName,
       startCheckout: async (targetTier, billingCycle) => {
-        const _result = await checkoutMutation.mutateAsync({
+        const result = await checkoutMutation.mutateAsync({
           tier: targetTier,
           billingCycle,
         });
         window.location.href = result.url;
       },
       openPortal: async () => {
-        const _result = await portalMutation.mutateAsync({});
+        const result = await portalMutation.mutateAsync({});
         window.location.href = result.url;
       },
     }),
@@ -116,7 +116,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useSubscription(): SubscriptionContextValue {
-  const _ctx = useContext(SubscriptionContext);
+  const ctx = useContext(SubscriptionContext);
   if (!ctx) {
     throw new Error('useSubscription must be used inside <SubscriptionProvider>');
   }
@@ -139,9 +139,9 @@ export interface GateError {
 
 export function parseGateError(error: unknown): GateError | null {
   try {
-    const _trpcError = error as { message?: string; data?: { code?: string } };
+    const trpcError = error as { message?: string; data?: { code?: string } };
     if (!trpcError?.message) return null;
-    const _parsed = JSON.parse(trpcError.message) as GateError;
+    const parsed = JSON.parse(trpcError.message) as GateError;
     if (!parsed.type) return null;
     return parsed;
   } catch {

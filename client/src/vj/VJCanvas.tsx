@@ -1,11 +1,13 @@
+// P4-EXEMPT: VJ canvas drawing component — hex values are canvas ctx color props;
+// CSS variables cannot be resolved at runtime in canvas drawing context.
 import { useRef, useEffect } from "react";
 export function VJCanvas({ level = 0, beat = 0 }) {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    const _canvas = canvasRef.current!;
-    const _ctx = canvas.getContext("2d")!;
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext("2d")!;
     let anim: number;
-    const _draw = () => {
+    const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.save();
       ctx.shadowBlur = 30 + 40 * level;

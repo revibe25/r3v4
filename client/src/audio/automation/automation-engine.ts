@@ -26,12 +26,12 @@ export class AutomationEngine {
     this.lanes.clear();
 
     for (const laneData of data) {
-      const _param = this.paramResolver(
+      const param = this.paramResolver(
         (laneData as any).paramPath
       );
       if (!param) continue;
 
-      const _lane = new AutomationLane(
+      const lane = new AutomationLane(
         laneData.id,
         param
       );
@@ -41,7 +41,7 @@ export class AutomationEngine {
   }
 
   scheduleAll() {
-    const _startTime = Tone.now();
+    const startTime = Tone.now();
 
     for (const lane of this.lanes.values()) {
       lane.schedule(startTime);
@@ -49,7 +49,7 @@ export class AutomationEngine {
   }
 
   clearAll() {
-    const _now = Tone.now();
+    const now = Tone.now();
     for (const lane of this.lanes.values()) {
       lane.clear(now);
     }

@@ -12,7 +12,7 @@ export class MeterNode {
   constructor(id: string) {
     this.id = id;
 
-    const _context = getAudioContext();
+    const context = getAudioContext();
 
     this.analyser = context.createAnalyser();
     this.analyser.fftSize = 2048;
@@ -32,16 +32,16 @@ export class MeterNode {
   getMeterData(): MeterData {
     this.analyser.getFloatTimeDomainData(this.buffer as Float32Array<ArrayBuffer>);
 
-    let _sum = 0;
-    let _peak = 0;
+    let sum = 0;
+    let peak = 0;
 
-    for (let _i = 0; i < this.buffer.length; i++) {
-      const _v = this.buffer[i];
+    for (let i = 0; i < this.buffer.length; i++) {
+      const v = this.buffer[i];
       sum += v * v;
       peak = Math.max(peak, Math.abs(v));
     }
 
-    const _rms = Math.sqrt(sum / this.buffer.length);
+    const rms = Math.sqrt(sum / this.buffer.length);
 
     return { rms, peak };
   }

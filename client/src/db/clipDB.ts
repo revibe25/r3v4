@@ -16,4 +16,4 @@ export class ClipDB extends Dexie {
 }
 
 // Single instance to import anywhere in the client
-export const _clipDB = new ClipDB();
+export const clipDB = new ClipDB();

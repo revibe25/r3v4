@@ -39,6 +39,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { logger } from '@/lib/logger';
 import {
   Play, Pause, Square, SkipBack, SkipForward, Repeat, Save,
   FolderOpen, Upload, Settings, Activity, Cpu, ZoomIn, ZoomOut,
@@ -934,11 +935,26 @@ export default function MultiTrackPanel() {
 
   // ── AUDIO ENGINE ────────────────────────────────────────────────────────────
 
+  // Defer AudioEngine init until first user gesture (autoplay policy).
   useEffect(() => {
-    const _engine = audioEngineRef.current;
-    engine.initialize().catch(console.error);
+    const handler = () => {
+      if (audioEngineRef.current) {
+        // PRD §8.1: logger.error instead of console.error.
+        // Verify import: import { logger } from '@/lib/logger'
+        audioEngineRef.current.initialize().catch((err) => {
+          logger.error({ err }, 'AudioEngine initialization failed');
+        });
+      }
+      window.removeEventListener('click', handler);
+      window.removeEventListener('keydown', handler);
+    };
+    window.addEventListener('click', handler, { once: true });
+    window.addEventListener('keydown', handler, { once: true });
     return () => {
-      if (typeof engine.cleanup === 'function') engine.cleanup();
+      window.removeEventListener('click', handler);
+      window.removeEventListener('keydown', handler);
+      // Merged from original cleanup — fixed undeclared `engine` → audioEngineRef.current
+      if (typeof audioEngineRef.current?.cleanup === 'function') audioEngineRef.current.cleanup();
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
   }, []);
@@ -1429,7 +1445,7 @@ export default function MultiTrackPanel() {
                         <div
                           className="pointer-events-none"
                           style={{
-                            position: 'fixed',
+                            position: 'absolute',
                             top: 0, bottom: 0,
                             left: 128 + project.transport.position * pixelsPerSecond - scrollLeft,
                             width: 1,

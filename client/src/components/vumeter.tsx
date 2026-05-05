@@ -3,7 +3,7 @@ interface VUMeterProps {
   className?: string;
 }
 
-export const _VUMeter = ({ level = 0, className = '' }: VUMeterProps) => {
+export const VUMeter = ({ level = 0, className = '' }: VUMeterProps) => {
   return (
     <div className={`vu-meter ${className}`}>
       <div 

@@ -156,7 +156,7 @@ export class AudioClip {
       this.gainNode.connect(this.channel.input);
 
       // Build the buffer source
-      const _src = this.context.createBufferSource();
+      const src = this.context.createBufferSource();
       src.buffer = this.buffer;
       src.playbackRate.value = this.config.playbackRate ?? 1;
 
@@ -170,11 +170,11 @@ export class AudioClip {
 
       const when    = transportToContextTime(transportTime, this.context);
       const offset  = this.config.offset   ?? 0;
-      const _duration = this.config.duration;
+      const duration = this.config.duration;
 
       // Fades — schedule against gainNode
-      const _gain = this.gainNode.gain;
-      const _targetGain = this.config.gain ?? 1;
+      const gain = this.gainNode.gain;
+      const targetGain = this.config.gain ?? 1;
 
       if ((this.config.fadeIn ?? 0) > 0) {
         gain.setValueAtTime(0, when);
@@ -184,7 +184,7 @@ export class AudioClip {
       }
 
       if ((this.config.fadeOut ?? 0) > 0 && duration !== undefined) {
-        const _fadeStart = when + duration - this.config.fadeOut!;
+        const fadeStart = when + duration - this.config.fadeOut!;
         gain.setValueAtTime(targetGain, fadeStart);
         gain.linearRampToValueAtTime(0, when + duration);
       }
@@ -255,7 +255,7 @@ export class AudioClip {
   update(changes: Partial<Omit<AudioClipConfig, 'id' | 'buffer'>>): void {
     if (this._state === 'disposed') return;
 
-    const _prev = { ...this.config };
+    const prev = { ...this.config };
     this.config = { ...this.config, ...changes };
 
     // Apply live-patchable params immediately

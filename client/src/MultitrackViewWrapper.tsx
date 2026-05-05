@@ -1,3 +1,4 @@
+import { PageNav } from '@/components/page-nav';
 import MultitrackView                          from './components/multi-track-view';
 import type { Track as ViewTrack }             from './components/multi-track-view';
 import { useDAWStore }                         from './hooks/useDAWStore';
@@ -39,7 +40,8 @@ function MultitrackViewWrapper() {
   } = useDAWStore();
 
   return (
-    <MultitrackView
+    <>
+      <MultitrackView
       tracks={tracks.map(adaptTrack)}
       transport={{ isPlaying: playing, isRecording: recording, position }}
       hideTransport={true}
@@ -61,10 +63,11 @@ function MultitrackViewWrapper() {
       }}
       onDeleteTrack={(id)    => removeTrack(id)}
       onDuplicateTrack={(id) => {
-        const _src = tracks.find(t => t.id === id);
+        const src = tracks.find(t => t.id === id);
         if (src) addTrack({ ...src, label: `${src.label} (copy)` });
       }}
     />
+    </>
   );
 }
 

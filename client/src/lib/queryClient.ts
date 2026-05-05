@@ -9,7 +9,7 @@ import { QueryClient, type QueryFunction } from '@tanstack/react-query';
 import { useAuthStore } from '../hooks/authStore';
 
 function authHeaders(extra?: Record<string, string>): Record<string, string> {
-  const _token = useAuthStore.getState().token;
+  const token = useAuthStore.getState().token;
   const headers: Record<string, string> = { ...extra };
   if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
@@ -17,7 +17,7 @@ function authHeaders(extra?: Record<string, string>): Record<string, string> {
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const _text = (await res.text()) || res.statusText;
+    const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
 }
@@ -27,7 +27,7 @@ export async function apiRequest(
   url: string,
   data?: unknown,
 ): Promise<Response> {
-  const _res = await fetch(url, {
+  const res = await fetch(url, {
     method,
     headers: data
       ? authHeaders({ 'Content-Type': 'application/json' })
@@ -46,7 +46,7 @@ export function getQueryFn<T>({
   on401: UnauthorizedBehavior;
 }): QueryFunction<T> {
   return async ({ queryKey }) => {
-    const _res = await fetch(queryKey.join('/') as string, {
+    const res = await fetch(queryKey.join('/') as string, {
       headers: authHeaders(),
     });
     if (unauthorizedBehavior === 'returnNull' && res.status === 401) {
@@ -57,7 +57,7 @@ export function getQueryFn<T>({
   };
 }
 
-export const _queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,

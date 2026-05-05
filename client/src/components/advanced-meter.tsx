@@ -20,34 +20,34 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
   showPeak = true,
   showDb = false,
 }) => {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Cache ctx and gradient so they're not recreated every frame
-  const _ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-  const _gradientRef = useRef<CanvasGradient | null>(null);
-  const _rafRef = useRef<number | null>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const gradientRef = useRef<CanvasGradient | null>(null);
+  const rafRef = useRef<number | null>(null);
 
   // Internal peak hold state — also respect the incoming peak prop
-  const _peakHoldRef = useRef<number>(0);
-  const _peakHoldTimeRef = useRef<number>(0);
+  const peakHoldRef = useRef<number>(0);
+  const peakHoldTimeRef = useRef<number>(0);
 
-  const _isVertical = orientation === 'vertical';
+  const isVertical = orientation === 'vertical';
 
   // Rebuild the gradient whenever canvas dimensions or orientation change.
   // drawLength = the axis along which the meter travels.
-  const _buildGradient = useCallback(() => {
-    const _ctx = ctxRef.current;
+  const buildGradient = useCallback(() => {
+    const ctx = ctxRef.current;
     if (!ctx) return;
 
-    const _drawLength = isVertical ? height : width;
+    const drawLength = isVertical ? height : width;
 
-    const _gradient = isVertical
+    const gradient = isVertical
       ? ctx.createLinearGradient(0, drawLength, 0, 0)
       : ctx.createLinearGradient(0, 0, drawLength, 0);
 
-    gradient.addColorStop(0,    '#22c55e'); // Green
-    gradient.addColorStop(0.6,  '#eab308'); // Yellow
-    gradient.addColorStop(0.85, '#f97316'); // Orange
+    gradient.addColorStop(0,    'var(--accent-green)'); // Green
+    gradient.addColorStop(0.6,  'var(--amber-500)'); // Yellow
+    gradient.addColorStop(0.85, 'var(--track-orange)'); // Orange
     gradient.addColorStop(1,    '#ef4444'); // Red
 
     gradientRef.current = gradient;
@@ -55,13 +55,13 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
 
   // Initialise (or reinitialise) the canvas whenever dimensions/orientation change.
   useEffect(() => {
-    const _canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
     canvas.width  = width;
     canvas.height = height;
 
-    const _ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
     ctxRef.current = ctx;
 
@@ -69,21 +69,21 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
   }, [width, height, buildGradient]);
 
   // Main draw function — called via RAF so it never blocks the main thread.
-  const _draw = useCallback(() => {
-    const _canvas = canvasRef.current;
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
     const ctx    = ctxRef.current;
-    const _gradient = gradientRef.current;
+    const gradient = gradientRef.current;
     if (!canvas || !ctx || !gradient) return;
 
     // Draw length = the axis along which the meter fills.
-    const _drawLength = isVertical ? height : width;
+    const drawLength = isVertical ? height : width;
     // Draw thickness = the perpendicular axis.
     const drawThick  = isVertical ? width  : height;
 
     // ── Peak hold ──────────────────────────────────────────────────────────
-    const _now = Date.now();
+    const now = Date.now();
     // Use the higher of the incoming peak prop and the internally tracked hold.
-    const _effectivePeak = Math.max(peak, peakHoldRef.current);
+    const effectivePeak = Math.max(peak, peakHoldRef.current);
 
     if (level > peakHoldRef.current) {
       peakHoldRef.current     = level;
@@ -93,11 +93,11 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
     }
 
     // ── Clear ──────────────────────────────────────────────────────────────
-    ctx.fillStyle = '#1a1a1a';
+    ctx.fillStyle = 'var(--t-b2x)';
     ctx.fillRect(0, 0, width, height);
 
     // ── Level bar ─────────────────────────────────────────────────────────
-    const _levelPx = Math.min(level, 1) * drawLength;
+    const levelPx = Math.min(level, 1) * drawLength;
     ctx.fillStyle = gradient;
 
     if (isVertical) {
@@ -109,8 +109,8 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
 
     // ── Peak indicator ────────────────────────────────────────────────────
     if (showPeak && effectivePeak > 0) {
-      const _peakPx = effectivePeak * drawLength;
-      ctx.fillStyle = '#ffffff';
+      const peakPx = effectivePeak * drawLength;
+      ctx.fillStyle = 'var(--white)';
 
       if (isVertical) {
         ctx.fillRect(0, drawLength - peakPx - 2, drawThick, 2);
@@ -123,9 +123,9 @@ export const AdvancedMeter: React.FC<AdvancedMeterProps> = ({
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
     ctx.lineWidth   = 1;
 
-    const _marks = [0, -6, -12, -18, -24, -30];
+    const marks = [0, -6, -12, -18, -24, -30];
     marks.forEach(db => {
-      const _position = ((db + 60) / 60) * drawLength;
+      const position = ((db + 60) / 60) * drawLength;
 
       ctx.beginPath();
       if (isVertical) {

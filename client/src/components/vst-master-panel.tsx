@@ -61,10 +61,10 @@ export interface EffectConfig {
 
 function VSTPluginManagerPlaceholder() {
   return (
-    <div className="border border-[#222] p-8 text-center">
+    <div className="border border-[var(--dj-border)] p-8 text-center">
       <div className="text-4xl mb-4">🔌</div>
-      <p className="text-xs tracking-widest uppercase text-[#888]">VST Plugin Manager</p>
-      <p className="text-xs text-[#444] mt-1 tracking-wider">Coming soon...</p>
+      <p className="text-xs tracking-widest uppercase text-[var(--text-dim)]">VST Plugin Manager</p>
+      <p className="text-xs text-[var(--dj-dim)] mt-1 tracking-wider">Coming soon...</p>
     </div>
   );
 }
@@ -77,7 +77,7 @@ function LoadingFallback() {
   return (
     <div className="flex items-center justify-center p-8 font-mono">
       <Loader2 className="animate-spin h-6 w-6 text-[#a3e635] mr-3" />
-      <span className="text-xs tracking-widest text-[#888]">LOADING...</span>
+      <span className="text-xs tracking-widest text-[var(--text-dim)]">LOADING...</span>
     </div>
   );
 }
@@ -88,7 +88,7 @@ function LoadingFallback() {
 
 function SectionHeader({ label, sub }: { label: string; sub?: string }) {
   return (
-    <div className="mb-4 border-b border-[#1a1a1a] pb-3">
+    <div className="mb-4 border-b border-[var(--t-b2x)] pb-3">
       <h2 className="text-xs font-bold tracking-widest uppercase text-[#a3e635]">
         {label}
       </h2>
@@ -115,15 +115,15 @@ function VSTMasterPanel({
   const [activeTab, setActiveTab] = useState('project');
 
   // Lazy AudioContext for serializer (only needed for sampleRate)
-  const _audioCtxRef = useRef<AudioContext | null>(null);
-  const _getAudioCtx = () => {
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const getAudioCtx = () => {
     if (!audioCtxRef.current) audioCtxRef.current = getAudioContext();
     return audioCtxRef.current;
   };
 
   const _handleSaveProject = async () => {
     try {
-      const _projectData = await onProjectSave();
+      const projectData = await onProjectSave();
       console.log('Project saved:', projectData);
       return projectData;
     } catch (error) {
@@ -146,7 +146,7 @@ function VSTMasterPanel({
   };
 
   return (
-    <div className="w-full bg-[#060606] text-[#f0f0f0] font-mono">
+    <div className="w-full bg-[var(--void)] text-[var(--daw-fg)] font-mono">
 
       {/* Loading bar */}
       {loadingProject && (
@@ -163,7 +163,7 @@ function VSTMasterPanel({
         {/* Tab bar */}
         <TabsList className="
           w-full grid grid-cols-5
-          bg-[#0a0a0a] border-b border-[#1a1a1a]
+          bg-[#0a0a0a] border-b border-[var(--t-b2x)]
           rounded-none h-auto p-0
         ">
           {[
@@ -177,9 +177,9 @@ function VSTMasterPanel({
               key={value}
               value={value}
               className="
-                rounded-none border-r border-[#1a1a1a] last:border-r-0
+                rounded-none border-r border-[var(--t-b2x)] last:border-r-0
                 text-[10px] tracking-widest uppercase font-mono py-3
-                text-[#555] hover:text-[#888] transition-colors
+                text-[#555] hover:text-[var(--text-dim)] transition-colors
                 data-[state=active]:bg-transparent
                 data-[state=active]:text-[#a3e635]
                 data-[state=active]:border-b-2
@@ -204,7 +204,7 @@ function VSTMasterPanel({
             <VSTProjectManagerUI
               onSave={() => {
                 // Build chains Map directly from channel fxChains
-                const _chains = new Map<string, FXChain>();
+                const chains = new Map<string, FXChain>();
                 channels.forEach(ch => chains.set(ch.id, ch.fxChain));
                 return VSTProjectSerializer.serializeProject(
                   chains,
@@ -213,8 +213,8 @@ function VSTMasterPanel({
                 );
               }}
               onLoad={async (data: SerializedVSTChain) => {
-                const _audioCtx = getAudioCtx();
-                const _restoredChains = await VSTProjectSerializer.deserializeProject(
+                const audioCtx = getAudioCtx();
+                const restoredChains = await VSTProjectSerializer.deserializeProject(
                   data,
                   audioCtx
                 );

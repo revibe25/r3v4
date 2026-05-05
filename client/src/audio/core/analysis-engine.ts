@@ -101,11 +101,11 @@ export class AudioEngine {
 
   createAnalyser(trackId: string): AnalyserNode {
     if (!this.context) throw new Error('AudioContext not initialized');
-    const _analyser = this.context.createAnalyser();
+    const analyser = this.context.createAnalyser();
     analyser.fftSize = this.fftSize;
     analyser.smoothingTimeConstant = this.smoothingTime;
 
-    const _spectrumLength = analyser.frequencyBinCount;
+    const spectrumLength = analyser.frequencyBinCount;
     this.trackStates.set(trackId, {
       rms: 0,
       spectrum: new Float32Array(spectrumLength),
@@ -131,34 +131,34 @@ export class AudioEngine {
 
   connectClip(trackId: string, source: AudioBufferSourceNode) {
     if (!this.context || !this.masterGain) return;
-    const _analyser = this.analyserNodes.get(trackId) || this.createAnalyser(trackId);
+    const analyser = this.analyserNodes.get(trackId) || this.createAnalyser(trackId);
     source.connect(analyser);
     analyser.connect(this.masterGain);
     this.clipNodes.set(trackId, source);
   }
 
   applyFX(trackId: string, fx: FXChain) {
-    const _state = this.trackStates.get(trackId);
+    const state = this.trackStates.get(trackId);
     if (!state) return;
     state.fxChains.push(fx);
-    const _analyser = this.analyserNodes.get(trackId);
+    const analyser = this.analyserNodes.get(trackId);
     if (analyser) (fx as any).getOutput().connect(analyser);
   }
 
   private async loop() {
     if (!this.context) return;
-    const _now = this.context.currentTime;
-    const _bpm = (transportEngine as any).state.bpm || 120;
-    const _secondsPerBeat = 60 / bpm;
+    const now = this.context.currentTime;
+    const bpm = (transportEngine as any).state.bpm || 120;
+    const secondsPerBeat = 60 / bpm;
 
     // --- Gather all track onsets first for cross-track alignment ---
     const trackOnsets: Map<string, { kick: boolean; snare: boolean; hihat: boolean }> = new Map();
 
     for (const [trackId, state] of this.trackStates.entries()) {
-      const _analyser = this.analyserNodes.get(trackId);
+      const analyser = this.analyserNodes.get(trackId);
       if (!analyser) continue;
 
-      const _data = new Float32Array(analyser.frequencyBinCount);
+      const data = new Float32Array(analyser.frequencyBinCount);
       analyser.getFloatFrequencyData(data);
       state.spectrum = data;
 
@@ -166,14 +166,14 @@ export class AudioEngine {
 
       // ML Drum Classification: TF.js stub - not active
       // --- Beat & quantized beat ---
-      const _bpm = (transportEngine as any).state.bpm || 120;
-      const _secondsPerBeat = 60 / bpm;
-      const _minBeatInterval = 0.2;
+      const bpm = (transportEngine as any).state.bpm || 120;
+      const secondsPerBeat = 60 / bpm;
+      const minBeatInterval = 0.2;
 
       if (state.onsetDetected && now - state.lastBeatTime > minBeatInterval) {
         state.lastBeatTime = now;
         state.beatPhase = 0;
-        const _beatFraction = (now / secondsPerBeat) % 1;
+        const beatFraction = (now / secondsPerBeat) % 1;
         state.quantizedBeat = Math.round(beatFraction * this.quantization) / this.quantization;
         // MIDI triggers
         midiEngine.state.notes.forEach(() => state.midiTriggered = true);
@@ -214,4 +214,4 @@ export class AudioEngine {
   }
 }
 
-export const _analysisEngine = new AudioEngine();
+export const analysisEngine = new AudioEngine();

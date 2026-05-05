@@ -16,12 +16,12 @@ export function TransBtn({
 }: TransBtnProps) {
   const [pressed, setPressed] = useState(false);
 
-  const _bg = danger
-    ? (pressed || active ? '#ff2200' : 'transparent')
+  const bg = danger
+    ? (pressed || active ? 'var(--signal-clip)' : 'transparent')
     : active ? color : 'transparent';
-  const _borderColor = danger ? '#ff2200' : active ? color : DJ_BORDER;
+  const borderColor = danger ? 'var(--signal-clip)' : active ? color : DJ_BORDER;
   const textColor   = danger
-    ? (active || pressed ? DJ_BLACK : '#ff2200')
+    ? (active || pressed ? DJ_BLACK : 'var(--signal-clip)')
     : active ? DJ_BLACK : DJ_DIM;
 
   return (

@@ -75,14 +75,14 @@ export class TransportEngine {
   }
 }
 
-let _transportEngine: TransportEngine | null = null;
+let transportEngine: TransportEngine | null = null;
 export function getTransportEngine(): TransportEngine {
   if (!_transportEngine) _transportEngine = new TransportEngine();
   return _transportEngine;
 }
 
 // backward-compat named export (lazy-evaluated)
-export const _transportEngine = new Proxy({} as TransportEngine, {
+export const transportEngine = new Proxy({} as TransportEngine, {
   get(_t, prop) {
     return (getTransportEngine() as any)[prop];
   }

@@ -43,7 +43,7 @@ interface FXConfig {
 // ICONS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const _ReverbIcon = ({ size = 16 }: { size?: number }) => (
+const ReverbIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12c0-3 2.5-6 6-6s6 3 6 6-2.5 6-6 6" />
     <path d="M8 12c0-2 1.5-4 4-4s4 2 4 4-1.5 4-4 4" opacity="0.6" />
@@ -51,7 +51,7 @@ const _ReverbIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const _DelayIcon = ({ size = 16 }: { size?: number }) => (
+const DelayIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <rect x="3" y="8" width="4" height="8" rx="1" />
     <rect x="10" y="10" width="4" height="6" rx="1" opacity="0.6" />
@@ -59,21 +59,21 @@ const _DelayIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const _FlangerIcon = ({ size = 16 }: { size?: number }) => (
+const FlangerIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12 Q 6 6, 8 12 T 14 12 T 20 12" />
     <path d="M2 12 Q 6 16, 10 12 T 18 12" opacity="0.4" />
   </svg>
 );
 
-const _ReverseIcon = ({ size = 16 }: { size?: number }) => (
+const ReverseIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <polyline points="11 17 6 12 11 7" />
     <path d="M6 12h12" /><path d="M18 7v10" />
   </svg>
 );
 
-const _VinylIcon = ({ size = 16 }: { size?: number }) => (
+const VinylIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <circle cx="12" cy="12" r="9" />
     <circle cx="12" cy="12" r="3.5" />
@@ -81,14 +81,14 @@ const _VinylIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const _ChorusIcon = ({ size = 16 }: { size?: number }) => (
+const ChorusIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M4 12 Q 8 8, 12 12 T 20 12" />
     <path d="M4 12 Q 8 16, 12 12 T 20 12" opacity="0.5" />
   </svg>
 );
 
-const _PhaserIcon = ({ size = 16 }: { size?: number }) => (
+const PhaserIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <circle cx="12" cy="12" r="8" opacity="0.3" />
     <circle cx="12" cy="12" r="5" opacity="0.5" />
@@ -96,26 +96,26 @@ const _PhaserIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-const _BitcrusherIcon = ({ size = 16 }: { size?: number }) => (
+const BitcrusherIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M3 12h3v3h3v-6h3v8h3v-10h3v12h3" />
   </svg>
 );
 
-const _DistortionIcon = ({ size = 16 }: { size?: number }) => (
+const DistortionIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <path d="M2 12 L 6 8 L 10 16 L 14 4 L 18 18 L 22 12" />
   </svg>
 );
 
-const _CompressorIcon = ({ size = 16 }: { size?: number }) => (
+const CompressorIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M3 20 L 8 15 L 12 15 L 21 6" />
     <path d="M3 4 L 21 4" opacity="0.3" />
   </svg>
 );
 
-const _TremoloIcon = ({ size = 16 }: { size?: number }) => (
+const TremoloIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M2 12 L 5 8 L 8 12 L 11 8 L 14 12 L 17 8 L 20 12 L 23 8" />
   </svg>
@@ -126,29 +126,29 @@ const _TremoloIcon = ({ size = 16 }: { size?: number }) => (
 // ═══════════════════════════════════════════════════════════════════════════
 
 const FX_CONFIG: readonly FXConfig[] = [
-  { key: 'reverb',      label: 'Reverb',       shortLabel: 'REV', color: '#10b981', icon: <ReverbIcon />,     category: 'time' },
-  { key: 'delay',       label: 'Delay',        shortLabel: 'DLY', color: '#3b82f6', icon: <DelayIcon />,      category: 'time' },
-  { key: 'reverse',     label: 'Reverse',      shortLabel: 'RVS', color: '#f59e0b', icon: <ReverseIcon />,    category: 'time' },
-  { key: 'flange',      label: 'Flanger',      shortLabel: 'FLN', color: '#a78bfa', icon: <FlangerIcon />,    category: 'modulation' },
-  { key: 'chorus',      label: 'Chorus',       shortLabel: 'CHO', color: '#06b6d4', icon: <ChorusIcon />,     category: 'modulation' },
-  { key: 'phaser',      label: 'Phaser',       shortLabel: 'PHS', color: '#8b5cf6', icon: <PhaserIcon />,     category: 'modulation' },
-  { key: 'tremolo',     label: 'Tremolo',      shortLabel: 'TRM', color: '#ec4899', icon: <TremoloIcon />,    category: 'modulation' },
-  { key: 'compressor',  label: 'Compressor',   shortLabel: 'CMP', color: '#f97316', icon: <CompressorIcon />, category: 'dynamics' },
-  { key: 'sidechain',   label: 'Sidechain',    shortLabel: 'SID', color: '#0ea5e9', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, category: 'dynamics' },
+  { key: 'reverb',      label: 'Reverb',       shortLabel: 'REV', color: 'var(--status-ok)', icon: <ReverbIcon />,     category: 'time' },
+  { key: 'delay',       label: 'Delay',        shortLabel: 'DLY', color: 'var(--looper-blue)', icon: <DelayIcon />,      category: 'time' },
+  { key: 'reverse',     label: 'Reverse',      shortLabel: 'RVS', color: 'var(--status-warn)', icon: <ReverseIcon />,    category: 'time' },
+  { key: 'flange',      label: 'Flanger',      shortLabel: 'FLN', color: 'var(--accent-violet-soft)', icon: <FlangerIcon />,    category: 'modulation' },
+  { key: 'chorus',      label: 'Chorus',       shortLabel: 'CHO', color: 'var(--track-cyan)', icon: <ChorusIcon />,     category: 'modulation' },
+  { key: 'phaser',      label: 'Phaser',       shortLabel: 'PHS', color: 'var(--accent-purple)', icon: <PhaserIcon />,     category: 'modulation' },
+  { key: 'tremolo',     label: 'Tremolo',      shortLabel: 'TRM', color: 'var(--track-pink)', icon: <TremoloIcon />,    category: 'modulation' },
+  { key: 'compressor',  label: 'Compressor',   shortLabel: 'CMP', color: 'var(--track-orange)', icon: <CompressorIcon />, category: 'dynamics' },
+  { key: 'sidechain',   label: 'Sidechain',    shortLabel: 'SID', color: 'var(--accent-blue)', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, category: 'dynamics' },
   { key: 'distortion',  label: 'Distortion',   shortLabel: 'DST', color: '#ef4444', icon: <DistortionIcon />, category: 'tone' },
-  { key: 'bitcrusher',  label: 'Bitcrusher',   shortLabel: 'BIT', color: '#84cc16', icon: <BitcrusherIcon />, category: 'tone' },
-  { key: 'saturation',  label: 'Saturation',   shortLabel: 'SAT', color: '#fb923c', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.912 5.813a2 2 0 001.272 1.272L21 12l-5.816 1.916a2 2 0 00-1.272 1.272L12 21l-1.912-5.812a2 2 0 00-1.272-1.272L3 12l5.816-1.916a2 2 0 001.272-1.272z"/></svg>, category: 'tone' },
-  { key: 'vinyl',       label: 'Vinyl',        shortLabel: 'VNL', color: '#be123c', icon: <VinylIcon />,      category: 'creative' },
-  { key: 'autoFilter',  label: 'Auto Filter',  shortLabel: 'AFL', color: '#7c3aed', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>, category: 'creative' },
-  { key: 'stereoWiden', label: 'Stereo Width', shortLabel: 'STW', color: '#14b8a6', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"/><path d="M12 3c-2.76 3.6-4.5 6.77-4.5 9s1.74 5.4 4.5 9"/><path d="M12 3c2.76 3.6 4.5 6.77 4.5 9s-1.74 5.4-4.5 9"/></svg>, category: 'creative' },
+  { key: 'bitcrusher',  label: 'Bitcrusher',   shortLabel: 'BIT', color: 'var(--looper-lime)', icon: <BitcrusherIcon />, category: 'tone' },
+  { key: 'saturation',  label: 'Saturation',   shortLabel: 'SAT', color: 'var(--orange-400)', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3l1.912 5.813a2 2 0 001.272 1.272L21 12l-5.816 1.916a2 2 0 00-1.272 1.272L12 21l-1.912-5.812a2 2 0 00-1.272-1.272L3 12l5.816-1.916a2 2 0 001.272-1.272z"/></svg>, category: 'tone' },
+  { key: 'vinyl',       label: 'Vinyl',        shortLabel: 'VNL', color: 'var(--status-error)', icon: <VinylIcon />,      category: 'creative' },
+  { key: 'autoFilter',  label: 'Auto Filter',  shortLabel: 'AFL', color: 'var(--accent-purple)', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>, category: 'creative' },
+  { key: 'stereoWiden', label: 'Stereo Width', shortLabel: 'STW', color: 'var(--looper-teal)', icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"/><path d="M12 3c-2.76 3.6-4.5 6.77-4.5 9s1.74 5.4 4.5 9"/><path d="M12 3c2.76 3.6 4.5 6.77 4.5 9s-1.74 5.4-4.5 9"/></svg>, category: 'creative' },
 ] as const;
 
 const CATEGORY_COLORS: Record<string, string> = {
-  time: '#10b981',
-  modulation: '#a78bfa',
-  dynamics: '#f59e0b',
+  time: 'var(--status-ok)',
+  modulation: 'var(--accent-violet-soft)',
+  dynamics: 'var(--status-warn)',
   tone: '#ef4444',
-  creative: '#06b6d4',
+  creative: 'var(--track-cyan)',
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -156,11 +156,11 @@ const CATEGORY_COLORS: Record<string, string> = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function SpectrumAnalyzer({ activeCount, height = 48 }: { activeCount: number; height?: number }) {
-  const _bars = 32;
+  const bars = 32;
   const [heights, setHeights] = useState<number[]>(Array(bars).fill(0));
 
   useEffect(() => {
-    const _interval = setInterval(() => {
+    const interval = setInterval(() => {
       setHeights(Array.from({ length: bars }, () => Math.random() * (activeCount > 0 ? 0.85 : 0.25)));
     }, 60);
     return () => clearInterval(interval);
@@ -175,8 +175,8 @@ function SpectrumAnalyzer({ activeCount, height = 48 }: { activeCount: number; h
           style={{
             height: `${Math.max(h * 100, 3)}%`,
             transition: 'height 0.06s ease-out',
-            background: `linear-gradient(180deg, ${i < bars * 0.3 ? '#10b981' : i < bars * 0.65 ? '#f59e0b' : '#ef4444'} 0%, ${i < bars * 0.3 ? '#059669' : i < bars * 0.65 ? '#d97706' : '#dc2626'} 100%)`,
-            boxShadow: h > 0.5 ? `0 0 6px ${i < bars * 0.3 ? '#10b981' : i < bars * 0.65 ? '#f59e0b' : '#ef4444'}55` : 'none',
+            background: `linear-gradient(180deg, ${i < bars * 0.3 ? 'var(--status-ok)' : i < bars * 0.65 ? 'var(--status-warn)' : '#ef4444'} 0%, ${i < bars * 0.3 ? 'var(--status-ok)' : i < bars * 0.65 ? 'var(--status-warn)' : 'var(--status-error)'} 100%)`,
+            boxShadow: h > 0.5 ? `0 0 6px ${i < bars * 0.3 ? 'var(--status-ok)' : i < bars * 0.65 ? 'var(--status-warn)' : '#ef4444'}55` : 'none',
             minHeight: 2,
           }}
         />
@@ -214,7 +214,7 @@ function ModeSwitcher({ mode, onChange }: { mode: PanelMode; onChange: (m: Panel
             letterSpacing: '0.05em',
             textTransform: 'uppercase',
             background: mode === m.id ? 'rgba(167,139,250,0.2)' : 'transparent',
-            color: mode === m.id ? '#a78bfa' : 'rgba(255,255,255,0.4)',
+            color: mode === m.id ? 'var(--accent-violet-soft)' : 'rgba(255,255,255,0.4)',
             borderRight: m.id !== 'professional' ? '1px solid rgba(255,255,255,0.1)' : 'none',
             transition: 'all 0.15s ease',
             cursor: 'pointer',
@@ -231,7 +231,7 @@ function ModeSwitcher({ mode, onChange }: { mode: PanelMode; onChange: (m: Panel
 // FX BUTTON VARIANTS
 // ═══════════════════════════════════════════════════════════════════════════
 
-const _FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   return (
     <button
@@ -279,7 +279,7 @@ const _FXButtonCompact = memo(({ config, isActive, onToggle }: { config: FXConfi
   );
 });
 
-const _FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   const [wetDry, setWetDry] = useState(70);
   const [showSlider, setShowSlider] = useState(false);
@@ -376,7 +376,7 @@ const _FXButtonNormal = memo(({ config, isActive, onToggle }: { config: FXConfig
   );
 });
 
-const _FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
+const FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; isActive: boolean; onToggle: (k: string) => void }) => {
   const [pressed, setPressed] = useState(false);
   const [wetDry, setWetDry] = useState(70);
   const [depth, setDepth] = useState(50);
@@ -465,7 +465,7 @@ const _FXButtonPro = memo(({ config, isActive, onToggle }: { config: FXConfig; i
 // MAIN FX PANEL
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProps) => {
+export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProps) => {
   const [fxState, setFxState] = useState<FXState>({});
   const [mode, setMode] = useState<PanelMode>('normal');
   const [collapsed, setCollapsed] = useState(false);
@@ -473,9 +473,9 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
   const [masterMix, setMasterMix] = useState(100);
   const [showAnalyzer, setShowAnalyzer] = useState(true);
 
-  const _fx = fxProp ?? fxState;
+  const fx = fxProp ?? fxState;
 
-  const _onToggle = useCallback((key: string) => {
+  const onToggle = useCallback((key: string) => {
     if (onToggleProp) {
       onToggleProp(key);
     } else {
@@ -483,20 +483,20 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
     }
   }, [onToggleProp]);
 
-  const _activeCount = useMemo(() => FX_CONFIG.filter(c => fx[c.key]).length, [fx]);
-  const _activeFX = useMemo(() => FX_CONFIG.filter(c => fx[c.key]), [fx]);
+  const activeCount = useMemo(() => FX_CONFIG.filter(c => fx[c.key]).length, [fx]);
+  const activeFX = useMemo(() => FX_CONFIG.filter(c => fx[c.key]), [fx]);
 
   const _panelGlow = useMemo(() => {
-    const _colors = activeFX.map(c => c.color);
+    const colors = activeFX.map(c => c.color);
     if (!colors.length) return 'none';
     return colors.slice(0, 3).map(c => `0 0 40px ${c}14`).join(', ');
   }, [activeFX]);
 
-  const _filteredFX = selectedCategory
+  const filteredFX = selectedCategory
     ? FX_CONFIG.filter(c => c.category === selectedCategory)
     : FX_CONFIG;
 
-  const _gridCols = mode === 'compact' ? 'repeat(auto-fill, minmax(58px, 1fr))' :
+  const gridCols = mode === 'compact' ? 'repeat(auto-fill, minmax(58px, 1fr))' :
                    mode === 'normal'  ? 'repeat(auto-fill, minmax(88px, 1fr))' :
                                         '1fr';
 
@@ -534,7 +534,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
+              background: 'linear-gradient(135deg, var(--accent-violet-soft) 0%, var(--accent-purple) 100%)',
               boxShadow: '0 0 14px #a78bfa44',
               flexShrink: 0,
             }}>
@@ -562,10 +562,10 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
             }}>
               <div style={{
                 width: 6, height: 6, borderRadius: '50%',
-                background: '#10b981', boxShadow: '0 0 8px #10b981',
+                background: 'var(--status-ok)', boxShadow: '0 0 8px var(--status-ok)',
                 animation: 'fx-led-pulse 1.5s ease-in-out infinite',
               }} />
-              <span style={{ fontSize: 9, fontWeight: 700, color: '#10b981', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--status-ok)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                 {activeCount}/{FX_CONFIG.length} Active
               </span>
             </div>
@@ -634,7 +634,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
               </span>
               <div style={{ display: 'flex', gap: 4 }}>
                 {Object.entries(CATEGORY_COLORS).map(([cat, color]) => {
-                  const _active = FX_CONFIG.filter(c => c.category === cat && fx[c.key]).length;
+                  const active = FX_CONFIG.filter(c => c.category === cat && fx[c.key]).length;
                   return active > 0 ? (
                     <div key={cat} style={{
                       width: 8, height: 8, borderRadius: '50%',
@@ -692,7 +692,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
                   Master FX Mix
                 </span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>{masterMix}%</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--status-ok)' }}>{masterMix}%</span>
                   <button
                     onClick={() => setMasterMix(100)}
                     style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 4, cursor: 'pointer', padding: '2px 4px', color: 'rgba(255,255,255,0.5)', fontSize: 8 }}
@@ -702,7 +702,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
               <input
                 type="range" min={0} max={100} value={masterMix}
                 onChange={e => setMasterMix(+e.target.value)}
-                style={{ width: '100%', accentColor: '#10b981', height: 2 }}
+                style={{ width: '100%', accentColor: 'var(--status-ok)', height: 2 }}
               />
             </div>
           )}
@@ -740,7 +740,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
                     {i < activeFX.length - 1 && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 10 }}>›</span>}
                   </div>
                 ))}
-                <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, background: 'linear-gradient(90deg, #10b981, #059669)', color: 'white', boxShadow: '0 0 10px #10b98133' }}>OUT</span>
+                <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: 4, background: 'linear-gradient(90deg, var(--status-ok), var(--status-ok))', color: 'white', boxShadow: '0 0 10px #10b98133' }}>OUT</span>
               </div>
             </div>
           )}
@@ -753,7 +753,7 @@ export const _FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelPro
           }}>
             <button
               onClick={() => {
-                const _keys = Object.fromEntries(FX_CONFIG.map(c => [c.key, false]));
+                const keys = Object.fromEntries(FX_CONFIG.map(c => [c.key, false]));
                 setFxState(keys);
               }}
               style={{

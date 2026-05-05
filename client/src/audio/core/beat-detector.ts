@@ -63,8 +63,8 @@ export class AudioEngine {
 
   async start() {
     this.ctx = getAudioContext();
-    const _stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const _src = this.ctx.createMediaStreamSource(stream);
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const src = this.ctx.createMediaStreamSource(stream);
 
     this.analyser = this.ctx.createAnalyser();
     this.analyser.fftSize = this.config.fftSize!;
@@ -88,22 +88,22 @@ export class AudioEngine {
   private loop = () => {
     this.analyser.getFloatFrequencyData(this.data as Float32Array<ArrayBuffer>);
 
-    const _N = this.data.length;
+    const N = this.data.length;
 
     // Convert dB → linear magnitude
-    const _mag = new Float32Array(N) as unknown as Float32Array;
-    for (let _i = 0; i < N; i++) mag[i] = Math.pow(10, this.data[i] / 20);
+    const mag = new Float32Array(N) as unknown as Float32Array;
+    for (let i = 0; i < N; i++) mag[i] = Math.pow(10, this.data[i] / 20);
 
     // RMS calculations
-    let _sumSquares = 0,
+    let sumSquares = 0,
       bassSum = 0,
       midSum = 0,
       trebleSum = 0,
       centroidSum = 0,
       totalMag = 0;
 
-    for (let _i = 0; i < N; i++) {
-      const _m = mag[i];
+    for (let i = 0; i < N; i++) {
+      const m = mag[i];
       sumSquares += m * m;
 
       if (i < N / 4) bassSum += m * m;
@@ -114,29 +114,29 @@ export class AudioEngine {
       totalMag += m;
     }
 
-    const _rms = Math.sqrt(sumSquares / N);
-    const _bassRMS = Math.sqrt(bassSum / (N / 4));
-    const _midRMS = Math.sqrt(midSum / (N / 4));
-    const _trebleRMS = Math.sqrt(trebleSum / (N / 2));
-    const _spectralCentroid = centroidSum / totalMag / N;
+    const rms = Math.sqrt(sumSquares / N);
+    const bassRMS = Math.sqrt(bassSum / (N / 4));
+    const midRMS = Math.sqrt(midSum / (N / 4));
+    const trebleRMS = Math.sqrt(trebleSum / (N / 2));
+    const spectralCentroid = centroidSum / totalMag / N;
 
     // Spectral flux (difference with previous frame)
-    let _flux = 0;
-    for (let _i = 0; i < N; i++) {
-      const _diff = mag[i] - this.previousData[i];
+    let flux = 0;
+    for (let i = 0; i < N; i++) {
+      const diff = mag[i] - this.previousData[i];
       flux += diff > 0 ? diff : 0;
       this.previousData[i] = mag[i];
     }
     flux /= N;
 
     // Onset detection
-    const _onsetDetected = flux > this.config.onsetThreshold!;
+    const onsetDetected = flux > this.config.onsetThreshold!;
 
     // Beat detection with smoothing
-    const _now = this.ctx.currentTime;
+    const now = this.ctx.currentTime;
     if (onsetDetected && now - this.lastBeat > 0.2 && rms > this.config.beatThreshold!) {
-      const _delta = now - this.lastBeat;
-      const _instantBPM = 60 / delta;
+      const delta = now - this.lastBeat;
+      const instantBPM = 60 / delta;
       this.bpm = this.config.bpmSmoothing! * this.bpm + (1 - this.config.bpmSmoothing!) * instantBPM;
       this.lastBeat = now;
 
@@ -164,4 +164,4 @@ export class AudioEngine {
   };
 }
 
-export const _beatDetector = new AudioEngine();
+export const beatDetector = new AudioEngine();

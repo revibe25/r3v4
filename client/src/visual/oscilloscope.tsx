@@ -52,18 +52,18 @@ export function Oscilloscope({
   data,
   width = 400,
   height = 120,
-  color = "#4ade80",
+  color = "var(--green-400)",
   background = "#0a0a0a",
   lineWidth = 1.5,
   ariaLabel = "Waveform oscilloscope",
 }: OscilloscopeProps) {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const _canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const _ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // §SES.3 BLOCK fix 3: empty-data guard
@@ -73,7 +73,7 @@ export function Oscilloscope({
     // §SES.3 BLOCK fix 1: devicePixelRatio scaling
     // Sets the canvas backing store to the physical pixel resolution so the
     // waveform is sharp on HiDPI (Retina) screens.
-    const _dpr = window.devicePixelRatio ?? 1;
+    const dpr = window.devicePixelRatio ?? 1;
     canvas.width  = width  * dpr;
     canvas.height = height * dpr;
     canvas.style.width  = `${width}px`;
@@ -106,12 +106,12 @@ export function Oscilloscope({
     ctx.lineJoin    = "round";
     ctx.lineCap     = "round";
 
-    const _sliceWidth = width / (data.length - 1 || 1);
+    const sliceWidth = width / (data.length - 1 || 1);
 
-    for (let _i = 0; i < data.length; i++) {
-      const _sample = data[i];
+    for (let i = 0; i < data.length; i++) {
+      const sample = data[i];
       // Clamp to [-1, 1] then map to canvas y-coordinate space
-      const _clamped = Math.max(-1, Math.min(1, sample));
+      const clamped = Math.max(-1, Math.min(1, sample));
       const y       = ((1 - clamped) / 2) * height;
       const x       = i * sliceWidth;
 

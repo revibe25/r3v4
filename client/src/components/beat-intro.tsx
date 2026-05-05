@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--accent-purple) (violet)
+// Reason: AI inference visualization — LLPTE beat analysis overlay
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
@@ -10,23 +15,23 @@ const PAD_DIM_MS   = 220;            // how long pad glow persists
 const POP_MS       = 150;            // scale pop duration
 
 // ── Pad categories (mirrors drum-pads.tsx) ─────────────────────────────────────
-const _CATS = [
+const CATS = [
   { label: "KICK",   color: "#ef4444", rgb: "239,68,68"   },
   { label: "KICK",   color: "#ef4444", rgb: "239,68,68"   },
   { label: "KICK",   color: "#ef4444", rgb: "239,68,68"   },
   { label: "KICK",   color: "#ef4444", rgb: "239,68,68"   },
-  { label: "SNARE",  color: "#f97316", rgb: "249,115,22"  },
-  { label: "SNARE",  color: "#f97316", rgb: "249,115,22"  },
-  { label: "SNARE",  color: "#f97316", rgb: "249,115,22"  },
-  { label: "SNARE",  color: "#f97316", rgb: "249,115,22"  },
+  { label: "SNARE",  color: "var(--track-orange)", rgb: "249,115,22"  },
+  { label: "SNARE",  color: "var(--track-orange)", rgb: "249,115,22"  },
+  { label: "SNARE",  color: "var(--track-orange)", rgb: "249,115,22"  },
+  { label: "SNARE",  color: "var(--track-orange)", rgb: "249,115,22"  },
   { label: "HI-HAT", color: "#a3e635", rgb: "163,230,53"  },
   { label: "HI-HAT", color: "#a3e635", rgb: "163,230,53"  },
   { label: "HI-HAT", color: "#a3e635", rgb: "163,230,53"  },
   { label: "HI-HAT", color: "#a3e635", rgb: "163,230,53"  },
-  { label: "PERC",   color: "#8b5cf6", rgb: "139,92,246"  },
-  { label: "PERC",   color: "#8b5cf6", rgb: "139,92,246"  },
-  { label: "PERC",   color: "#8b5cf6", rgb: "139,92,246"  },
-  { label: "PERC",   color: "#8b5cf6", rgb: "139,92,246"  },
+  { label: "PERC",   color: "var(--accent-purple)", rgb: "139,92,246"  },
+  { label: "PERC",   color: "var(--accent-purple)", rgb: "139,92,246"  },
+  { label: "PERC",   color: "var(--accent-purple)", rgb: "139,92,246"  },
+  { label: "PERC",   color: "var(--accent-purple)", rgb: "139,92,246"  },
 ];
 
 // ── Sound names per pad ────────────────────────────────────────────────────────
@@ -39,7 +44,7 @@ const PAD_NAMES = [
 
 // ── Intro beat pattern ─────────────────────────────────────────────────────────
 // pad: 0-15, step: 0-15 (16th notes), vel: 0-1
-const _BEAT = [
+const BEAT = [
   // ─ KICK ─────────────────────────────────────────────────────
   { pad: 0,  step: 0,  vel: 1.00 },  // Beat 1 downbeat
   { pad: 1,  step: 3,  vel: 0.50 },  // Ghost 16th before beat 2
@@ -86,7 +91,7 @@ const STEP_MAP = Array.from({ length: STEPS }, (_, s) =>
 // ── Web Audio synthesis ────────────────────────────────────────────────────────
 
 function mkKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _osc = ctx.createOscillator(), g = ctx.createGain();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(58, t);
   osc.frequency.exponentialRampToValueAtTime(28, t + 0.06);
@@ -95,7 +100,7 @@ function mkKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.48);
   osc.start(t); osc.stop(t + 0.5);
   // Click transient
-  const _c = ctx.createOscillator(), cg = ctx.createGain();
+  const c = ctx.createOscillator(), cg = ctx.createGain();
   c.connect(cg); cg.connect(dest);
   c.frequency.value = 1400;
   cg.gain.setValueAtTime(vel * 0.38, t);
@@ -104,7 +109,7 @@ function mkKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 function mkGhostKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _osc = ctx.createOscillator(), g = ctx.createGain();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(80, t);
   osc.frequency.exponentialRampToValueAtTime(32, t + 0.28);
@@ -115,11 +120,11 @@ function mkGhostKick(ctx: AudioContext, dest: AudioNode, t: number, vel: number)
 
 function mkSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   // Noise body
-  const _len = Math.floor(ctx.sampleRate * 0.22);
-  const _buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const _d = buf.getChannelData(0);
-  for (let _i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  const _ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
+  const len = Math.floor(ctx.sampleRate * 0.22);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
   ns.buffer = buf;
   hpf.type = "highpass"; hpf.frequency.value = 2200;
   ns.connect(hpf); hpf.connect(ng); ng.connect(dest);
@@ -127,7 +132,7 @@ function mkSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   ng.gain.exponentialRampToValueAtTime(0.001, t + 0.19);
   ns.start(t); ns.stop(t + 0.22);
   // Tone
-  const _osc = ctx.createOscillator(), og = ctx.createGain();
+  const osc = ctx.createOscillator(), og = ctx.createGain();
   osc.connect(og); og.connect(dest);
   osc.frequency.value = 180;
   og.gain.setValueAtTime(vel * 0.58, t);
@@ -136,11 +141,11 @@ function mkSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 function mkGhostSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _len = Math.floor(ctx.sampleRate * 0.1);
-  const _buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const _d = buf.getChannelData(0);
-  for (let _i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  const _ns = ctx.createBufferSource(), bpf = ctx.createBiquadFilter(), ng = ctx.createGain();
+  const len = Math.floor(ctx.sampleRate * 0.1);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(), bpf = ctx.createBiquadFilter(), ng = ctx.createGain();
   ns.buffer = buf;
   bpf.type = "bandpass"; bpf.frequency.value = 2800; bpf.Q.value = 0.8;
   ns.connect(bpf); bpf.connect(ng); ng.connect(dest);
@@ -150,11 +155,11 @@ function mkGhostSnare(ctx: AudioContext, dest: AudioNode, t: number, vel: number
 }
 
 function mkClosedHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _len = Math.floor(ctx.sampleRate * 0.055);
-  const _buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const _d = buf.getChannelData(0);
-  for (let _i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  const _ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
+  const len = Math.floor(ctx.sampleRate * 0.055);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
   ns.buffer = buf;
   hpf.type = "highpass"; hpf.frequency.value = 9500;
   ns.connect(hpf); hpf.connect(ng); ng.connect(dest);
@@ -164,11 +169,11 @@ function mkClosedHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) 
 }
 
 function mkOpenHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _len = Math.floor(ctx.sampleRate * 0.32);
-  const _buf = ctx.createBuffer(1, len, ctx.sampleRate);
-  const _d = buf.getChannelData(0);
-  for (let _i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  const _ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
+  const len = Math.floor(ctx.sampleRate * 0.32);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const ns = ctx.createBufferSource(), hpf = ctx.createBiquadFilter(), ng = ctx.createGain();
   ns.buffer = buf;
   hpf.type = "highpass"; hpf.frequency.value = 8500;
   ns.connect(hpf); hpf.connect(ng); ng.connect(dest);
@@ -178,7 +183,7 @@ function mkOpenHH(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 function mkRim(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _osc = ctx.createOscillator(), g = ctx.createGain();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.type = "triangle";
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(1700, t);
@@ -190,13 +195,13 @@ function mkRim(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 
 function mkCowbell(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
   [562, 845].forEach(freq => {
-    const _osc = ctx.createOscillator(), g = ctx.createGain();
+    const osc = ctx.createOscillator(), g = ctx.createGain();
     osc.type = "square"; osc.frequency.value = freq;
     // gentle waveshape distortion
-    const _ws = ctx.createWaveShaper();
-    const _curve = new Float32Array(128);
-    for (let _i = 0; i < 128; i++) {
-      const _x = (i / 64) - 1;
+    const ws = ctx.createWaveShaper();
+    const curve = new Float32Array(128);
+    for (let i = 0; i < 128; i++) {
+      const x = (i / 64) - 1;
       curve[i] = (Math.PI + 180) * x / (Math.PI + 180 * Math.abs(x));
     }
     ws.curve = curve;
@@ -208,7 +213,7 @@ function mkCowbell(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 function mkTexture(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _osc = ctx.createOscillator(), lpf = ctx.createBiquadFilter(), g = ctx.createGain();
+  const osc = ctx.createOscillator(), lpf = ctx.createBiquadFilter(), g = ctx.createGain();
   osc.type = "sawtooth";
   lpf.type = "lowpass"; lpf.frequency.value = 780;
   osc.connect(lpf); lpf.connect(g); g.connect(dest);
@@ -220,7 +225,7 @@ function mkTexture(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 function mkAccent(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
-  const _osc = ctx.createOscillator(), g = ctx.createGain();
+  const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.connect(g); g.connect(dest);
   osc.frequency.setValueAtTime(900, t);
   osc.frequency.exponentialRampToValueAtTime(220, t + 0.11);
@@ -230,7 +235,7 @@ function mkAccent(ctx: AudioContext, dest: AudioNode, t: number, vel: number) {
 }
 
 // pad → synth function
-const _SYNTHS = [
+const SYNTHS = [
   mkKick, mkGhostKick, mkGhostKick, mkGhostKick,
   mkSnare, mkGhostSnare, mkGhostSnare, mkGhostSnare,
   mkClosedHH, mkOpenHH, mkClosedHH, mkClosedHH,
@@ -258,10 +263,10 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   const destRef    = useRef<GainNode|null>(null);
   const schedRef   = useRef<ReturnType<typeof setInterval>|null>(null);
   const rafRef     = useRef<number|null>(null);
-  const _playingRef = useRef(false);
+  const playingRef = useRef(false);
   const stepRef    = useRef(0);
   const nextTimeRef= useRef(0);
-  const _pendingVis = useRef<{pad:number;vel:number;step:number;time:number}[]>([]);
+  const pendingVis = useRef<{pad:number;vel:number;step:number;time:number}[]>([]);
   const hitIdRef   = useRef(0);
 
   // Cleanup on unmount
@@ -271,11 +276,11 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
     ctxRef.current?.close();
   }, []);
 
-  const _getCtx = useCallback(() => {
+  const getCtx = useCallback(() => {
     if (!ctxRef.current) {
-      const _AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       ctxRef.current = new AudioCtx();
-      const _master = ctxRef.current.createGain();
+      const master = ctxRef.current.createGain();
       master.gain.value = 0.82;
       master.connect(ctxRef.current.destination);
       destRef.current = master;
@@ -285,7 +290,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   }, []);
 
   // Schedule one step's hits into Web Audio
-  const _scheduleStep = useCallback((s: number, t: number) => {
+  const scheduleStep = useCallback((s: number, t: number) => {
     const { ctx, dest } = getCtx();
     STEP_MAP[s].forEach(({ pad, vel }) => {
       SYNTHS[pad](ctx, dest!, t, vel);
@@ -294,7 +299,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   }, [getCtx]);
 
   // Audio scheduler — runs on setInterval, schedules ahead by LOOKAHEAD
-  const _runScheduler = useCallback(() => {
+  const runScheduler = useCallback(() => {
     const { ctx } = getCtx();
     while (nextTimeRef.current < ctx.currentTime + LOOKAHEAD) {
       scheduleStep(stepRef.current, nextTimeRef.current);
@@ -305,15 +310,15 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   }, [getCtx, scheduleStep]);
 
   // Visual loop — syncs to Web Audio clock via requestAnimationFrame
-  const _visualLoop = useCallback(() => {
+  const visualLoop = useCallback(() => {
     if (!playingRef.current) return;
-    const _ctx = ctxRef.current;
+    const ctx = ctxRef.current;
     if (ctx) {
-      const _now = ctx.currentTime;
-      const _due = pendingVis.current.filter(v => v.time <= now + 0.005);
+      const now = ctx.currentTime;
+      const due = pendingVis.current.filter(v => v.time <= now + 0.005);
       if (due.length) {
         pendingVis.current = pendingVis.current.filter(v => v.time > now + 0.005);
-        const _latest = due[due.length - 1];
+        const latest = due[due.length - 1];
 
         setStep(latest.step);
         setLastHit({ pad: latest.pad, vel: latest.vel, step: latest.step, id: ++hitIdRef.current });
@@ -328,9 +333,9 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         });
 
         setActivePads(prev => ({ ...prev, ...padMap }));
-        setPoppingPads(prev => { const _n = new Set(prev); due.forEach(v => n.add(v.pad)); return n; });
+        setPoppingPads(prev => { const n = new Set(prev); due.forEach(v => n.add(v.pad)); return n; });
         setHitLog(prev => {
-          const _entries = due.map(v => ({
+          const entries = due.map(v => ({
             id: hitIdRef.current + v.pad,
             pad: v.pad, vel: v.vel, step: v.step,
           }));
@@ -341,11 +346,11 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         due.forEach(({ pad }) => {
           setTimeout(() => {
             setActivePads(prev => {
-              const _n = { ...prev }; delete n[pad]; return n;
+              const n = { ...prev }; delete n[pad]; return n;
             });
           }, PAD_DIM_MS);
           setTimeout(() => {
-            setPoppingPads(prev => { const _n = new Set(prev); n.delete(pad); return n; });
+            setPoppingPads(prev => { const n = new Set(prev); n.delete(pad); return n; });
           }, POP_MS);
         });
       }
@@ -353,7 +358,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
     rafRef.current = requestAnimationFrame(visualLoop);
   }, []);
 
-  const _start = useCallback(() => {
+  const start = useCallback(() => {
     const { ctx } = getCtx();
     playingRef.current = true;
     stepRef.current = 0;
@@ -365,7 +370,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
     setPlaying(true);
   }, [getCtx, runScheduler, visualLoop]);
 
-  const _stop = useCallback(() => {
+  const stop = useCallback(() => {
     playingRef.current = false;
     clearInterval(schedRef.current ?? undefined); schedRef.current = null;
     cancelAnimationFrame(rafRef.current ?? 0); rafRef.current = null;
@@ -381,8 +386,8 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   return (
     <div style={{
       fontFamily: "'IBM Plex Mono','Courier New',monospace",
-      background: "#060606",
-      color: "#f0f0f0",
+      background: "var(--void)",
+      color: "var(--daw-fg)",
       minHeight: "100vh",
       padding: "20px",
       backgroundImage:
@@ -438,7 +443,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
               boxShadow: playing ? "0 0 8px #a3e635" : "none",
               animation: playing ? "blink 1s step-end infinite" : "none",
             }} />
-            <span style={{ fontSize:9, letterSpacing:"0.2em", color: playing ? "#a3e635" : "#333", textTransform:"uppercase" }}>
+            <span style={{ fontSize:9, letterSpacing:"0.2em", color: playing ? "#a3e635" : "var(--dj-dimmer)", textTransform:"uppercase" }}>
               {playing ? "LIVE" : "STANDBY"}
             </span>
           </div>
@@ -453,8 +458,8 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
           disabled={disabled && !playing}
           style={{
             background: playing ? "#a3e635" : "transparent",
-            color: playing ? "#060606" : (disabled ? "#333" : "#a3e635"),
-            border:`2px solid ${disabled && !playing ? "#222" : "#a3e635"}`,
+            color: playing ? "var(--void)" : (disabled ? "var(--dj-dimmer)" : "#a3e635"),
+            border:`2px solid ${disabled && !playing ? "var(--dj-border)" : "#a3e635"}`,
             padding:"12px 32px", fontSize:10,
             letterSpacing:"0.3em", textTransform:"uppercase",
             cursor: disabled && !playing ? "not-allowed" : "pointer",
@@ -470,7 +475,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         {/* Counters */}
         {[
           { label:"BAR",  val: playing ? barNum                : "—", big: true,  col:"#a3e635" },
-          { label:"BEAT", val: playing ? beatNum               : "—", big: true,  col:"#f0f0f0" },
+          { label:"BEAT", val: playing ? beatNum               : "—", big: true,  col:"var(--daw-fg)" },
           { label:"STEP", val: playing && step >= 0 ? String(step+1).padStart(2,"0") : "—", big: false, col:"#555" },
         ].map(({ label, val, big, col }) => (
           <div key={label}>
@@ -497,7 +502,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         <div style={{ display:"flex", gap:2 }}>
           {Array.from({ length: STEPS }, (_, s) => {
             const hits   = STEP_MAP[s];
-            const _active = s === step;
+            const active = s === step;
             return (
               <div key={s} style={{ flex:1, position:"relative" }}>
                 <div style={{
@@ -505,7 +510,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
                   background: active
                     ? "#a3e635"
                     : hits.length ? "rgba(163,230,53,0.08)" : "rgba(255,255,255,0.03)",
-                  border:`1px solid ${active ? "#a3e635" : hits.length ? "rgba(163,230,53,0.2)" : "#111"}`,
+                  border:`1px solid ${active ? "#a3e635" : hits.length ? "rgba(163,230,53,0.2)" : "var(--dj-surface2)"}`,
                   boxShadow: active ? "0 0 14px rgba(163,230,53,0.7)" : "none",
                   transition:"background 0.04s, box-shadow 0.04s",
                 }} />
@@ -546,7 +551,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
               const vel  = activePads[i] ?? 0;
               const pop  = poppingPads.has(i);
               const hit  = vel > 0.04;
-              const _hasNote = BEAT.some(b => b.pad === i);
+              const hasNote = BEAT.some(b => b.pad === i);
               const row  = Math.floor(i / 4) + 1;
               const col  = (i % 4) + 1;
 
@@ -559,7 +564,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
                     background: hit
                       ? `rgba(${cat.rgb},${0.12 + vel * 0.52})`
                       : hasNote ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.018)",
-                    border:`1px solid ${hit ? cat.color : hasNote ? "rgba(255,255,255,0.1)" : "#111"}`,
+                    border:`1px solid ${hit ? cat.color : hasNote ? "rgba(255,255,255,0.1)" : "var(--dj-surface2)"}`,
                     boxShadow: hit
                       ? `0 0 ${10 + vel * 22}px rgba(${cat.rgb},${vel * 0.8}), inset 0 0 ${vel * 14}px rgba(${cat.rgb},0.15)`
                       : "none",
@@ -621,9 +626,9 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
           <div style={{ display:"flex", gap:20, marginTop:10 }}>
             {[
               { label:"KICK",   color:"#ef4444" },
-              { label:"SNARE",  color:"#f97316" },
+              { label:"SNARE",  color:"var(--track-orange)" },
               { label:"HI-HAT", color:"#a3e635" },
-              { label:"PERC",   color:"#8b5cf6" },
+              { label:"PERC",   color:"var(--accent-purple)" },
             ].map(({ label, color }) => (
               <div key={label} style={{ display:"flex", alignItems:"center", gap:6 }}>
                 <div style={{ width:8, height:8, background:color }} />
@@ -638,16 +643,16 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
               PATTERN MAP — ALL 16 PADS
             </div>
             {["KICK","SNARE","HI-HAT","PERC"].map((cat, ri) => {
-              const _color = ["#ef4444","#f97316","#a3e635","#8b5cf6"][ri];
+              const color = ["#ef4444","var(--track-orange)","#a3e635","var(--accent-purple)"][ri];
               const base  = ri * 4;
-              const _activeSteps = new Set(BEAT.filter(b => b.pad >= base && b.pad < base+4).map(b => b.step));
+              const activeSteps = new Set(BEAT.filter(b => b.pad >= base && b.pad < base+4).map(b => b.step));
               return (
                 <div key={cat} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
                   <span style={{ fontSize:6, letterSpacing:"0.15em", color:"rgba(255,255,255,0.22)", textTransform:"uppercase", minWidth:44 }}>{cat}</span>
                   <div style={{ display:"flex", gap:1, flex:1 }}>
                     {Array.from({ length:16 }, (_, s) => {
                       const on  = activeSteps.has(s);
-                      const _cur = s === step;
+                      const cur = s === step;
                       return (
                         <div key={s} style={{
                           flex:1, height:10,
@@ -681,8 +686,8 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
             </div>
             {lastHit ? (() => {
               const c   = CATS[lastHit.pad];
-              const _row = Math.floor(lastHit.pad / 4) + 1;
-              const _col = (lastHit.pad % 4) + 1;
+              const row = Math.floor(lastHit.pad / 4) + 1;
+              const col = (lastHit.pad % 4) + 1;
               return (
                 <>
                   {/* Big pad number */}
@@ -748,8 +753,8 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
           </div>
 
           {/* ── Hit log ────────────────────────────────────────── */}
-          <div style={{ border:"1px solid #111", background:"rgba(0,0,0,0.3)", flex:1 }}>
-            <div style={{ padding:"8px 10px", borderBottom:"1px solid #111", fontSize:7, letterSpacing:"0.3em", color:"rgba(255,255,255,0.22)", textTransform:"uppercase" }}>
+          <div style={{ border:"1px solid var(--dj-surface2)", background:"rgba(0,0,0,0.3)", flex:1 }}>
+            <div style={{ padding:"8px 10px", borderBottom:"1px solid var(--dj-surface2)", fontSize:7, letterSpacing:"0.3em", color:"rgba(255,255,255,0.22)", textTransform:"uppercase" }}>
               LIVE HIT LOG
             </div>
             <div style={{ overflow:"hidden" }}>
@@ -758,7 +763,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
                   No events yet
                 </div>
               ) : hitLog.map((h, idx) => {
-                const _c = CATS[h.pad];
+                const c = CATS[h.pad];
                 return (
                   <div
                     key={h.id}

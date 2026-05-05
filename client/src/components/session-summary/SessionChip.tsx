@@ -20,10 +20,10 @@ export function SessionChip() {
   }
 
   if (summary) {
-    const _mins = Math.floor(summary.durationSeconds / 60);
-    const _secs = summary.durationSeconds % 60;
-    const _duration = `${mins}m ${secs.toString().padStart(2, "0")}s`;
-    const _savedMins = Math.floor(summary.timeSavedSeconds / 60);
+    const mins = Math.floor(summary.durationSeconds / 60);
+    const secs = summary.durationSeconds % 60;
+    const duration = `${mins}m ${secs.toString().padStart(2, "0")}s`;
+    const savedMins = Math.floor(summary.timeSavedSeconds / 60);
 
     return (
       <div className="session-chip session-chip--done" title="Session complete">

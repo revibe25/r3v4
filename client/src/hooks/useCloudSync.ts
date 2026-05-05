@@ -26,7 +26,7 @@ async function trpcMutation<TInput, TOutput>(
   input: TInput,
   token?: string,
 ): Promise<TOutput> {
-  const _res = await fetch(`${API_BASE}/trpc/${procedure}`, {
+  const res = await fetch(`${API_BASE}/trpc/${procedure}`, {
     method:  'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,11 +36,11 @@ async function trpcMutation<TInput, TOutput>(
   });
 
   if (!res.ok) {
-    const _err = await res.json().catch(() => ({ message: res.statusText })) as { message?: string };
+    const err = await res.json().catch(() => ({ message: res.statusText })) as { message?: string };
     throw new Error(err.message ?? `tRPC ${procedure} failed: ${res.status}`);
   }
 
-  const _body = await res.json() as { result?: { data?: { json?: TOutput } }; error?: { message: string } };
+  const body = await res.json() as { result?: { data?: { json?: TOutput } }; error?: { message: string } };
   if (body.error) throw new Error(body.error.message);
   return body.result?.data?.json as TOutput;
 }
@@ -50,17 +50,17 @@ async function trpcQuery<TOutput>(
   input: unknown,
   token?: string,
 ): Promise<TOutput> {
-  const _params = encodeURIComponent(JSON.stringify({ json: input }));
-  const _res = await fetch(`${API_BASE}/trpc/${procedure}?input=${params}`, {
+  const params = encodeURIComponent(JSON.stringify({ json: input }));
+  const res = await fetch(`${API_BASE}/trpc/${procedure}?input=${params}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
   if (!res.ok) {
-    const _err = await res.json().catch(() => ({ message: res.statusText })) as { message?: string };
+    const err = await res.json().catch(() => ({ message: res.statusText })) as { message?: string };
     throw new Error(err.message ?? `tRPC ${procedure} failed: ${res.status}`);
   }
 
-  const _body = await res.json() as { result?: { data?: { json?: TOutput } }; error?: { message: string } };
+  const body = await res.json() as { result?: { data?: { json?: TOutput } }; error?: { message: string } };
   if (body.error) throw new Error(body.error.message);
   return body.result?.data?.json as TOutput;
 }
@@ -76,8 +76,8 @@ function getToken(): string | undefined {
 const LS_KEY = 'r3v4_project_snapshot';
 
 function saveLocally(): void {
-  const _s = useDAWStore.getState();
-  const _snapshot = {
+  const s = useDAWStore.getState();
+  const snapshot = {
     bpm: s.bpm, timeSignature: s.timeSignature, masterGain: s.masterGain,
     tracks: s.tracks, regions: s.regions, midiPatterns: s.midiPatterns,
     loopEnabled: s.loopEnabled, loopStart: s.loopStart, loopEnd: s.loopEnd,
@@ -90,7 +90,7 @@ function saveLocally(): void {
 
 function loadLocally(): Record<string, unknown> | null {
   try {
-    const _raw = undefined /* [wire§8] httpOnly cookie */;
+    const raw = undefined /* [wire§8] httpOnly cookie */;
     return raw ? JSON.parse(raw) as Record<string, unknown> : null;
   } catch {
     return null;
@@ -100,7 +100,7 @@ function loadLocally(): Record<string, unknown> | null {
 // ── Serialise store → ProjectStateSchema ─────────────────────────────────────
 
 function serialiseProjectState() {
-  const _s = useDAWStore.getState();
+  const s = useDAWStore.getState();
   return {
     bpm:           s.bpm,
     timeSignature: s.timeSignature,
@@ -126,14 +126,14 @@ export interface CloudSyncAPI {
 }
 
 export function useCloudSync(): CloudSyncAPI {
-  const _debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Auto-save subscription ────────────────────────────────────────────────
   useEffect(() => {
     const { autoSaveEnabled } = useDAWStore.getState();
     if (!autoSaveEnabled) return;
 
-    const _unsub = useDAWStore.subscribe(
+    const unsub = useDAWStore.subscribe(
       s => [s.tracks, s.regions, s.midiPatterns, s.bpm, s.masterGain] as unknown[],
       () => {
         // Always snapshot locally (offline-safe)
@@ -143,11 +143,11 @@ export function useCloudSync(): CloudSyncAPI {
 
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(async () => {
-          const _store = useDAWStore.getState();
+          const store = useDAWStore.getState();
           if (!store.autoSaveEnabled) return;
           store.setSyncStatus('syncing');
           try {
-            const _result = await trpcMutation<
+            const result = await trpcMutation<
               { projectId?: string; name: string; state: ReturnType<typeof serialiseProjectState> },
               { projectId: string; savedAt: Date }
             >('project.save', {
@@ -173,7 +173,7 @@ export function useCloudSync(): CloudSyncAPI {
 
   // ── Online/offline detection ──────────────────────────────────────────────
   useEffect(() => {
-    const _onOffline = () => useDAWStore.getState().setSyncStatus('offline');
+    const onOffline = () => useDAWStore.getState().setSyncStatus('offline');
     const onOnline  = () => {
       if (useDAWStore.getState().syncStatus === 'offline') {
         useDAWStore.getState().setSyncStatus('idle');
@@ -190,9 +190,9 @@ export function useCloudSync(): CloudSyncAPI {
   // ── Restore local snapshot on first load (no token) ───────────────────────
   useEffect(() => {
     if (!getToken()) {
-      const _snapshot = loadLocally();
+      const snapshot = loadLocally();
       if (snapshot) {
-        const _store = useDAWStore.getState();
+        const store = useDAWStore.getState();
         // Partial restore of safe fields
         if (typeof snapshot.bpm === 'number')        store.setBpm(snapshot.bpm);
         if (typeof snapshot.masterGain === 'number') store.setMasterGain(snapshot.masterGain);
@@ -203,13 +203,13 @@ export function useCloudSync(): CloudSyncAPI {
   }, []);
 
   // ── Manual save ───────────────────────────────────────────────────────────
-  const _save = useCallback(async () => {
-    const _store = useDAWStore.getState();
+  const save = useCallback(async () => {
+    const store = useDAWStore.getState();
     saveLocally();
     if (!getToken()) { store.setSyncStatus('idle'); return; }
     store.setSyncStatus('syncing');
     try {
-      const _result = await trpcMutation<
+      const result = await trpcMutation<
         { projectId?: string; name: string; state: ReturnType<typeof serialiseProjectState> },
         { projectId: string; savedAt: Date }
       >('project.save', {
@@ -226,18 +226,18 @@ export function useCloudSync(): CloudSyncAPI {
   }, []);
 
   // ── Load project ──────────────────────────────────────────────────────────
-  const _load = useCallback(async (projectId: string) => {
-    const _store = useDAWStore.getState();
+  const load = useCallback(async (projectId: string) => {
+    const store = useDAWStore.getState();
     if (!getToken()) throw new Error('Not authenticated');
     store.setSyncStatus('syncing');
     try {
-      const _result = await trpcQuery<{
+      const result = await trpcQuery<{
         projectId: string; name: string;
         state: ReturnType<typeof serialiseProjectState>;
         updatedAt: Date;
       }>('project.load', { projectId }, getToken());
 
-      const _s = result.state;
+      const s = result.state;
       store.setProjectId(result.projectId);
       store.setProjectName(result.name);
       store.setBpm(s.bpm);
@@ -248,12 +248,12 @@ export function useCloudSync(): CloudSyncAPI {
 
       // Replace tracks + regions wholesale
       for (const t of s.tracks) {
-        const _existing = store.tracks.find(e => e.id === t.id);
+        const existing = store.tracks.find(e => e.id === t.id);
         if (existing) store.updateTrack(t.id, t);
         else store.addTrack(t);
       }
       for (const r of s.regions) {
-        const _existing = store.regions.find(e => e.id === r.id);
+        const existing = store.regions.find(e => e.id === r.id);
         if (!existing) store.addRegion(r);
       }
 
@@ -266,18 +266,18 @@ export function useCloudSync(): CloudSyncAPI {
   }, []);
 
   // ── List projects ─────────────────────────────────────────────────────────
-  const _listProjects = useCallback(async () => {
+  const listProjects = useCallback(async () => {
     return trpcQuery<{ id: string; name: string; updatedAt: Date }[]>(
       'project.list', {}, getToken(),
     );
   }, []);
 
   // ── AI analysis ───────────────────────────────────────────────────────────
-  const _analyseWithAI = useCallback(async () => {
-    const _store = useDAWStore.getState();
+  const analyseWithAI = useCallback(async () => {
+    const store = useDAWStore.getState();
     store.setAIThinking(true);
     try {
-      const _result = await trpcMutation<
+      const result = await trpcMutation<
         { tracks: unknown; bpm: number; position: number },
         { suggestions: { type: string; confidence: number; description: string; params: Record<string, unknown> }[] }
       >('daw.ai.suggestions', {
@@ -339,9 +339,9 @@ export function useCloudSync(): CloudSyncAPI {
   }, []);
 
   // ── AI co-producer chat ───────────────────────────────────────────────────
-  const _chatWithCoProd = useCallback(async (message: string): Promise<string> => {
-    const _store = useDAWStore.getState();
-    const _result = await trpcMutation<
+  const chatWithCoProd = useCallback(async (message: string): Promise<string> => {
+    const store = useDAWStore.getState();
+    const result = await trpcMutation<
       { messages: { role: string; content: string }[]; context: { bpm: number; trackCount: number; position: number } },
       { reply: string }
     >('ai.chat', {
@@ -357,11 +357,11 @@ export function useCloudSync(): CloudSyncAPI {
   }, []);
 
   // ── Server-side mastering ─────────────────────────────────────────────────
-  const _runMasteringServer = useCallback(async () => {
-    const _store = useDAWStore.getState();
+  const runMasteringServer = useCallback(async () => {
+    const store = useDAWStore.getState();
     store.updateMastering({ processing: true });
     try {
-      const _result = await trpcMutation<
+      const result = await trpcMutation<
         { targetLUFS: number; ceilingDB: number; dynamicsMode: string; stereoWidth: number },
         { inputLUFS: number; inputPeak: number; outputLUFS: number; dynamicRange: number; recommendation: string }
       >('mastering.analyse', {

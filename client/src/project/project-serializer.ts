@@ -20,7 +20,7 @@ import { useMixerStore } from "../store/mixer-store";
 import { useDAWStore }   from "../hooks/useDAWStore";
 
 export function serializeProject(): ProjectData {
-  const _mixer = useMixerStore.getState();
+  const mixer = useMixerStore.getState();
   const daw   = useDAWStore.getState();
 
   return {

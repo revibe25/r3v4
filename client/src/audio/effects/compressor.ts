@@ -59,24 +59,24 @@ export class CompressorEffect {
       return;
     }
 
-    const _threshold = Math.max(-100, Math.min(0, this.params.threshold));
+    const threshold = Math.max(-100, Math.min(0, this.params.threshold));
     this.compressor.threshold.rampTo(threshold, 0.1);
 
-    const _ratio = Math.max(1, Math.min(20, this.params.ratio));
+    const ratio = Math.max(1, Math.min(20, this.params.ratio));
     this.compressor.ratio.rampTo(ratio, 0.1);
 
-    const _attackSec = Math.max(0, Math.min(1, this.params.attack / 1000));
+    const attackSec = Math.max(0, Math.min(1, this.params.attack / 1000));
     this.compressor.attack.rampTo(attackSec, 0.1);
 
-    const _releaseSec = Math.max(0.01, Math.min(3, this.params.release / 1000));
+    const releaseSec = Math.max(0.01, Math.min(3, this.params.release / 1000));
     this.compressor.release.rampTo(releaseSec, 0.1);
 
-    const _knee = Math.max(0, Math.min(40, this.params.knee));
+    const knee = Math.max(0, Math.min(40, this.params.knee));
     this.compressor.knee.rampTo(knee, 0.1);
 
     // Tone.js v14: use Math.pow(10, db/20) instead of Math.pow(10, )
     const makeupDb     = this.params.makeup || this.autoCalculateMakeup();
-    const _makeupLinear = Math.pow(10, makeupDb / 20);
+    const makeupLinear = Math.pow(10, makeupDb / 20);
     this.makeupGain.gain.rampTo(makeupLinear, 0.1);
 
     this.wetGain.gain.rampTo(this.params.wet, 0.1);
@@ -84,7 +84,7 @@ export class CompressorEffect {
   }
 
   private autoCalculateMakeup(): number {
-    const _maxReduction = Math.abs(this.params.threshold) * (1 - 1 / this.params.ratio);
+    const maxReduction = Math.abs(this.params.threshold) * (1 - 1 / this.params.ratio);
     return Math.min(40, maxReduction * 0.5);
   }
 
@@ -99,7 +99,7 @@ export class CompressorEffect {
   }
 
   connectFromNode(source: AudioNode): this {
-    const _gain = Tone.getContext().createGain();
+    const gain = Tone.getContext().createGain();
     source.connect(gain);
     Tone.connect(gain as unknown as AudioNode, this.dryGain);
     Tone.connect(gain as unknown as AudioNode, this.compressor);

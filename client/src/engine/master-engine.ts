@@ -185,7 +185,7 @@ class MasterEngine {
 
 // ── Singleton export ──────────────────────────────────────────────────────────
 
-export const _masterEngine = new MasterEngine();
+export const masterEngine = new MasterEngine();
 
 // HMR safety — prevent stale instances after hot reload in Vite
 if (import.meta.hot) {

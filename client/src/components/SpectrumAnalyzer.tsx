@@ -1,4 +1,4 @@
 // src/components/SpectrumAnalyzer.tsx
-export const _SpectrumAnalyzer = () => {
+export const SpectrumAnalyzer = () => {
   return <div>Spectrum Analyzer</div>;
 };

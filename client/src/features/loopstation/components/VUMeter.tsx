@@ -2,25 +2,25 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getLoopEngine } from '../engine/loopEngine';
 
-const _SEG = 28;
-const _DEC = 0.018;
-const _PHOLD = 2400;
-const _PDEC = 0.01;
+const SEG = 28;
+const DEC = 0.018;
+const PHOLD = 2400;
+const PDEC = 0.01;
 const GR_DEC = 0.03;
 
 function segColor(i: number, lit: boolean): string {
-  if (!lit) return '#0b0b0b';
-  const _p = i / SEG;
-  if (p >= 0.93) return '#ff2244';
-  if (p >= 0.82) return '#ff6b00';
-  if (p >= 0.70) return '#f5d000';
-  if (p >= 0.50) return '#7ed321';
-  return '#39ff14';
+  if (!lit) return 'var(--panel-deep)';
+  const p = i / SEG;
+  if (p >= 0.93) return 'var(--signal-clip-alt)';
+  if (p >= 0.82) return 'var(--looper-orange)';
+  if (p >= 0.70) return 'var(--accent-yellow)';
+  if (p >= 0.50) return 'var(--status-ok-alt)';
+  return 'var(--looper-acid)';
 }
 
 function segGlow(i: number, lit: boolean): string {
   if (!lit) return 'none';
-  const _p = i / SEG;
+  const p = i / SEG;
   if (p >= 0.93) return '0 0 5px #ff224499, 0 0 10px #ff224433';
   if (p >= 0.82) return '0 0 4px #ff6b0088';
   if (p >= 0.70) return '0 0 3px #f5d00066';
@@ -31,9 +31,9 @@ const Bar: React.FC<{
   level: number; peak: number; gr: number; clip: boolean;
   onReset: () => void; h: number; showGr?: boolean;
 }> = ({ level, peak, gr, clip, onReset, h, showGr }) => {
-  const _filled = Math.round(level * SEG);
-  const _ps = Math.min(SEG - 1, Math.round(peak * SEG) - 1);
-  const _grFilled = Math.round(gr * SEG);
+  const filled = Math.round(level * SEG);
+  const ps = Math.min(SEG - 1, Math.round(peak * SEG) - 1);
+  const grFilled = Math.round(gr * SEG);
 
   return (
     <div style={{ display: 'flex', gap: 1.5 }}>
@@ -43,10 +43,10 @@ const Bar: React.FC<{
         onClick={onReset}
       >
         {Array.from({ length: SEG }, (_, i) => {
-          const _lit = i < filled;
-          const _isPk = i === ps && peak > 0.01;
-          const _isClip = clip && i >= SEG - 1;
-          const _bg = isClip ? '#ff0033' : isPk ? '#ffffff' : segColor(i, lit);
+          const lit = i < filled;
+          const isPk = i === ps && peak > 0.01;
+          const isClip = clip && i >= SEG - 1;
+          const bg = isClip ? 'var(--signal-clip-hard)' : isPk ? 'var(--white)' : segColor(i, lit);
           return (
             <div
               key={i}
@@ -65,14 +65,14 @@ const Bar: React.FC<{
       {showGr && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1, width: 3, height: h }}>
           {Array.from({ length: SEG }, (_, i) => {
-            const _idx = SEG - 1 - i;
-            const _lit = idx >= SEG - grFilled;
+            const idx = SEG - 1 - i;
+            const lit = idx >= SEG - grFilled;
             return (
               <div
                 key={i}
                 style={{
                   flex: 1, minHeight: 2,
-                  background: lit ? '#c084fc' : '#0b0b0b',
+                  background: lit ? 'var(--looper-purple)' : 'var(--panel-deep)',
                   boxShadow: lit ? '0 0 2px #c084fc66' : 'none',
                   transition: 'background 40ms',
                 }}
@@ -87,20 +87,20 @@ const Bar: React.FC<{
 
 // Stereo correlation meter (-1 to +1)
 const CorrelationMeter: React.FC<{ L: number; R: number }> = ({ L, R }) => {
-  const _corr = L * R > 0 ? 1 : L * R < 0 ? -1 : 0;
-  const _pos = (corr + 1) / 2;
+  const corr = L * R > 0 ? 1 : L * R < 0 ? -1 : 0;
+  const pos = (corr + 1) / 2;
   return (
-    <div style={{ position: 'relative', width: '100%', height: 4, background: '#0a0a0a', border: '1px solid #141414' }}>
+    <div style={{ position: 'relative', width: '100%', height: 4, background: '#0a0a0a', border: '1px solid var(--t-b2)' }}>
       <div style={{
         position: 'absolute', top: 0, bottom: 0,
         left: `${pos * 100}%`,
         width: 2,
-        background: pos > 0.4 && pos < 0.9 ? '#39ff14' : '#ff6b00',
+        background: pos > 0.4 && pos < 0.9 ? 'var(--looper-acid)' : 'var(--looper-orange)',
         boxShadow: '0 0 4px currentColor',
         transform: 'translateX(-50%)',
         transition: 'left 60ms',
       }} />
-      <div style={{ position: 'absolute', top: -1, left: '50%', width: 1, height: 6, background: '#222', transform: 'translateX(-50%)' }} />
+      <div style={{ position: 'absolute', top: -1, left: '50%', width: 1, height: 6, background: 'var(--dj-border)', transform: 'translateX(-50%)' }} />
     </div>
   );
 };
@@ -127,18 +127,18 @@ export const VUMeter: React.FC<Props> = ({
   const [gr, sGR] = useState(0);
   const [clip, sClip] = useState(false);
 
-  const _rafRef = useRef<number>(0);
-  const _smL = useRef(0), smR = useRef(0);
-  const _pkL = useRef(0), pkR = useRef(0);
-  const _pkLA = useRef(0), pkRA = useRef(0);
-  const _smGR = useRef(0);
+  const rafRef = useRef<number>(0);
+  const smL = useRef(0), smR = useRef(0);
+  const pkL = useRef(0), pkR = useRef(0);
+  const pkLA = useRef(0), pkRA = useRef(0);
+  const smGR = useRef(0);
 
   useEffect(() => {
-    const _e = getLoopEngine();
+    const e = getLoopEngine();
     return e.on('clipDetected', i => { if (i === trackIndex) sClip(true); });
   }, [trackIndex]);
 
-  const _reset = useCallback(() => {
+  const reset = useCallback(() => {
     pkL.current = 0; pkR.current = 0;
     sPL(0); sPR(0); sClip(false); sGR(0);
     getLoopEngine().resetClip(trackIndex);
@@ -151,8 +151,8 @@ export const VUMeter: React.FC<Props> = ({
       sLL(0); sLR(0);
       return;
     }
-    const _tick = (now: number) => {
-      const _s = getLoopEngine().getStereoLevel(trackIndex);
+    const tick = (now: number) => {
+      const s = getLoopEngine().getStereoLevel(trackIndex);
       smL.current = s.L >= smL.current ? s.L : Math.max(0, smL.current - DEC);
       smR.current = s.R >= smR.current ? s.R : Math.max(0, smR.current - DEC);
       if (smL.current >= pkL.current) { pkL.current = smL.current; pkLA.current = now; }
@@ -160,8 +160,8 @@ export const VUMeter: React.FC<Props> = ({
       if (smR.current >= pkR.current) { pkR.current = smR.current; pkRA.current = now; }
       else if (now - pkRA.current > PHOLD) pkR.current = Math.max(0, pkR.current - PDEC);
       // Simulated GR (would come from compressor node in real impl)
-      const _peak = Math.max(smL.current, smR.current);
-      const _targetGr = peak > 0.7 ? (peak - 0.7) * 2 : 0;
+      const peak = Math.max(smL.current, smR.current);
+      const targetGr = peak > 0.7 ? (peak - 0.7) * 2 : 0;
       smGR.current = targetGr >= smGR.current ? targetGr : Math.max(0, smGR.current - GR_DEC);
       sLL(smL.current); sLR(smR.current); sPL(pkL.current); sPR(pkR.current);
       sGR(smGR.current);
@@ -180,8 +180,8 @@ export const VUMeter: React.FC<Props> = ({
         onClick={reset}
         style={{
           width: compact ? 10 : 13, height: 4,
-          background: clip ? '#ff0033' : '#0d0d0d',
-          border: `1px solid ${clip ? '#ff003388' : '#1a1a1a'}`,
+          background: clip ? 'var(--signal-clip-hard)' : '#0d0d0d',
+          border: `1px solid ${clip ? '#ff003388' : 'var(--t-b2x)'}`,
           boxShadow: clip ? '0 0 8px #ff003366, 0 0 16px #ff003322' : 'none',
           cursor: 'pointer',
           transition: 'all 0.1s',
@@ -194,7 +194,7 @@ export const VUMeter: React.FC<Props> = ({
           <div style={{
             display: 'flex', flexDirection: 'column-reverse', justifyContent: 'space-between',
             height, paddingRight: 2,
-            fontSize: 5, color: '#252525',
+            fontSize: 5, color: 'var(--t-b3x)',
             fontFamily: 'IBM Plex Mono, monospace', lineHeight: 1,
           }}>
             {SCALE_LABELS.map(l => <span key={l}>{l}</span>)}
@@ -216,7 +216,7 @@ export const VUMeter: React.FC<Props> = ({
       {!compact && (
         <div style={{ display: 'flex', gap: showGr ? 10 : 5 }}>
           {['L', 'R'].map(c => (
-            <span key={c} style={{ fontSize: 5, color: '#1e1e1e', fontFamily: 'IBM Plex Mono,monospace', width: 5, textAlign: 'center' }}>{c}</span>
+            <span key={c} style={{ fontSize: 5, color: 'var(--t-b3)', fontFamily: 'IBM Plex Mono,monospace', width: 5, textAlign: 'center' }}>{c}</span>
           ))}
         </div>
       )}

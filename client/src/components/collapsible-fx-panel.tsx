@@ -36,7 +36,7 @@ interface CollapsibleFXPanelProps {
   scrollable?: boolean;
 }
 
-export const _CollapsibleFXPanel = ({
+export const CollapsibleFXPanel = ({
   title,
   icon,
   children,
@@ -47,22 +47,22 @@ export const _CollapsibleFXPanel = ({
   scrollable = false,
 }: CollapsibleFXPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const _uid = useId();
-  const _headerId = `cfxp-btn-${uid}`;
-  const _regionId = `cfxp-region-${uid}`;
+  const uid = useId();
+  const headerId = `cfxp-btn-${uid}`;
+  const regionId = `cfxp-region-${uid}`;
 
   // Refs for measured-height animation
-  const _wrapperRef = useRef<HTMLDivElement>(null);
-  const _contentRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Once opened for the first time, children stay mounted to preserve audio state
-  const _hasBeenOpenedRef = useRef(defaultOpen);
+  const hasBeenOpenedRef = useRef(defaultOpen);
   if (isOpen) hasBeenOpenedRef.current = true;
 
   // Measured height: fires synchronously after DOM update, before paint — no flicker
   useLayoutEffect(() => {
-    const _wrapper = wrapperRef.current;
-    const _content = contentRef.current;
+    const wrapper = wrapperRef.current;
+    const content = contentRef.current;
     if (!wrapper || !content) return;
 
     if (isOpen) {
@@ -80,13 +80,13 @@ export const _CollapsibleFXPanel = ({
 
   // When children change size (e.g. dynamic content), keep maxHeight in sync
   useLayoutEffect(() => {
-    const _wrapper = wrapperRef.current;
-    const _content = contentRef.current;
+    const wrapper = wrapperRef.current;
+    const content = contentRef.current;
     if (!wrapper || !content || !isOpen) return;
     wrapper.style.maxHeight = `${content.scrollHeight}px`;
   });
 
-  const _variantStyles = {
+  const variantStyles = {
     default: {
       container: 'bg-card/50 backdrop-blur-sm border border-border rounded-lg',
       header: 'px-4 py-3',
@@ -104,7 +104,7 @@ export const _CollapsibleFXPanel = ({
     },
   };
 
-  const _styles = variantStyles[variant];
+  const styles = variantStyles[variant];
 
   return (
     <div className={cn(styles.container, className)}>
@@ -200,7 +200,7 @@ interface FXSectionProps {
   className?: string;
 }
 
-export const _FXSection = ({ title, children, className }: FXSectionProps) => (
+export const FXSection = ({ title, children, className }: FXSectionProps) => (
   <div className={cn('space-y-2', className)}>
     {title && (
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-3">
@@ -224,7 +224,7 @@ interface CompactKnobProps {
   disabled?: boolean;
 }
 
-export const _CompactKnob = ({
+export const CompactKnob = ({
   label,
   value,
   onChange,
@@ -234,9 +234,9 @@ export const _CompactKnob = ({
   unit = '',
   disabled = false,
 }: CompactKnobProps) => {
-  const _normalizedValue = (value - min) / (max - min);
-  const _rotationAngle = normalizedValue * 270 - 135;
-  const _displayValue = step < 1 ? value.toFixed(1) : Math.round(value).toString();
+  const normalizedValue = (value - min) / (max - min);
+  const rotationAngle = normalizedValue * 270 - 135;
+  const displayValue = step < 1 ? value.toFixed(1) : Math.round(value).toString();
 
   return (
     <div className={cn('flex flex-col items-center gap-1.5 min-w-[60px]', disabled && 'opacity-50 pointer-events-none')}>
@@ -285,7 +285,7 @@ interface CompactSliderProps {
   disabled?: boolean;
 }
 
-export const _CompactSlider = ({
+export const CompactSlider = ({
   label,
   value,
   onChange,
@@ -295,7 +295,7 @@ export const _CompactSlider = ({
   unit = '',
   disabled = false,
 }: CompactSliderProps) => {
-  const _displayValue = step < 1 ? value.toFixed(1) : Math.round(value).toString();
+  const displayValue = step < 1 ? value.toFixed(1) : Math.round(value).toString();
 
   return (
     <div className={cn('flex items-center gap-3', disabled && 'opacity-50 pointer-events-none')}>

@@ -26,19 +26,19 @@ export function formatTime(
   }
 
   if (format === 'frames') {
-    const _totalFrames = Math.floor(seconds * 30);
-    const _ff = totalFrames % 30;
-    const _ss = Math.floor(totalFrames / 30) % 60;
-    const _mm = Math.floor(totalFrames / 30 / 60);
+    const totalFrames = Math.floor(seconds * 30);
+    const ff = totalFrames % 30;
+    const ss = Math.floor(totalFrames / 30) % 60;
+    const mm = Math.floor(totalFrames / 30 / 60);
     return `${mm}:${String(ss).padStart(2, '0')}:${String(ff).padStart(2, '0')}`;
   }
 
   // bars (default)
-  const _beatsPerSecond = tempo / 60;
+  const beatsPerSecond = tempo / 60;
   const totalBeats     = seconds * beatsPerSecond;
   const bar  = Math.floor(totalBeats / 4) + 1;
-  const _beat = Math.floor(totalBeats % 4) + 1;
-  const _tick = Math.floor((totalBeats % 1) * 480);
+  const beat = Math.floor(totalBeats % 4) + 1;
+  const tick = Math.floor((totalBeats % 1) * 480);
   return `${bar}:${beat}:${String(tick).padStart(3, '0')}`;
 }
 
@@ -70,7 +70,7 @@ export function serializeProject(project: unknown): string {
 
 /** Triggers a browser download of a text/JSON blob. */
 export function downloadFile(content: string, filename: string): void {
-  const _blob = new Blob([content], { type: 'application/json' });
+  const blob = new Blob([content], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;

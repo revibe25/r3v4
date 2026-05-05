@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: Admin warning state — file should migrate to pages/admin/AdminPage.tsx
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * client/src/pages/AdminPage.tsx
  * R3 v4 — Remote Admin Monitor
@@ -8,11 +13,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../hooks/authStore';
 import { PageNav } from '../components/page-nav';
 
-const _T = {
-  bg: '#060606', surface: '#0d0d0d', border: '#1c1c1c',
+const T = {
+  bg: 'var(--void)', surface: '#0d0d0d', border: '#1c1c1c',
   acid: '#a3e635',
-  amber: '#f59e0b', cyan: '#22d3ee', red: '#ef4444',
-  green: '#22c55e', dim: '#444', muted: '#666', text: '#e5e5e5',
+  amber: 'var(--status-warn)', cyan: 'var(--looper-cyan)', red: '#ef4444',
+  green: 'var(--accent-green)', dim: 'var(--dj-dim)', muted: 'var(--dj-muted)', text: '#e5e5e5',
   font: '"IBM Plex Mono", "JetBrains Mono", monospace',
 } as const;
 
@@ -25,15 +30,15 @@ interface AdminStats {
 }
 
 function formatUptime(s: number) {
-  const _h = Math.floor(s / 3600);
-  const _m = Math.floor((s % 3600) / 60);
-  const _sec = s % 60;
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
 function Led({ on, color = T.acid }: { on: boolean; color?: string }) {
   return <span style={{ display:'inline-block', width:8, height:8, borderRadius:'50%',
-    background: on ? color : '#1a1a1a', border:`1px solid ${on ? color : '#2a2a2a'}`,
+    background: on ? color : 'var(--t-b2x)', border:`1px solid ${on ? color : '#2a2a2a'}`,
     boxShadow: on ? `0 0 6px ${color}88` : 'none', flexShrink:0 }} />;
 }
 
@@ -62,20 +67,20 @@ function Section({ label }: { label:string }) {
 }
 
 export default function AdminPage() {
-  const _token = useAuthStore(s => s.token);
+  const token = useAuthStore(s => s.token);
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastPoll, setLastPoll] = useState('');
   const [pollCount, setPollCount] = useState(0);
 
-  const _poll = useCallback(async () => {
+  const poll = useCallback(async () => {
     if (!token) return;
     try {
-      const _res = await fetch('/api/admin/stats', {
+      const res = await fetch('/api/admin/stats', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
-        const _d = await res.json().catch(() => ({}));
+        const d = await res.json().catch(() => ({}));
         setError(d.error ?? `HTTP ${res.status}`);
         return;
       }
@@ -86,9 +91,9 @@ export default function AdminPage() {
     } catch { setError('Network error'); }
   }, [token]);
 
-  useEffect(() => { poll(); const _id = setInterval(poll, 5000); return () => clearInterval(id); }, [poll]);
+  useEffect(() => { poll(); const id = setInterval(poll, 5000); return () => clearInterval(id); }, [poll]);
 
-  const _dbOk = stats?.db.status === 'ok';
+  const dbOk = stats?.db.status === 'ok';
 
   return (
     <div style={{ display:'flex', flexDirection:'column', height:'100vh',

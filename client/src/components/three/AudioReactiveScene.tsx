@@ -1,3 +1,8 @@
+// ── P4-EXEMPT: WebGL/Three.js ────────────────────────────────────────────────
+// Three.js prop defaults (colorBase, colorAccent, fog args) — THREE.Color() cannot resolve CSS variables
+// Exempted: P4 remediation pass. Do not replace Three.js color props with
+// CSS variables — THREE.Color() cannot resolve var(--token) at runtime.
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * AudioReactiveScene.tsx
  *
@@ -15,7 +20,7 @@
  *   <AudioReactiveScene />
  *
  * For N8AO SSAO (optional):
- *   const _n8aoRef = useRef();
+ *   const n8aoRef = useRef();
  *   <N8AOPostPass ref={n8aoRef} ... />
  *   <N8AOBeatController passRef={n8aoRef} fftRef={fftRef} />
  */
@@ -28,7 +33,7 @@ import { useLoopEngineFFTRef } from "../../hooks/use-loop-engine-fft";
 
 // ── Shaders ───────────────────────────────────────────────────────────────────
 
-const _VERT = /* glsl */`
+const VERT = /* glsl */`
 uniform float uTime;
 uniform float uBassEnergy;
 uniform float uMidEnergy;
@@ -60,7 +65,7 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position + normal*(d+sh), 1.0);
 }`;
 
-const _FRAG = /* glsl */`
+const FRAG = /* glsl */`
 uniform float uTime;
 uniform float uBassEnergy;
 uniform float uMidEnergy;
@@ -92,9 +97,9 @@ function ReactiveIcosphere({ fftRef, beatFlashRef, colorBase, colorAccent }: {
   colorAccent:  string;
 }) {
   const meshRef  = useRef<THREE.Mesh>(null);
-  const toV3     = (hex: string) => { const _c = new THREE.Color(hex); return new THREE.Vector3(c.r, c.g, c.b); };
+  const toV3     = (hex: string) => { const c = new THREE.Color(hex); return new THREE.Vector3(c.r, c.g, c.b); };
 
-  const _uniforms = useMemo(() => ({
+  const uniforms = useMemo(() => ({
     uTime:       { value: 0 },
     uBassEnergy: { value: 0 },
     uMidEnergy:  { value: 0 },
@@ -105,8 +110,8 @@ function ReactiveIcosphere({ fftRef, beatFlashRef, colorBase, colorAccent }: {
   }), [colorBase, colorAccent]);
 
   useFrame(({ clock }) => {
-    const _u = uniforms;
-    const _b = fftRef.current.bands;
+    const u = uniforms;
+    const b = fftRef.current.bands;
     u.uTime.value       = clock.getElapsedTime();
     u.uBassEnergy.value = THREE.MathUtils.lerp(u.uBassEnergy.value, b.sub + b.low, 0.15);
     u.uMidEnergy.value  = THREE.MathUtils.lerp(u.uMidEnergy.value,  b.mid, 0.12);
@@ -136,24 +141,24 @@ function ParticleRing({ fftRef, count = 128, radius = 3.2, color = "#00aaff" }: 
 }) {
   const ptsRef  = useRef<THREE.Points>(null);
   const geo     = useMemo(() => {
-    const _pos = new Float32Array(count * 3);
-    for (let _i = 0; i < count; i++) {
-      const _a = (i / count) * Math.PI * 2;
+    const pos = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
       pos[i*3]=Math.cos(a)*radius; pos[i*3+1]=0; pos[i*3+2]=Math.sin(a)*radius;
     }
-    const _g = new THREE.BufferGeometry();
+    const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     return g;
   }, [count, radius]);
 
   useFrame(({ clock }) => {
-    const _pos = geo.attributes.position as THREE.BufferAttribute;
-    const _fft = fftRef.current.masterFft;
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    const fft = fftRef.current.masterFft;
     const b   = fftRef.current.bands;
     const t   = clock.getElapsedTime();
-    for (let _i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       const a   = (i / count) * Math.PI * 2;
-      const _idx = Math.floor((i / count) * fft.length * 0.5);
+      const idx = Math.floor((i / count) * fft.length * 0.5);
       const e   = Math.max(0, (fft[idx] + 100) / 100);
       const r   = radius + e * 1.5 + b.sub * 0.8;
       pos.setXYZ(i,
@@ -179,8 +184,8 @@ function AudioReactiveCamera({ fftRef }: {
   const baseZ      = useRef(5);
 
   useFrame(() => {
-    const _b = fftRef.current.bands;
-    const _bass = b.sub + b.low;
+    const b = fftRef.current.bands;
+    const bass = b.sub + b.low;
     baseZ.current = THREE.MathUtils.lerp(baseZ.current, 5, 0.02);
     camera.position.z = THREE.MathUtils.lerp(camera.position.z, baseZ.current + bass * 0.8, 0.08);
     camera.position.y = THREE.MathUtils.lerp(camera.position.y, Math.sin(Date.now()*0.0003)*0.15 + b.mid*0.2, 0.05);
@@ -207,10 +212,10 @@ export function AudioReactiveScene({
   animateCamera = true,
 }: AudioReactiveSceneProps) {
   const fftRef       = useLoopEngineFFTRef();
-  const _beatFlashRef = useRef(0);
+  const beatFlashRef = useRef(0);
 
   useEffect(() => {
-    const _off = getLoopEngine().on("beat", (_, beat) => {
+    const off = getLoopEngine().on("beat", (_, beat) => {
       beatFlashRef.current = beat === 0 ? 1.0 : 0.35;
     });
     return off;
@@ -239,9 +244,9 @@ export function N8AOBeatController({ passRef, fftRef, baseRadius = 1.5, baseInte
   baseIntensity?: number;
 }) {
   useFrame(() => {
-    const _pass = passRef.current;
+    const pass = passRef.current;
     if (!pass?.configuration) return;
-    const _bass = fftRef.current.bands.sub + fftRef.current.bands.low;
+    const bass = fftRef.current.bands.sub + fftRef.current.bands.low;
     pass.configuration.aoRadius  = baseRadius   + bass * 2.0;
     pass.configuration.intensity = baseIntensity + bass * 8.0;
   });

@@ -33,7 +33,7 @@ export function useFXChain(
   connectTo?: AudioNode | null,
   initialData?: SerializedFXChain,
 ): UseFXChainReturn {
-  const _chainRef = useRef<FXChain | null>(null);
+  const chainRef = useRef<FXChain | null>(null);
 
   const [state, setState] = useState<FXChainState>({
     effects:   [],
@@ -44,8 +44,8 @@ export function useFXChain(
   });
 
   // Sync state from chain after any mutation
-  const _syncState = useCallback(() => {
-    const _chain = chainRef.current;
+  const syncState = useCallback(() => {
+    const chain = chainRef.current;
     if (!chain) return;
 
     const bypassed:  Record<string, boolean> = {};
@@ -53,7 +53,7 @@ export function useFXChain(
 
     // Access internal slots via the public slot getter
     (chain as any).effects.forEach(fx => {
-      const _slot = chain.getSlot(fx.id);
+      const slot = chain.getSlot(fx.id);
       if (slot) {
         bypassed[fx.id]  = slot.bypass;
         wetLevels[fx.id] = slot.wet;
@@ -71,7 +71,7 @@ export function useFXChain(
 
   // Create chain on mount
   useEffect(() => {
-    const _chain = new FXChain();
+    const chain = new FXChain();
     chainRef.current = chain;
 
     // Restore from serialized data if provided
@@ -87,7 +87,7 @@ export function useFXChain(
       if (connectTo) (chain as any).connect(connectTo);
     }
 
-    const _unsub = (chain as any).on((payload: FXChainEventPayload) => {
+    const unsub = (chain as any).on((payload: FXChainEventPayload) => {
       syncState();
     });
 
@@ -103,54 +103,54 @@ export function useFXChain(
 
   // Re-wire output if connectTo changes
   useEffect(() => {
-    const _chain = chainRef.current;
+    const chain = chainRef.current;
     if (!chain || !connectTo) return;
     (chain as any).disconnect();
     (chain as any).connect(connectTo);
   }, [connectTo]);
 
-  const _addFX = useCallback((fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => {
+  const addFX = useCallback((fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => {
     chainRef.current?.addFX(fx, index, options);
   }, []);
 
-  const _removeFX = useCallback((fxId: string) => {
+  const removeFX = useCallback((fxId: string) => {
     chainRef.current?.removeFX(fxId);
   }, []);
 
-  const _moveFX = useCallback((from: number, to: number) => {
+  const moveFX = useCallback((from: number, to: number) => {
     chainRef.current?.moveFX(from, to);
   }, []);
 
-  const _setBypass = useCallback((fxId: string, bypass: boolean) => {
+  const setBypass = useCallback((fxId: string, bypass: boolean) => {
     chainRef.current?.setBypass(fxId, bypass);
     syncState();
   }, [syncState]);
 
-  const _toggleBypass = useCallback((fxId: string) => {
+  const toggleBypass = useCallback((fxId: string) => {
     chainRef.current?.toggleBypass(fxId);
     syncState();
   }, [syncState]);
 
-  const _setWet = useCallback((fxId: string, wet: number) => {
+  const setWet = useCallback((fxId: string, wet: number) => {
     chainRef.current?.setWet(fxId, wet);
     syncState();
   }, [syncState]);
 
-  const _setPreGain = useCallback((value: number) => {
+  const setPreGain = useCallback((value: number) => {
     chainRef.current?.setPreGain(value);
     syncState();
   }, [syncState]);
 
-  const _setPostGain = useCallback((value: number) => {
+  const setPostGain = useCallback((value: number) => {
     chainRef.current?.setPostGain(value);
     syncState();
   }, [syncState]);
 
-  const _clear = useCallback(() => {
+  const clear = useCallback(() => {
     chainRef.current?.clear();
   }, []);
 
-  const _serialize = useCallback((): SerializedFXChain | null => {
+  const serialize = useCallback((): SerializedFXChain | null => {
     return chainRef.current?.serialize() ?? null;
   }, []);
 

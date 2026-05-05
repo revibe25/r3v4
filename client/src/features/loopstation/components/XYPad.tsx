@@ -65,7 +65,7 @@ const CORNER_VALUES: Record<'TL' | 'TR' | 'BL' | 'BR', XYPoint> = {
 const AxisBar: React.FC<{
   value: number; axis: 'x' | 'y'; size: number; color: string;
 }> = ({ value, axis, size, color }) => {
-  const _isX = axis === 'x';
+  const isX = axis === 'x';
   return (
     <div style={{
       position: 'absolute',
@@ -73,7 +73,7 @@ const AxisBar: React.FC<{
         ? { bottom: -6, left: 0, right: 0, height: 3 }
         : { right:  -6, top:  0, bottom: 0, width: 3 }),
       background: '#0a0a0a',
-      border: `1px solid #141414`,
+      border: `1px solid var(--t-b2)`,
     }}>
       <div style={{
         position: 'absolute',
@@ -94,8 +94,8 @@ export const XYPad: React.FC<Props> = ({
   size        = 130,
   labelTL     = 'FILT', labelTR = 'WET',
   labelBL     = 'DRY',  labelBR = 'RVB',
-  colorX      = '#39ff14',
-  colorY      = '#22d3ee',
+  colorX      = 'var(--looper-acid)',
+  colorY      = 'var(--looper-cyan)',
   spring      = false,
   springSpeed = 0.12,
   snapGrid    = false,
@@ -120,7 +120,7 @@ export const XYPad: React.FC<Props> = ({
   const lockX  = useRef(false);
   const lockY  = useRef(false);
   const trail  = useRef<XYPoint[]>([]);
-  const _curPos = useRef<XYPoint>({ x, y });
+  const curPos = useRef<XYPoint>({ x, y });
 
   // Sync internal position ref
   useEffect(() => { curPos.current = { x, y }; }, [x, y]);
@@ -129,17 +129,17 @@ export const XYPad: React.FC<Props> = ({
   useEffect(() => {
     if (!pulse) return;
     setPulsing(true);
-    const _t = setTimeout(() => setPulsing(false), 100);
+    const t = setTimeout(() => setPulsing(false), 100);
     return () => clearTimeout(t);
   }, [pulse]);
 
   // ── Canvas render loop ─────────────────────────────────────────────────────
   useEffect(() => {
-    const _canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const _draw = () => {
-      const _ctx = canvas.getContext('2d');
+    const draw = () => {
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
       const { width: W, height: H } = canvas;
 
@@ -148,12 +148,12 @@ export const XYPad: React.FC<Props> = ({
       // Trail
       if (showTrail && trail.current.length > 1) {
         ctx.save();
-        for (let _i = 1; i < trail.current.length; i++) {
-          const _prev = trail.current[i - 1];
-          const _curr = trail.current[i];
+        for (let i = 1; i < trail.current.length; i++) {
+          const prev = trail.current[i - 1];
+          const curr = trail.current[i];
           const age  = i / trail.current.length;          // 0 = oldest, 1 = newest
-          const _alpha = age * age * 0.6;
-          const _width = age * 2;
+          const alpha = age * age * 0.6;
+          const width = age * 2;
 
           ctx.beginPath();
           ctx.moveTo(prev.x * W, prev.y * H);
@@ -176,11 +176,11 @@ export const XYPad: React.FC<Props> = ({
   }, [showTrail, colorX, active]);
 
   // ── Point from event ───────────────────────────────────────────────────────
-  const _getPoint = useCallback((clientX: number, clientY: number, shiftKey = false, ctrlKey = false): XYPoint => {
+  const getPoint = useCallback((clientX: number, clientY: number, shiftKey = false, ctrlKey = false): XYPoint => {
     if (!padRef.current) return { x, y };
     const r  = padRef.current.getBoundingClientRect();
-    let _nx = Math.min(1, Math.max(0, (clientX - r.left)  / r.width));
-    let _ny = Math.min(1, Math.max(0, (clientY - r.top)   / r.height));
+    let nx = Math.min(1, Math.max(0, (clientX - r.left)  / r.width));
+    let ny = Math.min(1, Math.max(0, (clientY - r.top)   / r.height));
 
     // Axis lock
     if (shiftKey || lockX.current) nx = curPos.current.x;
@@ -196,10 +196,10 @@ export const XYPad: React.FC<Props> = ({
   }, [x, y, snapGrid, gridDivs]);
 
   // ── Spring animation ───────────────────────────────────────────────────────
-  const _runSpring = useCallback(() => {
-    const _tick = () => {
-      const _cx2 = curPos.current.x;
-      const _cy2 = curPos.current.y;
+  const runSpring = useCallback(() => {
+    const tick = () => {
+      const cx2 = curPos.current.x;
+      const cy2 = curPos.current.y;
       const dx  = (0.5 - cx2) * springSpeed;
       const dy  = (0.5 - cy2) * springSpeed;
       if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) {
@@ -213,12 +213,12 @@ export const XYPad: React.FC<Props> = ({
   }, [onChange, springSpeed]);
 
   // ── Mouse handlers ─────────────────────────────────────────────────────────
-  const _onMouseDown = useCallback((e: React.MouseEvent) => {
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     cancelAnimationFrame(springRaf.current);
 
     // Double-click: reset to center
-    const _now = Date.now();
+    const now = Date.now();
     if (now - lastDblClick < 300) {
       onChange({ x: 0.5, y: 0.5 });
       trail.current = [];
@@ -229,13 +229,13 @@ export const XYPad: React.FC<Props> = ({
 
     setActive(true);
 
-    const _update = (ev: MouseEvent) => {
-      const _p = getPoint(ev.clientX, ev.clientY, ev.shiftKey, ev.ctrlKey);
+    const update = (ev: MouseEvent) => {
+      const p = getPoint(ev.clientX, ev.clientY, ev.shiftKey, ev.ctrlKey);
       trail.current = [...trail.current.slice(-(trailLength - 1)), p];
       onChange(p);
     };
 
-    const _onUp = () => {
+    const onUp = () => {
       setActive(false);
       lockX.current = false;
       lockY.current = false;
@@ -250,31 +250,31 @@ export const XYPad: React.FC<Props> = ({
   }, [lastDblClick, onChange, getPoint, trailLength, spring, runSpring]);
 
   // ── Touch handlers ─────────────────────────────────────────────────────────
-  const _onTouchStart = useCallback((e: React.TouchEvent) => {
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     cancelAnimationFrame(springRaf.current);
     setActive(true);
-    const _t = e.touches[0];
-    const _p = getPoint(t.clientX, t.clientY);
+    const t = e.touches[0];
+    const p = getPoint(t.clientX, t.clientY);
     trail.current = [p];
     onChange(p);
   }, [getPoint, onChange]);
 
-  const _onTouchMove = useCallback((e: React.TouchEvent) => {
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
-    const _t = e.touches[0];
-    const _p = getPoint(t.clientX, t.clientY);
+    const t = e.touches[0];
+    const p = getPoint(t.clientX, t.clientY);
     trail.current = [...trail.current.slice(-(trailLength - 1)), p];
     onChange(p);
   }, [getPoint, onChange, trailLength]);
 
-  const _onTouchEnd = useCallback(() => {
+  const onTouchEnd = useCallback(() => {
     setActive(false);
     if (spring) runSpring();
   }, [spring, runSpring]);
 
   // ── Corner label click ─────────────────────────────────────────────────────
-  const _handleCornerClick = useCallback((corner: 'TL' | 'TR' | 'BL' | 'BR', e: React.MouseEvent) => {
+  const handleCornerClick = useCallback((corner: 'TL' | 'TR' | 'BL' | 'BR', e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(CORNER_VALUES[corner]);
     trail.current = [];
@@ -283,11 +283,11 @@ export const XYPad: React.FC<Props> = ({
 
   // ── Grid points ────────────────────────────────────────────────────────────
   const gridLines: number[] = [];
-  for (let _i = 1; i < gridDivs; i++) gridLines.push(i / gridDivs);
+  for (let i = 1; i < gridDivs; i++) gridLines.push(i / gridDivs);
 
   // ── Derived color mix ──────────────────────────────────────────────────────
   // Cursor color blends between colorX (left) and colorY (bottom)
-  const _cursorColor = colorX;
+  const cursorColor = colorX;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -301,10 +301,10 @@ export const XYPad: React.FC<Props> = ({
           width:     size,
           height:    size,
           position:  'relative',
-          background: '#040404',
-          border:    `1px solid ${active ? colorX + '88' : '#181818'}`,
-          borderLeft: `3px solid ${active ? colorX : '#161616'}`,
-          borderTop:  `1px solid ${active ? colorY + '44' : '#111'}`,
+          background: 'var(--panel-deep)',
+          border:    `1px solid ${active ? colorX + '88' : 'var(--panel)'}`,
+          borderLeft: `3px solid ${active ? colorX : 'var(--dj-surface3)'}`,
+          borderTop:  `1px solid ${active ? colorY + '44' : 'var(--dj-surface2)'}`,
           cursor:    'crosshair',
           userSelect: 'none',
           transition: 'border-color .12s',
@@ -329,16 +329,16 @@ export const XYPad: React.FC<Props> = ({
               position: 'absolute', left: 0, right: 0, top: `${p * 100}%`,
               height: 1,
               background: p === 0.5
-                ? `linear-gradient(90deg, transparent, #1e1e1e 20%, #1e1e1e 80%, transparent)`
-                : `linear-gradient(90deg, transparent, #111 30%, #111 70%, transparent)`,
+                ? `linear-gradient(90deg, transparent, var(--t-b3) 20%, var(--t-b3) 80%, transparent)`
+                : `linear-gradient(90deg, transparent, var(--dj-surface2) 30%, var(--dj-surface2) 70%, transparent)`,
               pointerEvents: 'none',
             }} />
             <div style={{
               position: 'absolute', top: 0, bottom: 0, left: `${p * 100}%`,
               width: 1,
               background: p === 0.5
-                ? `linear-gradient(180deg, transparent, #1e1e1e 20%, #1e1e1e 80%, transparent)`
-                : `linear-gradient(180deg, transparent, #111 30%, #111 70%, transparent)`,
+                ? `linear-gradient(180deg, transparent, var(--t-b3) 20%, var(--t-b3) 80%, transparent)`
+                : `linear-gradient(180deg, transparent, var(--dj-surface2) 30%, var(--dj-surface2) 70%, transparent)`,
               pointerEvents: 'none',
             }} />
           </React.Fragment>
@@ -489,10 +489,10 @@ export const XYPad: React.FC<Props> = ({
         {/* ── Snap grid dots (shown when snapGrid is true) ─────────────── */}
         {snapGrid && active && Array.from({ length: gridDivs + 1 }, (_, gx) =>
           Array.from({ length: gridDivs + 1 }, (_, gy) => {
-            const _gxp = gx / gridDivs;
-            const _gyp = gy / gridDivs;
-            const _dist = Math.hypot(gxp - x, gyp - y);
-            const _alpha = Math.max(0, 1 - dist * 8);
+            const gxp = gx / gridDivs;
+            const gyp = gy / gridDivs;
+            const dist = Math.hypot(gxp - x, gyp - y);
+            const alpha = Math.max(0, 1 - dist * 8);
             return alpha > 0.05 ? (
               <div key={`${gx}-${gy}`} style={{
                 position: 'absolute',
@@ -516,7 +516,7 @@ export const XYPad: React.FC<Props> = ({
             width: 3, height: 3,
             background: '#2a2a2a',
             transform: 'translate(-50%, -50%)',
-            border: '1px solid #333',
+            border: '1px solid var(--dj-dimmer)',
             pointerEvents: 'none',
           }} />
         )}
@@ -537,7 +537,7 @@ export const XYPad: React.FC<Props> = ({
               position:   'absolute',
               ...style,
               fontSize:   6,
-              color:      '#1e1e1e',
+              color:      'var(--t-b3)',
               fontFamily: 'IBM Plex Mono, monospace',
               letterSpacing: '.1em',
               background: 'none',
@@ -549,7 +549,7 @@ export const XYPad: React.FC<Props> = ({
               zIndex:     2,
             }}
             onMouseEnter={e => (e.currentTarget.style.color = colorX)}
-            onMouseLeave={e => (e.currentTarget.style.color = '#1e1e1e')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--t-b3)')}
           >
             {lbl}
           </button>
@@ -567,7 +567,7 @@ export const XYPad: React.FC<Props> = ({
       {/* ── Info bar ────────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', width: size, alignItems: 'center' }}>
         <span style={{
-          fontSize: 6, color: active ? colorX + 'aa' : '#1e1e1e',
+          fontSize: 6, color: active ? colorX + 'aa' : 'var(--t-b3)',
           fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '.12em',
           transition: 'color .1s',
         }}>
@@ -575,7 +575,7 @@ export const XYPad: React.FC<Props> = ({
         </span>
 
         <span style={{
-          fontSize: 6, color: '#191919',
+          fontSize: 6, color: 'var(--panel)',
           fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '.2em',
           textTransform: 'uppercase',
         }}>
@@ -583,7 +583,7 @@ export const XYPad: React.FC<Props> = ({
         </span>
 
         <span style={{
-          fontSize: 6, color: active ? colorY + 'aa' : '#1e1e1e',
+          fontSize: 6, color: active ? colorY + 'aa' : 'var(--t-b3)',
           fontFamily: 'IBM Plex Mono, monospace', letterSpacing: '.12em',
           transition: 'color .1s',
         }}>

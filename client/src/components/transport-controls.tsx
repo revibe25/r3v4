@@ -17,7 +17,7 @@ interface TransportControlsProps {
   disabled?: boolean;
 }
 
-export const _TransportControls = memo(function TransportControls({
+export const TransportControls = memo(function TransportControls({
   isArmed,
   isRecording,
   isPlaying,
@@ -31,16 +31,16 @@ export const _TransportControls = memo(function TransportControls({
   onExport,
 }: TransportControlsProps) {
   // Guard: only fire onRecord if not already recording
-  const _handleRecord = useCallback(() => {
+  const handleRecord = useCallback(() => {
     if (!isRecording) onRecord();
   }, [isRecording, onRecord]);
 
   // Guard: only fire onPlay if not already playing
-  const _handlePlay = useCallback(() => {
+  const handlePlay = useCallback(() => {
     if (!isPlaying) onPlay();
   }, [isPlaying, onPlay]);
 
-  const _hasEvents = recordedEventsCount > 0;
+  const hasEvents = recordedEventsCount > 0;
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-2">

@@ -47,7 +47,7 @@ export async function initializeAudioContext(): Promise<void> {
         return;
       }
 
-      const _Tone = (window as any).Tone;
+      const Tone = (window as any).Tone;
 
       // Check AudioContext state
       if (Tone.context && Tone.context.state !== 'running') {
@@ -59,7 +59,7 @@ export async function initializeAudioContext(): Promise<void> {
       state.error = null;
       console.log('✅ AudioContext initialized successfully');
     } catch (error) {
-      const _err = error instanceof Error ? error : new Error(String(error));
+      const err = error instanceof Error ? error : new Error(String(error));
       state.error = err;
       console.error('❌ Failed to initialize AudioContext:', err.message);
 
@@ -108,17 +108,17 @@ export function isAudioReady(): boolean {
  *  • `resumed = false` in catch allows retry on next gesture (non-fatal path).
  */
 export function registerAudioInitTriggers(): () => void {
-  const _EVENTS = ['click', 'touchstart', 'keydown', 'pointerdown'] as const;
-  let _resumed = false;
+  const EVENTS = ['click', 'touchstart', 'keydown', 'pointerdown'] as const;
+  let resumed = false;
 
-  const _handleGesture = async (): Promise<void> => {
+  const handleGesture = async (): Promise<void> => {
     if (resumed) return;
     resumed = true;
 
     try {
       // Dynamic import — Tone.js must NOT be imported at module scope in a
       // utility that loads before any user gesture.
-      const _Tone = await import('tone');
+      const Tone = await import('tone');
       await Tone.start();
       console.debug('[R3 Audio] AudioContext resumed via user gesture.');
     } catch (audioErr) {

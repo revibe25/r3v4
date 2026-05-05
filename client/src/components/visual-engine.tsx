@@ -9,13 +9,13 @@ import { useRef } from 'react';
 import type { ShaderMaterial } from 'three';
 import { useLoopEngineFFTRef } from '../hooks/use-loop-engine-fft';
 
-const _vertexShader = `
+const vertexShader = `
 void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 `;
 
-const _fragmentShader = `
+const fragmentShader = `
 uniform float time;
 uniform float uSub;
 uniform float uLow;
@@ -55,12 +55,12 @@ void main() {
 
 function ShaderPlane() {
   const mat    = useRef<ShaderMaterial>(null!);
-  const _fftRef = useLoopEngineFFTRef();
+  const fftRef = useLoopEngineFFTRef();
 
   useFrame(({ clock }) => {
     if (!mat.current) return;
-    const _u = mat.current.uniforms;
-    const _b = fftRef.current.bands;
+    const u = mat.current.uniforms;
+    const b = fftRef.current.bands;
     u.time.value      = clock.elapsedTime;
     u.uSub.value      = b.sub;
     u.uLow.value      = b.low;

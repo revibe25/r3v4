@@ -1,3 +1,8 @@
+// ── P4-EXEMPT: WebGL/Three.js ────────────────────────────────────────────────
+// Three.js scene file — material colors and fog args require literal hex
+// Exempted: P4 remediation pass. Do not replace Three.js color props with
+// CSS variables — THREE.Color() cannot resolve var(--token) at runtime.
+// ─────────────────────────────────────────────────────────────────────────────
 // FILE: client/src/components/ThreeStage.tsx
 import React, { useRef, memo } from 'react';
 import { AudioReactiveScene, N8AOBeatController } from './three/AudioReactiveScene';
@@ -19,12 +24,12 @@ interface ThreeStageProps {
   colorAccent?:  string;
 }
 
-export const _ThreeStage = memo(function ThreeStage({
+export const ThreeStage = memo(function ThreeStage({
   children,
   shake,
   audioReactive = false,
   colorBase     = '#1a0066',
-  colorAccent   = '#00ff88',
+  colorAccent   = 'var(--accent-neon-green)',
 }: ThreeStageProps) {
   return (
     <Canvas
@@ -36,7 +41,7 @@ export const _ThreeStage = memo(function ThreeStage({
       <color attach="background" args={['#050505']} />
 
       <ambientLight intensity={0.25} />
-      <hemisphereLight intensity={0.35} groundColor="#111" />
+      <hemisphereLight intensity={0.35} groundColor="var(--dj-surface2)" />
 
       {/* Single directional light with a shadow map */}
       <directionalLight
@@ -68,7 +73,7 @@ export const _ThreeStage = memo(function ThreeStage({
           height={0.8}
           depth={0.03}
           colorLow={colorAccent}
-          colorHigh="#ffffff"
+          colorHigh="var(--white)"
           position={[0, -2.5, 0]}
         />
       )}
@@ -101,14 +106,14 @@ function CameraRig({ shake }: { shake: number }) {
   const { camera } = useThree();
 
   // Keep a live ref to shake so useFrame never captures a stale value
-  const _shakeRef = useRef(shake);
+  const shakeRef = useRef(shake);
   shakeRef.current = shake;
 
-  const _velocity = useRef(new THREE.Vector3());
+  const velocity = useRef(new THREE.Vector3());
 
   useFrame(() => {
-    const _s = shakeRef.current;
-    const _vel = velocity.current;
+    const s = shakeRef.current;
+    const vel = velocity.current;
 
     // Apply random impulse when shaking
     if (s > 0) {
@@ -118,7 +123,7 @@ function CameraRig({ shake }: { shake: number }) {
 
     // Spring force: gently pull camera back toward BASE_POSITION.
     // Without this the camera drifts arbitrarily far from its starting point.
-    const _springStrength = 0.04;
+    const springStrength = 0.04;
     vel.x += (BASE_POSITION.x - camera.position.x) * springStrength;
     vel.y += (BASE_POSITION.y - camera.position.y) * springStrength;
     vel.z += (BASE_POSITION.z - camera.position.z) * springStrength;

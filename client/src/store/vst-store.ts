@@ -105,7 +105,7 @@ const PERFORMANCE_UPDATE_INTERVAL = 33; // ~30fps
 // Module-level ref — not Zustand state (not serializable, not reactive)
 let _monitoringIntervalId: ReturnType<typeof setInterval> | null = null;
 
-export const _useVSTStore = create<VSTStore>()(
+export const useVSTStore = create<VSTStore>()(
   devtools(
     (set, get) => ({
       ...initialState,
@@ -132,9 +132,9 @@ export const _useVSTStore = create<VSTStore>()(
             import('@/audio/fx/vst-automation-engine'),
           ]);
 
-          const _performanceMonitor = new VSTPerformanceMonitor(audioContext);
-          const _sidechainRouter = new SidechainRouter(audioContext);
-          const _automationEngine = new VSTAutomationEngine(audioContext);
+          const performanceMonitor = new VSTPerformanceMonitor(audioContext);
+          const sidechainRouter = new SidechainRouter(audioContext);
+          const automationEngine = new VSTAutomationEngine(audioContext);
 
           // Set up performance callbacks
           performanceMonitor.onOverload(() => {
@@ -180,8 +180,8 @@ export const _useVSTStore = create<VSTStore>()(
         performanceMonitor.start();
         
         // Set up periodic updates
-        const _intervalId = setInterval(() => {
-          const _snapshot = performanceMonitor.getCurrentSnapshot();
+        const intervalId = setInterval(() => {
+          const snapshot = performanceMonitor.getCurrentSnapshot();
           get().updatePerformance(snapshot);
         }, PERFORMANCE_UPDATE_INTERVAL);
 
@@ -215,7 +215,7 @@ export const _useVSTStore = create<VSTStore>()(
         const { performanceHistory } = get();
 
         // Add to history
-        const _newHistory = [...performanceHistory, snapshot];
+        const newHistory = [...performanceHistory, snapshot];
         
         // Trim if too long
         if (newHistory.length > MAX_HISTORY_LENGTH) {
@@ -270,7 +270,7 @@ export const _useVSTStore = create<VSTStore>()(
       // ============================================
 
       addPluginToChannel: (channelId, pluginId, pluginName) => {
-        const _chains = get().channelFXChains;
+        const chains = get().channelFXChains;
         const chain  = chains[channelId] ?? [];
         set({
           channelFXChains: { ...chains, [channelId]: [...chain, pluginId] },
@@ -280,14 +280,14 @@ export const _useVSTStore = create<VSTStore>()(
       },
 
       removePluginFromChannel: (channelId, pluginIndex) => {
-        const _chains = get().channelFXChains;
+        const chains = get().channelFXChains;
         const chain  = [...(chains[channelId] ?? [])];
         chain.splice(pluginIndex, 1);
         set({ channelFXChains: { ...chains, [channelId]: chain } });
       },
 
       reorderChannelFX: (channelId, from, to) => {
-        const _chains = get().channelFXChains;
+        const chains = get().channelFXChains;
         const chain  = [...(chains[channelId] ?? [])];
         const [item] = chain.splice(from, 1);
         chain.splice(to, 0, item);
@@ -334,26 +334,26 @@ export const _useVSTStore = create<VSTStore>()(
 // SELECTORS
 // ============================================
 
-export const _selectCPUUsage = (state: VSTStore) => 
+export const selectCPUUsage = (state: VSTStore) => 
   state.currentSnapshot?.cpu.total ?? 0;
 
-export const _selectMemoryUsage = (state: VSTStore) => 
+export const selectMemoryUsage = (state: VSTStore) => 
   state.currentSnapshot?.memory.percentage ?? 0;
 
-export const _selectLatency = (state: VSTStore) => 
+export const selectLatency = (state: VSTStore) => 
   state.currentSnapshot?.latency.total ?? 0;
 
-export const _selectHasAlerts = (state: VSTStore) =>
+export const selectHasAlerts = (state: VSTStore) =>
   state.cpuOverload || state.memoryWarning || state.dropoutCount > 0;
 
-export const _selectChannelFX = (channelId: string) => (state: VSTStore) =>
+export const selectChannelFX = (channelId: string) => (state: VSTStore) =>
   state.channelFXChains[channelId] ?? [];
 
-export const _selectActivePlugin = (state: VSTStore) =>
+export const selectActivePlugin = (state: VSTStore) =>
   state.activePlugin;
 
-export const _selectPerformanceHistory = (state: VSTStore, duration: number = 10) => {
-  const _now = Date.now();
-  const _cutoff = now - (duration * 1000);
+export const selectPerformanceHistory = (state: VSTStore, duration: number = 10) => {
+  const now = Date.now();
+  const cutoff = now - (duration * 1000);
   return state.performanceHistory.filter(s => s.timestamp >= cutoff);
 };

@@ -33,7 +33,7 @@ interface VariantConfig<V extends VariantRecord> {
  * Build a type-safe variant utility — a lightweight alternative to CVA.
  *
  * @example
- * const _button = variants({
+ * const button = variants({
  *   base: 'inline-flex items-center rounded',
  *   variants: {
  *     intent: { primary: 'bg-blue-500 text-white', ghost: 'bg-transparent' },
@@ -48,18 +48,18 @@ export function variants<V extends VariantRecord>(config: VariantConfig<V>) {
   return (props?: VariantProps<V> & { className?: ClassValue }): string => {
     const { className, ...variantProps } = props ?? {};
 
-    const _variantClasses = Object.entries(config.variants).map(([key, options]) => {
-      const _value =
+    const variantClasses = Object.entries(config.variants).map(([key, options]) => {
+      const value =
         (variantProps as Record<string, unknown>)[key] ??
         config.defaultVariants?.[key as keyof V];
       return value !== undefined ? options[value as string] : undefined;
     });
 
-    const _compoundClasses = (config.compoundVariants ?? [])
+    const compoundClasses = (config.compoundVariants ?? [])
       .filter((compound) => {
         const { className: _c, ...conditions } = compound;
         return Object.entries(conditions).every(([k, v]) => {
-          const _active =
+          const active =
             (variantProps as Record<string, unknown>)[k] ??
             config.defaultVariants?.[k as keyof V];
           return active === v;
@@ -112,10 +112,10 @@ export function cmap<T extends string>(
  * or spread manually.
  *
  * @example
- * const _cls = transition('fade');
+ * const cls = transition('fade');
  * // cls.base, cls.from, cls.to
  */
-const _TRANSITIONS = {
+const TRANSITIONS = {
   fade:       { base: 'transition-opacity duration-200',                    from: 'opacity-0',                    to: 'opacity-100' },
   scale:      { base: 'transition-transform duration-200 origin-top-left',  from: 'scale-95 opacity-0',           to: 'scale-100 opacity-100' },
   slideDown:  { base: 'transition-all duration-200',                        from: '-translate-y-2 opacity-0',     to: 'translate-y-0 opacity-100' },
