@@ -27,9 +27,9 @@ export class AutomationLane {
 
     this.clear(startTime);
 
-    for (let _i = 0; i < this.points.length; i++) {
-      const _point = this.points[i];
-      const _t = startTime + point.time;
+    for (let i = 0; i < this.points.length; i++) {
+      const point = this.points[i];
+      const t = startTime + point.time;
 
       if (point.curve === "step") {
         this.param.setValueAtTime(point.value, t);

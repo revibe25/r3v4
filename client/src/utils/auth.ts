@@ -32,7 +32,7 @@ export interface AuthError {
   status?: number;
 }
 
-let _initializationLock = false;
+let initializationLock = false;
 
 /**
  * MOCK LOGIN - For testing until real backend is found
@@ -54,32 +54,29 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
       throw { message: 'Invalid email format', code: 'INVALID_EMAIL' };
     }
 
-    // MOCK: Simulate 2 second delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // MOCK: Always succeed
-    const mockResponse: LoginResponse = {
-      token: 'mock-token-' + Date.now(),
-      user: {
-        id: 'user-' + Math.random().toString(36).substr(2, 9),
-        email: credentials.email,
-        name: 'Test User'
-      }
-    };
-
-    // Store token and user
-    if (mockResponse.token) {
-      sessionStorage.setItem(TOKEN_KEY, mockResponse.token);
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        credential: credentials.email,
+        password: credentials.password,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw { message: body.error ?? 'Login failed', code: 'AUTH_ERROR', status: res.status };
     }
-    if (mockResponse.user) {
-      sessionStorage.setItem(USER_KEY, JSON.stringify(mockResponse.user));
+    const response: LoginResponse = await res.json();
+    if (response.token) {
+      sessionStorage.setItem(TOKEN_KEY, response.token);
     }
-
+    if (response.user) {
+      sessionStorage.setItem(USER_KEY, JSON.stringify(response.user));
+    }
     if (import.meta.env.MODE === 'development') {
-      console.debug('✅ Mock login successful');
+      console.debug('Login successful');
     }
-
-    return mockResponse;
+    return response;
   } catch (error) {
     const authError: AuthError = error instanceof Object && 'message' in error
       ? (error as AuthError)
@@ -116,11 +113,11 @@ export function getAuthToken(): string | null {
  * Get stored user
  */
 export function getStoredUser(): User | null {
-  const _userStr = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
+  const userStr = sessionStorage.getItem(USER_KEY) || localStorage.getItem(USER_KEY);
   if (!userStr) return null;
 
   try {
-    const _user = JSON.parse(userStr) as User;
+    const user = JSON.parse(userStr) as User;
     if (user.id && user.email) {
       return user;
     }
@@ -137,8 +134,8 @@ export function getStoredUser(): User | null {
  * Check if authenticated
  */
 export function isAuthenticated(): boolean {
-  const _token = getAuthToken();
-  const _user = getStoredUser();
+  const token = getAuthToken();
+  const user = getStoredUser();
   return !!token && !!user;
 }
 
@@ -147,7 +144,7 @@ export function isAuthenticated(): boolean {
  */
 export function validateEmail(email: string): boolean {
   if (!email || typeof email !== 'string') return false;
-  const _emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
@@ -194,7 +191,7 @@ export function createAuthHeaders(ignoreCache = false): Record<string, string> {
     return { ...cachedHeaders };
   }
 
-  const _token = getAuthToken();
+  const token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

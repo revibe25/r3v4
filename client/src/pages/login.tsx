@@ -1,9 +1,9 @@
 // client/src/pages/login.tsx
 // Enhanced v2 — PRD-compliant design system
-// Colors: cyan #00F5FF (active), violet #8B5CF6 (AI), lime #a3e635 (accent),
-//         amber #f59e0b (warning), red #ff3b3b (error)
+// Colors: cyan var(--accent-cyan) (active), violet var(--accent-purple) (AI), lime #a3e635 (accent),
+//         amber var(--status-warn) (warning), red #ff3b3b (error)
 // Font: JetBrains Mono (data), IBM Plex Mono (fallback)
-// Background: #060606, Card: #0a0a0a, Border: #1c1c1c
+// Background: var(--void), Card: #0a0a0a, Border: #1c1c1c
 // Live pulse wave canvas behind panel — animated LLPTE signal visualization
 
 import {
@@ -43,20 +43,20 @@ interface Tokens {
 
 // ─── Design tokens — PRD-compliant ───────────────────────────────────────────
 const T: Tokens = {
-  bg:       '#060606',
+  bg:       'var(--void)',
   card:     '#0a0a0a',
   cardGlow: '#0d0d0d',
   border:   '#1c1c1c',
   borderHi: '#2a2a2a',
   accent:   '#a3e635',       // lime — R3 brand
-  accentHv: '#84cc16',
-  cyan:     '#00F5FF',       // PRD: active state
-  violet:   '#8B5CF6',       // PRD: AI signal
-  amber:    '#f59e0b',       // PRD: warning
-  text:     '#f0f0f0',
-  textSub:  '#a0a0a0',
+  accentHv: 'var(--looper-lime)',
+  cyan:     'var(--accent-cyan)',       // PRD: active state
+  violet:   'var(--accent-purple)',       // PRD: AI signal
+  amber:    'var(--status-warn)',       // PRD: warning
+  text:     'var(--daw-fg)',
+  textSub:  'var(--text-dim)',
   muted:    '#555555',
-  dim:      '#333333',
+  dim:      'var(--dj-dimmer)',
   error:    '#ff3b3b',
   font:     "'JetBrains Mono','IBM Plex Mono','Fira Code',monospace",
 };
@@ -64,7 +64,7 @@ const T: Tokens = {
 // ─── Password strength ────────────────────────────────────────────────────────
 function getStrength(pw: string): number {
   if (!pw) return 0;
-  let _s = 0;
+  let s = 0;
   if (pw.length >= 8)          s++;
   if (/[A-Z]/.test(pw))        s++;
   if (/[0-9]/.test(pw))        s++;
@@ -72,14 +72,14 @@ function getStrength(pw: string): number {
   return s;
 }
 const STRENGTH_LABEL = ['', 'WEAK', 'FAIR', 'STRONG', 'MAX'] as const;
-const STRENGTH_COLOR = ['', '#ff3b3b', '#f59e0b', '#a3e635', '#00F5FF'] as const;
+const STRENGTH_COLOR = ['', '#ff3b3b', 'var(--status-warn)', '#a3e635', 'var(--accent-cyan)'] as const;
 
 // ─── Keyframe injection ───────────────────────────────────────────────────────
 const INJECTED_ID = 'r3-login-v2-keyframes';
 function injectKeyframes(): void {
   if (typeof document === 'undefined') return;
   if (document.getElementById(INJECTED_ID)) return;
-  const _style = document.createElement('style');
+  const style = document.createElement('style');
   style.id = INJECTED_ID;
   style.textContent = `
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
@@ -129,10 +129,10 @@ function injectKeyframes(): void {
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: #060606;
+      background: var(--void);
       border: 1px solid #1c1c1c;
       border-radius: 0;
-      color: #f0f0f0;
+      color: var(--daw-fg);
       font-family: 'JetBrains Mono','IBM Plex Mono',monospace;
       font-size: 13px;
       padding: 12px 14px;
@@ -141,14 +141,14 @@ function injectKeyframes(): void {
       letter-spacing: 0.02em;
     }
     .r3-input:focus {
-      border-color: #00F5FF;
+      border-color: var(--accent-cyan);
       box-shadow: 0 0 0 1px rgba(0,245,255,0.15), inset 0 0 20px rgba(0,245,255,0.02);
     }
     .r3-input:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
-    .r3-input::placeholder { color: #333; }
+    .r3-input::placeholder { color: var(--dj-dimmer); }
 
     .r3-checkbox {
       appearance: none;
@@ -156,7 +156,7 @@ function injectKeyframes(): void {
       width: 12px;
       height: 12px;
       border: 1px solid #2a2a2a;
-      background: #060606;
+      background: var(--void);
       cursor: pointer;
       flex-shrink: 0;
       transition: background 0.15s, border-color 0.15s;
@@ -173,26 +173,26 @@ function injectKeyframes(): void {
 // Multi-layer signal visualization: LLPTE pre/post AI signal (violet + cyan)
 // plus ambient carrier waves — all animated at 60fps
 function PulseWaveCanvas() {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const _canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
-    const _ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let _animId = 0;
-    let _t = 0;
-    let _resizeTimer = 0;
+    let animId = 0;
+    let t = 0;
 
-    const _resize = () => {
-      const _rect = canvas.getBoundingClientRect();
-      const _w = Math.round(rect.width  || canvas.offsetWidth  || 800);
-      const _h = Math.round(rect.height || canvas.offsetHeight || 600);
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width  || canvas.offsetWidth  || 800);
+      const h = Math.round(rect.height || canvas.offsetHeight || 600);
       if (canvas.width !== w)  canvas.width  = w;
       if (canvas.height !== h) canvas.height = h;
     };
-    const _onResize = () => {
+    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+    const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(resize, 80);
     };
@@ -200,7 +200,7 @@ function PulseWaveCanvas() {
     window.addEventListener('resize', onResize);
 
     // Signal layers — PRD-accurate: violet = AI/pre, cyan = post-AI, lime = carrier
-    const _layers = [
+    const layers = [
       // Carrier / ambient — lime green, slow, wide
       { amp: 28,  freq: 0.007, speed: 0.008, phase: 0,    color: 'rgba(163,230,53,0.07)',  lineW: 1,   yOff: 0.50 },
       { amp: 14,  freq: 0.015, speed: 0.014, phase: 1.1,  color: 'rgba(163,230,53,0.04)',  lineW: 0.8, yOff: 0.38 },
@@ -219,15 +219,15 @@ function PulseWaveCanvas() {
       { amp: 60,  freq: 0.004, speed: 0.004, phase: 3.0,  color: 'rgba(245,158,11,0.025)', lineW: 1,   yOff: 0.50 },
     ];
 
-    const _draw = () => {
+    const draw = () => {
       const { width, height } = canvas;
       if (width > 0 && height > 0) {
         ctx.clearRect(0, 0, width, height);
 
         // Radial ambient glow behind card center
-        const _cx = width * 0.5;
-        const _cy = height * 0.5;
-        const _grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.55);
+        const cx = width * 0.5;
+        const cy = height * 0.5;
+        const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, width * 0.55);
         grd.addColorStop(0, 'rgba(139,92,246,0.04)');
         grd.addColorStop(0.5, 'rgba(0,245,255,0.02)');
         grd.addColorStop(1, 'transparent');
@@ -239,10 +239,10 @@ function PulseWaveCanvas() {
           ctx.strokeStyle = w.color;
           ctx.lineWidth = w.lineW;
 
-          const _yBase = height * w.yOff;
-          for (let _x = 0; x <= width; x += 1.5) {
-            const _tScaled = t * w.speed * 60;
-            const _y =
+          const yBase = height * w.yOff;
+          for (let x = 0; x <= width; x += 1.5) {
+            const tScaled = t * w.speed * 60;
+            const y =
               yBase
               + Math.sin(x * w.freq + tScaled + w.phase) * w.amp
               + Math.sin(x * w.freq * 0.47 + tScaled * 0.6 + w.phase * 1.3) * (w.amp * 0.35)
@@ -253,8 +253,8 @@ function PulseWaveCanvas() {
         });
 
         // Vertical scan line — subtle CRT sweep
-        const _scanX = ((t * 0.4) % (width + 200)) - 100;
-        const _scanGrd = ctx.createLinearGradient(scanX - 30, 0, scanX + 30, 0);
+        const scanX = ((t * 0.4) % (width + 200)) - 100;
+        const scanGrd = ctx.createLinearGradient(scanX - 30, 0, scanX + 30, 0);
         scanGrd.addColorStop(0, 'transparent');
         scanGrd.addColorStop(0.5, 'rgba(0,245,255,0.025)');
         scanGrd.addColorStop(1, 'transparent');
@@ -290,24 +290,24 @@ function PulseWaveCanvas() {
 
 // ─── Mini LLPTE oscilloscope — shows last 200 "ticks" as a live waveform ─────
 function MiniOscilloscope({ active }: { active: boolean }) {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const bufRef    = useRef<Float32Array>(new Float32Array(200));
   const tRef      = useRef(0);
 
   useEffect(() => {
     if (!active) return;
-    const _canvas = canvasRef.current;
+    const canvas = canvasRef.current;
     if (!canvas) return;
-    const _ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let _animId = 0;
+    let animId = 0;
 
-    const _draw = () => {
-      const _t = tRef.current++;
-      const _buf = bufRef.current;
+    const draw = () => {
+      const t = tRef.current++;
+      const buf = bufRef.current;
       // Simulate LLPTE post-AI signal
-      const _newSample =
+      const newSample =
         Math.sin(t * 0.12) * 0.4
         + Math.sin(t * 0.07 + 1.2) * 0.25
         + Math.sin(t * 0.21 + 0.5) * 0.15
@@ -322,11 +322,11 @@ function MiniOscilloscope({ active }: { active: boolean }) {
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(139,92,246,0.7)';
       ctx.lineWidth = 1;
-      for (let _i = 0; i < buf.length; i++) {
-        const _x = (i / buf.length) * width;
-        const _vPre = Math.sin((tRef.current - buf.length + i) * 0.12 + 0.8) * 0.4
+      for (let i = 0; i < buf.length; i++) {
+        const x = (i / buf.length) * width;
+        const vPre = Math.sin((tRef.current - buf.length + i) * 0.12 + 0.8) * 0.4
                    + Math.sin((tRef.current - buf.length + i) * 0.07 + 2.0) * 0.25;
-        const _y = height * 0.5 - vPre * (height * 0.38);
+        const y = height * 0.5 - vPre * (height * 0.38);
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.stroke();
@@ -335,9 +335,9 @@ function MiniOscilloscope({ active }: { active: boolean }) {
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(0,245,255,0.85)';
       ctx.lineWidth = 1.5;
-      for (let _i = 0; i < buf.length; i++) {
-        const _x = (i / buf.length) * width;
-        const _y = height * 0.5 - buf[i] * (height * 0.38);
+      for (let i = 0; i < buf.length; i++) {
+        const x = (i / buf.length) * width;
+        const y = height * 0.5 - buf[i] * (height * 0.38);
         i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
       ctx.stroke();
@@ -369,18 +369,18 @@ function MiniOscilloscope({ active }: { active: boolean }) {
 
 // ─── LLPTE status badge row ───────────────────────────────────────────────────
 function LLPTEBar({ state }: { state: LoginState }) {
-  const _isActive = state === 'loading' || state === 'success';
+  const isActive = state === 'loading' || state === 'success';
   const latency  = isActive ? '10ms' : '—';
   const edges    = isActive ? '847' : '—';
 
-  const _badge = (label: string, val: string, color: string) => (
+  const badge = (label: string, val: string, color: string) => (
     <div style={{
       display:    'flex',
       alignItems: 'center',
       gap:        5,
       padding:    '3px 8px',
       border:     `1px solid ${T.border}`,
-      background: '#080808',
+      background: 'var(--t-b0x)',
     }}>
       <div style={{
         width:        5,
@@ -403,7 +403,7 @@ function LLPTEBar({ state }: { state: LoginState }) {
       gap:          6,
       padding:      '10px 36px',
       borderBottom: `1px solid ${T.border}`,
-      background:   '#070707',
+      background:   'var(--t-b0xx)',
       overflowX:    'auto',
     }}>
       <Cpu size={9} color={T.muted} strokeWidth={1.5} style={{ flexShrink: 0 }} />
@@ -423,7 +423,7 @@ function OscilloscopePanel({ active }: { active: boolean }) {
     <div style={{
       padding:      '10px 36px 12px',
       borderBottom: `1px solid ${T.border}`,
-      background:   '#070707',
+      background:   'var(--t-b0xx)',
     }}>
       <div style={{
         display:       'flex',
@@ -450,11 +450,11 @@ function OscilloscopePanel({ active }: { active: boolean }) {
 
 // ─── Submit button ────────────────────────────────────────────────────────────
 function SubmitButton({ state }: { state: LoginState }) {
-  const _isLoading = state === 'loading';
-  const _isSuccess = state === 'success';
+  const isLoading = state === 'loading';
+  const isSuccess = state === 'success';
   const [hovered, setHovered] = useState(false);
 
-  const _bg = isSuccess
+  const bg = isSuccess
     ? T.cyan
     : hovered && !isLoading
     ? T.accentHv
@@ -476,7 +476,7 @@ function SubmitButton({ state }: { state: LoginState }) {
         border:         'none',
         borderRadius:   0,
         background:     bg,
-        color:          '#060606',
+        color:          'var(--void)',
         fontFamily:     T.font,
         fontSize:       11,
         letterSpacing:  '.3em',
@@ -576,16 +576,16 @@ export default function LoginPage() {
   const [shakeKey,   setShakeKey]   = useState(0);
 
   const credRef       = useRef<HTMLInputElement>(null);
-  const _errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const strength  = getStrength(password);
-  const _isLoading = loginState === 'loading';
-  const _isSuccess = loginState === 'success';
+  const isLoading = loginState === 'loading';
+  const isSuccess = loginState === 'success';
   const isError   = loginState === 'error';
 
   useEffect(() => {
     injectKeyframes();
-    const _mountTimer = setTimeout(() => setMounted(true), 60);
+    const mountTimer = setTimeout(() => setMounted(true), 60);
     return () => {
       clearTimeout(mountTimer);
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
@@ -596,7 +596,7 @@ export default function LoginPage() {
     if (mounted) credRef.current?.focus();
   }, [mounted]);
 
-  const _triggerError = useCallback((msg: string) => {
+  const triggerError = useCallback((msg: string) => {
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     setErrorMsg(msg);
     setLoginState('error');
@@ -604,11 +604,11 @@ export default function LoginPage() {
     errorTimerRef.current = setTimeout(() => setLoginState('idle'), 5000);
   }, []);
 
-  const _handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (isLoading || isSuccess) return;
 
-    const _trimmed = credential.trim();
+    const trimmed = credential.trim();
     if (!trimmed || !password) {
       triggerError('All fields are required.');
       return;
@@ -622,21 +622,21 @@ export default function LoginPage() {
       setLoginState('success');
       setTimeout(() => setLocation('/instrument'), 800);
     } catch (err) {
-      const _raw = (err as Error).message ?? '';
+      const raw = (err as Error).message ?? '';
       triggerError(raw || 'Authentication failed — check your credentials.');
     }
   };
 
   // PRD: grid texture behind everything
-  const _gridBg = [
+  const gridBg = [
     'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.008) 3px,rgba(255,255,255,.008) 4px)',
     'repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.01) 39px,rgba(255,255,255,.01) 40px)',
   ].join(',');
 
   // Top border: cyan on active/success, error on error, accent normally
-  const _topBorderColor = isSuccess ? T.cyan : isError ? T.error : T.accent;
+  const topBorderColor = isSuccess ? T.cyan : isError ? T.error : T.accent;
 
-  const _cardTranslateY = mounted ? '0' : '16px';
+  const cardTranslateY = mounted ? '0' : '16px';
   const cardOpacity    = mounted ? 1 : 0;
 
   return (
@@ -960,12 +960,12 @@ export default function LoginPage() {
           alignItems:     'center',
           padding:        '10px 36px',
           borderTop:      `1px solid ${T.border}`,
-          background:     '#070707',
+          background:     'var(--t-b0xx)',
         }}>
           <span style={{ fontSize: 7, letterSpacing: '.2em', color: T.dim }}>SECURE · ENCRYPTED</span>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             {/* Tiny node indicators — PRD LLPTE pipeline nodes */}
-            {[T.cyan, T.violet, T.violet, T.cyan, '#10B981'].map((c, i) => (
+            {[T.cyan, T.violet, T.violet, T.cyan, 'var(--status-ok)'].map((c, i) => (
               <div key={i} style={{
                 width:        5,
                 height:       5,

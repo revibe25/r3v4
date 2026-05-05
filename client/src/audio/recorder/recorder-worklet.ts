@@ -27,7 +27,7 @@ class RecorderWorklet extends AudioWorkletProcessor {
   process(inputs: Float32Array[][]): boolean {
     if (!this.recording) return true;
 
-    const _input = inputs[0];
+    const input = inputs[0];
     if (!input || input.length === 0) return true;
 
     // mono for now (can extend to stereo later)

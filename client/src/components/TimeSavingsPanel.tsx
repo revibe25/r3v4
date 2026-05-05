@@ -21,22 +21,22 @@ interface TimeSavingsPanelProps {
   expanded?: boolean;
 }
 
-export const _TimeSavingsPanel = memo(function TimeSavingsPanel({
+export const TimeSavingsPanel = memo(function TimeSavingsPanel({
   stats,
   expanded = false,
 }: TimeSavingsPanelProps) {
-  const _totalAdjustments = stats.totalAIAdjustments + stats.totalManualAdjustments;
-  const _aiPercent = totalAdjustments > 0
+  const totalAdjustments = stats.totalAIAdjustments + stats.totalManualAdjustments;
+  const aiPercent = totalAdjustments > 0
     ? Math.round((stats.totalAIAdjustments / totalAdjustments) * 100)
     : 0;
 
-  const _acceptRate = (stats.acceptedSuggestions + stats.rejectedSuggestions) > 0
+  const acceptRate = (stats.acceptedSuggestions + stats.rejectedSuggestions) > 0
     ? Math.round((stats.acceptedSuggestions / (stats.acceptedSuggestions + stats.rejectedSuggestions)) * 100)
     : 0;
 
   // Headline: time saved as a percentage of session time
-  const _sessionMinutes = (Date.now() - stats.sessionStartedAt) / 60000;
-  const _speedupPercent = sessionMinutes > 0
+  const sessionMinutes = (Date.now() - stats.sessionStartedAt) / 60000;
+  const speedupPercent = sessionMinutes > 0
     ? Math.min(95, Math.round((stats.estimatedMinutesSaved / (sessionMinutes + stats.estimatedMinutesSaved)) * 100))
     : 0;
 
@@ -148,7 +148,7 @@ const COLOR_MAP = {
   slate: 'text-slate-400',
 };
 
-const _StatCard = memo(function StatCard({ label, value, subtext, color }: StatCardProps) {
+const StatCard = memo(function StatCard({ label, value, subtext, color }: StatCardProps) {
   return (
     <div className="flex flex-col gap-0.5 p-2.5 rounded-lg bg-white/3 border border-white/5">
       <span className="text-[9px] font-mono text-slate-600 uppercase tracking-wider">{label}</span>

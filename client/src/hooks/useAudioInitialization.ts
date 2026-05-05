@@ -20,7 +20,7 @@ export function useAudioInitialization(): void {
     // removed from utils/audio.ts (r3-wire-fix-master.py Fix 3b) — both
     // gated on window.Tone (CDN-only no-ops in this ESM project).
     // AudioContext deferral is now handled by the MasterEngine lazy getter.
-    const _cleanup = registerAudioInitTriggers();
+    const cleanup = registerAudioInitTriggers();
     return () => { cleanup(); };
   }, []);
 }

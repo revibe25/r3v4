@@ -31,7 +31,7 @@ const SUPPORTED_VERSIONS = ['1.0.0'];
  */
 export function serializeProject(state: ProjectState): string {
   try {
-    const _json = JSON.stringify(state, null, 2);
+    const json = JSON.stringify(state, null, 2);
     console.log(`[ProjectSerializer] Serialized project (${json.length} bytes)`);
     return json;
   } catch (error) {
@@ -44,7 +44,7 @@ export function serializeProject(state: ProjectState): string {
  * Serialize and create downloadable blob
  */
 export function serializeProjectToBlob(state: ProjectState): Blob {
-  const _json = serializeProject(state);
+  const json = serializeProject(state);
   return new Blob([json], { type: 'application/json' });
 }
 
@@ -52,12 +52,12 @@ export function serializeProjectToBlob(state: ProjectState): Blob {
  * Create a download link for project file
  */
 export function downloadProject(state: ProjectState, filename?: string): void {
-  const _blob = serializeProjectToBlob(state);
-  const _url = URL.createObjectURL(blob);
+  const blob = serializeProjectToBlob(state);
+  const url = URL.createObjectURL(blob);
   
-  const _name = filename || `${state.metadata.name}.json`;
+  const name = filename || `${state.metadata.name}.json`;
   
-  const _link = document.createElement('a');
+  const link = document.createElement('a');
   link.href = url;
   link.download = name;
   link.click();
@@ -76,7 +76,7 @@ export function downloadProject(state: ProjectState, filename?: string): void {
  */
 export function deserializeProject(json: string): ProjectState {
   try {
-    const _state = JSON.parse(json) as ProjectState;
+    const state = JSON.parse(json) as ProjectState;
     
     // Validate structure
     if (!validateProjectStructure(state)) {
@@ -89,7 +89,7 @@ export function deserializeProject(json: string): ProjectState {
     }
     
     // Migrate if needed
-    const _migratedState = migrateProject(state);
+    const migratedState = migrateProject(state);
     
     console.log('[ProjectSerializer] Deserialized project:', {
       name: migratedState.metadata.name,
@@ -109,12 +109,12 @@ export function deserializeProject(json: string): ProjectState {
  */
 export function loadProjectFromFile(file: File): Promise<ProjectState> {
   return new Promise((resolve, reject) => {
-    const _reader = new FileReader();
+    const reader = new FileReader();
     
     reader.onload = (event) => {
       try {
-        const _json = event.target?.result as string;
-        const _state = deserializeProject(json);
+        const json = event.target?.result as string;
+        const state = deserializeProject(json);
         resolve(state);
       } catch (error) {
         reject(error);
@@ -143,7 +143,7 @@ function validateProjectStructure(state: any): boolean {
   }
   
   // Required top-level fields
-  const _requiredFields = [
+  const requiredFields = [
     'version',
     'timestamp',
     'metadata',
@@ -191,7 +191,7 @@ function validateMetadata(metadata: any): boolean {
     return false;
   }
   
-  const _requiredFields = ['name', 'created', 'modified'];
+  const requiredFields = ['name', 'created', 'modified'];
   
   for (const field of requiredFields) {
     if (!(field in metadata)) {
@@ -270,8 +270,8 @@ export function getProjectSummary(state: ProjectState): {
   sidechainCount: number;
   sizeEstimate: string;
 } {
-  const _json = JSON.stringify(state);
-  const _sizeKB = new Blob([json]).size / 1024;
+  const json = JSON.stringify(state);
+  const sizeKB = new Blob([json]).size / 1024;
   
   return {
     name: state.metadata.name,

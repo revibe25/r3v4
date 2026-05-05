@@ -23,24 +23,24 @@ export function Knob({
 }: KnobProps) {
   const [dragging, setDragging] = useState(false);
   const startY   = useRef(0);
-  const _startVal = useRef(0);
+  const startVal = useRef(0);
 
   const pct  = (value - min) / (max - min);
   const cx   = size / 2;
   const cy   = size / 2;
-  const _arcR = size / 2 - 9;
+  const arcR = size / 2 - 9;
 
-  const _trackArc = useMemo(
+  const trackArc = useMemo(
     () => describeArc(cx, cy, arcR, KNOB_START, KNOB_START + KNOB_ARC),
     [cx, cy, arcR],
   );
 
-  const _valueArc = useMemo(() => {
+  const valueArc = useMemo(() => {
     if (pct < 0.005) return '';
     return describeArc(cx, cy, arcR, KNOB_START, KNOB_START + pct * KNOB_ARC);
   }, [cx, cy, arcR, pct]);
 
-  const _indAngle = KNOB_START + pct * KNOB_ARC;
+  const indAngle = KNOB_START + pct * KNOB_ARC;
   const indRad   = (indAngle * Math.PI) / 180;
   const ir       = size / 2 - 18;
   const indX     = cx + ir * Math.cos(indRad);
@@ -49,7 +49,7 @@ export function Knob({
   const indX2    = cx + ir2 * Math.cos(indRad);
   const indY2    = cy + ir2 * Math.sin(indRad);
 
-  const _onPointerDown = useCallback((e: React.PointerEvent) => {
+  const onPointerDown = useCallback((e: React.PointerEvent) => {
     setDragging(true);
     startY.current   = e.clientY;
     startVal.current = value;
@@ -57,7 +57,7 @@ export function Knob({
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }, [value]);
 
-  const _onPointerMove = useCallback((e: PointerEvent) => {
+  const onPointerMove = useCallback((e: PointerEvent) => {
     if (!dragging) return;
     const delta  = startY.current - e.clientY;
     const range  = max - min;
@@ -67,7 +67,7 @@ export function Knob({
     onChange(newVal);
   }, [dragging, max, min, onChange, step]);
 
-  const _onPointerUp = useCallback(() => setDragging(false), []);
+  const onPointerUp = useCallback(() => setDragging(false), []);
 
   useEffect(() => {
     if (dragging) {
@@ -94,12 +94,12 @@ export function Knob({
             const a     = ((KNOB_START + frac * KNOB_ARC) * Math.PI) / 180;
             const r1    = size / 2 - 3;
             const r2    = size / 2 - 8;
-            const _major = i === 0 || i === 10 || i === 5;
+            const major = i === 0 || i === 10 || i === 5;
             return (
               <line key={i}
                 x1={cx + r1 * Math.cos(a)} y1={cy + r1 * Math.sin(a)}
                 x2={cx + r2 * Math.cos(a)} y2={cy + r2 * Math.sin(a)}
-                stroke={major ? '#333' : '#222'}
+                stroke={major ? 'var(--dj-dimmer)' : 'var(--dj-border)'}
                 strokeWidth={major ? 1.5 : 1} strokeLinecap="square"
               />
             );

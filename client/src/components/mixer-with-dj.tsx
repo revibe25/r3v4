@@ -34,20 +34,20 @@ export default function MixerWithDJ() {
   const [pitchSemitones, setPitchSemitones] = useState(0);
   const [crossfade, setCrossfade] = useState(0);
 
-  const _updateChannel = useCallback((id: number, updates: Partial<ChannelState>) => {
+  const updateChannel = useCallback((id: number, updates: Partial<ChannelState>) => {
     setChannels((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   }, []);
 
-  const _duplicateChannel = (id: number) => {
+  const duplicateChannel = (id: number) => {
     setChannels((prev) => {
-      const _base = prev.find((c) => c.id === id);
+      const base = prev.find((c) => c.id === id);
       if (!base) return prev;
-      const _newId = Math.max(...prev.map((p) => p.id)) + 1;
+      const newId = Math.max(...prev.map((p) => p.id)) + 1;
       return [...prev, { ...base, id: newId, name: `${base.name} Copy` }];
     });
   };
 
-  const _deleteChannel = (id: number) => setChannels((prev) => prev.filter((c) => c.id !== id));
+  const deleteChannel = (id: number) => setChannels((prev) => prev.filter((c) => c.id !== id));
 
   useEffect(() => {
     setChannels((prev) => prev.map((c) => ({ ...c, reverb: Math.round(filterVal * 50) })));

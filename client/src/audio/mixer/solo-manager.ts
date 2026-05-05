@@ -76,7 +76,7 @@ export class SoloManager {
 
     if (this.entries.has(channel.id)) {
       // Re-registering — update group without resetting pre-solo state
-      const _entry = this.entries.get(channel.id)!;
+      const entry = this.entries.get(channel.id)!;
       entry.groupId = groupId;
       return;
     }
@@ -100,7 +100,7 @@ export class SoloManager {
    * Unregister a channel. Restores its mute state before removing it.
    */
   unregister(id: string): void {
-    const _entry = this.entries.get(id);
+    const entry = this.entries.get(id);
     if (!entry) return;
 
     // Restore pre-solo mute before removing
@@ -141,7 +141,7 @@ export class SoloManager {
   solo(id: string): void {
     this.assertNotDisposed();
 
-    const _entry = this.entries.get(id);
+    const entry = this.entries.get(id);
     if (!entry) {
       console.warn(`[SoloManager] solo: channel "${id}" not registered`);
       return;
@@ -165,7 +165,7 @@ export class SoloManager {
   unsolo(id: string): void {
     this.assertNotDisposed();
 
-    const _entry = this.entries.get(id);
+    const entry = this.entries.get(id);
     if (!entry) return;
 
     entry.isSoloed = false;
@@ -177,7 +177,7 @@ export class SoloManager {
    * Toggle the solo state of a channel by id.
    */
   toggleSolo(id: string): void {
-    const _entry = this.entries.get(id);
+    const entry = this.entries.get(id);
     if (!entry) return;
 
     if (entry.isSoloed) {
@@ -254,7 +254,7 @@ export class SoloManager {
   recalculate(): void {
     if (this._disposed) return;
 
-    const _soloedEntries = [...this.entries.values()].filter((e) => e.isSoloed);
+    const soloedEntries = [...this.entries.values()].filter((e) => e.isSoloed);
 
     if (soloedEntries.length === 0) {
       this.restorePreSoloStates();
@@ -269,23 +269,23 @@ export class SoloManager {
       }
     }
 
-    const _soloedIds = new Set(soloedEntries.map((e) => e.channel.id));
+    const soloedIds = new Set(soloedEntries.map((e) => e.channel.id));
 
     // Also unmute channels in the same group as any soloed channel
-    const _soloedGroups = new Set(
+    const soloedGroups = new Set(
       soloedEntries
         .map((e) => e.groupId)
         .filter((g): g is string => g !== undefined),
     );
 
     for (const [id, entry] of this.entries) {
-      const _shouldHear =
+      const shouldHear =
         soloedIds.has(id) ||
         (entry.groupId !== undefined && soloedGroups.has(entry.groupId));
 
       // Mute channels that shouldn't be heard; preserve independent mutes on
       // soloed channels
-      const _newMute = !shouldHear || (entry.channel.isMuted() && !soloedIds.has(id));
+      const newMute = !shouldHear || (entry.channel.isMuted() && !soloedIds.has(id));
       entry.channel.setMute(newMute);
     }
 
@@ -303,7 +303,7 @@ export class SoloManager {
    * so a later clearAllSolos() restores the correct state.
    */
   recordMuteState(id: string): void {
-    const _entry = this.entries.get(id);
+    const entry = this.entries.get(id);
     if (entry && !this.hasSoloed()) {
       entry.preSoloMute = entry.channel.isMuted();
     }
@@ -406,7 +406,7 @@ export class SoloManager {
 
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
-let _soloManager: SoloManager | null = null;
+let soloManager: SoloManager | null = null;
 
 /**
  * Shared SoloManager singleton. Re-creates itself if disposed.

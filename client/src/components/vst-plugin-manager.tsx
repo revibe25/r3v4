@@ -46,7 +46,7 @@ export function VSTPluginManager({
     manufacturer: '',
   });
 
-  const _handleAddPlugin = () => {
+  const handleAddPlugin = () => {
     if (!newPlugin.name || !newPlugin.path) {
       return;
     }
@@ -65,7 +65,7 @@ export function VSTPluginManager({
     setShowAddForm(false);
   };
 
-  const _handleScanPlugins = async () => {
+  const handleScanPlugins = async () => {
     // Placeholder for VST scanning functionality
     console.log('Scanning for VST plugins...');
     // In a real implementation, this would call a backend API or Electron IPC
@@ -77,7 +77,7 @@ export function VSTPluginManager({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">VST Plugin Manager</h3>
-          <p className="text-sm text-[#888]">
+          <p className="text-sm text-[var(--text-dim)]">
             Manage your installed VST plugins
           </p>
         </div>
@@ -174,7 +174,7 @@ export function VSTPluginManager({
       <div className="space-y-2">
         {plugins.length === 0 ? (
           <Card>
-            <CardContent className="py-8 text-center text-[#888]">
+            <CardContent className="py-8 text-center text-[var(--text-dim)]">
               <p>No plugins installed</p>
               <p className="text-sm mt-1">
                 Click "Scan for Plugins" or "Add Plugin" to get started
@@ -198,19 +198,19 @@ export function VSTPluginManager({
                         className={`h-4 w-4 ${
                           plugin.enabled
                             ? 'text-accent'
-                            : 'text-[#888]'
+                            : 'text-[var(--text-dim)]'
                         }`}
                       />
                     </div>
                     <div className="flex-1">
                       <div className="font-medium">{plugin.name}</div>
-                      <div className="text-sm text-[#888]">
+                      <div className="text-sm text-[var(--text-dim)]">
                         {plugin.manufacturer && (
                           <span>{plugin.manufacturer} • </span>
                         )}
                         <span className="uppercase">{plugin.type}</span>
                       </div>
-                      <div className="text-xs text-[#888] mt-1">
+                      <div className="text-xs text-[var(--text-dim)] mt-1">
                         {plugin.path}
                       </div>
                     </div>

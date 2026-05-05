@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--accent-purple) (violet)
+// Reason: AI clip suggestion indicator — LLPTE inference result on clip
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 import React from 'react';
 import { FileAudio, Music } from 'lucide-react';
 
@@ -28,19 +33,19 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   onStartResize,
   onClick
 }) => {
-  const _width = clip.duration * pixelsPerSecond;
-  const _left = clip.startTime * pixelsPerSecond;
+  const width = clip.duration * pixelsPerSecond;
+  const left = clip.startTime * pixelsPerSecond;
   
-  const _defaultColor = clip.type === 'midi' ? '#6366f1' : '#8b5cf6';
-  const _selectedColor = clip.type === 'midi' ? '#3b82f6' : '#a78bfa';
+  const defaultColor = clip.type === 'midi' ? 'var(--track-indigo)' : 'var(--accent-purple)';
+  const selectedColor = clip.type === 'midi' ? 'var(--looper-blue)' : 'var(--accent-violet-soft)';
 
-  const _handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onClick) onClick(clip.id);
     onStartDrag(clip.id, e.clientX);
   };
 
-  const _handleResizeMouseDown = (e: React.MouseEvent) => {
+  const handleResizeMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (onStartResize) {
       onStartResize(clip.id, e.clientX);
@@ -54,7 +59,7 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
         left: `${left}px`,
         width: `${width}px`,
         backgroundColor: clip.color || (isSelected ? selectedColor : defaultColor),
-        border: isSelected ? '2px solid #60a5fa' : '2px solid rgba(255,255,255,0.2)',
+        border: isSelected ? '2px solid var(--accent-blue)' : '2px solid rgba(255,255,255,0.2)',
         boxShadow: isSelected ? '0 0 0 1px rgba(96, 165, 250, 0.5)' : 'none'
       }}
       onMouseDown={handleMouseDown}

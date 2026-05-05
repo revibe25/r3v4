@@ -38,7 +38,7 @@ export function useSidechain(): SidechainState {
   useEffect(() => {
     const e   = getLoopEngine();
     const on  = e.on("sidechainEnabled",  () => setEnabled(true));
-    const _off = e.on("sidechainDisabled", () => setEnabled(false));
+    const off = e.on("sidechainDisabled", () => setEnabled(false));
     return () => { on(); off(); };
   }, []);
 
@@ -46,33 +46,33 @@ export function useSidechain(): SidechainState {
     return () => { if (getLoopEngine().initialized) getLoopEngine().disableSidechain(); };
   }, []);
 
-  const _enable = useCallback((cfg: SidechainConfig) => {
-    const _c = { ...cfg,
+  const enable = useCallback((cfg: SidechainConfig) => {
+    const c = { ...cfg,
       amount:  Math.max(0, Math.min(1, cfg.amount)),
       attack:  Math.max(0.0001, Math.min(1, cfg.attack)),
       release: Math.max(0.001,  Math.min(2, cfg.release)),
     };
     cfgRef.current = c;
     setConfig(c);
-    const _engine = getLoopEngine();
+    const engine = getLoopEngine();
     if (engine.initialized) {
       engine.enableSidechain(c.sourceTrackIndex, c.amount, c.attack, c.release);
       setEnabled(true);
     } else {
-      const _off = engine.on("ready", () => {
+      const off = engine.on("ready", () => {
         engine.enableSidechain(c.sourceTrackIndex, c.amount, c.attack, c.release);
         off();
       });
     }
   }, []);
 
-  const _disable = useCallback(() => {
+  const disable = useCallback(() => {
     getLoopEngine().disableSidechain();
     setEnabled(false);
   }, []);
 
-  const _update = useCallback((partial: Partial<SidechainConfig>) => {
-    const _next = { ...cfgRef.current, ...partial };
+  const update = useCallback((partial: Partial<SidechainConfig>) => {
+    const next = { ...cfgRef.current, ...partial };
     cfgRef.current = next;
     setConfig(next);
     if (enabled && getLoopEngine().initialized) {
@@ -80,7 +80,7 @@ export function useSidechain(): SidechainState {
     }
   }, [enabled]);
 
-  const _setAmount = useCallback((amount: number) => {
+  const setAmount = useCallback((amount: number) => {
     update({ amount: Math.max(0, Math.min(1, amount)) });
   }, [update]);
 

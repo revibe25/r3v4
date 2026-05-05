@@ -6,7 +6,7 @@ export function useAIMix() {
       stems: string[];
       style: string;
     }) => {
-      const _res = await fetch("/api/ai/mix", {
+      const res = await fetch("/api/ai/mix", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

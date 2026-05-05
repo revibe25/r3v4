@@ -11,13 +11,13 @@ interface Props {
   onClose:   () => void;
 }
 
-const _AG = {
+const AG = {
   panel:  '#0d0d0d',
   border: '#1c1c1c',
   acid:   '#a3e635',
-  soft:   '#888',
-  dim:    '#3a3a3a',
-  white:  '#f0f0f0',
+  soft:   'var(--text-dim)',
+  dim:    'var(--neutral-700)',
+  white:  'var(--daw-fg)',
 };
 
 export function VSTPanelModal({ trackId, trackName, onClose }: Props) {

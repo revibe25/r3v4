@@ -22,7 +22,7 @@ export class AudioEngine {
   async loadAudioFile(file: File): Promise<AudioBuffer | null> {
     if (!this.ctx) return null;
     try {
-      const _ab = await file.arrayBuffer();
+      const ab = await file.arrayBuffer();
       return await this.ctx.decodeAudioData(ab);
     } catch (err) {
       console.error('[AudioEngine] loadAudioFile failed:', err);
@@ -32,11 +32,11 @@ export class AudioEngine {
 
   generateWaveformData(buffer: AudioBuffer, samples = 200): number[] {
     const ch   = buffer.getChannelData(0);
-    const _step = Math.max(1, Math.floor(ch.length / samples));
+    const step = Math.max(1, Math.floor(ch.length / samples));
     const out: number[] = [];
-    for (let _i = 0; i < samples; i++) {
-      let _peak = 0;
-      for (let _j = 0; j < step; j++) {
+    for (let i = 0; i < samples; i++) {
+      let peak = 0;
+      for (let j = 0; j < step; j++) {
         peak = Math.max(peak, Math.abs(ch[i * step + j] ?? 0));
       }
       out.push(peak);

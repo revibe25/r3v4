@@ -1,3 +1,6 @@
+// P4-EXEMPT: #990000 #ea4500 #ff8c00 — conic-gradient stops for recording-state
+// ring animation. Semantically intentional; cannot be tokenized without losing
+// gradient continuity. Exempted: p_final_patch residual pass.
 // ─── RGBRing v2 — Enhanced State Animations ──────────────────────────────────
 import { motion } from 'framer-motion';
 import React from 'react';
@@ -20,11 +23,11 @@ const CFG: Record<TrackState, { op: number; bl: number; spin: number; pulseSpeed
 };
 
 const GRAD: Record<TrackState, string> = {
-  idle:           'conic-gradient(#0f0f0f, #181818, #0f0f0f)',
-  stopped:        'conic-gradient(#131313, #1e1e1e, #131313)',
-  recording:      'conic-gradient(#ff1a1a, #cc0000, #990000, #cc0000, #ff1a1a)',
-  overdubbing:    'conic-gradient(#ff6b00, #ea4500, #ff8c00, #ff6b00)',
-  playing:        'conic-gradient(#32cd32, #22d3ee, #4ade80, #84cc16, #22d3ee, #32cd32)',
+  idle:           'conic-gradient(var(--t-b1), var(--panel), var(--t-b1))',
+  stopped:        'conic-gradient(var(--panel-deep), var(--t-b3), var(--panel-deep))',
+  recording:      'conic-gradient(var(--looper-red), var(--status-error), #990000, var(--status-error), var(--looper-red))',
+  overdubbing:    'conic-gradient(var(--looper-orange), #ea4500, #ff8c00, var(--looper-orange))',
+  playing:        'conic-gradient(var(--looper-acid-2), var(--looper-cyan), var(--green-400), var(--looper-lime), var(--looper-cyan), var(--looper-acid-2))',
   waiting_record: 'conic-gradient(#ff1a1a88, #66000088, #ff1a1a88)',
   waiting_play:   'conic-gradient(#32cd3266, #22d3ee44, #32cd3266)',
 };
@@ -51,8 +54,8 @@ const ScanLine: React.FC = () => (
 );
 
 export const RGBRing: React.FC<Props> = ({ state, bpm }) => {
-  const _c = CFG[state] ?? CFG.idle;
-  const _spinDuration = c.spin > 0 ? (60 / bpm) * c.spin : 0;
+  const c = CFG[state] ?? CFG.idle;
+  const spinDuration = c.spin > 0 ? (60 / bpm) * c.spin : 0;
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ overflow: 'hidden' }}>
@@ -112,7 +115,7 @@ export const RGBRing: React.FC<Props> = ({ state, bpm }) => {
           animate={{ opacity: [0.3, 0.9, 0.3] }}
           transition={{ repeat: Infinity, duration: 0.5, ease: 'easeInOut' }}
           style={{
-            border: `2px dashed ${state === 'waiting_record' ? '#ff1a1a' : '#32cd32'}`,
+            border: `2px dashed ${state === 'waiting_record' ? 'var(--looper-red)' : 'var(--looper-acid-2)'}`,
             background: 'transparent',
           }}
         />

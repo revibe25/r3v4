@@ -15,7 +15,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-let _ctx: AudioContext | null = null;
+let ctx: AudioContext | null = null;
 let _initializing: Promise<AudioContext> | null = null;
 const _listeners: Array<(ctx: AudioContext) => void> = [];
 
@@ -26,26 +26,26 @@ const _listeners: Array<(ctx: AudioContext) => void> = [];
  * Synchronous — safe after the context is known to be running.
  */
 export function getAudioContext(): AudioContext {
-  if (_ctx) return _ctx;
+  if (ctx) return ctx;
 
-  _ctx = new AudioContext({
+  ctx = new AudioContext({
     latencyHint: "interactive",
     sampleRate: 44100,
   });
 
   // Notify any onAudioContext subscribers
   _listeners.forEach((cb) => {
-    try { cb(_ctx!); } catch {}
+    try { cb(ctx!); } catch {}
   });
 
-  return _ctx;
+  return ctx;
 }
 
 /**
  * Legacy alias — identical to getAudioContext().
  * Kept for files that imported `getAudioContextSync` from the old module.
  */
-export const _getAudioContextSync = getAudioContext;
+export const getAudioContextSync = getAudioContext;
 
 // ── Resume ────────────────────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ export const _getAudioContextSync = getAudioContext;
  * Race-safe: concurrent callers share one Promise.
  */
 export async function ensureAudioRunning(): Promise<AudioContext> {
-  const _ctx = getAudioContext();
+  const ctx = getAudioContext();
 
   if (ctx.state === "running") return ctx;
 
@@ -72,7 +72,7 @@ export async function ensureAudioRunning(): Promise<AudioContext> {
  * Legacy alias — identical to ensureAudioRunning().
  * Kept for files that imported `resumeAudioContext` from the old module.
  */
-export const _resumeAudioContext = ensureAudioRunning;
+export const resumeAudioContext = ensureAudioRunning;
 
 // ── Subscription ──────────────────────────────────────────────────────────────
 
@@ -86,15 +86,15 @@ export const _resumeAudioContext = ensureAudioRunning;
 export function onAudioContext(
   callback: (ctx: AudioContext) => void
 ): () => void {
-  if (_ctx) {
-    try { callback(_ctx); } catch {}
+  if (ctx) {
+    try { callback(ctx); } catch {}
     // Return no-op unsubscribe — already fired
     return () => {};
   }
 
   _listeners.push(callback);
   return () => {
-    const _idx = _listeners.indexOf(callback);
+    const idx = _listeners.indexOf(callback);
     if (idx !== -1) _listeners.splice(idx, 1);
   };
 }
@@ -105,8 +105,8 @@ export function onAudioContext(
  * Suspends the shared context (e.g. app backgrounded).
  */
 export async function suspendAudio(): Promise<void> {
-  if (_ctx && _ctx.state === "running") {
-    await _ctx.suspend();
+  if (ctx && ctx.state === "running") {
+    await ctx.suspend();
   }
 }
 
@@ -115,9 +115,9 @@ export async function suspendAudio(): Promise<void> {
  * Only call on full app teardown — NOT between sessions.
  */
 export async function closeAudio(): Promise<void> {
-  if (_ctx) {
-    await _ctx.close();
-    _ctx = null;
+  if (ctx) {
+    await ctx.close();
+    ctx = null;
     _initializing = null;
     _listeners.length = 0;
   }
@@ -127,4 +127,4 @@ export async function closeAudio(): Promise<void> {
  * Legacy alias — identical to closeAudio().
  * Kept for files that imported `closeAudioContext` from the old module.
  */
-export const _closeAudioContext = closeAudio;
+export const closeAudioContext = closeAudio;

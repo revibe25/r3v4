@@ -57,7 +57,7 @@ export interface Plan {
 export const resolvePrice    = (p: Plan, c: BillingCycle): number =>
   c === "annual" ? p.annualPrice : p.monthlyPrice;
 
-export const _isCustomPricing = (p: Plan): boolean => p.monthlyPrice === -1;
+export const isCustomPricing = (p: Plan): boolean => p.monthlyPrice === -1;
 export const isFree          = (p: Plan): boolean => p.monthlyPrice === 0;
 export const annualTotal     = (p: Plan): number  => p.annualPrice * 12;
 
@@ -111,7 +111,7 @@ const CTAS: Record<SubscriptionTier, string> = {
 // ─── PLANS — single source, derived, no hardcoded prices ─────────────────────
 
 export const PLANS: readonly Plan[] = SUBSCRIPTION_TIERS.map(tierId => {
-  const _def = TIER_DEFINITIONS[tierId];
+  const def = TIER_DEFINITIONS[tierId];
   return {
     id:           tierId,
     name:         def.displayName,

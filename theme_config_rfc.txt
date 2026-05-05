@@ -1,0 +1,10 @@
+# Add these to the preflight grep -iv allowlist if intentional:
+  -e "#b87333"
+  -e "#cd7f32"
+  -e "#d4af37"
+# Badge gradient stops — semantically coupled, cannot be tokenized:
+  -e "#ffd700" -e "#806000" -e "#fde68a"
+  -e "#e8eaed" -e "#6c757d" -e "#5d6875" -e "#2d3339"
+  -e "#f4c2a0" -e "#5f3317" -e "#d4af87" -e "#6b3410"
+  -e "#064e3b" -e "#022c22"
+  -e "#fb7185" -e "#7c2d12"

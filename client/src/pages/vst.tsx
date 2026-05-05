@@ -20,17 +20,17 @@ import { VSTBrowser } from '@/components/vst-browser';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 
 // ── Canonical palette — SKILLS.md §7 ────────────────────────────────────────
-const _T = {
+const T = {
   bg:        '#0a0a0a',
   surface:   '#0d0d0d',
   border:    '#1c1c1c',
   text:      '#e5e5e5',
   dim:       '#555',
-  soft:      '#888',
+  soft:      'var(--text-dim)',
   accent:    '#a3e635',
-  cyan:      '#00F5FF',   // PRD §3 — active state color
-  violet:    '#8B5CF6',   // PRD §3 — AI color
-  amber:     '#f59e0b',   // PRD §3 — warning
+  cyan:      'var(--accent-cyan)',   // PRD §3 — active state color
+  violet:    'var(--accent-purple)',   // PRD §3 — AI color
+  amber:     'var(--status-warn)',   // PRD §3 — warning
   font:      '"IBM Plex Mono", "JetBrains Mono", monospace',
 } as const;
 
@@ -93,7 +93,7 @@ const FX_NODES: FxNodeEntry[] = [
 
 const STATUS_COLOR: Record<FxNodeEntry['status'], string> = {
   active:  T.accent,
-  idle:    '#444',
+  idle:    'var(--dj-dim)',
   pending: T.amber,
 };
 
@@ -216,7 +216,7 @@ function LLPTECallout() {
 export default function VSTPage() {
   const [selectedPlugin, setSelectedPlugin] = useState<VSTPluginInfo | null>(null);
 
-  const _handlePluginSelect = (plugin: VSTPluginInfo): void => {
+  const handlePluginSelect = (plugin: VSTPluginInfo): void => {
     setSelectedPlugin(plugin);
   };
 

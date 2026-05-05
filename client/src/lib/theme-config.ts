@@ -1,17 +1,14 @@
 // client/src/lib/theme-config.ts
 
 export type Theme =
-  | 'light'
   | 'dark'
+  | 'light'
+  | 'acid'
+  | 'neon'
   | 'chrome'
-  | 'steel'
   | 'forest'
   | 'sunset'
-  | 'midnight'
-  | 'aurora'
-  | 'bronze'
-  | 'copper'
-  | 'gold';
+  | 'aurora';
 
 export type ThemeCategory = 'light' | 'dark';
 
@@ -35,45 +32,60 @@ export interface ThemeMetadata {
   accent: string;
   gradient: Gradient;
   audio: AudioProfile;
+  description: string;
 }
 
 export const STORAGE_KEY = 'r3vibe-theme';
 
 export const THEMES: Record<Theme, ThemeMetadata> = {
-  light: {
-    label: 'Light',
-    isDark: false,
-    category: 'light',
-    accent: '#f59e0b',
-    gradient: { from: '#fde68a', to: '#ffffff' },
-    audio: { bass: 0.1, mid: 0.1, treble: 0.1, pulseIntensity: 0.05 },
-  },
   dark: {
     label: 'Dark',
+    description: 'Classic dark theme',
     isDark: true,
     category: 'dark',
-    accent: '#3b82f6',
-    gradient: { from: '#020617', to: '#020617' },
+    accent: '#a3e635',
+    gradient: { from: '#0d0d0d', to: '#0a0a0a' },
     audio: { bass: 0.2, mid: 0.15, treble: 0.1, pulseIntensity: 0.1 },
+  },
+  light: {
+    label: 'Light',
+    description: 'Clean light theme',
+    isDark: false,
+    category: 'light',
+    accent: '#5b21b6',
+    gradient: { from: '#fafafa', to: '#f0f0f0' },
+    audio: { bass: 0.1, mid: 0.1, treble: 0.1, pulseIntensity: 0.05 },
+  },
+  acid: {
+    label: 'Acid',
+    description: 'Acid lime — DAW core palette',
+    isDark: true,
+    category: 'dark',
+    accent: '#a3e635',
+    gradient: { from: '#0a0a0a', to: '#0d0d0d' },
+    audio: { bass: 0.3, mid: 0.2, treble: 0.15, pulseIntensity: 0.2 },
+  },
+  neon: {
+    label: 'Neon',
+    description: 'Cyan neon — high contrast',
+    isDark: true,
+    category: 'dark',
+    accent: '#00F5FF',
+    gradient: { from: '#050505', via: '#001a1a', to: '#000d0d' },
+    audio: { bass: 0.25, mid: 0.45, treble: 0.6, pulseIntensity: 0.35 },
   },
   chrome: {
     label: 'Chrome',
+    description: 'Polished chrome finish',
     isDark: true,
     category: 'dark',
-    accent: '#c5c9cc',
-    gradient: { from: '#e8eaed', via: '#c5c9cc', to: '#6c757d' },
+    accent: '#e8eaed',
+    gradient: { from: '#e8eaed', via: '#9aa0a6', to: '#6c757d' },
     audio: { bass: 0.2, mid: 0.4, treble: 0.6, pulseIntensity: 0.2 },
-  },
-  steel: {
-    label: 'Steel',
-    isDark: true,
-    category: 'dark',
-    accent: '#8b95a1',
-    gradient: { from: '#5d6875', via: '#8b95a1', to: '#2d3339' },
-    audio: { bass: 0.35, mid: 0.3, treble: 0.25, pulseIntensity: 0.15 },
   },
   forest: {
     label: 'Forest',
+    description: 'Natural forest green',
     isDark: true,
     category: 'dark',
     accent: '#10b981',
@@ -82,51 +94,21 @@ export const THEMES: Record<Theme, ThemeMetadata> = {
   },
   sunset: {
     label: 'Sunset',
+    description: 'Warm sunset tones',
     isDark: true,
     category: 'dark',
     accent: '#f97316',
     gradient: { from: '#fb7185', to: '#7c2d12' },
     audio: { bass: 0.45, mid: 0.35, treble: 0.25, pulseIntensity: 0.3 },
   },
-  midnight: {
-    label: 'Midnight',
-    isDark: true,
-    category: 'dark',
-    accent: '#4f46e5',
-    gradient: { from: '#020617', to: '#000000' },
-    audio: { bass: 0.6, mid: 0.25, treble: 0.1, pulseIntensity: 0.15 },
-  },
   aurora: {
     label: 'Aurora',
+    description: 'Northern lights palette',
     isDark: true,
     category: 'dark',
     accent: '#d946ef',
-    gradient: { from: '#22d3ee', via: '#a855f7', to: '#ec4899' },
+    gradient: { from: '#00F5FF', via: '#8B5CF6', to: '#ec4899' },
     audio: { bass: 0.25, mid: 0.5, treble: 0.7, pulseIntensity: 0.4 },
-  },
-  copper: {
-    label: 'Copper',
-    isDark: true,
-    category: 'dark',
-    accent: '#b87333',
-    gradient: { from: '#f4c2a0', via: '#b87333', to: '#5f3317' },
-    audio: { bass: 0.45, mid: 0.4, treble: 0.3, pulseIntensity: 0.25 },
-  },
-  gold: {
-    label: 'Gold',
-    isDark: true,
-    category: 'dark',
-    accent: '#d4af37',
-    gradient: { from: '#ffd700', via: '#d4af37', to: '#806000' },
-    audio: { bass: 0.3, mid: 0.45, treble: 0.4, pulseIntensity: 0.2 },
-  },
-  bronze: {
-    label: 'Bronze',
-    isDark: true,
-    category: 'dark',
-    accent: '#cd7f32',
-    gradient: { from: '#d4af87', via: '#cd7f32', to: '#6b3410' },
-    audio: { bass: 0.5, mid: 0.4, treble: 0.3, pulseIntensity: 0.3 },
   },
 };
 

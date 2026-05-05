@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: WebGL/Three.js scene energy color — CSS variables cannot be used in Three.Color()
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * client/src/components/daw/AudioReactiveScene.tsx
  * Three.js r128 audio-reactive visual layer for R3 v4 (Phase 2 Pro / Elite).
@@ -18,7 +23,7 @@
  * Props:
  *   fftRef   — ref from useLoopEngineFFTRef (updated every rAF, no re-render)
  *   visible  — when false the canvas is hidden (Three.js render loop paused)
- *   accent   — primary emissive color (default: amber #f59e0b)
+ *   accent   — primary emissive color (default: amber var(--status-warn))
  */
 
 import React, { useEffect, useRef, memo } from 'react';
@@ -27,7 +32,7 @@ import type { FFTFrame } from '../../hooks/useLoopEngineFFTRef';
 
 // ── Shaders ───────────────────────────────────────────────────────────────────
 
-const _VERT = /* glsl */`
+const VERT = /* glsl */`
   uniform float uTime;
   uniform float uBeat;
   uniform float uRMS;
@@ -50,7 +55,7 @@ const _VERT = /* glsl */`
   }
 `;
 
-const _FRAG = /* glsl */`
+const FRAG = /* glsl */`
   uniform float uTime;
   uniform float uRMS;
   uniform float uBeat;
@@ -112,13 +117,13 @@ interface Props {
 }
 
 function hexToVec3(hex: string): THREE.Vector3 {
-  const _c = new THREE.Color(hex);
+  const c = new THREE.Color(hex);
   return new THREE.Vector3(c.r, c.g, c.b);
 }
 
-export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }: Props) => {
-  const _mountRef = useRef<HTMLDivElement>(null);
-  const _sceneRef = useRef<{
+export const AudioReactiveScene = memo(({ fftRef, visible, accent = 'var(--status-warn)' }: Props) => {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<{
     renderer: THREE.WebGLRenderer;
     scene:    THREE.Scene;
     camera:   THREE.PerspectiveCamera;
@@ -132,23 +137,23 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
   } | null>(null);
 
   useEffect(() => {
-    const _mount = mountRef.current;
+    const mount = mountRef.current;
     if (!mount) return;
 
     // ── Renderer ────────────────────────────────────────────────────────────
-    const _renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(mount.clientWidth, mount.clientHeight);
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
     const scene  = new THREE.Scene();
-    const _camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(60, mount.clientWidth / mount.clientHeight, 0.1, 1000);
     camera.position.set(0, 8, 20);
     camera.lookAt(0, 0, 0);
 
     // ── Background plane with shader ──────────────────────────────────────
-    const _accentVec = hexToVec3(accent);
+    const accentVec = hexToVec3(accent);
     const uniforms: Record<string, THREE.IUniform> = {
       uTime:   { value: 0 },
       uRMS:    { value: 0 },
@@ -158,35 +163,35 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
 
     const planeMat  = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG, uniforms, transparent: true, side: THREE.DoubleSide });
     const planeGeo  = new THREE.PlaneGeometry(40, 20, 32, 32);
-    const _planeMesh = new THREE.Mesh(planeGeo, planeMat);
+    const planeMesh = new THREE.Mesh(planeGeo, planeMat);
     planeMesh.rotation.x = -Math.PI / 3;
     planeMesh.position.y = -2;
     scene.add(planeMesh);
 
     // ── Instanced 32×32 reactive grid ─────────────────────────────────────
-    const _GRID = 32;
-    const _COUNT = GRID * GRID;
+    const GRID = 32;
+    const COUNT = GRID * GRID;
     const cubeUni: Record<string, THREE.IUniform> = {
       uAccent: { value: accentVec },
       uBeat:   { value: 0 },
     };
-    const _cubeMat = new THREE.ShaderMaterial({
+    const cubeMat = new THREE.ShaderMaterial({
       vertexShader: CUBE_VERT, fragmentShader: CUBE_FRAG,
       uniforms: cubeUni,
     });
     // BoxGeometry — NOT CapsuleGeometry (r128 constraint)
-    const _cubeGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const _instMesh = new THREE.InstancedMesh(cubeGeo, cubeMat, COUNT);
+    const cubeGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const instMesh = new THREE.InstancedMesh(cubeGeo, cubeMat, COUNT);
     instMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
-    const _fftAttr = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
+    const fftAttr = new THREE.InstancedBufferAttribute(new Float32Array(COUNT), 1);
     fftAttr.setUsage(THREE.DynamicDrawUsage);
     (cubeGeo as THREE.BufferGeometry).setAttribute('aFFT', fftAttr);
 
-    const _dummy = new THREE.Object3D();
-    let _idx = 0;
-    for (let _x = 0; x < GRID; x++) {
-      for (let _z = 0; z < GRID; z++) {
+    const dummy = new THREE.Object3D();
+    let idx = 0;
+    for (let x = 0; x < GRID; x++) {
+      for (let z = 0; z < GRID; z++) {
         dummy.position.set((x - GRID / 2) * 0.7, 0, (z - GRID / 2) * 0.7 - 4);
         dummy.updateMatrix();
         instMesh.setMatrixAt(idx++, dummy.matrix);
@@ -197,36 +202,36 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
 
     // ── Ambient light (minimal — emissive material is self-lit) ───────────
     scene.add(new THREE.AmbientLight(0x111111, 0.5));
-    const _pointLight = new THREE.PointLight(new THREE.Color(accent), 2, 30);
+    const pointLight = new THREE.PointLight(new THREE.Color(accent), 2, 30);
     pointLight.position.set(0, 5, 0);
     scene.add(pointLight);
 
-    const _clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     // ── Manual orbit (mouse drag) — no OrbitControls in r128 ─────────────
-    let _isDragging = false;
-    let _prevX = 0;
-    let _cameraTheta = 0;
-    const _onMouseDown = (e: MouseEvent) => { isDragging = true; prevX = e.clientX; };
-    const _onMouseMove = (e: MouseEvent) => {
+    let isDragging = false;
+    let prevX = 0;
+    let cameraTheta = 0;
+    const onMouseDown = (e: MouseEvent) => { isDragging = true; prevX = e.clientX; };
+    const onMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
       cameraTheta += (e.clientX - prevX) * 0.005;
       prevX = e.clientX;
-      const _r = 22;
+      const r = 22;
       camera.position.x = Math.sin(cameraTheta) * r;
       camera.position.z = Math.cos(cameraTheta) * r;
       camera.lookAt(0, 2, 0);
     };
-    const _onMouseUp = () => { isDragging = false; };
+    const onMouseUp = () => { isDragging = false; };
     renderer.domElement.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
 
     // ── Resize handler ────────────────────────────────────────────────────
-    const _onResize = () => {
+    const onResize = () => {
       if (!mount) return;
-      const _w = mount.clientWidth;
-      const _h = mount.clientHeight;
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
@@ -234,8 +239,8 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
     window.addEventListener('resize', onResize);
 
     // ── Animation loop ────────────────────────────────────────────────────
-    let _raf = 0;
-    const _animate = () => {
+    let raf = 0;
+    const animate = () => {
       raf = requestAnimationFrame(animate);
       if (!visible) return; // skip render when hidden (save GPU)
 
@@ -251,9 +256,9 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
       cubeUni.uBeat.value   = beat;
 
       // Update instanced grid FFT heights
-      const _fftData = frame.fft;
-      for (let _i = 0; i < COUNT; i++) {
-        const _binIdx = i % 128;
+      const fftData = frame.fft;
+      for (let i = 0; i < COUNT; i++) {
+        const binIdx = i % 128;
         (fftAttr.array as Float32Array)[i] = fftData[binIdx];
       }
       fftAttr.needsUpdate = true;
@@ -284,7 +289,7 @@ export const _AudioReactiveScene = memo(({ fftRef, visible, accent = '#f59e0b' }
 
   // Sync visibility — don't destroy/recreate just to hide
   useEffect(() => {
-    const _s = sceneRef.current;
+    const s = sceneRef.current;
     if (!s) return;
     s.renderer.domElement.style.opacity = visible ? '1' : '0';
     s.renderer.domElement.style.pointerEvents = visible ? 'auto' : 'none';

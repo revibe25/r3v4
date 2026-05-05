@@ -81,15 +81,15 @@ export class PerformanceMonitor {
   private measureLoop = (): void => {
     if (!this.isRunning) return;
 
-    const _now = performance.now();
+    const now = performance.now();
     this.frameStartTime = now;
 
     // Calculate FPS
-    const _deltaTime = now - this.lastFrameTime;
+    const deltaTime = now - this.lastFrameTime;
     this.lastFrameTime = now;
 
     if (deltaTime > 0) {
-      const _instantFps = 1000 / deltaTime;
+      const instantFps = 1000 / deltaTime;
       this.fpsHistory.push(instantFps);
 
       // Keep only last 60 frames
@@ -136,10 +136,10 @@ export class PerformanceMonitor {
    * Measure a component's execution time
    */
   measureComponent<T>(name: string, fn: () => T): T {
-    const _startTime = performance.now();
-    const _result = fn();
-    const _endTime = performance.now();
-    const _duration = endTime - startTime;
+    const startTime = performance.now();
+    const result = fn();
+    const endTime = performance.now();
+    const duration = endTime - startTime;
 
     this.recordComponentMetric(name, duration);
 
@@ -150,10 +150,10 @@ export class PerformanceMonitor {
    * Measure async component's execution time
    */
   async measureComponentAsync<T>(name: string, fn: () => Promise<T>): Promise<T> {
-    const _startTime = performance.now();
-    const _result = await fn();
-    const _endTime = performance.now();
-    const _duration = endTime - startTime;
+    const startTime = performance.now();
+    const result = await fn();
+    const endTime = performance.now();
+    const duration = endTime - startTime;
 
     this.recordComponentMetric(name, duration);
 
@@ -164,7 +164,7 @@ export class PerformanceMonitor {
    * Record component metric
    */
   private recordComponentMetric(name: string, duration: number): void {
-    let _metric = this.componentMetrics.get(name);
+    let metric = this.componentMetrics.get(name);
 
     if (!metric) {
       metric = {
@@ -189,11 +189,11 @@ export class PerformanceMonitor {
    * Estimate CPU usage (approximation)
    */
   private estimateCPUUsage(): number {
-    const _frameTime = this.getAverageFrameTime();
-    const _targetFrameTime = 1000 / 60; // 60fps target
+    const frameTime = this.getAverageFrameTime();
+    const targetFrameTime = 1000 / 60; // 60fps target
 
     // Rough estimate: if we're taking 16ms per frame, we're using 100% CPU
-    const _cpuUsage = Math.min(100, (frameTime / targetFrameTime) * 100);
+    const cpuUsage = Math.min(100, (frameTime / targetFrameTime) * 100);
 
     return cpuUsage;
   }
@@ -203,7 +203,7 @@ export class PerformanceMonitor {
    */
   private getMemoryUsage(): number {
     if ('memory' in performance) {
-      const _memory = (performance as any).memory;
+      const memory = (performance as any).memory;
       return (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100;
     }
     return 0;
@@ -215,7 +215,7 @@ export class PerformanceMonitor {
   private getAverageFrameTime(): number {
     if (this.fpsHistory.length === 0) return 0;
 
-    const _avgFps = this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
+    const avgFps = this.fpsHistory.reduce((a, b) => a + b, 0) / this.fpsHistory.length;
     return 1000 / avgFps;
   }
 
@@ -257,7 +257,7 @@ export class PerformanceMonitor {
       return [...this.snapshots];
     }
 
-    const _cutoff = performance.now() - duration * 1000;
+    const cutoff = performance.now() - duration * 1000;
     return this.snapshots.filter(s => s.timestamp >= cutoff);
   }
 
@@ -275,10 +275,10 @@ export class PerformanceMonitor {
    * Get performance report
    */
   getReport(): string {
-    const _metrics = this.getMetrics();
-    const _bottlenecks = this.getBottlenecks(5);
+    const metrics = this.getMetrics();
+    const bottlenecks = this.getBottlenecks(5);
 
-    let _report = '=== PERFORMANCE REPORT ===\n\n';
+    let report = '=== PERFORMANCE REPORT ===\n\n';
     report += `FPS: ${metrics.fps.toFixed(1)}\n`;
     report += `Frame Time: ${metrics.frameTime.toFixed(2)}ms\n`;
     report += `CPU Usage: ${metrics.cpuUsage.toFixed(1)}%\n`;
@@ -313,7 +313,7 @@ export class PerformanceMonitor {
    * Check if performance is degraded
    */
   isPerformanceDegraded(): boolean {
-    const _metrics = this.getMetrics();
+    const metrics = this.getMetrics();
     return metrics.fps < 30 || metrics.cpuUsage > 80;
   }
 
@@ -321,9 +321,9 @@ export class PerformanceMonitor {
    * Get performance grade (A-F)
    */
   getPerformanceGrade(): string {
-    const _metrics = this.getMetrics();
-    const _fps = metrics.fps;
-    const _cpu = metrics.cpuUsage;
+    const metrics = this.getMetrics();
+    const fps = metrics.fps;
+    const cpu = metrics.cpuUsage;
 
     if (fps >= 58 && cpu < 30) return 'A';
     if (fps >= 50 && cpu < 50) return 'B';
@@ -352,7 +352,7 @@ export function resetPerformanceMonitor(): void {
 
 // React hook for performance monitoring
 export function usePerformanceMonitor() {
-  const _monitor = getPerformanceMonitor();
+  const monitor = getPerformanceMonitor();
 
   return {
     start: () => monitor.start(),

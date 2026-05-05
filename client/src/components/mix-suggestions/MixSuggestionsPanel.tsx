@@ -29,20 +29,20 @@
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 
 // ── Canonical palette — SKILLS.md §7 ─────────────────────────────────────────
-const _P = {
+const P = {
   bg:        '#0a0a0a',
   surface:   '#0d0d0d',
-  void:      '#060606',
+  void:      'var(--void)',
   border:    '#1c1c1c',
   border2:   '#2a2a2a',
   text:      '#e5e5e5',
   dim:       '#555',
-  soft:      '#888',
+  soft:      'var(--text-dim)',
   accent:    '#a3e635',   // acid green — primary
   accentDim: 'rgba(163,230,53,0.10)',
-  cyan:      '#00F5FF',   // PRD §3 — active state
-  violet:    '#8B5CF6',   // PRD §3 — AI color
-  amber:     '#f59e0b',   // PRD §3 — warning
+  cyan:      'var(--accent-cyan)',   // PRD §3 — active state
+  violet:    'var(--accent-purple)',   // PRD §3 — AI color
+  amber:     'var(--status-warn)',   // PRD §3 — warning
   red:       '#ef4444',   // danger
   font:      '"JetBrains Mono","Fira Code","Courier New",monospace',
 } as const;
@@ -118,7 +118,7 @@ const DEMO_SUGGESTIONS: MixSuggestion[] = [
 ];
 
 // ── Confidence badge ──────────────────────────────────────────────────────────
-const _ConfidenceBadge = memo(({ confidence }: { confidence: number }) => {
+const ConfidenceBadge = memo(({ confidence }: { confidence: number }) => {
   const isAuto   = confidence >= 0.65;
   const color    = isAuto ? P.accent : confidence >= 0.40 ? P.amber : P.red;
   const label    = isAuto ? 'AUTO' : 'SUGGEST';
@@ -142,7 +142,7 @@ const _ConfidenceBadge = memo(({ confidence }: { confidence: number }) => {
 ConfidenceBadge.displayName = 'ConfidenceBadge';
 
 // ── Acceptance rate meter ────────────────────────────────────────────────────
-const _AcceptanceRate = memo(({ accepted, total }: { accepted: number; total: number }) => {
+const AcceptanceRate = memo(({ accepted, total }: { accepted: number; total: number }) => {
   if (total === 0) return null;
   const rate     = accepted / total;
   const pct      = Math.round(rate * 100);
@@ -186,9 +186,9 @@ interface SuggestionCardProps {
   onReject:    (id: string) => void;
 }
 
-const _SuggestionCard = memo(({ suggestion, onAccept, onReject }: SuggestionCardProps) => {
+const SuggestionCard = memo(({ suggestion, onAccept, onReject }: SuggestionCardProps) => {
   const meta     = TRIGGER_META[suggestion.type];
-  const _resolved = suggestion.outcome !== null;
+  const resolved = suggestion.outcome !== null;
 
   const outcomeColor: Record<SuggestionOutcome, string> = {
     auto_applied: P.accent,
@@ -310,7 +310,7 @@ const _SuggestionCard = memo(({ suggestion, onAccept, onReject }: SuggestionCard
 SuggestionCard.displayName = 'SuggestionCard';
 
 // ── Empty state ───────────────────────────────────────────────────────────────
-const _EmptyState = memo(({ analysing }: { analysing: boolean }) => (
+const EmptyState = memo(({ analysing }: { analysing: boolean }) => (
   <div style={{
     padding:    '20px 12px',
     textAlign:  'center',
@@ -359,7 +359,7 @@ const _EmptyState = memo(({ analysing }: { analysing: boolean }) => (
 EmptyState.displayName = 'EmptyState';
 
 // ── Trigger legend ────────────────────────────────────────────────────────────
-const _TriggerLegend = memo(() => (
+const TriggerLegend = memo(() => (
   <div style={{
     padding:    '6px 10px',
     borderTop:  `1px solid ${P.border}`,
@@ -414,7 +414,7 @@ export function MixSuggestionsPanel({ onSuggestionAccept, onSuggestionReject }: 
   const pending   = suggestions.filter(s => s.outcome === null);
 
   // ── Trigger analysis (simulates LLPTE detection — backend pending §8.4) ────
-  const _runAnalysis = useCallback(() => {
+  const runAnalysis = useCallback(() => {
     if (analysing) return;
     setAnalysing(true);
     setHasAnalysed(false);
@@ -430,7 +430,7 @@ export function MixSuggestionsPanel({ onSuggestionAccept, onSuggestionReject }: 
   }, [analysing]);
 
   // ── Accept ─────────────────────────────────────────────────────────────────
-  const _handleAccept = useCallback((id: string) => {
+  const handleAccept = useCallback((id: string) => {
     setSuggestions(prev =>
       prev.map(s => s.id === id ? { ...s, outcome: 'accepted' as const } : s)
     );
@@ -439,7 +439,7 @@ export function MixSuggestionsPanel({ onSuggestionAccept, onSuggestionReject }: 
   }, [onSuggestionAccept]);
 
   // ── Reject ─────────────────────────────────────────────────────────────────
-  const _handleReject = useCallback((id: string) => {
+  const handleReject = useCallback((id: string) => {
     setSuggestions(prev =>
       prev.map(s => s.id === id ? { ...s, outcome: 'rejected' as const } : s)
     );
@@ -447,8 +447,8 @@ export function MixSuggestionsPanel({ onSuggestionAccept, onSuggestionReject }: 
   }, [onSuggestionReject]);
 
   // ── Accept all pending ─────────────────────────────────────────────────────
-  const _handleAcceptAll = useCallback(() => {
-    const _pendingIds = pending.map(s => s.id);
+  const handleAcceptAll = useCallback(() => {
+    const pendingIds = pending.map(s => s.id);
     setSuggestions(prev =>
       prev.map(s => pendingIds.includes(s.id) ? { ...s, outcome: 'accepted' as const } : s)
     );

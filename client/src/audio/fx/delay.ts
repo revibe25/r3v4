@@ -47,13 +47,13 @@ const DIVISION_MULTIPLIERS: Record<Exclude<DelaySync, 'off'>, number> = {
 };
 
 function syncToSeconds(division: Exclude<DelaySync, 'off'>, bpm: number): number {
-  const _beatsPerSec = bpm / 60;
+  const beatsPerSec = bpm / 60;
   return DIVISION_MULTIPLIERS[division] / beatsPerSec;
 }
 
 // ─── Presets ─────────────────────────────────────────────────────────────────
 
-const _PRESETS = {
+const PRESETS = {
   /** Subtle room-filling slap */
   slap: {
     time: 0.08, sync: 'off', feedback: 0.15, mix: 0.25,
@@ -173,7 +173,7 @@ export class Delay extends FXNodeBase {
         this.splitter.connect(this.delayR, 1);
 
         // Apply spread to right channel
-        const _baseTime = this.resolvedTime;
+        const baseTime = this.resolvedTime;
         this.delayL.delayTime.value = baseTime;
         this.delayR.delayTime.value = Math.min(4, baseTime + spread);
 
@@ -193,7 +193,7 @@ export class Delay extends FXNodeBase {
         this.input.connect(this.splitter);
         this.splitter.connect(this.delayL, 0);
 
-        const _baseTime = this.resolvedTime;
+        const baseTime = this.resolvedTime;
         this.delayL.delayTime.value = baseTime;
         this.delayR.delayTime.value = Math.min(4, baseTime + spread);
 
@@ -217,11 +217,11 @@ export class Delay extends FXNodeBase {
   // ─── Bulk param update ────────────────────────────────────────────────────────
 
   setParams(params: DelayParams): void {
-    const _prev = { ...this._params };
+    const prev = { ...this._params };
     this._params = { ...this._params, ...params };
 
-    const _now = this.context.currentTime;
-    const _modeChanged = params.mode !== undefined && params.mode !== prev.mode;
+    const now = this.context.currentTime;
+    const modeChanged = params.mode !== undefined && params.mode !== prev.mode;
 
     // Rebuild the graph if mode changed
     if (modeChanged) {
@@ -230,7 +230,7 @@ export class Delay extends FXNodeBase {
 
     // Time
     if (params.time !== undefined || params.sync !== undefined || params.bpm !== undefined) {
-      const _t = this.resolvedTime;
+      const t = this.resolvedTime;
       smoothParam(this.delayL.delayTime, t, now);
       smoothParam(
         this.delayR.delayTime,
@@ -256,7 +256,7 @@ export class Delay extends FXNodeBase {
     }
 
     if (params.spread !== undefined && !modeChanged) {
-      const _t = this.resolvedTime;
+      const t = this.resolvedTime;
       smoothParam(
         this.delayR.delayTime,
         Math.min(4, t + this._params.spread),
@@ -271,7 +271,7 @@ export class Delay extends FXNodeBase {
   setTime(seconds: number): void {
     this._params.time = Math.max(0, Math.min(4, seconds));
     this._params.sync = 'off';
-    const _t = this.resolvedTime;
+    const t = this.resolvedTime;
     smoothParam(this.delayL.delayTime, t, this.context.currentTime);
     smoothParam(this.delayR.delayTime, Math.min(4, t + this._params.spread), this.context.currentTime);
   }
@@ -280,7 +280,7 @@ export class Delay extends FXNodeBase {
   setSyncDivision(division: DelaySync, bpm?: number): void {
     this._params.sync = division;
     if (bpm !== undefined) this._params.bpm = bpm;
-    const _t = this.resolvedTime;
+    const t = this.resolvedTime;
     smoothParam(this.delayL.delayTime, t, this.context.currentTime);
     smoothParam(this.delayR.delayTime, Math.min(4, t + this._params.spread), this.context.currentTime);
   }
@@ -289,7 +289,7 @@ export class Delay extends FXNodeBase {
   setBPM(bpm: number): void {
     this._params.bpm = bpm;
     if (this._params.sync !== 'off') {
-      const _t = this.resolvedTime;
+      const t = this.resolvedTime;
       smoothParam(this.delayL.delayTime, t, this.context.currentTime);
       smoothParam(this.delayR.delayTime, Math.min(4, t + this._params.spread), this.context.currentTime);
     }
@@ -329,7 +329,7 @@ export class Delay extends FXNodeBase {
   /** L/R spread in seconds (stereo & ping-pong modes). */
   setSpread(seconds: number): void {
     this._params.spread = Math.max(0, seconds);
-    const _t = this.resolvedTime;
+    const t = this.resolvedTime;
     smoothParam(
       this.delayR.delayTime,
       Math.min(4, t + this._params.spread),

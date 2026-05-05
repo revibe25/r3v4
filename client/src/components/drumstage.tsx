@@ -1,3 +1,6 @@
+// P4-EXEMPT: #030803 #4d6b18 — Three.js <lineBasicMaterial color=...> props;
+// CSS variables cannot be resolved by the Three.js material system at runtime.
+// Exempted: p_final_patch residual pass.
 // FILE: client/src/components/DrumStage.tsx
 // Enhanced 10x: reflective floor, stage platform, truss rails, LED strips,
 // per-pad point lights, overhead spotlights, atmospheric fog, floor grid,
@@ -26,7 +29,7 @@ function padPosition(i: number): [number, number, number] {
 
 // ── Reflective metallic floor ─────────────────────────────────────────────────
 function MetallicFloor() {
-  const _matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const matRef = useRef<THREE.MeshStandardMaterial>(null);
   useFrame(({ clock }) => {
     if (matRef.current) {
       matRef.current.envMapIntensity =
@@ -48,20 +51,20 @@ function MetallicFloor() {
 
 // ── Faint grid lines on the floor ────────────────────────────────────────────
 function FloorGrid() {
-  const _geo = useMemo(() => {
+  const geo = useMemo(() => {
     const pts: number[] = [];
-    for (let _i = -10; i <= 10; i++) {
+    for (let i = -10; i <= 10; i++) {
       pts.push(i * 1.6, -0.175, -18,   i * 1.6, -0.175,  18);
       pts.push(-18, -0.175, i * 1.6,   18, -0.175, i * 1.6);
     }
-    const _g = new THREE.BufferGeometry();
+    const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     return g;
   }, []);
 
   return (
     <lineSegments geometry={geo}>
-      <lineBasicMaterial color="#1a2a0a" opacity={0.28} transparent />
+      <lineBasicMaterial color="var(--status-ok-dim)" opacity={0.28} transparent />
     </lineSegments>
   );
 }
@@ -78,8 +81,8 @@ function StagePlatform() {
 
 // ── Truss frame (4 corner posts + 4 overhead crossbeams) ─────────────────────
 function StageRails() {
-  const _mat = (
-    <meshStandardMaterial color="#1a1a1a" metalness={0.88} roughness={0.22} />
+  const mat = (
+    <meshStandardMaterial color="var(--t-b2x)" metalness={0.88} roughness={0.22} />
   );
 
   const posts: [number, number, number][] = [
@@ -104,8 +107,8 @@ function StageRails() {
       ))}
       {beams.map(([s, e], i) => {
         const mid: [number,number,number] = [(s[0]+e[0])/2, (s[1]+e[1])/2, (s[2]+e[2])/2];
-        const _len = Math.hypot(e[0]-s[0], e[2]-s[2]);
-        const _ang = Math.atan2(e[2]-s[2], e[0]-s[0]);
+        const len = Math.hypot(e[0]-s[0], e[2]-s[2]);
+        const ang = Math.atan2(e[2]-s[2], e[0]-s[0]);
         return (
           <mesh key={`beam-${i}`} position={mid} rotation={[0, -ang, Math.PI/2]} castShadow>
             <cylinderGeometry args={[0.026, 0.026, len, 6]} />
@@ -119,11 +122,11 @@ function StageRails() {
 
 // ── LED edge strips (front bright, others dimmer) ─────────────────────────────
 function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
-  const _frontRef = useRef<THREE.MeshStandardMaterial>(null);
-  const _sideRefs = [useRef<THREE.MeshStandardMaterial>(null), useRef<THREE.MeshStandardMaterial>(null)];
+  const frontRef = useRef<THREE.MeshStandardMaterial>(null);
+  const sideRefs = [useRef<THREE.MeshStandardMaterial>(null), useRef<THREE.MeshStandardMaterial>(null)];
 
   useFrame(({ clock }) => {
-    const _total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
+    const total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
     const idle  = 0.08 + Math.sin(clock.elapsedTime * 1.8) * 0.025;
     const hit   = Math.min(total * 3, 4.0);
     if (frontRef.current) frontRef.current.emissiveIntensity = total > 0 ? hit : idle;
@@ -139,7 +142,7 @@ function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
         <boxGeometry args={[9.0, 0.05, 0.05]} />
         <meshStandardMaterial
           ref={frontRef}
-          color="#040404"
+          color="var(--panel-deep)"
           emissive={ACID}
           emissiveIntensity={0.08}
           metalness={0.9}
@@ -150,7 +153,7 @@ function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
       <mesh position={[0, -0.155, -5.0]}>
         <boxGeometry args={[9.0, 0.05, 0.05]} />
         <meshStandardMaterial
-          color="#040404"
+          color="var(--panel-deep)"
           emissive={ACID_DIM}
           emissiveIntensity={0.03}
           metalness={0.9}
@@ -163,7 +166,7 @@ function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
           <boxGeometry args={[0.05, 0.05, 6.5]} />
           <meshStandardMaterial
             ref={sideRefs[i]}
-            color="#040404"
+            color="var(--panel-deep)"
             emissive={ACID_DIM}
             emissiveIntensity={0.025}
             metalness={0.9}
@@ -177,15 +180,15 @@ function LEDStrips({ velocities }: { velocities: Map<number, number> }) {
 
 // ── Per-pad reactive point lights ─────────────────────────────────────────────
 function PadLights({ pads, velocities }: { pads: any[]; velocities: Map<number, number> }) {
-  const _refs = useRef<(THREE.PointLight | null)[]>([]);
+  const refs = useRef<(THREE.PointLight | null)[]>([]);
 
   useFrame(() => {
     pads.forEach((pad, i) => {
-      const _light = refs.current[i];
+      const light = refs.current[i];
       if (!light) return;
       const vel    = velocities.get(i) ?? 0;
-      const _active = pad.isActive || vel > 0;
-      const _target = active ? vel * 5.5 + 0.6 : 0;
+      const active = pad.isActive || vel > 0;
+      const target = active ? vel * 5.5 + 0.6 : 0;
       light.intensity = THREE.MathUtils.lerp(light.intensity, target, 0.22);
     });
   });
@@ -226,7 +229,7 @@ function OverheadSpots() {
           angle={0.30}
           penumbra={0.65}
           distance={14}
-          color="#eef5ee"
+          color="var(--text-primary)"
           castShadow
           shadow-mapSize={[512, 512]}
         />
@@ -245,7 +248,7 @@ function PadNamePlates({ pads }: { pads: any[] }) {
           <mesh key={i} position={[x, 0.65, z]}>
             <boxGeometry args={[0.58, 0.014, 0.12]} />
             <meshStandardMaterial
-              color="#050505"
+              color="var(--panel)"
               emissive={ACID_DIM}
               emissiveIntensity={pad.isActive ? 5 : 0.5}
               metalness={0.96}
@@ -260,10 +263,10 @@ function PadNamePlates({ pads }: { pads: any[] }) {
 
 // ── Invisible emissive plane that feeds Bloom post-processing ─────────────────
 function GroundHalo({ velocities }: { velocities: Map<number, number> }) {
-  const _matRef = useRef<THREE.MeshStandardMaterial>(null);
+  const matRef = useRef<THREE.MeshStandardMaterial>(null);
   useFrame(() => {
     if (!matRef.current) return;
-    const _total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
+    const total = Array.from(velocities.values()).reduce((a, b) => a + b, 0);
     matRef.current.emissiveIntensity = THREE.MathUtils.lerp(
       matRef.current.emissiveIntensity, total * 0.45, 0.12
     );
@@ -273,7 +276,7 @@ function GroundHalo({ velocities }: { velocities: Map<number, number> }) {
       <planeGeometry args={[9, 6.5]} />
       <meshStandardMaterial
         ref={matRef}
-        color="#000"
+        color="var(--dj-black)"
         emissive={ACID}
         emissiveIntensity={0}
         transparent

@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: VST load/compatibility warning — adjacent to sanctioned vst.tsx
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * client/src/components/vst-browser.tsx
  * VST Plugin Browser — Acid Grid Edition
@@ -24,24 +29,24 @@ import { useVSTStore } from '@/store/vst-store';
 
 // ── Acid Grid design tokens ───────────────────────────────────────────────────
 // Mirrors the CSS custom properties in instrument.tsx STYLES block.
-const _AG = {
-  black:   '#060606',
+const AG = {
+  black:   'var(--void)',
   ink:     '#0a0a0a',
   panel:   '#0d0d0d',
-  card:    '#0f0f0f',
+  card:    'var(--t-b1)',
   border:  '#1c1c1c',
   mute:    '#2a2a2a',
-  dim:     '#3a3a3a',
-  mid:     '#666',
-  soft:    '#888',
+  dim:     'var(--neutral-700)',
+  mid:     'var(--dj-muted)',
+  soft:    'var(--text-dim)',
   acid:    '#a3e635',
-  acid2:   '#84cc16',
+  acid2:   'var(--looper-lime)',
   acidDim: 'rgba(163,230,53,0.08)',
-  acidD:   '#4d6b18',
-  white:   '#f0f0f0',
+  acidD:   'var(--status-ok-dim)',
+  white:   'var(--daw-fg)',
   err:     '#ff3b3b',
   rec:     '#ef4444',
-  cyan:    '#22d3ee',
+  cyan:    'var(--looper-cyan)',
   font:    "'IBM Plex Mono', 'JetBrains Mono', monospace",
 } as const;
 
@@ -51,17 +56,17 @@ const CAT_COLOR: Record<string, string> = {
   instrument: AG.acid,
   effects:    AG.cyan,
   effect:     AG.cyan,
-  dynamics:   '#f59e0b',
-  eq:         '#a78bfa',
-  reverb:     '#60a5fa',
-  delay:      '#34d399',
+  dynamics:   'var(--status-warn)',
+  eq:         'var(--accent-violet-soft)',
+  reverb:     'var(--accent-blue)',
+  delay:      'var(--status-ok-alt)',
   distortion: AG.err,
   utility:    AG.soft,
-  filter:     '#fb923c',
-  chorus:     '#e879f9',
-  modulation: '#38bdf8',
+  filter:     'var(--orange-400)',
+  chorus:     'var(--accent-fuchsia)',
+  modulation: 'var(--accent-blue)',
 };
-const _catAccent = (cat = '') => CAT_COLOR[cat.toLowerCase()] ?? AG.soft;
+const catAccent = (cat = '') => CAT_COLOR[cat.toLowerCase()] ?? AG.soft;
 
 // ── Shared style helpers ──────────────────────────────────────────────────────
 const mono: CSSProperties = { fontFamily: AG.font };
@@ -72,7 +77,7 @@ const tag: CSSProperties  = {
 };
 
 // Keyframes injected once
-const _KEYFRAMES = `
+const KEYFRAMES = `
   @keyframes vst-spin  { to { transform: rotate(360deg); } }
   @keyframes vst-sweep { from { left: -60%; } to { left: 100%; } }
   @keyframes vst-pulse { from { opacity: 0.5; } to { opacity: 1; } }
@@ -89,7 +94,7 @@ interface VSTBrowserProps {
 // MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
-  const _addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
+  const addPluginToChannel = useVSTStore(s => s.addPluginToChannel);
 
   const [plugins,     setPlugins]     = useState<VSTPluginInfo[]>([]);
   const [recentIds,   setRecentIds]   = useState<string[]>([]);
@@ -107,13 +112,13 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Scan ─────────────────────────────────────────────────────────────────
-  const _handleScan = useCallback(async () => {
+  const handleScan = useCallback(async () => {
     setIsScanning(true);
     setScanMsg('INITIALIZING SCANNER...');
     try {
-      const _audioCtx = getAudioContext();
+      const audioCtx = getAudioContext();
       setScanMsg('SCANNING /PLUGINS...');
-      const _result = await VSTScanner.scanDirectory('/plugins', audioCtx);
+      const result = await VSTScanner.scanDirectory('/plugins', audioCtx);
       setPlugins(result.plugins);
       VSTScanner.saveToStorage();
       setScanMsg(`FOUND ${result.plugins.length} PLUGIN${result.plugins.length !== 1 ? 'S' : ''}`);
@@ -128,7 +133,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Select ───────────────────────────────────────────────────────────────
-  const _handlePluginSelect = useCallback((plugin: VSTPluginInfo) => {
+  const handlePluginSelect = useCallback((plugin: VSTPluginInfo) => {
     setLoadingId(plugin.id);
     setRecentIds(prev =>
       [plugin.id, ...prev.filter(id => id !== plugin.id)].slice(0, 10)
@@ -139,7 +144,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, [channelId, addPluginToChannel, onPluginSelect]);
 
   // ── Favorite toggle ───────────────────────────────────────────────────────
-  const _toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
+  const toggleFavorite = useCallback((pluginId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPlugins(prev =>
       prev.map(p => p.id === pluginId ? { ...p, isFavorite: !p.isFavorite } : p)
@@ -148,18 +153,18 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
   }, []);
 
   // ── Derived data ──────────────────────────────────────────────────────────
-  const _categories = useMemo(
+  const categories = useMemo(
     () => Array.from(new Set(plugins.map(p => p.category))).sort(),
     [plugins],
   );
 
-  const _filteredPlugins = useMemo(() => {
+  const filteredPlugins = useMemo(() => {
     return plugins.filter(plugin => {
       if (selectedCat === 'favorites') return !!plugin.isFavorite;
       if (selectedCat === 'recent')    return recentIds.includes(plugin.id);
       if (selectedCat !== 'all' && plugin.category !== selectedCat) return false;
       if (searchQuery) {
-        const _q = searchQuery.toLowerCase();
+        const q = searchQuery.toLowerCase();
         return (
           plugin.name.toLowerCase().includes(q) ||
           plugin.vendor.toLowerCase().includes(q) ||
@@ -170,9 +175,9 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
     });
   }, [plugins, searchQuery, selectedCat, recentIds]);
 
-  const _TABS = [
+  const TABS = [
     { id: 'all',       label: 'ALL',    icon: null,                           accent: AG.white },
-    { id: 'favorites', label: 'FAV',    icon: <Star size={9} />,              accent: '#f59e0b' },
+    { id: 'favorites', label: 'FAV',    icon: <Star size={9} />,              accent: 'var(--status-warn)' },
     { id: 'recent',    label: 'RECENT', icon: <TrendingUp size={9} />,        accent: AG.cyan },
     ...categories.map(c => ({ id: c, label: c.toUpperCase(), icon: null, accent: catAccent(c) })),
   ];
@@ -231,7 +236,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
 
         {/* View toggle: grid / list */}
         {(['grid', 'list'] as const).map(mode => {
-          const _active = viewMode === mode;
+          const active = viewMode === mode;
           return (
             <button
               key={mode}
@@ -339,7 +344,7 @@ export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
         scrollbarWidth: 'none' as const,
       }}>
         {TABS.map(({ id, label, icon, accent }) => {
-          const _active = selectedCat === id;
+          const active = selectedCat === id;
           return (
             <button
               key={id}
@@ -487,7 +492,7 @@ function PluginCard({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const _accent = catAccent(plugin.category);
+  const accent = catAccent(plugin.category);
 
   return (
     <div
@@ -496,7 +501,7 @@ function PluginCard({
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'relative',
-        background: hovered ? '#111111' : AG.card,
+        background: hovered ? 'var(--dj-surface2)' : AG.card,
         border: `1px solid ${hovered ? AG.dim : AG.border}`,
         borderTop: `2px solid ${hovered ? accent : AG.border}`,
         cursor: loading ? 'wait' : 'pointer',
@@ -526,21 +531,21 @@ function PluginCard({
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
             padding: 2, flexShrink: 0,
-            color: plugin.isFavorite ? '#f59e0b' : AG.dim,
+            color: plugin.isFavorite ? 'var(--status-warn)' : AG.dim,
             transition: 'color 0.1s',
             display: 'flex', alignItems: 'center',
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#f59e0b'; }}
-          onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? '#f59e0b' : AG.dim; }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--status-warn)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? 'var(--status-warn)' : AG.dim; }}
         >
-          <Star size={10} style={{ fill: plugin.isFavorite ? '#f59e0b' : 'none' }} />
+          <Star size={10} style={{ fill: plugin.isFavorite ? 'var(--status-warn)' : 'none' }} />
         </button>
       </div>
 
       {/* Plugin name */}
       <div style={{
         fontFamily: AG.font, fontWeight: 600, fontSize: 11,
-        color: hovered ? AG.white : '#d4d4d4',
+        color: hovered ? AG.white : 'var(--text-secondary)',
         letterSpacing: '0.02em', lineHeight: 1.2,
         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
       }}>
@@ -596,7 +601,7 @@ function PluginListItem({
   onToggleFavorite: (e: React.MouseEvent) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const _accent = catAccent(plugin.category);
+  const accent = catAccent(plugin.category);
 
   return (
     <div
@@ -610,7 +615,7 @@ function PluginListItem({
         gap: 0,
         padding: '0 14px',
         height: 38,
-        background: hovered ? '#0f0f0f' : 'transparent',
+        background: hovered ? 'var(--t-b1)' : 'transparent',
         borderBottom: `1px solid ${AG.border}`,
         borderLeft: `3px solid ${hovered ? accent : 'transparent'}`,
         cursor: loading ? 'wait' : 'pointer',
@@ -631,7 +636,7 @@ function PluginListItem({
       {/* Name */}
       <span style={{
         fontFamily: AG.font, fontWeight: 600, fontSize: 10,
-        color: hovered ? AG.white : '#cccccc',
+        color: hovered ? AG.white : 'var(--daw-ghost)',
         letterSpacing: '0.04em',
         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         paddingRight: 8,
@@ -662,13 +667,13 @@ function PluginListItem({
         style={{
           background: 'none', border: 'none', cursor: 'pointer', padding: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: plugin.isFavorite ? '#f59e0b' : AG.dim,
+          color: plugin.isFavorite ? 'var(--status-warn)' : AG.dim,
           transition: 'color 0.1s',
         }}
-        onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = '#f59e0b'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? '#f59e0b' : AG.dim; }}
+        onMouseEnter={e => { e.stopPropagation(); e.currentTarget.style.color = 'var(--status-warn)'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = plugin.isFavorite ? 'var(--status-warn)' : AG.dim; }}
       >
-        <Star size={10} style={{ fill: plugin.isFavorite ? '#f59e0b' : 'none' }} />
+        <Star size={10} style={{ fill: plugin.isFavorite ? 'var(--status-warn)' : 'none' }} />
       </button>
     </div>
   );

@@ -88,7 +88,7 @@ export function useEffectChain(
       return;
     }
 
-    const _intervalId = setInterval(() => {
+    const intervalId = setInterval(() => {
       setEffects([...chain.effects]);
     }, updateInterval);
 
@@ -98,7 +98,7 @@ export function useEffectChain(
   /**
    * Add effect to chain
    */
-  const _addEffect = useCallback((effect: AudioEffect, position?: number) => {
+  const addEffect = useCallback((effect: AudioEffect, position?: number) => {
     if (!chain) {
       console.error('[useEffectChain] Cannot add effect: chain not initialized');
       return;
@@ -116,7 +116,7 @@ export function useEffectChain(
   /**
    * Remove effect from chain
    */
-  const _removeEffect = useCallback((effectId: string) => {
+  const removeEffect = useCallback((effectId: string) => {
     if (!chain) {
       console.error('[useEffectChain] Cannot remove effect: chain not initialized');
       return;
@@ -134,7 +134,7 @@ export function useEffectChain(
   /**
    * Reorder effect in chain
    */
-  const _reorderEffect = useCallback((effectId: string, newPosition: number) => {
+  const reorderEffect = useCallback((effectId: string, newPosition: number) => {
     if (!chain) {
       console.error('[useEffectChain] Cannot reorder effect: chain not initialized');
       return;
@@ -152,8 +152,8 @@ export function useEffectChain(
   /**
    * Bypass/enable specific effect
    */
-  const _bypassEffect = useCallback((effectId: string, bypass: boolean) => {
-    const _effect = chain?.getEffect(effectId);
+  const bypassEffect = useCallback((effectId: string, bypass: boolean) => {
+    const effect = chain?.getEffect(effectId);
     if (!effect) {
       console.error(`[useEffectChain] Effect ${effectId} not found`);
       return;
@@ -166,12 +166,12 @@ export function useEffectChain(
   /**
    * Set effect parameter
    */
-  const _setEffectParameter = useCallback((
+  const setEffectParameter = useCallback((
     effectId: string,
     parameterId: string,
     value: number
   ) => {
-    const _effect = chain?.getEffect(effectId);
+    const effect = chain?.getEffect(effectId);
     if (!effect) {
       console.error(`[useEffectChain] Effect ${effectId} not found`);
       return;
@@ -187,7 +187,7 @@ export function useEffectChain(
   /**
    * Bypass all effects
    */
-  const _bypassAll = useCallback(() => {
+  const bypassAll = useCallback(() => {
     if (!chain) return;
 
     chain.bypassAll();
@@ -197,7 +197,7 @@ export function useEffectChain(
   /**
    * Enable all effects
    */
-  const _enableAll = useCallback(() => {
+  const enableAll = useCallback(() => {
     if (!chain) return;
 
     chain.enableAll();
@@ -207,7 +207,7 @@ export function useEffectChain(
   /**
    * Clear all effects
    */
-  const _clear = useCallback(() => {
+  const clear = useCallback(() => {
     if (!chain) return;
 
     chain.clear();
@@ -217,7 +217,7 @@ export function useEffectChain(
   /**
    * Get effect chain state
    */
-  const _getState = useCallback((): EffectState[] => {
+  const getState = useCallback((): EffectState[] => {
     if (!chain) return [];
     return chain.effects.map(effect => effect.getState());
   }, [chain]);
@@ -225,15 +225,15 @@ export function useEffectChain(
   /**
    * Get specific effect
    */
-  const _getEffect = useCallback((effectId: string): AudioEffect | undefined => {
+  const getEffect = useCallback((effectId: string): AudioEffect | undefined => {
     return chain?.getEffect(effectId);
   }, [chain]);
 
   /**
    * Get effect parameters
    */
-  const _getEffectParameters = useCallback((effectId: string): EffectParameter[] => {
-    const _effect = chain?.getEffect(effectId);
+  const getEffectParameters = useCallback((effectId: string): EffectParameter[] => {
+    const effect = chain?.getEffect(effectId);
     return effect?.getParameters() ?? [];
   }, [chain]);
 

@@ -32,14 +32,14 @@ export class VSTAutomationEngine implements AutomationEngine {
   currentTime: number = 0;
 
   createLane(id: string, paramPath: string): IAutomationLane {
-    const _lane = { id, points: [], enabled: true, paramPath } as unknown as IAutomationLane;
+    const lane = { id, points: [], enabled: true, paramPath } as unknown as IAutomationLane;
     this.lanes.set(id, lane);
     return lane;
   }
   removeLane(id: string): void { this.lanes.delete(id); }
   getLane(id: string): IAutomationLane | undefined { return this.lanes.get(id); }
   getAllLanes(): IAutomationLane[] { return Array.from(this.lanes.values()); }
-  clearLane(id: string): void { const _l = this.lanes.get(id); if (l) (l as any).points = []; }
+  clearLane(id: string): void { const l = this.lanes.get(id); if (l) (l as any).points = []; }
   clearAll(): void { this.lanes.forEach((_: IAutomationLane, id: string) => this.clearLane(id)); }
   setCurrentTime(t: number): void { this.currentTime = t; }
   getValueAtTime(_laneId: string, _t: number): number { return 0; }
@@ -57,23 +57,23 @@ export class VSTAutomationEngine implements AutomationEngine {
   }
 
   createAutomationLane(id: string, paramId: number, points: AutomationPoint[]): void {
-    const _lane = new AutomationLaneImpl(id, paramId, points, this.audioContext);
+    const lane = new AutomationLaneImpl(id, paramId, points, this.audioContext);
     this.automationLanes.set(id, lane);
   }
 
   createLFO(id: string, paramId: number, config: LFOConfig): void {
-    const _lfo = new LFO(id, paramId, config, this.audioContext);
+    const lfo = new LFO(id, paramId, config, this.audioContext);
     this.lfos.set(id, lfo);
   }
 
   createEnvelope(id: string, paramId: number, config: EnvelopeConfig): void {
-    const _envelope = new Envelope(id, paramId, config, this.audioContext);
+    const envelope = new Envelope(id, paramId, config, this.audioContext);
     this.envelopes.set(id, envelope);
   }
 
   getAutomationValue(paramId: number, time: number): number {
-    let _value = 0;
-    let _hasAutomation = false;
+    let value = 0;
+    let hasAutomation = false;
 
     this.automationLanes.forEach(lane => {
       if (lane.paramId === paramId && lane.enabled) {
@@ -84,7 +84,7 @@ export class VSTAutomationEngine implements AutomationEngine {
 
     this.lfos.forEach(lfo => {
       if (lfo.paramId === paramId && lfo.enabled) {
-        const _lfoValue = lfo.getValueAtTime(time);
+        const lfoValue = lfo.getValueAtTime(time);
         value = hasAutomation ? value + lfoValue * lfo.config.depth : lfoValue;
         hasAutomation = true;
       }
@@ -137,14 +137,14 @@ class AutomationLaneImpl {
     if (time >= this.points[this.points.length - 1].time)
       return this.points[this.points.length - 1].value;
 
-    let _i = 0;
+    let i = 0;
     while (i < this.points.length - 1 && this.points[i + 1].time <= time) i++;
 
-    const _p1 = this.points[i];
-    const _p2 = this.points[i + 1];
+    const p1 = this.points[i];
+    const p2 = this.points[i + 1];
     if (!p2) return p1.value;
 
-    const _t = (time - p1.time) / (p2.time - p1.time);
+    const t = (time - p1.time) / (p2.time - p1.time);
     return this.interpolate(p1.value, p2.value, t, p1.curve);
   }
 
@@ -155,7 +155,7 @@ class AutomationLaneImpl {
       case AutomationCurve.LOGARITHMIC:
         return v1 + (v2 - v1) * Math.log(1 + t * (Math.E - 1)) / Math.log(Math.E);
       case AutomationCurve.SMOOTH: {
-        const _s = t * t * (3 - 2 * t);
+        const s = t * t * (3 - 2 * t);
         return v1 + (v2 - v1) * s;
       }
       case AutomationCurve.STEP:
@@ -172,7 +172,7 @@ class AutomationLaneImpl {
   }
   removePoint(time: number): void { this.points = this.points.filter(p => p.time !== time); }
   updatePoint(time: number, value: number): void {
-    const _p = this.points.find(p => p.time === time);
+    const p = this.points.find(p => p.time === time);
     if (p) p.value = value;
   }
 }
@@ -205,7 +205,7 @@ class LFO {
   }
 
   getValueAtTime(time: number): number {
-    const _phase = (time * this.config.frequency + this.config.phase) % 1;
+    const phase = (time * this.config.frequency + this.config.phase) % 1;
     switch (this.config.waveform) {
       case 'sine':     return Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
       case 'triangle': return phase < 0.5 ? phase * 2 : 2 - phase * 2;
@@ -259,7 +259,7 @@ class Envelope {
   getValueAtTime(time: number): number {
     if (this.stage === 'idle') return 0;
 
-    const _elapsed = time - this.startTime;
+    const elapsed = time - this.startTime;
 
     if (this.stage === 'attack') {
       if (elapsed < this.config.attack) return elapsed / this.config.attack;
@@ -267,7 +267,7 @@ class Envelope {
     }
 
     if (this.stage === 'decay') {
-      const _decayElapsed = elapsed - this.config.attack;
+      const decayElapsed = elapsed - this.config.attack;
       if (decayElapsed < this.config.decay) {
         return 1 - (1 - this.config.sustain) * (decayElapsed / this.config.decay);
       }
@@ -277,7 +277,7 @@ class Envelope {
     if (this.stage === 'sustain') return this.config.sustain;
 
     if (this.stage === 'release') {
-      const _releaseElapsed = time - this.releaseStartTime;
+      const releaseElapsed = time - this.releaseStartTime;
       if (releaseElapsed < this.config.release) {
         return this.config.sustain * (1 - releaseElapsed / this.config.release);
       }

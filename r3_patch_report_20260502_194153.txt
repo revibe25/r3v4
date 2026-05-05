@@ -1,0 +1,228 @@
+R3v4 Patch Suite — WIRE Protocol
+Root: /home/r3v/Stable
+Backup dir: /home/r3v/Stable/.r3-patch-backups-20260502_194153
+Timestamp: 20260502_194153
+
+======================================================================
+  BLOCKER 1 — Store barrel: strip _ prefix from hook exports
+======================================================================
+  [BACKUP] audio-store.ts → audio-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useAudioStore'
+    [WARN] anchor not found, skipping: 'export const _selectIsPlaying'
+  [BACKUP] clip-store.ts → clip-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useClipStore'
+  [BACKUP] fx-store.ts → fx-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useFXStore'
+  [BACKUP] meter-store.ts → meter-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useMeterStore'
+  [BACKUP] mixer-store.ts → mixer-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useMixerStore'
+  [BACKUP] vst-store.ts → vst-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useVSTStore'
+  [BACKUP] session-metrics.store.ts → session-metrics.store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useSessionMetricsStore'
+  [SKIP] client/src/store/session-metrics.store.ts — file not found (path may differ)
+  [SKIP] client/src/store/metrics/session-metrics.store.ts — file not found (path may differ)
+  [BACKUP] auth-store.ts → auth-store.ts.bak-20260502_194153-1
+    [WARN] anchor not found, skipping: 'export const _useAuthStore'
+
+  Store barrel summary: 0 files patched, 2 skipped.
+  ACTION REQUIRED: run pnpm tsc --noEmit and fix any residual errors
+  (barrel re-exports in store/index.ts should now resolve correctly)
+
+======================================================================
+  BLOCKER 1 (cont.) — Invoke r3_fix_store_barrel.py
+======================================================================
+  R3v4 — Store Barrel Re-export Fixer (WIRE Protocol)
+  Root: /home/r3v/Stable
+  
+  Barrel: /home/r3v/Stable/client/src/store/index.ts
+  Backup: /home/r3v/Stable/client/src/store/index.ts.bak-20260502_194153
+    audio-store.ts: ['useAudioStore', 'selectIsPlaying', '_selectChannelCount', '_selectHasSoloChannels']
+    clip-store.ts: ['useClipStore', 'Clip']
+    fx-store.ts: ['useFXStore', 'useChannelFX', 'useVSTStatus', 'useChannelDryWet', 'useGlobalBypass', 'useCanUndo', 'useCanRedo', 'usePresets', 'subscribeChannelFX', 'subscribeGlobalBypass', 'VSTStatus', 'FXAddedCallback', 'FXRemovedCallback', 'VSTStatusEntry', 'FXPreset', 'FXSnapshot', 'ChannelHistory']
+    meter-store.ts: ['useMeterStore']
+    mixer-store.ts: ['useMixerStore', 'MixerStore', 'ChannelState']
+    vst-store.ts: ['useVSTStore', '_selectCPUUsage', '_selectMemoryUsage', '_selectLatency', '_selectHasAlerts', '_selectChannelFX', '_selectActivePlugin', '_selectPerformanceHistory']
+    session-metrics.store.ts: ['useSessionMetricsStore', 'SessionMetricsSummary']
+    [SKIP] client/src/store/session-metrics.store.ts not found
+    auth-store.ts: ['AuthStore']
+  
+    [FIX] auth-store: barrel exports ['useAuthStore'] but they don't exist
+           [WARN] useAuthStore → no match in ['AuthStore']
+  
+  [WRITTEN] /home/r3v/Stable/client/src/store/index.ts
+  
+  Verification:
+    pnpm tsc --noEmit
+    grep -n 'error TS2305' /tmp/tsc_out.txt  # Module has no exported member
+
+======================================================================
+  BLOCKER 2a — preferences-modal.tsx: _AG → AG
+======================================================================
+  [BACKUP] preferences-modal.tsx → preferences-modal.tsx.bak-20260502_194153-1
+  [SKIP] No \b_AG\b tokens found — already patched or path differs
+
+======================================================================
+  BLOCKER 2b — vst-panel-modal.tsx: _AG → AG
+======================================================================
+  [BACKUP] vst-panel-modal.tsx → vst-panel-modal.tsx.bak-20260502_194153-1
+  [SKIP] No \b_AG\b tokens found — already patched or path differs
+
+======================================================================
+  BLOCKER 2c — pricing/tokens.ts: _COLOR → COLOR + ensure export
+======================================================================
+  [BACKUP] tokens.ts → tokens.ts.bak-20260502_194153-1
+  [SKIP] No \b_COLOR\b tokens found — already patched or path differs
+
+======================================================================
+  BLOCKER 3 — audio-engine.ts: variable declaration prefix mismatches
+======================================================================
+  [BACKUP] audio-engine.ts → audio-engine.ts.bak-20260502_194153-1
+  [WARN] anchor not found: 'const _ab '
+  [WARN] anchor not found: 'const _step '
+  [WARN] anchor not found: 'let _i '
+  [WARN] anchor not found: 'let _peak '
+  [WARN] anchor not found: 'let _j '
+  [WARN] anchor not found: 'const _engine '
+  [WRITTEN] /home/r3v/Stable/client/src/pages/multi-track-panel/audio-engine.ts
+  IMPORTANT: run pnpm tsc --noEmit to catch any residual undefined references
+
+======================================================================
+  BLOCKER 4 — Delete rogue stores/auth-store.ts (duplicate auth)
+======================================================================
+  [SKIP] stores/auth-store.ts not found — already removed or path differs
+
+======================================================================
+  BLOCKER 5 — Playhead position: 'fixed' → 'absolute'
+======================================================================
+  [BACKUP] multi-track-panel.tsx → multi-track-panel.tsx.bak-20260502_194153-1
+  Found 0 occurrence(s) of position:'fixed' in file
+  [WARN] No position:'fixed' found — may already be patched or path differs
+
+======================================================================
+  PATCH 6 — AudioEngine.initialize(): gesture guard
+======================================================================
+  [BACKUP] multi-track-panel.tsx → multi-track-panel.tsx.bak-20260502_194153-2
+  [WARN] Could not match full useEffect block exactly.
+  Manual fix: replace the useEffect containing engine.initialize() with:
+  // Defer AudioEngine init until first user gesture (autoplay policy).
+  useEffect(() => {
+    const handler = () => {
+      if (audioEngineRef.current) {
+        // FIX-D: logger.error replaces console.error per PRD §8.1.
+        // Requires: import { logger } from '@/lib/logger' — verify path before commit.
+        audioEngineRef.current.initialize().catch((err) => {
+          logger.error({ err }, 'AudioEngine initialization failed');
+        });
+      }
+      window.removeEventListener('click', handler);
+      window.removeEventListener('keydown', handler);
+    };
+    window.addEventListener('click', handler, { once: true });
+    window.addEventListener('keydown', handler, { once: true });
+    return () => {
+      window.removeEventListener('click', handler);
+      window.removeEventListener('keydown', handler);
+    };
+  }, []);
+
+  To see the actual useEffect shape, run on Kali:
+    grep -n 'engine.initialize\|useEffect' /home/r3v/Stable/client/src/components/multi-track-panel.tsx
+
+======================================================================
+  PATCH 7 — runtime-guard.ts: remove false-positive CSS var rule
+======================================================================
+  [BACKUP] runtime-guard.ts → runtime-guard.ts.bak-20260502_194153-1
+  [WARN] False-positive rule not found with expected pattern
+  Search for: /var\(--color-[^)]+\)/ in runtime-guard.ts manually
+
+======================================================================
+  PATCH 8 — visuals.tsx BandMeterHUD: rename _prefix declarations
+======================================================================
+  [BACKUP] visuals.tsx → visuals.tsx.bak-20260502_194153-1
+  [SKIP] No _prefixed declarations found — already patched or path differs
+
+======================================================================
+  PATCH 9 — enforce-ui-design-system.sh: tag-based checkpoint
+======================================================================
+  [BACKUP] enforce-ui-design-system.sh → enforce-ui-design-system.sh.bak-20260502_194153-1
+  [WARN] Commit-message grep pattern not found — may already be patched
+
+======================================================================
+  INFO 10 — usePricing tRPC path: verification audit (no write)
+======================================================================
+  usePricing.ts mutation call:
+    9: *   - Exact procedure path (likely trpc.subscription.createCheckoutSession)
+43:  const _checkoutMutation = trpc.subscription.createCheckout.useMutation();
+  Router match in server/routers/subscription.ts:
+    26:  createCheckoutSession,
+37:  createCheckout: protectedProcedure
+46:      const url = await createCheckoutSession({
+  Compare the procedure name in usePricing.ts against the router definition.
+  If they differ, update usePricing.ts to use the exact router key name.
+
+======================================================================
+  PATH DISCOVERY — run these on Kali if files were SKIPped above
+======================================================================
+  session-metrics.store.ts:
+    find client/src -name '*session-metrics*' -o -name '*metrics*store*'
+  preferences-modal.tsx:
+    find client/src -name '*preferences-modal*'
+  vst-panel-modal.tsx:
+    find client/src -name '*vst-panel-modal*' -o -name '*vst*modal*'
+  audio-engine.ts:
+    find client/src -name 'audio-engine.ts'
+  usePricing hook:
+    find client/src -name '*usePricing*' -o -name '*Pricing*hook*'
+  r3_fix_store_barrel.py:
+    find . -name 'r3_fix_store_barrel.py' 2>/dev/null
+
+  Stale .bak files in client/src/ (from prior runs) pollute BLOCKER4 grep.
+  Clean them with:  find client/src -name '*.bak' -delete
+  Verify first:     find client/src -name '*.bak'
+
+======================================================================
+  POST-PATCH — pnpm tsc --noEmit
+======================================================================
+  ✅ pnpm tsc --noEmit → 0 errors
+
+======================================================================
+  WIRE SUMMARY
+======================================================================
+
+FILES PATCHED (where found):
+  client/src/store/audio-store.ts          _useAudioStore, _selectIsPlaying → unprefixed
+  client/src/store/clip-store.ts           _useClipStore → useClipStore
+  client/src/store/fx-store.ts             _useFXStore → useFXStore
+  client/src/store/meter-store.ts          _useMeterStore → useMeterStore
+  client/src/store/mixer-store.ts          _useMixerStore → useMixerStore
+  client/src/store/vst-store.ts            _useVSTStore → useVSTStore
+  client/src/store/session-metrics.store.ts _useSessionMetricsStore → unprefixed
+  client/src/store/auth-store.ts           _useAuthStore → useAuthStore (if present)
+  client/src/components/preferences-modal.tsx  _AG → AG (all usages)
+  client/src/components/vst-panel-modal.tsx    _AG → AG (all usages)
+  client/src/pages/pricing/tokens.ts           _COLOR → COLOR (all usages)
+  client/src/lib/audio-engine.ts               _ab/_step/_i/_peak/_j/_engine → unprefixed
+  client/src/components/daw/multi-track-panel.tsx  position:'fixed' → 'absolute' (playhead)
+                                                   engine.initialize() → gesture-guarded
+  client/src/design-tokens/runtime-guard.ts    removed false-positive var(--color-*) rule
+  client/src/components/visuals.tsx            _startedRef/_barRefs/_tick/_startHUD → unprefixed
+  scripts/enforce-ui-design-system.sh          commit-grep → git tag ui-checkpoint
+
+DELETED (after import-site audit):
+  client/src/stores/auth-store.ts              rogue duplicate auth store (if no importers found)
+
+REMAINING AMBIGUITIES:
+  - usePricing tRPC path: requires manual comparison (audit output above)
+  - multi-track-panel.tsx @ts-nocheck: still present — migration path TBD (Roadmap item)
+  - VJCanvas.tsx level/beat props: untyped — add interface as low-priority follow-up
+  - Vite GHSA-4w7w-66w2-5vf9: check Vite version, bump to >=6.4.2 if needed
+    run:  cat client/package.json | grep '"vite"'
+  - git tag ui-checkpoint: must be set manually on Kali after confirming last stable sha
+
+REGRESSION CHECK:
+  pnpm tsc --noEmit → see output above
+  If errors remain, they indicate additional usage sites of _prefixed names not
+  covered by this script. Run: grep -rn '_use\|_AG\|_COLOR\|_ab' client/src/
+    

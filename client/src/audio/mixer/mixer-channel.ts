@@ -224,8 +224,8 @@ export class MixerChannel implements MixerChannel {
    * Move an effect within the FX chain
    */
   moveFX(fromIndex: number, toIndex: number): void {
-    const _effects = this.fxChain.getAllEffects();
-    const _fx = effects[fromIndex];
+    const effects = this.fxChain.getAllEffects();
+    const fx = effects[fromIndex];
     if (fx) this.fxChain.reorderEffect(fx.id, toIndex);
   }
   
@@ -242,7 +242,7 @@ export class MixerChannel implements MixerChannel {
     config?: any
   ): Promise<VSTFXNode> {
     try {
-      const _vstNode = await (this.fxChain as any).addEffect(vstUrl, workletName, config);
+      const vstNode = await (this.fxChain as any).addEffect(vstUrl, workletName, config);
       
       // Type assertion since we know addVSTEffect returns VSTFXNode
       if (!(vstNode instanceof (VSTFXNode as any))) {
@@ -281,7 +281,7 @@ export class MixerChannel implements MixerChannel {
    * Clear all effects from the FX chain
    */
   clearFX(): void {
-    const _effects = [...this.fxChain.getAllEffects()];
+    const effects = [...this.fxChain.getAllEffects()];
     effects.forEach(fx => this.removeFX(fx.id));
   }
 
@@ -295,17 +295,17 @@ export class MixerChannel implements MixerChannel {
   getMeterLevel(): number {
     this.analyserNode.getByteTimeDomainData(this.meterDataArray as unknown as Uint8Array<ArrayBuffer>);
     
-    let _sum = 0;
-    for (let _i = 0; i < this.meterDataArray.length; i++) {
-      const _normalized = (this.meterDataArray[i] - 128) / 128;
+    let sum = 0;
+    for (let i = 0; i < this.meterDataArray.length; i++) {
+      const normalized = (this.meterDataArray[i] - 128) / 128;
       sum += normalized * normalized;
     }
     
-    const _rms = Math.sqrt(sum / this.meterDataArray.length);
+    const rms = Math.sqrt(sum / this.meterDataArray.length);
     this._currentLevel = Math.min(1, rms * 2); // Scale up for visibility
     
     // Update peak with hold
-    const _now = Date.now();
+    const now = Date.now();
     if (this._currentLevel > this._peakLevel) {
       this._peakLevel = this._currentLevel;
       this.peakHoldTime = now;
@@ -336,7 +336,7 @@ export class MixerChannel implements MixerChannel {
    * Get frequency spectrum data
    */
   getFrequencyData(): Uint8Array {
-    const _dataArray = new Uint8Array(this.analyserNode.frequencyBinCount) as unknown as Uint8Array;
+    const dataArray = new Uint8Array(this.analyserNode.frequencyBinCount) as unknown as Uint8Array;
     this.analyserNode.getByteFrequencyData(dataArray as unknown as Uint8Array<ArrayBuffer>);
     return dataArray;
   }
@@ -395,7 +395,7 @@ export class MixerChannel implements MixerChannel {
       this.clearFX();
       
       // Restore FX chain
-      const _restoredChain = new FXChain() /* FXChain.deserialize() not implemented */;
+      const restoredChain = new FXChain() /* FXChain.deserialize() not implemented */;
       
       // Copy effects from restored chain to this channel's chain
       (restoredChain as any).effects.forEach((fx: FXNodeBase) => {
@@ -412,7 +412,7 @@ export class MixerChannel implements MixerChannel {
    * Clone this channel (creates a new channel with same settings)
    */
   clone(newId: string): MixerChannel {
-    const _clonedChannel = new MixerChannel(newId);
+    const clonedChannel = new MixerChannel(newId);
     clonedChannel.setVolume(this._volume);
     clonedChannel.setPan(this._pan);
     clonedChannel.setMute(this._muted);

@@ -14,7 +14,7 @@ import { useMixerStore } from "../store/mixer-store";
 import { useDAWStore }   from "../hooks/useDAWStore";
 
 export function loadProject(data: ProjectData): void {
-  const _mixer = useMixerStore.getState();
+  const mixer = useMixerStore.getState();
   const daw   = useDAWStore.getState();
 
   // ── Clear existing state ──────────────────────────────────────────────────

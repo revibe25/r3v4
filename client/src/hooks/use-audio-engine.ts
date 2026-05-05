@@ -9,7 +9,7 @@ export function useAudioEngine() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const _unsubscribe = instrumentEngine.subscribe(() => {
+    const unsubscribe = instrumentEngine.subscribe(() => {
       setState({ ...instrumentEngine.state });
     });
     return () => {
@@ -17,21 +17,21 @@ export function useAudioEngine() {
     };
   }, []);
 
-  const _init = useCallback(async () => {
+  const init = useCallback(async () => {
     await instrumentEngine.init();
     setIsInitialized(true);
     setState({ ...instrumentEngine.state });
   }, []);
 
   useEffect(() => {
-    const _handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
-      const _tag = document.activeElement?.tagName;
+      const tag = document.activeElement?.tagName;
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(tag || '')) return;
 
-      const _key = e.key.toLowerCase();
-      const _padIndex = PAD_KEYS.indexOf(key);
-      const _keyIndex = PIANO_KEYS.indexOf(key);
+      const key = e.key.toLowerCase();
+      const padIndex = PAD_KEYS.indexOf(key);
+      const keyIndex = PIANO_KEYS.indexOf(key);
 
       if (padIndex !== -1) {
         e.preventDefault();
@@ -47,13 +47,13 @@ export function useAudioEngine() {
   }, []);
 
   // VST loading helper for channels
-  const _loadChannelVST = useCallback(async (
+  const loadChannelVST = useCallback(async (
     channel: MixerChannel,
     vstUrl: string,
     workletName?: string
   ) => {
     try {
-      const _vstNode = await channel.addVST(vstUrl, workletName);
+      const vstNode = await channel.addVST(vstUrl, workletName);
       setState({ ...instrumentEngine.state });
       return vstNode;
     } catch (error) {

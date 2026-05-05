@@ -270,7 +270,7 @@ export type EngineEventMap = {
 type EngineListener<K extends keyof EngineEventMap> = (...args: EngineEventMap[K]) => void;
 type ToneModule = typeof ToneType;
 
-let _Tone: ToneModule | null = null;
+let Tone: ToneModule | null = null;
 
 // ── Internal Helpers ──────────────────────────────────────────────────────────
 
@@ -289,8 +289,8 @@ function rmsToLufs(rms: number): number {
 
 // Compute RMS from a Float32Array (for sidechain envelope follower)
 function computeRMS(data: Float32Array): number {
-  let _sum = 0;
-  for (let _i = 0; i < data.length; i++) sum += data[i] * data[i];
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
   return Math.sqrt(sum / data.length);
 }
 
@@ -478,7 +478,7 @@ class LoopEngine {
   private _listeners: { [K in keyof EngineEventMap]?: Set<EngineListener<K>> } = {};
 
   private constructor() {
-    for (let _i = 0; i < LFO_COUNT; i++) {
+    for (let i = 0; i < LFO_COUNT; i++) {
       this._lfos.push({
         id: i, shape: 'sine', rateSynced: true,
         rateHz: 1, rateNote: '4n', depth: 0.5,
@@ -487,10 +487,10 @@ class LoopEngine {
       });
       this._lfoScaleNodes.set(i, []);
     }
-    for (let _i = 0; i < MACRO_COUNT; i++) {
+    for (let i = 0; i < MACRO_COUNT; i++) {
       this._macros.push({
         id: i, label: `MACRO ${i + 1}`, value: 0.5,
-        target: 'none', color: '#32cd32',
+        target: 'none', color: 'var(--looper-acid-2)',
         lfoEnabled: false, lfoShape: 'sine',
         lfoRate: 0.3, lfoDepth: 0.5, lfoSync: true,
       });
@@ -603,7 +603,7 @@ class LoopEngine {
       this.metronomeAccent.volume.value = -18;
 
       // ── Per-track nodes ──────────────────────────────────────────────────
-      const _built = await Promise.all(
+      const built = await Promise.all(
         Array.from({ length: TRACK_COUNT }, (_, i) => this._buildTrack(i))
       );
       (this.tracks as EngineTrack[]).push(...built);
@@ -621,7 +621,7 @@ class LoopEngine {
       this.initialized = true;
       this.emit('ready');
     } catch (err) {
-      const _error = err instanceof Error ? err : new Error(String(err));
+      const error = err instanceof Error ? err : new Error(String(err));
       this.emit('error', error);
       throw error;
     }
@@ -630,7 +630,7 @@ class LoopEngine {
   // ── Track builder ─────────────────────────────────────────────────────────
 
   private async _buildTrack(i: number): Promise<EngineTrack> {
-    const _T = _Tone!;
+    const T = _Tone!;
 
     const outputGain    = new T.Gain(1).connect(this.masterBus);
     const panner        = new T.Panner(0).connect(outputGain);
@@ -696,7 +696,7 @@ class LoopEngine {
     const clips: ClipBuffer[] = Array.from({ length: CLIP_COUNT }, (_, ci) => ({
       buffer: null, hasContent: false,
       lengthBars: 0, name: `Clip ${ci + 1}`,
-      color: '#222222',
+      color: 'var(--dj-border)',
       state: 'empty' as const,
       _player: null, _synced: false,
     }));
@@ -725,7 +725,7 @@ class LoopEngine {
     if (!_Tone) return;
     this._lfos.forEach(lfo => {
       if (lfo._lfo) { lfo._lfo.stop(); lfo._lfo.dispose(); }
-      const _node = new _Tone.LFO({
+      const node = new _Tone.LFO({
         type:      lfo.shape as ToneType.ToneOscillatorType,
         frequency: lfo.rateSynced ? this._lfoSyncFreq(lfo.rateNote) : lfo.rateHz,
         min:       -1, max: 1,
@@ -742,7 +742,7 @@ class LoopEngine {
   private _lfoSyncFreq(note: string): number {
     if (!_Tone) return 1;
     try {
-      const _seconds = _Tone.Time(note as ToneType.Unit.Time).toSeconds();
+      const seconds = _Tone.Time(note as ToneType.Unit.Time).toSeconds();
       return 1 / seconds;
     } catch { return 1; }
   }
@@ -756,21 +756,21 @@ class LoopEngine {
     if (!lfo._lfo || !_Tone) return;
 
     // Dispose old scale nodes for this LFO
-    const _oldNodes = this._lfoScaleNodes.get(lfo.id) ?? [];
+    const oldNodes = this._lfoScaleNodes.get(lfo.id) ?? [];
     oldNodes.forEach(n => { try { n.dispose(); } catch { /* ok */ } });
     this._lfoScaleNodes.set(lfo.id, []);
 
-    const _depth = lfo.depth;
+    const depth = lfo.depth;
     const newScaleNodes: ToneType.Scale[] = [];
 
-    const _connectToParam = (param: ToneType.Param<any>, scale: number) => {
-      const _scaleNode = new _Tone.Scale(-scale, scale);
+    const connectToParam = (param: ToneType.Param<any>, scale: number) => {
+      const scaleNode = new _Tone.Scale(-scale, scale);
       newScaleNodes.push(scaleNode);
       lfo._lfo!.connect(scaleNode);
       scaleNode.connect(param);
     };
 
-    const _trackI = lfo.trackIndex;
+    const trackI = lfo.trackIndex;
 
     switch (lfo.target) {
       case 'filter':
@@ -811,10 +811,10 @@ class LoopEngine {
   private _startBeatScheduler(): void {
     if (!_Tone) return;
     const [beatsPerBar] = this._parseTimeSignature();
-    let _beat = 0;
+    let beat = 0;
 
     this._beatScheduleId = _Tone.Transport.scheduleRepeat((time) => {
-      const _bar = Math.floor(beat / beatsPerBar);
+      const bar = Math.floor(beat / beatsPerBar);
       const b   = beat % beatsPerBar;
       this._currentBar  = bar;
       this._currentBeat = b;
@@ -838,7 +838,7 @@ class LoopEngine {
       '1/2': '2n', '1/4': '4n', '1/8': '8n',
       'free': '4n', 'instant': '16n',
     };
-    const _interval = intervalMap[this._quantMode] ?? '1m';
+    const interval = intervalMap[this._quantMode] ?? '1m';
     this._quantScheduleId = _Tone.Transport.scheduleRepeat(() => {
       this.emit('quantizeTick', this._quantMode);
     }, interval as ToneType.Unit.Time);
@@ -861,12 +861,12 @@ class LoopEngine {
     if (!navigator.requestMIDIAccess) return;
     try {
       const access  = await navigator.requestMIDIAccess({ sysex: false });
-      const _outputs = Array.from(access.outputs.values());
+      const outputs = Array.from(access.outputs.values());
       if (outputs.length) this._midiOutput = outputs[0];
 
       // ── MIDI Input capture (added 2026-04-25) ───────────────────────────
       this._midiAccess = access;
-      const _inputs = Array.from(access.inputs.values());
+      const inputs = Array.from(access.inputs.values());
       if (inputs.length) {
         this._midiInput = inputs[0];
         // setMidiInputEnabled(true) may have been called before MIDI was ready
@@ -900,9 +900,9 @@ class LoopEngine {
   // ── MIDI input handler (added 2026-04-25) ──────────────────────────────────
 
   private _onMidiMessage(e: MIDIMessageEvent): void {
-    const _data = e.data;
+    const data = e.data;
     if (!data || data.length < 1) return;
-    const _status = data[0];
+    const status = data[0];
     const type   = status & 0xF0;
     const note   = data[1] ?? 0;
     const vel    = data[2] ?? 0;
@@ -914,24 +914,24 @@ class LoopEngine {
 
     // ── Note On ───────────────────────────────────────────────────────────
     if (type === 0x90 && vel > 0) {
-      const _trackIdx = this._midiNoteMap[note];
+      const trackIdx = this._midiNoteMap[note];
       if (trackIdx !== undefined) this.emit('midiNoteOn', trackIdx, note, vel);
       return;
     }
 
     // ── Note Off (status 0x80, or Note On with vel=0) ─────────────────────
     if (type === 0x80 || (type === 0x90 && vel === 0)) {
-      const _trackIdx = this._midiNoteMap[note];
+      const trackIdx = this._midiNoteMap[note];
       if (trackIdx !== undefined) this.emit('midiNoteOff', trackIdx, note);
       return;
     }
 
     // ── Control Change ────────────────────────────────────────────────────
     if (type === 0xB0) {
-      const _norm = vel / 127;
+      const norm = vel / 127;
       this.emit('midiCC', note, vel);
       // Custom handler takes priority
-      const _handler = this._midiCCHandlers[note];
+      const handler = this._midiCCHandlers[note];
       if (handler) { handler(norm); return; }
       // Default CC map — uses confirmed public Tone.js node properties
       switch (note) {
@@ -994,7 +994,7 @@ class LoopEngine {
   /** Switch the active MIDI input port by index into getMidiInputs(). */
   selectMidiInput(index: number): void {
     if (!this._midiAccess) return;
-    const _inputs = Array.from(this._midiAccess.inputs.values());
+    const inputs = Array.from(this._midiAccess.inputs.values());
     const input  = inputs[index];
     if (!input) return;
     if (this._midiInput) this._midiInput.onmidimessage = null;
@@ -1007,7 +1007,7 @@ class LoopEngine {
   // ── Player sync helpers ───────────────────────────────────────────────────
 
   startPlayerOnTransport(i: number): void {
-    const _t = this.track(i, 'startPlayerOnTransport');
+    const t = this.track(i, 'startPlayerOnTransport');
     if (!t || !_Tone || t._playerSynced || !t.player.loaded) return;
     this._applyPlaybackMode(t);
     t.player.sync().start(0);
@@ -1015,20 +1015,20 @@ class LoopEngine {
   }
 
   setupTrack(trackId: string): void {
-    const _i = parseInt(trackId.split('-')[1], 10);
+    const i = parseInt(trackId.split('-')[1], 10);
     if (!isNaN(i) && this.tracks[i]) { /* nodes built in _buildTrack */ }
   }
 
   getTrackNodes(trackId: string): { gain: ToneType.Gain; analyser: ToneType.Analyser } | null {
-    const _i = parseInt(trackId.split('-')[1], 10);
+    const i = parseInt(trackId.split('-')[1], 10);
     if (isNaN(i)) return null;
-    const _t = this.tracks[i];
+    const t = this.tracks[i];
     if (!t) return null;
     return { gain: t.outputGain, analyser: t.analyser };
   }
 
   stopPlayerFromTransport(i: number): void {
-    const _t = this.track(i, 'stopPlayerFromTransport');
+    const t = this.track(i, 'stopPlayerFromTransport');
     if (!t || !_Tone || !t._playerSynced) return;
     try { t.player.stop(); t.player.unsync(); } catch { /* ok */ }
     t._playerSynced = false;
@@ -1054,7 +1054,7 @@ class LoopEngine {
         t.player.playbackRate = 1;
         break;
       case 'stutter': {
-        const _dur = t.player.buffer.duration;
+        const dur = t.player.buffer.duration;
         t.player.loopStart = 0;
         t.player.loopEnd   = dur * 0.25;
         t.player.reverse   = false;
@@ -1069,7 +1069,7 @@ class LoopEngine {
   }
 
   setPlaybackMode(i: number, mode: PlaybackMode): void {
-    const _t = this.track(i, 'setPlaybackMode');
+    const t = this.track(i, 'setPlaybackMode');
     if (!t) return;
     t.playbackMode = mode;
     if (t._playerSynced) this._applyPlaybackMode(t);
@@ -1078,22 +1078,22 @@ class LoopEngine {
   // ── Undo / Redo ───────────────────────────────────────────────────────────
 
   pushUndo(i: number): void {
-    const _t = this.track(i, 'pushUndo');
+    const t = this.track(i, 'pushUndo');
     if (!t || !t.player.loaded) return;
-    const _copy = t.player.buffer.get();
+    const copy = t.player.buffer.get();
     if (!copy) return;
     if (t._undoStack.length >= UNDO_DEPTH) t._undoStack.shift();
     if (_Tone) {
-      const _buf = new _Tone.ToneAudioBuffer(copy);
+      const buf = new _Tone.ToneAudioBuffer(copy);
       t._undoStack.push(buf);
       this.emit('undoPush', i, t._undoStack.length);
     }
   }
 
   undoTrack(i: number): boolean {
-    const _t = this.track(i, 'undoTrack');
+    const t = this.track(i, 'undoTrack');
     if (!t || t._undoStack.length === 0) return false;
-    const _prev = t._undoStack.pop()!;
+    const prev = t._undoStack.pop()!;
     this.stopPlayerFromTransport(i);
     t.player.buffer = prev;
     this.startPlayerOnTransport(i);
@@ -1108,27 +1108,27 @@ class LoopEngine {
   // ── Track FX controls ────────────────────────────────────────────────────
 
   setTrackVolume(i: number, vol: number): void {
-    const _t = this.track(i, 'setTrackVolume');
+    const t = this.track(i, 'setTrackVolume');
     if (t) lerpParam(t.outputGain.gain as any, clamp(vol, 0, 1.5));
   }
 
   setTrackInputGain(i: number, gain: number): void {
-    const _t = this.track(i, 'setTrackInputGain');
+    const t = this.track(i, 'setTrackInputGain');
     if (t) lerpParam(t.inputGain.gain as any, clamp(gain, 0, 4));
   }
 
   setTrackPan(i: number, pan: number): void {
-    const _t = this.track(i, 'setTrackPan');
+    const t = this.track(i, 'setTrackPan');
     if (t) lerpParam(t.panner.pan as any, clamp(pan, -1, 1));
   }
 
   setTrackEQ(i: number, band: 'low' | 'mid' | 'high', val: number): void {
-    const _t = this.track(i, 'setTrackEQ');
+    const t = this.track(i, 'setTrackEQ');
     if (t) t.eq[band].value = clamp(val, -24, 24);
   }
 
   setTrackCompressor(i: number, threshold: number, ratio: number, attack = 0.003, release = 0.15): void {
-    const _t = this.track(i, 'setTrackCompressor');
+    const t = this.track(i, 'setTrackCompressor');
     if (!t) return;
     t.compressor.threshold.value = clamp(threshold, -60, 0);
     t.compressor.ratio.value     = clamp(ratio, 1, 20);
@@ -1137,19 +1137,19 @@ class LoopEngine {
   }
 
   setTrackGate(i: number, threshold: number): void {
-    const _t = this.track(i, 'setTrackGate');
+    const t = this.track(i, 'setTrackGate');
     if (t) (t.gate as any).threshold = clamp(threshold, -80, 0);
   }
 
   setTrackSaturation(i: number, amount: number): void {
-    const _t = this.track(i, 'setTrackSaturation');
+    const t = this.track(i, 'setTrackSaturation');
     if (!t) return;
     t.saturator.distortion = clamp(amount, 0, 1);
     t.saturator.wet.value  = amount > 0.01 ? 1 : 0;
   }
 
   setTrackChorus(i: number, depth: number, freq: number, wet: number): void {
-    const _t = this.track(i, 'setTrackChorus');
+    const t = this.track(i, 'setTrackChorus');
     if (!t) return;
     (t.chorus as any).depth     = clamp(depth, 0, 1);
     (t.chorus as any).frequency = clamp(freq, 0.1, 10);
@@ -1157,7 +1157,7 @@ class LoopEngine {
   }
 
   setTrackFlanger(i: number, depth: number, freq: number, wet: number): void {
-    const _t = this.track(i, 'setTrackFlanger');
+    const t = this.track(i, 'setTrackFlanger');
     if (!t) return;
     (t.flanger as any).depth     = clamp(depth, 0, 1);
     (t.flanger as any).frequency = clamp(freq, 0.05, 5);
@@ -1165,19 +1165,19 @@ class LoopEngine {
   }
 
   setTrackPhaser(i: number, freq: number, wet: number): void {
-    const _t = this.track(i, 'setTrackPhaser');
+    const t = this.track(i, 'setTrackPhaser');
     if (!t) return;
     (t.phaser as any).frequency = clamp(freq, 0.1, 20);
     lerpParam(t.phaser.wet as any, clamp(wet, 0, 1));
   }
 
   setTrackBitCrusher(i: number, bits: number): void {
-    const _t = this.track(i, 'setTrackBitCrusher');
+    const t = this.track(i, 'setTrackBitCrusher');
     if (t) t.bitCrusher.bits = clamp(Math.round(bits), 1, 16) as any;
   }
 
   setTrackTremolo(i: number, freq: number, depth: number, wet: number): void {
-    const _t = this.track(i, 'setTrackTremolo');
+    const t = this.track(i, 'setTrackTremolo');
     if (!t) return;
     (t.tremolo as any).frequency = clamp(freq, 0.1, 20);
     (t.tremolo as any).depth     = clamp(depth, 0, 1);
@@ -1185,34 +1185,34 @@ class LoopEngine {
   }
 
   setTrackPitch(i: number, semitones: number, cents = 0): void {
-    const _t = this.track(i, 'setTrackPitch');
+    const t = this.track(i, 'setTrackPitch');
     if (!t) return;
     t.pitchShift.pitch = clamp(semitones + cents / 100, -24, 24);
   }
 
   setHarmonyMode(i: number, mode: HarmonyMode): void {
-    const _t = this.track(i, 'setHarmonyMode');
+    const t = this.track(i, 'setHarmonyMode');
     if (!t) return;
     t.pitchShift.pitch     = HARMONY_SEMITONES[mode];
     t.pitchShift.wet.value = HARMONY_WET[mode];
   }
 
   setReverbSend(i: number, amount: number): void {
-    const _t = this.track(i, 'setReverbSend');
+    const t = this.track(i, 'setReverbSend');
     if (!t) return;
     t.reverbSendAmount = amount;
     lerpParam(t.reverbSend.gain as any, clamp(amount, 0, 1));
   }
 
   setDelaySend(i: number, amount: number): void {
-    const _t = this.track(i, 'setDelaySend');
+    const t = this.track(i, 'setDelaySend');
     if (!t) return;
     t.delaySendAmount = amount;
     lerpParam(t.delaySend.gain as any, clamp(amount, 0, 1));
   }
 
   setChorusSend(i: number, amount: number): void {
-    const _t = this.track(i, 'setChorusSend');
+    const t = this.track(i, 'setChorusSend');
     if (!t) return;
     t.chorusSendAmount = amount;
     lerpParam(t.chorusSend.gain as any, clamp(amount, 0, 1));
@@ -1221,14 +1221,14 @@ class LoopEngine {
   // ── Mute / Solo ───────────────────────────────────────────────────────────
 
   muteTrack(i: number, muted: boolean): void {
-    const _t = this.track(i, 'muteTrack');
+    const t = this.track(i, 'muteTrack');
     if (!t) return;
     t.isMuted = muted;
     this._updateSoloMuteBus();
   }
 
   soloTrack(i: number, soloed: boolean): void {
-    const _t = this.track(i, 'soloTrack');
+    const t = this.track(i, 'soloTrack');
     if (!t) return;
     t.isSoloed = soloed;
     this._soloActive = this.tracks.some(tr => tr.isSoloed);
@@ -1238,22 +1238,22 @@ class LoopEngine {
 
   private _updateSoloMuteBus(): void {
     this.tracks.forEach(t => {
-      const _hear = t.isMuted ? false : this._soloActive ? t.isSoloed : true;
+      const hear = t.isMuted ? false : this._soloActive ? t.isSoloed : true;
       lerpParam(t.outputGain.gain as any, hear ? 1 : 0, 0.02);
     });
   }
 
   cueTrack(i: number, cued: boolean): void {
-    const _t = this.track(i, 'cueTrack');
+    const t = this.track(i, 'cueTrack');
     if (t) t.isCued = cued;
   }
 
   incrementOverdub(i: number): void {
-    const _t = this.track(i); if (t) t.overdubLayers++;
+    const t = this.track(i); if (t) t.overdubLayers++;
   }
 
   resetOverdub(i: number): void {
-    const _t = this.track(i);
+    const t = this.track(i);
     if (t) { t.overdubLayers = 0; this.stopPlayerFromTransport(i); }
   }
 
@@ -1431,8 +1431,8 @@ class LoopEngine {
     const compMap  = { low: this._mbLowComp,  mid: this._mbMidComp,  high: this._mbHighComp  };
     const gainMap  = { low: this._mbLowGain,  mid: this._mbMidGain,  high: this._mbHighGain  };
 
-    const _comp = compMap[band];
-    const _gain = gainMap[band];
+    const comp = compMap[band];
+    const gain = gainMap[band];
 
     if (comp) {
       comp.threshold.value = state.threshold;
@@ -1466,7 +1466,7 @@ class LoopEngine {
   }
 
   private _disposeMBNodes(): void {
-    const _nodes = [
+    const nodes = [
       this._mbLowLP, this._mbMidHP, this._mbMidLP, this._mbHighHP,
       this._mbLowComp, this._mbMidComp, this._mbHighComp,
       this._mbLowGain, this._mbMidGain, this._mbHighGain,
@@ -1507,8 +1507,8 @@ class LoopEngine {
     if (!this.ready('setHarmonicExciter') || !_Tone) return;
 
     const wetAmt  = clamp(amount, 0, 1);
-    const _hpfFreq = clamp(tone, 2000, 12000);
-    const _satDrive = drive !== undefined ? clamp(drive, 0, 1) : this._exciterState.drive;
+    const hpfFreq = clamp(tone, 2000, 12000);
+    const satDrive = drive !== undefined ? clamp(drive, 0, 1) : this._exciterState.drive;
 
     this._exciterState = { amount: wetAmt, tone: hpfFreq, drive: satDrive };
 
@@ -1598,7 +1598,7 @@ class LoopEngine {
    */
   enableSidechain(sourceTrackIndex: number, amount: number, attack = 0.003, release = 0.15): void {
     if (!this.ready('enableSidechain') || !_Tone) return;
-    const _t = this.tracks[sourceTrackIndex];
+    const t = this.tracks[sourceTrackIndex];
     if (!t) { console.warn(`[LoopEngine] enableSidechain: track ${sourceTrackIndex} not found`); return; }
 
     // Clear any existing sidechain schedule
@@ -1614,23 +1614,23 @@ class LoopEngine {
     // getDraw().schedule() ensures the gain write happens on the audio thread
     this._sidechainScheduleId = _Tone.Transport.scheduleRepeat((time) => {
       _Tone!.getDraw().schedule(() => {
-        const _src = this.tracks[this._sidechainSourceIdx];
+        const src = this.tracks[this._sidechainSourceIdx];
         if (!src) return;
 
         // Read waveform RMS from source analyser
-        const _waveform = src.analyser.getValue() as Float32Array;
+        const waveform = src.analyser.getValue() as Float32Array;
         const rms      = computeRMS(waveform);
         const env      = clamp(rms, 0, 1);
 
         // IIR smoothing: attack when signal rises, release when falls
-        const _coeff = env > this._sidechainEnvLevel
+        const coeff = env > this._sidechainEnvLevel
           ? Math.exp(-1 / (this._sidechainAttack * 44100 / 64))   // ~audio-rate
           : Math.exp(-1 / (this._sidechainRelease * 44100 / 64));
 
         this._sidechainEnvLevel = coeff * this._sidechainEnvLevel + (1 - coeff) * env;
 
         // Gain reduction: 1 = no duck, (1 - amount) = max duck
-        const _duck = 1 - this._sidechainEnvLevel * this._sidechainAmount;
+        const duck = 1 - this._sidechainEnvLevel * this._sidechainAmount;
         this.sidechainGain.gain.setTargetAtTime(clamp(duck, 0, 1), ctx.currentTime, 0.015);
       }, time);
     }, SC_UPDATE_INTERVAL);
@@ -1721,10 +1721,10 @@ class LoopEngine {
 
   private _startGrainScheduler(): void {
     if (!_Tone) return;
-    const _t = this.tracks[this._granularSourceTrack];
+    const t = this.tracks[this._granularSourceTrack];
     if (!t?.player.loaded) return;
 
-    const _dest = this._granularWidener ?? this.masterBus;
+    const dest = this._granularWidener ?? this.masterBus;
 
     this._granularScheduleId = _Tone.Transport.scheduleRepeat((time) => {
       if (!_Tone || !this._granularFrozen) return;
@@ -1737,18 +1737,18 @@ class LoopEngine {
       const gs     = this._grainState.grainSize;
       const rate   = Math.pow(2, this._grainState.pitch / 12);
 
-      for (let _g = 0; g < this._grainState.grainCount; g++) {
+      for (let g = 0; g < this._grainState.grainCount; g++) {
         // Randomized start within buffer, leaving room for grain length
-        const _maxStart = Math.max(0, dur - gs);
-        const _startPos = Math.random() * maxStart;
+        const maxStart = Math.max(0, dur - gs);
+        const startPos = Math.random() * maxStart;
 
-        const _grain = new _Tone.Player(buf).connect(dest);
+        const grain = new _Tone.Player(buf).connect(dest);
         grain.playbackRate = rate;
 
         // Optional stereo spread per grain
         if (this._grainState.spread > 0) {
-          const _pan = (Math.random() * 2 - 1) * this._grainState.spread;
-          const _panner = new _Tone.Panner(pan).connect(dest);
+          const pan = (Math.random() * 2 - 1) * this._grainState.spread;
+          const panner = new _Tone.Panner(pan).connect(dest);
           grain.disconnect(dest);
           grain.connect(panner);
           // Dispose panner after grain
@@ -1756,7 +1756,7 @@ class LoopEngine {
         }
 
         // Stagger grains within the interval for richer texture
-        const _staggerSec = (g / this._grainState.grainCount) * gs * 0.5;
+        const staggerSec = (g / this._grainState.grainCount) * gs * 0.5;
         grain.start(time + staggerSec, startPos, gs);
         grain.stop(time + staggerSec + gs);
 
@@ -1798,7 +1798,7 @@ class LoopEngine {
    */
   setGranularSpread(spread: number): void {
     if (!this.ready('setGranularSpread') || !_Tone) return;
-    const _width = clamp(spread, 0, 1);
+    const width = clamp(spread, 0, 1);
     this._grainState.spread = width;
 
     if (!this._granularWidener) {
@@ -1812,9 +1812,9 @@ class LoopEngine {
   // ── Clip launcher ─────────────────────────────────────────────────────────
 
   async loadClip(trackIndex: number, clipIndex: number, buffer: ToneType.ToneAudioBuffer): Promise<void> {
-    const _t = this.track(trackIndex, 'loadClip');
+    const t = this.track(trackIndex, 'loadClip');
     if (!t || !_Tone) return;
-    const _clip = t.clips[clipIndex];
+    const clip = t.clips[clipIndex];
     if (!clip) return;
 
     if (clip._player) {
@@ -1833,9 +1833,9 @@ class LoopEngine {
   }
 
   launchClip(trackIndex: number, clipIndex: number): void {
-    const _t = this.track(trackIndex, 'launchClip');
+    const t = this.track(trackIndex, 'launchClip');
     if (!t || !_Tone) return;
-    const _clip = t.clips[clipIndex];
+    const clip = t.clips[clipIndex];
     if (!clip?.hasContent || !clip._player) return;
 
     t.clips.forEach((c, ci) => {
@@ -1851,9 +1851,9 @@ class LoopEngine {
   }
 
   stopClip(trackIndex: number, clipIndex: number): void {
-    const _t = this.track(trackIndex, 'stopClip');
+    const t = this.track(trackIndex, 'stopClip');
     if (!t) return;
-    const _clip = t.clips[clipIndex];
+    const clip = t.clips[clipIndex];
     if (!clip?._player) return;
     if (clip._synced) {
       try { clip._player.stop(); clip._player.unsync(); } catch { /* ok */ }
@@ -1864,9 +1864,9 @@ class LoopEngine {
   }
 
   setClipMeta(trackIndex: number, clipIndex: number, name: string, color: string): void {
-    const _t = this.track(trackIndex);
+    const t = this.track(trackIndex);
     if (!t) return;
-    const _clip = t.clips[clipIndex];
+    const clip = t.clips[clipIndex];
     if (clip) { clip.name = name; clip.color = color; }
   }
 
@@ -1894,14 +1894,14 @@ class LoopEngine {
       return;
     }
 
-    const _t = this.track(config.trackIndex);
+    const t = this.track(config.trackIndex);
     if (!t?.player.loaded) return;
 
     this._beatRepeat._scheduleId = _Tone.Transport.scheduleRepeat((time) => {
       if (Math.random() > config.chance) return;
 
       const dur  = _Tone!.Time(config.division as ToneType.Unit.Time).toSeconds() * config.length;
-      const _frag = new _Tone.Player(t.player.buffer).connect(t.inputGain);
+      const frag = new _Tone.Player(t.player.buffer).connect(t.inputGain);
 
       if (config.variation === 'pitch') {
         frag.playbackRate = Math.pow(2, (Math.floor(Math.random() * 5) - 2) / 12);
@@ -1913,7 +1913,7 @@ class LoopEngine {
         frag.playbackRate = Math.pow(2, config.pitch / 12);
       }
 
-      const _startOff = Math.random() * (t.player.buffer.duration * 0.5);
+      const startOff = Math.random() * (t.player.buffer.duration * 0.5);
       frag.start(time, startOff, dur);
       frag.stop(time + dur);
       setTimeout(() => { try { frag.dispose(); } catch { /* ok */ } }, (dur + 0.5) * 1000);
@@ -1924,7 +1924,7 @@ class LoopEngine {
 
   setBeatRepeatPitch(semitones: number): void {
     if (!this.ready('setBeatRepeatPitch')) return;
-    const _pitch = clamp(semitones, -24, 24);
+    const pitch = clamp(semitones, -24, 24);
     this._beatRepeat.pitch = pitch;
     if (this._beatRepeat.enabled) {
       this.setBeatRepeat({
@@ -1943,7 +1943,7 @@ class LoopEngine {
 
   setLFO(id: number, config: Partial<LFOState>): void {
     if (id < 0 || id >= LFO_COUNT) return;
-    const _lfo = this._lfos[id];
+    const lfo = this._lfos[id];
     Object.assign(lfo, config);
 
     if (!_Tone || !lfo._lfo) return;
@@ -1967,7 +1967,7 @@ class LoopEngine {
 
   setMacro(id: number, value: number): void {
     if (id < 0 || id >= MACRO_COUNT) return;
-    const _m = this._macros[id];
+    const m = this._macros[id];
     m.value = clamp(value, 0, 1);
     this._applyMacro(m);
     this.emit('macroChange', id, m.value, m.target);
@@ -1985,7 +1985,7 @@ class LoopEngine {
 
   private _applyMacro(m: MacroKnob): void {
     if (!this.ready()) return;
-    const _v = m.value;
+    const v = m.value;
     switch (m.target) {
       case 'filter':      this.setGlobalFilter(20 + v * 19980);  break;
       case 'reverb':      this.setGlobalReverb(2.5, v);          break;
@@ -2041,7 +2041,7 @@ class LoopEngine {
    */
   setReverbPreDelay(seconds: number): void {
     if (!this.ready('setReverbPreDelay') || !_Tone) return;
-    const _delayTime = clamp(seconds, 0, 0.5);
+    const delayTime = clamp(seconds, 0, 0.5);
 
     if (!this._reverbPreDelayNode) {
       this._reverbPreDelayNode = new _Tone.Delay(delayTime, 0.5);
@@ -2098,45 +2098,45 @@ class LoopEngine {
   // ── Metering / Visualisation ──────────────────────────────────────────────
 
   getTrackLevel(i: number): number {
-    const _t = this.track(i); if (!t) return 0;
+    const t = this.track(i); if (!t) return 0;
     const v     = t.meter.getValue();
-    const _level = typeof v === 'number' ? v : (v as number[])[0] ?? 0;
+    const level = typeof v === 'number' ? v : (v as number[])[0] ?? 0;
     if (level >= 0.99 && !t.clipHeld) { t.clipHeld = true; this.emit('clipDetected', i); }
     return level;
   }
 
   getStereoLevel(i: number): StereoLevel {
-    const _t = this.track(i);
+    const t = this.track(i);
     if (!t) return { L: 0, R: 0, peak: 0, clip: false, lufs: -70 };
-    const _toM = (v: number | number[]) => typeof v === 'number' ? v : (v[0] ?? 0);
+    const toM = (v: number | number[]) => typeof v === 'number' ? v : (v[0] ?? 0);
     const L    = toM(t.meterL.getValue());
     const R    = toM(t.meterR.getValue());
-    const _peak = Math.max(L, R);
-    const _lufs = rmsToLufs(peak);
+    const peak = Math.max(L, R);
+    const lufs = rmsToLufs(peak);
     if (peak >= 0.99 && !t.clipHeld) { t.clipHeld = true; this.emit('clipDetected', i); }
     return { L, R, peak, clip: t.clipHeld, lufs };
   }
 
   resetClip(i: number): void {
-    const _t = this.track(i); if (t) t.clipHeld = false;
+    const t = this.track(i); if (t) t.clipHeld = false;
   }
 
   getMasterLevel(): number {
     if (!this.ready()) return 0;
-    const _v = this.masterMeter.getValue();
+    const v = this.masterMeter.getValue();
     return typeof v === 'number' ? v : (v as number[])[0] ?? 0;
   }
 
   getMasterLufs(): number { return rmsToLufs(this.getMasterLevel()); }
 
   getTrackWaveform(i: number): Float32Array {
-    const _t = this.track(i);
+    const t = this.track(i);
     if (!t) return new Float32Array(ANALYSER_SIZE);
     return t.analyser.getValue() as Float32Array;
   }
 
   getTrackFft(i: number): Float32Array {
-    const _t = this.track(i);
+    const t = this.track(i);
     if (!t) return new Float32Array(FFT_SIZE / 2);
     return t.fft.getValue() as Float32Array;
   }
@@ -2158,7 +2158,7 @@ class LoopEngine {
   }
 
   setBpm(bpm: number): void {
-    const _c = clamp(bpm, 20, 300);
+    const c = clamp(bpm, 20, 300);
     this._pendingBpm = c;
     if (this.initialized && _Tone) {
       _Tone.Transport.bpm.value = c;
@@ -2172,14 +2172,14 @@ class LoopEngine {
   }
 
   tapTempo(): number {
-    const _now = performance.now();
+    const now = performance.now();
     this._tapTimes.push(now);
     if (this._tapTimes.length > TAP_HISTORY + 1) this._tapTimes.shift();
     if (this._tapTimes.length < 2) return this._pendingBpm;
-    let _total = 0;
-    for (let _i = 1; i < this._tapTimes.length; i++)
+    let total = 0;
+    for (let i = 1; i < this._tapTimes.length; i++)
       total += this._tapTimes[i] - this._tapTimes[i - 1];
-    const _bpm = clamp(Math.round(60000 / (total / (this._tapTimes.length - 1))), 40, 240);
+    const bpm = clamp(Math.round(60000 / (total / (this._tapTimes.length - 1))), 40, 240);
     this.setBpm(bpm);
     return bpm;
   }
@@ -2255,7 +2255,7 @@ class LoopEngine {
 
   // ── Scene snapshots ───────────────────────────────────────────────────────
 
-  captureScene(id: string, label: string, color = '#333'): SceneSnapshot {
+  captureScene(id: string, label: string, color = 'var(--dj-dimmer)'): SceneSnapshot {
     const scene: SceneSnapshot = {
       id, label, color,
       bpm: this.getBpm(),
@@ -2352,12 +2352,12 @@ class LoopEngine {
   morphScenes(from: SceneSnapshot, to: SceneSnapshot, durationMs = 2000): void {
     cancelAnimationFrame(this._morphRafId);
     const start   = performance.now();
-    const _totalMs = durationMs;
+    const totalMs = durationMs;
     const lerp    = (a: number, b: number, t: number) => a + (b - a) * t;
 
-    const _tick = () => {
-      const _elapsed = performance.now() - start;
-      const _t = Math.min(1, elapsed / totalMs);
+    const tick = () => {
+      const elapsed = performance.now() - start;
+      const t = Math.min(1, elapsed / totalMs);
 
       this.setBpm(lerp(from.bpm, to.bpm, t));
       this.setGlobalFilter(lerp(from.fx.filterFreq, to.fx.filterFreq, t));
@@ -2369,7 +2369,7 @@ class LoopEngine {
       this.setGlobalStereoWidth(lerp(from.fx.stereoWidth, to.fx.stereoWidth, t));
 
       from.tracks.forEach((fs, i) => {
-        const _ts = to.tracks[i];
+        const ts = to.tracks[i];
         if (!ts) return;
         this.setTrackVolume(i, lerp(fs.volume, ts.volume, t));
         this.setTrackPan(i,    lerp(fs.pan,    ts.pan,    t));
@@ -2404,7 +2404,7 @@ class LoopEngine {
 
   private track(index: number, caller?: string): EngineTrack | null {
     if (!this.ready(caller)) return null;
-    const _t = this.tracks[index];
+    const t = this.tracks[index];
     if (!t) { console.warn(`[LoopEngine] track(${index}) out of range.`); return null; }
     return t;
   }
@@ -2443,7 +2443,7 @@ class LoopEngine {
     // LFOs + Scale nodes
     this._lfos.forEach(lfo => {
       // Dispose scale nodes first
-      const _scales = this._lfoScaleNodes.get(lfo.id) ?? [];
+      const scales = this._lfoScaleNodes.get(lfo.id) ?? [];
       scales.forEach(n => { try { n.dispose(); } catch { /* ok */ } });
       try { lfo._lfo?.stop(); lfo._lfo?.dispose(); } catch { /* ok */ }
       lfo._lfo = null;
@@ -2503,7 +2503,7 @@ class LoopEngine {
     this.initialized     = false;
     _Tone                = null;
     LoopEngine._instance = null;
-    _engine              = null;
+    engine              = null;
     this.emit('disposed');
     this._listeners = {};
   }
@@ -2511,11 +2511,11 @@ class LoopEngine {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-let _engine: LoopEngine | null = null;
+let engine: LoopEngine | null = null;
 
 export function getLoopEngine(): LoopEngine {
-  if (!_engine) _engine = LoopEngine.getInstance();
-  return _engine;
+  if (!engine) engine = LoopEngine.getInstance();
+  return engine;
 }
 
 export { LoopEngine };

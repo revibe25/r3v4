@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--accent-cyan) (cyan)
+// Reason: Audio engine playhead indicator — live cursor on instrument surface
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * Instrument Page — Acid Grid: Component Edition
  *
@@ -49,9 +54,9 @@ interface InstrumentPageProps {
 }
 
 // ── Lazy panels (code-split: only loaded when the FX panel opens) ─────────
-const _WaveformEditor = lazy(() =>
+const WaveformEditor = lazy(() =>
   import('@/components/waveform-editor').then(m => ({ default: m.WaveformEditor })));
-const _LoopStation505 = lazy(() =>
+const LoopStation505 = lazy(() =>
   import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────
@@ -65,27 +70,27 @@ const KEYBOARD_SHORTCUTS = {
 // STYLES
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _STYLES = `
+const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* ── Variables ─────────────────────────────────────────────────────────── */
 :root {
-  --ag-black:  #060606;
+  --ag-black:  var(--void);
   --ag-ink:    #0a0a0a;
   --ag-panel:  #0d0d0d;
-  --ag-card:   #0f0f0f;
+  --ag-card:   var(--t-b1);
   --ag-border: #1c1c1c;
   --ag-mute:   #2a2a2a;
-  --ag-dim:    #3a3a3a;
-  --ag-mid:    #666;
-  --ag-soft:   #888;
+  --ag-dim:    var(--neutral-700);
+  --ag-mid:    var(--dj-muted);
+  --ag-soft:   var(--text-dim);
   --ag-acid:   #a3e635;
-  --ag-acid2:  #84cc16;
-  --ag-acid-d: #4d6b18;
-  --ag-white:  #f0f0f0;
+  --ag-acid2:  var(--looper-lime);
+  --ag-acid-d: var(--status-ok-dim);
+  --ag-white:  var(--daw-fg);
   --ag-err:    #ff3b3b;
   --ag-rec:    #ef4444;
-  --ag-cyan:   #00F5FF;   /* PRD §3 canonical active-state cyan */
+  --ag-cyan:   var(--accent-cyan);   /* PRD §3 canonical active-state cyan */
 }
 
 /* ── Shell ─────────────────────────────────────────────────────────────── */
@@ -278,10 +283,10 @@ const _STYLES = `
 /* Individual pad buttons */
 .ag-frame [data-testid^="pad-"] {
   border-radius: 0 !important;
-  border: 1px solid #3a3a3a !important;
-  border-top: 1px solid #4a4a4a !important;
-  border-bottom: 2px solid #111 !important;
-  background: linear-gradient(180deg, #2a2a2a 0%, #1c1c1c 60%, #141414 100%) !important;
+  border: 1px solid var(--neutral-700) !important;
+  border-top: 1px solid var(--surface) !important;
+  border-bottom: 2px solid var(--dj-surface2) !important;
+  background: linear-gradient(180deg, #2a2a2a 0%, #1c1c1c 60%, var(--t-b2) 100%) !important;
   color: var(--ag-white) !important;
   font-family: 'IBM Plex Mono', monospace !important;
   font-size: 9px !important;
@@ -297,7 +302,7 @@ const _STYLES = `
 .ag-frame [data-testid^="pad-"]:hover {
   border-color: var(--ag-acid-d) !important;
   border-top-color: var(--ag-acid) !important;
-  background: linear-gradient(180deg, #333 0%, #242424 60%, #1a1a1a 100%) !important;
+  background: linear-gradient(180deg, var(--dj-dimmer) 0%, var(--panel-mid) 60%, var(--t-b2x) 100%) !important;
   color: var(--ag-acid) !important;
   box-shadow: inset 0 1px 0 rgba(163,230,53,.15), 0 0 8px rgba(163,230,53,.1) !important;
 }
@@ -308,7 +313,7 @@ const _STYLES = `
 .ag-frame [data-testid^="pad-"].active {
   background: linear-gradient(180deg, var(--ag-acid) 0%, var(--ag-acid2) 100%) !important;
   border-color: var(--ag-acid) !important;
-  border-top-color: #d4ff40 !important;
+  border-top-color: var(--accent-neon-lime) !important;
   color: var(--ag-black) !important;
   box-shadow: 0 0 0 1px var(--ag-acid), 0 0 24px rgba(163,230,53,.6), inset 0 0 16px rgba(163,230,53,.3) !important;
 }
@@ -377,49 +382,49 @@ const _STYLES = `
 /* White keys — pure white */
 .ag-frame [data-testid^="piano-key-"].rounded-b-lg {
   border-radius: 0 !important;
-  background: #ffffff !important;
-  border: 1px solid #ccc !important;
+  background: var(--white) !important;
+  border: 1px solid var(--daw-ghost) !important;
   border-top: none !important;
-  border-bottom: 3px solid #aaa !important;
-  color: #333 !important;
-  box-shadow: inset 0 -2px 4px rgba(0,0,0,.1), 1px 0 0 #ccc !important;
+  border-bottom: 3px solid var(--daw-sub) !important;
+  color: var(--dj-dimmer) !important;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,.1), 1px 0 0 var(--daw-ghost) !important;
   transition: background .05s, border-color .05s, box-shadow .05s !important;
 }
 
 /* White key active */
 .ag-frame [data-testid^="piano-key-"].rounded-b-lg:active,
 .ag-frame [data-testid^="piano-key-"].rounded-b-lg.bg-white {
-  background: #ffffff !important;
-  border-color: #aaa !important;
-  color: #333 !important;
+  background: var(--white) !important;
+  border-color: var(--daw-sub) !important;
+  color: var(--dj-dimmer) !important;
   box-shadow: inset 0 3px 8px rgba(0,0,0,.15) !important;
 }
 
 /* White key hover */
 .ag-frame [data-testid^="piano-key-"].rounded-b-lg:hover:not(:active) {
-  background: #f5f5f5 !important;
-  border-color: #bbb !important;
-  color: #333 !important;
+  background: var(--text-primary) !important;
+  border-color: var(--text-dim) !important;
+  color: var(--dj-dimmer) !important;
   box-shadow: inset 0 -2px 4px rgba(0,0,0,.08) !important;
 }
 
 /* Black keys — pure black */
 .ag-frame [data-testid^="piano-key-"].rounded-b-md {
   border-radius: 0 !important;
-  background: #000000 !important;
-  border: 1px solid #222 !important;
-  border-bottom: 3px solid #000 !important;
+  background: var(--dj-black) !important;
+  border: 1px solid var(--dj-border) !important;
+  border-bottom: 3px solid var(--dj-black) !important;
   box-shadow: 2px 4px 8px rgba(0,0,0,.9) !important;
 }
 .ag-frame [data-testid^="piano-key-"].rounded-b-md:active,
 .ag-frame [data-testid^="piano-key-"].rounded-b-md.bg-black {
-  background: #000000 !important;
-  border-color: #333 !important;
+  background: var(--dj-black) !important;
+  border-color: var(--dj-dimmer) !important;
   box-shadow: inset 0 2px 6px rgba(0,0,0,.6) !important;
 }
 .ag-frame [data-testid^="piano-key-"].rounded-b-md:hover:not(:active) {
   background: #0a0a0a !important;
-  border-color: #333 !important;
+  border-color: var(--dj-dimmer) !important;
   box-shadow: 0 4px 10px rgba(0,0,0,.8) !important;
 }
 
@@ -430,10 +435,10 @@ const _STYLES = `
 }
 .ag-frame [data-testid^="piano-key-"].rounded-b-md span {
   font-family: 'IBM Plex Mono', monospace !important;
-  color: #888 !important; font-size: 8px !important;
+  color: var(--text-dim) !important; font-size: 8px !important;
 }
 .ag-frame [data-testid^="piano-key-"]:active span,
-.ag-frame [data-testid^="piano-key-"]:hover span { color: #333 !important; }
+.ag-frame [data-testid^="piano-key-"]:hover span { color: var(--dj-dimmer) !important; }
 
 /* Velocity fill — restyle to acid gradient */
 .ag-frame .bg-gradient-to-t.from-blue-400\/40 {
@@ -960,7 +965,7 @@ const _STYLES = `
 .ag-panel-scroll::-webkit-scrollbar       { width: 4px; }
 .ag-panel-scroll::-webkit-scrollbar-track { background: var(--ag-ink); }
 .ag-panel-scroll::-webkit-scrollbar-thumb { background: var(--ag-acid); border-radius: 0; }
-.ag-panel-scroll::-webkit-scrollbar-thumb:hover { background: #84cc16; box-shadow: 0 0 6px rgba(184,255,0,.5); }
+.ag-panel-scroll::-webkit-scrollbar-thumb:hover { background: var(--looper-lime); box-shadow: 0 0 6px rgba(184,255,0,.5); }
 
 /* GLOBAL OVERRIDES (input, scrollbars, focus rings)                     */
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -1167,7 +1172,7 @@ export default function InstrumentPage({
   const { toast } = useToast();
   const [initError, setInitError] = useState<string | null>(null);
   const [isLoading,  setIsLoading]  = useState(false);
-  const _tapTimesRef = useRef<number[]>([]);
+  const tapTimesRef = useRef<number[]>([]);
   const [tapFlash,   setTapFlash]   = useState(false);
   const {
     state, isInitialized, init,
@@ -1177,15 +1182,15 @@ export default function InstrumentPage({
     assignPadSample, assignKeySample, exportSession, importSession,
   } = useAudioEngine();
 
-  const _handleTapTempo = useCallback(() => {
+  const handleTapTempo = useCallback(() => {
     const now   = performance.now();
-    const _fresh = tapTimesRef.current.filter(t => now - t < 3000);
+    const fresh = tapTimesRef.current.filter(t => now - t < 3000);
     fresh.push(now);
     tapTimesRef.current = fresh.slice(-8);
     if (fresh.length >= 2) {
-      const _intervals = fresh.slice(1).map((t, i) => t - fresh[i]);
-      const _avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
-      const _bpm = Math.round(60000 / avg);
+      const intervals = fresh.slice(1).map((t, i) => t - fresh[i]);
+      const avg = intervals.reduce((s, v) => s + v, 0) / intervals.length;
+      const bpm = Math.round(60000 / avg);
       if (bpm >= 20 && bpm <= 999) setBpm(bpm);
     }
     setTapFlash(true);
@@ -1195,7 +1200,7 @@ export default function InstrumentPage({
   // ── Init ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const _go = async () => {
+    const go = async () => {
       if (isInitialized) return;
       try {
         setIsLoading(true); setInitError(null);
@@ -1203,14 +1208,14 @@ export default function InstrumentPage({
         if (defaultBpm !== 120) setBpm(defaultBpm);
         toast({ title: 'Audio Engine Initialized', description: 'Ready to make music!' });
       } catch (e) {
-        const _msg = e instanceof Error ? e.message : 'Unknown error';
+        const msg = e instanceof Error ? e.message : 'Unknown error';
         setInitError(msg);
         toast({ variant: 'destructive', title: 'Initialization Failed', description: msg });
       } finally { setIsLoading(false); }
     };
     if (autoInitialize) { go(); return; }
     const onClick   = () => { if (!isInitialized && !isLoading) go(); };
-    const _onKeyDown = () => { if (!isInitialized && !isLoading) go(); };
+    const onKeyDown = () => { if (!isInitialized && !isLoading) go(); };
     window.addEventListener('click',   onClick,   { once: true });
     window.addEventListener('keydown', onKeyDown, { once: true });
     return () => { window.removeEventListener('click', onClick); window.removeEventListener('keydown', onKeyDown); };
@@ -1220,12 +1225,12 @@ export default function InstrumentPage({
 
   useEffect(() => {
     if (!isInitialized) return;
-    const _h = (e: KeyboardEvent) => {
+    const h = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      const _k = e.key.toUpperCase();
-      const _pi = KEYBOARD_SHORTCUTS.pads.indexOf(k);
+      const k = e.key.toUpperCase();
+      const pi = KEYBOARD_SHORTCUTS.pads.indexOf(k);
       if (pi !== -1 && state.pads[pi]) { e.preventDefault(); triggerPad(pi); return; }
-      const _ki = KEYBOARD_SHORTCUTS.keys.indexOf(k);
+      const ki = KEYBOARD_SHORTCUTS.keys.indexOf(k);
       if (ki !== -1 && state.keys[ki]) { e.preventDefault(); triggerKey(ki); return; }
       if (e.ctrlKey || e.metaKey) {
         if (k === 'A') { e.preventDefault(); arm(); }
@@ -1244,7 +1249,7 @@ export default function InstrumentPage({
   //    pad hit (playPadWithFx fires once from drum-pads MIDI handler,
   //    once from triggerPad here).
   // ────────────────────────────────────────────────────────────
-  const _handleMidiKey = useCallback(
+  const handleMidiKey = useCallback(
     (index: number, octaveShift: number, velocity: number) => {
       // triggerKey(index, octaveShift, velocity) — 3 params confirmed on engine.
       // index   : MIDI note - 60 (0-based key index into state.keys[])
@@ -1265,10 +1270,10 @@ export default function InstrumentPage({
 
   // ── Session ──────────────────────────────────────────────────────────────
 
-  const _handleSave = useCallback(() => {
+  const handleSave = useCallback(() => {
     try {
-      const _json = exportSession();
-      const _blob = new Blob([json], { type: 'application/json' });
+      const json = exportSession();
+      const blob = new Blob([json], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
       const ts   = new Date().toISOString().replace(/[:.]/g, '-');
       const fn   = `r3vibe-session-${ts}.json`;
@@ -1282,10 +1287,10 @@ export default function InstrumentPage({
     }
   }, [exportSession, toast]);
 
-  const _handleLoad = useCallback(async (file: File) => {
+  const handleLoad = useCallback(async (file: File) => {
     try {
       setIsLoading(true);
-      const _text = await file.text();
+      const text = await file.text();
       try { JSON.parse(text); } catch { throw new Error('Invalid JSON file'); }
       await importSession(text);
       toast({ title: 'Session Loaded', description: `Loaded ${file.name}` });
@@ -1294,12 +1299,12 @@ export default function InstrumentPage({
     } finally { setIsLoading(false); }
   }, [importSession, toast]);
 
-  const _handleExport = useCallback(() => handleSave(), [handleSave]);
+  const handleExport = useCallback(() => handleSave(), [handleSave]);
 
   // ── handleLoadJson — accepts the JSON string HeaderControls passes ────────
   //    HeaderControls reads the file itself and calls onLoad(jsonString).
   //    handleLoad(file: File) is kept for the direct file-input path.
-  const _handleLoadJson = useCallback(async (json: string) => {
+  const handleLoadJson = useCallback(async (json: string) => {
     try {
       setIsLoading(true);
       try { JSON.parse(json); } catch { throw new Error('Invalid JSON'); }
@@ -1310,7 +1315,7 @@ export default function InstrumentPage({
     } finally { setIsLoading(false); }
   }, [importSession, toast]);
 
-  const _getSessionData = useCallback((): SessionData => ({
+  const getSessionData = useCallback((): SessionData => ({
     bpm: state.bpm,
     fx:  state.fx as unknown as Record<string, boolean>,
     filterVal: state.filterVal,
@@ -1322,7 +1327,7 @@ export default function InstrumentPage({
   // ── IndexedDB Auto-Save (2 s debounce)
   //    exportSession() confirmed on useAudioEngine hook.
   // ────────────────────────────────────────────────────────────
-  const _autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!isInitialized) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
@@ -1339,7 +1344,7 @@ export default function InstrumentPage({
   // ── Mic / Samples ─────────────────────────────────────────────────────────
 
   const handleMicrophoneData  = useCallback((data: Float32Array) => {
-    const _rms = Math.sqrt(data.reduce((s, x) => s + x * x, 0) / data.length);
+    const rms = Math.sqrt(data.reduce((s, x) => s + x * x, 0) / data.length);
     if (rms > 0.5) { /* visual hook */ }
   }, []);
 
@@ -1347,11 +1352,11 @@ export default function InstrumentPage({
     toast({ variant: 'destructive', title: 'Microphone Error', description: error.message });
   }, [toast]);
 
-  const _handleLoadSample = useCallback(async (file: File) => {
+  const handleLoadSample = useCallback(async (file: File) => {
     try {
       if (!file.type.startsWith('audio/')) throw new Error('Please select an audio file');
       if (file.size > 50 * 1024 * 1024) throw new Error('File size exceeds 50MB limit');
-      const _buffer = await loadSample(file);
+      const buffer = await loadSample(file);
       toast({ title: 'Sample Loaded', description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` });
       return buffer;
     } catch (err) {
@@ -1362,7 +1367,7 @@ export default function InstrumentPage({
 
   // ── Ticker ───────────────────────────────────────────────────────────────
 
-  const _TICKER = ['Polyphony','Web Audio API','Offline-First','MIDI Support','Accessible',
+  const TICKER = ['Polyphony','Web Audio API','Offline-First','MIDI Support','Accessible',
     'MultiTrack DAW','VST System','IndexedDB','Mobile-Friendly','R3 Native','Designed by Ernesto'];
 
   // ── Render ────────────────────────────────────────────────────────────────

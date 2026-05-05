@@ -40,7 +40,7 @@ function Led({ on, color = '#a3e635' }: { on: boolean; color?: string }) {
         width:         8,
         height:        8,
         borderRadius:  '50%',
-        background:    on ? color : '#111',
+        background:    on ? color : 'var(--dj-surface2)',
         boxShadow:     on ? `0 0 6px ${color}, 0 0 14px ${color}55` : 'none',
         border:       `1px solid ${on ? color : '#2a2a2a'}`,
         flexShrink:    0,
@@ -101,7 +101,7 @@ function AuthInput({
         onBlur={() => setFocused(false)}
         style={{
           background:    '#0d0d0d',
-          border:       `1px solid ${error ? '#ef444455' : focused ? '#a3e63544' : '#1e1e1e'}`,
+          border:       `1px solid ${error ? '#ef444455' : focused ? '#a3e63544' : 'var(--t-b3)'}`,
           borderRadius:  3,
           padding:      '8px 12px',
           color:         '#e5e5e5',
@@ -123,7 +123,7 @@ function AuthInput({
 
 export default function AuthPage() {
   const [, setLocation] = useLocation();
-  const _isAuthed = useAuthStore(selectIsAuthed);
+  const isAuthed = useAuthStore(selectIsAuthed);
   const { login, register, loading, error, clearError } = useAuthStore();
 
   const [mode,     setMode]     = useState<'login' | 'register'>('login');
@@ -140,14 +140,14 @@ export default function AuthPage() {
   // Clear server error when mode switches
   useEffect(() => { clearError(); setLocalErr(null); }, [mode, clearError]);
 
-  const _submit = useCallback(async (e: React.FormEvent) => {
+  const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalErr(null);
 
-    const _emailErr = validateEmail(email);
+    const emailErr = validateEmail(email);
     if (emailErr) { setLocalErr(emailErr); return; }
 
-    const _passErr = validatePassword(password, mode === 'register');
+    const passErr = validatePassword(password, mode === 'register');
     if (passErr) { setLocalErr(passErr); return; }
 
     if (mode === 'register' && password !== confirm) {
@@ -167,7 +167,7 @@ export default function AuthPage() {
     }
   }, [email, password, confirm, mode, login, register, setLocation]);
 
-  const _displayError = localErr ?? error;
+  const displayError = localErr ?? error;
 
   return (
     <>
@@ -175,7 +175,7 @@ export default function AuthPage() {
       <div
         style={{
           height:          'calc(100vh - var(--nav-h, 0px))',
-          background:       '#080808',
+          background:       'var(--t-b0x)',
           display:          'flex',
           alignItems:       'center',
           justifyContent:   'center',
@@ -219,7 +219,7 @@ export default function AuthPage() {
             zIndex:        1,
             width:         360,
             background:   '#0d0d0d',
-            border:       '1px solid #1e1e1e',
+            border:       '1px solid var(--t-b3)',
             borderRadius:  6,
             overflow:     'hidden',
             boxShadow:    '0 0 40px rgba(0,0,0,0.8), 0 0 1px #a3e63522',
@@ -229,7 +229,7 @@ export default function AuthPage() {
           <div
             style={{
               padding:      '10px 16px',
-              borderBottom: '1px solid #1a1a1a',
+              borderBottom: '1px solid var(--t-b2x)',
               background:   '#0a0a0a',
               display:      'flex',
               alignItems:   'center',
@@ -238,14 +238,14 @@ export default function AuthPage() {
           >
             {/* Status LEDs */}
             <div style={{ display: 'flex', gap: 5 }}>
-              <Led on color="#22c55e" />
+              <Led on color="var(--accent-green)" />
               <Led on={loading} color="#a3e635" />
               <Led on={!!displayError} color="#ef4444" />
             </div>
             <span style={{ fontSize: 9, letterSpacing: '0.25em', color: '#555', flex: 1 }}>
               R3 v4 — ACCESS CONTROL
             </span>
-            <span style={{ fontSize: 8, color: '#333', letterSpacing: '0.1em' }}>
+            <span style={{ fontSize: 8, color: 'var(--dj-dimmer)', letterSpacing: '0.1em' }}>
               {mode === 'login' ? 'AUTHENTICATE' : 'REGISTER'}
             </span>
           </div>
@@ -254,7 +254,7 @@ export default function AuthPage() {
           <div
             style={{
               display:      'flex',
-              borderBottom: '1px solid #1a1a1a',
+              borderBottom: '1px solid var(--t-b2x)',
             }}
           >
             {(['login', 'register'] as const).map(m => (
@@ -264,10 +264,10 @@ export default function AuthPage() {
                 style={{
                   flex:          1,
                   padding:       '8px 0',
-                  background:    mode === m ? '#111' : 'transparent',
+                  background:    mode === m ? 'var(--dj-surface2)' : 'transparent',
                   border:        'none',
                   borderBottom:  mode === m ? '1px solid #a3e635' : '1px solid transparent',
-                  color:         mode === m ? '#a3e635' : '#333',
+                  color:         mode === m ? '#a3e635' : 'var(--dj-dimmer)',
                   fontSize:       9,
                   letterSpacing: '0.2em',
                   cursor:        'pointer',
@@ -331,10 +331,10 @@ export default function AuthPage() {
               disabled={loading}
               style={{
                 padding:       '10px 0',
-                background:    loading ? '#111' : '#a3e63518',
-                border:       `1px solid ${loading ? '#222' : '#a3e63544'}`,
+                background:    loading ? 'var(--dj-surface2)' : '#a3e63518',
+                border:       `1px solid ${loading ? 'var(--dj-border)' : '#a3e63544'}`,
                 borderRadius:  3,
-                color:         loading ? '#444' : '#a3e635',
+                color:         loading ? 'var(--dj-dim)' : '#a3e635',
                 fontSize:       10,
                 letterSpacing: '0.25em',
                 cursor:        loading ? 'not-allowed' : 'pointer',
@@ -352,7 +352,7 @@ export default function AuthPage() {
                     style={{
                       width:         10,
                       height:        10,
-                      border:       '1px solid #333',
+                      border:       '1px solid var(--dj-dimmer)',
                       borderTop:    '1px solid #a3e635',
                       borderRadius: '50%',
                       animation:    'spin 0.6s linear infinite',
@@ -378,14 +378,14 @@ export default function AuthPage() {
           <div
             style={{
               padding:   '8px 16px',
-              borderTop: '1px solid #141414',
-              background: '#080808',
+              borderTop: '1px solid var(--t-b2)',
+              background: 'var(--t-b0x)',
               display:   'flex',
               justifyContent: 'space-between',
             }}
           >
-            <span style={{ fontSize: 8, color: '#222', letterSpacing: '0.15em' }}>SECURE · ENCRYPTED</span>
-            <span style={{ fontSize: 8, color: '#222', letterSpacing: '0.15em' }}>R3 v4</span>
+            <span style={{ fontSize: 8, color: 'var(--dj-border)', letterSpacing: '0.15em' }}>SECURE · ENCRYPTED</span>
+            <span style={{ fontSize: 8, color: 'var(--dj-border)', letterSpacing: '0.15em' }}>R3 v4</span>
           </div>
         </div>
 

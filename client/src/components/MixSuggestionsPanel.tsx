@@ -35,7 +35,7 @@ interface Props {
   onAnalyse:    () => void;
 }
 
-export const _MixSuggestionsPanel = memo(function MixSuggestionsPanel({
+export const MixSuggestionsPanel = memo(function MixSuggestionsPanel({
   suggestions,
   status,
   acceptedIds,
@@ -109,8 +109,8 @@ export const _MixSuggestionsPanel = memo(function MixSuggestionsPanel({
       {status === "done" && suggestions.length > 0 && (
         <div className="flex flex-col gap-2">
           {suggestions.map((s, idx) => {
-            const _accepted = acceptedIds.has(idx);
-            const _rejected = rejectedIds.has(idx);
+            const accepted = acceptedIds.has(idx);
+            const rejected = rejectedIds.has(idx);
             return (
               <div
                 key={idx}

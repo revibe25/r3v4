@@ -33,29 +33,29 @@ export function useIRReverb(): IRReverbHookState {
   const [wet,     setWetState]= useState(0.35);
   const [currentPreset, setCurrentPreset] = useState<IRPreset | null>(null);
 
-  const _wire = useCallback(() => {
+  const wire = useCallback(() => {
     if (wiredRef.current) return;
     import("tone").then(Tone => {
-      const _rawCtx = Tone.getContext().rawContext as AudioContext;
+      const rawCtx = Tone.getContext().rawContext as AudioContext;
       engineRef.current.init(rawCtx);
-      const _le = getLoopEngine();
+      const le = getLoopEngine();
       if (le.initialized) { engineRef.current.patchIntoLoopEngine(le); wiredRef.current = true; }
       if (pendingRef.current) {
-        const _url = pendingRef.current; pendingRef.current = null;
+        const url = pendingRef.current; pendingRef.current = null;
         void loadUrl(url);
       }
     }).catch(e => setError(String(e)));
   }, []);  
 
   useEffect(() => {
-    const _le = getLoopEngine();
+    const le = getLoopEngine();
     if (le.initialized) { wire(); return; }
     return le.on("ready", wire);
   }, [wire]);
 
   useEffect(() => () => engineRef.current.dispose(), []);
 
-  const _loadUrl = async (url: string) => {
+  const loadUrl = async (url: string) => {
     setLoading(true); setError(null);
     try {
       if (!wiredRef.current) { pendingRef.current = url; return; }
@@ -65,19 +65,19 @@ export function useIRReverb(): IRReverbHookState {
     finally     { setLoading(false); }
   };
 
-  const _loadFromUrl = useCallback(async (url: string) => {
+  const loadFromUrl = useCallback(async (url: string) => {
     setCurrentPreset(null); await loadUrl(url);
   }, []);  
 
-  const _loadPreset = useCallback(async (preset: IRPreset) => {
+  const loadPreset = useCallback(async (preset: IRPreset) => {
     setCurrentPreset(preset); await loadUrl(IR_CATALOG[preset]);
   }, []);  
 
-  const _setWet = useCallback((w: number) => {
+  const setWet = useCallback((w: number) => {
     engineRef.current.setWet(w); setWetState(w);
   }, []);
 
-  const _setPreGain = useCallback((g: number) => { engineRef.current.setPreGain(g); }, []);
+  const setPreGain = useCallback((g: number) => { engineRef.current.setPreGain(g); }, []);
   const dispose    = useCallback(() => { engineRef.current.dispose(); setLoaded(false); }, []);
 
   return { loaded, loading, error, wet, currentPreset, loadPreset, loadFromUrl, setWet, setPreGain, dispose };

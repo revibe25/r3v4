@@ -67,10 +67,10 @@ export class IRReverbEngine {
     if (url === this._curUrl && this._loaded) return;
     this._loading = true;
     try {
-      const _res = await fetch(url);
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`[IRReverbEngine] fetch failed: ${url} (${res.status})`);
       const buf     = await res.arrayBuffer();
-      const _decoded = await this._ctx.decodeAudioData(buf);
+      const decoded = await this._ctx.decodeAudioData(buf);
       this._conv.buffer = decoded;
       this._curUrl  = url;
       this._loaded  = true;
@@ -95,14 +95,14 @@ export class IRReverbEngine {
     // Tap master analyser → our input
     (loopEngine.masterAnalyser as any).connect(this._input);
     // Return → master limiter input
-    const _limIn = (loopEngine.masterLimiter as any).input as AudioNode | undefined;
+    const limIn = (loopEngine.masterLimiter as any).input as AudioNode | undefined;
     if (limIn) this._output.connect(limIn);
     else       (loopEngine.masterLimiter as any).connect(this._output);
   }
 
   setWet(wet: number, rampMs = 50): void {
     this._wet = Math.max(0, Math.min(1, wet));
-    const _now = this._ctx?.currentTime ?? 0;
+    const now = this._ctx?.currentTime ?? 0;
     const r   = rampMs / 1000;
     this._wetGain?.gain.linearRampToValueAtTime(this._wet,     now + r);
     this._dryGain?.gain.linearRampToValueAtTime(1 - this._wet, now + r);

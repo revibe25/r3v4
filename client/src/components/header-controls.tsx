@@ -21,6 +21,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
+import { useLocation } from 'wouter';
 import { Moon, Sun, Music, Clock, Palette, Save, FolderOpen, Upload } from 'lucide-react';
 import { LogoutButton } from '@/components/logout-button';
 import { useToast } from '@/hooks/use-toast';
@@ -39,32 +40,35 @@ interface HeaderControlsProps {
 
 // ─── Theme config ──────────────────────────────────────────────────────────────
 const THEME_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  dark: Moon, light: Sun, chrome: Palette, purple: Palette, blue: Palette, forest: Palette,
+  dark: Moon, light: Sun, acid: Palette, neon: Palette,
+  chrome: Palette, forest: Palette, sunset: Palette, aurora: Palette,
 };
 
 const THEMES: Record<string, { label: string; description: string }> = {
-  dark:   { label: 'Dark',   description: 'Classic dark theme'    },
-  light:  { label: 'Light',  description: 'Clean light theme'     },
-  chrome: { label: 'Chrome', description: 'Polished chrome finish' },
-  purple: { label: 'Purple', description: 'Rich purple tones'     },
-  blue:   { label: 'Blue',   description: 'Cool blue shades'      },
-  forest: { label: 'Forest', description: 'Natural forest green'  },
+  dark:    { label: 'Dark',    description: 'Classic dark theme'       },
+  light:   { label: 'Light',   description: 'Clean light theme'        },
+  acid:    { label: 'Acid',    description: 'Acid lime — DAW core'     },
+  neon:    { label: 'Neon',    description: 'Cyan neon — high contrast' },
+  chrome:  { label: 'Chrome',  description: 'Polished chrome finish'   },
+  forest:  { label: 'Forest',  description: 'Natural forest green'     },
+  sunset:  { label: 'Sunset',  description: 'Warm sunset tones'        },
+  aurora:  { label: 'Aurora',  description: 'Northern lights palette'  },
 };
 
 // ─── Design tokens — mirrors waveform-editor.tsx exactly ──────────────────────
-const _S = {
-  bg:         '#000000',
-  bgPanel:    '#0c0c0c',
-  border:     '#222',
+const S = {
+  bg:         'var(--dj-black)',
+  bgPanel:    'var(--dj-surface)',
+  border:     'var(--dj-border)',
   accent:     '#a3e635',
   textDim:    '#555',
-  textMuted:  '#444',
-  textActive: '#fff',
+  textMuted:  'var(--dj-dim)',
+  textActive: 'var(--white)',
   font:       "'IBM Plex Mono', 'JetBrains Mono', monospace",
 } as const;
 
 // Tiny reusable styled button (matches waveform-editor ghost button pattern)
-const _BarButton = React.forwardRef<
+const BarButton = React.forwardRef<
   HTMLButtonElement,
   {
     onClick: () => void;
@@ -72,7 +76,7 @@ const _BarButton = React.forwardRef<
     children: React.ReactNode;
     title?: string;
   }
->(function BarButton({ onClick, active = false, children, title }, _ref) {
+>(function BarButton({ onClick, active = false, children, title }, ref) {
   return (
     <button
       ref={ref}
@@ -81,7 +85,7 @@ const _BarButton = React.forwardRef<
       className="flex items-center gap-1 h-7 px-2 transition-colors"
       style={{
         background:   active ? S.accent    : 'transparent',
-        color:        active ? '#000'       : S.textDim,
+        color:        active ? 'var(--dj-black)'       : S.textDim,
         border:       `1px solid ${active ? S.accent : S.border}`,
         borderRadius: 0,
         fontFamily:   S.font,
@@ -98,17 +102,17 @@ const _BarButton = React.forwardRef<
   );
 });
 
-const _tipStyle = {
-  background:   '#0c0c0c',
-  border:       '1px solid #222',
+const tipStyle = {
+  background:   'var(--dj-surface)',
+  border:       '1px solid var(--dj-border)',
   borderRadius: 0,
   fontFamily:   "'IBM Plex Mono', 'JetBrains Mono', monospace",
   fontSize:     10,
-  color:        '#fff',
+  color:        'var(--white)',
 };
 
 // ─── Main Component ────────────────────────────────────────────────────────────
-export const _HeaderControls = memo(function HeaderControls({
+export const HeaderControls = memo(function HeaderControls({
   bpm,
   onBpmChange,
   metronomeOn,
@@ -118,7 +122,8 @@ export const _HeaderControls = memo(function HeaderControls({
   getSessionData,
 }: HeaderControlsProps) {
   const { theme, setTheme, themes, themeMetadata } = useTheme();
-  const _fileInputRef = useRef<HTMLInputElement>(null);
+  const [location, navigate] = useLocation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [saveDialogOpen, setSaveDialogOpen]         = useState(false);
   const [loadDialogOpen, setLoadDialogOpen]         = useState(false);
   const [sessionName, setSessionName]               = useState('');
@@ -135,7 +140,7 @@ export const _HeaderControls = memo(function HeaderControls({
   });
 
   // TanStack v5 — no onError in useQuery; handle via isError
-  const _prevErr = useRef(false);
+  const prevErr = useRef(false);
   if (sessionsError && !prevErr.current) {
     prevErr.current = true;
     toast({ title: 'Sessions unavailable', variant: 'default' });
@@ -155,7 +160,7 @@ export const _HeaderControls = memo(function HeaderControls({
     onError: () => toast({ title: 'Save failed', variant: 'destructive' }),
   });
 
-  const _filteredSessions = useMemo(
+  const filteredSessions = useMemo(
     () => sessions.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase())),
     [sessions, searchQuery],
   );
@@ -163,8 +168,8 @@ export const _HeaderControls = memo(function HeaderControls({
   const ThemeIcon  = THEME_ICONS[theme] ?? Moon;
   const msPerBeat  = useMemo(() => (60_000 / bpm).toFixed(0), [bpm]);
 
-  const _handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const _file = e.target.files?.[0];
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
     try {
       onLoad(await file.text());
@@ -176,11 +181,11 @@ export const _HeaderControls = memo(function HeaderControls({
     }
   }, [onLoad, toast]);
 
-  const _handleThemeChange = useCallback((t: string) => {
+  const handleThemeChange = useCallback((t: string) => {
     if (themes.includes(t as any)) setTheme(t as any);
   }, [themes, setTheme]);
 
-  const _handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
+  const handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
 
   // ─── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -212,7 +217,7 @@ export const _HeaderControls = memo(function HeaderControls({
             className="flex items-center justify-center w-6 h-6"
             style={{ background: S.accent, borderRadius: 0 }}
           >
-            <Music className="w-3.5 h-3.5" style={{ color: '#000' }} />
+            <Music className="w-3.5 h-3.5" style={{ color: 'var(--dj-black)' }} />
           </div>
           <div>
             <div
@@ -228,6 +233,44 @@ export const _HeaderControls = memo(function HeaderControls({
               STUDIO · DAW
             </div>
           </div>
+        </div>
+
+        {/* ── Page nav ─────────────────────────────────────────────────── */}
+        <div className="flex items-center border-r flex-shrink-0" style={{ borderColor: S.border }}>
+          {[
+            { path: '/instrument',  label: 'KEYS'   },
+            { path: '/daw',         label: 'DAW'    },
+            { path: '/mixer',       label: 'MIXER'  },
+            { path: '/multitrack',  label: 'MULTI'  },
+            { path: '/loopstation', label: 'LOOP'   },
+            { path: '/collab',      label: 'COLLAB' },
+            { path: '/vst',         label: 'VST'    },
+          ].map(({ path, label }) => {
+            const active = location === path || location.startsWith(path + '/');
+            return (
+              <button
+                key={path}
+                onClick={() => navigate(path)}
+                className="h-full px-3 py-2 text-[10px] uppercase transition-colors"
+                style={{
+                  fontFamily:    S.font,
+                  letterSpacing: 1.5,
+                  background:    active ? S.accent : 'transparent',
+                  color:         active ? 'var(--dj-black)' : S.textDim,
+                  borderRight:   `1px solid ${S.border}`,
+                  borderRadius:  0,
+                }}
+                onMouseEnter={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.color = S.textActive;
+                }}
+                onMouseLeave={e => {
+                  if (!active) (e.currentTarget as HTMLElement).style.color = S.textDim;
+                }}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
 
         {/* ── BPM / Metronome ──────────────────────────────────────────────── */}
@@ -335,7 +378,7 @@ export const _HeaderControls = memo(function HeaderControls({
                 {themes.map(t => {
                   const Icon   = THEME_ICONS[t] ?? Moon;
                   const meta   = THEMES[t] ?? {};
-                  const _active = t === theme;
+                  const active = t === theme;
                   return (
                     <DropdownMenuRadioItem
                       key={t}
@@ -343,7 +386,7 @@ export const _HeaderControls = memo(function HeaderControls({
                       className="gap-2"
                       style={{
                         color:        active ? S.accent : S.textActive,
-                        background:   active ? '#111'   : 'transparent',
+                        background:   active ? 'var(--dj-surface2)'   : 'transparent',
                         borderRadius: 0,
                       }}
                     >
@@ -467,7 +510,7 @@ export const _HeaderControls = memo(function HeaderControls({
                     background:  'transparent',
                     fontFamily:  S.font,
                   }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#0f0f0f'; }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--t-b1)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                   onClick={() => {
                     onLoad(JSON.stringify(session));

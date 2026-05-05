@@ -87,7 +87,7 @@ export class VSTFXNode extends FXNodeBase {
       // Setup message handlers
       this.vstNode.port.onmessage = (event: MessageEvent) => {
         const { type, ...data } = event.data;
-        const _handler = this.messageHandlers.get(type);
+        const handler = this.messageHandlers.get(type);
         if (handler) {
           handler(data);
         }
@@ -113,7 +113,7 @@ export class VSTFXNode extends FXNodeBase {
 
       // Wait for initialization confirmation
       await new Promise<void>((resolve, reject) => {
-        const _timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
           reject(new Error('VST initialization timeout'));
         }, 5000);
 
@@ -164,7 +164,7 @@ export class VSTFXNode extends FXNodeBase {
     }
 
     // Clamp value
-    const _param = this.vstModule?.parameters.find((p) => p.id === paramId);
+    const param = this.vstModule?.parameters.find((p) => p.id === paramId);
     if (param) {
       value = Math.max(param.minValue, Math.min(param.maxValue, value));
     }
@@ -184,7 +184,7 @@ export class VSTFXNode extends FXNodeBase {
     if (!this.vstNode) return 0;
 
     return new Promise((resolve) => {
-      const _handler = (data: any) => {
+      const handler = (data: any) => {
         if (data.paramId === paramId) {
           this.messageHandlers.delete('parameterValue');
           resolve(data.value);
@@ -225,14 +225,14 @@ export class VSTFXNode extends FXNodeBase {
     this.automationLanes.set(paramId, lane);
 
     // Convert to sample-rate automation buffer
-    const _duration = points[points.length - 1].time;
-    const _sampleRate = this.context.sampleRate;
-    const _bufferLength = Math.ceil(duration * sampleRate);
-    const _buffer = new Float32Array(bufferLength);
+    const duration = points[points.length - 1].time;
+    const sampleRate = this.context.sampleRate;
+    const bufferLength = Math.ceil(duration * sampleRate);
+    const buffer = new Float32Array(bufferLength);
 
-    let _pointIndex = 0;
-    for (let _i = 0; i < bufferLength; i++) {
-      const _time = i / sampleRate;
+    let pointIndex = 0;
+    for (let i = 0; i < bufferLength; i++) {
+      const time = i / sampleRate;
 
       // Find surrounding points
       while (pointIndex < points.length - 1 && points[pointIndex + 1].time <= time) {
@@ -243,9 +243,9 @@ export class VSTFXNode extends FXNodeBase {
         buffer[i] = points[pointIndex].value;
       } else {
         // Linear interpolation
-        const _p1 = points[pointIndex];
-        const _p2 = points[pointIndex + 1];
-        const _t = (time - p1.time) / (p2.time - p1.time);
+        const p1 = points[pointIndex];
+        const p2 = points[pointIndex + 1];
+        const t = (time - p1.time) / (p2.time - p1.time);
         buffer[i] = p1.value + (p2.value - p1.value) * t;
       }
     }
@@ -274,7 +274,7 @@ export class VSTFXNode extends FXNodeBase {
   }
 
   enableAutomation(paramId: number, enabled: boolean): void {
-    const _lane = this.automationLanes.get(paramId);
+    const lane = this.automationLanes.get(paramId);
     if (lane) {
       lane.enabled = enabled;
       if (!enabled) {
@@ -314,7 +314,7 @@ export class VSTFXNode extends FXNodeBase {
   }
 
   async loadPreset(preset: VSTPreset | string): Promise<void> {
-    const _presetData = typeof preset === 'string' ? this.presets.get(preset) : preset;
+    const presetData = typeof preset === 'string' ? this.presets.get(preset) : preset;
 
     if (!presetData) {
       throw new Error(`Preset not found: ${preset}`);
@@ -345,7 +345,7 @@ export class VSTFXNode extends FXNodeBase {
   }
 
   exportPreset(name?: string): string {
-    const _preset = name ? this.presets.get(name) : this.getCurrentPreset();
+    const preset = name ? this.presets.get(name) : this.getCurrentPreset();
     if (!preset) {
       throw new Error('No preset to export');
     }
@@ -353,7 +353,7 @@ export class VSTFXNode extends FXNodeBase {
   }
 
   importPreset(json: string): VSTPreset {
-    const _preset = JSON.parse(json) as VSTPreset;
+    const preset = JSON.parse(json) as VSTPreset;
     this.presets.set(preset.name, preset);
     return preset;
   }
@@ -375,10 +375,10 @@ export class VSTFXNode extends FXNodeBase {
 
     try {
       // Save current state
-      const _currentState = preserveState ? await this.getCurrentPreset() : null;
+      const currentState = preserveState ? await this.getCurrentPreset() : null;
 
       // Load new VST module
-      const _newModule = await loadVST({
+      const newModule = await loadVST({
         url: newVstUrl,
         audioCtx: this.context,
         inputChannels: this.config.inputChannels,
@@ -387,7 +387,7 @@ export class VSTFXNode extends FXNodeBase {
 
       // Send hot swap message to worklet
       await new Promise<void>((resolve, reject) => {
-        const _timeout = setTimeout(() => {
+        const timeout = setTimeout(() => {
           reject(new Error('Hot swap timeout'));
         }, 5000);
 
@@ -468,7 +468,7 @@ export class VSTFXNode extends FXNodeBase {
     if (!this.vstNode) return null;
 
     return new Promise((resolve) => {
-      const _timeout = setTimeout(() => {
+      const timeout = setTimeout(() => {
         resolve(null);
       }, 1000);
 
@@ -518,7 +518,7 @@ export class VSTFXNode extends FXNodeBase {
   }
 
   static async deserialize(data: any, audioContext: AudioContext): Promise<VSTFXNode> {
-    const _node = new VSTFXNode(audioContext, data.config);
+    const node = new VSTFXNode(audioContext, data.config);
     await node.initialize();
 
     // Restore parameters

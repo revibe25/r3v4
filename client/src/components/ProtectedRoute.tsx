@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: Tier gate warning UI — subscription status indicator only
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * client/src/components/ProtectedRoute.tsx
  * Wouter-based route guard for R3 v4.
@@ -31,9 +36,9 @@ const TIER_ORDER = { explorer: 0, creator: 1, pro_artist: 2 } as const;
 
 export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
   const { loading, error } = useAuthStore();
-  const _isAuthed = useAuthStore(selectIsAuthed);
+  const isAuthed = useAuthStore(selectIsAuthed);
   const tier     = useAuthStore(s => s.user?.tier ?? 'explorer');
-  const _initAuth = useAuthStore(s => s.initAuth);
+  const initAuth = useAuthStore(s => s.initAuth);
 
   // Re-hydrate token on mount (no-op if already loaded or no token stored)
   useEffect(() => {
@@ -58,14 +63,14 @@ export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
             style={{
               width: 32,
               height: 32,
-              border: '2px solid #1e1e1e',
-              borderTop: '2px solid #f59e0b',
+              border: '2px solid var(--t-b3)',
+              borderTop: '2px solid var(--status-warn)',
               borderRadius: '50%',
               animation: 'spin 0.8s linear infinite',
               margin: '0 auto 16px',
             }}
           />
-          <p style={{ color: '#444', fontSize: 11, letterSpacing: '0.2em' }}>
+          <p style={{ color: 'var(--dj-dim)', fontSize: 11, letterSpacing: '0.2em' }}>
             INITIALISING
           </p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -94,10 +99,10 @@ export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
           gap: 16,
         }}
       >
-        <p style={{ color: '#f59e0b', fontSize: 12, letterSpacing: '0.2em' }}>
+        <p style={{ color: 'var(--status-warn)', fontSize: 12, letterSpacing: '0.2em' }}>
           {minTier.toUpperCase()} TIER REQUIRED
         </p>
-        <p style={{ color: '#444', fontSize: 10 }}>
+        <p style={{ color: 'var(--dj-dim)', fontSize: 10 }}>
           This feature requires the {minTier} plan or higher.
         </p>
         <a
@@ -105,7 +110,7 @@ export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
           style={{
             padding: '6px 16px',
             border: '1px solid #f59e0b44',
-            color: '#f59e0b',
+            color: 'var(--status-warn)',
             fontSize: 10,
             letterSpacing: '0.15em',
             borderRadius: 4,

@@ -20,9 +20,9 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   onSelect,
   onContext,
 }) => {
-  const _zoom = useDAWStore(s => s.zoom);
-  const _left = timeToPixels(clip.startTime, zoom);
-  const _width = timeToPixels(clip.duration, zoom);
+  const zoom = useDAWStore(s => s.zoom);
+  const left = timeToPixels(clip.startTime, zoom);
+  const width = timeToPixels(clip.duration, zoom);
 
   return (
     <div

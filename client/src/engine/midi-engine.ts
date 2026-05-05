@@ -141,7 +141,7 @@ export class MidiEngine {
 
   /** Send a CC message to the first available output (or by port id). */
   sendCC(cc: number, value: number, channel = 0, portId?: string): void {
-    const _output = portId
+    const output = portId
       ? this._outputs.get(portId)
       : this._outputs.values().next().value;
 
@@ -150,7 +150,7 @@ export class MidiEngine {
   }
 
   sendNoteOn(note: number, velocity: number, channel = 0, portId?: string): void {
-    const _output = portId
+    const output = portId
       ? this._outputs.get(portId)
       : this._outputs.values().next().value;
     if (!output) return;
@@ -158,7 +158,7 @@ export class MidiEngine {
   }
 
   sendNoteOff(note: number, channel = 0, portId?: string): void {
-    const _output = portId
+    const output = portId
       ? this._outputs.get(portId)
       : this._outputs.values().next().value;
     if (!output) return;
@@ -168,7 +168,7 @@ export class MidiEngine {
   /** Send MIDI clock start (0xfa), continue (0xfb), or stop (0xfc). */
   sendTransport(cmd: "start" | "continue" | "stop", portId?: string): void {
     const byte   = cmd === "start" ? 0xfa : cmd === "continue" ? 0xfb : 0xfc;
-    const _output = portId
+    const output = portId
       ? this._outputs.get(portId)
       : this._outputs.values().next().value;
     output?.send([byte]);
@@ -215,14 +215,14 @@ export class MidiEngine {
 
   private _handleMessage = (e: WebMidi.MIDIMessageEvent): void => {
     const [status, data1, data2] = e.data;
-    const _channel = status & 0x0f;
+    const channel = status & 0x0f;
     const type    = status & 0xf0;
 
     switch (type) {
       // ── Control Change ──────────────────────────────────────────────────
       case 0xb0: {
         const key   = `${channel}:${data1}`;
-        const _value = data1 === 7 || data1 === 11   // volume / expression
+        const value = data1 === 7 || data1 === 11   // volume / expression
           ? data2 / 127                             // 0–1 linear
           : data2 / 127;
         this.state.cc[key] = value;
@@ -264,7 +264,7 @@ export class MidiEngine {
 
       // ── Pitch Bend ──────────────────────────────────────────────────────
       case 0xe0: {
-        const _raw = ((data2 << 7) | data1);
+        const raw = ((data2 << 7) | data1);
         // Map 0–16383 → -1 to 1 with dead center at 8192
         this.state.pitchBend[channel] = (raw - 8192) / 8192;
         break;
@@ -296,7 +296,7 @@ export class MidiEngine {
    * A sliding median over recent intervals discards those outliers cleanly.
    */
   private _handleClock(): void {
-    const _now = performance.now();
+    const now = performance.now();
     this._clockTimestamps.push(now);
 
     // Trim history to bounded window
@@ -306,14 +306,14 @@ export class MidiEngine {
 
     // Compute BPM from median of recent intervals
     if (this._clockTimestamps.length >= 2) {
-      const _intervals = this._clockTimestamps
+      const intervals = this._clockTimestamps
         .slice(-Math.min(CLOCK_MEDIAN_WINDOW + 1, this._clockTimestamps.length))
         .map((t, i, arr) => (i === 0 ? null : t - arr[i - 1]))
         .filter((v): v is number => v !== null);
 
       if (intervals.length > 0) {
         const median      = medianOf(intervals);
-        const _rawBpm = 60_000 / (median * CLOCKS_PER_BEAT);
+        const rawBpm = 60_000 / (median * CLOCKS_PER_BEAT);
         this.state.bpm    = Math.min(999, Math.max(20, rawBpm));
       }
     }
@@ -338,7 +338,7 @@ export class MidiEngine {
 
   private _loadMappings(): void {
     try {
-      const _raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) this._mappings = JSON.parse(raw) as MidiMapping[];
     } catch { /* corrupt data */ }
   }
@@ -357,7 +357,7 @@ export class MidiEngine {
   ): void {
     // Only allocate if someone is actually listening
     if (!this.events) return; // guard
-    const _ev = new Event(type) as T;
+    const ev = new Event(type) as T;
     init(ev);
     this.events.dispatchEvent(ev);
   }
@@ -367,8 +367,8 @@ export class MidiEngine {
   // New code should prefer engine.events.addEventListener().
 
   onCC(cb: (cc: number, value: number, channel: number) => void): () => void {
-    const _handler = (e: Event) => {
-      const _ev = e as MidiCCEvent;
+    const handler = (e: Event) => {
+      const ev = e as MidiCCEvent;
       cb(ev.cc, ev.value, ev.channel);
     };
     this.events.addEventListener("cc", handler);
@@ -376,8 +376,8 @@ export class MidiEngine {
   }
 
   onNote(cb: (note: number, velocity: number, channel: number) => void): () => void {
-    const _handler = (e: Event) => {
-      const _ev = e as MidiNoteEvent;
+    const handler = (e: Event) => {
+      const ev = e as MidiNoteEvent;
       cb(ev.note, ev.velocity, ev.channel);
     };
     this.events.addEventListener("note", handler);
@@ -385,8 +385,8 @@ export class MidiEngine {
   }
 
   onClock(cb: (phase: number, bpm: number) => void): () => void {
-    const _handler = (e: Event) => {
-      const _ev = e as MidiClockEvent;
+    const handler = (e: Event) => {
+      const ev = e as MidiClockEvent;
       cb(ev.phase, ev.bpm);
     };
     this.events.addEventListener("clock", handler);
@@ -398,7 +398,7 @@ export class MidiEngine {
 
 /** Returns the median value of a numeric array without mutating it. */
 function medianOf(values: number[]): number {
-  const _sorted = [...values].sort((a, b) => a - b);
+  const sorted = [...values].sort((a, b) => a - b);
   const mid    = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 1
     ? sorted[mid]
@@ -407,7 +407,7 @@ function medianOf(values: number[]): number {
 
 // ── Singleton ─────────────────────────────────────────────────────────────────
 
-export const _midiEngine = new MidiEngine();
+export const midiEngine = new MidiEngine();
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => midiEngine.stop());

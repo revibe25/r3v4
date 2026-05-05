@@ -25,6 +25,7 @@
  * MIDI sequencer is driven by useMidiSequencer.
  */
 
+import { PageNav } from '@/components/page-nav';
 import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
 } from 'react';
@@ -46,26 +47,26 @@ import { SessionSummaryPanel }   from '../components/session-summary/SessionSumm
 
 // ─── Shared mini-components ───────────────────────────────────────────────────
 
-const _Knob = memo(({
+const Knob = memo(({
   value, min = 0, max = 1, label, onChange, accent = '#a3e635', size = 36,
 }: {
   value: number; min?: number; max?: number; label: string;
   onChange: (v: number) => void; accent?: string; size?: number;
 }) => {
-  const _dragStart = useRef<{ y: number; v: number } | null>(null);
-  const _pct = (value - min) / (max - min);
-  const _angle = -135 + pct * 270;
+  const dragStart = useRef<{ y: number; v: number } | null>(null);
+  const pct = (value - min) / (max - min);
+  const angle = -135 + pct * 270;
 
-  const _onMouseDown = (e: React.MouseEvent) => {
+  const onMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     dragStart.current = { y: e.clientY, v: value };
-    const _onMove = (ev: MouseEvent) => {
+    const onMove = (ev: MouseEvent) => {
       if (!dragStart.current) return;
-      const _delta = (dragStart.current.y - ev.clientY) / 120;
+      const delta = (dragStart.current.y - ev.clientY) / 120;
       const next  = Math.max(min, Math.min(max, dragStart.current.v + delta * (max - min)));
       onChange(Math.round(next * 1000) / 1000);
     };
-    const _onUp = () => {
+    const onUp = () => {
       dragStart.current = null;
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup',   onUp);
@@ -77,13 +78,13 @@ const _Knob = memo(({
   return (
     <div className="flex flex-col items-center gap-0.5 select-none" style={{ width: size }}>
       <div
-        className="relative rounded-full border border-[#333] bg-[#1a1a1a] cursor-ns-resize"
+        className="relative rounded-full border border-[var(--dj-dimmer)] bg-[var(--t-b2x)] cursor-ns-resize"
         style={{ width: size, height: size }}
         onMouseDown={onMouseDown}
       >
         <div
           className="absolute inset-[3px] rounded-full"
-          style={{ background: `conic-gradient(from ${-135}deg at 50% 50%, #222 0deg, #222 ${pct*270}deg, transparent ${pct*270}deg)` }}
+          style={{ background: `conic-gradient(from ${-135}deg at 50% 50%, var(--dj-border) 0deg, var(--dj-border) ${pct*270}deg, transparent ${pct*270}deg)` }}
         />
         <div
           className="absolute w-0.5 bg-current origin-bottom rounded"
@@ -96,33 +97,33 @@ const _Knob = memo(({
           }}
         />
         <div
-          className="absolute inset-[5px] rounded-full bg-[#111] flex items-center justify-center"
+          className="absolute inset-[5px] rounded-full bg-[var(--dj-surface2)] flex items-center justify-center"
           style={{ boxShadow: `0 0 6px ${accent}44` }}
         />
       </div>
-      <span className="text-[9px] tracking-widest uppercase" style={{ color: '#5a5a5a' }}>{label}</span>
+      <span className="text-[9px] tracking-widest uppercase" style={{ color: 'var(--surface-mid)' }}>{label}</span>
     </div>
   );
 });
 Knob.displayName = 'Knob';
 
-const _VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = '#f59e0b', clip = '#ef4444' }: {
+const VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = 'var(--status-warn)', clip = '#ef4444' }: {
   level: number; vertical?: boolean; accent?: string; warn?: string; clip?: string;
 }) => {
-  const _bars = 12;
+  const bars = 12;
   return (
     <div className={`flex ${vertical ? 'flex-col-reverse' : 'flex-row'} gap-px`} style={vertical ? { height: 48 } : { width: 48 }}>
       {Array.from({ length: bars }, (_, i) => {
-        const _threshold = i / bars;
-        const _active = level > threshold;
-        const _color = i >= bars - 2 ? clip : i >= bars - 4 ? warn : accent;
+        const threshold = i / bars;
+        const active = level > threshold;
+        const color = i >= bars - 2 ? clip : i >= bars - 4 ? warn : accent;
         return (
           <div
             key={i}
             className={`rounded-sm transition-opacity duration-75`}
             style={{
               flex: 1,
-              background: active ? color : '#222',
+              background: active ? color : 'var(--dj-border)',
               opacity: active ? 1 : 0.35,
               boxShadow: active ? `0 0 3px ${color}88` : 'none',
             }}
@@ -134,7 +135,7 @@ const _VUMeter = memo(({ level, vertical = true, accent = '#a3e635', warn = '#f5
 });
 VUMeter.displayName = 'VUMeter';
 
-const _Btn = memo(({
+const Btn = memo(({
   children, onClick, active, danger, dim, className = '', title,
 }: {
   children: React.ReactNode; onClick?: () => void;
@@ -152,8 +153,8 @@ const _Btn = memo(({
           ? 'bg-red-600/20 border-red-600/60 text-red-400'
           : 'bg-[#a3e635]/10 border-[#a3e635]/40 text-[#a3e635]'
         : dim
-          ? 'bg-transparent border-[#2a2a2a] text-[#444] cursor-not-allowed'
-          : 'bg-[#1a1a1a] border-[#333] text-[#888] hover:border-[#555] hover:text-[#ccc]'
+          ? 'bg-transparent border-[#2a2a2a] text-[var(--dj-dim)] cursor-not-allowed'
+          : 'bg-[var(--t-b2x)] border-[var(--dj-dimmer)] text-[var(--text-dim)] hover:border-[#555] hover:text-[var(--daw-ghost)]'
       }
       ${className}
     `}
@@ -163,13 +164,13 @@ const _Btn = memo(({
 ));
 Btn.displayName = 'Btn';
 
-const _Led = memo(({ on, color = '#f59e0b', pulse }: { on: boolean; color?: string; pulse?: boolean }) => (
+const Led = memo(({ on, color = 'var(--status-warn)', pulse }: { on: boolean; color?: string; pulse?: boolean }) => (
   <div
     className={`w-2 h-2 rounded-full ${pulse && on ? 'animate-pulse' : ''}`}
     style={{
-      background: on ? color : '#1a1a1a',
+      background: on ? color : 'var(--t-b2x)',
       boxShadow: on ? `0 0 6px ${color}, 0 0 12px ${color}44` : 'none',
-      border: `1px solid ${on ? color : '#333'}`,
+      border: `1px solid ${on ? color : 'var(--dj-dimmer)'}`,
     }}
   />
 ));
@@ -180,8 +181,8 @@ Led.displayName = 'Led';
 //   Fix: Self-contained memo component driven by acceptedCount from store.
 //   4 min/suggestion is the conservative estimate from PRD §8.4.2.
 //   Renders null when count=0 → no layout impact until first acceptance.
-const _TimeSavingsReadout = memo(() => {
-  const _acceptedCount = useDAWStore(
+const TimeSavingsReadout = memo(() => {
+  const acceptedCount = useDAWStore(
     s => s.aiSuggestions.filter((x: { accepted: boolean | null }) => x.accepted === true).length,
   );
   const MINS_PER = 4; // PRD §8.4.2 conservative estimate
@@ -202,7 +203,7 @@ TimeSavingsReadout.displayName = 'TimeSavingsReadout';
 
 // ─── Transport Bar ────────────────────────────────────────────────────────────
 
-const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
+const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
   const {
     playing, recording, bpm, position, timeSignature, loopEnabled,
     metronomeEnabled, masterGain, syncStatus, projectName, collabConnected,
@@ -214,13 +215,13 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
   const [bpmInput,  setBpmInput]    = useState('');
   const [editingName, setEditingName] = useState(false);
 
-  const _beats = Math.floor(position);
+  const beats = Math.floor(position);
   const bar   = Math.floor(beats / timeSignature[0]) + 1;
   const beat  = (beats % timeSignature[0]) + 1;
-  const _posStr = `${String(bar).padStart(3,'0')}:${beat}`;
+  const posStr = `${String(bar).padStart(3,'0')}:${beat}`;
 
   const syncColors: Record<string, string> = {
-    idle: '#444', syncing: '#f59e0b', synced: '#22c55e', error: '#ef4444', offline: '#555',
+    idle: 'var(--dj-dim)', syncing: 'var(--status-warn)', synced: 'var(--accent-green)', error: '#ef4444', offline: '#555',
   };
 
   return (
@@ -228,11 +229,11 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
          style={{ minHeight: 52 }}>
       {/* Project name */}
       <div className="flex items-center gap-2 min-w-[140px]">
-        <Led on={collabConnected} color="#22d3ee" pulse={collabConnected} />
+        <Led on={collabConnected} color="var(--looper-cyan)" pulse={collabConnected} />
         {editingName ? (
           <input
             autoFocus
-            className="bg-[#1a1a1a] border border-[#a3e635]/40 px-1 text-xs text-white w-28"
+            className="bg-[var(--t-b2x)] border border-[#a3e635]/40 px-1 text-xs text-white w-28"
             value={projectName}
             onChange={e => setProjectName(e.target.value)}
             onBlur={() => setEditingName(false)}
@@ -240,7 +241,7 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
           />
         ) : (
           <span
-            className="text-[11px] tracking-widest text-[#888] cursor-pointer hover:text-[#a3e635] transition-colors"
+            className="text-[11px] tracking-widest text-[var(--text-dim)] cursor-pointer hover:text-[#a3e635] transition-colors"
             onClick={() => setEditingName(true)}
           >
             {projectName}
@@ -248,7 +249,7 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
         )}
         <div
           className="w-1.5 h-1.5 rounded-full"
-          style={{ background: syncColors[syncStatus] ?? '#444' }}
+          style={{ background: syncColors[syncStatus] ?? 'var(--dj-dim)' }}
           title={`Sync: ${syncStatus}`}
         />
       </div>
@@ -268,7 +269,7 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
       </div>
 
       {/* Position display */}
-      <div className="font-mono text-sm bg-[#0a0a0a] border border-[#222] rounded px-2 py-1"
+      <div className="font-mono text-sm bg-[#0a0a0a] border border-[var(--dj-border)] rounded px-2 py-1"
            style={{ minWidth: 72, textAlign: 'center' }}>
         <span className="text-[#a3e635]">{posStr}</span>
       </div>
@@ -288,13 +289,13 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
             value={bpmInput}
             onChange={e => setBpmInput(e.target.value)}
             onBlur={() => {
-              const _v = parseFloat(bpmInput);
+              const v = parseFloat(bpmInput);
               if (!isNaN(v)) setBpm(v);
               setEditingBpm(false);
             }}
             onKeyDown={e => {
               if (e.key === 'Enter') {
-                const _v = parseFloat(bpmInput); if (!isNaN(v)) setBpm(v);
+                const v = parseFloat(bpmInput); if (!isNaN(v)) setBpm(v);
                 setEditingBpm(false);
               }
               if (e.key === 'Escape') setEditingBpm(false);
@@ -302,7 +303,7 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
           />
         ) : (
           <div
-            className="font-mono text-sm bg-[#0a0a0a] border border-[#222] px-2 py-1 cursor-pointer hover:border-[#a3e635]/30 min-w-[56px] text-center text-[#a3e635]"
+            className="font-mono text-sm bg-[#0a0a0a] border border-[var(--dj-border)] px-2 py-1 cursor-pointer hover:border-[#a3e635]/30 min-w-[56px] text-center text-[#a3e635]"
             onClick={() => { setBpmInput(String(bpm)); setEditingBpm(true); }}
           >
             {bpm.toFixed(1)}
@@ -312,13 +313,13 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
           className="text-[10px] text-[#555] hover:text-[#a3e635] px-1 select-none"
           onClick={() => engine.nudgeBpm(1)}
         >▶</button>
-        <span className="text-[9px] text-[#444] tracking-widest">BPM</span>
+        <span className="text-[9px] text-[var(--dj-dim)] tracking-widest">BPM</span>
         <Btn onClick={engine.tapTempo} className="text-[9px]" title="Tap Tempo (T)">TAP</Btn>
       </div>
 
       {/* Time signature */}
       <select
-        className="bg-[#0d0d0d] border border-[#222] rounded text-[11px] text-[#888] px-1 py-0.5 cursor-pointer"
+        className="bg-[#0d0d0d] border border-[var(--dj-border)] rounded text-[11px] text-[var(--text-dim)] px-1 py-0.5 cursor-pointer"
         value={`${timeSignature[0]}/${timeSignature[1]}`}
         onChange={e => {
           const [n, d] = e.target.value.split('/').map(Number);
@@ -341,7 +342,7 @@ const _TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine
         {/* PATCH-D04-b: Time savings readout wired here (PRD §8.4) */}
         <TimeSavingsReadout />
         <div className="w-px h-5 bg-[#2a2a2a]" />
-        <span className="text-[9px] text-[#444] tracking-widest">MASTER</span>
+        <span className="text-[9px] text-[var(--dj-dim)] tracking-widest">MASTER</span>
         <Knob
           value={masterGain} min={0} max={1.5} label=""
           onChange={setMasterGain} size={28}
@@ -354,16 +355,16 @@ TransportBar.displayName = 'TransportBar';
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }) => {
+const Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> }) => {
   const { sidebarTab, setSidebarTab, collabUsers, collabConnected, collabEnabled, loadedPlugins } = useDAWStore();
   // PATCH-D01: reactive selector — getState() inside JSX is not reactive
-  const _collabRoom = useDAWStore(s => s.collabRoom);
+  const collabRoom = useDAWStore(s => s.collabRoom);
   const [joining, setJoining] = useState(false);
   const [roomInput, setRoomInput] = useState('');
   const [, navigate]  = useLocation();
   const uploadRef     = useRef<HTMLInputElement>(null);
 
-  const _FILES = [
+  const FILES = [
     { name: 'KICKS/', type: 'folder' },
     { name: 'SNARES/', type: 'folder' },
     { name: 'SYNTHS/', type: 'folder' },
@@ -382,7 +383,7 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
             className={`flex-1 py-1.5 text-[9px] tracking-widest uppercase font-mono transition-colors ${
               sidebarTab === tab
                 ? 'text-[#a3e635] border-b border-[#a3e635]'
-                : 'text-[#444] hover:text-[#888]'
+                : 'text-[var(--dj-dim)] hover:text-[var(--text-dim)]'
             }`}
           >
             {tab === 'files' ? '📁' : tab === 'collab' ? '👥' : '🧩'}
@@ -394,14 +395,14 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
         {/* ── Files tab ──────────────────────────────────────────────────── */}
         {sidebarTab === 'files' && (
           <>
-            <p className="text-[9px] text-[#444] tracking-widest px-1 mb-2">BROWSER</p>
+            <p className="text-[9px] text-[var(--dj-dim)] tracking-widest px-1 mb-2">BROWSER</p>
             {FILES.map(f => (
               <div
                 key={f.name}
-                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[#1a1a1a] cursor-pointer group"
+                className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[var(--t-b2x)] cursor-pointer group"
               >
                 <span className="text-[#555] text-xs">{f.type === 'folder' ? '▸' : '•'}</span>
-                <span className="text-[11px] text-[#666] group-hover:text-[#aaa] transition-colors font-mono">
+                <span className="text-[11px] text-[var(--dj-muted)] group-hover:text-[var(--daw-sub)] transition-colors font-mono">
                   {f.name}
                 </span>
               </div>
@@ -413,7 +414,7 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
                 accept="audio/*,.wav,.mp3,.aiff,.flac,.ogg"
                 style={{ display: 'none' }}
                 onChange={e => {
-                  const _file = e.target.files?.[0];
+                  const file = e.target.files?.[0];
                   if (file) { /* upload queued — wire to engine handler */ }
                   e.target.value = '';
                 }}
@@ -428,12 +429,12 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
         {/* ── Collab tab (L2) ────────────────────────────────────────────── */}
         {sidebarTab === 'collab' && (
           <>
-            <p className="text-[9px] text-[#444] tracking-widest px-1 mb-2">
+            <p className="text-[9px] text-[var(--dj-dim)] tracking-widest px-1 mb-2">
               COLLABORATION
             </p>
             <div className="flex items-center gap-2 mb-3">
-              <Led on={collabConnected} color="#22d3ee" pulse={collabConnected} />
-              <span className="text-[10px] text-[#666]">
+              <Led on={collabConnected} color="var(--looper-cyan)" pulse={collabConnected} />
+              <span className="text-[10px] text-[var(--dj-muted)]">
                 {collabConnected ? `ROOM ${collabRoom}` : 'DISCONNECTED'}
               </span>
             </div>
@@ -444,13 +445,13 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
                   <input
                     autoFocus
                     placeholder="ROOM ID"
-                    className="w-full bg-[#1a1a1a] border border-[#a3e635]/30 px-2 py-1 text-[11px] text-[#ccc] font-mono"
+                    className="w-full bg-[var(--t-b2x)] border border-[#a3e635]/30 px-2 py-1 text-[11px] text-[var(--daw-ghost)] font-mono"
                     value={roomInput}
                     onChange={e => setRoomInput(e.target.value.toUpperCase())}
                     onKeyDown={e => {
                       if (e.key === 'Enter' && roomInput) {
-                        const _userId = crypto.randomUUID().slice(0, 8);
-                        const _colors = ['#f59e0b','#22d3ee','#22c55e','#a855f7','#ef4444'];
+                        const userId = crypto.randomUUID().slice(0, 8);
+                        const colors = ['var(--status-warn)','var(--looper-cyan)','var(--accent-green)','var(--accent-violet)','#ef4444'];
                         const color  = colors[Math.floor(Math.random() * colors.length)];
                         collab.joinRoom(roomInput, userId, `USER_${userId.slice(0,4)}`, color);
                         setJoining(false);
@@ -486,13 +487,13 @@ const _Sidebar = memo(({ collab }: { collab: ReturnType<typeof useCollabSocket> 
         {/* ── Plugins tab (L2) ───────────────────────────────────────────── */}
         {sidebarTab === 'plugins' && (
           <>
-            <p className="text-[9px] text-[#444] tracking-widest px-1 mb-2">PLUGIN SDK</p>
+            <p className="text-[9px] text-[var(--dj-dim)] tracking-widest px-1 mb-2">PLUGIN SDK</p>
             {loadedPlugins.length === 0 ? (
-              <div className="text-[10px] text-[#333] text-center py-4 font-mono">NO PLUGINS LOADED</div>
+              <div className="text-[10px] text-[var(--dj-dimmer)] text-center py-4 font-mono">NO PLUGINS LOADED</div>
             ) : loadedPlugins.map(p => (
-              <div key={p.id} className="flex items-center justify-between px-2 py-1 rounded bg-[#1a1a1a]">
-                <span className="text-[10px] text-[#777]">{p.name}</span>
-                <Led on={p.enabled} color="#22c55e" />
+              <div key={p.id} className="flex items-center justify-between px-2 py-1 rounded bg-[var(--t-b2x)]">
+                <span className="text-[10px] text-[var(--text-muted)]">{p.name}</span>
+                <Led on={p.enabled} color="var(--accent-green)" />
               </div>
             ))}
             <div className="pt-2 border-t border-[#1c1c1c] mt-2">
@@ -512,7 +513,7 @@ Sidebar.displayName = 'Sidebar';
 
 const BEAT_WIDTH = 24; // px per beat at zoom=1
 
-const _ArrangementView = memo(({
+const ArrangementView = memo(({
   engine, collab,
 }: {
   engine: ReturnType<typeof useDAWEngine>;
@@ -525,29 +526,29 @@ const _ArrangementView = memo(({
     setSelectedTrack, setScrollLeft, setZoom,
     trackHeightMode,
   } = useDAWStore();
-  const _setSelectedRegion = useDAWStore(s => s.setSelectedRegion);
+  const setSelectedRegion = useDAWStore(s => s.setSelectedRegion);
 
-  const _containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const TRACK_HEIGHT = trackHeightMode === 'compact' ? 28 : trackHeightMode === 'large' ? 56 : 40;
-  const _BPW = BEAT_WIDTH * zoom;  // beats → px with zoom
+  const BPW = BEAT_WIDTH * zoom;  // beats → px with zoom
 
-  const _totalBeats = 128;
-  const _totalWidth = totalBeats * BPW;
+  const totalBeats = 128;
+  const totalWidth = totalBeats * BPW;
 
   // Playhead position
-  const _playheadX = position * BPW - scrollLeft;
+  const playheadX = position * BPW - scrollLeft;
 
   // Snap to beat grid
-  const _snapBeat = useCallback((px: number) => {
-    const _rawBeat = (px + scrollLeft) / BPW;
+  const snapBeat = useCallback((px: number) => {
+    const rawBeat = (px + scrollLeft) / BPW;
     return Math.round(rawBeat);
   }, [scrollLeft, BPW]);
 
-  const _onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollLeft((e.currentTarget as HTMLDivElement).scrollLeft);
   }, [setScrollLeft]);
 
-  const _onWheel = useCallback((e: React.WheelEvent) => {
+  const onWheel = useCallback((e: React.WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
       setZoom(zoom * (e.deltaY > 0 ? 0.9 : 1.1));
@@ -555,18 +556,18 @@ const _ArrangementView = memo(({
   }, [zoom, setZoom]);
 
   // Click on arrangement ruler to seek
-  const _onRulerClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const _rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-    const _beat = snapBeat(e.clientX - rect.left);
+  const onRulerClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    const beat = snapBeat(e.clientX - rect.left);
     engine.seekTo(beat);
     collab.broadcastCursor(beat, selectedTrackId);
   }, [snapBeat, engine, collab, selectedTrackId]);
 
   // Beat markers
-  const _beatMarkers = useMemo(() => {
+  const beatMarkers = useMemo(() => {
     const markers: number[] = [];
-    const _step = zoom < 1 ? 8 : zoom < 2 ? 4 : 1;
-    for (let _b = 0; b <= totalBeats; b += step) {
+    const step = zoom < 1 ? 8 : zoom < 2 ? 4 : 1;
+    for (let b = 0; b <= totalBeats; b += step) {
       markers.push(b);
     }
     return markers;
@@ -588,7 +589,7 @@ const _ArrangementView = memo(({
               style={{ left: b * BPW - scrollLeft }}
             >
               <div className="w-px bg-[#2a2a2a] flex-1" />
-              <span className="text-[8px] text-[#444] font-mono ml-1">{b}</span>
+              <span className="text-[8px] text-[var(--dj-dim)] font-mono ml-1">{b}</span>
             </div>
           ))}
           {/* Loop region on ruler */}
@@ -607,8 +608,8 @@ const _ArrangementView = memo(({
               className="absolute top-0 w-px h-full"
               style={{
                 left: playheadX,
-                background: '#f59e0b',
-                boxShadow: '0 0 4px #f59e0b',
+                background: 'var(--status-warn)',
+                boxShadow: '0 0 4px var(--status-warn)',
               }}
             />
           )}
@@ -643,15 +644,15 @@ const _ArrangementView = memo(({
                Root cause: no affordance to add track from arrangement view.
                RA-01: requires addTrack to be on the store interface. */}
           <div
-            className="flex items-center justify-center border-b border-[#1a1a1a]
-                       cursor-pointer hover:bg-[#141414] transition-colors group"
+            className="flex items-center justify-center border-b border-[var(--t-b2x)]
+                       cursor-pointer hover:bg-[var(--t-b2)] transition-colors group"
             style={{ height: TRACK_HEIGHT }}
             onClick={() => {
-              const _s = useDAWStore.getState();
+              const s = useDAWStore.getState();
               s.addTrack({
                 label:       `TRACK ${s.tracks.length + 1}`,
                 type:        'audio',
-                color:       '#64748b',
+                color:       'var(--text-dim)',
                 gain:        0.8,
                 pan:         0,
                 mute:        false,
@@ -689,8 +690,8 @@ const _ArrangementView = memo(({
             {tracks.map((track, i) => (
               <div
                 key={track.id}
-                className={`absolute w-full border-b border-[#1a1a1a] ${
-                  selectedTrackId === track.id ? 'bg-[#141414]' : i % 2 === 0 ? 'bg-[#0d0d0d]' : 'bg-[#0b0b0b]'
+                className={`absolute w-full border-b border-[var(--t-b2x)] ${
+                  selectedTrackId === track.id ? 'bg-[var(--t-b2)]' : i % 2 === 0 ? 'bg-[#0d0d0d]' : 'bg-[var(--panel-deep)]'
                 }`}
                 style={{ top: i * TRACK_HEIGHT, height: TRACK_HEIGHT }}
                 onClick={() => {
@@ -708,15 +709,15 @@ const _ArrangementView = memo(({
                 style={{
                   left: b * BPW,
                   height: tracks.length * TRACK_HEIGHT,
-                  background: b % 4 === 0 ? '#1c1c1c' : '#151515',
+                  background: b % 4 === 0 ? '#1c1c1c' : 'var(--panel-deep)',
                 }}
               />
             ))}
 
             {/* Regions */}
             {regions.map(region => {
-              const _track = tracks.find(t => t.id === region.trackId);
-              const _trackIdx = tracks.findIndex(t => t.id === region.trackId);
+              const track = tracks.find(t => t.id === region.trackId);
+              const trackIdx = tracks.findIndex(t => t.id === region.trackId);
               if (!track || trackIdx < 0) return null;
               return (
                 <RegionBlock
@@ -733,7 +734,7 @@ const _ArrangementView = memo(({
 
             {/* L3: Arrangement prediction overlays */}
             {predictionsVisible && arrangementPredictions.map((pred, i) => {
-              const _trackIdx = tracks.findIndex(t => t.id === pred.trackId);
+              const trackIdx = tracks.findIndex(t => t.id === pred.trackId);
               if (trackIdx < 0) return null;
               const PRED_COLORS: Record<string, string> = {
                 introduce: '#22c55e33', mute: '#ef444433',
@@ -766,7 +767,7 @@ const _ArrangementView = memo(({
               style={{
                 left: position * BPW,
                 height: tracks.length * TRACK_HEIGHT,
-                background: playing ? '#f59e0b' : '#f59e0b66',
+                background: playing ? 'var(--status-warn)' : '#f59e0b66',
                 boxShadow: playing ? '0 0 6px #f59e0b88' : 'none',
               }}
             />
@@ -778,7 +779,7 @@ const _ArrangementView = memo(({
 });
 ArrangementView.displayName = 'ArrangementView';
 
-const _TrackLabel = memo(({
+const TrackLabel = memo(({
   track, height, selected, onSelect,
 }: {
   track: Track; height: number; selected: boolean; onSelect: () => void;
@@ -786,25 +787,25 @@ const _TrackLabel = memo(({
   const { updateTrack } = useDAWStore();
   return (
     <div
-      className={`flex items-center gap-1.5 px-2 border-b border-[#1a1a1a] cursor-pointer transition-colors ${
-        selected ? 'bg-[#1a1a1a]' : 'bg-[#0d0d0d] hover:bg-[#141414]'
+      className={`flex items-center gap-1.5 px-2 border-b border-[var(--t-b2x)] cursor-pointer transition-colors ${
+        selected ? 'bg-[var(--t-b2x)]' : 'bg-[#0d0d0d] hover:bg-[var(--t-b2)]'
       }`}
       style={{ height, borderLeft: `2px solid ${track.color}` }}
       onClick={onSelect}
     >
       <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-        <span className="text-[10px] font-mono tracking-wider text-[#ccc] truncate">{track.label}</span>
+        <span className="text-[10px] font-mono tracking-wider text-[var(--daw-ghost)] truncate">{track.label}</span>
         <div className="flex items-center gap-1">
-          <span className="text-[8px] text-[#444]">{track.type.toUpperCase()}</span>
+          <span className="text-[8px] text-[var(--dj-dim)]">{track.type.toUpperCase()}</span>
         </div>
       </div>
       <div className="flex flex-col gap-0.5">
         <button
-          className={`text-[8px] font-mono px-1 ${track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[#444] hover:text-[#888]'}`}
+          className={`text-[8px] font-mono px-1 ${track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[var(--dj-dim)] hover:text-[var(--text-dim)]'}`}
           onClick={e => { e.stopPropagation(); updateTrack(track.id, { mute: !track.mute }); }}
         >M</button>
         <button
-          className={`text-[8px] font-mono px-1 rounded ${track.solo ? 'text-cyan-400 bg-cyan-500/20' : 'text-[#444] hover:text-[#888]'}`}
+          className={`text-[8px] font-mono px-1 rounded ${track.solo ? 'text-cyan-400 bg-cyan-500/20' : 'text-[var(--dj-dim)] hover:text-[var(--text-dim)]'}`}
           onClick={e => { e.stopPropagation(); updateTrack(track.id, { solo: !track.solo }); }}
         >S</button>
       </div>
@@ -813,7 +814,7 @@ const _TrackLabel = memo(({
 });
 TrackLabel.displayName = 'TrackLabel';
 
-const _RegionBlock = memo(({
+const RegionBlock = memo(({
   region, top, height, bpw, selected, onClick,
 }: {
   region: TrackRegion; top: number; height: number; bpw: number;
@@ -852,19 +853,19 @@ const PIANO_PITCHES = [
   72,71,70,69,68,67,66,65,64,63,62,61,60,59,58,57,56,55,54,53,52,51,50,49,48,
 ];
 
-const _MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequencer> }) => {
+const MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSequencer> }) => {
   const {
     midiPatterns, activePatternId, sequencerStep, setActivePattern, addMidiPattern,
   } = useDAWStore();
 
-  const _pattern = midiPatterns.find(p => p.id === activePatternId);
+  const pattern = midiPatterns.find(p => p.id === activePatternId);
   const steps   = pattern?.steps ?? 16;
 
-  const _hasNote = useCallback((step: number, pitch: number) =>
+  const hasNote = useCallback((step: number, pitch: number) =>
     pattern?.notes.some(n => n.step === step && n.pitch === pitch) ?? false,
   [pattern]);
 
-  const _noteVelocity = useCallback((step: number, pitch: number) =>
+  const noteVelocity = useCallback((step: number, pitch: number) =>
     pattern?.notes.find(n => n.step === step && n.pitch === pitch)?.velocity ?? 100,
   [pattern]);
 
@@ -880,7 +881,7 @@ const _MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSeque
               className={`px-2 py-0.5 rounded text-[9px] font-mono transition-colors ${
                 p.id === activePatternId
                   ? 'bg-[#a3e635]/10 text-[#a3e635] border border-[#a3e635]/40'
-                  : 'text-[#444] hover:text-[#888] border border-[#222]'
+                  : 'text-[var(--dj-dim)] hover:text-[var(--text-dim)] border border-[var(--dj-border)]'
               }`}
               onClick={() => setActivePattern(p.id)}
             >{p.name}</button>
@@ -912,17 +913,17 @@ const _MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSeque
         {/* Piano keys */}
         <div className="flex-none flex flex-col border-r border-[#1c1c1c]" style={{ width: 36 }}>
           {PIANO_PITCHES.map(pitch => {
-            const _name = seq.getPitchLabel(pitch);
-            const _isBlack = name.includes('#');
+            const name = seq.getPitchLabel(pitch);
+            const isBlack = name.includes('#');
             return (
               <div
                 key={pitch}
-                className={`flex items-center justify-end pr-1 border-b border-[#111] ${
-                  isBlack ? 'bg-[#111]' : 'bg-[#1a1a1a]'
+                className={`flex items-center justify-end pr-1 border-b border-[var(--dj-surface2)] ${
+                  isBlack ? 'bg-[var(--dj-surface2)]' : 'bg-[var(--t-b2x)]'
                 }`}
                 style={{ height: `${100 / PIANO_PITCHES.length}%` }}
               >
-                <span className="text-[7px] font-mono" style={{ color: isBlack ? '#444' : '#555' }}>
+                <span className="text-[7px] font-mono" style={{ color: isBlack ? 'var(--dj-dim)' : '#555' }}>
                   {name}
                 </span>
               </div>
@@ -937,19 +938,19 @@ const _MidiSequencerPanel = memo(({ seq }: { seq: ReturnType<typeof useMidiSeque
               <div key={pitch} className="flex flex-1" style={{ height: `${100 / PIANO_PITCHES.length}%` }}>
                 {Array.from({ length: steps }, (_, step) => {
                   const active    = hasNote(step, pitch);
-                  const _isCurrent = step === sequencerStep;
+                  const isCurrent = step === sequencerStep;
                   const vel       = noteVelocity(step, pitch);
                   return (
                     <div
                       key={step}
-                      className="border-r border-b border-[#111] cursor-pointer transition-colors flex items-end"
+                      className="border-r border-b border-[var(--dj-surface2)] cursor-pointer transition-colors flex items-end"
                       style={{
                         width: 20,
                         background: isCurrent
                           ? '#f59e0b22'
                           : active
                             ? '#a3e635'
-                            : step % 4 === 0 ? '#151515' : '#0d0d0d',
+                            : step % 4 === 0 ? 'var(--panel-deep)' : '#0d0d0d',
                         boxShadow: active ? '0 0 4px rgba(163,230,53,0.35)' : 'none',
                       }}
                       onClick={() => seq.toggleNote(step, pitch, 100)}
@@ -976,14 +977,14 @@ MidiSequencerPanel.displayName = 'MidiSequencerPanel';
 
 // ─── Mixer Strip ──────────────────────────────────────────────────────────────
 
-const _MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
+const MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> }) => {
   const { tracks, masterGain, setMasterGain, updateTrack, setActiveFXTrack, activeFXTrackId } = useDAWStore();
   const [meters, setMeters] = useState<Record<string, number>>({});
 
   // Update meters on rAF
   useEffect(() => {
     let raf: number;
-    const _update = () => {
+    const update = () => {
       const next: Record<string, number> = {};
       for (const t of tracks) next[t.id] = engine.getTrackMeterValue(t.id);
       setMeters(next);
@@ -1011,7 +1012,7 @@ const _MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> 
       ))}
 
       {/* Master channel */}
-      <div className="flex flex-col items-center px-3 py-2 border-l border-[#2a2a2a] bg-[#111] min-w-[64px]">
+      <div className="flex flex-col items-center px-3 py-2 border-l border-[#2a2a2a] bg-[var(--dj-surface2)] min-w-[64px]">
         <span className="text-[8px] tracking-widest text-[#555] mb-2">MASTER</span>
         <VUMeter level={masterGain > 1 ? 1 : masterGain} />
         <div className="mt-auto">
@@ -1040,7 +1041,7 @@ const _MixerStrip = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine> 
 });
 MixerStrip.displayName = 'MixerStrip';
 
-const _MixerChannel = memo(({
+const MixerChannel = memo(({
   track, meterLevel, fxActive, onFXClick, onChange,
 }: {
   track: Track;
@@ -1051,7 +1052,7 @@ const _MixerChannel = memo(({
 }) => (
   <div
     className={`flex flex-col items-center px-2 py-2 border-r border-[#1c1c1c] transition-colors min-w-[52px] ${
-      track.solo ? 'bg-[#0f1a11]' : track.mute ? 'bg-[#1a0f0f]' : ''
+      track.solo ? 'bg-[var(--panel-deep)]' : track.mute ? 'bg-[var(--panel-deep)]' : ''
     }`}
     style={{ borderTop: `2px solid ${track.color}` }}
   >
@@ -1083,19 +1084,19 @@ const _MixerChannel = memo(({
     <div className="flex gap-0.5">
       <button
         className={`text-[7px] font-mono px-0.5 rounded transition-colors ${
-          track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[#333] hover:text-[#666]'
+          track.mute ? 'text-[#a3e635] bg-[#a3e635]/10' : 'text-[var(--dj-dimmer)] hover:text-[var(--dj-muted)]'
         }`}
         onClick={() => onChange({ mute: !track.mute })}
       >M</button>
       <button
         className={`text-[7px] font-mono px-0.5 rounded transition-colors ${
-          track.solo ? 'text-cyan-400 bg-cyan-500/20' : 'text-[#333] hover:text-[#666]'
+          track.solo ? 'text-cyan-400 bg-cyan-500/20' : 'text-[var(--dj-dimmer)] hover:text-[var(--dj-muted)]'
         }`}
         onClick={() => onChange({ solo: !track.solo })}
       >S</button>
       <button
         className={`text-[7px] font-mono px-0.5 rounded transition-colors ${
-          fxActive ? 'text-purple-400 bg-purple-500/20' : 'text-[#333] hover:text-[#666]'
+          fxActive ? 'text-purple-400 bg-purple-500/20' : 'text-[var(--dj-dimmer)] hover:text-[var(--dj-muted)]'
         }`}
         onClick={onFXClick}
       >FX</button>
@@ -1106,12 +1107,12 @@ MixerChannel.displayName = 'MixerChannel';
 
 const FX_TYPES = ['eq','compressor','reverb','delay','filter','distortion'] as const;
 
-const _FXRackInline = memo(({ trackId }: { trackId: string }) => {
+const FXRackInline = memo(({ trackId }: { trackId: string }) => {
   const { tracks, updateFXSlot, toggleFXSlot } = useDAWStore();
-  const _track = tracks.find(t => t.id === trackId);
+  const track = tracks.find(t => t.id === trackId);
   if (!track) return null;
 
-  const _addFX = (type: FXSlot['type']) => {
+  const addFX = (type: FXSlot['type']) => {
     useDAWStore.getState().updateTrack(trackId, {
       fxChain: [...track.fxChain, {
         id: `fx_${Date.now()}`, type, enabled: true,
@@ -1121,13 +1122,13 @@ const _FXRackInline = memo(({ trackId }: { trackId: string }) => {
   };
 
   return (
-    <div className="flex flex-col px-3 py-2 border-l-2 border-purple-500/40 min-w-[240px] bg-[#0f0f14]">
+    <div className="flex flex-col px-3 py-2 border-l-2 border-purple-500/40 min-w-[240px] bg-[var(--panel-deep)]">
       <div className="flex items-center justify-between mb-2">
         <span className="text-[9px] tracking-widest text-purple-400">
           FX RACK — {track.label}
         </span>
         <select
-          className="bg-[#1a1a1a] border border-[#333] rounded text-[9px] text-[#888] px-1"
+          className="bg-[var(--t-b2x)] border border-[var(--dj-dimmer)] rounded text-[9px] text-[var(--text-dim)] px-1"
           onChange={e => addFX(e.target.value as FXSlot['type'])}
           value=""
         >
@@ -1142,7 +1143,7 @@ const _FXRackInline = memo(({ trackId }: { trackId: string }) => {
             className={`px-2 py-1 rounded border text-[9px] font-mono cursor-pointer transition-colors ${
               fx.enabled
                 ? 'border-purple-500/50 text-purple-300 bg-purple-500/10'
-                : 'border-[#333] text-[#444]'
+                : 'border-[var(--dj-dimmer)] text-[var(--dj-dim)]'
             }`}
             onClick={() => toggleFXSlot(trackId, fx.id)}
             title={fx.enabled ? 'Click to disable' : 'Click to enable'}
@@ -1151,7 +1152,7 @@ const _FXRackInline = memo(({ trackId }: { trackId: string }) => {
           </div>
         ))}
         {track.fxChain.length === 0 && (
-          <span className="text-[9px] text-[#333]">NO FX — ADD FROM DROPDOWN</span>
+          <span className="text-[9px] text-[var(--dj-dimmer)]">NO FX — ADD FROM DROPDOWN</span>
         )}
       </div>
     </div>
@@ -1161,7 +1162,7 @@ FXRackInline.displayName = 'FXRackInline';
 
 // ─── AI Panel (L1 mix + L3 co-producer + L3 mastering) ───────────────────────
 
-const _AIPanel = memo(() => {
+const AIPanel = memo(() => {
   const {
     aiPanelTab, aiSuggestions, aiChat, aiThinking, mastering,
     setAIPanelTab, acceptSuggestion, rejectSuggestion, addAIChat,
@@ -1170,15 +1171,15 @@ const _AIPanel = memo(() => {
 
   const [chatInput, setChatInput] = useState('');
   const [aiError,   setAiError]   = useState<string | null>(null);
-  const _chatEndRef = useRef<HTMLDivElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [aiChat]);
 
   // ── sendChat: tries server, falls back to local LLPTE stub ──────────────
-  const _sendChat = useCallback(async () => {
-    const _msg = chatInput.trim();
+  const sendChat = useCallback(async () => {
+    const msg = chatInput.trim();
     if (!msg) return;
     addAIChat({ role: 'user', content: msg });
     setChatInput('');
@@ -1191,11 +1192,11 @@ const _AIPanel = memo(() => {
       // call the chatWithCoProd function directly on the module-level instance.
       // The actual hook instance is managed in useCloudSync.ts.
       // For a full tRPC integration, call trpc.daw['ai.chat'].mutate() here.
-      const _token = localStorage.getItem('r3_token');
-      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const _store = useDAWStore.getState();
+      const token = localStorage.getItem('r3_token');
+      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const store = useDAWStore.getState();
 
-      const _res = await fetch(`${apiBase}/trpc/daw.ai.chat`, {
+      const res = await fetch(`${apiBase}/trpc/daw.ai.chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1211,16 +1212,16 @@ const _AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const _data = await res.json() as { result?: { data?: { json?: { reply: string } } } };
-        const _reply = data.result?.data?.json?.reply ?? '';
+        const data = await res.json() as { result?: { data?: { json?: { reply: string } } } };
+        const reply = data.result?.data?.json?.reply ?? '';
         addAIChat({ role: 'assistant', content: reply });
       } else {
         throw new Error(`HTTP ${res.status}`);
       }
     } catch {
       // Graceful degradation: local response when server unavailable
-      const _bpm = useDAWStore.getState().bpm;
-      const _localReply = `Analysing your arrangement at ${bpm} BPM. `
+      const bpm = useDAWStore.getState().bpm;
+      const localReply = `Analysing your arrangement at ${bpm} BPM. `
         + `I suggest boosting low-mid on BASS around 200Hz, and introducing `
         + `a rhythmic sidechain from KICK at 4:1 ratio. `
         + `Current dynamic range reads approx -12 LUFS — 2dB headroom before ceiling.`;
@@ -1231,15 +1232,15 @@ const _AIPanel = memo(() => {
   }, [chatInput, addAIChat, setAIThinking]);
 
   // ── triggerSuggestions: server first, local LLPTE stub as fallback ───────
-  const _triggerSuggestions = useCallback(async () => {
+  const triggerSuggestions = useCallback(async () => {
     setAIThinking(true);
     setAiError(null);
-    const _store = useDAWStore.getState();
+    const store = useDAWStore.getState();
 
     try {
-      const _token = localStorage.getItem('r3_token');
-      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const _res = await fetch(`${apiBase}/trpc/daw.ai.suggestions`, {
+      const token = localStorage.getItem('r3_token');
+      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const res = await fetch(`${apiBase}/trpc/daw.ai.suggestions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1251,10 +1252,10 @@ const _AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const _data = await res.json() as {
+        const data = await res.json() as {
           result?: { data?: { json?: { suggestions: { type: string; confidence: number; description: string; params: Record<string, unknown> }[] } } }
         };
-        const _suggestions = data.result?.data?.json?.suggestions ?? [];
+        const suggestions = data.result?.data?.json?.suggestions ?? [];
         for (const s of suggestions) {
           store.addAISuggestion({
             type: s.type as 'mix' | 'arrangement' | 'mastering' | 'harmony' | 'rhythm',
@@ -1275,14 +1276,14 @@ const _AIPanel = memo(() => {
   }, [setAIThinking]);
 
   // ── runMasteringAnalysis: server first, local calculation fallback ───────
-  const _runMasteringAnalysis = useCallback(async () => {
+  const runMasteringAnalysis = useCallback(async () => {
     updateMastering({ processing: true });
     const { targetLUFS, ceilingDB, dynamicsMode, stereoWidth } = mastering;
 
     try {
-      const _token = localStorage.getItem('r3_token');
-      const _apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
-      const _res = await fetch(`${apiBase}/trpc/daw.mastering.analyse`, {
+      const token = localStorage.getItem('r3_token');
+      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+      const res = await fetch(`${apiBase}/trpc/daw.mastering.analyse`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1292,18 +1293,18 @@ const _AIPanel = memo(() => {
       });
 
       if (res.ok) {
-        const _data = await res.json() as { result?: { data?: { json?: {
+        const data = await res.json() as { result?: { data?: { json?: {
           inputLUFS: number; inputPeak: number; outputLUFS: number;
           dynamicRange: number; recommendation: string;
         } } } };
-        const _result = data.result?.data?.json;
+        const result = data.result?.data?.json;
         if (result) { updateMastering({ processing: false, analysisResult: result }); return; }
       }
     } catch { /* fall through */ }
 
     // Local calculation fallback
-    const _inputLUFS = -18.3;
-    const _gainNeeded = targetLUFS - inputLUFS;
+    const inputLUFS = -18.3;
+    const gainNeeded = targetLUFS - inputLUFS;
     updateMastering({
       processing: false,
       analysisResult: {
@@ -1329,7 +1330,7 @@ const _AIPanel = memo(() => {
             className={`flex-1 py-2 text-[8px] tracking-widest uppercase transition-colors ${
               aiPanelTab === tab
                 ? 'text-[#a3e635] border-b border-[#a3e635] bg-[#a3e635]/5'
-                : 'text-[#444] hover:text-[#777]'
+                : 'text-[var(--dj-dim)] hover:text-[var(--text-muted)]'
             }`}
           >
             {tab === 'mix' ? 'AI MIX' : tab === 'coproducer' ? 'CO-PROD' : 'MASTER'}
@@ -1369,8 +1370,8 @@ const _AIPanel = memo(() => {
 
             {aiSuggestions.filter(s => s.accepted === null).length === 0 && !aiThinking && (
               <div className="text-center py-8">
-                <div className="text-[10px] text-[#333] font-mono">LLPTE READY</div>
-                <div className="text-[9px] text-[#222] mt-1">Click ANALYSE to generate mix suggestions</div>
+                <div className="text-[10px] text-[var(--dj-dimmer)] font-mono">LLPTE READY</div>
+                <div className="text-[9px] text-[var(--dj-border)] mt-1">Click ANALYSE to generate mix suggestions</div>
               </div>
             )}
 
@@ -1382,15 +1383,28 @@ const _AIPanel = memo(() => {
                   className={`text-[9px] font-mono px-2 py-0.5 rounded border transition-colors ${
                     predictionsVisible
                       ? 'border-cyan-500/50 text-cyan-400 bg-cyan-500/10'
-                      : 'border-[#333] text-[#444] hover:border-[#555]'
+                      : 'border-[var(--dj-dimmer)] text-[var(--dj-dim)] hover:border-[#555]'
                   }`}
                   onClick={() => {
                     if (!predictionsVisible) {
-                      // Generate fake predictions for demo; real impl: llpte-ai inference
-                      useDAWStore.getState().setArrangementPredictions([
-                        { trackId: 'trk_3', startBeat: 32, suggestedAction: 'introduce', confidence: 0.82, label: 'ADD GHOST' },
-                        { trackId: 'trk_5', startBeat: 48, suggestedAction: 'fade',       confidence: 0.71, label: 'FADE OUT' },
-                      ]);
+                      const store = useDAWStore.getState();
+                      const token = localStorage.getItem('r3_token');
+                      const apiBase = (import.meta.env?.VITE_API_URL as string | undefined) ?? '';
+                      fetch(`${apiBase}/trpc/daw.ai.suggestions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json',
+                          ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+                        body: JSON.stringify({ json: { tracks: store.tracks, bpm: store.bpm, position: store.position } }),
+                      }).then(r => r.json()).then((data: { result?: { data?: { json?: { suggestions: { type: string; confidence: number; description: string; params: Record<string, unknown> }[] } } } }) => {
+                        const suggestions = data.result?.data?.json?.suggestions ?? [];
+                        store.setArrangementPredictions(suggestions.map(s => ({
+                          trackId: (s.params?.trackId as string) ?? 'trk_1',
+                          startBeat: (s.params?.startBeat as number) ?? 32,
+                          suggestedAction: s.type,
+                          confidence: s.confidence,
+                          label: s.description.slice(0, 20).toUpperCase(),
+                        })));
+                      }).catch(() => {});
                     }
                     setPredictionsVisible(!predictionsVisible);
                   }}
@@ -1408,8 +1422,8 @@ const _AIPanel = memo(() => {
             <div className="flex-1 p-3 space-y-2 overflow-y-auto" style={{ maxHeight: 320 }}>
               {aiChat.length === 0 && (
                 <div className="text-center py-6">
-                  <div className="text-[10px] text-[#333] font-mono mb-1">AI CO-PRODUCER</div>
-                  <div className="text-[9px] text-[#222]">
+                  <div className="text-[10px] text-[var(--dj-dimmer)] font-mono mb-1">AI CO-PRODUCER</div>
+                  <div className="text-[9px] text-[var(--dj-border)]">
                     Ask me about your arrangement, mix balance, or genre direction.
                   </div>
                 </div>
@@ -1419,8 +1433,8 @@ const _AIPanel = memo(() => {
                   <div
                     className={`max-w-[90%] rounded px-2 py-1.5 text-[10px] leading-relaxed ${
                       msg.role === 'user'
-                        ? 'bg-[#a3e635]/12 text-[#d0f58a] border border-[#a3e635]/25'
-                        : 'bg-[#1a1a1a] text-[#aaa] border border-[#2a2a2a]'
+                        ? 'bg-[#a3e635]/12 text-[var(--accent-neon-lime)] border border-[#a3e635]/25'
+                        : 'bg-[var(--t-b2x)] text-[var(--daw-sub)] border border-[#2a2a2a]'
                     }`}
                   >
                     {msg.content}
@@ -1430,7 +1444,7 @@ const _AIPanel = memo(() => {
               {aiThinking && aiPanelTab === 'coproducer' && (
                 <div className="flex gap-1 pl-1">
                   {[0,1,2].map(i => (
-                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[#444] animate-bounce"
+                    <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--dj-dim)] animate-bounce"
                          style={{ animationDelay: `${i * 0.2}s` }} />
                   ))}
                 </div>
@@ -1440,7 +1454,7 @@ const _AIPanel = memo(() => {
             <div className="flex-none p-2 border-t border-[#1c1c1c]">
               <div className="flex gap-1.5">
                 <input
-                  className="flex-1 bg-[#1a1a1a] border border-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[#ccc] placeholder-[#333]"
+                  className="flex-1 bg-[var(--t-b2x)] border border-[#2a2a2a] rounded px-2 py-1 text-[10px] text-[var(--daw-ghost)] placeholder-[var(--dj-dimmer)]"
                   placeholder="Ask the AI co-producer…"
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
@@ -1458,12 +1472,12 @@ const _AIPanel = memo(() => {
             <div className="flex items-center justify-between">
               <span className="text-[9px] tracking-widest text-[#555]">ADAPTIVE MASTERING</span>
               <div className="flex items-center gap-1.5">
-                <Led on={mastering.enabled} color="#22c55e" />
+                <Led on={mastering.enabled} color="var(--accent-green)" />
                 <button
                   className={`text-[9px] font-mono px-2 py-0.5 rounded border transition-colors ${
                     mastering.enabled
                       ? 'border-green-500/50 text-green-400 bg-green-500/10'
-                      : 'border-[#333] text-[#444]'
+                      : 'border-[var(--dj-dimmer)] text-[var(--dj-dim)]'
                   }`}
                   onClick={() => updateMastering({ enabled: !mastering.enabled })}
                 >
@@ -1485,7 +1499,7 @@ const _AIPanel = memo(() => {
                 className="w-full h-1 rounded appearance-none"
                 style={{ accentColor: '#a3e635' }}
               />
-              <div className="flex justify-between text-[8px] text-[#333]">
+              <div className="flex justify-between text-[8px] text-[var(--dj-dimmer)]">
                 <span>-23 (broadcast)</span><span>-14 (streaming)</span><span>-6 (loud)</span>
               </div>
             </div>
@@ -1516,7 +1530,7 @@ const _AIPanel = memo(() => {
                     className={`flex-1 py-1 rounded border text-[8px] font-mono transition-colors ${
                       mastering.dynamicsMode === mode
                         ? 'border-[#a3e635]/40 text-[#a3e635] bg-[#a3e635]/10'
-                        : 'border-[#222] text-[#444] hover:border-[#333]'
+                        : 'border-[var(--dj-border)] text-[var(--dj-dim)] hover:border-[var(--dj-dimmer)]'
                     }`}
                   >
                     {mode.toUpperCase()}
@@ -1536,7 +1550,7 @@ const _AIPanel = memo(() => {
                 value={mastering.stereoWidth}
                 onChange={e => updateMastering({ stereoWidth: parseFloat(e.target.value) })}
                 className="w-full h-1 rounded appearance-none"
-                style={{ accentColor: '#22d3ee' }}
+                style={{ accentColor: 'var(--looper-cyan)' }}
               />
             </div>
 
@@ -1549,10 +1563,10 @@ const _AIPanel = memo(() => {
             </Btn>
 
             {mastering.analysisResult && (
-              <div className="bg-[#111] border border-[#222] rounded p-2 space-y-1.5">
+              <div className="bg-[var(--dj-surface2)] border border-[var(--dj-border)] rounded p-2 space-y-1.5">
                 <div className="flex justify-between text-[9px]">
                   <span className="text-[#555]">INPUT</span>
-                  <span className="font-mono text-[#888]">{mastering.analysisResult.inputLUFS} LUFS</span>
+                  <span className="font-mono text-[var(--text-dim)]">{mastering.analysisResult.inputLUFS} LUFS</span>
                 </div>
                 <div className="flex justify-between text-[9px]">
                   <span className="text-[#555]">TARGET</span>
@@ -1560,10 +1574,10 @@ const _AIPanel = memo(() => {
                 </div>
                 <div className="flex justify-between text-[9px]">
                   <span className="text-[#555]">DYN RANGE</span>
-                  <span className="font-mono text-[#888]">{mastering.analysisResult.dynamicRange} LU</span>
+                  <span className="font-mono text-[var(--text-dim)]">{mastering.analysisResult.dynamicRange} LU</span>
                 </div>
                 <div className="pt-1 border-t border-[#1c1c1c]">
-                  <p className="text-[9px] text-[#666] leading-relaxed">
+                  <p className="text-[9px] text-[var(--dj-muted)] leading-relaxed">
                     {mastering.analysisResult.recommendation}
                   </p>
                 </div>
@@ -1577,7 +1591,7 @@ const _AIPanel = memo(() => {
 });
 AIPanel.displayName = 'AIPanel';
 
-const _AISuggestionCard = memo(({
+const AISuggestionCard = memo(({
   suggestion, onAccept, onReject,
 }: {
   suggestion: AISuggestion;
@@ -1585,10 +1599,10 @@ const _AISuggestionCard = memo(({
   onReject: () => void;
 }) => {
   const TYPE_COLORS: Record<string, string> = {
-    mix: '#22d3ee', arrangement: '#f59e0b', mastering: '#22c55e',
-    harmony: '#a855f7', rhythm: '#f472b6',
+    mix: 'var(--looper-cyan)', arrangement: 'var(--status-warn)', mastering: 'var(--accent-green)',
+    harmony: 'var(--accent-violet)', rhythm: 'var(--looper-pink)',
   };
-  const _color = TYPE_COLORS[suggestion.type] ?? '#888';
+  const color = TYPE_COLORS[suggestion.type] ?? 'var(--text-dim)';
 
   return (
     <div
@@ -1602,7 +1616,7 @@ const _AISuggestionCard = memo(({
         <div className="flex items-center gap-1">
           {/* PATCH-D05: ARIA meter for confidence bar */}
           <div
-            className="w-12 h-0.5 rounded-full bg-[#222]"
+            className="w-12 h-0.5 rounded-full bg-[var(--dj-border)]"
             role="meter"
             aria-label={`Confidence ${Math.round(suggestion.confidence * 100)}%`}
             aria-valuenow={Math.round(suggestion.confidence * 100)}
@@ -1619,7 +1633,7 @@ const _AISuggestionCard = memo(({
           </span>
         </div>
       </div>
-      <p className="text-[9px] text-[#888] leading-relaxed">{suggestion.description}</p>
+      <p className="text-[9px] text-[var(--text-dim)] leading-relaxed">{suggestion.description}</p>
       <div className="flex gap-1.5">
         <button
           onClick={onAccept}
@@ -1627,7 +1641,7 @@ const _AISuggestionCard = memo(({
         >APPLY</button>
         <button
           onClick={onReject}
-          className="flex-1 py-0.5 text-[8px] font-mono rounded border transition-colors border-[#333] text-[#444] hover:border-[#555]"
+          className="flex-1 py-0.5 text-[8px] font-mono rounded border transition-colors border-[var(--dj-dimmer)] text-[var(--dj-dim)] hover:border-[#555]"
         >SKIP</button>
       </div>
     </div>
@@ -1638,8 +1652,8 @@ AISuggestionCard.displayName = 'AISuggestionCard';
 // ─── Main DAW Page ────────────────────────────────────────────────────────────
 
 export default function DAW() {
-  const _engine = useDAWEngine();
-  const _collab = useCollabSocket();
+  const engine = useDAWEngine();
+  const collab = useCollabSocket();
   const seq    = useMidiSequencer();
 
   const { sequencerVisible, setSequencerVisible, aiPanelVisible, setAIPanelVisible } = useDAWStore();
@@ -1649,10 +1663,10 @@ export default function DAW() {
   //   Fix: write session record to localStorage on mount; stamp endMs on unmount.
   //   Regression: additive — no UI change; quota failure is non-fatal.
   useEffect(() => {
-    const _sessionId = crypto.randomUUID();
+    const sessionId = crypto.randomUUID();
     const startMs   = Date.now();
     try {
-      const _prev = JSON.parse(localStorage.getItem('r3v4_sessions') ?? '[]') as unknown[];
+      const prev = JSON.parse(localStorage.getItem('r3v4_sessions') ?? '[]') as unknown[];
       localStorage.setItem(
         'r3v4_sessions',
         JSON.stringify([...prev.slice(-49), { sessionId, startMs, endMs: null, page: 'DAW' }]),
@@ -1662,7 +1676,7 @@ export default function DAW() {
     return () => {
       try {
         type SessionEntry = { sessionId: string; endMs: number | null };
-        const _sessions = JSON.parse(
+        const sessions = JSON.parse(
           localStorage.getItem('r3v4_sessions') ?? '[]',
         ) as SessionEntry[];
         localStorage.setItem(
@@ -1679,14 +1693,14 @@ export default function DAW() {
 
   // Global keyboard shortcuts — Ctrl+S triggers cloud save
   useEffect(() => {
-    const _onKey = async (e: KeyboardEvent) => {
-      const _target = e.target as HTMLElement;
+    const onKey = async (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
 
       // Ctrl/Cmd + S → save to localStorage immediately; cloud save async
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
-        const _store = useDAWStore.getState();
+        const store = useDAWStore.getState();
         store.setSyncStatus('syncing');
         try {
           localStorage.setItem('r3v4_project_snapshot', JSON.stringify({
@@ -1737,11 +1751,12 @@ export default function DAW() {
   }, [engine, sequencerVisible, aiPanelVisible, setSequencerVisible, setAIPanelVisible]);
 
   return (
-    <div
+    <>
+      <div
       className="flex flex-col"
       style={{
         height: '100vh',
-        background: '#060606',
+        background: 'var(--void)',
         backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,.016) 31px,rgba(255,255,255,.016) 32px)',
         color: '#e5e5e5',
         fontFamily: '"IBM Plex Mono","JetBrains Mono","Fira Code",monospace',
@@ -1756,7 +1771,7 @@ export default function DAW() {
 
       {/* Toolbar row */}
       <div className="flex items-center gap-2 px-4 py-1.5 border-b border-[#1c1c1c] bg-[#0d0d0d] flex-none">
-        <span className="text-[8px] text-[#333] tracking-widest mr-1">VIEW</span>
+        <span className="text-[8px] text-[var(--dj-dimmer)] tracking-widest mr-1">VIEW</span>
         <Btn
           active={sequencerVisible}
           onClick={() => setSequencerVisible(!sequencerVisible)}
@@ -1784,7 +1799,7 @@ export default function DAW() {
 
         <div className="ml-auto flex items-center gap-2">
               <SessionChip />
-          <span className="text-[8px] text-[#333]">ZOOM</span>
+          <span className="text-[8px] text-[var(--dj-dimmer)]">ZOOM</span>
           <Btn className="text-[9px]" onClick={() => useDAWStore.getState().setZoom(useDAWStore.getState().zoom * 0.8)}>−</Btn>
           <span className="text-[9px] font-mono text-[#555] w-8 text-center">
             {useDAWStore(s => s.zoom).toFixed(1)}×
@@ -1793,7 +1808,7 @@ export default function DAW() {
 
           <div className="w-px h-4 bg-[#2a2a2a] mx-1" />
 
-          <span className="text-[8px] text-[#333]">ROWS</span>
+          <span className="text-[8px] text-[var(--dj-dimmer)]">ROWS</span>
           {(['compact','normal','large'] as const).map(m => (
             <Btn
               key={m}
@@ -1831,38 +1846,39 @@ export default function DAW() {
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center gap-4 px-4 py-1 border-t border-[#1a1a1a] bg-[#080808] flex-none">
+      <div className="flex items-center gap-4 px-4 py-1 border-t border-[var(--t-b2x)] bg-[var(--t-b0x)] flex-none">
         <StatusBar />
       </div>
     </div>
+    </>
   );
 }
 
-const _StatusBar = memo(() => {
+const StatusBar = memo(() => {
   const { playing, recording, collabConnected, collabUsers, syncStatus, bpm, timeSignature } = useDAWStore();
   return (
     <>
       <div className="flex items-center gap-1.5">
-        <Led on={playing}    color="#22c55e"  />
+        <Led on={playing}    color="var(--accent-green)"  />
         <Led on={recording}  color="#ef4444" pulse={recording} />
-        <span className="text-[8px] text-[#333]">
+        <span className="text-[8px] text-[var(--dj-dimmer)]">
           {recording ? 'REC' : playing ? 'PLAY' : 'STOPPED'}
         </span>
       </div>
       <div className="w-px h-3 bg-[#2a2a2a]" />
-      <span className="text-[8px] font-mono text-[#333]">
+      <span className="text-[8px] font-mono text-[var(--dj-dimmer)]">
         {bpm} BPM · {timeSignature[0]}/{timeSignature[1]}
       </span>
       {collabConnected && (
         <>
           <div className="w-px h-3 bg-[#2a2a2a]" />
           <div className="flex items-center gap-1.5">
-            <Led on color="#22d3ee" />
-            <span className="text-[8px] text-[#22d3ee]">{collabUsers.length + 1} IN SESSION</span>
+            <Led on color="var(--looper-cyan)" />
+            <span className="text-[8px] text-[var(--looper-cyan)]">{collabUsers.length + 1} IN SESSION</span>
           </div>
         </>
       )}
-      <div className="ml-auto text-[8px] text-[#252525] font-mono">
+      <div className="ml-auto text-[8px] text-[var(--t-b3x)] font-mono">
         R3 v4 · SPACE=play · R=rec · T=tap · M=midi · A=ai · ±=zoom
       </div>
     </>

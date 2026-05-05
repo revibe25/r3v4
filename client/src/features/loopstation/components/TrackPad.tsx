@@ -40,22 +40,22 @@ interface Props {
 // ── Constants ──────────────────────────────────────────────────────────────────
 const HARMONY: HarmonyMode[] = ['off', 'subtle', 'choir', 'ambient', 'counter', 'octave', 'fifth', 'unison'];
 const PLAYBACK: { key: PlaybackMode; label: string; color: string }[] = [
-  { key: 'normal',   label: '▶',   color: '#39ff14' },
-  { key: 'reverse',  label: '◀',   color: '#f472b6' },
-  { key: 'half',     label: '½',   color: '#c084fc' },
-  { key: 'double',   label: '2x',  color: '#c084fc' },
-  { key: 'stutter',  label: 'STU', color: '#fb923c' },
-  { key: 'pingpong', label: '⇄',   color: '#22d3ee' },
+  { key: 'normal',   label: '▶',   color: 'var(--looper-acid)' },
+  { key: 'reverse',  label: '◀',   color: 'var(--looper-pink)' },
+  { key: 'half',     label: '½',   color: 'var(--looper-purple)' },
+  { key: 'double',   label: '2x',  color: 'var(--looper-purple)' },
+  { key: 'stutter',  label: 'STU', color: 'var(--orange-400)' },
+  { key: 'pingpong', label: '⇄',   color: 'var(--looper-cyan)' },
 ];
 
 const SCOL: Record<string, string> = {
-  idle:           '#1a1a1a',
-  recording:      '#ff1a1a',
-  overdubbing:    '#ff6b00',
-  playing:        '#39ff14',
-  stopped:        '#252525',
-  waiting_record: '#ff1a1a',
-  waiting_play:   '#39ff14',
+  idle:           'var(--t-b2x)',
+  recording:      'var(--looper-red)',
+  overdubbing:    'var(--looper-orange)',
+  playing:        'var(--looper-acid)',
+  stopped:        'var(--t-b3x)',
+  waiting_record: 'var(--looper-red)',
+  waiting_play:   'var(--looper-acid)',
 };
 
 const SLBL: Record<string, string> = {
@@ -73,10 +73,10 @@ const TRACK_NAMES = ['TRACK 1', 'TRACK 2', 'TRACK 3', 'TRACK 4', 'TRACK 5'];
 // ── Utilities ──────────────────────────────────────────────────────────────────
 function useQPulse(ready: boolean) {
   const [p, setP] = useState(false);
-  const _id = useRef(-1);
+  const id = useRef(-1);
   useEffect(() => {
     if (!ready) return;
-    const _e = getLoopEngine();
+    const e = getLoopEngine();
     id.current = e.scheduleRepeat(() => { setP(true); setTimeout(() => setP(false), 80); }, '1m');
     return () => { e.clearSchedule(id.current); id.current = -1; };
   }, [ready]);
@@ -88,16 +88,16 @@ const LB: React.FC<{
   label: string; active: boolean; ac?: string; disabled?: boolean;
   onClick?: () => void; onMD?: () => void; onMU?: () => void; onML?: () => void;
   title?: string; w?: number; h?: number; fontSize?: number;
-}> = ({ label, active, ac = '#39ff14', disabled, onClick, onMD, onMU, onML, title, w = 24, h = 18, fontSize = 7 }) => (
+}> = ({ label, active, ac = 'var(--looper-acid)', disabled, onClick, onMD, onMU, onML, title, w = 24, h = 18, fontSize = 7 }) => (
   <button
     onClick={onClick} onMouseDown={onMD} onMouseUp={onMU} onMouseLeave={onML}
     disabled={disabled} title={title}
     style={{
       width: w, height: h, fontSize, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.08em',
-      background: active ? `${ac}16` : '#090909',
-      border: `1px solid ${active ? ac : '#181818'}`,
+      background: active ? `${ac}16` : 'var(--t-b0)',
+      border: `1px solid ${active ? ac : 'var(--panel)'}`,
       borderBottom: `2px solid ${active ? ac + '66' : '#0a0a0a'}`,
-      color: active ? ac : disabled ? '#111' : '#2e2e2e',
+      color: active ? ac : disabled ? 'var(--dj-surface2)' : 'var(--panel-mid)',
       cursor: disabled ? 'default' : 'pointer',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       transition: 'all .07s', userSelect: 'none',
@@ -119,22 +119,22 @@ const Fader: React.FC<{
   value: number; onChange: (v: number) => void;
   color: string; h?: number; label?: string;
 }> = ({ value, onChange, color, h = 80, label }) => {
-  const _dragging = useRef(false);
-  const _sy = useRef(0);
-  const _sv = useRef(value);
-  const _tref = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const sy = useRef(0);
+  const sv = useRef(value);
+  const tref = useRef<HTMLDivElement>(null);
 
-  const _md = (e: React.MouseEvent) => {
+  const md = (e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true;
     sy.current = e.clientY;
     sv.current = value;
-    const _mv = (ev: MouseEvent) => {
+    const mv = (ev: MouseEvent) => {
       if (!dragging.current || !tref.current) return;
-      const _ht = tref.current.getBoundingClientRect().height;
+      const ht = tref.current.getBoundingClientRect().height;
       onChange(Math.min(1, Math.max(0, sv.current - (ev.clientY - sy.current) / ht)));
     };
-    const _up = () => {
+    const up = () => {
       dragging.current = false;
       window.removeEventListener('mousemove', mv);
       window.removeEventListener('mouseup', up);
@@ -144,9 +144,9 @@ const Fader: React.FC<{
   };
 
   // Double-click to reset to unity (0.8)
-  const _dblClick = () => onChange(0.8);
-  const _capY = `${(1 - value) * (h - 8)}px`;
-  const _unityY = `${(1 - 0.8) * (h - 8)}px`;
+  const dblClick = () => onChange(0.8);
+  const capY = `${(1 - value) * (h - 8)}px`;
+  const unityY = `${(1 - 0.8) * (h - 8)}px`;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -154,8 +154,8 @@ const Fader: React.FC<{
         ref={tref}
         style={{
           width: 10, height: h,
-          background: 'linear-gradient(180deg, #0d0d0d 0%, #080808 100%)',
-          border: '1px solid #141414',
+          background: 'linear-gradient(180deg, #0d0d0d 0%, var(--t-b0x) 100%)',
+          border: '1px solid var(--t-b2)',
           borderRadius: 1,
           position: 'relative', cursor: 'ns-resize',
         }}
@@ -174,22 +174,22 @@ const Fader: React.FC<{
         <div style={{
           position: 'absolute', left: -3, right: -3,
           top: unityY, height: 1,
-          background: '#333',
+          background: 'var(--dj-dimmer)',
         }} />
         {/* Fader cap */}
         <div style={{
           position: 'absolute', top: capY, left: -3, right: -3, height: 10,
-          background: 'linear-gradient(180deg, #383838 0%, #1e1e1e 50%, #2a2a2a 100%)',
-          border: `1px solid ${value > 0.01 ? color + '88' : '#282828'}`,
+          background: 'linear-gradient(180deg, var(--panel-mid) 0%, var(--t-b3) 50%, #2a2a2a 100%)',
+          border: `1px solid ${value > 0.01 ? color + '88' : 'var(--t-b4)'}`,
           borderRadius: 1,
           boxShadow: value > 0.01 ? `0 0 6px ${color}44` : '0 1px 3px rgba(0,0,0,0.8)',
           cursor: 'ns-resize',
         }} />
       </div>
-      <span style={{ fontSize: 5, color: '#252525', fontFamily: 'IBM Plex Mono,monospace' }}>
+      <span style={{ fontSize: 5, color: 'var(--t-b3x)', fontFamily: 'IBM Plex Mono,monospace' }}>
         {Math.round(value * 100)}
       </span>
-      {label && <span style={{ fontSize: 5, color: '#1e1e1e', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.15em' }}>{label}</span>}
+      {label && <span style={{ fontSize: 5, color: 'var(--t-b3)', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.15em' }}>{label}</span>}
     </div>
   );
 };
@@ -198,33 +198,33 @@ const Fader: React.FC<{
 const EQMini: React.FC<{
   low: number; mid: number; high: number; color: string;
 }> = ({ low, mid, high, color }) => {
-  const _vals = [low, mid, high];
-  const _labels = ['L', 'M', 'H'];
+  const vals = [low, mid, high];
+  const labels = ['L', 'M', 'H'];
   return (
     <div style={{ display: 'flex', gap: 2, alignItems: 'flex-end', height: 18 }}>
       {vals.map((v, i) => {
-        const _norm = (v + 20) / 40; // -20 to +20 → 0 to 1
+        const norm = (v + 20) / 40; // -20 to +20 → 0 to 1
         const _barH = Math.max(2, Math.round(norm * 16));
         const _midH = 8;
-        const _isBoost = norm > 0.5;
+        const isBoost = norm > 0.5;
         return (
           <div key={labels[i]} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
             <div style={{
-              width: 6, height: 16, background: '#090909',
-              border: '1px solid #141414', position: 'relative', overflow: 'hidden',
+              width: 6, height: 16, background: 'var(--t-b0)',
+              border: '1px solid var(--t-b2)', position: 'relative', overflow: 'hidden',
             }}>
               {/* Center line */}
-              <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: '#1e1e1e' }} />
+              <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'var(--t-b3)' }} />
               {/* Bar */}
               <div style={{
                 position: 'absolute',
                 [isBoost ? 'bottom' : 'top']: '50%',
                 left: 0, right: 0,
                 height: Math.abs(norm - 0.5) * 32,
-                background: Math.abs(norm - 0.5) > 0.1 ? `${color}88` : '#1e1e1e',
+                background: Math.abs(norm - 0.5) > 0.1 ? `${color}88` : 'var(--t-b3)',
               }} />
             </div>
-            <span style={{ fontSize: 4, color: '#1e1e1e', fontFamily: 'IBM Plex Mono,monospace' }}>{labels[i]}</span>
+            <span style={{ fontSize: 4, color: 'var(--t-b3)', fontFamily: 'IBM Plex Mono,monospace' }}>{labels[i]}</span>
           </div>
         );
       })}
@@ -236,15 +236,15 @@ const EQMini: React.FC<{
 const LoopRing: React.FC<{
   progress: number; color: string; isActive: boolean; size?: number;
 }> = ({ progress, color, isActive, size = 24 }) => {
-  const _r = (size - 3) / 2;
-  const _circ = 2 * Math.PI * r;
-  const _dash = progress * circ;
+  const r = (size - 3) / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = progress * circ;
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#141414" strokeWidth={2} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--t-b2)" strokeWidth={2} />
       <circle
         cx={size / 2} cy={size / 2} r={r} fill="none"
-        stroke={isActive ? color : '#222'}
+        stroke={isActive ? color : 'var(--dj-border)'}
         strokeWidth={isActive ? 2.5 : 1.5}
         strokeDasharray={`${dash} ${circ - dash}`}
         strokeLinecap="round"
@@ -258,31 +258,31 @@ const LoopRing: React.FC<{
 const SendStrip: React.FC<{
   label: string; value: number; color: string; onChange: (v: number) => void;
 }> = ({ label, value, color, onChange }) => {
-  const _w = 48;
-  const _dragging = useRef(false);
-  const _sx = useRef(0), sv2 = useRef(value);
-  const _md = (e: React.MouseEvent) => {
+  const w = 48;
+  const dragging = useRef(false);
+  const sx = useRef(0), sv2 = useRef(value);
+  const md = (e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = true; sx.current = e.clientX; sv2.current = value;
-    const _mv = (ev: MouseEvent) => {
+    const mv = (ev: MouseEvent) => {
       if (!dragging.current) return;
       onChange(Math.min(1, Math.max(0, sv2.current + (ev.clientX - sx.current) / 120)));
     };
-    const _up = () => { dragging.current = false; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    const up = () => { dragging.current = false; window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
     window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
   };
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 6, color: '#252525', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em' }}>{label}</span>
-        <span style={{ fontSize: 6, color: value > 0.05 ? color : '#222', fontFamily: 'IBM Plex Mono,monospace' }}>
+        <span style={{ fontSize: 6, color: 'var(--t-b3x)', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em' }}>{label}</span>
+        <span style={{ fontSize: 6, color: value > 0.05 ? color : 'var(--dj-border)', fontFamily: 'IBM Plex Mono,monospace' }}>
           {Math.round(value * 100)}
         </span>
       </div>
       <div
         style={{
-          width: '100%', height: 8, background: '#090909',
-          border: '1px solid #141414', position: 'relative', cursor: 'ew-resize',
+          width: '100%', height: 8, background: 'var(--t-b0)',
+          border: '1px solid var(--t-b2)', position: 'relative', cursor: 'ew-resize',
         }}
         onMouseDown={md}
       >
@@ -312,8 +312,8 @@ const TrackPadInner: React.FC<Props> = ({
   onPitchChange, onFineChange, onChorusChange,
   onGateChange, onCompChange, onSatChange, onTrimChange,
 }) => {
-  const _ctrl = useAnimation();
-  const _pulse = useQPulse(isReady);
+  const ctrl = useAnimation();
+  const pulse = useQPulse(isReady);
 
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState<'eq' | 'fx' | 'mod' | 'dyn'>('eq');
@@ -321,23 +321,23 @@ const TrackPadInner: React.FC<Props> = ({
   const [ch, setCH] = useState(false);
   const [loopProgress, setLoopProgress] = useState(0);
   const [overdubBlend, setOD] = useState(0.7);
-  const _ct = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const _lpRef = useRef<number>(0);
+  const ct = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lpRef = useRef<number>(0);
   const _lastBar = useRef(0);
 
-  const _isActive = track.state === 'playing' || track.state === 'overdubbing';
-  const _isRec = track.state === 'recording';
-  const _isWaiting = track.state === 'waiting_record' || track.state === 'waiting_play';
-  const _col = SCOL[track.state] ?? '#1a1a1a';
-  const _wc = track.state === 'overdubbing' ? '#ff6b00' : track.color;
+  const isActive = track.state === 'playing' || track.state === 'overdubbing';
+  const isRec = track.state === 'recording';
+  const isWaiting = track.state === 'waiting_record' || track.state === 'waiting_play';
+  const col = SCOL[track.state] ?? 'var(--t-b2x)';
+  const wc = track.state === 'overdubbing' ? 'var(--looper-orange)' : track.color;
 
   // Animate loop progress
   useEffect(() => {
     if (!isActive || !track.loopLength) { setLoopProgress(0); return; }
-    const _tick = () => {
-      const _pos = beat.bar % (Number(track.loopLength) || 4);
-      const _beatInLoop = pos * 4 + beat.beat;
-      const _totalBeats = (Number(track.loopLength) || 4) * 4;
+    const tick = () => {
+      const pos = beat.bar % (Number(track.loopLength) || 4);
+      const beatInLoop = pos * 4 + beat.beat;
+      const totalBeats = (Number(track.loopLength) || 4) * 4;
       setLoopProgress(beatInLoop / totalBeats);
       lpRef.current = requestAnimationFrame(tick);
     };
@@ -364,21 +364,21 @@ const TrackPadInner: React.FC<Props> = ({
     }
   }, [isActive, isRec, isWaiting, beat.beat, pulse, bpm, ctrl]);
 
-  const _hCH = useCallback(() => { ct.current = setTimeout(() => setCH(true), 600); }, []);
-  const _hCU = useCallback(() => {
+  const hCH = useCallback(() => { ct.current = setTimeout(() => setCH(true), 600); }, []);
+  const hCU = useCallback(() => {
     if (ct.current) clearTimeout(ct.current);
     if (ch) { onClear(track.id); setCH(false); } else setCH(false);
   }, [ch, onClear, track.id]);
 
-  const _trackBgGrad = isActive
-    ? `radial-gradient(ellipse at 50% 80%, ${col}0d 0%, #060606 100%)`
-    : '#070707';
+  const trackBgGrad = isActive
+    ? `radial-gradient(ellipse at 50% 80%, ${col}0d 0%, var(--void) 100%)`
+    : 'var(--t-b0xx)';
 
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
       background: trackBgGrad,
-      borderRight: '1px solid #0f0f0f',
+      borderRight: '1px solid var(--t-b1)',
       boxShadow: isActive
         ? `inset 0 0 40px ${col}08, inset -1px 0 0 ${col}1a`
         : 'none',
@@ -389,7 +389,7 @@ const TrackPadInner: React.FC<Props> = ({
       {/* ── TRACK HEADER ──────────────────────────────────────────────────── */}
       <div style={{
         padding: '4px 6px 3px',
-        background: 'linear-gradient(180deg, #0c0c0c 0%, #080808 100%)',
+        background: 'linear-gradient(180deg, var(--dj-surface) 0%, var(--t-b0x) 100%)',
         borderBottom: `2px solid ${col}`,
         display: 'flex', alignItems: 'center', gap: 4,
         position: 'relative', overflow: 'hidden',
@@ -411,7 +411,7 @@ const TrackPadInner: React.FC<Props> = ({
         }}>
           <span style={{
             fontSize: 10, fontWeight: 900, fontFamily: 'Syne, sans-serif',
-            color: isActive ? '#050505' : col, lineHeight: 1,
+            color: isActive ? 'var(--panel)' : col, lineHeight: 1,
           }}>
             {track.index + 1}
           </span>
@@ -425,14 +425,14 @@ const TrackPadInner: React.FC<Props> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             {track.overdubLayers > 0 && (
               <span style={{
-                fontSize: 6, color: '#ff6b00', background: 'rgba(255,107,0,0.12)',
+                fontSize: 6, color: 'var(--looper-orange)', background: 'rgba(255,107,0,0.12)',
                 border: '1px solid rgba(255,107,0,0.25)', padding: '0 3px',
                 fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.05em', flexShrink: 0,
               }}>×{track.overdubLayers + 1}</span>
             )}
-            {track.muted && <div style={{ width: 4, height: 4, background: '#ff6b00', boxShadow: '0 0 4px #ff6b00', flexShrink: 0 }} />}
-            {track.soloed && <div style={{ width: 4, height: 4, background: '#39ff14', boxShadow: '0 0 4px #39ff14', flexShrink: 0 }} />}
-            {track.cued && <div style={{ width: 4, height: 4, background: '#22d3ee', boxShadow: '0 0 4px #22d3ee', flexShrink: 0 }} />}
+            {track.muted && <div style={{ width: 4, height: 4, background: 'var(--looper-orange)', boxShadow: '0 0 4px var(--looper-orange)', flexShrink: 0 }} />}
+            {track.soloed && <div style={{ width: 4, height: 4, background: 'var(--looper-acid)', boxShadow: '0 0 4px var(--looper-acid)', flexShrink: 0 }} />}
+            {track.cued && <div style={{ width: 4, height: 4, background: 'var(--looper-cyan)', boxShadow: '0 0 4px var(--looper-cyan)', flexShrink: 0 }} />}
           </div>
           <span style={{
             fontSize: 6, color: col, fontFamily: 'IBM Plex Mono,monospace',
@@ -487,11 +487,11 @@ const TrackPadInner: React.FC<Props> = ({
             }}>
               {SLBL[track.state]}
             </div>
-            <span style={{ fontSize: 7, color: '#1e1e1e', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em' }}>
+            <span style={{ fontSize: 7, color: 'var(--t-b3)', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em' }}>
               {track.hasContent ? 'PLAY / OVERDUB' : 'TAP TO RECORD'}
             </span>
             <span style={{
-              fontSize: 5, color: '#141414',
+              fontSize: 5, color: 'var(--t-b2)',
               fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.3em',
               marginTop: 2,
             }}>KEY {track.index + 1}</span>
@@ -502,7 +502,7 @@ const TrackPadInner: React.FC<Props> = ({
         {isRec && pulse && (
           <div style={{
             position: 'absolute', inset: 0,
-            border: '2px solid #ff1a1a',
+            border: '2px solid var(--looper-red)',
             opacity: 0.7, pointerEvents: 'none',
           }} />
         )}
@@ -520,45 +520,45 @@ const TrackPadInner: React.FC<Props> = ({
       </motion.button>
 
       {/* ── TRANSPORT ROW ─────────────────────────────────────────────────── */}
-      <div style={{ padding: '3px 5px', borderBottom: '1px solid #0f0f0f', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 2 }}>
+      <div style={{ padding: '3px 5px', borderBottom: '1px solid var(--t-b1)', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 2 }}>
         <LB label="■" active={false} disabled={track.state === 'idle' || track.state === 'stopped'} onClick={() => onStop(track.id)} title="Stop" />
-        <LB label="M" active={track.muted}  ac="#ff6b00" onClick={() => onMuteToggle(track.id)}  title="Mute" />
-        <LB label="S" active={track.soloed} ac="#39ff14" onClick={() => onSoloToggle(track.id)} title="Solo" />
-        <LB label="Q" active={track.cued}   ac="#22d3ee" onClick={() => onCueToggle(track.id)}  title="Cue / Headphones" />
-        <LB label={ch ? '!CLR' : 'CLR'} active={ch} ac="#ff1a1a" onMD={hCH} onMU={hCU}
+        <LB label="M" active={track.muted}  ac="var(--looper-orange)" onClick={() => onMuteToggle(track.id)}  title="Mute" />
+        <LB label="S" active={track.soloed} ac="var(--looper-acid)" onClick={() => onSoloToggle(track.id)} title="Solo" />
+        <LB label="Q" active={track.cued}   ac="var(--looper-cyan)" onClick={() => onCueToggle(track.id)}  title="Cue / Headphones" />
+        <LB label={ch ? '!CLR' : 'CLR'} active={ch} ac="var(--looper-red)" onMD={hCH} onMU={hCU}
           onML={() => { if (ct.current) clearTimeout(ct.current); setCH(false); }}
           title="Hold to clear" />
       </div>
 
       {/* ── FADER + VU ────────────────────────────────────────────────────── */}
-      <div style={{ padding: '6px 5px 4px', borderBottom: '1px solid #0f0f0f', display: 'flex', gap: 4, alignItems: 'flex-end', justifyContent: 'center', background: '#070707' }}>
+      <div style={{ padding: '6px 5px 4px', borderBottom: '1px solid var(--t-b1)', display: 'flex', gap: 4, alignItems: 'flex-end', justifyContent: 'center', background: 'var(--t-b0xx)' }}>
         <Fader value={track.volume} onChange={v => onVolumeChange(track.id, v)} color={track.color} h={84} />
         <VUMeter trackIndex={track.index} isActive={isActive} showScale height={84} showGr={isActive} />
       </div>
 
       {/* ── FX SENDS (compact horizontal bars) ───────────────────────────── */}
-      <div style={{ padding: '5px 6px', borderBottom: '1px solid #0f0f0f', display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <SendStrip label="REV" value={track.reverbSend} color="#ff6b00" onChange={v => onReverbSend(track.id, v)} />
-        <SendStrip label="DLY" value={track.delaySend}  color="#22d3ee" onChange={v => onDelaySend(track.id, v)} />
-        <SendStrip label="CHO" value={track.chorusSend ?? 0} color="#a855f7" onChange={v => onChorusSend(track.id, v)} />
+      <div style={{ padding: '5px 6px', borderBottom: '1px solid var(--t-b1)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <SendStrip label="REV" value={track.reverbSend} color="var(--looper-orange)" onChange={v => onReverbSend(track.id, v)} />
+        <SendStrip label="DLY" value={track.delaySend}  color="var(--looper-cyan)" onChange={v => onDelaySend(track.id, v)} />
+        <SendStrip label="CHO" value={track.chorusSend ?? 0} color="var(--accent-violet)" onChange={v => onChorusSend(track.id, v)} />
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-          <span style={{ fontSize: 6, color: '#252525', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em', flexShrink: 0 }}>PAN</span>
-          <div style={{ flex: 1, position: 'relative', height: 8, background: '#090909', border: '1px solid #141414', cursor: 'ew-resize' }}
+          <span style={{ fontSize: 6, color: 'var(--t-b3x)', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em', flexShrink: 0 }}>PAN</span>
+          <div style={{ flex: 1, position: 'relative', height: 8, background: 'var(--t-b0)', border: '1px solid var(--t-b2)', cursor: 'ew-resize' }}
             onMouseDown={e => {
               e.preventDefault();
-              const _rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-              const _sv = track.pan;
-              const _sx = e.clientX;
-              const _mv = (ev: MouseEvent) => {
-                const _newPan = Math.min(1, Math.max(-1, sv + (ev.clientX - sx) / (rect.width / 2)));
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              const sv = track.pan;
+              const sx = e.clientX;
+              const mv = (ev: MouseEvent) => {
+                const newPan = Math.min(1, Math.max(-1, sv + (ev.clientX - sx) / (rect.width / 2)));
                 onPanChange(track.id, newPan);
               };
-              const _up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+              const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
               window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
             }}
             onDoubleClick={() => onPanChange(track.id, 0)}
           >
-            <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: '#1e1e1e' }} />
+            <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'var(--t-b3)' }} />
             <div style={{
               position: 'absolute',
               left: track.pan >= 0 ? '50%' : `${(track.pan + 1) * 50}%`,
@@ -574,7 +574,7 @@ const TrackPadInner: React.FC<Props> = ({
               boxShadow: `0 0 4px ${track.color}`,
             }} />
           </div>
-          <span style={{ fontSize: 6, color: Math.abs(track.pan) > 0.05 ? track.color : '#222', fontFamily: 'IBM Plex Mono,monospace', flexShrink: 0, width: 18, textAlign: 'right' }}>
+          <span style={{ fontSize: 6, color: Math.abs(track.pan) > 0.05 ? track.color : 'var(--dj-border)', fontFamily: 'IBM Plex Mono,monospace', flexShrink: 0, width: 18, textAlign: 'right' }}>
             {track.pan === 0 ? 'C' : `${track.pan > 0 ? 'R' : 'L'}${Math.round(Math.abs(track.pan) * 100)}`}
           </span>
         </div>
@@ -587,8 +587,8 @@ const TrackPadInner: React.FC<Props> = ({
           padding: '3px 6px', width: '100%', height: 16, fontSize: 6,
           letterSpacing: '.2em', fontFamily: 'IBM Plex Mono,monospace',
           background: expanded ? 'rgba(57,255,20,0.03)' : 'transparent',
-          border: 'none', borderBottom: '1px solid #0f0f0f',
-          color: expanded ? '#39ff14' : '#1e1e1e', cursor: 'pointer',
+          border: 'none', borderBottom: '1px solid var(--t-b1)',
+          color: expanded ? 'var(--looper-acid)' : 'var(--t-b3)', cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
         }}
       >
@@ -597,16 +597,16 @@ const TrackPadInner: React.FC<Props> = ({
 
       {/* ── EXPANDED SECTION ──────────────────────────────────────────────── */}
       {expanded && (
-        <div style={{ borderBottom: '1px solid #0f0f0f' }}>
+        <div style={{ borderBottom: '1px solid var(--t-b1)' }}>
           {/* Tab bar */}
-          <div style={{ display: 'flex', borderBottom: '1px solid #0f0f0f' }}>
+          <div style={{ display: 'flex', borderBottom: '1px solid var(--t-b1)' }}>
             {(['eq', 'fx', 'mod', 'dyn'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)} style={{
                 flex: 1, height: 16, fontSize: 6, fontFamily: 'IBM Plex Mono,monospace',
                 letterSpacing: '.12em', textTransform: 'uppercase',
                 background: tab === t ? 'rgba(57,255,20,0.05)' : 'transparent',
-                border: 'none', borderBottom: `1px solid ${tab === t ? '#39ff14' : 'transparent'}`,
-                color: tab === t ? '#39ff14' : '#222', cursor: 'pointer',
+                border: 'none', borderBottom: `1px solid ${tab === t ? 'var(--looper-acid)' : 'transparent'}`,
+                color: tab === t ? 'var(--looper-acid)' : 'var(--dj-border)', cursor: 'pointer',
               }}>{t}</button>
             ))}
           </div>
@@ -615,11 +615,11 @@ const TrackPadInner: React.FC<Props> = ({
           {tab === 'eq' && (
             <div style={{ padding: '8px 6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="HF"  value={(track.eq.high + 20) / 40} color="#22d3ee" size="xs" bipolar
+                <FXKnob label="HF"  value={(track.eq.high + 20) / 40} color="var(--looper-cyan)" size="xs" bipolar
                   onChange={v => onEQChange(track.id, 'high', v * 40 - 20)} />
-                <FXKnob label="MF"  value={(track.eq.mid + 20) / 40}  color="#22d3ee" size="xs" bipolar
+                <FXKnob label="MF"  value={(track.eq.mid + 20) / 40}  color="var(--looper-cyan)" size="xs" bipolar
                   onChange={v => onEQChange(track.id, 'mid', v * 40 - 20)} />
-                <FXKnob label="LF"  value={(track.eq.low + 20) / 40}  color="#22d3ee" size="xs" bipolar
+                <FXKnob label="LF"  value={(track.eq.low + 20) / 40}  color="var(--looper-cyan)" size="xs" bipolar
                   onChange={v => onEQChange(track.id, 'low', v * 40 - 20)} />
               </div>
             </div>
@@ -629,9 +629,9 @@ const TrackPadInner: React.FC<Props> = ({
           {tab === 'fx' && (
             <div style={{ padding: '8px 6px', display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="PTCH" value={0.5} color="#c084fc" size="xs" bipolar onChange={v => onPitchChange(track.id, Math.round(v * 24 - 12))} />
-                <FXKnob label="FINE" value={0.5} color="#818cf8" size="xs" bipolar onChange={v => onFineChange(track.id, Math.round(v * 200 - 100))} />
-                <FXKnob label="CHO"  value={0}   color="#f472b6" size="xs" onChange={v => onChorusChange(track.id, v)} />
+                <FXKnob label="PTCH" value={0.5} color="var(--looper-purple)" size="xs" bipolar onChange={v => onPitchChange(track.id, Math.round(v * 24 - 12))} />
+                <FXKnob label="FINE" value={0.5} color="var(--accent-indigo)" size="xs" bipolar onChange={v => onFineChange(track.id, Math.round(v * 200 - 100))} />
+                <FXKnob label="CHO"  value={0}   color="var(--looper-pink)" size="xs" onChange={v => onChorusChange(track.id, v)} />
               </div>
               <div>
                 <div style={{ fontSize: 6, color: '#1c1c1c', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.2em', marginBottom: 3, textAlign: 'center' }}>HARMONY</div>
@@ -639,15 +639,15 @@ const TrackPadInner: React.FC<Props> = ({
                   value={track.harmonyMode}
                   onChange={e => onHarmonyChange(track.id, e.target.value as HarmonyMode)}
                   style={{
-                    width: '100%', fontSize: 7, background: '#060606',
-                    color: track.harmonyMode === 'off' ? '#1e1e1e' : '#39ff14',
-                    border: `1px solid ${track.harmonyMode === 'off' ? '#141414' : '#39ff1422'}`,
+                    width: '100%', fontSize: 7, background: 'var(--void)',
+                    color: track.harmonyMode === 'off' ? 'var(--t-b3)' : 'var(--looper-acid)',
+                    border: `1px solid ${track.harmonyMode === 'off' ? 'var(--t-b2)' : '#39ff1422'}`,
                     padding: '2px 4px', cursor: 'pointer', outline: 'none',
                     fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em',
                   }}
                 >
                   {HARMONY.map(m => (
-                    <option key={m} value={m} style={{ background: '#060606' }}>
+                    <option key={m} value={m} style={{ background: 'var(--void)' }}>
                       {m === 'off' ? '— HARMONY OFF' : `♪ ${m.toUpperCase()}`}
                     </option>
                   ))}
@@ -674,7 +674,7 @@ const TrackPadInner: React.FC<Props> = ({
                     onChange={e => setOD(Number(e.target.value) / 100)}
                     style={{ flex: 1, accentColor: track.color, cursor: 'pointer', height: 2 }}
                   />
-                  <span style={{ fontSize: 6, color: '#333', fontFamily: 'IBM Plex Mono,monospace', width: 20, textAlign: 'right' }}>
+                  <span style={{ fontSize: 6, color: 'var(--dj-dimmer)', fontFamily: 'IBM Plex Mono,monospace', width: 20, textAlign: 'right' }}>
                     {Math.round(overdubBlend * 100)}
                   </span>
                 </div>
@@ -686,13 +686,13 @@ const TrackPadInner: React.FC<Props> = ({
           {tab === 'dyn' && (
             <div style={{ padding: '8px 6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="GATE" value={0}    color="#eab308" size="xs" onChange={v => onGateChange(track.id, v)} />
-                <FXKnob label="COMP" value={0.35} color="#eab308" size="xs" onChange={v => onCompChange(track.id, v)} />
-                <FXKnob label="SAT"  value={0}    color="#f97316" size="xs" onChange={v => onSatChange(track.id, v)} />
+                <FXKnob label="GATE" value={0}    color="var(--amber-500)" size="xs" onChange={v => onGateChange(track.id, v)} />
+                <FXKnob label="COMP" value={0.35} color="var(--amber-500)" size="xs" onChange={v => onCompChange(track.id, v)} />
+                <FXKnob label="SAT"  value={0}    color="var(--track-orange)" size="xs" onChange={v => onSatChange(track.id, v)} />
               </div>
               <div style={{ marginTop: 6, display: 'flex', justifyContent: 'space-around' }}>
-                <FXKnob label="TRIM" value={0.5}  color="#94a3b8" size="xs" onChange={v => onTrimChange(track.id, v)} />
-                <FXKnob label="XFAD" value={0.5}  color="#94a3b8" size="xs" bipolar onChange={v => { console.warn('XFAD stub', v); }} />
+                <FXKnob label="TRIM" value={0.5}  color="var(--slate-400)" size="xs" onChange={v => onTrimChange(track.id, v)} />
+                <FXKnob label="XFAD" value={0.5}  color="var(--slate-400)" size="xs" bipolar onChange={v => { console.warn('XFAD stub', v); }} />
               </div>
             </div>
           )}
@@ -702,16 +702,16 @@ const TrackPadInner: React.FC<Props> = ({
       {/* ── LOOP LENGTH + STATE FOOTER ─────────────────────────────────────── */}
       <div style={{
         padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        background: '#060606',
+        background: 'var(--void)',
       }}>
-        <span style={{ fontSize: 6, color: '#191919', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em' }}>
+        <span style={{ fontSize: 6, color: 'var(--panel)', fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.1em' }}>
           {track.loopLength ?? '—'}
         </span>
         <div style={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           {Array.from({ length: 4 }, (_, i) => (
             <div key={i} style={{
               width: 4, height: 4,
-              background: isActive && i === beat.beat ? col : '#141414',
+              background: isActive && i === beat.beat ? col : 'var(--t-b2)',
               boxShadow: isActive && i === beat.beat ? `0 0 4px ${col}` : 'none',
               transition: 'all 0.04s',
             }} />
@@ -722,4 +722,4 @@ const TrackPadInner: React.FC<Props> = ({
   );
 };
 
-export const _TrackPad = React.memo(TrackPadInner);
+export const TrackPad = React.memo(TrackPadInner);

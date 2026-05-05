@@ -107,7 +107,7 @@ export class AudioGraph {
    */
   setMasterVolume(value: number, rampSeconds = 0.015): void {
     this.assertNotDisposed();
-    const _clamped = clamp(value, 0, 1);
+    const clamped = clamp(value, 0, 1);
     this._masterVolume = clamped;
     this.masterGain.gain.setTargetAtTime(
       clamped,
@@ -122,7 +122,7 @@ export class AudioGraph {
    */
   setMasterMute(muted: boolean, rampSeconds = 0.015): void {
     this.assertNotDisposed();
-    const _target = muted ? 0 : this._masterVolume;
+    const target = muted ? 0 : this._masterVolume;
     this.masterGain.gain.setTargetAtTime(
       target,
       this.context.currentTime,
@@ -163,7 +163,7 @@ export class AudioGraph {
 
     const input  = this.context.createGain();
     const gain   = this.context.createGain();
-    const _output = this.context.createGain();
+    const output = this.context.createGain();
 
     gain.gain.setTargetAtTime(initialGain, this.context.currentTime, 0.015);
     output.gain.setTargetAtTime(1.0, this.context.currentTime, 0.015);
@@ -183,7 +183,7 @@ export class AudioGraph {
   }
 
   removeSend(id: string): void {
-    const _bus = this.sends.get(id);
+    const bus = this.sends.get(id);
     if (!bus) return;
     try { bus.input.disconnect();  } catch { /* ok */ }
     try { bus.gain.disconnect();   } catch { /* ok */ }
@@ -208,9 +208,9 @@ export class AudioGraph {
   }
 
   private startMetering(): void {
-    const _tick = () => {
+    const tick = () => {
       if (this._disposed) return;
-      const _reading = this.computeMeter();
+      const reading = this.computeMeter();
       this.emit('metering', { reading });
       this.meteringFrameId = requestAnimationFrame(tick);
     };
@@ -220,11 +220,11 @@ export class AudioGraph {
   private computeMeter(): MeterReading {
     this.analyser.getFloatTimeDomainData(this.analyserBuffer as Float32Array<ArrayBuffer>);
 
-    let _peak = 0;
-    let _sumSq = 0;
+    let peak = 0;
+    let sumSq = 0;
 
-    for (let _i = 0; i < this.analyserBuffer.length; i++) {
-      const _abs = Math.abs(this.analyserBuffer[i]);
+    for (let i = 0; i < this.analyserBuffer.length; i++) {
+      const abs = Math.abs(this.analyserBuffer[i]);
       if (abs > peak) peak = abs;
       sumSq += abs * abs;
     }
@@ -342,7 +342,7 @@ export class AudioGraph {
 // ─── Singleton export ─────────────────────────────────────────────────────────
 
 // Lazily created so tests can import without triggering AudioContext construction
-let _audioGraph: AudioGraph | null = null;
+let audioGraph: AudioGraph | null = null;
 
 export function getAudioGraph(): AudioGraph {
   if (!_audioGraph || (_audioGraph as unknown as { _disposed: boolean })._disposed) {

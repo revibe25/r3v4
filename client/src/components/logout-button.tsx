@@ -8,9 +8,9 @@ import { useLocation } from 'wouter';
 import { LogOut } from 'lucide-react';
 import { useAuthStore } from '@/hooks/authStore';
 
-const _S = {
-  bg:     '#0c0c0c',
-  border: '#222',
+const S = {
+  bg:     'var(--dj-surface)',
+  border: 'var(--dj-border)',
   accent: '#a3e635',
   dim:    '#555',
   danger: '#ff3b3b',
@@ -31,7 +31,7 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   // Close on outside click
   useEffect(() => {
     if (!confirming) return;
-    const _handler = (e: MouseEvent) => {
+    const handler = (e: MouseEvent) => {
       if (
         popoverRef.current && !popoverRef.current.contains(e.target as Node) &&
         triggerRef.current && !triggerRef.current.contains(e.target as Node)
@@ -44,14 +44,14 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
   // Close on Escape
   useEffect(() => {
     if (!confirming) return;
-    const _handler = (e: KeyboardEvent) => {
+    const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setConfirming(false);
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [confirming]);
 
-  const _handleConfirm = useCallback(() => {
+  const handleConfirm = useCallback(() => {
     logout();                          // clears hooks/authStore + r3_token
     localStorage.removeItem('r3-auth'); // purge legacy stores/authStore key
     setConfirming(false);
@@ -138,7 +138,7 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
                 flex:          1,
                 padding:       '7px 0',
                 background:    S.danger,
-                color:         '#fff',
+                color:         'var(--white)',
                 border:        'none',
                 borderRadius:  0,
                 cursor:        'pointer',
@@ -149,7 +149,7 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
                 fontWeight:    700,
                 transition:    'background .1s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#cc2020'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--status-error)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = S.danger; }}
             >
               Sign Out
@@ -171,9 +171,9 @@ export function LogoutButton({ variant = 'full' }: LogoutButtonProps) {
                 transition:    'all .1s',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background  = '#1a1a1a';
-                e.currentTarget.style.borderColor = '#444';
-                e.currentTarget.style.color       = '#888';
+                e.currentTarget.style.background  = 'var(--t-b2x)';
+                e.currentTarget.style.borderColor = 'var(--dj-dim)';
+                e.currentTarget.style.color       = 'var(--text-dim)';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.background  = 'transparent';

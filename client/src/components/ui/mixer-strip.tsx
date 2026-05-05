@@ -22,7 +22,7 @@ export function MixerStrip({ id }: { id: string }) {
 
   return (
     <div style={{ width: 80 }}>
-      <div style={{ height: 60, background: "#222" }}>
+      <div style={{ height: 60, background: "var(--dj-border)" }}>
         <div
           style={{
             height: `${(meter?.rms ?? 0) * 100}%`,

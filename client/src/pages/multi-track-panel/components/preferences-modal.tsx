@@ -12,13 +12,13 @@ interface Props {
   onClose:     () => void;
 }
 
-const _AG = {
-  black:  '#060606',
+const AG = {
+  black:  'var(--void)',
   panel:  '#0d0d0d',
   border: '#1c1c1c',
   acid:   '#a3e635',
-  soft:   '#888',
-  white:  '#f0f0f0',
+  soft:   'var(--text-dim)',
+  white:  'var(--daw-fg)',
 };
 
 const row: CSSProperties = {

@@ -1,3 +1,8 @@
+// ── P4-EXEMPT: WebGL/Three.js ────────────────────────────────────────────────
+// Three.js prop defaults (colorLow, colorHigh) — THREE.Color() cannot resolve CSS variables
+// Exempted: P4 remediation pass. Do not replace Three.js color props with
+// CSS variables — THREE.Color() cannot resolve var(--token) at runtime.
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * WaveformMesh.tsx
  *
@@ -53,20 +58,20 @@ export function WaveformMesh({
   const barWidth  = width / binCount;
 
   useFrame(() => {
-    const _mesh = meshRef.current;
+    const mesh = meshRef.current;
     if (!mesh) return;
-    const _engine = getLoopEngine();
+    const engine = getLoopEngine();
     if (!engine.initialized) return;
 
-    const _raw = useFft
+    const raw = useFft
       ? (trackIndex < 0 ? engine.getMasterFft()      : engine.getTrackFft(trackIndex))
       : (trackIndex < 0 ? engine.getMasterWaveform() : engine.getTrackWaveform(trackIndex));
     if (!raw?.length) return;
 
-    const _step = Math.max(1, Math.floor(raw.length / binCount));
+    const step = Math.max(1, Math.floor(raw.length / binCount));
 
-    for (let _i = 0; i < binCount; i++) {
-      const _sample = raw[i * step] ?? 0;
+    for (let i = 0; i < binCount; i++) {
+      const sample = raw[i * step] ?? 0;
       const amp    = Math.min(1, Math.abs(useFft ? Math.max(0, (sample + 100) / 100) : sample) * gain);
       const barH   = Math.max(0.001, amp * height);
 

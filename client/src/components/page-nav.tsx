@@ -1,3 +1,8 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: Navigation warning state — subscription/auth degraded indicator
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
 /**
  * client/src/components/page-nav.tsx
  * R3 v4 — global navigation bar.
@@ -35,26 +40,26 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 export const NAV_HEIGHT_PX = 44;
 
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
-const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument', '/daw'];
+const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument'];
 
 // ── Admin gate ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'earnestathepco@gmail.com';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
-const _T = {
-  bg:        '#0c0c0c',
-  border:    '#222',
+const T = {
+  bg:        'var(--dj-surface)',
+  border:    'var(--dj-border)',
   accent:    '#a3e635',
   accentDim: '#a3e63522',
-  dim:       '#444',
-  dimHover:  '#888',
+  dim:       'var(--dj-dim)',
+  dimHover:  'var(--text-dim)',
   font:      "'IBM Plex Mono', 'JetBrains Mono', monospace",
 } as const;
 
 // ── Tier badge colours ────────────────────────────────────────────────────────
 const TIER_STYLE: Record<string, { color: string; border: string }> = {
-  explorer:   { color: '#555',    border: '#333'      },
-  creator:    { color: '#f59e0b', border: '#f59e0b44' },
+  explorer:   { color: '#555',    border: 'var(--dj-dimmer)'      },
+  creator:    { color: 'var(--status-warn)', border: '#f59e0b44' },
   pro_artist: { color: '#a3e635', border: '#a3e63544' },
 };
 
@@ -69,7 +74,7 @@ const TIER_STYLE: Record<string, { color: string; border: string }> = {
 //   7. /collab      — collaborative DAW pro (WaveLab)
 //   8. /mixer       — drag & drop mixer view (MultitrackView)
 //
-const _PAGES = [
+const PAGES = [
   { href: '/pricing',    label: 'Pricing',    icon: Tag,     authOnly: false, hideWhenAuthed: false },
   { href: '/auth',       label: 'Login',      icon: LogIn,   authOnly: false, hideWhenAuthed: true  },
   { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
@@ -85,7 +90,7 @@ const _PAGES = [
 
 export function PageNav() {
   const [location] = useLocation();
-  const _isAuthenticated = useAuthStore(selectIsAuthed);
+  const isAuthenticated = useAuthStore(selectIsAuthed);
   const userEmail       = useAuthStore(s => s.user?.email ?? '');
   const tier            = useAuthStore(s => s.user?.tier ?? 'explorer');
   const isAdmin         = userEmail === ADMIN_EMAIL;
@@ -93,7 +98,7 @@ export function PageNav() {
   // Suppress nav entirely on auth/login pages — clean UX, no self-referential links
   if (NAV_HIDDEN_ON.includes(location)) return null;
 
-  const _tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
+  const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
 
   return (
     <nav
@@ -126,7 +131,7 @@ export function PageNav() {
           if (hideWhenAuthed && isAuthenticated) return null;
           if (authOnly && !isAuthenticated) return null;
 
-          const _active = location === href;
+          const active = location === href;
 
           return (
             <Link
@@ -154,14 +159,14 @@ export function PageNav() {
               }}
               onMouseEnter={e => {
                 if (!active) {
-                  const _el = e.currentTarget as HTMLAnchorElement;
+                  const el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dimHover;
-                  el.style.borderColor = '#444';
+                  el.style.borderColor = 'var(--dj-dim)';
                 }
               }}
               onMouseLeave={e => {
                 if (!active) {
-                  const _el = e.currentTarget as HTMLAnchorElement;
+                  const el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dim;
                   el.style.borderColor = T.border;
                 }
@@ -216,12 +221,12 @@ export function PageNav() {
               transition:    'color 0.12s, border-color 0.12s',
             }}
             onMouseEnter={e => {
-              const _el = e.currentTarget as HTMLAnchorElement;
+              const el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.accent;
               el.style.color       = T.accent;
             }}
             onMouseLeave={e => {
-              const _el = e.currentTarget as HTMLAnchorElement;
+              const el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.border;
               el.style.color       = T.dim;
             }}
@@ -230,9 +235,6 @@ export function PageNav() {
             ADMIN
           </a>
         )}
-
-        {/* Theme switcher */}
-        <ThemeSwitcher />
 
         {/* Theme switcher */}
         <ThemeSwitcher />
@@ -256,13 +258,13 @@ export function PageNav() {
             transition:     'color 0.12s, border-color 0.12s, background 0.12s',
           }}
           onMouseEnter={e => {
-            const _el = e.currentTarget as HTMLButtonElement;
+            const el = e.currentTarget as HTMLButtonElement;
             el.style.background  = T.accentDim;
             el.style.color       = T.accent;
             el.style.borderColor = T.accent;
           }}
           onMouseLeave={e => {
-            const _el = e.currentTarget as HTMLButtonElement;
+            const el = e.currentTarget as HTMLButtonElement;
             el.style.background  = 'transparent';
             el.style.color       = T.dim;
             el.style.borderColor = T.border;

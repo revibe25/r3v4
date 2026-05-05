@@ -39,17 +39,17 @@ export function DJControls({
   const filter      = filterProp    ?? filterInt;
   const pitch       = pitchProp     ?? pitchInt;
   const crossfade   = crossfadeProp ?? crossfadeInt;
-  const _isActivePlay = isPlaying    ?? playing;
+  const isActivePlay = isPlaying    ?? playing;
 
   const handleFilter    = onFilterChange    ?? setFilterInt;
   const handlePitch     = onPitchChange     ?? ((v: number) => setPitchInt(Math.round(v)));
-  const _handleCrossfade = onCrossfadeChange ?? setCrossfadeInt;
+  const handleCrossfade = onCrossfadeChange ?? setCrossfadeInt;
   const handlePlay      = onPlay            ?? (() => setPlaying(true));
   const handlePause     = onPause           ?? (() => setPlaying(false));
   const handleStop      = onStop            ?? (() => setPlaying(false));
 
   const cfPct    = (crossfade + 1) / 2;
-  const _knobSize = mode === 'compact' ? 52 : mode === 'professional' ? 88 : 68;
+  const knobSize = mode === 'compact' ? 52 : mode === 'professional' ? 88 : 68;
   const cols     = mode === 'compact' ? 4 : 6;
 
   return (
@@ -89,7 +89,7 @@ export function DJControls({
               </svg>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: '#ffffff' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 3, textTransform: 'uppercase', color: 'var(--white)' }}>
                 DJ CONTROLLER
               </div>
               <div style={{ fontSize: 8, color: DJ_DIM, letterSpacing: 2 }}>
@@ -320,7 +320,7 @@ export function DJControls({
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 3 }}>
                 {Array.from({ length: 8 }).map((_, i) => {
-                  const _isActive = hotCue === i;
+                  const isActive = hotCue === i;
                   return (
                     <button
                       key={i}

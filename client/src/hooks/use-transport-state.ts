@@ -13,22 +13,22 @@ export function useTransportState() {
     position: 0,
   });
 
-  const _togglePlay = useCallback(() => {
+  const togglePlay = useCallback(() => {
     setTransport(prev => ({ ...prev, isPlaying: !prev.isPlaying }));
   }, []);
 
-  const _toggleRecord = useCallback(() => {
+  const toggleRecord = useCallback(() => {
     setTransport(prev => ({
       ...prev,
       isRecording: !prev.isRecording,
     }));
   }, []);
 
-  const _setPosition = useCallback((position: number) => {
+  const setPosition = useCallback((position: number) => {
     setTransport(prev => ({ ...prev, position }));
   }, []);
 
-  const _stop = useCallback(() => {
+  const stop = useCallback(() => {
     setTransport(prev => ({
       ...prev,
       isPlaying: false,
@@ -39,7 +39,7 @@ export function useTransportState() {
   // Simulate playhead movement
   useEffect(() => {
     if (!transport.isPlaying) return;
-    const _interval = setInterval(() => {
+    const interval = setInterval(() => {
       setTransport(prev => ({
         ...prev,
         position: prev.position + 0.016,

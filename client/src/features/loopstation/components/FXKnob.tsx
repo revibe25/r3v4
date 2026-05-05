@@ -58,36 +58,36 @@ function applySnap(v: number, snapPoints: number[]): number {
 }
 
 function hexToRgb(hex: string): [number, number, number] {
-  const _r = parseInt(hex.slice(1, 3), 16);
-  const _g = parseInt(hex.slice(3, 5), 16);
-  const _b = parseInt(hex.slice(5, 7), 16);
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
   return [r, g, b];
 }
 
 // ── Modulation Ring (animated canvas overlay) ──────────────────────────────────
 const ModRing: React.FC<{ amount: number; color: string; d: number }> = ({ amount, color, d }) => {
-  const _canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
   const t         = useRef(0);
 
   useEffect(() => {
-    const _cv = canvasRef.current;
+    const cv = canvasRef.current;
     if (!cv || amount <= 0) return;
-    const _ctx = cv.getContext('2d');
+    const ctx = cv.getContext('2d');
     if (!ctx) return;
 
-    const _cx = d / 2;
+    const cx = d / 2;
     const r  = cx - 1.5;
     const ARC_START = (135 * Math.PI) / 180;
     const ARC_RANGE = (270 * Math.PI) / 180;
 
-    const _draw = () => {
+    const draw = () => {
       t.current += 0.04;
       ctx.clearRect(0, 0, d, d);
 
       // Pulsing arc representing LFO sweep
-      const _sweep = (Math.sin(t.current) * 0.5 + 0.5) * amount;
-      const _arcEnd = ARC_START + sweep * ARC_RANGE;
+      const sweep = (Math.sin(t.current) * 0.5 + 0.5) * amount;
+      const arcEnd = ARC_START + sweep * ARC_RANGE;
 
       ctx.beginPath();
       ctx.arc(cx, cx, r, ARC_START, arcEnd);
@@ -157,7 +157,7 @@ const ValuePopup: React.FC<{
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 export const FXKnob: React.FC<Props> = ({
-  label, value, color = '#39ff14', size = 'md',
+  label, value, color = 'var(--looper-acid)', size = 'md',
   bipolar = false, ticks = 11, unit = '',
   disabled = false,
   defaultValue,
@@ -172,11 +172,11 @@ export const FXKnob: React.FC<Props> = ({
 
   const sy      = useRef(0);
   const sv      = useRef(value);
-  const _rootRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const { d, inner, lw, tr, fs, lfs, tickLen } = S[size];
   const cx   = d / 2;
-  const _arcR = cx - lw - 4;
+  const arcR = cx - lw - 4;
   const perim     = 2 * Math.PI * arcR;
   const arcTotal  = (270 / 360) * perim;   // full 270° in canvas units
   const _arcOffset = (135 / 360) * perim;   // rotate so bottom-left is 0
@@ -190,9 +190,9 @@ export const FXKnob: React.FC<Props> = ({
 
   if (bipolar) {
     // Map 0–1 value to -1–+1 deviation
-    const _dev = value * 2 - 1;            // -1 to +1
-    const _half = arcTotal / 2;
-    const _fill = Math.abs(dev) * half;
+    const dev = value * 2 - 1;            // -1 to +1
+    const half = arcTotal / 2;
+    const fill = Math.abs(dev) * half;
     const gap  = perim - fill;
 
     if (dev >= 0) {
@@ -202,39 +202,39 @@ export const FXKnob: React.FC<Props> = ({
     } else {
       // Negative: start from (center - fill), go clockwise to center
       arcDashArray = `${fill} ${gap}`;
-      const _startAngle = 270 - Math.abs(dev) * 135;       // degrees
+      const startAngle = 270 - Math.abs(dev) * 135;       // degrees
       arcRotation  = `rotate(${startAngle} ${cx} ${cx})`;
     }
   } else {
-    const _fill = value * arcTotal;
+    const fill = value * arcTotal;
     arcDashArray = `${fill} ${perim - fill}`;
     arcRotation  = `rotate(135 ${cx} ${cx})`;
   }
 
   // ── Track pointer position for indicator line ─────────────────────────────
-  const _rotation = value * 270 - 135;
+  const rotation = value * 270 - 135;
 
   // ── Value display ─────────────────────────────────────────────────────────
-  const _displayVal = formatValue
+  const displayVal = formatValue
     ? formatValue(value)
     : bipolar
       ? ((value * 2 - 1) * 100).toFixed(0)
       : Math.round(value * 100).toString();
 
   // ── Drag handler ──────────────────────────────────────────────────────────
-  const _startDrag = useCallback((clientY: number, shiftKey: boolean) => {
+  const startDrag = useCallback((clientY: number, shiftKey: boolean) => {
     if (disabled) return;
     setDragging(true);
     setShowPopup(true);
     sy.current = clientY;
     sv.current = value;
-    const _sensitivity = shiftKey ? 600 : 140;
+    const sensitivity = shiftKey ? 600 : 140;
 
-    const _onMove = (ey: number) => {
-      let _next = Math.min(1, Math.max(0, sv.current + (sy.current - ey) / sensitivity));
+    const onMove = (ey: number) => {
+      let next = Math.min(1, Math.max(0, sv.current + (sy.current - ey) / sensitivity));
       // Center snap for bipolar
       if (bipolar) {
-        const _snapPoints = [0.5, ...snap];
+        const snapPoints = [0.5, ...snap];
         next = applySnap(next, snapPoints);
       } else if (snap.length) {
         next = applySnap(next, snap);
@@ -242,9 +242,9 @@ export const FXKnob: React.FC<Props> = ({
       onChange(next);
     };
 
-    const _onMouseMove = (ev: MouseEvent) => onMove(ev.clientY);
-    const _onTouchMove = (ev: TouchEvent) => { ev.preventDefault(); onMove(ev.touches[0].clientY); };
-    const _onUp = () => {
+    const onMouseMove = (ev: MouseEvent) => onMove(ev.clientY);
+    const onTouchMove = (ev: TouchEvent) => { ev.preventDefault(); onMove(ev.touches[0].clientY); };
+    const onUp = () => {
       setDragging(false);
       setShowPopup(false);
       window.removeEventListener('mousemove', onMouseMove);
@@ -259,13 +259,13 @@ export const FXKnob: React.FC<Props> = ({
     window.addEventListener('touchend',  onUp);
   }, [value, onChange, disabled, bipolar, snap]);
 
-  const _onMouseDown = useCallback((e: React.MouseEvent) => {
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
 
     // Double-click: reset to default
-    const _now = Date.now();
+    const now = Date.now();
     if (now - lastClick < 280) {
-      const _def = defaultValue ?? (bipolar ? 0.5 : 0);
+      const def = defaultValue ?? (bipolar ? 0.5 : 0);
       onChange(def);
       setLastClick(0);
       return;
@@ -275,20 +275,20 @@ export const FXKnob: React.FC<Props> = ({
     startDrag(e.clientY, e.shiftKey);
   }, [lastClick, defaultValue, bipolar, onChange, startDrag]);
 
-  const _onTouchStart = useCallback((e: React.TouchEvent) => {
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
     e.preventDefault();
     startDrag(e.touches[0].clientY, false);
   }, [startDrag]);
 
   // ── Mouse wheel ────────────────────────────────────────────────────────────
   useEffect(() => {
-    const _el = rootRef.current;
+    const el = rootRef.current;
     if (!el) return;
-    const _onWheel = (e: WheelEvent) => {
+    const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (disabled) return;
-      const _step = e.shiftKey ? 0.002 : 0.01;
-      const _next = Math.min(1, Math.max(0, value + (e.deltaY < 0 ? step : -step)));
+      const step = e.shiftKey ? 0.002 : 0.01;
+      const next = Math.min(1, Math.max(0, value + (e.deltaY < 0 ? step : -step)));
       onChange(next);
     };
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -296,13 +296,13 @@ export const FXKnob: React.FC<Props> = ({
   }, [value, onChange, disabled]);
 
   // ── Tick marks ─────────────────────────────────────────────────────────────
-  const _tickAngles = Array.from({ length: ticks }, (_, i) => -135 + (i / (ticks - 1)) * 270);
+  const tickAngles = Array.from({ length: ticks }, (_, i) => -135 + (i / (ticks - 1)) * 270);
 
   // ── Glow intensity — brighter at extremes ──────────────────────────────────
-  const _extremity = bipolar
+  const extremity = bipolar
     ? Math.abs(value - 0.5) * 2   // 0 at center, 1 at max deflection
     : value;
-  const _glowStrength = dragging ? 1 : 0.3 + extremity * 0.5;
+  const glowStrength = dragging ? 1 : 0.3 + extremity * 0.5;
 
   // ── Color components for rgba usage ───────────────────────────────────────
   const _isHex = color.startsWith('#') && color.length === 7;
@@ -346,9 +346,9 @@ export const FXKnob: React.FC<Props> = ({
             // For normal: active if tick position ≤ value
             // For bipolar: active if tick is between center and value
             let active: boolean;
-            const _tickPct = i / (ticks - 1);
+            const tickPct = i / (ticks - 1);
             if (bipolar) {
-              const _center = 0.5;
+              const center = 0.5;
               const v      = value;
               active = v >= center
                 ? tickPct >= center && tickPct <= v
@@ -357,8 +357,8 @@ export const FXKnob: React.FC<Props> = ({
               active = tickPct <= value;
             }
 
-            const _len1 = tr + (isEdge ? 0 : 1);
-            const _len2 = len1 + tickLen + (isEdge || isMid ? 1.5 : isQuart ? 1 : 0);
+            const len1 = tr + (isEdge ? 0 : 1);
+            const len2 = len1 + tickLen + (isEdge || isMid ? 1.5 : isQuart ? 1 : 0);
 
             return (
               <line
@@ -367,7 +367,7 @@ export const FXKnob: React.FC<Props> = ({
                 y1={cx + len1 * Math.sin(rad)}
                 x2={cx + len2 * Math.cos(rad)}
                 y2={cx + len2 * Math.sin(rad)}
-                stroke={active ? color : (isMid && bipolar) ? '#333' : '#1a1a1a'}
+                stroke={active ? color : (isMid && bipolar) ? 'var(--dj-dimmer)' : 'var(--t-b2x)'}
                 strokeWidth={isEdge || isMid ? 1.5 : 0.8}
                 strokeLinecap="square"
                 style={{
@@ -396,7 +396,7 @@ export const FXKnob: React.FC<Props> = ({
           <circle
             cx={cx} cy={cx} r={arcR}
             fill="none"
-            stroke="#141414"
+            stroke="var(--t-b2)"
             strokeWidth={lw}
             strokeDasharray={`${arcTotal} ${perim - arcTotal}`}
             transform={`rotate(135 ${cx} ${cx})`}
@@ -422,7 +422,7 @@ export const FXKnob: React.FC<Props> = ({
           <circle
             cx={cx} cy={cx} r={cx - lw - 5}
             fill="url(#knobShell)"
-            stroke={dragging ? color + '44' : '#1e1e1e'}
+            stroke={dragging ? color + '44' : 'var(--t-b3)'}
             strokeWidth={dragging ? 1.5 : 0.8}
           />
 
@@ -430,7 +430,7 @@ export const FXKnob: React.FC<Props> = ({
           <circle
             cx={cx} cy={cx} r={inner}
             fill="url(#knobCap)"
-            stroke="#222"
+            stroke="var(--dj-border)"
             strokeWidth={0.5}
           />
 
@@ -460,11 +460,11 @@ export const FXKnob: React.FC<Props> = ({
           <defs>
             <radialGradient id="knobShell" cx="40%" cy="35%" r="65%">
               <stop offset="0%"   stopColor="#2a2a2a" />
-              <stop offset="50%"  stopColor="#141414" />
+              <stop offset="50%"  stopColor="var(--t-b2)" />
               <stop offset="100%" stopColor="#0a0a0a" />
             </radialGradient>
             <radialGradient id="knobCap" cx="38%" cy="32%" r="68%">
-              <stop offset="0%"   stopColor="#222" />
+              <stop offset="0%"   stopColor="var(--dj-border)" />
               <stop offset="100%" stopColor="#0d0d0d" />
             </radialGradient>
           </defs>
@@ -484,7 +484,7 @@ export const FXKnob: React.FC<Props> = ({
             fontFamily:  'IBM Plex Mono, monospace',
             fontSize:    fs - (size === 'xs' ? 2 : 1),
             fontWeight:  700,
-            color:       dragging ? color : '#2e2e2e',
+            color:       dragging ? color : 'var(--panel-mid)',
             lineHeight:  1,
             letterSpacing: '-.02em',
             transition: 'color 0.1s',

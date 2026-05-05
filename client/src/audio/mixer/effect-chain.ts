@@ -115,13 +115,13 @@ export class EffectChain implements IEffectChain {
   addEffect(effect: AudioEffect, position?: number, wetDry = 1): void {
     this.assertActive();
 
-    const _insertAt = position !== undefined
+    const insertAt = position !== undefined
       ? clamp(position, 0, this.slots.length)
       : this.slots.length;
 
     // Build per-slot wet/dry nodes
-    const _dry = this.audioContext.createGain();
-    const _wet = this.audioContext.createGain();
+    const dry = this.audioContext.createGain();
+    const wet = this.audioContext.createGain();
     dry.gain.setTargetAtTime(1 - wetDry, this.audioContext.currentTime, 0.015);
     wet.gain.setTargetAtTime(wetDry, this.audioContext.currentTime, 0.015);
     this.wetNodes.set(effect.id, { dry, wet });
@@ -141,7 +141,7 @@ export class EffectChain implements IEffectChain {
   removeEffect(effectId: string): boolean {
     this.assertActive();
 
-    const _index = this.slots.findIndex((s) => s.effect.id === effectId);
+    const index = this.slots.findIndex((s) => s.effect.id === effectId);
     if (index === -1) {
       this.warn(`removeEffect: effect "${effectId}" not found`);
       return false;
@@ -165,13 +165,13 @@ export class EffectChain implements IEffectChain {
   reorderEffect(effectId: string, newPosition: number): void {
     this.assertActive();
 
-    const _from = this.slots.findIndex((s) => s.effect.id === effectId);
+    const from = this.slots.findIndex((s) => s.effect.id === effectId);
     if (from === -1) {
       this.warn(`reorderEffect: effect "${effectId}" not found`);
       return;
     }
 
-    const _to = clamp(newPosition, 0, this.slots.length - 1);
+    const to = clamp(newPosition, 0, this.slots.length - 1);
     if (from === to) return;
 
     const [slot] = this.slots.splice(from, 1);
@@ -186,7 +186,7 @@ export class EffectChain implements IEffectChain {
    * Move an effect one step toward the front of the chain.
    */
   moveUp(effectId: string): void {
-    const _idx = this.slots.findIndex((s) => s.effect.id === effectId);
+    const idx = this.slots.findIndex((s) => s.effect.id === effectId);
     if (idx > 0) this.reorderEffect(effectId, idx - 1);
   }
 
@@ -194,7 +194,7 @@ export class EffectChain implements IEffectChain {
    * Move an effect one step toward the end of the chain.
    */
   moveDown(effectId: string): void {
-    const _idx = this.slots.findIndex((s) => s.effect.id === effectId);
+    const idx = this.slots.findIndex((s) => s.effect.id === effectId);
     if (idx !== -1 && idx < this.slots.length - 1) this.reorderEffect(effectId, idx + 1);
   }
 
@@ -210,7 +210,7 @@ export class EffectChain implements IEffectChain {
   setEffectBypassed(effectId: string, bypassed: boolean): void {
     this.assertActive();
 
-    const _slot = this.slots.find((s) => s.effect.id === effectId);
+    const slot = this.slots.find((s) => s.effect.id === effectId);
     if (!slot) {
       this.warn(`setEffectBypassed: effect "${effectId}" not found`);
       return;
@@ -246,7 +246,7 @@ export class EffectChain implements IEffectChain {
     this.assertActive();
 
     const slot  = this.slots.find((s) => s.effect.id === effectId);
-    const _nodes = this.wetNodes.get(effectId);
+    const nodes = this.wetNodes.get(effectId);
 
     if (!slot || !nodes) {
       this.warn(`setEffectWetDry: effect "${effectId}" not found`);
@@ -306,7 +306,7 @@ export class EffectChain implements IEffectChain {
   deserialize(state: EffectChainState, factory?: EffectFactory): void {
     this.assertActive();
 
-    const _resolve = factory ?? this.effectFactory;
+    const resolve = factory ?? this.effectFactory;
     if (!resolve) {
       this.emitError(
         new Error('No effectFactory provided — pass one to the constructor or to deserialize()'),
@@ -319,8 +319,8 @@ export class EffectChain implements IEffectChain {
 
     for (const effectState of state.effects) {
       try {
-        const _wetDry = (effectState as unknown as Record<string, unknown>)['_wetDry'] as number ?? 1;
-        const _effect = resolve(effectState);
+        const wetDry = (effectState as unknown as Record<string, unknown>)['_wetDry'] as number ?? 1;
+        const effect = resolve(effectState);
         this.addEffect(effect, undefined, wetDry);
       } catch (err) {
         this.emitError(toError(err), `deserialize[${effectState.id}]`);
@@ -436,7 +436,7 @@ export class EffectChain implements IEffectChain {
       try { effect.disconnect(); } catch { /* ok */ }
     }
 
-    const _active = this.slots.filter((s) => !s.effect.bypassed);
+    const active = this.slots.filter((s) => !s.effect.bypassed);
 
     if (active.length === 0) {
       this.inputNode.connect(this.outputNode);
@@ -447,7 +447,7 @@ export class EffectChain implements IEffectChain {
     let prev: AudioNode = this.inputNode;
 
     for (const slot of active) {
-      const _nodes = this.wetNodes.get(slot.effect.id);
+      const nodes = this.wetNodes.get(slot.effect.id);
 
       if (!nodes || slot.wetDry >= 1) {
         // Full wet — simple series connection
@@ -484,7 +484,7 @@ export class EffectChain implements IEffectChain {
 
   /** Disconnect and nullify the wet/dry gain pair for a slot. */
   private disposeSlotNodes(effectId: string): void {
-    const _nodes = this.wetNodes.get(effectId);
+    const nodes = this.wetNodes.get(effectId);
     if (!nodes) return;
     try { nodes.dry.disconnect(); } catch { /* ok */ }
     try { nodes.wet.disconnect(); } catch { /* ok */ }

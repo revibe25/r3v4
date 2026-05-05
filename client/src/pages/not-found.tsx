@@ -6,7 +6,7 @@
  * IBM Plex Mono + Syne display. --ag-* CSS variables. Lime #a3e635 accent.
  */
 
-const _STYLES = `
+const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 .r3-404-shell {
@@ -14,7 +14,7 @@ const _STYLES = `
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #060606;
+  background: var(--void);
   background-image:
     repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.010) 3px, rgba(255,255,255,.010) 4px),
     repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,.013) 31px, rgba(255,255,255,.013) 32px);
@@ -59,7 +59,7 @@ const _STYLES = `
 
 .r3-404-header-label {
   font-size: 8px; letter-spacing: 0.25em; text-transform: uppercase;
-  color: #444; flex: 1;
+  color: var(--dj-dim); flex: 1;
 }
 
 .r3-404-body { padding: 32px 28px 28px; }
@@ -82,7 +82,7 @@ const _STYLES = `
 
 .r3-404-title {
   font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
-  color: #f0f0f0; margin-bottom: 8px;
+  color: var(--daw-fg); margin-bottom: 8px;
 }
 
 .r3-404-desc {
@@ -98,18 +98,18 @@ const _STYLES = `
   display: inline-flex; align-items: center; gap: 6px;
   font-family: 'IBM Plex Mono', monospace; font-size: 9px;
   letter-spacing: 0.16em; text-transform: uppercase; text-decoration: none;
-  color: #f0f0f0; background: transparent; border: 1px solid #1c1c1c;
+  color: var(--daw-fg); background: transparent; border: 1px solid #1c1c1c;
   padding: 7px 14px; cursor: pointer;
   transition: background 0.1s, border-color 0.1s, color 0.1s;
 }
-.r3-404-btn:hover { background: #a3e635; border-color: #a3e635; color: #060606; }
+.r3-404-btn:hover { background: #a3e635; border-color: #a3e635; color: var(--void); }
 .r3-404-btn-primary {
   background: rgba(163,230,53,0.06); border-color: rgba(163,230,53,0.3); color: #a3e635;
 }
-.r3-404-btn-primary:hover { background: #a3e635; border-color: #a3e635; color: #060606; }
+.r3-404-btn-primary:hover { background: #a3e635; border-color: #a3e635; color: var(--void); }
 
 .r3-404-footer {
-  padding: 10px 18px; border-top: 1px solid #1c1c1c; background: #080808;
+  padding: 10px 18px; border-top: 1px solid #1c1c1c; background: var(--t-b0x);
   display: flex; justify-content: space-between; align-items: center;
 }
 .r3-404-footer-text { font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: #2a2a2a; }
