@@ -11,7 +11,7 @@
  *   ai.suggestions     — generate mix/arrangement suggestions via llpte-ai
  *   ai.chat            — AI co-producer chat (single turn, stateless)
  *   mastering.analyse  — target-LUFS / dynamic range analysis
- *   collab.roomStats   — admin: current room occupancy (Elite tier only)
+ *   collab.roomStats   — room occupancy stats (pro_artist tier+)
  *
  * Billing gates:
  *   Free  → project.save (1 project slot), project.load
