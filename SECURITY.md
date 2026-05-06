@@ -80,7 +80,7 @@
 
 ### F-WS-01 — ws/collab.ts · JWT_SECRET optional: WebSocket auth fails open
 
-- **Status:** Deferred
+- **Status:** Fixed 2026-05-06
 - **Advisory status:** Internal finding
 - **Advisory published:** 2026-05-06
 - **Surface:** Runtime — WebSocket endpoint at /ws
@@ -96,7 +96,7 @@
 
 ### F-WS-02 — ws/collab.ts · Client-supplied userId overrides JWT identity
 
-- **Status:** Deferred
+- **Status:** Fixed 2026-05-06
 - **Advisory status:** Internal finding
 - **Advisory published:** 2026-05-06
 - **Surface:** Runtime — WebSocket join handler

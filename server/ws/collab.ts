@@ -114,7 +114,7 @@ function removeUserFromRoom(roomId: string, userId: string): void {
 // Optional JWT verification — graceful degradation if JWT_SECRET not set.
 function verifyToken(req: IncomingMessage): { userId?: string } {
   const secret = process.env.JWT_SECRET;
-  if (!secret) return {};
+  if (!secret) { return { _authFailed: true } as { userId?: string }; } // F-WS-01: fail closed
   try {
     const raw = req.headers['authorization']?.replace('Bearer ', '')
       ?? new URL(req.url ?? '', 'http://x').searchParams.get('token')
@@ -146,6 +146,10 @@ setInterval(() => {
 // ── Main attach function ──────────────────────────────────────────────────────
 
 export function attachCollabServer(server: HttpServer | HttpsServer): WebSocketServer {
+  // F-WS-01: hard-fail at startup if JWT_SECRET is not configured
+  if (!process.env.JWT_SECRET) {
+    throw new Error('[collab] JWT_SECRET is required — refusing to start WebSocket server without auth');
+  }
   const wss = new WebSocketServer({ server, path: '/ws' });
 
   wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
@@ -158,8 +162,17 @@ export function attachCollabServer(server: HttpServer | HttpsServer): WebSocketS
       return;
     }
 
-    // Optional JWT check (non-blocking — guest users allowed)
-    const { userId: tokenUserId } = verifyToken(req);
+    // F-WS-01: JWT required — fail closed if token missing or invalid
+    const authResult = verifyToken(req);
+    if ('_authFailed' in authResult) {
+      ws.close(4401, 'Server misconfiguration: JWT_SECRET not set');
+      return;
+    }
+    if (!authResult.userId) {
+      ws.close(4001, 'Authentication required');
+      return;
+    }
+    const { userId: tokenUserId } = authResult;
 
     // Room size guard
     const room = getOrCreateRoom(roomId);
@@ -191,7 +204,8 @@ export function attachCollabServer(server: HttpServer | HttpsServer): WebSocketS
 
         // ── join ────────────────────────────────────────────────────────────
         case 'join': {
-          const userId = (msg.userId as string | undefined)?.slice(0, 32) ?? tokenUserId;
+          // F-WS-02: JWT identity is authoritative — client-supplied userId ignored when token present
+          const userId = tokenUserId ?? (msg.userId as string | undefined)?.slice(0, 32);
           const name   = (msg.name  as string | undefined)?.slice(0, 40) ?? 'USER';
           const color  = /^#[0-9a-fA-F]{6}$/.test(msg.color as string)
             ? (msg.color as string) : '#f59e0b';
