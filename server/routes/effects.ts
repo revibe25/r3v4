@@ -121,7 +121,7 @@ router.get("/", requireUser, (_req, res) => {
 // ── GET /effects/:id ──────────────────────────────────────────────────────────
 
 router.get("/:id", requireUser, (req, res) => {
-  const effect = EFFECTS_REGISTRY.get(req.params.id);
+  const effect = EFFECTS_REGISTRY.get(req.params.id as string);
   if (!effect) {
     return res.status(404).json({ error: `Effect '${req.params.id}' not found` });
   }
@@ -141,7 +141,7 @@ router.post("/:id/apply", requireUser, async (req, res) => {
     return res.status(400).json({ error: parsed.error.flatten() });
   }
 
-  const effect = EFFECTS_REGISTRY.get(effectId);
+  const effect = EFFECTS_REGISTRY.get(effectId as string);
   if (!effect) {
     return res.status(404).json({ error: `Effect '${effectId}' not found` });
   }
@@ -153,7 +153,7 @@ router.post("/:id/apply", requireUser, async (req, res) => {
     const result = await storage.applyEffectToTrack({
       userId,
       trackId,
-      effectId,
+      effectId: effectId as string,
       settings: parameters,
     });
 
@@ -180,7 +180,7 @@ router.delete("/:id/apply", requireUser, async (req, res) => {
   const userId = req.user!.id;
 
   try {
-    await storage.removeEffectFromTrack({ userId, trackId, effectId });
+    await storage.removeEffectFromTrack({ userId, trackId, effectId: effectId as string });
     logger.info({ userId, trackId, effectId }, "Effect removed");
     return res.json({ success: true });
   } catch (err) {
