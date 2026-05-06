@@ -198,3 +198,24 @@ Covers: picomatch CVE-2026-33671, CVE-2026-33672 · postcss CVE-2026-41305
 
 - **Status:** Fixed
 - **Fix:** `checkAiTransitionLimit` in `server/middleware/feature-gate.ts` scopes count to `(userId, calendar day)` via `gte(aiTransitionUsage.usedAt, startOfDay)`. Client-supplied `X-Session-Id` has no effect on the limit. Schema confirmed: `usedAt timestamp NOT NULL DEFAULT NOW()` in `shared/schema-subscription.ts`.
+
+---
+
+### F-10 — `ai.chat` prompt injection — FIXED 2026-05-06
+
+- **Status:** Fixed
+- **Fix:** `activeTrack` sanitized server-side before LLM context interpolation: `raw.replace(/[^\w\s\-]/g, '').slice(0, 40)` applied in `server/routers/daw.ts` before `ctxStr` is built. Safe to wire real Anthropic API call.
+
+---
+
+### C-03 — AI transition limit bypass — FIXED (confirmed 2026-05-06)
+
+- **Status:** Fixed
+- **Fix:** `checkAiTransitionLimit` in `server/middleware/feature-gate.ts` scopes count to `(userId, calendar day)` — `X-Session-Id` rotation has zero effect. Schema confirmed: `usedAt timestamp NOT NULL DEFAULT NOW()`.
+
+---
+
+### F-06 — /health info leakage — FIXED 2026-05-06
+
+- **Status:** Fixed
+- **Note:** Originally marked Fixed in April audit but code was never patched. Actually fixed this session — endpoint now returns `{ ok, uptime }` only. Dead `getRoomStats` import removed from `server/index.ts`.
