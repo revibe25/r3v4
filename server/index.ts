@@ -44,7 +44,7 @@ import { createContext }      from './trpc';
 import { appRouter }          from './procedures';
 import { authRouter }         from './routes/auth';
 import { trpcAuth }            from './middleware/auth';
-import { attachCollabServer, getRoomStats } from './ws/collab';
+import { attachCollabServer } from './ws/collab';
 import { db }                 from './db';
 import { subscriptions }      from '../shared/schema';
 import { eq }                 from 'drizzle-orm';
