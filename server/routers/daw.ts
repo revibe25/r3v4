@@ -34,7 +34,6 @@ import { db } from '../db';
 import { projects } from '../../shared/schema';
 import { aiDecisionLog } from '../db/schema';
 import Anthropic from '@anthropic-ai/sdk';
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 import { eq, and, desc, isNull } from 'drizzle-orm';
 
 // ── Zod schemas ───────────────────────────────────────────────────────────────
@@ -458,6 +457,7 @@ export const dawRouter = router({
         ctxStr,
       ].join(' ');
 
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
       const t0 = Date.now();
       let reply: string;
       try {
