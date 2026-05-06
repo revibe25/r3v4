@@ -140,3 +140,36 @@
   this table — audit confirmed no exposure. Column added preventatively.
 - Gap closed 2026-05-06.
 
+
+---
+
+### FIXED 2026-05-06 — CVE-2026-39356 · drizzle-orm < 0.45.2 · SQL injection
+
+- **Status:** Fixed
+- **Surface:** Runtime
+- **Fix:** Root `pnpm.overrides` updated from pinned `0.39.3` (vulnerable) to `>=0.45.2`. pnpm install confirmed resolved version 0.45.2.
+- **Our severity:** High — SQL injection via improperly escaped identifiers is a direct data-layer attack, reachable from any tRPC route that calls drizzle.
+
+---
+
+### FIXED 2026-05-06 — CVE-2026-41650 · fast-xml-parser < 5.7.0 · CDATA/comment injection
+
+- **Status:** Fixed  
+- **Surface:** Runtime (via @aws-sdk/client-s3 → @aws-sdk/core → @aws-sdk/xml-builder)
+- **Fix:** `pnpm.overrides["fast-xml-parser"]` tightened from `>=5.2.0` to `>=5.7.0`.
+- **Our severity:** Medium — XML injection reachable from S3 response parsing (attacker-influenced input).
+
+---
+
+### DEFERRED BATCH — Dev-build-isolated findings (2026-05-06)
+
+Covers: picomatch CVE-2026-33671, CVE-2026-33672 · postcss CVE-2026-41305
+
+- **Status:** Deferred
+- **Advisory status:** Public (N-day)
+- **Surface:** Dev-build-isolated — all three reach @r3vibe/server only via devDependencies (ts-morph, vite). No supply-chain path to shipped artifacts. No attacker-influenced input. No credential pivot.
+- **Our severity:** Low in context — advisory says High/Medium but dev-isolated blast radius reduces this. Delta noted; reasoning: no runtime path confirmed via `pnpm why`.
+- **Interim control:** pnpm.overrides pins esbuild >=0.25.0 (already applied). No runtime exposure — friction-only interim acceptable for dev-build-isolated findings.
+- **Revisit trigger:** 2026-08-06 (quarterly dev-dep review)
+- **Owner:** @3R
+- **Upgrade path:** picomatch — update ts-morph when upstream ships compatible release. postcss — resolved automatically by Vite 6 migration (C-02, due 2026-06-15).
