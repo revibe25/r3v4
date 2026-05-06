@@ -1839,7 +1839,6 @@ const StatusBar = memo(() => {
   const { playing, recording, collabConnected, collabUsers, syncStatus, bpm, timeSignature } = useDAWStore();
   return (
     <>
-    <>
       <div className="flex items-center gap-1.5">
         <Led on={playing}    color="#22c55e"  />
         <Led on={recording}  color="#ef4444" pulse={recording} />

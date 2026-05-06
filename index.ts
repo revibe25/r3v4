@@ -25,8 +25,8 @@
  */
 
 import http from 'http';
-import express
-import type { Request, Response } from 'express' from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
