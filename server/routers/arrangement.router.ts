@@ -4,20 +4,20 @@
  */
 import { z } from "zod";
 import { router } from "../trpc";
-import { protectedProcedure } from "../procedures";
+import { protectedProcedure } from "../base-procedures";
 import {
   createArrangement, getArrangement,
   listArrangements, updateArrangement, deleteArrangement,
 } from "../services/arrangement.service";
 
 export const arrangementRouter = router({
-  list: protectedProcedure.query(async ({ ctx }) =>
+  list: protectedProcedure.query(async ({ ctx }: { ctx: any }) =>
     listArrangements(ctx.user!.id)
   ),
 
   get: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const a = await getArrangement(input.id);
       if (!a) throw new Error(`Arrangement ${input.id} not found`);
       return a;
@@ -25,7 +25,7 @@ export const arrangementRouter = router({
 
   create: protectedProcedure
     .input(z.object({ name: z.string().optional() }))
-    .mutation(async ({ ctx, input }) =>
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) =>
       createArrangement(ctx.user!.id, input.name)
     ),
 
@@ -42,7 +42,7 @@ export const arrangementRouter = router({
         lengthBars: z.number().min(1).optional(),
       }),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const updated = await updateArrangement(input.id, input.patch);
       if (!updated) throw new Error(`Arrangement ${input.id} not found`);
       return updated;
@@ -50,7 +50,7 @@ export const arrangementRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const deleted = await deleteArrangement(input.id);
       if (!deleted) throw new Error(`Arrangement ${input.id} not found`);
       return { success: true };
