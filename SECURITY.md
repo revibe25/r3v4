@@ -75,3 +75,68 @@
 - **Revisit trigger:** 2026-08-03 (≤90 days, Medium)
 - **Owner:** @3R
 - **Action:** Confirm no user-supplied CSS strings reach postcss at build. Close if confirmed static-only.
+
+---
+
+### F-WS-01 — ws/collab.ts · JWT_SECRET optional: WebSocket auth fails open
+
+- **Status:** Deferred
+- **Advisory status:** Internal finding
+- **Advisory published:** 2026-05-06
+- **Surface:** Runtime — WebSocket endpoint at /ws
+- **Our severity:** Medium — if JWT_SECRET is unset in production, all WebSocket connections are unauthenticated. The comment calls this 'graceful degradation' but in production it is a complete auth bypass on the collab surface.
+- **Mythos-class re-price:** Discovering that JWT_SECRET is unset via error response timing or by attempting an unauthed WS connection is trivial. Once known, the room is open to any client.
+- **Why deferred:** Requires deployment config verification (JWT_SECRET is set in prod). Code fix is a one-line guard. Low engineering cost but needs env confirmation.
+- **Interim control:** Verify JWT_SECRET is set in all production and staging environments. Add to deployment checklist.
+- **Revisit trigger:** 2026-05-22 (before external beta)
+- **Owner:** @3R
+- **Fix:** In verifyToken(), if !secret: ws.close(4401, 'Server misconfiguration') rather than returning {}. Add startup assertion: if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET required').
+
+---
+
+### F-WS-02 — ws/collab.ts · Client-supplied userId overrides JWT identity
+
+- **Status:** Deferred
+- **Advisory status:** Internal finding
+- **Advisory published:** 2026-05-06
+- **Surface:** Runtime — WebSocket join handler
+- **Our severity:** Medium — in the join handler, msg.userId takes precedence over tokenUserId from JWT verification. A client with a valid JWT for userId A can join as userId B by sending { type:'join', userId:'B' }. Allows impersonation in collaborative rooms.
+- **Mythos-class re-price:** WS frame manipulation is trivial. Any browser devtools session can craft the join message. Room data is ephemeral (not persisted) which limits impact, but impersonation is real.
+- **Why deferred:** Room state is non-persistent and action broadcasts are allow-listed. Business impact is limited to in-session confusion, not data exfiltration. Fix is one line.
+- **Interim control:** Friction-only. The ALLOWED_ACTION_TYPES allow-list limits what an impersonator can broadcast. Acceptable interim for pre-external-beta only.
+- **Revisit trigger:** 2026-05-22 (before external beta)
+- **Owner:** @3R
+- **Fix:** In join handler: const userId = tokenUserId ?? (msg.userId as string)?.slice(0, 32). When JWT_SECRET is set and tokenUserId exists, do not accept msg.userId override.
+
+---
+
+### AUDIT GAP CLOSED — ws/collab.ts getRoomStats()
+
+- getRoomStats() returns { roomCount, totalUsers, rooms: [{id, users}] } — aggregate only.
+- No per-user identifiers (userId, name, color) are included.
+- Finding: clean. Gap closed 2026-05-06.
+
+---
+
+### AUDIT GAP CLOSED — session-metrics.service.ts userId scoping
+
+- startSession: userId stored at INSERT. ✅
+- stopSession: userId checked at application layer (existing.userId !== userId). ✅
+  DB-layer WHERE clause added as defense-in-depth (this patch cycle).
+- getSessionSummary: userId checked at application layer. ✅
+  DB-layer WHERE clause added as defense-in-depth (this patch cycle).
+- Finding: application-layer scoping was correct. DB-layer defense-in-depth added.
+  Gap closed 2026-05-06.
+
+---
+
+### AUDIT GAP CLOSED — effectChainsTable / waveformEditsTable exposure
+
+- **CRITICAL** finding promoted from audit gap to fixed:
+- effectChainsTable: user_id column added (migration 0008), requireUser added to all routes,
+  WHERE userId added to all 5 chain routes in presets.ts.
+- effectPresetsTable: same — user_id column added, all 5 preset routes secured.
+- waveformEditsTable: user_id column added (migration 0008). No router currently exposes
+  this table — audit confirmed no exposure. Column added preventatively.
+- Gap closed 2026-05-06.
+

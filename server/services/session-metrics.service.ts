@@ -1,5 +1,5 @@
 import { randomUUID }   from "crypto";
-import { eq }           from "drizzle-orm";
+import { eq, and }      from "drizzle-orm";
 import { db } from "../db";
 import { sessionMetrics } from "../../shared/schema-session-metrics";
 import { calculateTimeSavings } from "./time-savings.service";
@@ -35,7 +35,7 @@ export async function stopSession(
   const [existing] = await db
     .select()
     .from(sessionMetrics)
-    .where(eq(sessionMetrics.id, input.sessionId))
+    .where(and(eq(sessionMetrics.id, input.sessionId), eq(sessionMetrics.userId, userId)))
     .limit(1);
 
   if (!existing) throw new Error(`Session not found: ${input.sessionId}`);
@@ -83,7 +83,7 @@ export async function getSessionSummary(
   const [row] = await db
     .select()
     .from(sessionMetrics)
-    .where(eq(sessionMetrics.id, sessionId))
+    .where(and(eq(sessionMetrics.id, sessionId), eq(sessionMetrics.userId, userId)))
     .limit(1);
 
   if (!row || row.userId !== userId) return null;

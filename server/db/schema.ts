@@ -183,6 +183,7 @@ export const midiMappings = pgTable("midi_mappings", {
 // ==================== LEGACY TABLES ====================
 export const effectPresetsTable = pgTable("effect_presets", {
   id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").references(() => users.id),
   name: text("name").notNull(),
   settings: json("settings").notNull(),
   category: text("category").default("general"),
@@ -193,6 +194,7 @@ export const effectPresetsTable = pgTable("effect_presets", {
 
 export const effectChainsTable = pgTable("effect_chains", {
   id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id),
   name: text("name").notNull(),
   nodes: text("nodes").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -210,6 +212,7 @@ export const djCuesTable = pgTable("dj_cues", {
 
 export const waveformEditsTable = pgTable("waveform_edits", {
   id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id),
   sampleId: text("sample_id").notNull(),
   editType: text("edit_type").notNull(),
   params: text("params").notNull(),
