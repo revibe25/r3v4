@@ -184,3 +184,17 @@ Covers: picomatch CVE-2026-33671, CVE-2026-33672 · postcss CVE-2026-41305
 - **Our severity:** Medium — per-session counter previously keyable on client-supplied header; authenticated users could achieve unlimited AI transitions by rotating X-Session-Id
 - **Fix:** `checkAiTransitionLimit` in `server/middleware/feature-gate.ts` scopes the `aiTransitionUsage` query to `(userId, calendar_day)` via `gte(aiTransitionUsage.usedAt, startOfDay)`. Client-supplied `X-Session-Id` has no effect on the daily count. Schema confirmed: `usedAt timestamp NOT NULL DEFAULT NOW()`.
 - **Owner:** @3R
+
+---
+
+### F-10 — `ai.chat` prompt injection — FIXED 2026-05-06
+
+- **Status:** Fixed
+- **Fix:** `activeTrack` sanitized server-side before LLM context interpolation: `raw.replace(/[^\w\s\-]/g, '').slice(0, 40)` applied in `server/routers/daw.ts` before `ctxStr` is built.
+
+---
+
+### C-03 — AI transition limit bypass — FIXED (prior session)
+
+- **Status:** Fixed
+- **Fix:** `checkAiTransitionLimit` in `server/middleware/feature-gate.ts` scopes count to `(userId, calendar day)` via `gte(aiTransitionUsage.usedAt, startOfDay)`. Client-supplied `X-Session-Id` has no effect on the limit. Schema confirmed: `usedAt timestamp NOT NULL DEFAULT NOW()` in `shared/schema-subscription.ts`.
