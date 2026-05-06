@@ -438,7 +438,12 @@ export const dawRouter = router({
       // Build context string for system prompt
       const ctxStr = [
         `Project: ${input.context.trackCount} tracks, ${input.context.bpm} BPM.`,
-        input.context.activeTrack ? `Selected track: ${input.context.activeTrack}.` : '',
+        // F-10: sanitize activeTrack before interpolation — strip instruction-syntax chars
+        (() => {
+          const raw = input.context.activeTrack ?? '';
+          const safe = raw.replace(/[^\w\s\-]/g, '').slice(0, 40);
+          return safe ? `Selected track: ${safe}.` : '';
+        })(),
         `Playhead at beat ${input.context.position}.`,
       ].filter(Boolean).join(' ');
 
