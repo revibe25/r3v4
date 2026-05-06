@@ -11,7 +11,7 @@
 
 ### D-01 — CVE-2026-39356 · drizzle-orm@0.39.3 SQL injection
 
-- **Status:** Deferred
+- **Status:** Fixed 2026-05-06
 - **Advisory status:** Public (N-day)
 - **Advisory published:** 2026 (https://github.com/advisories/CVE-2026-39356)
 - **Surface:** Runtime — production dependency via @r3vibe/server
