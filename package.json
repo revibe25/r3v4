@@ -15,6 +15,7 @@
     "implement-metrics": "tsx implement-session-metrics.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.0",
     "@aws-sdk/client-s3": "^3.1024.0",
     "@aws-sdk/s3-request-presigner": "^3.1024.0",
     "@trpc/server": "^11.16.0",
