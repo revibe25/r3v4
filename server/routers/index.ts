@@ -45,11 +45,11 @@ import {
 // ── Sessions ──────────────────────────────────────────────────────────────────
 const sessionsRouter = router({
   list: protectedProcedure
-    .query(({ ctx }) => storage.getSessionsByUser(ctx.user.id)),
+    .query(({ ctx }: { ctx: any }) => storage.getSessionsByUser(ctx.user.id)),
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const session = await storage.getSession(input.id);
       if (!session) throw new TRPCError({ code: 'NOT_FOUND' });
       if (session.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -58,14 +58,14 @@ const sessionsRouter = router({
 
   create: protectedProcedure
     .input(insertSessionSchema.omit({ userId: true }))
-    .mutation(({ ctx, input }) => {
+    .mutation(({ ctx, input }: { ctx: any; input: any }) => {
       const payload: InsertSession = { ...(input as Omit<InsertSession, 'userId'>), userId: ctx.user.id };
       return storage.createSession(payload);
     }),
 
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: z.record(z.unknown()) }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const session = await storage.getSession(input.id);
       if (!session) throw new TRPCError({ code: 'NOT_FOUND' });
       if (session.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -74,7 +74,7 @@ const sessionsRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const session = await storage.getSession(input.id);
       if (!session) throw new TRPCError({ code: 'NOT_FOUND' });
       if (session.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -85,11 +85,11 @@ const sessionsRouter = router({
 // ── Projects ──────────────────────────────────────────────────────────────────
 export const projectsRouter = router({
   list: protectedProcedure
-    .query(({ ctx }) => storage.getProjectsByUser(ctx.user.id)),
+    .query(({ ctx }: { ctx: any }) => storage.getProjectsByUser(ctx.user.id)),
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const project = await storage.getProject(input.id);
       if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
       if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -98,14 +98,14 @@ export const projectsRouter = router({
 
   create: protectedProcedure
     .input(insertProjectSchema.omit({ userId: true }))
-    .mutation(({ ctx, input }) => {
+    .mutation(({ ctx, input }: { ctx: any; input: any }) => {
       const payload: InsertProject = { ...(input as Omit<InsertProject, 'userId'>), userId: ctx.user.id };
       return storage.createProject(payload);
     }),
 
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: z.record(z.unknown()) }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const project = await storage.getProject(input.id);
       if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
       if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -114,7 +114,7 @@ export const projectsRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const project = await storage.getProject(input.id);
       if (!project) throw new TRPCError({ code: 'NOT_FOUND' });
       if (project.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -126,11 +126,11 @@ export const projectsRouter = router({
 export const presetsRouter = router({
   list: protectedProcedure
     .input(z.object({ type: z.string().optional() }))
-    .query(({ ctx, input }) => storage.getPresetsByUser(ctx.user.id, input.type)),
+    .query(({ ctx, input }: { ctx: any; input: any }) => storage.getPresetsByUser(ctx.user.id, input.type)),
 
   byId: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const preset = await storage.getPreset(input.id);
       if (!preset) throw new TRPCError({ code: 'NOT_FOUND' });
       if (!preset.isFactory && preset.userId !== ctx.user.id) {
@@ -141,14 +141,14 @@ export const presetsRouter = router({
 
   create: protectedProcedure
     .input(insertPresetSchema.omit({ userId: true }))
-    .mutation(({ ctx, input }) => {
+    .mutation(({ ctx, input }: { ctx: any; input: any }) => {
       const payload: InsertPreset = { ...(input as Omit<InsertPreset, 'userId'>), userId: ctx.user.id };
       return storage.createPreset(payload);
     }),
 
   update: protectedProcedure
     .input(z.object({ id: z.string(), data: z.record(z.unknown()) }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const preset = await storage.getPreset(input.id);
       if (!preset) throw new TRPCError({ code: 'NOT_FOUND' });
       if (preset.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -157,7 +157,7 @@ export const presetsRouter = router({
 
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const preset = await storage.getPreset(input.id);
       if (!preset) throw new TRPCError({ code: 'NOT_FOUND' });
       if (preset.userId !== ctx.user.id) throw new TRPCError({ code: 'FORBIDDEN' });
@@ -168,11 +168,11 @@ export const presetsRouter = router({
 // ── Settings ──────────────────────────────────────────────────────────────────
 export const settingsRouter = router({
   get: protectedProcedure
-    .query(({ ctx }) => storage.getSettings(ctx.user.id)),
+    .query(({ ctx }: { ctx: any }) => storage.getSettings(ctx.user.id)),
 
   update: protectedProcedure
     .input(z.record(z.unknown()))
-    .mutation(({ ctx, input }) => storage.updateSettings(input, ctx.user.id)),
+    .mutation(({ ctx, input }: { ctx: any; input: any }) => storage.updateSettings(input, ctx.user.id)),
 });
 
 // ── Root router ───────────────────────────────────────────────────────────────

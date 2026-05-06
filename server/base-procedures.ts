@@ -1,7 +1,7 @@
-import { t } from "./trpc";
+import { router, publicProcedure } from "./trpc";
 import { TRPCError } from "@trpc/server";
 
-export const protectedProcedure = t.procedure.use(async ({ ctx, next }: { ctx: any; next: any }) => {
+export const protectedProcedure = publicProcedure.use(async ({ ctx, next }: { ctx: any; next: any }) => {
   if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

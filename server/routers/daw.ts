@@ -259,7 +259,7 @@ export const dawRouter = router({
       name:        z.string().min(1).max(80),
       state:       ProjectStateSchema,
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       requireTier(ctx, 'explorer');
 
       const userId    = ctx.user.id;
@@ -315,7 +315,7 @@ export const dawRouter = router({
   // ── project.load ────────────────────────────────────────────────────────────
   'project.load': protectedProcedure
     .input(z.object({ projectId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const row = await db
         .select()
         .from(projects)
@@ -347,7 +347,7 @@ export const dawRouter = router({
 
   // ── project.list ────────────────────────────────────────────────────────────
   'project.list': protectedProcedure
-    .query(async ({ ctx }) => {
+    .query(async ({ ctx }: { ctx: any }) => {
       requireTier(ctx, 'creator');
       const rows = await db
         .select({
@@ -367,7 +367,7 @@ export const dawRouter = router({
   // ── project.delete ───────────────────────────────────────────────────────────
   'project.delete': protectedProcedure
     .input(z.object({ projectId: z.string() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const existing = await db
         .select({ userId: projects.userId })
         .from(projects)
@@ -392,7 +392,7 @@ export const dawRouter = router({
       tracks: z.array(TrackSchema),
       bpm:    z.number().min(40).max(240),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       requireTier(ctx, 'creator');
       try {
         return await runLLPTEAnalysis(input.tracks, input.bpm);
@@ -412,7 +412,7 @@ export const dawRouter = router({
       bpm:      z.number().min(40).max(240),
       position: z.number().min(0),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       requireTier(ctx, 'creator');
       const { suggestions } = await runLLPTEAnalysis(input.tracks, input.bpm);
       return { suggestions };
@@ -432,7 +432,7 @@ export const dawRouter = router({
         position:      z.number(),
       }),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       requireTier(ctx, 'pro_artist');
 
       // Build context string for system prompt
@@ -469,14 +469,14 @@ export const dawRouter = router({
       stereoWidth:  z.number().min(0).max(2),
       currentLUFS:  z.number().optional(),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       requireTier(ctx, 'pro_artist');
       return runMasteringAnalysis(input);
     }),
 
   // ── collab.roomStats ─────────────────────────────────────────────────────────
   'collab.roomStats': protectedProcedure
-    .query(async ({ ctx }) => {
+    .query(async ({ ctx }: { ctx: any }) => {
       requireTier(ctx, 'pro_artist');
       const { getRoomStats } = await import('../ws/collab');
       return getRoomStats();

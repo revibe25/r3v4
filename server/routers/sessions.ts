@@ -15,19 +15,19 @@ export const sessionsRouter = router({
         bpm: z.number().int().min(40).max(300),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       return startSession(ctx.user.id, input);
     }),
 
   stop: protectedProcedure
     .input(z.object({ sessionId: z.string().uuid() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       return stopSession(ctx.user.id, input);
     }),
 
   summary: protectedProcedure
     .input(z.object({ sessionId: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       return getSessionSummary(ctx.user.id, input.sessionId);
     }),
 });

@@ -30,7 +30,7 @@ import {
 import { BILLING_CYCLES } from '../../shared/subscription.types';
 
 export const subscriptionRouter = router({
-  getMySubscription: protectedProcedure.query(async ({ ctx }) => {
+  getMySubscription: protectedProcedure.query(async ({ ctx }: { ctx: any }) => {
     return getUserSubscription(ctx.user.id);
   }),
 
@@ -41,7 +41,7 @@ export const subscriptionRouter = router({
       successPath: z.string().default('/dashboard?upgraded=true'),
       cancelPath: z.string().default('/pricing'),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
       const url = await createCheckoutSession({
         userId: ctx.user.id,
@@ -60,7 +60,7 @@ export const subscriptionRouter = router({
 
   createPortal: protectedProcedure
     .input(z.object({ returnPath: z.string().default('/account') }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
       const url = await createPortalSession(ctx.user.id, `${baseUrl}${input.returnPath}`);
       return { url };

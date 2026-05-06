@@ -12,7 +12,7 @@ export const aiMixRouter = router({
       targetLoudness:       z.number().min(-23).max(-6),
       enableStemSeparation: z.boolean(),
     }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       const mixerState = ctx.mixerEngine.getState();
       return aiService.analyze({
         mixerState,

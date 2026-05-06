@@ -23,14 +23,14 @@ export const sessionMetricsRouter = router({
       trackIds: z.array(z.string()).min(1),
       bpm:      z.number().int().min(60).max(220).default(128),
     }))
-    .mutation(({ ctx, input }) =>
+    .mutation(({ ctx, input }: { ctx: any; input: any }) =>
       startSession(ctx.user.id, input)
     ),
 
   /** Stop session — persists duration + time savings, returns summary */
   stop: protectedProcedure
     .input(z.object({ sessionId: z.string().uuid() }))
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       try {
         return await stopSession(ctx.user.id, input);
       } catch (err) {
@@ -44,7 +44,7 @@ export const sessionMetricsRouter = router({
   /** Get summary for a single session */
   summary: protectedProcedure
     .input(z.object({ sessionId: z.string().uuid() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const result = await getSessionSummary(ctx.user.id, input.sessionId);
       if (!result) throw new TRPCError({ code: "NOT_FOUND" });
       return result;
@@ -53,7 +53,7 @@ export const sessionMetricsRouter = router({
   /** Last N sessions for history / dashboard */
   history: protectedProcedure
     .input(z.object({ limit: z.number().int().min(1).max(100).default(20) }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ ctx, input }: { ctx: any; input: any }) => {
       const rows = await db
         .select()
         .from(sessionMetrics)
@@ -75,7 +75,7 @@ export const sessionMetricsRouter = router({
 
   /** Aggregate totals for the current user — investor demo metric */
   totals: protectedProcedure
-    .query(async ({ ctx }) => {
+    .query(async ({ ctx }: { ctx: any }) => {
       const rows = await db
         .select()
         .from(sessionMetrics)

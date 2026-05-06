@@ -98,7 +98,7 @@ export const adminRouter = router({
    * Lightweight gate-check called by the AdminAgentSuitePage on mount.
    * Returns `{ isAdmin: true }` or throws FORBIDDEN.
    */
-  checkAccess: protectedProcedure.query(async ({ ctx }) => {
+  checkAccess: protectedProcedure.query(async ({ ctx }: { ctx: any }) => {
     await assertAdmin(ctx.user.id);
     return { isAdmin: true } as const;
   }),
@@ -124,7 +124,7 @@ export const adminRouter = router({
         maxTokens: z.number().int().min(100).max(4000).default(1000),
       }),
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }: { ctx: any; input: any }) => {
       await assertAdmin(ctx.user.id);
 
       const content = await callAnthropic(

@@ -101,7 +101,7 @@ export function createContext({ req, res }: { req: Request; res: Response }): TR
   };
 }
 
-const t = initTRPC.context<TRPCContext>().create();
+export const t = initTRPC.context<TRPCContext>().create();
 
 export const router     = t.router;
 export const publicProc = t.procedure;
