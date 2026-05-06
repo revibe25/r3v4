@@ -266,13 +266,10 @@ app.use(
 // ── Health check ──────────────────────────────────────────────────────────────
 
 app.get('/health', (_req, res) => {
-  const rooms = getRoomStats();
+  // F-06: strip version, memory, and room stats — unauthenticated callers get uptime only
   res.json({
-    ok:      true,
-    uptime:  Math.floor(process.uptime()),
-    memory:  process.memoryUsage().rss,
-    collab:  rooms,
-    version: process.env.npm_package_version ?? '4.0.0',
+    ok:     true,
+    uptime: Math.floor(process.uptime()),
   });
 });
 
