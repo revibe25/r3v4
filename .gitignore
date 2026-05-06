@@ -104,3 +104,4 @@ secrets/
 .r3-audits*/
 r3-*.sh
 r3-*.py
+fix_*.sh
