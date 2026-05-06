@@ -43,7 +43,7 @@ import {
 } from '../../shared/subscription.types';
 import { db } from '../db';
 import { aiTransitionUsage } from '../../shared/schema-subscription';
-import { eq, and, count } from 'drizzle-orm';
+import { eq, and, count, gte } from 'drizzle-orm';
 
 
 interface GuestCounter {
@@ -160,7 +160,8 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
       .where(
         and(
           eq(aiTransitionUsage.userId, userId),
-          eq(aiTransitionUsage.sessionId, sessionId),
+          // C-03: scope to calendar day — client cannot reset by rotating X-Session-Id
+          gte(aiTransitionUsage.usedAt, (() => { const d = new Date(); d.setUTCHours(0,0,0,0); return d; })()),
         ),
       );
 
@@ -177,7 +178,7 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
           userTier: tier,
           requiredTier: 'creator',
           upgradeUrl: '/pricing',
-          message: `You've used all ${numericLimit} AI transitions for this session. Upgrade to Creator for unlimited.`,
+          message: `You've used all ${numericLimit} AI transitions for today. Upgrade to Creator for unlimited.`,
         }),
       });
     }
