@@ -31,7 +31,7 @@ const noop1s  = (_s: string) => {};
 const noop1n  = (_n: number) => {};
 const noop2sn = (_s: string, _n: number) => {};
 const noop2nn = (_a: number, _b: number) => {};
-const noopNum = noop1n;
+const _noopNum = noop1n;
 
 const DEFAULT_FX: FXState = {
   filterFreq:      1000,

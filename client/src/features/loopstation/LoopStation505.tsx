@@ -14,7 +14,6 @@
 //   DESIGN:   Phosphor dark-glass, grain overlay, premium LED system
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { PageNav } from '@/components/page-nav';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLoopStation505 } from './hooks/useLoopStation505';
 import { FXKnob } from './components/FXKnob';
@@ -367,7 +366,7 @@ const SceneBtn: React.FC<{
 };
 
 // ── 32-Step Sequencer ─────────────────────────────────────────────────────────
-const TRACK_COLORS = ['var(--looper-acid-2)', 'var(--looper-cyan)', 'var(--looper-orange)', 'var(--looper-purple)', 'var(--looper-yellow)'];
+const _TRACK_COLORS = ['var(--looper-acid-2)', 'var(--looper-cyan)', 'var(--looper-orange)', 'var(--looper-purple)', 'var(--looper-yellow)'];
 
 const Sequencer32: React.FC<{
   tracks: Array<{ id: string; color: string; index: number }>;
@@ -545,7 +544,7 @@ const CLIP_ROWS = 8;
 const ClipLauncher: React.FC<{
   tracks: Array<{ id: string; color: string; index: number }>;
   isReady: boolean; beat: { bar: number; beat: number }; bpm: number;
-}> = ({ tracks, isReady, beat }) => {
+}> = ({ tracks, isReady, _beat }) => {
   const [clips, setClips] = useState<ClipState[][]>(
     () => Array(CLIP_ROWS).fill(null).map((_, r) =>
       Array(5).fill(null).map((__, c) => (r === 0 && c < 2 ? 'loaded' : 'empty'))
@@ -553,7 +552,7 @@ const ClipLauncher: React.FC<{
   );
   const [activeRow, setActiveRow] = useState<number | null>(null);
 
-  const CLR: Record<ClipState, string> = {
+  const _CLR: Record<ClipState, string> = {
     empty:     T.bg2,
     loaded:    T.b4,
     playing:   T.acid,
@@ -613,7 +612,7 @@ const ClipLauncher: React.FC<{
   return (
     <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 4 }}>
       <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
-        {tracks.map((tr, i) => (
+        {tracks.map((tr, _i) => (
           <div key={tr.id} style={{
             flex: 1, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: `${tr.color}0d`, border: `1px solid ${tr.color}33`,
@@ -941,7 +940,7 @@ export const LoopStation505: React.FC = () => {
     setBpm, tapTempo, toggleMetronome,
     setFilter, setFilterType, setDelay, setReverb, setCompressor, setXY,
     saveScene, recallScene,
-    setSwing: setSwingEngine, setTimeSignature, setQuantMode, setPlaybackMode,
+    setSwing: setSwingEngine, setTimeSignature, setQuantMode, _setPlaybackMode,
   } = useLoopStation505();
 
   // ── FX State ──────────────────────────────────────────────────────────────

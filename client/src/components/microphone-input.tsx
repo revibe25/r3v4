@@ -13,7 +13,7 @@ const BORDER     = "var(--dj-border)";
 const BORDER2    = "#2a2a2a";
 const DIM        = "var(--dj-dim)";
 const DIMMER     = "var(--dj-dimmer)";
-const MUTED      = "var(--dj-muted)";
+const _MUTED      = "var(--dj-muted)";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ActiveTab   = "signal" | "process" | "record" | "route";
@@ -323,7 +323,7 @@ function EQCurve({ bands, nodes, w = 560, h = 100 }:
     const FMIN = 20, FMAX = 20000;
     for (let i = 0; i < POINTS; i++) freqs[i] = FMIN * Math.pow(FMAX / FMIN, i / POINTS);
     const combined = new Float32Array(POINTS).fill(0);
-    nodes.forEach((n, idx) => {
+    nodes.forEach((n, _idx) => {
       if (!n) return;
       const mag = new Float32Array(POINTS);
       const phase = new Float32Array(POINTS);
@@ -425,7 +425,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   const [isRec,      setIsRec]      = useState(false);
   const [recTime,    setRecTime]    = useState(0);
   const [monitoring, setMonitoring] = useState(false);
-  const [advOpen,    setAdvOpen]    = useState(false);
+  const [_advOpen,    _setAdvOpen]    = useState(false);
   const [error,      setError]      = useState("");
   const [warning,    setWarning]    = useState("");
 

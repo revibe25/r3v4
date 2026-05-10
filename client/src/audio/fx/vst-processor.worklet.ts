@@ -266,7 +266,7 @@ class VSTProcessor extends AudioWorkletProcessor {
   process(
     inputs: Float32Array[][],
     outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
+    _parameters: Record<string, Float32Array>
   ): boolean {
     if (!this.isInitialized || !this.wasmExports || !this.wasmMemory) {
       // Pass through

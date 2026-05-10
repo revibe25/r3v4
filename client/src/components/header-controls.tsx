@@ -119,15 +119,15 @@ export const HeaderControls = memo(function HeaderControls({
   onMetronomeToggle,
   onSave,
   onLoad,
-  getSessionData,
+  _getSessionData,
 }: HeaderControlsProps) {
   const { theme, setTheme, themes, themeMetadata } = useTheme();
-  const [location, navigate] = useLocation();
+  const [_location, _navigate] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [saveDialogOpen, setSaveDialogOpen]         = useState(false);
+  const [_saveDialogOpen, setSaveDialogOpen]         = useState(false);
   const [loadDialogOpen, setLoadDialogOpen]         = useState(false);
-  const [sessionName, setSessionName]               = useState('');
-  const [sessionDescription, setSessionDescription] = useState('');
+  const [_sessionName, setSessionName]               = useState('');
+  const [_sessionDescription, setSessionDescription] = useState('');
   const [searchQuery, setSearchQuery]               = useState('');
   const { toast } = useToast();
 

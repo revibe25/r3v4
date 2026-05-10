@@ -9,8 +9,8 @@ declare abstract class AudioWorkletProcessor {
 }
 declare function registerProcessor(name: string, ctor: { new(): AudioWorkletProcessor }): void;
 declare const currentTime: number;
-declare const currentFrame: number;
-declare const sampleRate: number;
+declare const _currentFrame: number;
+declare const _sampleRate: number;
 
 // client/src/audio/engine/worklet/processor.ts
 

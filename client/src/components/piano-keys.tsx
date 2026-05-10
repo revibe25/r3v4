@@ -6,10 +6,10 @@
 import clsx from "clsx";
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  Upload, ChevronUp, ChevronDown, AlertCircle, Circle, Check, Trash2, Settings,
-  Layers, Zap, Music, Play, Square, Save, Download, Radio, Repeat, GitBranch,
-  Volume2, VolumeX, Copy, Sparkles, Grid3x3, Shuffle, Lock, Unlock, Activity,
-  Mic, StopCircle, SkipBack, SkipForward, AudioWaveform, Sliders, Eye, EyeOff
+  Upload, ChevronUp, ChevronDown, _AlertCircle, Circle, _Check, Trash2, Settings,
+  _Layers, Zap, Music, Play, Square, Save, Download, _Radio, _Repeat, _GitBranch,
+  _Volume2, _VolumeX, _Copy, _Sparkles, _Grid3x3, _Shuffle, Lock, Unlock, Activity,
+  Mic, StopCircle, SkipBack, _SkipForward, _AudioWaveform, Sliders, Eye, EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,9 +22,8 @@ import {
   DialogTitle, DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { Popover, PopoverContent } from '@/components/ui/popover';
 import { getAudioContext } from "@/audio/core/audio-context";
 
 // ============================================================================
@@ -215,15 +214,15 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function midiToFrequency(midiNote: number): number {
+function _midiToFrequency(midiNote: number): number {
   return 440 * Math.pow(2, (midiNote - 69) / 12);
 }
 
-function frequencyToMidi(frequency: number): number {
+function _frequencyToMidi(frequency: number): number {
   return 69 + 12 * Math.log2(frequency / 440);
 }
 
-function generateEuclideanRhythm(steps: number, pulses: number): boolean[] {
+function _generateEuclideanRhythm(steps: number, pulses: number): boolean[] {
   const pattern: boolean[] = new Array(steps).fill(false);
   if (pulses >= steps) return pattern.fill(true);
   const slope = pulses / steps;
@@ -443,7 +442,7 @@ function BlackKey({
 // ============================================================================
 
 export function PianoKeys({
-  keys, onTrigger, onAssignSample, loadSample, onEffectChange,
+  _keys, onTrigger, onAssignSample, loadSample, onEffectChange,
 }: PianoKeysProps) {
   // ========================================================================
   // STATE MANAGEMENT

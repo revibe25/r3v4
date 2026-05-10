@@ -38,7 +38,7 @@ export type PresetCallback = (preset: Preset) => void;
 const DB_NAME      = "r3-presets";
 const DB_VERSION   = 1;
 const STORE_NAME   = "presets";
-const SCHEMA_VER   = 2;            // increment when Preset shape changes
+const _SCHEMA_VER   = 2;            // increment when Preset shape changes
 const MAX_HISTORY  = 50;
 const LS_PREFIX    = "preset:";    // legacy fallback key prefix
 
@@ -88,7 +88,7 @@ export class PresetEngine {
     if (this._db) return this._db;
     if (this._dbReady) return this._dbReady;
 
-    this._dbReady = new Promise<IDBDatabase>((resolve, reject) => {
+    this._dbReady = new Promise<IDBDatabase>((resolve, _reject) => {
       if (typeof indexedDB === "undefined") {
         // Fallback for environments without IDB (tests, SSR)
         this._useFallback = true;

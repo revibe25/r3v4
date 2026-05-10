@@ -3,13 +3,11 @@ import { MixerChannel } from '@/audio/mixer/mixer-channel';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMasterBus } from '../audio/mixer/master-bus';
 import { transportEngine } from '../audio/transport/transport-engine';
-import { AudioEngine } from '@/audio/core/analysis-engine';
 
 import type {
-  VSTPerformanceMonitor,
-  VSTAutomationEngine,
+  _VSTPerformanceMonitor,
+  _VSTAutomationEngine,
 } from '@/types/audio';
-import { SidechainRouter } from '@/audio/fx/vst-sidechain';
 
 
 // Import audio engine if it exists, otherwise we'll use a fallback
@@ -21,10 +19,10 @@ let PIANO_KEYS: string[] = [];
 try {
   const analysisEngineModule = require('@/lib/audio-engine');
   analysisEngine = analysisEngineModule.analysisEngine;
-  AudioState = analysisEngineModule.AudioState;
+  _AudioState = analysisEngineModule.AudioState;
   PAD_KEYS = analysisEngineModule.PAD_KEYS || ['1', '2', '3', '4', 'q', 'w', 'e', 'r', 'a', 's', 'd', 'f', 'z', 'x', 'c', 'v'];
   PIANO_KEYS = analysisEngineModule.PIANO_KEYS || ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'];
-} catch (error) {
+} catch (_error) {
   // Fallback if audio-engine doesn't exist
   console.warn('Audio engine not found, using fallback mode');
 }

@@ -40,33 +40,29 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  Play, Pause, Square, SkipBack, SkipForward, Repeat, Save,
+  Play, Pause, Square, SkipBack, _SkipForward, Repeat, Save,
   FolderOpen, Upload, Settings, Activity, Cpu, ZoomIn, ZoomOut,
-  X, ArrowLeft, Plus, Mic, Volume2, VolumeX, Sliders,
-  ChevronDown, ChevronRight, ChevronUp, Layers, Music,
-  Clock, Info, Headphones, Radio, LayoutGrid, Wand2,
-  AlignLeft, SplitSquareHorizontal, Maximize2, Minimize2,
-  CircleDot, Scissors, Copy, Trash2, Lock, Unlock,
-  RotateCcw, RotateCw, Eye, EyeOff, Snowflake, Zap
+  X, ArrowLeft, Plus, _Mic, _Volume2, VolumeX, Sliders,
+  ChevronDown, ChevronRight, _ChevronUp, _Layers, _Music,
+  _Clock, Info, Headphones, _Radio, _LayoutGrid, _Wand2,
+  AlignLeft, _SplitSquareHorizontal, _Maximize2, Minimize2,
+  CircleDot, _Scissors, _Copy, Trash2, _Lock, _Unlock,
+  _RotateCcw, _RotateCw, _Eye, _EyeOff, Snowflake, Zap
 } from 'lucide-react';
 import { Link } from 'wouter';
 
-import { PageNav } from '@/components/page-nav';
 import { useVSTContextOptional } from '@/contexts/VSTContext';
 import { VSTPerformanceUI } from '@/components/vst-performance-monitor-ui';
-import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
 
 import { AudioEngine } from './audio-engine';
-import { MixerView } from './components/mixer-view';
-import { TimelineView } from './components/timeline-view';
 import { PreferencesModal } from './components/preferences-modal';
 import { VSTPanelModal } from './components/vst-panel-modal';
-import { THEME_COLORS, TRACK_COLORS, FX_ICONS } from './constants';
-import { formatTime, generateId, gainToDb, clamp, serializeProject, downloadFile } from './utils';
+import { TRACK_COLORS, FX_ICONS } from './constants';
+import { formatTime, generateId, gainToDb, serializeProject, downloadFile } from './utils';
 
 import type {
   AdvancedTrack, ProjectState, Preferences, AudioClip,
-  TransportState, FXType, ViewMode, AutomationMode
+  TransportState, _FXType, _ViewMode, _AutomationMode
 } from './types';
 
 // ============================================================
@@ -509,7 +505,7 @@ const AG_STYLES = `
 // ============================================================
 
 const METER_DECAY      = 0.92;
-const PEAK_HOLD_FRAMES = 60;
+const _PEAK_HOLD_FRAMES = 60;
 const MAX_TRACKS       = 32;
 
 const TRACK_TYPE_COLORS: Record<string, string> = {
@@ -749,7 +745,7 @@ function MasterStrip({
 }
 
 function ClipBlock({
-  clip, trackColor, pixelsPerSecond, trackHeight, isSelected, onClick
+  clip, trackColor, pixelsPerSecond, _trackHeight, isSelected, onClick
 }: {
   clip: AudioClip; trackColor: string; pixelsPerSecond: number;
   trackHeight: number; isSelected: boolean; onClick: () => void;
@@ -786,7 +782,7 @@ function ClipBlock({
   );
 }
 
-function TimelineRuler({ zoom, duration = 300, tempo = 120, timeFormat = 'bars' }: {
+function TimelineRuler({ zoom, duration = 300, tempo = 120, _timeFormat = 'bars' }: {
   zoom: number; duration?: number; tempo?: number; timeFormat?: string;
 }) {
   const pixelsPerSecond = 50 * zoom;
@@ -820,7 +816,7 @@ function TimelineRuler({ zoom, duration = 300, tempo = 120, timeFormat = 'bars' 
   );
 }
 
-function TransportDisplay({ position, tempo, timeSignature, timeFormat }: {
+function TransportDisplay({ position, tempo, _timeSignature, timeFormat }: {
   position: number; tempo: number; timeSignature: string; timeFormat: string;
 }) {
   const time           = formatTime(position, timeFormat as any, tempo);
