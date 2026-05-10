@@ -1,0 +1,56 @@
+{
+  "authority": "PRD v5.0.0 §3.1 (canonical monorepo), §8.1 (phantom dirs), §7.13 (Mythos triage)",
+  
+  "canonical_dirs": {
+    "components": "client/src/components",
+    "hooks": "client/src/hooks",
+    "stores": "client/src/stores"
+  },
+  
+  "phantom_directories_to_delete": [
+    "client/components",
+    "client/hooks",
+    "client/stores",
+    "client/client/src/components",
+    "client/client/src/hooks",
+    "client/client/src/stores"
+  ],
+  "phantom_consequence": "Zero impact — all active code uses @/alias → client/src/",
+  
+  "migration_scripts": {
+    "ARCHIVE_AFTER_VERIFY": [
+      "wire_patches_v5_to_v5_1.py",
+      "add_ticker.py",
+      "scripts/relocate_dsp.py",
+      "client/src/extract-wrapper.sh"
+    ],
+    "KEEP_OPERATIONAL": [
+      "r3hygiene.py",
+      "scripts/r3_master_fix.py",
+      "scripts/scripts_security_due_check_Version2.py"
+    ]
+  },
+  
+  "backup_strategy": {
+    "approach": "consolidate_by_hash",
+    "rule": "For each backup group: if hashes identical, keep latest timestamp; if different hashes, keep all",
+    "high_risk_preserve": [
+      "schema.ts",
+      "auth.ts",
+      "trpc.ts",
+      "index.ts",
+      "daw.ts",
+      "procedures.ts"
+    ]
+  },
+  
+  "untracked_features": {
+    "action": "commit",
+    "reason": "Part of canonical source tree structure; will be referenced by imports"
+  },
+  
+  "enforcement": {
+    "pnpm_tsc_gate": "Must return zero errors (PRD §7.1)",
+    "ci_enforcement": "PRD §7.2 automated gates apply"
+  }
+}
