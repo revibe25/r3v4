@@ -291,7 +291,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   return (
     <div className="flex flex-col h-full bg-card text-foreground font-sans">
       {!hideTransport && (
-      <div className="h-14 flex items-center gap-4 px-4 border-b border-border bg-background shadow-lg">
+      <div className="h-14 flex items-center gap-4 px-4 bg-background shadow-lg">
         <div className="flex items-center gap-2">
           <button
             onClick={onTogglePlay}
@@ -342,8 +342,19 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
       </div>
       )}
 
+      {/* Ticker */}
+      <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+      <div style={{ overflow:"hidden", position:"relative", background:"#080808", padding:"5px 0", flexShrink:0 }}>
+        <div style={{ display:"flex", width:"max-content", animation:"ag-scroll 28s linear infinite" }}>
+          {["R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System","R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System"].map((item, i) => (
+            <span key={i} style={{ padding:"0 18px", fontSize:9, letterSpacing:"0.2em", textTransform:"uppercase", fontFamily:'"IBM Plex Mono",monospace', color:"#fff", whiteSpace:"nowrap" }}>
+              {item}<span style={{ color:"#a3e635", marginLeft:8 }}>/</span>
+            </span>
+          ))}
+        </div>
+      </div>
       {/* Timeline Header */}
-      <div className="h-10 bg-muted border-b border-border text-xs text-muted-foreground flex items-center px-4 font-medium">
+      <div className="h-10 bg-muted text-xs text-muted-foreground flex items-center px-4 font-medium">
         <span className="flex-1">Tracks & Inserts</span>
         <span className="w-24 text-right">Vol</span>
         <span className="w-20 text-right">Pan</span>
@@ -358,7 +369,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
           return (
             <div key={groupId}>
               {isGroup && (
-                <div className="h-12 bg-muted/50 border-b border-border px-3 flex items-center gap-2 hover:bg-muted transition-colors">
+                <div className="h-12 bg-muted/50 border-b border-zinc-800 px-3 flex items-center gap-2 hover:bg-muted transition-colors">
                   <button
                     onClick={() => toggleGroup(groupId)}
                     className="p-1 hover:bg-muted rounded transition-colors"
@@ -393,7 +404,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
                         setContextMenu({ x: e.clientX, y: e.clientY, trackId: track.id });
                       }
                     }}
-                    className={`flex items-center h-20 border-b transition-colors ${
+                    className={`flex items-center h-20 border-b border-zinc-800 transition-colors ${
                       track.locked ? 'opacity-60 cursor-not-allowed' : 'cursor-move'
                     } ${
                       dragState.trackId === track.id

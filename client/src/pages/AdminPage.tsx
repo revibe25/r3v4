@@ -101,7 +101,6 @@ export default function AdminPage() {
       backgroundImage:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px),repeating-linear-gradient(90deg,transparent,transparent 31px,rgba(255,255,255,.016) 31px,rgba(255,255,255,.016) 32px)',
       color:T.text, fontFamily:T.font, overflow:'hidden',
       borderLeft:'3px solid #a3e635', boxShadow:'inset 3px 0 18px rgba(163,230,53,0.15)' }}>
-      <PageNav />
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 16px',
         borderBottom:`1px solid ${T.border}`, background:T.surface, flexShrink:0 }}>
         <div style={{ display:'flex', gap:5 }}>

@@ -4,10 +4,10 @@ export interface UploadResult { fileKey: string; publicUrl: string; size: number
 
 let cfg: UploadServerConfig | null = null;
 export async function getUploadConfig(): Promise<UploadServerConfig> {
-  if (_cfg) return _cfg;
+  if (cfg) return cfg;
   const res = await fetch('/api/uploads/config');
   if (!res.ok) throw new Error('Failed to fetch upload config');
-  _cfg = await res.json(); return _cfg!;
+  cfg = await res.json(); return cfg!;
 }
 
 export async function validateFile(file: File): Promise<string | null> {

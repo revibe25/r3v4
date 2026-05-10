@@ -75,10 +75,10 @@ export class TransportEngine {
   }
 }
 
-let transportEngine: TransportEngine | null = null;
+let _transportEngineInstance: TransportEngine | null = null;
 export function getTransportEngine(): TransportEngine {
-  if (!_transportEngine) _transportEngine = new TransportEngine();
-  return _transportEngine;
+  if (!_transportEngineInstance) _transportEngineInstance = new TransportEngine();
+  return _transportEngineInstance;
 }
 
 // backward-compat named export (lazy-evaluated)

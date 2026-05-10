@@ -81,7 +81,7 @@ const AG_STYLES = `
   --ag-ink:    #0a0a0a;
   --ag-panel:  #0d0d0d;
   --ag-card:   #0f0f0f;
-  --ag-border: #1c1c1c;
+  --ag-border: #222222;
   --ag-mute:   #2a2a2a;
   --ag-dim:    #3a3a3a;
   --ag-mid:    #666;
@@ -253,12 +253,12 @@ const AG_STYLES = `
 
 .ag-daw-ticker-item {
   font-size: 8px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--ag-mid); padding: 0 24px; white-space: nowrap;
+  color: #fff; padding: 0 24px; white-space: nowrap;
   display: flex; align-items: center; gap: 10px;
   transition: color .2s;
 }
 
-.ag-daw-ticker-sep { color: var(--ag-acid); opacity: 0.6; }
+.ag-daw-ticker-sep { color: #a3e635; }
 
 /* ── Section strip ───────────────────────────────────────── */
 .ag-daw-section-strip {
@@ -267,7 +267,6 @@ const AG_STYLES = `
   border-bottom: 1px solid var(--ag-border);
   padding: 5px 16px;
   display: flex; align-items: center; gap: 8px;
-  border-left: 3px solid var(--ag-acid);
   flex-shrink: 0;
 }
 
@@ -393,6 +392,7 @@ const AG_STYLES = `
 .ag-daw-shell .bg-card        { background: var(--ag-card)   !important; }
 
 .ag-daw-shell .border-border  { border-color: var(--ag-border) !important; }
+.ag-daw-shell [class*="border-border"] { border-color: var(--ag-border) !important; }
 .ag-daw-shell .border-border\/50, .ag-daw-shell .border-border\/30,
 .ag-daw-shell .border-border\/40  { border-color: var(--ag-border) !important; }
 
@@ -543,9 +543,9 @@ function VUMeter({
   };
 
   const MeterBar = ({ val, pk }: { val: number; pk: number }) => (
-    <div className="relative flex-1 bg-black/60 rounded-sm overflow-hidden border border-white/5" style={{ height }}>
+    <div className="relative flex-1 bg-black/60 rounded-sm overflow-hidden " style={{ height }}>
       {[0.75, 0.5, 0.25].map(mark => (
-        <div key={mark} className="absolute w-full border-t border-white/10" style={{ bottom: `${mark * 100}%` }} />
+        <div key={mark} className="absolute w-full " style={{ bottom: `${mark * 100}%` }} />
       ))}
       <div
         className={`absolute bottom-0 left-0 right-0 transition-all duration-75 ${getColor(val)}`}
@@ -587,8 +587,8 @@ function TrackStrip({
 
   return (
     <div
-      className={`flex flex-col flex-shrink-0 border-r border-border/50 transition-all duration-150 ${
-        isSelected ? 'bg-primary/5 border-l-2 border-l-primary' : 'bg-card/30 hover:bg-card/50'
+      className={`flex flex-col flex-shrink-0 border-r border-border transition-all duration-150 ${
+        isSelected ? 'bg-primary/5' : 'bg-card/30 hover:bg-card/50'
       }`}
       style={{ width: expanded ? 120 : 80 }}
       onClick={onSelect}
@@ -720,7 +720,7 @@ function MasterStrip({
 }) {
   const dbVal = gainToDb(volume).toFixed(1);
   return (
-    <div className="flex flex-col flex-shrink-0 w-20 border-l border-primary/20"
+    <div className="flex flex-col flex-shrink-0 w-20"
       style={{ background: 'linear-gradient(180deg, rgba(163,230,53,.04) 0%, rgba(163,230,53,.02) 100%)' }}>
       <div className="h-0.5 bg-gradient-to-r from-purple-500 to-primary"
         style={{ boxShadow: '0 0 8px rgba(163,230,53,.3)' }} />
@@ -759,7 +759,7 @@ function ClipBlock({
   return (
     <div
       className={`absolute top-1 bottom-1 overflow-hidden cursor-pointer border transition-all ${
-        isSelected ? 'border-primary shadow-lg shadow-primary/20' : 'border-white/10 hover:border-white/20'
+        isSelected ? 'border-primary shadow-lg shadow-primary/20' : 'border-transparent hover:border-transparent'
       }`}
       style={{ left, width }}
       onClick={onClick}
@@ -1134,8 +1134,6 @@ export default function MultiTrackPanel() {
       {/* ── Page shell: PageNav + DAW stacked, fills viewport ────────── */}
       <div className="ag-page-shell">
 
-        {/* ── Top nav (single instance — no duplicate) ────────────────── */}
-        <PageNav />
 
         {/* ── DAW shell fills remaining height ────────────────────────── */}
         <div className="ag-daw-shell">
@@ -1313,7 +1311,7 @@ export default function MultiTrackPanel() {
 
             {/* MIXER */}
             {(preferences.viewMode === 'mixer' || preferences.viewMode === 'split') && !sectionCollapsed.mixer && (
-              <div className={`flex flex-col border-r border-border overflow-hidden ${preferences.viewMode === 'split' ? 'w-1/2' : 'flex-1'}`}>
+              <div className={`flex flex-col overflow-hidden ${preferences.viewMode === 'split' ? 'w-1/2' : 'flex-1'}`}>
                 <div className="ag-section-header">
                   <div className="ag-section-title">
                     <Sliders size={11} />
@@ -1358,7 +1356,7 @@ export default function MultiTrackPanel() {
 
             {/* TIMELINE */}
             {(preferences.viewMode === 'timeline' || preferences.viewMode === 'split') && !sectionCollapsed.timeline && (
-              <div className="flex flex-col border-r border-border overflow-hidden flex-1">
+              <div className="flex flex-col overflow-hidden flex-1">
                 <div className="ag-section-header">
                   <div className="ag-section-title">
                     <AlignLeft size={11} />
@@ -1376,7 +1374,7 @@ export default function MultiTrackPanel() {
                   <div className="flex flex-1 overflow-hidden">
 
                     {/* Track labels */}
-                    <div className="w-32 flex-shrink-0 border-r border-border overflow-y-auto overflow-x-hidden">
+                    <div className="w-32 flex-shrink-0 overflow-y-auto overflow-x-hidden">
                       <div className="h-7 border-b border-border flex items-center px-2"
                         style={{ background: 'linear-gradient(90deg, #0c0c0c, #080808)' }}>
                         <span className="text-[8px] text-muted-foreground font-mono tracking-widest">TRACK</span>

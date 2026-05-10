@@ -200,7 +200,7 @@ const STYLES = `
 @keyframes ag-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 .ag-ticker-item {
   font-size: 9px; letter-spacing: .25em; text-transform: uppercase;
-  color: var(--ag-white); padding: 0 24px; white-space: nowrap;
+  color: #fff; padding: 0 24px; white-space: nowrap;
   display: flex; align-items: center; gap: 12px;
 }
 .ag-ticker-sep { color: var(--ag-acid); font-size: 11px; }
@@ -248,6 +248,13 @@ const STYLES = `
 .ag-frame .bg-card\/50, .ag-frame .bg-card\/30 { border-radius: 0 !important; }
 .ag-frame .bg-card\/50, .ag-frame .bg-card\/30 {
   background: var(--ag-panel) !important; border: none !important;
+}
+/* Remove outer panel border on each CollapsibleFXPanel root.
+   The selector matches the panel root element only — it never matches
+   descendants, so the header bottom-border, the expanded-state lime
+   left accent, and all internal element borders are preserved. */
+.ag-frame .ag-panel > *:not(.ag-panel-ghost) {
+  border: none !important;
 }
 .ag-frame button[aria-expanded] {
   background: var(--ag-ink) !important; border-radius: 0 !important;
@@ -1454,7 +1461,6 @@ export default function InstrumentPage({
               onSave={handleSave} onLoad={handleLoadJson}
               getSessionData={getSessionData}
             />
-
             {/* Ticker */}
             <div className="ag-ticker-row">
               <div className="ag-ticker-inner">

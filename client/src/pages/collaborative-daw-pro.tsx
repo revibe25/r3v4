@@ -5,15 +5,19 @@
 
 import { PageNav } from '@/components/page-nav';
 import React, {
-  useState, useRef, useEffect, useCallback, useMemo, memo
+  useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense
 } from 'react';
 import {
   Play, Pause, Square, Plus, ZoomIn, ZoomOut, SkipBack,
   User, Download, Upload, Settings, Save, Share2, Undo2, Redo2,
   Grid3x3, Mic, Volume2, VolumeX, Activity, Wifi, WifiOff,
   ChevronUp, ChevronDown, Copy, Trash2, Layers, Sliders, X,
-  AlertCircle, CheckCircle, Zap, Radio, Lock, Unlock,
+  AlertCircle, CheckCircle, Zap, Radio, Lock, Unlock, Music, Repeat2,
 } from 'lucide-react';
+
+// ── Lazy panels ───────────────────────────────────────────────────────────────────────────
+const VSTBrowser     = lazy(() => import('@/components/vst-browser').then(m => ({ default: m.VSTBrowser })));
+const LoopStation505 = lazy(() => import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -103,10 +107,10 @@ interface LLPTESuggestion {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const C = {
-  void:          'var(--void)',
+  void:          '#060606',
   space:         '#0a0a0a',
   surface:       '#0d0d0d',
-  surfaceLift:   'var(--t-b1)',
+  surfaceLift:   '#0f0f0f',
   surfaceHover:  'var(--dj-surface3)',
   border:        '#1c1c1c',
   borderBright:  '#2a2a2a',
@@ -115,16 +119,16 @@ const C = {
   neonDim:       'rgba(163,230,53,0.08)',
   neonDim2:      'rgba(163,230,53,0.12)',
   acid2:         'var(--looper-lime)',
-  cyan:          'var(--accent-cyan)',   // PRD §3 — active state cyan
+  cyan:          '#00d4ff',             // PRD §3 — active state cyan
   magenta:       '#ff3b3b',
-  yellow:        'var(--accent-yellow)',
+  yellow:        '#ffcc00',
   purple:        'var(--accent-purple)',
-  text:          'var(--daw-fg)',
+  text:          '#f0f0f0',
   textMuted:     '#555555',
   textDim:       'var(--dj-dimmer)',
   tracks: [
-    '#ff3b3b','#a3e635','var(--accent-cyan)','var(--accent-yellow)',
-    'var(--accent-purple)','var(--accent-orange)','var(--accent-neon-teal)','var(--accent-pink)','var(--accent-blue)','var(--accent-pink)',
+    '#ff3b3b','#a3e635','#00d4ff','#ffcc00',
+    '#b048f8','#ff6600','#06ffa5','#f72585','#0088ff','#f72585',
   ],
 } as const;
 
@@ -177,7 +181,7 @@ const INIT_PROJECT: Project = {
 
 const INIT_COLLABS: Collaborator[] = [
   { id:'u1', name:'Alex Martinez', color:'#a3e635', cursor:{x:450,y:180}, status:'active', lastAction:'Editing "Full Drums"',  timestamp:Date.now()-30000,  editingTrackId:'t1' },
-  { id:'u2', name:'Jordan Kim',    color:'var(--accent-cyan)', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
+  { id:'u2', name:'Jordan Kim',    color:'#00d4ff', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
   { id:'u3', name:'Sam Rivera',    color:'#ff3b3b', cursor:{x:580,y:240}, status:'idle',   lastAction:'Added marker',          timestamp:Date.now()-120000 },
 ];
 
@@ -315,7 +319,37 @@ const _ConfBadge = ({ confidence, label }: { confidence: number; label: string }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+// ── DAW Error Boundary ───────────────────────────────────────────────────────────────────────────
+interface _DAWEBState { error: Error | null }
+class DAWErrorBoundary extends React.Component<{ children: React.ReactNode }, _DAWEBState> {
+  state: _DAWEBState = { error: null };
+  static getDerivedStateFromError(e: Error): _DAWEBState { return { error: e }; }
+  componentDidCatch(e: Error, _info: React.ErrorInfo): void {
+    window.dispatchEvent(new CustomEvent('daw:error', { detail: { error: e } }));
+  }
+  render() {
+    if (this.state.error) return (
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh',
+                    background:'#030303', flexDirection:'column', gap:16,
+                    fontFamily:'"IBM Plex Mono",monospace' }}>
+        <span style={{ color:'#ff3b3b', fontSize:11, letterSpacing:'.2em' }}>DAW RENDER ERROR</span>
+        <span style={{ color:'#555555', fontSize:9 }}>{this.state.error.message}</span>
+        <button onClick={()=>this.setState({error:null})}
+                style={{ marginTop:8, padding:'6px 16px', background:'#a3e635',
+                         border:'none', cursor:'pointer', fontSize:9, letterSpacing:'.2em' }}>
+          RESET
+        </button>
+      </div>
+    );
+    return this.props.children;
+  }
+}
+
 export default function CollabDAWPro() {
+  return <DAWErrorBoundary><CollabDAWProInner /></DAWErrorBoundary>;
+}
+
+function CollabDAWProInner() {
 
   const [project, setProject]                       = useState<Project>(INIT_PROJECT);
   const [transport, setTransport]                   = useState<TransportMode>('stopped');
@@ -334,6 +368,8 @@ export default function CollabDAWPro() {
   const [showActivity, setShowActivity]             = useState(true);
   const [showMixer, setShowMixer]                   = useState(false);
   const [showAI, setShowAI]                         = useState(true);
+  const [showVST, setShowVST]                       = useState(false);
+  const [showLoopStation, setShowLoopStation]       = useState(false);
   const [connStatus, setConnStatus]                 = useState<ConnectionStatus>('connected');
   const [metronome, setMetronome]                   = useState(false);
   const [snapGrid, setSnapGrid]                     = useState(true);
@@ -352,12 +388,18 @@ export default function CollabDAWPro() {
   const [peakedTracks, setPeakedTracks]             = useState<Set<string>>(new Set());
   const [toasts, setToasts]                         = useState<{id:number;msg:string;type:'ai'|'info'|'warn'}[]>([]);
   const [showSettings, setShowSettings]             = useState(false);
+  const [, _tickTs]                                  = useState(0);
 
   const canvasRef         = useRef<HTMLCanvasElement|null>(null);
   const containerRef      = useRef<HTMLDivElement|null>(null);
   const rafRef            = useRef<number|null>(null);
   const startTimeRef      = useRef<number|null>(null);
   const lastRenderRef     = useRef(0);
+  const dragRef = useRef<{
+    clipId: string; origStartBar: number; origTrackId: string;
+    startX: number; startY: number;
+  } | null>(null);
+  const [dragPreview, setDragPreview] = useState<{ clipId: string; startBar: number; trackId: string } | null>(null);
 
   const gridWidth = TL.gridWidth * zoom;
 
@@ -432,6 +474,15 @@ export default function CollabDAWPro() {
           levels[t.id] = clamp((Math.random()*0.7 + 0.2) * t.volume, 0, 1);
         });
         setVuLevels(levels);
+        const peaked = new Set<string>(
+          project.tracks
+            .filter(t => !t.muted && (levels[t.id] ?? 0) > 0.93)
+            .map(t => t.id)
+        );
+        if (peaked.size) {
+          setPeakedTracks(prev => new Set([...prev, ...peaked]));
+          setTimeout(() => setPeakedTracks(new Set()), 1500);
+        }
       } else {
         const levels: Record<string,number> = {};
         project.tracks.forEach(t => { levels[t.id] = 0; });
@@ -458,6 +509,12 @@ export default function CollabDAWPro() {
     }, 9000);
     return () => clearInterval(interval);
   }, [addActivity]);
+
+  // ── Timestamp ticker ──────────────────────────────────────────────────────
+  useEffect(() => {
+    const id = setInterval(() => _tickTs(n => n + 1), 8000);
+    return () => clearInterval(id);
+  }, []);
 
   // ── History ───────────────────────────────────────────────────────────────────
   const pushHistory = useCallback((next: Project) => {
@@ -617,9 +674,13 @@ export default function CollabDAWPro() {
     if (!ctx) return;
     const dpr  = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-    canvas.width  = rect.width  * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+    const nw   = Math.round(rect.width  * dpr);
+    const nh   = Math.round(rect.height * dpr);
+    if (canvas.width !== nw || canvas.height !== nh) {
+      canvas.width  = nw;
+      canvas.height = nh;
+    }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const W = rect.width, H = rect.height;
 
     // Background
@@ -641,19 +702,35 @@ export default function CollabDAWPro() {
       project.clips
         .filter(c => c.trackId === track.id)
         .forEach(c => {
+          if (dragPreview?.clipId === c.id) return;
           const cx = barsToPixels(c.startBar, gridWidth) - scrollLeft;
           const cw = barsToPixels(c.durationBars, gridWidth);
           if (cx + cw < 0 || cx > W) return;
           drawClip(ctx, c, track, ty, selectedClipIds.includes(c.id), c.id === hoveredClipId);
         });
     });
+    if (dragPreview) {
+      const dc   = project.clips.find(c => c.id === dragPreview.clipId);
+      const dt   = project.tracks.find(t => t.id === dragPreview.trackId);
+      const didx = project.tracks.findIndex(t => t.id === dragPreview.trackId);
+      if (dc && dt && didx >= 0) {
+        const dty = TL.rulerHeight + didx * TL.trackHeight - scrollTop;
+        const dcx = barsToPixels(dragPreview.startBar, gridWidth) - scrollLeft;
+        const dcw = barsToPixels(dc.durationBars, gridWidth);
+        if (dcx + dcw >= 0 && dcx <= W) {
+          ctx.globalAlpha = 0.82;
+          drawClip(ctx, { ...dc, startBar: dragPreview.startBar }, dt, dty, true, false);
+          ctx.globalAlpha = 1;
+        }
+      }
+    }
 
     project.markers.forEach(m => drawMarker(ctx, m, H));
     drawPlayhead(ctx, H);
     if (loopOn) drawLoop(ctx, H);
     collaborators.filter(c=>c.status==='active').forEach(c => drawCursor(ctx, c));
 
-  }, [project, currentBar, zoom, scrollLeft, scrollTop, selectedClipIds, selectedTrackId, collaborators, gridWidth, hoveredClipId, loopOn, loopRegion]);
+  }, [project, currentBar, zoom, scrollLeft, scrollTop, selectedClipIds, selectedTrackId, collaborators, gridWidth, hoveredClipId, loopOn, loopRegion, dragPreview]);
 
   const drawRuler = (ctx: CanvasRenderingContext2D, W: number) => {
     ctx.fillStyle = C.surface;
@@ -860,8 +937,8 @@ export default function CollabDAWPro() {
     if (hit) {
       const h = hit;
       e.metaKey||e.ctrlKey
-        ? setSelectedClipIds(p => p.includes(_h) ? p.filter(x=>x!==_h) : [...p,_h])
-        : !selectedClipIds.includes(_h) && setSelectedClipIds([_h]);
+        ? setSelectedClipIds(p => p.includes(h) ? p.filter(x=>x!==h) : [...p,h])
+        : !selectedClipIds.includes(h) && setSelectedClipIds([h]);
     } else {
       setSelectedClipIds([]);
     }
@@ -880,6 +957,16 @@ export default function CollabDAWPro() {
     const rect = canvas.getBoundingClientRect();
     const cx   = e.clientX - rect.left + scrollLeft;
     const cy   = e.clientY - rect.top  + scrollTop;
+    if (dragRef.current) {
+      const drag = dragRef.current;
+      const dxBars    = pixelsToBars(cx - drag.startX, gridWidth);
+      const newBar    = Math.max(0, drag.origStartBar + dxBars);
+      const trackIdx  = Math.max(0, Math.min(project.tracks.length - 1,
+        Math.floor((cy - TL.rulerHeight) / TL.trackHeight)));
+      const newTrackId = project.tracks[trackIdx]?.id ?? drag.origTrackId;
+      setDragPreview({ clipId: drag.clipId, startBar: newBar, trackId: newTrackId });
+      return;
+    }
     let hov: string|null = null;
     project.tracks.forEach((t, idx) => {
       const ty = TL.rulerHeight + idx * TL.trackHeight;
@@ -891,6 +978,40 @@ export default function CollabDAWPro() {
     setHoveredClipId(hov);
   };
 
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const cx = e.clientX - rect.left + scrollLeft;
+    const cy = e.clientY - rect.top  + scrollTop;
+    if (cy < TL.rulerHeight) return;
+    let hit: string | null = null;
+    project.tracks.forEach((t, idx) => {
+      const ty = TL.rulerHeight + idx * TL.trackHeight;
+      project.clips.filter(c => c.trackId === t.id).forEach(c => {
+        const x = barsToPixels(c.startBar, gridWidth), w = barsToPixels(c.durationBars, gridWidth);
+        if (cx >= x && cx <= x + w && cy >= ty + 6 && cy <= ty + TL.trackHeight - 6) hit = c.id;
+      });
+    });
+    if (!hit) return;
+    const clip = project.clips.find(c => c.id === hit)!;
+    dragRef.current = { clipId: hit, origStartBar: clip.startBar, origTrackId: clip.trackId, startX: cx, startY: cy };
+    setDragPreview({ clipId: hit, startBar: clip.startBar, trackId: clip.trackId });
+    e.preventDefault();
+  };
+  const handleMouseUp = (_e: React.MouseEvent<HTMLCanvasElement>) => {
+    const drag = dragRef.current;
+    if (!drag || !dragPreview) { dragRef.current = null; setDragPreview(null); return; }
+    dragRef.current = null;
+    const finalBar = Math.max(0, snapGrid ? Math.round(dragPreview.startBar) : dragPreview.startBar);
+    pushHistory({
+      ...project,
+      clips: project.clips.map(c =>
+        c.id === drag.clipId ? { ...c, startBar: finalBar, trackId: dragPreview.trackId } : c
+      ),
+    });
+    setDragPreview(null);
+  };
   const totalTH = project.tracks.length * TL.trackHeight + TL.rulerHeight;
 
   // ─── Render ───────────────────────────────────────────────────────────────────
@@ -1118,6 +1239,8 @@ export default function CollabDAWPro() {
             <AgBtn onClick={()=>setShowMixer(v=>!v)}   active={showMixer}   title="Mixer"><Sliders size={12} /> MIX</AgBtn>
             <AgBtn onClick={()=>setShowAI(v=>!v)}       active={showAI}      title="AI Panel"><Zap size={12} /> AI</AgBtn>
             <AgBtn onClick={()=>setShowActivity(v=>!v)} active={showActivity} title="Activity"><Radio size={12} /> LOG</AgBtn>
+            <AgBtn onClick={()=>setShowVST(v=>!v)}         active={showVST}         title="VST Browser"><Music size={12} /> VST</AgBtn>
+            <AgBtn onClick={()=>setShowLoopStation(v=>!v)} active={showLoopStation} title="Loop Station"><Repeat2 size={12} /> 505</AgBtn>
           </div>
 
           {/* Master vol + CPU — pushed right */}
@@ -1168,6 +1291,17 @@ export default function CollabDAWPro() {
             </div>
           </div>
         </div>
+        {/* Ticker */}
+        <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+        <div style={{ overflow:"hidden", position:"relative", background:"#080808", padding:"5px 0", flexShrink:0 }}>
+          <div style={{ display:"flex", width:"max-content", animation:"ag-scroll 28s linear infinite" }}>
+            {["R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System","R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System"].map((item, i) => (
+              <span key={i} style={{ padding:"0 18px", fontSize:9, letterSpacing:"0.2em", textTransform:"uppercase", fontFamily:"\"IBM Plex Mono\",monospace", color:"#fff", whiteSpace:"nowrap" }}>
+                {item}<span style={{ color:"#a3e635", marginLeft:8 }}>/</span>
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* ── LLPTE STATUS STRIP ──────────────────────────────────────────────── */}
         <div style={{
@@ -1204,6 +1338,42 @@ export default function CollabDAWPro() {
             <span style={{ fontSize:7, color:C.neon, fontWeight:700 }}>≥0.65</span>
           </div>
         </div>
+
+        {/* ── VST BROWSER PANEL ─────────────────────────────────────────────────────── */}
+        {showVST && (
+          <div style={{ height:340, background:C.void, borderTop:`2px solid ${C.neon}`, display:'flex', flexDirection:'column', flexShrink:0, overflow:'hidden' }}>
+            <div style={{ height:28, padding:'0 12px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between', background:C.void, flexShrink:0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ width:6, height:6, background:C.neon, boxShadow:`0 0 6px ${C.neon}` }} />
+                <span style={{ fontSize:7, letterSpacing:'.3em', textTransform:'uppercase', color:C.neon, fontFamily:FONT.mono }}>VIRTUAL VSTS</span>
+              </div>
+              <button onClick={()=>setShowVST(false)} style={{ background:'none', border:'none', cursor:'pointer', color:C.textMuted, padding:2 }}><X size={12} /></button>
+            </div>
+            <div style={{ flex:1, overflow:'hidden' }}>
+              <Suspense fallback={<div style={{ padding:16, fontSize:8, color:C.textMuted, fontFamily:FONT.mono, letterSpacing:'.2em' }}>LOADING VSTS…</div>}>
+                <VSTBrowser />
+              </Suspense>
+            </div>
+          </div>
+        )}
+
+        {/* ── LOOP STATION 505 ─────────────────────────────────────────────────────── */}
+        {showLoopStation && (
+          <div style={{ height:340, background:C.void, borderTop:`2px solid ${C.neon}`, display:'flex', flexDirection:'column', flexShrink:0, overflow:'hidden' }}>
+            <div style={{ height:28, padding:'0 12px', borderBottom:`1px solid ${C.border}`, display:'flex', alignItems:'center', justifyContent:'space-between', background:C.void, flexShrink:0 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ width:6, height:6, background:C.neon, boxShadow:`0 0 6px ${C.neon}` }} />
+                <span style={{ fontSize:7, letterSpacing:'.3em', textTransform:'uppercase', color:C.neon, fontFamily:FONT.mono }}>LOOP STATION 505</span>
+              </div>
+              <button onClick={()=>setShowLoopStation(false)} style={{ background:'none', border:'none', cursor:'pointer', color:C.textMuted, padding:2 }}><X size={12} /></button>
+            </div>
+            <div style={{ flex:1, overflow:'hidden' }}>
+              <Suspense fallback={<div style={{ padding:16, fontSize:8, color:C.textMuted, fontFamily:FONT.mono, letterSpacing:'.2em' }}>LOADING LOOP STATION…</div>}>
+                <LoopStation505 />
+              </Suspense>
+            </div>
+          </div>
+        )}
 
         {/* ── MAIN BODY ───────────────────────────────────────────────────────── */}
         <div style={{ display:'flex', flex:1, overflow:'hidden', position:'relative', zIndex:1 }}>
@@ -1322,7 +1492,10 @@ export default function CollabDAWPro() {
               <canvas
                 ref={canvasRef}
                 onClick={handleCanvasClick}
+                onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
                 onContextMenu={e=>{ e.preventDefault(); setContextMenu({x:e.clientX,y:e.clientY}); }}
                 style={{ position:'sticky', top:0, left:0, width:'100%', height:'100%', cursor:hoveredClipId?'pointer':'crosshair', display:'block' }}
               />
