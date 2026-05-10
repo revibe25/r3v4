@@ -272,7 +272,7 @@ interface DAWStore {
 }
 
 let id = 0;
-const uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++_id}`;
+const uid = (prefix = 'id') => `${prefix}_${Date.now()}_${++id}`;
 
 const DEFAULT_TRACKS: Track[] = [
   { id: 'trk_1', label: 'KICK',   type: 'audio', color: 'var(--status-warn)', gain: 0.8, pan: 0,    mute: false, solo: false, armed: false, fxChain: [], sends: [] , inputSource: null},

@@ -77,6 +77,7 @@ function useQPulse(ready: boolean) {
   useEffect(() => {
     if (!ready) return;
     const e = getLoopEngine();
+    if (!e.initialized) return;
     id.current = e.scheduleRepeat(() => { setP(true); setTimeout(() => setP(false), 80); }, '1m');
     return () => { e.clearSchedule(id.current); id.current = -1; };
   }, [ready]);
@@ -327,7 +328,7 @@ const TrackPadInner: React.FC<Props> = ({
 
   const isActive = track.state === 'playing' || track.state === 'overdubbing';
   const isRec = track.state === 'recording';
-  const isWaiting = track.state === 'waiting_record' || track.state === 'waiting_play';
+  const isWaiting = track.state === 'recording' || track.state === 'playing';
   const col = SCOL[track.state] ?? 'var(--t-b2x)';
   const wc = track.state === 'overdubbing' ? 'var(--looper-orange)' : track.color;
 
@@ -430,8 +431,8 @@ const TrackPadInner: React.FC<Props> = ({
                 fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.05em', flexShrink: 0,
               }}>×{track.overdubLayers + 1}</span>
             )}
-            {track.muted && <div style={{ width: 4, height: 4, background: 'var(--looper-orange)', boxShadow: '0 0 4px var(--looper-orange)', flexShrink: 0 }} />}
-            {track.soloed && <div style={{ width: 4, height: 4, background: 'var(--looper-acid)', boxShadow: '0 0 4px var(--looper-acid)', flexShrink: 0 }} />}
+            {track.isMuted && <div style={{ width: 4, height: 4, background: 'var(--looper-orange)', boxShadow: '0 0 4px var(--looper-orange)', flexShrink: 0 }} />}
+            {track.isSoloed && <div style={{ width: 4, height: 4, background: 'var(--looper-acid)', boxShadow: '0 0 4px var(--looper-acid)', flexShrink: 0 }} />}
             {track.cued && <div style={{ width: 4, height: 4, background: 'var(--looper-cyan)', boxShadow: '0 0 4px var(--looper-cyan)', flexShrink: 0 }} />}
           </div>
           <span style={{
@@ -521,9 +522,9 @@ const TrackPadInner: React.FC<Props> = ({
 
       {/* ── TRANSPORT ROW ─────────────────────────────────────────────────── */}
       <div style={{ padding: '3px 5px', borderBottom: '1px solid var(--t-b1)', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 2 }}>
-        <LB label="■" active={false} disabled={track.state === 'idle' || track.state === 'stopped'} onClick={() => onStop(track.id)} title="Stop" />
-        <LB label="M" active={track.muted}  ac="var(--looper-orange)" onClick={() => onMuteToggle(track.id)}  title="Mute" />
-        <LB label="S" active={track.soloed} ac="var(--looper-acid)" onClick={() => onSoloToggle(track.id)} title="Solo" />
+        <LB label="■" active={false} disabled={track.state === 'empty'} onClick={() => onStop(track.id)} title="Stop" />
+        <LB label="M" active={track.isMuted}  ac="var(--looper-orange)" onClick={() => onMuteToggle(track.id)}  title="Mute" />
+        <LB label="S" active={track.isSoloed} ac="var(--looper-acid)" onClick={() => onSoloToggle(track.id)} title="Solo" />
         <LB label="Q" active={track.cued}   ac="var(--looper-cyan)" onClick={() => onCueToggle(track.id)}  title="Cue / Headphones" />
         <LB label={ch ? '!CLR' : 'CLR'} active={ch} ac="var(--looper-red)" onMD={hCH} onMU={hCU}
           onML={() => { if (ct.current) clearTimeout(ct.current); setCH(false); }}

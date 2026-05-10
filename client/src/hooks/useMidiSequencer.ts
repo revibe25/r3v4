@@ -95,6 +95,7 @@ export function useMidiSequencer(): SequencerAPI {
           const step = (seq as unknown as { _index: number })._index ?? 0;
           useDAWStore.getState().setSequencerStep(step);
 
+          if (!Array.isArray(notesAtStep)) return;
           for (const note of (notesAtStep as unknown as MidiNote[])) {
             const freq  = Tone.Frequency(note.pitch, 'midi').toFrequency();
             const durSec = Tone.Time('16n').toSeconds() * note.duration;

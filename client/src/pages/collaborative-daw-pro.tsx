@@ -1351,7 +1351,9 @@ function CollabDAWProInner() {
             </div>
             <div style={{ flex:1, overflow:'hidden' }}>
               <Suspense fallback={<div style={{ padding:16, fontSize:8, color:C.textMuted, fontFamily:FONT.mono, letterSpacing:'.2em' }}>LOADING VSTS…</div>}>
-                <VSTBrowser />
+                <VSTBrowser 
+          onPluginSelect={() => {}}
+        />
               </Suspense>
             </div>
           </div>

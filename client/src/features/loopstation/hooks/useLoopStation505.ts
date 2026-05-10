@@ -1,7 +1,9 @@
 // @ts-nocheck
+export type { LoopTrack as ExtendedTrackState } from '../state/initialState';
 // client/src/features/loopstation/hooks/useLoopStation505.ts
 import { useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { getLoopEngine } from '../engine/loopEngine';
+import type { FXState } from '../types/loopstation.types';
 import { initialState } from '../state/initialState';
 
 type State = typeof initialState;
@@ -25,13 +27,49 @@ function reducer(state: State, action: Action): State {
 }
 
 const noop    = () => {};
-const noopNum = (_n: number) => {};
+const noop1s  = (_s: string) => {};
+const noop1n  = (_n: number) => {};
+const noop2sn = (_s: string, _n: number) => {};
+const noop2nn = (_a: number, _b: number) => {};
+const noopNum = noop1n;
+
+const DEFAULT_FX: FXState = {
+  filterFreq:      1000,
+  filterResonance: 1,
+  filterType:      'lowpass',
+  delayTime:       '8n',
+  delayFeedback:   0.3,
+  reverbDecay:     1.5,
+  reverbWet:       0,
+  chorusDepth:     0,
+  chorusRate:      1,
+  chorusWet:       0,
+  flangerDepth:    0,
+  flangerRate:     1,
+  driveAmount:     0,
+  bitDepth:        16,
+  stereoWidth:     0.5,
+  tiltEQ:          0,
+  phaserStages:    4,
+  phaserRate:      0.5,
+  phaserWet:       0,
+  granularFreeze:  false,
+  granularSize:    0.1,
+  granularDensity: 1,
+  xyX:             0.5,
+  xyY:             0.5,
+  metronomeOn:     false,
+  metronomeVol:    0.5,
+  compThreshold:   -24,
+  compRatio:       4,
+};
 
 export function useLoopStation505() {
   const [state,    dispatch]    = useReducer(reducer, initialState);
   const [isReady,  setIsReady]  = useState(false);
   const [isError,  setIsError]  = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [fxState,  setFxState]  = useState<FXState>(DEFAULT_FX);
   const engRef = useRef<ReturnType<typeof getLoopEngine> | null>(null);
 
   // ── Init engine + wire events ──────────────────────────────────────────────
@@ -46,6 +84,25 @@ export function useLoopStation505() {
       // Transport state
       eng.on?.('start', () => dispatch({ type: 'SET_PLAYING', playing: true  }));
       eng.on?.('stop',  () => dispatch({ type: 'SET_PLAYING', playing: false }));
+      // Hydrate fx state from engine snapshot (fields it exposes)
+      const snap = eng.getSnapshot?.();
+      if (snap?.fx) {
+        setFxState(prev => ({
+          ...prev,
+          filterFreq:      snap.fx.filterFreq      ?? prev.filterFreq,
+          filterType:      snap.fx.filterType      ?? prev.filterType,
+          filterResonance: snap.fx.filterRes        ?? prev.filterResonance,
+          reverbWet:       snap.fx.reverbWet        ?? prev.reverbWet,
+          reverbDecay:     snap.fx.reverbDecay      ?? prev.reverbDecay,
+          delayFeedback:   snap.fx.delayFeedback    ?? prev.delayFeedback,
+          delayTime:       snap.fx.delayTime        ?? prev.delayTime,
+          driveAmount:     snap.fx.driveAmount      ?? prev.driveAmount,
+          stereoWidth:     snap.fx.stereoWidth      ?? prev.stereoWidth,
+          phaserWet:       snap.fx.phaserWet        ?? prev.phaserWet,
+          bitDepth:        snap.fx.bitDepth         ?? prev.bitDepth,
+          granularFreeze:  snap.fx.granularFreeze   ?? prev.granularFreeze,
+        }));
+      }
       setIsReady(true);
     } catch (e) {
       setIsError(true);
@@ -131,28 +188,36 @@ export function useLoopStation505() {
     try { eng().setMasterVolume?.(v); } catch {}
   }, []);
 
+  const toggleMetronome = useCallback(() => {
+    setFxState(prev => {
+      const next = !prev.metronomeOn;
+      try { (eng() as any).setMetronome?.(next); } catch {}
+      return { ...prev, metronomeOn: next };
+    });
+  }, []);
+
   return {
     state, isReady, isError, errorMessage: errorMsg,
-    fx: null, midiSync: false, midiInputEnabled: false, midiInputs: [],
+    fx: fxState, midiSync: false, midiInputEnabled: false, midiInputs: [] as string[],
     scenes: [], activeScene: null, canUndo: false,
     // Transport
     init: noop, togglePlayback, stopPlayback, recordNextTrack: noop,
-    setBpm, tapTempo, toggleMetronome: noop,
+    setBpm, tapTempo, toggleMetronome,
     // Tracks
     pressTrack, stopTrack, clearTrack, clearAll, undo: noop,
     toggleMute, toggleSolo, toggleCue,
-    setTrackVolume, setTrackPan, setTrackEQ: noop,
-    setTrackPitchFX: noop, setTrackFineTune: noop, setTrackChorusFX: noop,
-    setTrackGateFX: noop, setTrackCompFX: noop, setTrackSatFX: noop, setTrackTrimFX: noop,
+    setTrackVolume, setTrackPan, setTrackEQ: (_s: string, _v: unknown) => {},
+    setTrackPitchFX: noop2sn, setTrackFineTune: noop2sn, setTrackChorusFX: noop2sn,
+    setTrackGateFX: noop2sn, setTrackCompFX: noop2sn, setTrackSatFX: noop2sn, setTrackTrimFX: noop2sn,
     // FX
-    setHarmonyMode: noop, setReverbSend: noopNum, setDelaySend: noopNum,
-    setChorusSend: noopNum, setMasterVolume,
-    setFilter: noop, setFilterType: noop, setDelay: noopNum,
-    setReverb: noopNum, setCompressor: noop, setXY: noop,
+    setHarmonyMode: noop1s, setReverbSend: noop2sn, setDelaySend: noop2sn,
+    setChorusSend: noop2sn, setMasterVolume,
+    setFilter: noop2nn, setFilterType: noop1s, setDelay: noop2sn,
+    setReverb: noop2nn, setCompressor: noop2nn, setXY: (_p: { x: number; y: number }) => {},
     // MIDI
-    toggleMidiInput: noop, toggleMidiClock: noop, selectMidiInputByIndex: noopNum,
+    toggleMidiInput: noop, toggleMidiClock: noop, selectMidiInputByIndex: noop1n,
     // Scenes / swing
-    saveScene: noop, recallScene: noop,
-    setSwing: noopNum, setTimeSignature: noop, setQuantMode: noop, setPlaybackMode: noop,
+    saveScene: noop1n, recallScene: noop1n,
+    setSwing: noop1n, setTimeSignature: noop1s, setQuantMode: noop1s, setPlaybackMode: noop1s,
   };
 }

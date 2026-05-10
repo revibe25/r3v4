@@ -1400,7 +1400,7 @@ const AIPanel = memo(() => {
                         store.setArrangementPredictions(suggestions.map(s => ({
                           trackId: (s.params?.trackId as string) ?? 'trk_1',
                           startBeat: (s.params?.startBeat as number) ?? 32,
-                          suggestedAction: s.type,
+                          suggestedAction: s.type as 'mute' | 'extend' | 'introduce' | 'fade' | 'break',
                           confidence: s.confidence,
                           label: s.description.slice(0, 20).toUpperCase(),
                         })));

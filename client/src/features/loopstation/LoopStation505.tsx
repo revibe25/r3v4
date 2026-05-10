@@ -1585,8 +1585,8 @@ export const LoopStation505: React.FC = () => {
                     <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                       <div style={{
                         width: 3, height: 12,
-                        background: t.state === 'idle' ? T.b2 : t.color,
-                        boxShadow: t.state !== 'idle' ? `0 0 6px ${t.color}66` : 'none', flexShrink: 0,
+                        background: t.state === 'empty' ? T.b2 : t.color,
+                        boxShadow: t.state !== 'empty' ? `0 0 6px ${t.color}66` : 'none', flexShrink: 0,
                       }} />
                       <span style={{ fontSize: 7, color: T.t4, fontFamily: 'IBM Plex Mono,monospace', width: 14, letterSpacing: '.1em' }}>T{t.index + 1}</span>
                       <div style={{ flex: 1, height: 4, background: T.bg0, position: 'relative', overflow: 'hidden' }}>
@@ -1609,8 +1609,8 @@ export const LoopStation505: React.FC = () => {
                         )}
                       </div>
                       <div style={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                        {t.muted  && <div style={{ width: 3, height: 3, background: T.orange }} />}
-                        {t.soloed && <div style={{ width: 3, height: 3, background: T.acid }} />}
+                        {t.isMuted  && <div style={{ width: 3, height: 3, background: T.orange }} />}
+                        {t.isSoloed && <div style={{ width: 3, height: 3, background: T.acid }} />}
                       </div>
                       <span style={{ fontSize: 6, color: T.t5, fontFamily: 'IBM Plex Mono,monospace', width: 24, textAlign: 'right' }}>
                         {t.loopLength ?? '—'}
