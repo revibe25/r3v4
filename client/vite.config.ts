@@ -189,7 +189,7 @@ export default defineConfig(({ mode }): UserConfig => {
       sourcemap: isProd ? 'hidden' : true,
 
       // Target modern browsers — avoids unnecessary legacy polyfills.
-      target: ['es2020', 'chrome90', 'firefox88', 'safari14'],
+      target: ['es2022', 'chrome105', 'firefox100', 'safari15.4'],
 
       // Raise the warning threshold slightly — audio apps legitimately have
       // large chunks (tone.js alone is ~300 KB gzipped).
@@ -224,6 +224,7 @@ export default defineConfig(({ mode }): UserConfig => {
     // List every dep that would otherwise trigger re-optimization mid-session.
     // Notably excludes audio libs — they load lazily and don't need pre-bundling.
     optimizeDeps: {
+      esbuildOptions: { target: 'es2022' },
       include: [
         'react',
         'react-dom',
