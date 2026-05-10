@@ -1,5 +1,5 @@
 /**
- * PricingPage.tsx — R3 v4
+ * PricingPage.tsx — R3 v4 (Refactored)
  *
  * Pure display. All state via usePricing hook.
  * All colors via tokens.ts — zero inline hex.
@@ -9,14 +9,14 @@
  * Route: <Route path="/pricing" component={PricingPage} />
  * (Injected into App.tsx via patch-app.py in this script)
  */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   Check, X, Zap, Music2, ChevronRight, Sparkles,
-  Upload, FolderOpen, Cpu, Users, Shield, Layers,
+  Upload, Cpu, Users, Shield, Layers,
   AlertCircle, Loader2,
 } from "lucide-react";
-import { COLOR, PLAN_ACCENT, PLAN_GLOW } from "./tokens";
+import { alpha, COLOR, PLAN_ACCENT, PLAN_GLOW } from "./tokens";
 import type { PlanId } from "./tokens";
 import {
   PLANS, STORAGE_ROWS, FAQ_ITEMS,
@@ -25,6 +25,11 @@ import {
 import type { Plan, BillingCycle } from "./pricing.data";
 import { usePricing } from "./usePricing";
 import type { SubscriptionTier } from '../../../../shared/subscription.types';
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const STAGGER_DELAY = 0.07;
+const FADE_DURATION = 0.45;
 
 // ─── Static lookup maps (no branches in render) ───────────────────────────────
 
@@ -41,18 +46,25 @@ const STAT_ITEMS = [
   { value: "∞",      label: "Track length",    Icon: Layers },
 ] as const;
 
-const fadeUp = (delay = 0) => ({
-  initial:    { opacity: 0, y: 20 },
-  animate:    { opacity: 1, y:  0 },
-  transition: { delay, duration: 0.45, ease: "easeOut" as const },
-});
+// ─── Animation helpers (respects reduced motion) ────────────────────────────
+
+function useFadeUp(delay = 0) {
+  const shouldReduceMotion = useReducedMotion();
+  return shouldReduceMotion
+    ? {}
+    : {
+        initial:    { opacity: 0, y: 20 },
+        animate:    { opacity: 1, y:  0 },
+        transition: { delay, duration: FADE_DURATION, ease: "easeOut" as const },
+      };
+}
 
 // ─── Background ───────────────────────────────────────────────────────────────
 
 function GridOverlay() {
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none select-none"
-         aria-hidden preserveAspectRatio="none" style={{ opacity: 0.03 }}>
+         aria-hidden="true" preserveAspectRatio="none" style={{ opacity: 0.03 }}>
       <defs>
         <pattern id="r3-grid" width="40" height="40" patternUnits="userSpaceOnUse">
           <path d="M 40 0 L 0 0 0 40" fill="none" stroke={COLOR.cyan} strokeWidth="0.5" />
@@ -64,20 +76,36 @@ function GridOverlay() {
 }
 
 function ScanLine() {
-  const r = useReducedMotion();
-  if (r) return null;
+  const shouldReduceMotion = useReducedMotion();
+  if (shouldReduceMotion) return null;
+
   return (
-    <motion.div className="absolute left-0 right-0 h-px pointer-events-none"
-      style={{ background: `linear-gradient(90deg,transparent,${COLOR.cyan},transparent)`, opacity: 0.15 }}
-      initial={{ top: "0%" }} animate={{ top: "100%" }}
-      transition={{ duration: 10, repeat: Infinity, ease: "linear" }} />
+    <motion.div 
+      className="absolute left-0 right-0 h-px pointer-events-none"
+      style={{ 
+        background: `linear-gradient(90deg,transparent,${COLOR.cyan},transparent)`, 
+        opacity: 0.15,
+        top: 0,
+      }}
+      initial={{ y: "-100vh" }} 
+      animate={{ y: "100vh" }}
+      transition={{ duration: 10, repeat: Infinity, ease: "linear" }} 
+    />
   );
 }
 
 function HeaderGlow() {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
-         style={{ background: `radial-gradient(ellipse at 50% 0%,${PLAN_GLOW.creator} 0%,transparent 65%)` }} />
+    <div 
+      className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
+      style={{ 
+        background: `radial-gradient(ellipse at 50% 0%,${PLAN_GLOW.creator} 0%,transparent 65%)`,
+        opacity: shouldReduceMotion ? 0.6 : 1,
+        transition: "opacity 0.3s ease",
+      }} 
+    />
   );
 }
 
@@ -86,31 +114,54 @@ function HeaderGlow() {
 function BillingToggle({ cycle, onToggle, onSet }: {
   cycle: BillingCycle; onToggle: () => void; onSet: (c: BillingCycle) => void;
 }) {
-  const r = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion();
   return (
     <div className="inline-flex items-center gap-3" role="group" aria-label="Billing cycle">
-      <button onClick={() => onSet("monthly")} className="text-sm font-mono transition-colors"
-        aria-pressed={cycle === "monthly"} style={{ color: cycle === "monthly" ? COLOR.textBody : COLOR.textDim }}>
+      <button 
+        onClick={() => onSet("monthly")} 
+        className="text-sm font-mono transition-colors"
+        aria-pressed={cycle === "monthly"} 
+        style={{ color: cycle === "monthly" ? COLOR.textBody : COLOR.textDim }}
+      >
         Monthly
       </button>
-      <button onClick={onToggle} className="relative w-12 h-6 rounded-full flex items-center"
+      <button 
+        onClick={onToggle} 
+        className="relative w-12 h-6 rounded-full flex items-center"
         style={{ border: `1px solid ${COLOR.borderSub}`, background: COLOR.bgElevate }}
-        aria-label={`Switch to ${cycle === "monthly" ? "annual" : "monthly"} billing`}>
-        <motion.div className="absolute w-4 h-4 rounded-full"
-          style={{ background: COLOR.cyan, boxShadow: `0 0 8px ${COLOR.cyan}99` }}
+        aria-label={`Switch to ${cycle === "monthly" ? "annual" : "monthly"} billing`}
+      >
+        <motion.div 
+          className="absolute w-4 h-4 rounded-full"
+          style={{ background: COLOR.cyan, boxShadow: `0 0 8px ${alpha(COLOR.cyan, 60)}` }}
           animate={{ left: cycle === "annual" ? "1.5rem" : "0.25rem" }}
-          transition={r ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 30 }} />
+          transition={shouldReduceMotion 
+            ? { duration: 0 } 
+            : { type: "spring", stiffness: 400, damping: 40 }
+          } 
+        />
       </button>
-      <button onClick={() => onSet("annual")} className="text-sm font-mono transition-colors"
-        aria-pressed={cycle === "annual"} style={{ color: cycle === "annual" ? COLOR.textBody : COLOR.textDim }}>
+      <button 
+        onClick={() => onSet("annual")} 
+        className="text-sm font-mono transition-colors"
+        aria-pressed={cycle === "annual"} 
+        style={{ color: cycle === "annual" ? COLOR.textBody : COLOR.textDim }}
+      >
         Annual
       </button>
       <AnimatePresence>
         {cycle === "annual" && (
           <motion.span
-            {...(r ? {} : { initial:{opacity:0,x:-8}, animate:{opacity:1,x:0}, exit:{opacity:0,x:-8} })}
+            initial={shouldReduceMotion ? {} : { opacity: 0, x: -8 }}
+            animate={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
+            exit={shouldReduceMotion ? {} : { opacity: 0, x: -8 }}
             className="text-xs font-mono px-2 py-0.5 rounded"
-            style={{ color:COLOR.cyan, border:`1px solid ${COLOR.cyan}33`, background:`${COLOR.cyan}11` }}>
+            style={{ 
+              color: COLOR.cyan, 
+              border: `1px solid ${alpha(COLOR.cyan, 20)}`, 
+              background: alpha(COLOR.cyan, 10),
+            }}
+          >
             Save ~20%
           </motion.span>
         )}
@@ -121,23 +172,33 @@ function BillingToggle({ cycle, onToggle, onSet }: {
 
 // ─── PriceDisplay ─────────────────────────────────────────────────────────────
 
-function PriceDisplay({ plan, cycle, accent }: { plan:Plan; cycle:BillingCycle; accent:string }) {
-  const price = useMemo(() => resolvePrice(plan, cycle), [plan, cycle]);
+function PriceDisplay({ plan, cycle, accent }: { plan: Plan; cycle: BillingCycle; accent: string }) {
+  const price = resolvePrice(plan, cycle);
+  const shouldReduceMotion = useReducedMotion();
 
-  if (isFree(plan)) return (
-    <div className="mb-6">
-      <span className="text-4xl font-mono" style={{ color: COLOR.textBody }}>$0</span>
-      <span className="text-sm font-mono ml-1.5" style={{ color: COLOR.textDim }}>forever</span>
-    </div>
-  );
+  if (isFree(plan)) {
+    return (
+      <div className="mb-6">
+        <span className="text-4xl font-mono" style={{ color: COLOR.textBody }}>$0</span>
+        <span className="text-sm font-mono ml-1.5" style={{ color: COLOR.textDim }}>forever</span>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6">
       <div className="flex items-end gap-0.5">
         <span className="text-sm font-mono mb-1.5" style={{ color: COLOR.textDim }}>$</span>
-        <motion.span key={price} initial={{ opacity:0, y:-6 }} animate={{ opacity:1, y:0 }}
+        <motion.span 
+          key={price} 
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: -6 }} 
+          animate={{ opacity: 1, y: 0 }}
           className="text-4xl font-mono"
-          style={{ color:COLOR.textBody, textShadow:plan.popular?`0 0 24px ${accent}55`:undefined }}>
+          style={{ 
+            color: COLOR.textBody, 
+            textShadow: plan.popular ? `0 0 24px ${alpha(accent, 30)}` : undefined 
+          }}
+        >
           {price}
         </motion.span>
         <span className="text-sm font-mono mb-1.5 ml-0.5" style={{ color: COLOR.textDim }}>/mo</span>
@@ -154,20 +215,25 @@ function PriceDisplay({ plan, cycle, accent }: { plan:Plan; cycle:BillingCycle; 
 // ─── PlanCta ──────────────────────────────────────────────────────────────────
 
 function PlanCta({ plan, accent, isPending, onCheckout }: {
-  plan:Plan; accent:string; isPending:boolean; onCheckout:(p:Plan)=>void;
+  plan: Plan; accent: string; isPending: boolean; onCheckout: (p: Plan) => void;
 }) {
-  const click = useCallback(() => { if (!isPending) onCheckout(plan); }, [isPending, onCheckout, plan]);
   return (
-    <button onClick={click} disabled={isPending} aria-busy={isPending}
+    <button 
+      onClick={() => { if (!isPending) onCheckout(plan); }} 
+      disabled={isPending} 
+      aria-busy={isPending}
       className="w-full py-2.5 px-4 rounded-lg text-sm font-mono tracking-wide transition-all
                  duration-200 mb-6 flex items-center justify-center gap-2
                  disabled:opacity-60 disabled:cursor-not-allowed group/btn"
       style={plan.popular
         ? { background: accent, color: COLOR.bgBase }
-        : { border:`1px solid ${accent}44`, color:accent, background:COLOR.bgElevate }}>
+        : { border: `1px solid ${alpha(accent, 20)}`, color: accent, background: COLOR.bgElevate }
+      }
+    >
       {isPending
         ? <Loader2 size={14} className="animate-spin" />
-        : <>{plan.cta}<ChevronRight size={14} className="transition-transform group-hover/btn:translate-x-0.5" /></>}
+        : <>{plan.cta}<ChevronRight size={14} className="transition-transform group-hover/btn:translate-x-0.5" /></>
+      }
     </button>
   );
 }
@@ -183,8 +249,10 @@ function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
       <span className="mt-0.5 shrink-0" style={{ color: cc }}>
         <Check size={12} strokeWidth={2.5} />
       </span>
-      <span className={`text-[13px] font-mono leading-snug ${!feature.included ? "line-through" : ""}`}
-            style={{ color: lc }}>
+      <span 
+        className={`text-[13px] font-mono leading-snug ${!feature.included ? "line-through" : ""}`}
+        style={{ color: lc }}
+      >
         {feature.label}
         {feature.detail && feature.included && (
           <span className="ml-1.5 text-[11px]" style={{ color: COLOR.textDim }}>— {feature.detail}</span>
@@ -197,31 +265,43 @@ function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
 // ─── PlanCard ─────────────────────────────────────────────────────────────────
 
 function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
-  plan:Plan; cycle:BillingCycle; index:number; isPending:boolean; onCheckout:(p:Plan)=>void;
+  plan: Plan; cycle: BillingCycle; index: number; isPending: boolean; onCheckout: (p: Plan) => void;
 }) {
-  const r = useReducedMotion();
+  const fadeUpProps = useFadeUp(index * STAGGER_DELAY);
   const accent = PLAN_ACCENT[plan.id];
-  const glow   = PLAN_GLOW[plan.id];
+  const glow = PLAN_GLOW[plan.id];
+
   return (
-    <motion.div {...(r ? {} : fadeUp(index * 0.07))}
+    <motion.article 
+      {...fadeUpProps}
       className="relative flex flex-col rounded-xl overflow-hidden transition-colors duration-300"
       style={{
         background:  COLOR.bgSurface,
-        border:      `1px solid ${plan.popular ? `${accent}44` : COLOR.borderSub}`,
+        border:      `1px solid ${plan.popular ? alpha(accent, 20) : COLOR.borderSub}`,
         boxShadow:   plan.popular ? `0 0 60px ${glow}` : undefined,
-      }}>
-      <div className="h-[2px] w-full shrink-0"
-           style={{ background:`linear-gradient(90deg,transparent,${accent}${plan.popular?"ff":"66"},transparent)` }} />
+      }}
+      aria-labelledby={`plan-title-${plan.id}`}
+    >
+      <div 
+        className="h-[2px] w-full shrink-0"
+        style={{ background: `linear-gradient(90deg,transparent,${plan.popular ? accent : alpha(accent, 40)},transparent)` }} 
+      />
       {plan.badge && (
-        <div className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded"
-             style={{ color:accent, border:`1px solid ${accent}44`, background:`${accent}11` }}>
+        <div 
+          className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded"
+          style={{ color: accent, border: `1px solid ${alpha(accent, 20)}`, background: alpha(accent, 10) }}
+        >
           {plan.badge}
         </div>
       )}
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-1">
           <span style={{ color: accent }}>{PLAN_ICON[plan.id]}</span>
-          <span className="text-[11px] font-mono uppercase tracking-[0.18em]" style={{ color: COLOR.textDim }}>
+          <span 
+            id={`plan-title-${plan.id}`}
+            className="text-[11px] font-mono uppercase tracking-[0.18em]" 
+            style={{ color: COLOR.textDim }}
+          >
             {plan.name}
           </span>
         </div>
@@ -235,23 +315,32 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
           {plan.features.map(f => <FeatureRow key={f.label} feature={f} />)}
         </ul>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }
 
 // ─── Stats strip ──────────────────────────────────────────────────────────────
 
 function StatsStrip() {
+  const fadeUpProps = useFadeUp(0.2);
+
   return (
-    <motion.div {...fadeUp(0.2)} className="grid grid-cols-4 rounded-xl overflow-hidden mb-14"
-      style={{ border:`1px solid ${COLOR.borderSub}`, background:COLOR.borderSub, gap:"1px" }}>
+    <motion.div 
+      {...fadeUpProps} 
+      className="grid grid-cols-4 rounded-xl overflow-hidden mb-14"
+      style={{ border: `1px solid ${COLOR.borderSub}`, background: COLOR.borderSub, gap: "1px" }}
+    >
       {STAT_ITEMS.map(({ value, label, Icon }) => (
-        <div key={label} className="flex flex-col items-center gap-1 px-6 py-4" style={{ background:COLOR.bgSurface }}>
+        <div 
+          key={label} 
+          className="flex flex-col items-center gap-1 px-6 py-4" 
+          style={{ background: COLOR.bgSurface }}
+        >
           <div className="flex items-center gap-1.5 mb-1">
-            <Icon size={12} style={{ color:COLOR.textDim }} />
-            <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color:COLOR.textDim }}>{label}</span>
+            <Icon size={12} style={{ color: COLOR.textDim }} />
+            <span className="text-[11px] font-mono uppercase tracking-wider" style={{ color: COLOR.textDim }}>{label}</span>
           </div>
-          <span className="text-xl font-mono" style={{ color:COLOR.cyan }}>{value}</span>
+          <span className="text-xl font-mono" style={{ color: COLOR.cyan }}>{value}</span>
         </div>
       ))}
     </motion.div>
@@ -261,28 +350,35 @@ function StatsStrip() {
 // ─── Storage table ────────────────────────────────────────────────────────────
 
 function StorageTable() {
+  const fadeUpProps = useFadeUp(0.35);
+
   return (
-    <motion.div {...fadeUp(0.35)} className="rounded-xl overflow-hidden mb-16"
-                style={{ border:`1px solid ${COLOR.borderSub}` }}>
-      <div className="px-8 py-5 flex items-center gap-3"
-           style={{ borderBottom:`1px solid ${COLOR.borderSub}`, background:COLOR.bgSurface }}>
-        <Upload size={14} style={{ color:COLOR.cyan }} />
-        <span className="text-[12px] font-mono uppercase tracking-[0.18em]" style={{ color:COLOR.textDim }}>
+    <motion.div 
+      {...fadeUpProps} 
+      className="rounded-xl overflow-hidden mb-16"
+      style={{ border: `1px solid ${COLOR.borderSub}` }}
+    >
+      <div 
+        className="px-8 py-5 flex items-center gap-3"
+        style={{ borderBottom: `1px solid ${COLOR.borderSub}`, background: COLOR.bgSurface }}
+      >
+        <Upload size={14} style={{ color: COLOR.cyan }} />
+        <span className="text-[12px] font-mono uppercase tracking-[0.18em]" style={{ color: COLOR.textDim }}>
           Limits & Storage
         </span>
       </div>
-      <div className="grid grid-cols-3" style={{ background:COLOR.borderSub, gap:"1px" }}>
+      <div className="grid grid-cols-3" style={{ background: COLOR.borderSub, gap: "1px" }}>
         {STORAGE_ROWS.map(row => {
           const accent = PLAN_ACCENT[row.tierKey as PlanId] ?? COLOR.textDim;
           return (
-            <div key={row.tierKey} className="px-6 py-5" style={{ background:COLOR.bgSurface }}>
-              <p className="text-[11px] font-mono uppercase tracking-wider mb-3" style={{ color:accent }}>
+            <div key={row.tierKey} className="px-6 py-5" style={{ background: COLOR.bgSurface }}>
+              <p className="text-[11px] font-mono uppercase tracking-wider mb-3" style={{ color: accent }}>
                 {row.tier}
               </p>
-              {([["Uploads",row.uploads],["Projects",row.projects],["Stems",row.stems]] as const).map(([k,v]) => (
+              {([["Uploads", row.uploads], ["Projects", row.projects], ["Stems", row.stems]] as const).map(([k, v]) => (
                 <div key={k} className="mb-2 last:mb-0">
-                  <p className="text-[10px] font-mono uppercase tracking-wider mb-0.5" style={{ color:COLOR.textGhost }}>{k}</p>
-                  <p className="text-sm font-mono" style={{ color:COLOR.textBody }}>{v}</p>
+                  <p className="text-[10px] font-mono uppercase tracking-wider mb-0.5" style={{ color: COLOR.textGhost }}>{k}</p>
+                  <p className="text-sm font-mono" style={{ color: COLOR.textBody }}>{v}</p>
                 </div>
               ))}
             </div>
@@ -297,35 +393,59 @@ function StorageTable() {
 
 function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const r = useReducedMotion();
-  const toggle = useCallback((i: number) => setOpenIndex(p => p === i ? null : i), []);
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <div className="max-w-2xl mx-auto mb-12">
-      <p className="text-[11px] font-mono uppercase tracking-[0.18em] text-center mb-6"
-         style={{ color:COLOR.textDim }}>Frequently Asked Questions</p>
+      <p 
+        className="text-[11px] font-mono uppercase tracking-[0.18em] text-center mb-6"
+        style={{ color: COLOR.textDim }}
+      >
+        Frequently Asked Questions
+      </p>
       <div className="space-y-2">
         {FAQ_ITEMS.map((item, i) => {
           const open = openIndex === i;
           return (
-            <div key={i} className="rounded-lg overflow-hidden"
-              style={{ border:`1px solid ${open?COLOR.borderMid:COLOR.borderSub}`, background:COLOR.bgSurface }}>
-              <button onClick={() => toggle(i)} aria-expanded={open}
+            <div 
+              key={i} 
+              className="rounded-lg overflow-hidden"
+              style={{ 
+                border: `1px solid ${open ? COLOR.borderMid : COLOR.borderSub}`, 
+                background: COLOR.bgSurface 
+              }}
+            >
+              <button 
+                onClick={() => setOpenIndex(p => p === i ? null : i)} 
+                aria-expanded={open}
                 className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 transition-colors"
-                style={{ background: open ? COLOR.bgElevate : undefined }}>
-                <span className="text-[13px] font-mono" style={{ color:COLOR.textBody }}>{item.q}</span>
-                <motion.span animate={{ rotate: open ? 90 : 0 }}
-                  transition={r ? {duration:0} : {duration:0.2}}
-                  className="shrink-0" style={{ color:COLOR.textDim }}>
+                style={{ background: open ? COLOR.bgElevate : undefined }}
+              >
+                <span className="text-[13px] font-mono" style={{ color: COLOR.textBody }}>{item.q}</span>
+                <motion.span 
+                  animate={{ rotate: open ? 90 : 0 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
+                  className="shrink-0" 
+                  style={{ color: COLOR.textDim }}
+                >
                   <ChevronRight size={14} />
                 </motion.span>
               </button>
               <AnimatePresence initial={false}>
                 {open && (
-                  <motion.div initial={{height:0,opacity:0}} animate={{height:"auto",opacity:1}}
-                    exit={{height:0,opacity:0}} transition={{duration:r?0:0.22,ease:"easeInOut"}}
-                    className="overflow-hidden">
-                    <div className="px-5 pb-4 pt-3" style={{ borderTop:`1px solid ${COLOR.borderSub}` }}>
-                      <p className="text-[13px] font-mono leading-relaxed" style={{ color:COLOR.textDim }}>{item.a}</p>
+                  <motion.div 
+                    key={`faq-content-${i}`}
+                    initial={{ height: 0, opacity: 0 }} 
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }} 
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div 
+                      className="px-5 pb-4 pt-3" 
+                      style={{ borderTop: `1px solid ${COLOR.borderSub}` }}
+                    >
+                      <p className="text-[13px] font-mono leading-relaxed" style={{ color: COLOR.textDim }}>{item.a}</p>
                     </div>
                   </motion.div>
                 )}
@@ -340,17 +460,38 @@ function FAQ() {
 
 // ─── Error Toast ──────────────────────────────────────────────────────────────
 
-function ErrorToast({ message, onDismiss }: { message:string; onDismiss:()=>void }) {
+function ErrorToast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  const toastRef = useRef<HTMLDivElement>(null);
+
+  // Move focus to toast when it appears
+  useEffect(() => {
+    toastRef.current?.focus();
+  }, []);
+
   return (
-    <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:16}}
-      role="alert" aria-live="assertive"
+    <motion.div 
+      ref={toastRef}
+      tabIndex={-1}
+      initial={{ opacity: 0, y: 16 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: 16 }}
+      role="alert" 
+      aria-live="assertive"
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3
-                 px-5 py-3 rounded-xl font-mono text-sm shadow-2xl"
-      style={{ background:COLOR.bgElevate, border:"1px solid #ff445544", color:"var(--status-error-soft)" }}>
+                 px-5 py-3 rounded-xl font-mono text-sm shadow-2xl outline-none"
+      style={{ 
+        background: COLOR.bgElevate, 
+        border: `1px solid ${alpha(COLOR.error, 20)}`, 
+        color: "var(--status-error-soft)" 
+      }}
+    >
       <AlertCircle size={14} />
       <span>{message}</span>
-      <button onClick={onDismiss} aria-label="Dismiss error"
-              className="ml-2 opacity-60 hover:opacity-100 transition-opacity">
+      <button 
+        onClick={onDismiss} 
+        aria-label="Dismiss error"
+        className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
+      >
         <X size={14} />
       </button>
     </motion.div>
@@ -362,31 +503,44 @@ function ErrorToast({ message, onDismiss }: { message:string; onDismiss:()=>void
 export default function PricingPage() {
   const { cycle, setCycle, toggleCycle, checkoutStatus, initiateCheckout, clearError } = usePricing();
   const pendingPlanId = checkoutStatus.type === "pending" ? checkoutStatus.planId : null;
+  const headerFadeUp = useFadeUp(0);
 
   return (
-    <div className="relative min-h-screen overflow-hidden"
-         style={{ background:COLOR.bgBase, color:COLOR.textBody }}>
+    <div 
+      className="relative min-h-screen overflow-hidden"
+      style={{ background: COLOR.bgBase, color: COLOR.textBody }}
+    >
       <GridOverlay />
       <ScanLine />
       <HeaderGlow />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
-        <motion.div {...fadeUp(0)} className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase
-                          tracking-[0.22em] px-3 py-1 rounded mb-5"
-               style={{ color:COLOR.cyan, border:`1px solid ${COLOR.cyan}22`, background:`${COLOR.cyan}08` }}>
+        <motion.div {...headerFadeUp} className="text-center mb-16">
+          <div 
+            className="inline-flex items-center gap-2 text-[11px] font-mono uppercase
+                       tracking-[0.22em] px-3 py-1 rounded mb-5"
+            style={{ 
+              color: COLOR.cyan, 
+              border: `1px solid ${alpha(COLOR.cyan, 20)}`, 
+              background: alpha(COLOR.cyan, 10),
+            }}
+          >
             <Sparkles size={10} />
             R3 v4 — Subscription
           </div>
-          <h1 className="text-5xl font-mono font-bold tracking-tight mb-4 leading-tight"
-              style={{ color:COLOR.textPrimary }}>
+          <h1 
+            className="text-5xl font-mono font-bold tracking-tight mb-4 leading-tight"
+            style={{ color: COLOR.textPrimary }}
+          >
             Build your studio.<br />
-            <span style={{ color:COLOR.cyan, textShadow:`0 0 40px ${COLOR.cyan}44` }}>
+            <span style={{ color: COLOR.cyan, textShadow: `0 0 40px ${alpha(COLOR.cyan, 20)}` }}>
               Scale when you're ready.
             </span>
           </h1>
-          <p className="text-[15px] font-mono max-w-xl mx-auto mb-8 leading-relaxed"
-             style={{ color:COLOR.textDim }}>
+          <p 
+            className="text-[15px] font-mono max-w-xl mx-auto mb-8 leading-relaxed"
+            style={{ color: COLOR.textDim }}
+          >
             Professional DJ &amp; DAW tools in the browser. No installs, no dongles.
           </p>
           <BillingToggle cycle={cycle} onToggle={toggleCycle} onSet={setCycle} />
@@ -397,15 +551,21 @@ export default function PricingPage() {
         {/* 3-column grid — matches SUBSCRIPTION_TIERS exactly */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
           {PLANS.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} cycle={cycle} index={i}
-                      isPending={pendingPlanId === plan.id} onCheckout={initiateCheckout} />
+            <PlanCard 
+              key={plan.id} 
+              plan={plan} 
+              cycle={cycle} 
+              index={i}
+              isPending={pendingPlanId === plan.id} 
+              onCheckout={initiateCheckout} 
+            />
           ))}
         </div>
 
         <StorageTable />
         <FAQ />
 
-        <p className="text-center text-[12px] font-mono" style={{ color:COLOR.textGhost }}>
+        <p className="text-center text-[12px] font-mono" style={{ color: COLOR.textGhost }}>
           14-day free trial on Creator &amp; Pro Artist&nbsp;·&nbsp;No credit card required&nbsp;·&nbsp;Cancel anytime
         </p>
       </div>

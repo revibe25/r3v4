@@ -1,3 +1,17 @@
+// ── AudioWorklet global stubs (not in standard webworker lib) ──────────────
+declare abstract class AudioWorkletProcessor {
+  readonly port: MessagePort;
+  abstract process(
+    inputs: Float32Array[][],
+    outputs: Float32Array[][],
+    parameters: Record<string, Float32Array>
+  ): boolean;
+}
+declare function registerProcessor(name: string, ctor: { new(): AudioWorkletProcessor }): void;
+declare const currentTime: number;
+declare const currentFrame: number;
+declare const sampleRate: number;
+
 // client/src/audio/engine/worklet/processor.ts
 
 class LLPTEProcessor extends AudioWorkletProcessor {

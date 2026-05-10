@@ -34,15 +34,17 @@
  *   Auth   : ProtectedRoute rehydrates JWT from localStorage via initAuth()
  *   Data   : TRPCProvider (React Query) wraps entire tree
  *   Sub    : SubscriptionProvider must be inside TRPCProvider
+ *   Tokens : injectTokenCSS() called once on mount (CSS custom properties)
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Switch, Route, Redirect } from 'wouter';
 import { TRPCProvider }          from './lib/trpc';
 import { ProtectedRoute }         from './components/ProtectedRoute';
 import { SubscriptionProvider }   from './hooks/useSubscription';
 import { ThemeProvider }          from './components/theme-provider';
 import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
+import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
 
 import LoginPage        from './pages/login';
 import PricingPage        from './pages/pricing/PricingPage';
@@ -138,6 +140,11 @@ function MultitrackViewWrapper() {
 }
 
 export default function App() {
+  // ── Inject CSS custom properties once on mount ───────────────────────────
+  useEffect(() => {
+    injectTokenCSS();
+  }, []);
+
   return (
     <TRPCProvider>
       {/*
@@ -159,7 +166,7 @@ export default function App() {
             flexDirection: 'column',
             height:        '100vh',
             overflow:      'hidden',
-            background:    'var(--t-b0x)',
+            background:    'var(--bg-base)',
           }}
         >
           {/*
@@ -222,6 +229,9 @@ export default function App() {
               </Route>
 
               <Route path="/visuals">
+                <ProtectedRoute><VisualsPage /></ProtectedRoute>
+              </Route>
+              <Route path="/visual">
                 <ProtectedRoute><VisualsPage /></ProtectedRoute>
               </Route>
 
