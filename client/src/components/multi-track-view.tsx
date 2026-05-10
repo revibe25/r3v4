@@ -132,7 +132,7 @@ const MultitrackView: React.FC<MultitrackViewProps> = ({
   //   Root cause: both computations ran unconditionally on every render.
   //   Keyed on `tracks` reference — Zustand guarantees stability for
   //   unmodified arrays.
-  const { visibleTracks, groupedTracks } = useMemo(() => {
+  const { _visibleTracks, groupedTracks } = useMemo(() => {
     const visible = tracks.filter(t => !t.hidden);
     const grouped = new Map<string, Track[]>();
     visible.forEach(track => {

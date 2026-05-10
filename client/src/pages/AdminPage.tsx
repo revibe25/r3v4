@@ -11,7 +11,6 @@
  */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '../hooks/authStore';
-import { PageNav } from '../components/page-nav';
 
 const T = {
   bg: 'var(--void)', surface: '#0d0d0d', border: '#1c1c1c',

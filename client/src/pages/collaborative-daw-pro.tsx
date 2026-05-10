@@ -3,16 +3,15 @@
 // Enhanced v2.0 — Acid Grid design system, LLPTE integration, full TypeScript
 // Route: /collab (App.tsx)
 
-import { PageNav } from '@/components/page-nav';
 import React, {
-  useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense
+  useState, useRef, useEffect, useCallback, _useMemo, memo, lazy, Suspense
 } from 'react';
 import {
   Play, Pause, Square, Plus, ZoomIn, ZoomOut, SkipBack,
-  User, Download, Upload, Settings, Save, Share2, Undo2, Redo2,
-  Grid3x3, Mic, Volume2, VolumeX, Activity, Wifi, WifiOff,
-  ChevronUp, ChevronDown, Copy, Trash2, Layers, Sliders, X,
-  AlertCircle, CheckCircle, Zap, Radio, Lock, Unlock, Music, Repeat2,
+  User, Download, Upload, _Settings, _Save, Share2, Undo2, Redo2,
+  Grid3x3, _Mic, Volume2, VolumeX, Activity, Wifi, WifiOff,
+  _ChevronUp, _ChevronDown, Copy, Trash2, _Layers, Sliders, X,
+  _AlertCircle, _CheckCircle, Zap, Radio, Lock, _Unlock, Music, Repeat2,
 } from 'lucide-react';
 
 // ── Lazy panels ───────────────────────────────────────────────────────────────────────────
@@ -281,7 +280,7 @@ const Divider = () => (
 );
 
 // VU Meter
-const VUMeter = memo(({ level, color, peaked }: { level: number; color: string; peaked: boolean }) => (
+const VUMeter = memo(({ level, color, _peaked }: { level: number; color: string; peaked: boolean }) => (
   <div style={{ display:'flex', flexDirection:'column-reverse', gap:1, height:48, width:6 }}>
     {Array.from({length:12}).map((_,i) => {
       const threshold = i / 12;
@@ -370,11 +369,11 @@ function CollabDAWProInner() {
   const [showAI, setShowAI]                         = useState(true);
   const [showVST, setShowVST]                       = useState(false);
   const [showLoopStation, setShowLoopStation]       = useState(false);
-  const [connStatus, setConnStatus]                 = useState<ConnectionStatus>('connected');
+  const [connStatus, _setConnStatus]                 = useState<ConnectionStatus>('connected');
   const [metronome, setMetronome]                   = useState(false);
   const [snapGrid, setSnapGrid]                     = useState(true);
   const [loopOn, setLoopOn]                         = useState(false);
-  const [loopRegion, setLoopRegion]                 = useState({ start:0, end:16 });
+  const [loopRegion, _setLoopRegion]                 = useState({ start:0, end:16 });
   const [masterVol, setMasterVol]                   = useState(0.82);
   const [masterMuted, setMasterMuted]               = useState(false);
   const [hoveredClipId, setHoveredClipId]           = useState<string|null>(null);
@@ -387,7 +386,7 @@ function CollabDAWProInner() {
   const [vuLevels, setVuLevels]                     = useState<Record<string,number>>({});
   const [peakedTracks, setPeakedTracks]             = useState<Set<string>>(new Set());
   const [toasts, setToasts]                         = useState<{id:number;msg:string;type:'ai'|'info'|'warn'}[]>([]);
-  const [showSettings, setShowSettings]             = useState(false);
+  const [_showSettings, _setShowSettings]             = useState(false);
   const [, _tickTs]                                  = useState(0);
 
   const canvasRef         = useRef<HTMLCanvasElement|null>(null);

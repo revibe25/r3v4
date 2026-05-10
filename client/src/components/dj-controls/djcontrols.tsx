@@ -1,4 +1,3 @@
-import { useSessionLifecycle } from "../../hooks/useSessionLifecycle";
 // @ts-nocheck
 import { useState } from 'react';
 import type { DJControlsProps } from './types';

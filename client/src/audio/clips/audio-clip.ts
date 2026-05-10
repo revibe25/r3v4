@@ -1,6 +1,6 @@
 // FILE: client/src/audio/clips/AudioClip.ts
 import * as Tone from 'tone';
-import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+import { getAudioContextSync } from '../core/audio-context';
 import type { MixerChannel } from '../mixer/mixer-channel';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

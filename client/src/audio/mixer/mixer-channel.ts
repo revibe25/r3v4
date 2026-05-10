@@ -7,9 +7,9 @@ import type { FXNodeBase } from "../fx/fx-nodebase";
 import { VSTFXNode } from "../fx/vst-fx-node";
 
 import type {
-  MixerChannelConfig,
-  EffectChain,
-  AudioEffect
+  _MixerChannelConfig,
+  _EffectChain,
+  _AudioEffect
 } from '@/types/audio';
 
 /**

@@ -103,7 +103,7 @@ function VSTMetricsRow({ vstId, metrics }: { vstId:string; metrics:PerformanceMe
   );
 }
 
-function OptimizationPanel({ monitor, vstIds, metrics }: { monitor:VSTPerformanceMonitor; vstIds:string[]; metrics:Map<string,PerformanceMetrics> }) {
+function OptimizationPanel({ monitor, vstIds, _metrics }: { monitor:VSTPerformanceMonitor; vstIds:string[]; metrics:Map<string,PerformanceMetrics> }) {
   const recs:{vstId:string;items:string[]}[]=[];
   (vstIds??[]).forEach(id=>{const items=monitor.getOptimizationRecommendations(id);if(items.length>0)recs.push({vstId:id,items});});
   if(recs.length===0) return (

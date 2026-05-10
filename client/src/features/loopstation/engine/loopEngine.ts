@@ -77,7 +77,7 @@ const HARMONY_WET: Record<HarmonyMode, number> = {
   octave: 0.5, fifth: 0.45, unison: 0.35,
 };
 
-const SYNCED_LFO_RATES = ['1m','2n','4n','8n','16n','8t','4t','1/32'] as const;
+const _SYNCED_LFO_RATES = ['1m','2n','4n','8n','16n','8t','4t','1/32'] as const;
 
 // ── Public types ──────────────────────────────────────────────────────────────
 
@@ -270,7 +270,7 @@ export type EngineEventMap = {
 type EngineListener<K extends keyof EngineEventMap> = (...args: EngineEventMap[K]) => void;
 type ToneModule = typeof ToneType;
 
-let Tone: ToneModule | null = null;
+let _Tone: ToneModule | null = null;
 
 // ── Internal Helpers ──────────────────────────────────────────────────────────
 

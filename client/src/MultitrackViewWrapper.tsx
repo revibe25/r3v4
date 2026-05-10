@@ -1,4 +1,3 @@
-import { PageNav } from '@/components/page-nav';
 import MultitrackView                          from './components/multi-track-view';
 import type { Track as ViewTrack }             from './components/multi-track-view';
 import { useDAWStore }                         from './hooks/useDAWStore';

@@ -68,7 +68,7 @@ const SLBL: Record<string, string> = {
   waiting_play:   '⟳PLY',
 };
 
-const TRACK_NAMES = ['TRACK 1', 'TRACK 2', 'TRACK 3', 'TRACK 4', 'TRACK 5'];
+const _TRACK_NAMES = ['TRACK 1', 'TRACK 2', 'TRACK 3', 'TRACK 4', 'TRACK 5'];
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 function useQPulse(ready: boolean) {
@@ -259,7 +259,7 @@ const LoopRing: React.FC<{
 const SendStrip: React.FC<{
   label: string; value: number; color: string; onChange: (v: number) => void;
 }> = ({ label, value, color, onChange }) => {
-  const w = 48;
+  const _w = 48;
   const dragging = useRef(false);
   const sx = useRef(0), sv2 = useRef(value);
   const md = (e: React.MouseEvent) => {

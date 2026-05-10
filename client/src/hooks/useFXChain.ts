@@ -87,7 +87,7 @@ export function useFXChain(
       if (connectTo) (chain as any).connect(connectTo);
     }
 
-    const unsub = (chain as any).on((payload: FXChainEventPayload) => {
+    const unsub = (chain as any).on((_payload: FXChainEventPayload) => {
       syncState();
     });
 

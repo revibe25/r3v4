@@ -64,7 +64,7 @@ const CORNER_VALUES: Record<'TL' | 'TR' | 'BL' | 'BR', XYPoint> = {
 // ── Axis Bar ──────────────────────────────────────────────────────────────────
 const AxisBar: React.FC<{
   value: number; axis: 'x' | 'y'; size: number; color: string;
-}> = ({ value, axis, size, color }) => {
+}> = ({ value, axis, _size, color }) => {
   const isX = axis === 'x';
   return (
     <div style={{

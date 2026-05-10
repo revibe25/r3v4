@@ -1,5 +1,4 @@
 // tokens.ts — Single entry point
-import { PRIMITIVE } from './primitive';
 import { SEMANTIC } from './semantic';
 import { PLAN_ACCENT, PLAN_GLOW } from './component';
 import { alpha } from './opacity';

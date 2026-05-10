@@ -3,14 +3,11 @@
 // src/components/effects-rack/effect-chain.tsx
 // ============================================================================
 
-import { ReverbEffect } from '../../audio/effects/reverb';
-import { DelayEffect } from '../../audio/effects/delay';
-import { FilterEffect } from '../../audio/effects/filter';
 import type { AnyEffectParams, EffectChainNode } from '@shared/effects.types';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
-import { X, Copy } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface EffectChainProps {
   effects: EffectChainNode[];
@@ -100,11 +97,11 @@ const EffectNode: React.FC<EffectNodeProps> = ({
 };
 
 // TODO: Implement ReverbControls, DelayControls, etc.
-const ReverbControls = ({ params, onChange }: any) => (
+const ReverbControls = ({ _params, _onChange }: any) => (
   <div className="text-xs text-muted-foreground">Reverb controls coming...</div>
 );
 
-const DelayControls = ({ params, onChange }: any) => (
+const DelayControls = ({ _params, _onChange }: any) => (
   <div className="text-xs text-muted-foreground">Delay controls coming...</div>
 );
 
@@ -183,7 +180,7 @@ interface HotCuesProps {
 
 export const HotCues: React.FC<HotCuesProps> = ({
   cues,
-  selectedCue,
+  _selectedCue,
   onCueJump,
   onCueSet,
   onCueDelete,

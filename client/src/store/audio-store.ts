@@ -11,7 +11,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import type {
   MixerChannel,
-  AudioEffect,
+  _AudioEffect,
   ProjectState,
   TransportState,
   TransportPosition
@@ -159,7 +159,7 @@ export const useAudioStore = create<AudioStore>()(
         // MIXER CHANNELS
         // ============================================
 
-        addChannel: (id: string, name?: string) => {
+        addChannel: (id: string, _name?: string) => {
           const { audioContext, channels } = get();
 
           if (!audioContext) {

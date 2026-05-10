@@ -1,7 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
 import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from './card';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from './collapsible';
 
