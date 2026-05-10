@@ -235,44 +235,6 @@ export const HeaderControls = memo(function HeaderControls({
           </div>
         </div>
 
-        {/* ── Page nav ─────────────────────────────────────────────────── */}
-        <div className="flex items-center border-r flex-shrink-0" style={{ borderColor: S.border }}>
-          {[
-            { path: '/instrument',  label: 'KEYS'   },
-            { path: '/daw',         label: 'DAW'    },
-            { path: '/mixer',       label: 'MIXER'  },
-            { path: '/multitrack',  label: 'MULTI'  },
-            { path: '/loopstation', label: 'LOOP'   },
-            { path: '/collab',      label: 'COLLAB' },
-            { path: '/vst',         label: 'VST'    },
-          ].map(({ path, label }) => {
-            const active = location === path || location.startsWith(path + '/');
-            return (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className="h-full px-3 py-2 text-[10px] uppercase transition-colors"
-                style={{
-                  fontFamily:    S.font,
-                  letterSpacing: 1.5,
-                  background:    active ? S.accent : 'transparent',
-                  color:         active ? 'var(--dj-black)' : S.textDim,
-                  borderRight:   `1px solid ${S.border}`,
-                  borderRadius:  0,
-                }}
-                onMouseEnter={e => {
-                  if (!active) (e.currentTarget as HTMLElement).style.color = S.textActive;
-                }}
-                onMouseLeave={e => {
-                  if (!active) (e.currentTarget as HTMLElement).style.color = S.textDim;
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-
         {/* ── BPM / Metronome ──────────────────────────────────────────────── */}
         <div
           className="flex items-center gap-2 px-3 py-2 border-r"

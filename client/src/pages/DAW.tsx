@@ -1768,6 +1768,17 @@ export default function DAW() {
       <SessionSummaryPanel />
       {/* Transport bar — always visible at top */}
       <TransportBar engine={engine} />
+      {/* Ticker */}
+      <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+      <div style={{ overflow:'hidden', position:'relative', background:'#080808', padding:'5px 0', flexShrink:0 }}>
+        <div style={{ display:'flex', width:'max-content', animation:'ag-scroll 28s linear infinite' }}>
+          {['R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System','R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System'].map((item, i) => (
+            <span key={i} style={{ padding:'0 18px', fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', fontFamily:'"IBM Plex Mono",monospace', color:'#fff', whiteSpace:'nowrap' }}>
+              {item}<span style={{ color:'#a3e635', marginLeft:8 }}>/</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* Toolbar row */}
       <div className="flex items-center gap-2 px-4 py-1.5 border-b border-[#1c1c1c] bg-[#0d0d0d] flex-none">

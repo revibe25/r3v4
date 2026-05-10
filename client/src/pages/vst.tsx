@@ -15,7 +15,6 @@
  */
 
 import { useState } from 'react';
-import { PageNav } from '@/components/page-nav';
 import { VSTBrowser } from '@/components/vst-browser';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 
@@ -230,7 +229,6 @@ export default function VSTPage() {
       fontFamily:    T.font,
       overflow:      'hidden',
     }}>
-      <PageNav />
 
       {/* Sub-header strip */}
       <div style={{
@@ -258,6 +256,18 @@ export default function VSTPage() {
         )}
       </div>
 
+
+      {/* Ticker */}
+      <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+      <div style={{ overflow:'hidden', position:'relative', background:'#080808', padding:'5px 0', flexShrink:0 }}>
+        <div style={{ display:'flex', width:'max-content', animation:'ag-scroll 28s linear infinite' }}>
+          {['R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System','R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System'].map((item, i) => (
+            <span key={i} style={{ padding:'0 18px', fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', fontFamily:'"IBM Plex Mono",monospace', color:'#fff', whiteSpace:'nowrap' }}>
+              {item}<span style={{ color:'#a3e635', marginLeft:8 }}>/</span>
+            </span>
+          ))}
+        </div>
+      </div>
       {/* Scrollable body */}
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px' }}>
 
@@ -266,7 +276,6 @@ export default function VSTPage() {
         <SectionHeader num="01 —" label="FX Chain Status" tag="LLPTE WIRED" />
         <FxChainStatusGrid />
 
-        <SectionHeader num="02 —" label="Plugin Browser" tag="WEB AUDIO" tagColor={T.cyan} />
         <div style={{ border: `1px solid ${T.border}`, background: T.surface }}>
           <VSTBrowser
             onPluginSelect={handlePluginSelect}

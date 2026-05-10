@@ -40,7 +40,7 @@ import { ThemeSwitcher } from '@/components/theme-switcher';
 export const NAV_HEIGHT_PX = 44;
 
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
-const NAV_HIDDEN_ON: string[] = ['/auth', '/login', '/instrument'];
+const NAV_HIDDEN_ON: string[] = ['/auth', '/login'];
 
 // ── Admin gate ────────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'earnestathepco@gmail.com';

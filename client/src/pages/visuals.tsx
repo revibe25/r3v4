@@ -22,7 +22,6 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import type { N8AOPostPass } from 'n8ao';
-import { PageNav } from '@/components/page-nav';
 import { AudioReactiveScene, N8AOBeatController } from '@/components/three/AudioReactiveScene';
 import { WaveformMesh } from '@/components/three/WaveformMesh';
 import { useLoopEngineFFTRef } from '@/hooks/use-loop-engine-fft';
@@ -337,8 +336,19 @@ export default function VisualsPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--dj-black)', color: 'var(--daw-fg)', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column' }}>
-      <PageNav />
 
+
+      {/* Ticker */}
+      <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+      <div style={{ overflow:'hidden', position:'relative', background:'#080808', padding:'5px 0', flexShrink:0 }}>
+        <div style={{ display:'flex', width:'max-content', animation:'ag-scroll 28s linear infinite' }}>
+          {['R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System','R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System'].map((item, i) => (
+            <span key={i} style={{ padding:'0 18px', fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', fontFamily:'"IBM Plex Mono",monospace', color:'#fff', whiteSpace:'nowrap' }}>
+              {item}<span style={{ color:'#a3e635', marginLeft:8 }}>/</span>
+            </span>
+          ))}
+        </div>
+      </div>
       {/* Full-screen canvas */}
       <div style={{ flex: 1, position: 'relative' }}>
         <Canvas

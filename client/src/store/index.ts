@@ -27,17 +27,17 @@
 export {
   useAudioStore,
   selectIsPlaying,
-  _selectChannelCount as selectChannelCount,
-  _selectHasSoloChannels as selectHasSoloChannels,
+  selectChannelCount as selectChannelCount,
+  selectHasSoloChannels as selectHasSoloChannels,
 } from './audio-store';
 
 // ── VST ───────────────────────────────────────────────────────────────────────
 export {
   useVSTStore,
-  _selectCPUUsage as selectCPUUsage,
-  _selectMemoryUsage as selectMemoryUsage,
-  _selectLatency as selectLatency,
-  _selectHasAlerts as selectHasAlerts,
+  selectCPUUsage as selectCPUUsage,
+  selectMemoryUsage as selectMemoryUsage,
+  selectLatency as selectLatency,
+  selectHasAlerts as selectHasAlerts,
 } from './vst-store';
 
 // ── Clips ─────────────────────────────────────────────────────────────────────

@@ -345,10 +345,10 @@ export class AudioGraph {
 let audioGraph: AudioGraph | null = null;
 
 export function getAudioGraph(): AudioGraph {
-  if (!_audioGraph || (_audioGraph as unknown as { _disposed: boolean })._disposed) {
-    _audioGraph = new AudioGraph();
+  if (!audioGraph || (audioGraph as unknown as { _disposed: boolean })._disposed) {
+    audioGraph = new AudioGraph();
   }
-  return _audioGraph;
+  return audioGraph;
 }
 
 /** Convenience re-export for code that imported the old `audioGraph` constant */

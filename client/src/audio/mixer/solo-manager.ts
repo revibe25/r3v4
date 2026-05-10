@@ -406,16 +406,16 @@ export class SoloManager {
 
 // ─── Singleton ────────────────────────────────────────────────────────────────
 
-let soloManager: SoloManager | null = null;
+let _soloManagerInstance: SoloManager | null = null;
 
 /**
  * Shared SoloManager singleton. Re-creates itself if disposed.
  */
 export function getSoloManager(): SoloManager {
-  if (!_soloManager || (_soloManager as unknown as { _disposed: boolean })._disposed) {
-    _soloManager = new SoloManager();
+  if (!_soloManagerInstance || (_soloManagerInstance as unknown as { _disposed: boolean })._disposed) {
+    _soloManagerInstance = new SoloManager();
   }
-  return _soloManager;
+  return _soloManagerInstance;
 }
 
 /** Convenience re-export for code that imported the old `soloManager` constant */
