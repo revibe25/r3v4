@@ -424,8 +424,10 @@ export const dawRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       requireTier(ctx, 'creator');
+      const t0 = Date.now();
       const { suggestions } = await runLLPTEAnalysis(input.tracks, input.bpm);
-      return { suggestions };
+      const latencyMs = Date.now() - t0;
+      return { suggestions, latencyMs };
     }),
 
   // ── ai.chat ──────────────────────────────────────────────────────────────────
