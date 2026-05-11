@@ -3,8 +3,7 @@ builder = "nixpacks"
 buildCommand = "pnpm install"
 
 [deploy]
-# Remove migration from start - we'll run it manually after app is healthy
-startCommand = "node dist/index.js"
+startCommand = "pnpm exec tsx index.ts"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
