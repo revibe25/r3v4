@@ -12,7 +12,7 @@
  *           the last line of defence. A migration is required: see
  *           migrations/0001_add_not_null_ownership.sql
  */
-
+import { serial, numeric, bigint } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import {
   pgTable, text, varchar, jsonb, integer, boolean,
@@ -252,3 +252,14 @@ export const insertProjectSchema = createInsertSchema(projects);
 export const insertSampleSchema  = createInsertSchema(samples);
 export const insertPresetSchema      = createInsertSchema(presets);
 export const insertAIDecisionSchema  = createInsertSchema(aiDecisionLog);
+
+export const sessionMetrics = pgTable("session_metrics", {
+  id:                serial("id").primaryKey(),
+  userId:            varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sessionId:         varchar("session_id").references(() => sessions.id, { onDelete: "set null" }),
+  durationSeconds:   numeric("duration_seconds", { precision: 10, scale: 1 }),
+  timeSavedSeconds:  numeric("time_saved_seconds", { precision: 10, scale: 1 }),
+  peakEnergyScore:   numeric("peak_energy_score", { precision: 6, scale: 4 }),
+  mixQualityScore:   numeric("mix_quality_score", { precision: 6, scale: 4 }),
+  createdAt:         bigint("created_at", { mode: "number" }).notNull().default(sql`EXTRACT(EPOCH FROM NOW())::BIGINT`),
+});

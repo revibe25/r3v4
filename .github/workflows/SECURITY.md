@@ -1,8 +1,20 @@
-# SECURITY.md — R3 v4 Deferred Findings Register
-<!-- Mythos audit 2026-04-22. All entries follow the five-lesson format from
-     the Mythos Security Triage skill (red.anthropic.com, April 7 2026). -->
-
+ # SECURITY.md — R3 v4 Deferred Findings Register
 ---
+**2026-05-10 — ASI/manual migration journal fix**
+
+## ASI Security Policy Attestation
+
+- Enforced at CI by `agents/verifier.js` (see Mythos-SKILL-v2.md v2.1).
+- All deferred, audit-gap, and block findings fail PRs or pushes until policy is satisfied.
+- SARIF export is available for automated dashboards.
+
+- Detected drizzle.__drizzle_migrations as empty, but schema up-to-date.
+- Seeded journal table with local _journal.json entries (7 migrations, tags and times match).
+- No destructive or speculative SQL run. All steps logged and confirmed.
+- Verified by: ./master_sync_drizzle_journal.sh (see committed script for audit trail).
+- Next migration must be handled via manual DBA/CI-admin review.
+
+--- 
 
 ## Fixed in this audit cycle (2026-04-22)
 
