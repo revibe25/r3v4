@@ -1,0 +1,12 @@
+[phases.setup]
+nixPkgs = ['nodejs_20', 'pnpm']
+
+[phases.install]
+cmds = ['pnpm install --frozen-lockfile']
+
+[phases.build]
+cmds = ['pnpm run build']
+
+[start]
+# Use compiled output, NOT raw TypeScript
+cmd = 'node dist/index.js'
