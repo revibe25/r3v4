@@ -1,0 +1,14 @@
+name: Mythos/ASI Security Enforcement
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: node agents/verifier.js
+      # (Optional) Upload SARIF report:
+      - uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: output/security-findings.sarif.json

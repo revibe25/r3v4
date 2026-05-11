@@ -1,4 +1,45 @@
 /**
+ * Generate a CSS color with alpha transparency.
+ * Supports hex (#RRGGBB / #RGB), rgb(), rgba(), CSS variables, and named colors.
+ */
+export function alpha(color: string, opacity: number): string {
+  const a = Math.max(0, Math.min(1, opacity));
+
+  // Hex: #RRGGBB or #RGB
+  if (color.startsWith("#")) {
+    const hex = color.replace("#", "");
+    let r: number, g: number, b: number;
+    if (hex.length === 6) {
+      r = parseInt(hex.slice(0, 2), 16);
+      g = parseInt(hex.slice(2, 4), 16);
+      b = parseInt(hex.slice(4, 6), 16);
+    } else if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else {
+      return color; // malformed hex — pass through
+    }
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  // rgb(r, g, b) → rgba(r, g, b, a)
+  if (color.startsWith("rgb(") && !color.startsWith("rgba(")) {
+    return color.replace("rgb(", "rgba(").replace(")", `, ${a})`);
+  }
+
+  // rgba(r, g, b, oldAlpha) → replace old alpha
+  if (color.startsWith("rgba(")) {
+    return color.replace(/,\s*[\d.]+\s*\)$/, `, ${a})`);
+  }
+
+  // CSS variables or named colors → color-mix fallback
+  return `color-mix(in srgb, ${color} ${Math.round(a * 100)}%, transparent)`;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+
+/**
  * tokens.ts — Canonical R3 v4 pricing UI token source
  *
  * Acid-lime palette aligned with instrument panel (--ag-acid: #a3e635).
@@ -9,7 +50,7 @@
 export type {
   SubscriptionTier as PlanId,
   BillingCycle,
-} from '../../../../shared/subscription.types';
+} from "../../../../shared/subscription.types";
 
 export const COLOR = {
   // ── Backgrounds — matches instrument shell exactly ──────────────────────
@@ -30,19 +71,15 @@ export const COLOR = {
   textGhost:   "var(--dj-dimmer)",
 
   // ── Lime-green accent cascade ────────────────────────────────────────────
-  // Primary:  #a3e635  — acid lime  (instrument --ag-acid)
-  // Mid:      var(--looper-lime)  — lime-500   (hover state, creator)
-  // Deep:     var(--green-400)  — green-400  (pro_artist complement)
-  // Muted:    var(--status-ok-dim)  — deep lime  (explorer/free, dim glow)
-  cyan:   "#a3e635",   // renamed token — now acid lime primary
+  cyan:   "#a3e635",              // acid lime primary
   amber:  "var(--looper-lime)",   // pro_artist accent — lime-500
-  purple: "var(--green-400)",   // creator accent — green complement
-  slate:  "var(--dj-dim)",   // explorer/free — neutral
+  purple: "var(--green-400)",     // creator accent — green complement
+  slate:  "var(--dj-dim)",        // explorer/free — neutral
 } as const;
 
 export type ColorToken = keyof typeof COLOR;
 
-import type { SubscriptionTier } from '../../../../shared/subscription.types';
+import type { SubscriptionTier } from "../../../../shared/subscription.types";
 
 /**
  * Per-tier accent colors.
