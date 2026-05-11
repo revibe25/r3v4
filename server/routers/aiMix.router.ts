@@ -1,13 +1,13 @@
 import { z } from "zod";
 import { router }             from "../trpc";
 import { protectedProcedure } from "../base-procedures";
-import { AIMixingService } from "../../services/ai-mix/src/AIMixingService";
+// AIMixingService sidecar not deployed — stub only. Active path: daw.ai.suggestions
 import {
   logAIDecision,
   updateAIDecisionOutcome,
 } from "../services/session-metrics.service";
 
-const aiService = new AIMixingService();
+const aiService = { analyze: async (_: unknown) => ({ suggestions: [] as Array<{ confidence: number; channelId: string; paramId: string; suggestedValue: number; rationale: string }> }) };
 
 // Confidence gates — CLAUDE.md LLPTE contract (PRD §8.5)
 const CONFIDENCE_AUTO_APPLY = 0.65;
