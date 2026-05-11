@@ -27,7 +27,7 @@ COPY shared/   ./shared/
 COPY packages/ ./packages/
 COPY index.ts  ./
 COPY tsconfig.json ./
-COPY drizzle.config.ts ./
+COPY server/drizzle.config.ts ./
 COPY drizzle/  ./drizzle/
 
 # ── Non-root user ─────────────────────────────────────────────────────────────
