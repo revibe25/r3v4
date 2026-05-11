@@ -1,7 +1,0 @@
-import { defineConfig } from "drizzle-kit";
-export default defineConfig({
-  dialect: "postgresql",
-  schema: "./server/db/schema.ts",
-  out: "./drizzle/migrations-skip",  // Non-existent folder = no migrations
-  dbCredentials: { url: process.env.DATABASE_URL! },
-});
