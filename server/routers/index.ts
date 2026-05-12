@@ -32,7 +32,6 @@ import { publicProc }         from '../trpc';
 import { router } from '../trpc';
 import { mixerRouter }  from './mixer.router';
 import { djRouter }     from './dj.router';
-import { aiMixRouter }  from './aiMix.router';
 import { protectedProcedure } from '../base-procedures';
 import { storage } from '../storage';
 import type { InsertSession, InsertProject, InsertPreset } from '../storage';
