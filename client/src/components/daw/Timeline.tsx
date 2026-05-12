@@ -341,7 +341,7 @@ export function Timeline() {
         <div style={{ display: "flex", gap: 2 }}>
           {(["M","S","R"] as const).map((lbl, i) => {
             const active  = i === 0 ? ch.muted : i === 1 ? ch.soloed : ch.armed;
-            const color   = i === 0 ? "#ffb300" : i === 1 ? "#00e5ff" : T.danger;
+            const color   = i === 0 ? "#ffb300" : i === 1 ? "#00e5ff" : "#ff4444";
             const onClick = i === 0
               ? () => store.toggleMute(track.id)
               : i === 1 ? () => store.toggleSolo(track.id)

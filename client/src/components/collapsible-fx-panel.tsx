@@ -34,6 +34,8 @@ interface CollapsibleFXPanelProps {
   maxHeight?: number | string;
   /** Enable independent scrollbar on this panel's content */
   scrollable?: boolean;
+  /** Optional badge label shown in header */
+  badge?: string;
 }
 
 export const CollapsibleFXPanel = ({
@@ -45,6 +47,7 @@ export const CollapsibleFXPanel = ({
   className,
   maxHeight,
   scrollable = false,
+  badge,
 }: CollapsibleFXPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const uid = useId();

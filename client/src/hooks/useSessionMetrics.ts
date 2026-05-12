@@ -6,7 +6,7 @@
  */
 import { useState, useCallback, useRef } from "react";
 import { trpc }  from "@/lib/trpc";
-import type { AutoLevelSessionStats } from "../../shared/auto-level.types";
+import type { AutoLevelSessionStats } from "../../../shared/auto-level.types";
 
 const EMPTY_STATS: AutoLevelSessionStats = {
   sessionStartedAt:             Date.now(),

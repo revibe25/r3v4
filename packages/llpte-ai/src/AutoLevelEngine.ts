@@ -144,6 +144,7 @@ export class AutoLevelEngine {
       const aIsPrimary    = trackA.rms >= trackB.rms;
       const targetTrackId = aIsPrimary ? idB : idA;
 
+      const SUGGESTION_THRESHOLD = 0.40;
       const eq: EQSuggestion = {
         trackId:    targetTrackId,
         band:       worstBand.eqBand,
@@ -152,7 +153,6 @@ export class AutoLevelEngine {
         q:          1.2,
         reason:     `Cut ${centerHz.toFixed(0)} Hz on ${targetTrackId} to reduce masking`,
         confidence: 0.65,
-        const SUGGESTION_THRESHOLD = 0.40;
       };
 
       const report: SpectralMaskingReport = {

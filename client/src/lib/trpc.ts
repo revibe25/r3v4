@@ -53,7 +53,7 @@ export const queryClient = new QueryClient({
 
 function getAuthHeaders(): Record<string, string> {
   // [wire§8] removed — auth via httpOnly cookie
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return {};
 }
 
 // ── API base URL ──────────────────────────────────────────────────────────────
@@ -75,7 +75,6 @@ export const trpcVanilla = createTRPCProxyClient<AppRouter>({
     }),
     httpBatchLink({
       url: API_URL,
-      credentials: 'include',
   headers: getAuthHeaders,
     }),
   ],
@@ -98,8 +97,7 @@ export function TRPCProvider({ children }: TRPCProviderProps) {
         }),
         httpBatchLink({
           url: API_URL,
-          credentials: 'include',
-  headers: getAuthHeaders,
+      headers: getAuthHeaders,
           // Batch window: up to 10ms to collect concurrent requests
           maxURLLength: 2083,
         }),
