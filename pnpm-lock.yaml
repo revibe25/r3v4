@@ -40,7 +40,7 @@ importers:
         specifier: ^17.4.2
         version: 17.4.2
       drizzle-orm:
-        specifier: ^0.45.2
+        specifier: '>=0.45.2'
         version: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)(postgres@3.4.9)
       drizzle-zod:
         specifier: ^0.8.3
@@ -137,7 +137,7 @@ importers:
         specifier: ^0.31.10
         version: 0.31.10
       esbuild:
-        specifier: ^0.28.0
+        specifier: '>=0.25.0'
         version: 0.28.0
       nanoid:
         specifier: ^5.1.11
