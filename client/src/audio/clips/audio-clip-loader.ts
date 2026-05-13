@@ -1,5 +1,5 @@
 // FILE: client/src/audio/clips/AudioClipLoader.ts
-import { getAudioContextSync } from '../core/audio-context';
+import { getAudioContext, getAudioContextSync } from '../core/audio-context';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

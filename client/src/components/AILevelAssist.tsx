@@ -18,7 +18,7 @@
 // Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
 // ─────────────────────────────────────────────────────────────────────────────
 
-import React, { memo, useMemo } from 'react';
+import React, { useCallback, memo, useMemo } from 'react';
 import type { TrackId, TrackAILevelState, EQSuggestion } from '../../../shared/auto-level.types';
 import type { PipelineNodeState } from '../../../packages/llpte-core/src/AutoLevelPipeline';
 
@@ -390,7 +390,7 @@ export const AILevelAssist = memo(function AILevelAssist({
   onReject,
   nodeState,
   trackOrder,
-  _compact = false,
+  compact = false,
 }: AILevelAssistProps) {
   const orderedTracks = useMemo(() => {
     const ids = trackOrder ?? Array.from(trackStates.keys());

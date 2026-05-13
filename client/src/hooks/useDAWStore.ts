@@ -306,7 +306,7 @@ const DEFAULT_PATTERN: MidiPattern = {
 };
 
 export const useDAWStore = create<DAWStore>()(
-  subscribeWithSelector((set, _get) => ({
+  subscribeWithSelector((set, get) => ({
     // Transport
     playing: false,
     recording: false,

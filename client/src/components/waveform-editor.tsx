@@ -8,10 +8,10 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-  ZoomIn, ZoomOut, Scissors, _Volume2, _Eye, _EyeOff, Copy, Trash2,
-  Play, Pause, SkipBack, SkipForward, Undo2, Redo2, _Mic, _MicOff,
+  ZoomIn, ZoomOut, Scissors, Volume2, Eye, EyeOff, Copy, Trash2,
+  Play, Pause, SkipBack, SkipForward, Undo2, Redo2, Mic, MicOff,
   Lock, Unlock, Magnet, Grid3X3, Layers, ChevronDown, ChevronRight,
-  _Headphones, Music, _Sliders, Gauge, ArrowLeftRight
+  Headphones, Music, Sliders, Gauge, ArrowLeftRight
 } from 'lucide-react';
 import { useTransportState } from '@/hooks/use-transport-state';
 
@@ -93,7 +93,7 @@ interface Track {
   locked: boolean;
 }
 
-interface _MultitrackState {
+interface MultitrackState {
   tracks: Track[];
   updateTrack: (id: string, data: Partial<Track>) => void;
   addTrack: () => void;
@@ -284,7 +284,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   // ========================================================================
 
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [scrollOffset, _setScrollOffset] = useState(0);
+  const [scrollOffset, setScrollOffset] = useState(0);
   const [selection, setSelection] = useState<SelectionRegion>({ start: 0, end: 0, active: false });
   const [activeTool, setActiveTool] = useState<EditTool>('select');
   const [snapMode, setSnapMode] = useState<SnapMode>('off');
@@ -293,8 +293,8 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   const [showMiniMap, setShowMiniMap] = useState(true);
   const [showSpectrum, setShowSpectrum] = useState(false);
   const [loopEnabled, setLoopEnabled] = useState(false);
-  const [loopStart, _setLoopStart] = useState(0);
-  const [loopEnd, _setLoopEnd] = useState(100);
+  const [loopStart, setLoopStart] = useState(0);
+  const [loopEnd, setLoopEnd] = useState(100);
   const [markers, setMarkers] = useState<Marker[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -331,7 +331,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       setHistoryIndex(prev => prev - 1);
-      const _entry = history[historyIndex - 1];
+      const entry = history[historyIndex - 1];
       // Apply undo logic based on entry.type
     }
   }, [historyIndex, history]);
@@ -339,7 +339,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
       setHistoryIndex(prev => prev + 1);
-      const _entry = history[historyIndex + 1];
+      const entry = history[historyIndex + 1];
       // Apply redo logic
     }
   }, [historyIndex, history]);

@@ -18,7 +18,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import type { BillingCycle, Plan } from "./pricing.data";
-import { isFree } from "./pricing.data";
+import { resolvePrice, isFree } from "./pricing.data";
 import type { SubscriptionTier } from '../../../../shared/subscription.types';
 import { trpc } from "../../lib/trpc";
 

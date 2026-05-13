@@ -3,10 +3,10 @@
  * Uses import.meta.env instead of process.env
  */
 
-const _API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
-const _REQUEST_TIMEOUT = parseInt(import.meta.env.VITE_AUTH_TIMEOUT || '30000', 10);
+const REQUEST_TIMEOUT = parseInt(import.meta.env.VITE_AUTH_TIMEOUT || '30000', 10);
 
 // Type definitions
 export interface LoginCredentials {
@@ -122,7 +122,7 @@ export function getStoredUser(): User | null {
       return user;
     }
     return null;
-  } catch (_e) {
+  } catch (e) {
     console.error('Failed to parse stored user');
     sessionStorage.removeItem(USER_KEY);
     localStorage.removeItem(USER_KEY);

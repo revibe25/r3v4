@@ -41,7 +41,7 @@ export function useDAWEngine(): EngineAPI {
   const tapTimesRef   = useRef<number[]>([]);
   const frameRef      = useRef<number>(0);
 
-  const _store = useDAWStore;
+  const store = useDAWStore;
 
   // ── Gesture gate: resume AudioContext on first user interaction ─────────
   // Tone.js creates its AudioContext on import — browsers block it until a

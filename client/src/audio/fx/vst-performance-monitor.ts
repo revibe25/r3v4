@@ -4,12 +4,12 @@ import type {
   PerformanceMonitor,
   PerformanceSnapshot} from '@/types/audio';
 import {
-  _CPUMetrics,
-  _MemoryMetrics,
-  _LatencyMetrics,
-  _EffectPerformance,
-  _ChannelPerformance,
-  _EffectType
+  CPUMetrics,
+  MemoryMetrics,
+  LatencyMetrics,
+  EffectPerformance,
+  ChannelPerformance,
+  EffectType
 } from '@/types/audio';
 
 export interface PerformanceMetrics {

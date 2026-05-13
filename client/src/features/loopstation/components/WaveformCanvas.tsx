@@ -56,7 +56,7 @@ interface WaveformCanvasProps {
 }
 
 // ── Hex → RGB ──────────────────────────────────────────────────────────────────
-function _hr(hex: string): [number, number, number] {
+function hr(hex: string): [number, number, number] {
   return [
     parseInt(hex.slice(1, 3), 16),
     parseInt(hex.slice(3, 5), 16),
@@ -192,7 +192,7 @@ function drawSpectrum(
   ctx: CanvasRenderingContext2D,
   data: Float32Array,
   w: number, h: number,
-  _color: string,
+  color: string,
 ): void {
   const bins = Math.min(data.length, Math.min(256, w));
   const bw   = w / bins;
@@ -254,7 +254,7 @@ function drawDots(
     const r    = norm * 5 + 0.4;
 
     // Colour by amplitude: low = color, high = white
-    const _brightness = 0.4 + norm * 0.6;
+    const brightness = 0.4 + norm * 0.6;
     ctx.fillStyle = norm > 0.6
       ? `rgba(255,255,255,${norm * 0.8})`
       : color + Math.round(norm * 180 + 60).toString(16).padStart(2, '0');
@@ -335,14 +335,14 @@ function drawLissajous(
 
 // ── MODE: WATERFALL (scrolling spectrogram) ───────────────────────────────────
 // Maintains an offscreen buffer that scrolls left each frame
-let _waterfallBuffer: ImageData | null = null;
+let waterfallBuffer: ImageData | null = null;
 let waterfallCanvas: HTMLCanvasElement | null = null;
 
 function drawWaterfall(
   ctx: CanvasRenderingContext2D,
   data: Float32Array,
   w: number, h: number,
-  _color: string,
+  color: string,
 ): void {
   // Lazy-init offscreen buffer
   if (!waterfallCanvas || waterfallCanvas.width !== w || waterfallCanvas.height !== h) {

@@ -35,7 +35,7 @@ interface Props {
 const TIER_ORDER = { explorer: 0, creator: 1, pro_artist: 2 } as const;
 
 export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
-  const { loading, _error } = useAuthStore();
+  const { loading, error } = useAuthStore();
   const isAuthed = useAuthStore(selectIsAuthed);
   const tier     = useAuthStore(s => s.user?.tier ?? 'explorer');
   const initAuth = useAuthStore(s => s.initAuth);

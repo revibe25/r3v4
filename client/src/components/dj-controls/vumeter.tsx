@@ -6,7 +6,7 @@ interface VUMeterProps {
   label: string;
 }
 
-export function VUMeter({ value, _color, label }: VUMeterProps) {
+export function VUMeter({ value, color, label }: VUMeterProps) {
   const segs   = 10;
   const active = Math.floor(value * segs);
 

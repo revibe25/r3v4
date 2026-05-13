@@ -26,11 +26,11 @@ const TIER_COLORS: Record<SubscriptionTier, string> = {
 export function UpgradePrompt({
   gateError,
   requiredTier: requiredTierProp,
-  _feature,
+  feature,
   compact = false,
   onDismiss,
 }: UpgradePromptProps) {
-  const { startCheckout, tier: _currentTier } = useSubscription();
+  const { startCheckout, tier: currentTier } = useSubscription();
   const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
   const [loading, setLoading] = useState(false);
 

@@ -7,7 +7,7 @@
  */
 
 import type {
-  _AudioEffect,
+  AudioEffect,
   EffectState,
   MixerChannelState,
   ProjectState

@@ -1,5 +1,6 @@
 // DJ Beat Sync and Grid Detection
 import type { BeatSyncConfig, BeatGrid, BeatGridMarker} from '@shared/dj.types';
+import { DJ_CONSTRAINTS } from '@shared/dj.types';
 
 export class BeatSync {
   private masterBpm: number;

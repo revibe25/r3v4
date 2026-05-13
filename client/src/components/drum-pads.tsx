@@ -27,7 +27,7 @@ import {
   Save,
   Activity,
   Zap,
-  _Layers,
+  Layers,
   Music,
   Mic,
   Radio,
@@ -58,7 +58,7 @@ interface DrumPadsProps {
 const ANIMATION_DURATION = 120;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const TOUCH_VELOCITY_MULTIPLIER = 1.2;
-const _DOUBLE_TAP_THRESHOLD = 300;
+const DOUBLE_TAP_THRESHOLD = 300;
 
 // ── Step Sequencer ─────────────────────────────────────────────────────────────
 const SEQ_STEPS = 16;
@@ -2257,7 +2257,7 @@ export function DrumPads({
               {Array.from({ length: 4 }).map((_, rowOffset) => {
                 const padIdx = seqPadOffset + rowOffset;
                 if (padIdx >= pads.length) return null;
-                const _pad = pads[padIdx];
+                const pad = pads[padIdx];
                 const row = patterns[activePatternSlot][padIdx] ?? Array(SEQ_STEPS).fill(0);
                 const cat = PAD_CATEGORIES[padIdx];
                 return (

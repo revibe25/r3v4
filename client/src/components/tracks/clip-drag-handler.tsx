@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 // Constants
 const PIXELS_PER_SECOND = 100;

@@ -25,6 +25,7 @@
  * MIDI sequencer is driven by useMidiSequencer.
  */
 
+import { PageNav } from '@/components/page-nav';
 import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
 } from 'react';
@@ -35,9 +36,12 @@ import { useDAWEngine }     from '../hooks/useDAWEngine';
 import { useCollabSocket }  from '../hooks/useCollabSocket';
 import { useMidiSequencer } from '../hooks/useMidiSequencer';
 import type {
-  Track, TrackRegion, FXSlot, _MidiPattern, AISuggestion, _AIChatMessage,
-  _CollabUser,
+  Track, TrackRegion, FXSlot, MidiPattern, AISuggestion, AIChatMessage,
+  CollabUser,
 } from '../hooks/useDAWStore';
+import { useLoopEngineFFTRef }   from '../hooks/useLoopEngineFFTRef';
+import { AudioReactiveScene }    from '../components/daw/AudioReactiveScene';
+import { WaveformMesh }          from '../components/daw/WaveformMesh';
 import { SessionChip }           from '../components/session-summary/SessionChip';
 import { SessionSummaryPanel }   from '../components/session-summary/SessionSummaryPanel';
 
@@ -203,7 +207,7 @@ const TransportBar = memo(({ engine }: { engine: ReturnType<typeof useDAWEngine>
   const {
     playing, recording, bpm, position, timeSignature, loopEnabled,
     metronomeEnabled, masterGain, syncStatus, projectName, collabConnected,
-    _setPlaying, _setRecording, setBpm, setLoopEnabled, setMetronome,
+    setPlaying, setRecording, setBpm, setLoopEnabled, setMetronome,
     setMasterGain, setProjectName, setTimeSignature,
   } = useDAWStore();
 
@@ -1104,7 +1108,7 @@ MixerChannel.displayName = 'MixerChannel';
 const FX_TYPES = ['eq','compressor','reverb','delay','filter','distortion'] as const;
 
 const FXRackInline = memo(({ trackId }: { trackId: string }) => {
-  const { tracks, _updateFXSlot, toggleFXSlot } = useDAWStore();
+  const { tracks, updateFXSlot, toggleFXSlot } = useDAWStore();
   const track = tracks.find(t => t.id === trackId);
   if (!track) return null;
 
@@ -1166,7 +1170,7 @@ const AIPanel = memo(() => {
   } = useDAWStore();
 
   const [chatInput, setChatInput] = useState('');
-  const [_aiError,   setAiError]   = useState<string | null>(null);
+  const [aiError,   setAiError]   = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1183,7 +1187,7 @@ const AIPanel = memo(() => {
     setAiError(null);
 
     try {
-      const { _useCloudSync } = await import('../hooks/useCloudSync');
+      const { useCloudSync } = await import('../hooks/useCloudSync');
       // NOTE: useCloudSync is a hook — we access it via dynamic import and
       // call the chatWithCoProd function directly on the module-level instance.
       // The actual hook instance is managed in useCloudSync.ts.
@@ -1862,7 +1866,7 @@ export default function DAW() {
 }
 
 const StatusBar = memo(() => {
-  const { playing, recording, collabConnected, collabUsers, _syncStatus, bpm, timeSignature } = useDAWStore();
+  const { playing, recording, collabConnected, collabUsers, syncStatus, bpm, timeSignature } = useDAWStore();
   return (
     <>
       <div className="flex items-center gap-1.5">
