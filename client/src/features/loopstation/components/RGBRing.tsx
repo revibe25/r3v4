@@ -14,6 +14,7 @@ interface Props {
 
 const CFG: Record<TrackState, { op: number; bl: number; spin: number; pulseSpeed?: number }> = {
   idle:           { op: 0.05, bl: 2,  spin: 0 },
+  empty:          { op: 0.05, bl: 2,  spin: 0 },  // alias for idle
   stopped:        { op: 0.08, bl: 2,  spin: 0 },
   recording:      { op: 0.92, bl: 9,  spin: 0, pulseSpeed: 0.6 },
   overdubbing:    { op: 0.78, bl: 6,  spin: 3, pulseSpeed: 0.35 },
@@ -24,6 +25,7 @@ const CFG: Record<TrackState, { op: number; bl: number; spin: number; pulseSpeed
 
 const GRAD: Record<TrackState, string> = {
   idle:           'conic-gradient(var(--t-b1), var(--panel), var(--t-b1))',
+  empty:          'conic-gradient(var(--t-b1), var(--panel), var(--t-b1))',  // alias for idle
   stopped:        'conic-gradient(var(--panel-deep), var(--t-b3), var(--panel-deep))',
   recording:      'conic-gradient(var(--looper-red), var(--status-error), #990000, var(--status-error), var(--looper-red))',
   overdubbing:    'conic-gradient(var(--looper-orange), #ea4500, #ff8c00, var(--looper-orange))',

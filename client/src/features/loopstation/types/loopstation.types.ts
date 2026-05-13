@@ -2,6 +2,7 @@
 
 export type TrackState =
   | 'idle'
+  | 'empty'           // alias for idle — used by Zustand store
   | 'recording'
   | 'overdubbing'
   | 'playing'
