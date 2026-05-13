@@ -75,6 +75,7 @@ export const COLOR = {
   amber:  "var(--looper-lime)",   // pro_artist accent — lime-500
   purple: "var(--green-400)",     // creator accent — green complement
   slate:  "var(--dj-dim)",        // explorer/free — neutral
+  error:  "#ff4455",              // error / destructive accent (red-400)
 } as const;
 
 export type ColorToken = keyof typeof COLOR;

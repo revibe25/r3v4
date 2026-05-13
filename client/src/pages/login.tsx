@@ -191,7 +191,7 @@ function PulseWaveCanvas() {
       if (canvas.width !== w)  canvas.width  = w;
       if (canvas.height !== h) canvas.height = h;
     };
-    let resizeTimer: ReturnType<typeof setTimeout> | undefined;
+    let resizeTimer: number | undefined;  // window.setTimeout returns number; @types/node was hijacking ReturnType<>
     const onResize = () => {
       clearTimeout(resizeTimer);
       resizeTimer = window.setTimeout(resize, 80);
