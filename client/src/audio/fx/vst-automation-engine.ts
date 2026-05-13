@@ -5,9 +5,9 @@ import type {
   AutomationLane as IAutomationLane,
   AutomationPoint} from '@/types/audio';
 import {
-  _AutomationTarget,
-  _AutomationLaneState,
-  _AutomationEngineState,
+  AutomationTarget,
+  AutomationLaneState,
+  AutomationEngineState,
   AutomationCurve
 } from '@/types/audio';
 

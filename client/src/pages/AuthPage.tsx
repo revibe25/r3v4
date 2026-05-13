@@ -12,7 +12,7 @@
  * On success the JWT is stored by authStore and ProtectedRoute unblocks.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { useAuthStore, selectIsAuthed } from '../hooks/authStore';
 

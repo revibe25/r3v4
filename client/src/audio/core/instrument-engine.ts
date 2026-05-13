@@ -279,7 +279,7 @@ class AudioEngine {
       try {
         lru.source.stop();
         lru.source.disconnect();
-      } catch (_e) {
+      } catch (e) {
         // Ignore errors if already stopped
       }
       lru.source = null;
@@ -711,7 +711,7 @@ class AudioEngine {
         try {
           voice.source.stop();
           voice.source.disconnect();
-        } catch (_e) {
+        } catch (e) {
           // Ignore
         }
       }

@@ -178,7 +178,7 @@ export class VSTProjectSerializer {
           const json = e.target?.result as string;
           const data = JSON.parse(json) as SerializedVSTChain;
           resolve(data);
-        } catch (_error) {
+        } catch (error) {
           reject(new Error('Invalid project file'));
         }
       };

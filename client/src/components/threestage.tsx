@@ -5,8 +5,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // FILE: client/src/components/ThreeStage.tsx
 import React, { useRef, memo } from 'react';
-import { AudioReactiveScene } from './three/AudioReactiveScene';
+import { AudioReactiveScene, N8AOBeatController } from './three/AudioReactiveScene';
 import { WaveformMesh } from './three/WaveformMesh';
+import { useLoopEngineFFTRef } from '../hooks/use-loop-engine-fft';
 import * as THREE from 'three';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';

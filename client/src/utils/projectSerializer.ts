@@ -9,10 +9,10 @@
 
 import type {
   ProjectState,
-  _ProjectMetadata,
-  _EffectChainState,
-  _SidechainRouterState,
-  _AutomationEngineState
+  ProjectMetadata,
+  EffectChainState,
+  SidechainRouterState,
+  AutomationEngineState
 } from '@/types/audio';
 
 // ============================================

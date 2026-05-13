@@ -149,10 +149,10 @@ export class AudioEngine {
     if (!this.context) return;
     const now = this.context.currentTime;
     const bpm = (transportEngine as any).state.bpm || 120;
-    const _secondsPerBeat = 60 / bpm;
+    const secondsPerBeat = 60 / bpm;
 
     // --- Gather all track onsets first for cross-track alignment ---
-    const _trackOnsets: Map<string, { kick: boolean; snare: boolean; hihat: boolean }> = new Map();
+    const trackOnsets: Map<string, { kick: boolean; snare: boolean; hihat: boolean }> = new Map();
 
     for (const [trackId, state] of this.trackStates.entries()) {
       const analyser = this.analyserNodes.get(trackId);

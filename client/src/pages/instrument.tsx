@@ -23,6 +23,7 @@ import {
 import { Link } from 'wouter';
 import { MicrophoneInput } from '@/components/microphone-input';
 import { useAudioEngine } from '@/hooks/use-audio-engine';
+import { useTheme } from "@/components/theme-provider";
 import { DrumPads } from '@/components/drum-pads';
 import { PianoKeys } from '@/components/piano-keys';
 import { FXPanel } from '@/components/fx-panel';
@@ -1293,7 +1294,7 @@ export default function InstrumentPage({
     }
   }, [exportSession, toast]);
 
-  const _handleLoad = useCallback(async (file: File) => {
+  const handleLoad = useCallback(async (file: File) => {
     try {
       setIsLoading(true);
       const text = await file.text();

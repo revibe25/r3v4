@@ -5,7 +5,7 @@ import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, ArrowRight, Activity, X } from 'lucide-react';
 import { VSTFXNode } from '@/audio/fx/vst-fx-node';
-import type { MixerChannel } from '@/types/audio';
+import type { MixerChannel, SidechainConfig } from '@/types/audio';
 import type { SidechainRouter } from '@/audio/fx/vst-sidechain';
 
 interface SidechainUIProps { router: SidechainRouter; channels: MixerChannel[]; onUpdate: () => void; }

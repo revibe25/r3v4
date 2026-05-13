@@ -12,7 +12,7 @@
 //   5. Render <TimeSavingsPanel> in your session footer
 // ─────────────────────────────────────────────────────────────
 
-import React, { useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useAutoLeveling } from '../hooks/useAutoLeveling';
 import { AILevelAssist } from './AILevelAssist';
 import { TimeSavingsPanel } from './TimeSavingsPanel';

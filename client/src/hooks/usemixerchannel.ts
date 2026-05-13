@@ -112,7 +112,7 @@ export function useMixerChannel(
       if (autoConnect && destination) {
         try {
           channel.disconnect();
-        } catch (_error) {
+        } catch (error) {
           // Ignore disconnection errors
         }
       }
@@ -251,7 +251,7 @@ export function useMixerChannel(
  */
 export function useCreateMixerChannel(
   config: MixerChannelConfig,
-  _audioContext: AudioContext
+  audioContext: AudioContext
 ): MixerChannel | null {
   const [channel, setChannel] = useState<MixerChannel | null>(null);
 

@@ -73,11 +73,11 @@ function getToken(): string | undefined {
 
 // ── Local snapshot fallback ───────────────────────────────────────────────────
 
-const _LS_KEY = 'r3v4_project_snapshot';
+const LS_KEY = 'r3v4_project_snapshot';
 
 function saveLocally(): void {
   const s = useDAWStore.getState();
-  const _snapshot = {
+  const snapshot = {
     bpm: s.bpm, timeSignature: s.timeSignature, masterGain: s.masterGain,
     tracks: s.tracks, regions: s.regions, midiPatterns: s.midiPatterns,
     loopEnabled: s.loopEnabled, loopStart: s.loopStart, loopEnd: s.loopEnd,

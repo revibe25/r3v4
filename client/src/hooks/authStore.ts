@@ -150,7 +150,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         stored,
       );
       set({ token: stored, user, loading: false });
-    } catch (_err) {
+    } catch (err) {
       // Token expired or invalid — clear silently
       // [wire§8] removed — auth via httpOnly cookie
       set({ token: null, user: null, loading: false });

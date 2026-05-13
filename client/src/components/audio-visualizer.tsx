@@ -4,7 +4,7 @@
 // Exempted: p_final_patch remediation pass.
 // ─────────────────────────────────────────────────────────────────────────
 // @ts-nocheck
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export type VisualizationMode = 'bars' | 'wave' | 'circular' | 'particles' | 'oscilloscope' | 'spectrogram' | 'terrain' | 'galaxy' | 'dna' | 'flame' | 'matrix' | 'aurora';
@@ -151,7 +151,7 @@ export function AudioVisualizer({
   width: propWidth,
   height: propHeight,
   className = '',
-  _showControls = true,
+  showControls = true,
   onVisualizationModeChange,
 }: AudioVisualizerProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -277,7 +277,7 @@ export function AudioVisualizer({
         const val = (data[idx] / 255) * sensitivity;
         const barH = val * h * 0.9;
         const x = i * (barW + gap);
-        const _ratio = i / count;
+        const ratio = i / count;
 
         // Gradient bar
         const grad = ctx.createLinearGradient(x, h, x, h - barH);
@@ -915,7 +915,7 @@ export function AudioVisualizer({
 
   // ── ACID TECHNO DESIGN TOKENS ──────────────────────────────────────────────
   const ACID = "#a3e635";
-  const _ACID_DIM = "#a3e63533";
+  const ACID_DIM = "#a3e63533";
   const ACID_BORDER = "#a3e63566";
   const BLACK = "var(--dj-black)";
   const SURFACE = "var(--dj-surface)";

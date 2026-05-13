@@ -106,7 +106,7 @@ export class VSTScanner {
   /**
    * Get list of plugin paths (mock - replace with actual FS scan)
    */
-  private static async getPluginPaths(_directoryPath: string): Promise<string[]> {
+  private static async getPluginPaths(directoryPath: string): Promise<string[]> {
     // In production, use File System Access API
     // For now, return mock paths
     return [

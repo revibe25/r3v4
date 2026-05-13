@@ -12,7 +12,7 @@
 //   - Animated counters for live demo
 // ─────────────────────────────────────────────────────────────
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { AutoLevelSessionStats } from '../../../shared/auto-level.types';
 
 interface TimeSavingsPanelProps {
