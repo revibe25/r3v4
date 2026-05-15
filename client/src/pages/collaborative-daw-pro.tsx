@@ -119,7 +119,7 @@ const C = {
   neonDim:       'rgba(163,230,53,0.08)',
   neonDim2:      'rgba(163,230,53,0.12)',
   acid2:         'var(--looper-lime)',
-  cyan:          '#00d4ff',             // PRD §3 — active state cyan
+  cyan:          '#00F5FF',             // PRD §3 — active state cyan
   magenta:       '#ff3b3b',
   yellow:        '#ffcc00',
   purple:        'var(--accent-purple)',
@@ -127,7 +127,7 @@ const C = {
   textMuted:     '#555555',
   textDim:       'var(--dj-dimmer)',
   tracks: [
-    '#ff3b3b','#a3e635','#00d4ff','#ffcc00',
+    '#ff3b3b','#a3e635','#00F5FF','#ffcc00',
     '#b048f8','#ff6600','#06ffa5','#f72585','#0088ff','#f72585',
   ],
 } as const;
@@ -181,7 +181,7 @@ const INIT_PROJECT: Project = {
 
 const INIT_COLLABS: Collaborator[] = [
   { id:'u1', name:'Alex Martinez', color:'#a3e635', cursor:{x:450,y:180}, status:'active', lastAction:'Editing "Full Drums"',  timestamp:Date.now()-30000,  editingTrackId:'t1' },
-  { id:'u2', name:'Jordan Kim',    color:'#00d4ff', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
+  { id:'u2', name:'Jordan Kim',    color:'#00F5FF', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
   { id:'u3', name:'Sam Rivera',    color:'#ff3b3b', cursor:{x:580,y:240}, status:'idle',   lastAction:'Added marker',          timestamp:Date.now()-120000 },
 ];
 
