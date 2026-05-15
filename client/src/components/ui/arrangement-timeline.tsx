@@ -19,7 +19,7 @@ export default function ArrangementTimeline() {
     previewStart: number;
   } | null>(null);
 
-  const tracks = useClipStore(state => state.tracks) as Record<string, any>;
+  const tracks = useClipStore(state => state.tracks);
 
   // PATCH-M07: Playhead animation — RAF with zoom dependency
   useEffect(() => {
@@ -114,14 +114,14 @@ export default function ArrangementTimeline() {
       </div>
 
       <div ref={timelineRef} className="relative">
-        {Object.values(tracks).map((track: any) => (
+        {Object.values(tracks).map(track => (
           <div key={track.id} className="relative border-b border-neutral-800"
             style={{ height: TRACK_HEIGHT, width: TOTAL_DURATION * zoom }}>
             {Array.from({ length: Math.ceil(TOTAL_DURATION / GRID_SNAP_SECONDS) }).map((_, i) => (
               <div key={`grid-${i}`} className="absolute top-0 h-full border-l border-neutral-900"
                 style={{ left: i * GRID_SNAP_SECONDS * zoom }} />
             ))}
-            {track.getAllClips().map((clip: any) => {
+            {track.getAllClips().map(clip => {
               const cfg = clip["config"] as { startTime: number; duration?: number };
               const clipStart = dragging?.clipId === clip.id ? dragging.previewStart : cfg.startTime;
               const x = clipStart * zoom;
