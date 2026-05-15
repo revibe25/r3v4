@@ -73,26 +73,6 @@ const KEYBOARD_SHORTCUTS = {
 const STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-/* ── Variables ─────────────────────────────────────────────────────────── */
-:root {
-  --ag-black:  var(--void);
-  --ag-ink:    #0a0a0a;
-  --ag-panel:  #0d0d0d;
-  --ag-card:   var(--t-b1);
-  --ag-border: #1c1c1c;
-  --ag-mute:   #2a2a2a;
-  --ag-dim:    var(--neutral-700);
-  --ag-mid:    var(--dj-muted);
-  --ag-soft:   var(--text-dim);
-  --ag-acid:   #a3e635;
-  --ag-acid2:  var(--looper-lime);
-  --ag-acid-d: var(--status-ok-dim);
-  --ag-white:  var(--daw-fg);
-  --ag-err:    #ff3b3b;
-  --ag-rec:    #ef4444;
-  --ag-cyan:   var(--accent-cyan);   /* PRD §3 canonical active-state cyan */
-}
-
 /* ── Shell ─────────────────────────────────────────────────────────────── */
 .ag-shell {
   height: 100vh;
