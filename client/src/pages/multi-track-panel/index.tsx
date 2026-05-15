@@ -76,26 +76,6 @@ import type {
 const AG_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
-:root {
-  --ag-black:  #060606;
-  --ag-ink:    #0a0a0a;
-  --ag-panel:  #0d0d0d;
-  --ag-card:   #0f0f0f;
-  --ag-border: #222222;
-  --ag-mute:   #2a2a2a;
-  --ag-dim:    #3a3a3a;
-  --ag-mid:    #666;
-  --ag-soft:   #888;
-  --ag-acid:   #a3e635;
-  --ag-acid2:  #84cc16;
-  --ag-acid-d: #4d6b18;
-  --ag-white:  #f0f0f0;
-  --ag-err:    #ff3b3b;
-  --ag-rec:    #ef4444;
-  --ag-cyan:   #22d3ee;
-  --ag-glow:   rgba(163,230,53,0.12);
-}
-
 /* ── Page-level shell ──────────────────────────────────────── */
 .ag-page-shell {
   display: flex;

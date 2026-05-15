@@ -138,3 +138,36 @@
   --status-ok-dim:      #3d7c00;
   --panel-void:         #000000;
 }
+
+
+/* ── Text semantic tokens (alias layer) ─────────────────────── */
+:root {
+  --text-primary:   var(--daw-fg);     /* #f0f0f0 — primary body text */
+  --text-secondary: var(--daw-sub);    /* #aaaaaa — secondary text */
+  --text-muted:     var(--dj-muted);   /* #666666 — muted / disabled */
+  --text-dim:       #888888;           /* dim text — between secondary and muted */
+}
+
+/* ── Agi-Suite semantic layer (--ag-*) ──────────────────────── */
+/* Consolidated from inline :root blocks previously duplicated in
+   instrument.tsx and multi-track-panel/index.tsx. Aliases to
+   primitives wherever possible; hex only when no primitive parent. */
+:root {
+  --ag-black:   var(--void);              /* darkest surface */
+  --ag-ink:     #0a0a0a;                  /* deep ink */
+  --ag-panel:   #0d0d0d;                  /* panel surface */
+  --ag-card:    var(--t-b1);              /* card surface */
+  --ag-border:  var(--dj-border);         /* card / panel border */
+  --ag-mute:    #2a2a2a;                  /* muted border / divider */
+  --ag-dim:     var(--neutral-700);       /* dim element */
+  --ag-mid:     var(--dj-muted);          /* mid-tone text/element */
+  --ag-soft:    var(--text-dim);          /* soft text */
+  --ag-acid:    #a3e635;                  /* primary accent — acid lime */
+  --ag-acid2:   var(--looper-lime);       /* secondary accent — lime */
+  --ag-acid-d:  var(--looper-acid-dim);   /* dim accent */
+  --ag-white:   var(--daw-fg);            /* primary text on dark */
+  --ag-err:     #ff3b3b;                  /* error red */
+  --ag-rec:     #ef4444;                  /* record red */
+  --ag-cyan:    var(--accent-cyan);       /* PRD §3 canonical active-state cyan */
+  --ag-glow:    rgba(163,230,53,0.12);    /* acid glow rgba */
+}
