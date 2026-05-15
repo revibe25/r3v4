@@ -58,36 +58,6 @@
   --looper-lime:    #84cc16;   /* bitcrusher / tone FX / creator accent */
 }
 
-/* ── P0: DAW/Looper core tokens ───────────────────────────── */
-:root {
-  --dj-black:     #000000;
-  --dj-surface:   #0c0c0c;
-  --dj-surface2:  #111111;
-  --dj-surface3:  #161616;
-  --dj-border:    #222222;
-  --dj-dim:       #444444;
-  --dj-dimmer:    #333333;
-  --dj-muted:     #666666;
-  --t-b1:         #0f0f0f;
-  --t-b2:         #141414;
-  --t-b3:         #1e1e1e;
-  --t-b4:         #282828;
-  --signal-clip:  #ff2200;
-  --signal-warn:  #ffaa00;
-  --looper-acid:    #39ff14;
-  --looper-acid-2:  #32cd32;
-  --looper-acid-dim:#4d6b18;
-  --looper-cyan:    #22d3ee;
-  --looper-orange:  #ff6b00;
-  --looper-red:     #ff1a1a;
-  --looper-purple:  #c084fc;
-  --looper-yellow:  #f5d000;
-  --looper-pink:    #f472b6;
-  --looper-blue:    #3b82f6;
-  --looper-teal:    #14b8a6;
-  --looper-lime:    #84cc16;
-}
-
 /* ── P0 addendum: waveform-editor track palette ── */
 :root {
   --track-pink:   #ec4899;
