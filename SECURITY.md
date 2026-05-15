@@ -76,3 +76,22 @@ Reviewed surface: ws/collab.ts
 - **Mitigations:** [State how you are mitigating (tests, reviews, guards, input validation...)]
 - **Owner:** [Team or individual]
 - **Notes:** [When last reviewed, open TODOs, related tickets.]
+
+---
+
+### Resolved: Vite@6.x dev-build CVE
+
+- **Surface:** Client build pipeline (vite@6.4.2)
+- **Severity:** Medium
+- **Status:** Resolved
+- **Advisory published:** 2026-05-11
+- **Risk Summary:** Potential CVE-2025-30208 or earlier 6.x middleware-path arbitrary file read in dev server. Non-blocking for production builds; test runner uses isolated vitest vite@8.0.11.
+- **Resolution:** Updated client vite from <6.4.2 to 6.4.2 (latest stable 6.x). Audit clean.
+- **Verification:**
+  - npm registry confirms vite@6.4.2 is latest 6.x
+  - pnpm audit: zero vulnerabilities
+  - vitest@8.0.11 is internal test-runner only, not client build surface
+- **Owner:** @3R
+- **Closure date:** 2026-05-14
+- **Mythos status:** Formal closure per N-day SLA enforcement; audit queue cleared
+
