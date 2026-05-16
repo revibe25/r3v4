@@ -598,26 +598,17 @@ function CollabDAWProInner() {
   }, [project, pushHistory]);
 
   // ── AI suggestion ops ──────────────────────────────────────────────────────────
-  // PRD §6: acceptance rate ≥40% tracked via aiDecisionLog.
-  // Every accept/reject stamps outcome + writes to aiMix.submitSuggestionOutcome.
-  const logSuggestionOutcome = useCallback((
-    id: string,
-    outcome: Extract<LLPTEDecision, 'accepted' | 'rejected'>,
-  ): void => {
-    const token   = localStorage.getItem('r3_token');
-    const apiBase = (typeof import.meta !== 'undefined' &&
-      (import.meta as unknown as Record<string, unknown>).env
-        ? ((import.meta as unknown as Record<string, unknown>).env as Record<string, unknown>).VITE_API_URL as string | undefined
-        : undefined) ?? '';
-    fetch(`${apiBase}/trpc/aiMix.submitSuggestionOutcome`, {
-      method:  'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ json: { decisionId: id, outcome } }),
-    }).catch(() => { /* non-fatal — log write failure does not block UI */ });
-  }, []);
+  // TODO(collab-pro-tier): aiDecisionLog metrics not wired on this surface.
+  //
+  // Previous logSuggestionOutcome implementation called a deprecated tRPC
+  // endpoint (aiMix.submitSuggestionOutcome) that never existed, AND passed
+  // a local suggestion ID where the server expects an aiDecisionLog row ID.
+  // Both bugs deleted.
+  //
+  // When Pro Artist collab tier ships, migrate to the canonical hook
+  // `useMixSuggestions` (see client/src/hooks/useMixSuggestions.ts) — it
+  // surfaces decisions via sessionMetrics.recordDecision and updates them
+  // via sessionMetrics.recordOutcome with proper decisionId tracking.
 
   const acceptSuggestion = useCallback((id: string) => {
     const s = suggestions.find(x => x.id === id);
@@ -625,16 +616,14 @@ function CollabDAWProInner() {
     // Stamp outcome on suggestion object before removing from panel
     setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'accepted' as const } : x));
     setSuggestions(p => p.filter(x => x.id !== id));
-    logSuggestionOutcome(id, 'accepted');
     toast(`AI applied: ${s.label}`, 'ai');
     addActivity(`Accepted AI: ${s.label}`, 'You', 'ai');
-  }, [suggestions, toast, addActivity, logSuggestionOutcome]);
+  }, [suggestions, toast, addActivity]);
 
   const rejectSuggestion = useCallback((id: string) => {
     setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'rejected' as const } : x));
     setSuggestions(p => p.filter(x => x.id !== id));
-    logSuggestionOutcome(id, 'rejected');
-  }, [logSuggestionOutcome]);
+  }, []);
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────────
   useEffect(() => {

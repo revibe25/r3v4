@@ -21,7 +21,7 @@
  *
  * Design: Acid-techno palette — SKILLS.md §7 canonical inline-style pattern.
  * No Tailwind. No `any`. No swallowed exceptions.
- * Backend wiring: aiMix.router.submitSuggestionOutcome — called by parent (DAW.tsx).
+ * Backend wiring: via parent hook (see useMixSuggestions for the canonical pattern).
  *
  * @module components/mix-suggestions/MixSuggestionsPanel
  */
