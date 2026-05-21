@@ -98,6 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         { credential: email.trim().toLowerCase(), password },
       );
       // [wire§8] removed — auth via httpOnly cookie
+      localStorage.setItem('r3_token', token);
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -118,6 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         { email: emailNorm, username, password },
       );
       // [wire§8] removed — auth via httpOnly cookie
+      localStorage.setItem('r3_token', token);
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -128,6 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // ── logout ─────────────────────────────────────────────────────────────────
   logout: () => {
     // [wire§8] removed — auth via httpOnly cookie
+    localStorage.removeItem('r3_token');
     set({ user: null, token: null, error: null });
   },
 
@@ -139,7 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // get() is in scope from create<AuthState>((set, get) => ...) closure.
     if (get().user) return;
 
-    const stored = localStorage.getItem('token');
+    const stored = localStorage.getItem('r3_token');
     if (!stored) return;
 
     set({ loading: true });
