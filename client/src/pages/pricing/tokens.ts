@@ -54,27 +54,27 @@ export type {
 
 export const COLOR = {
   // ── Backgrounds — matches instrument shell exactly ──────────────────────
-  bgBase:    "var(--void)",
+  bgBase:    "#060606",           // Hardcoded (was var(--void))
   bgSurface: "#0a0a0a",
   bgElevate: "#0d0d0d",
-  bgHover:   "var(--dj-surface2)",
+  bgHover:   "#1a1a1a",           // Hardcoded fallback (was var(--dj-surface2))
 
   // ── Borders ─────────────────────────────────────────────────────────────
   borderSub: "#1c1c1c",
   borderMid: "#2a2a2a",
 
   // ── Text ────────────────────────────────────────────────────────────────
-  textPrimary: "var(--daw-fg)",
-  textBody:    "var(--text-secondary)",
-  textMuted:   "var(--text-dim)",
+  textPrimary: "#e0e0e0",         // Hardcoded (was var(--daw-fg))
+  textBody:    "#e0e0e0",         // Hardcoded (was var(--text-secondary))
+  textMuted:   "#888888",         // Hardcoded (was var(--text-dim))
   textDim:     "#555555",
-  textGhost:   "var(--dj-dimmer)",
+  textGhost:   "#333333",         // Hardcoded (was var(--dj-dimmer))
 
   // ── Lime-green accent cascade ────────────────────────────────────────────
   cyan:   "#a3e635",              // acid lime primary
-  amber:  "var(--looper-lime)",   // pro_artist accent — lime-500
-  purple: "var(--green-400)",     // creator accent — green complement
-  slate:  "var(--dj-dim)",        // explorer/free — neutral
+  amber:  "#84cc16",              // creator accent — hardcoded (was var(--looper-lime))
+  purple: "#22d3ee",              // secondary cyan (was var(--green-400))
+  slate:  "#555555",              // explorer/free — neutral (was var(--dj-dim))
   error:  "#ff4455",              // error / destructive accent (red-400)
 } as const;
 
@@ -90,12 +90,12 @@ import type { SubscriptionTier } from "../../../../shared/subscription.types";
  */
 export const PLAN_ACCENT: Record<SubscriptionTier, string> = {
   explorer:   COLOR.slate,
-  creator:    COLOR.amber,
+  creator:    "#84cc16",          // Hardcoded for consistency
   pro_artist: COLOR.cyan,
 };
 
 export const PLAN_GLOW: Record<SubscriptionTier, string> = {
-  explorer:   "rgba(68,68,68,0.10)",
-  creator:    "rgba(132,204,22,0.10)",
-  pro_artist: "rgba(163,230,53,0.12)",
+  explorer:   "rgba(85,85,85,0.10)",      // matches #555555
+  creator:    "rgba(132,204,22,0.10)",    // matches #84cc16
+  pro_artist: "rgba(163,230,53,0.12)",    // matches #a3e635
 };
