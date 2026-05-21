@@ -102,6 +102,10 @@ export interface MasteringState {
   processing: boolean;
 }
 
+/** Alias kept for DAW.tsx import compatibility */
+export type MasteringSettings = MasteringState;
+export type TimeSignature = [number, number];
+
 // ── AI Co-Producer (Level 3) ──────────────────────────────────────────────────
 
 export interface AISuggestion {
