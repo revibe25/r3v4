@@ -1,20 +1,22 @@
 /**
- * DAW.tsx — R3 v5 Production-Ready Digital Audio Workstation
+ * DAW.tsx — R3/Native · Production-Grade Browser DAW
  *
- * Architecture: Modular component hierarchy with strict separation of concerns.
- * State: Zustand with atomic selectors, undo/redo middleware, persistence.
- * Audio: Tone.js via useDAWEngine with graceful degradation.
- * Network: Collab socket with automatic reconnection, request deduplication.
- * AI: Server-first with local LLM fallback, streaming responses.
+ * Platform:      R3/Native — Distributed Audio Platform
+ * Architecture:  Modular component hierarchy with strict separation of concerns.
+ * State:         Zustand with atomic selectors, undo/redo middleware, persistence.
+ * Audio:         Tone.js via useDAWEngine with graceful degradation.
+ * Network:       Collab socket with automatic reconnection, request deduplication.
+ * AI:            Server-first with local LLM fallback, streaming responses.
  * Accessibility: WCAG 2.1 AA compliant — keyboard, screen reader, high contrast.
- * Performance: Virtualized lists, memoized computations, RAF throttling, lazy loading.
- * Security: Input sanitization, CSP nonces, encrypted localStorage, AbortControllers.
+ * Performance:   Virtualized lists, memoized computations, RAF throttling, lazy loading.
+ * Security:      Input sanitization, CSP nonces, encrypted localStorage, AbortControllers.
  *
- * @module DAW
- * @version 5.0.0
- * @requires React 18+
- * @requires Tone.js
- * @requires Zustand
+ * @module    DAW
+ * @platform  R3/Native
+ * @version   4.0.0
+ * @requires  React 18+
+ * @requires  Tone.js
+ * @requires  Zustand
  */
 
 import React, {
