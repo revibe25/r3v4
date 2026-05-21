@@ -134,7 +134,7 @@ function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
 /**
  * useThrottledCallback — Returns a throttled version for high-frequency events.
  */
-function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
+function useThrottledCallback<T extends (...args: any[]) => any>(
   callback: T,
   limit: number,
 ): T {
