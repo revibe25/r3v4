@@ -7,7 +7,6 @@
  * Respects prefers-reduced-motion on every animated element.
  *
  * Route: <Route path="/pricing" component={PricingPage} />
- * (Injected into App.tsx via patch-app.py in this script)
  */
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -16,7 +15,7 @@ import {
   Upload, Cpu, Users, Shield, Layers,
   AlertCircle, Loader2,
 } from "lucide-react";
-import { alpha, COLOR, PLAN_ACCENT, PLAN_GLOW } from "./tokens";
+import { COLOR, PLAN_ACCENT, PLAN_GLOW } from "./tokens";
 import type { PlanId } from "./tokens";
 import {
   PLANS, STORAGE_ROWS, FAQ_ITEMS,
@@ -31,7 +30,7 @@ import type { SubscriptionTier } from '../../../../shared/subscription.types';
 const STAGGER_DELAY = 0.07;
 const FADE_DURATION = 0.45;
 
-// ─── Static lookup maps (no branches in render) ───────────────────────────────
+// ─── Static lookup maps ───────────────────────────────────────────────────────
 
 const PLAN_ICON: Record<SubscriptionTier, React.ReactNode> = {
   explorer:   <Music2 size={16} />,
@@ -46,7 +45,7 @@ const STAT_ITEMS = [
   { value: "∞",      label: "Track length",    Icon: Layers },
 ] as const;
 
-// ─── Animation helpers (respects reduced motion) ────────────────────────────
+// ─── Animation helpers ────────────────────────────────────────────────────────
 
 function useFadeUp(delay = 0) {
   const shouldReduceMotion = useReducedMotion();
@@ -78,33 +77,17 @@ function GridOverlay() {
 function ScanLine() {
   const shouldReduceMotion = useReducedMotion();
   if (shouldReduceMotion) return null;
-
   return (
-    <motion.div 
+    <motion.div
       className="absolute left-0 right-0 h-px pointer-events-none"
-      style={{ 
-        background: `linear-gradient(90deg,transparent,${COLOR.cyan},transparent)`, 
+      style={{
+        background: `linear-gradient(90deg,transparent,${COLOR.cyan},transparent)`,
         opacity: 0.15,
         top: 0,
       }}
-      initial={{ y: "-100vh" }} 
+      initial={{ y: "-100vh" }}
       animate={{ y: "100vh" }}
-      transition={{ duration: 10, repeat: Infinity, ease: "linear" }} 
-    />
-  );
-}
-
-function HeaderGlow() {
-  const shouldReduceMotion = useReducedMotion();
-
-  return (
-    <div 
-      className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] pointer-events-none"
-      style={{ 
-        background: `radial-gradient(ellipse at 50% 0%,${PLAN_GLOW.creator} 0%,transparent 65%)`,
-        opacity: shouldReduceMotion ? 0.6 : 1,
-        transition: "opacity 0.3s ease",
-      }} 
+      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
     />
   );
 }
@@ -117,34 +100,34 @@ function BillingToggle({ cycle, onToggle, onSet }: {
   const shouldReduceMotion = useReducedMotion();
   return (
     <div className="inline-flex items-center gap-3" role="group" aria-label="Billing cycle">
-      <button 
-        onClick={() => onSet("monthly")} 
+      <button
+        onClick={() => onSet("monthly")}
         className="text-sm font-mono transition-colors"
-        aria-pressed={cycle === "monthly"} 
+        aria-pressed={cycle === "monthly"}
         style={{ color: cycle === "monthly" ? COLOR.textBody : COLOR.textDim }}
       >
         Monthly
       </button>
-      <button 
-        onClick={onToggle} 
+      <button
+        onClick={onToggle}
         className="relative w-12 h-6 rounded-full flex items-center"
         style={{ border: `1px solid ${COLOR.borderSub}`, background: COLOR.bgElevate }}
         aria-label={`Switch to ${cycle === "monthly" ? "annual" : "monthly"} billing`}
       >
-        <motion.div 
+        <motion.div
           className="absolute w-4 h-4 rounded-full"
-          style={{ background: COLOR.cyan, boxShadow: `0 0 8px ${alpha(COLOR.cyan, 60)}` }}
+          style={{ background: COLOR.cyan }}
           animate={{ left: cycle === "annual" ? "1.5rem" : "0.25rem" }}
-          transition={shouldReduceMotion 
-            ? { duration: 0 } 
+          transition={shouldReduceMotion
+            ? { duration: 0 }
             : { type: "spring", stiffness: 400, damping: 40 }
-          } 
+          }
         />
       </button>
-      <button 
-        onClick={() => onSet("annual")} 
+      <button
+        onClick={() => onSet("annual")}
         className="text-sm font-mono transition-colors"
-        aria-pressed={cycle === "annual"} 
+        aria-pressed={cycle === "annual"}
         style={{ color: cycle === "annual" ? COLOR.textBody : COLOR.textDim }}
       >
         Annual
@@ -156,10 +139,10 @@ function BillingToggle({ cycle, onToggle, onSet }: {
             animate={shouldReduceMotion ? {} : { opacity: 1, x: 0 }}
             exit={shouldReduceMotion ? {} : { opacity: 0, x: -8 }}
             className="text-xs font-mono px-2 py-0.5 rounded"
-            style={{ 
-              color: COLOR.cyan, 
-              border: `1px solid ${alpha(COLOR.cyan, 20)}`, 
-              background: alpha(COLOR.cyan, 10),
+            style={{
+              color:      COLOR.textBody,
+              border:     `1px solid ${COLOR.borderMid}`,
+              background: COLOR.bgElevate,
             }}
           >
             Save ~20%
@@ -172,7 +155,7 @@ function BillingToggle({ cycle, onToggle, onSet }: {
 
 // ─── PriceDisplay ─────────────────────────────────────────────────────────────
 
-function PriceDisplay({ plan, cycle, accent }: { plan: Plan; cycle: BillingCycle; accent: string }) {
+function PriceDisplay({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
   const price = resolvePrice(plan, cycle);
   const shouldReduceMotion = useReducedMotion();
 
@@ -189,15 +172,12 @@ function PriceDisplay({ plan, cycle, accent }: { plan: Plan; cycle: BillingCycle
     <div className="mb-6">
       <div className="flex items-end gap-0.5">
         <span className="text-sm font-mono mb-1.5" style={{ color: COLOR.textDim }}>$</span>
-        <motion.span 
-          key={price} 
-          initial={shouldReduceMotion ? {} : { opacity: 0, y: -6 }} 
+        <motion.span
+          key={price}
+          initial={shouldReduceMotion ? {} : { opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl font-mono"
-          style={{ 
-            color: COLOR.textBody, 
-            textShadow: plan.popular ? `0 0 24px ${alpha(accent, 30)}` : undefined 
-          }}
+          style={{ color: COLOR.textBody }}
         >
           {price}
         </motion.span>
@@ -218,16 +198,16 @@ function PlanCta({ plan, accent, isPending, onCheckout }: {
   plan: Plan; accent: string; isPending: boolean; onCheckout: (p: Plan) => void;
 }) {
   return (
-    <button 
-      onClick={() => { if (!isPending) onCheckout(plan); }} 
-      disabled={isPending} 
+    <button
+      onClick={() => { if (!isPending) onCheckout(plan); }}
+      disabled={isPending}
       aria-busy={isPending}
-      className="w-full py-2.5 px-4 rounded-lg text-sm font-mono tracking-wide transition-all
+      className="w-full py-2.5 px-4 text-sm font-mono tracking-wide transition-all
                  duration-200 mb-6 flex items-center justify-center gap-2
                  disabled:opacity-60 disabled:cursor-not-allowed group/btn"
       style={plan.popular
         ? { background: accent, color: COLOR.bgBase }
-        : { border: `1px solid ${alpha(accent, 20)}`, color: accent, background: COLOR.bgElevate }
+        : { border: `1px solid ${COLOR.borderMid}`, color: accent, background: COLOR.bgElevate }
       }
     >
       {isPending
@@ -249,7 +229,7 @@ function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
       <span className="mt-0.5 shrink-0" style={{ color: cc }}>
         <Check size={12} strokeWidth={2.5} />
       </span>
-      <span 
+      <span
         className={`text-[13px] font-mono leading-snug ${!feature.included ? "line-through" : ""}`}
         style={{ color: lc }}
       >
@@ -269,37 +249,31 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
 }) {
   const fadeUpProps = useFadeUp(index * STAGGER_DELAY);
   const accent = PLAN_ACCENT[plan.id];
-  const glow = PLAN_GLOW[plan.id];
+  const glow   = PLAN_GLOW[plan.id];
 
   return (
-    <motion.article 
+    <motion.article
       {...fadeUpProps}
-      className="relative flex flex-col rounded-xl overflow-hidden transition-colors duration-300"
+      className="relative flex flex-col overflow-hidden transition-colors duration-300"
       style={{
-        background:  COLOR.bgSurface,
-        border:      `1px solid ${plan.popular ? alpha(accent, 20) : COLOR.borderSub}`,
-        boxShadow:   plan.popular ? `0 0 60px ${glow}` : undefined,
+        background: COLOR.bgSurface,
+        border:     `1px solid ${plan.popular ? COLOR.borderMid : COLOR.borderSub}`,
+        borderLeft: `2px solid ${COLOR.cyan}`,
+        boxShadow:  plan.popular 
+          ? `0 0 60px ${glow}, inset 2px 0 20px rgba(163,230,53,0.2)`
+          : `inset 2px 0 20px rgba(163,230,53,0.15)`,
       }}
       aria-labelledby={`plan-title-${plan.id}`}
     >
-      <div 
-        className="h-[2px] w-full shrink-0"
-        style={{ background: `linear-gradient(90deg,transparent,${plan.popular ? accent : alpha(accent, 40)},transparent)` }} 
-      />
-      {plan.badge && (
-        <div 
-          className="absolute top-4 right-4 text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded"
-          style={{ color: accent, border: `1px solid ${alpha(accent, 20)}`, background: alpha(accent, 10) }}
-        >
-          {plan.badge}
-        </div>
-      )}
+      {/* Gradient top bar removed — was creating visual clutter */}
+      {/* Plan badge removed — was creating green corner blocks  */}
+
       <div className="p-6 flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-1">
           <span style={{ color: accent }}>{PLAN_ICON[plan.id]}</span>
-          <span 
+          <span
             id={`plan-title-${plan.id}`}
-            className="text-[11px] font-mono uppercase tracking-[0.18em]" 
+            className="text-[11px] font-mono uppercase tracking-[0.18em]"
             style={{ color: COLOR.textDim }}
           >
             {plan.name}
@@ -308,7 +282,7 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
         <p className="text-[13px] font-mono leading-relaxed mb-5" style={{ color: COLOR.textDim }}>
           {plan.tagline}
         </p>
-        <PriceDisplay plan={plan} cycle={cycle} accent={accent} />
+        <PriceDisplay plan={plan} cycle={cycle} />
         <PlanCta plan={plan} accent={accent} isPending={isPending} onCheckout={onCheckout} />
         <div className="h-px mb-4" style={{ background: COLOR.borderSub }} />
         <ul className="flex flex-col flex-1">
@@ -323,17 +297,16 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
 
 function StatsStrip() {
   const fadeUpProps = useFadeUp(0.2);
-
   return (
-    <motion.div 
-      {...fadeUpProps} 
-      className="grid grid-cols-4 rounded-xl overflow-hidden mb-14"
+    <motion.div
+      {...fadeUpProps}
+      className="grid grid-cols-4 overflow-hidden mb-14"
       style={{ border: `1px solid ${COLOR.borderSub}`, background: COLOR.borderSub, gap: "1px" }}
     >
       {STAT_ITEMS.map(({ value, label, Icon }) => (
-        <div 
-          key={label} 
-          className="flex flex-col items-center gap-1 px-6 py-4" 
+        <div
+          key={label}
+          className="flex flex-col items-center gap-1 px-6 py-4"
           style={{ background: COLOR.bgSurface }}
         >
           <div className="flex items-center gap-1.5 mb-1">
@@ -351,20 +324,19 @@ function StatsStrip() {
 
 function StorageTable() {
   const fadeUpProps = useFadeUp(0.35);
-
   return (
-    <motion.div 
-      {...fadeUpProps} 
-      className="rounded-xl overflow-hidden mb-16"
+    <motion.div
+      {...fadeUpProps}
+      className="overflow-hidden mb-16"
       style={{ border: `1px solid ${COLOR.borderSub}` }}
     >
-      <div 
+      <div
         className="px-8 py-5 flex items-center gap-3"
         style={{ borderBottom: `1px solid ${COLOR.borderSub}`, background: COLOR.bgSurface }}
       >
         <Upload size={14} style={{ color: COLOR.cyan }} />
         <span className="text-[12px] font-mono uppercase tracking-[0.18em]" style={{ color: COLOR.textDim }}>
-          Limits & Storage
+          Limits &amp; Storage
         </span>
       </div>
       <div className="grid grid-cols-3" style={{ background: COLOR.borderSub, gap: "1px" }}>
@@ -397,7 +369,7 @@ function FAQ() {
 
   return (
     <div className="max-w-2xl mx-auto mb-12">
-      <p 
+      <p
         className="text-[11px] font-mono uppercase tracking-[0.18em] text-center mb-6"
         style={{ color: COLOR.textDim }}
       >
@@ -407,25 +379,25 @@ function FAQ() {
         {FAQ_ITEMS.map((item, i) => {
           const open = openIndex === i;
           return (
-            <div 
-              key={i} 
-              className="rounded-lg overflow-hidden"
-              style={{ 
-                border: `1px solid ${open ? COLOR.borderMid : COLOR.borderSub}`, 
-                background: COLOR.bgSurface 
+            <div
+              key={`faq-${i}`}
+              className="overflow-hidden"
+              style={{
+                border: `1px solid ${open ? COLOR.borderMid : COLOR.borderSub}`,
+                background: COLOR.bgSurface,
               }}
             >
-              <button 
-                onClick={() => setOpenIndex(p => p === i ? null : i)} 
+              <button
+                onClick={() => setOpenIndex(p => p === i ? null : i)}
                 aria-expanded={open}
                 className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 transition-colors"
                 style={{ background: open ? COLOR.bgElevate : undefined }}
               >
                 <span className="text-[13px] font-mono" style={{ color: COLOR.textBody }}>{item.q}</span>
-                <motion.span 
+                <motion.span
                   animate={{ rotate: open ? 90 : 0 }}
                   transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
-                  className="shrink-0" 
+                  className="shrink-0"
                   style={{ color: COLOR.textDim }}
                 >
                   <ChevronRight size={14} />
@@ -433,16 +405,16 @@ function FAQ() {
               </button>
               <AnimatePresence initial={false}>
                 {open && (
-                  <motion.div 
+                  <motion.div
                     key={`faq-content-${i}`}
-                    initial={{ height: 0, opacity: 0 }} 
+                    initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }} 
+                    exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    <div 
-                      className="px-5 pb-4 pt-3" 
+                    <div
+                      className="px-5 pb-4 pt-3"
                       style={{ borderTop: `1px solid ${COLOR.borderSub}` }}
                     >
                       <p className="text-[13px] font-mono leading-relaxed" style={{ color: COLOR.textDim }}>{item.a}</p>
@@ -463,32 +435,31 @@ function FAQ() {
 function ErrorToast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   const toastRef = useRef<HTMLDivElement>(null);
 
-  // Move focus to toast when it appears
   useEffect(() => {
     toastRef.current?.focus();
   }, []);
 
   return (
-    <motion.div 
+    <motion.div
       ref={toastRef}
       tabIndex={-1}
-      initial={{ opacity: 0, y: 16 }} 
-      animate={{ opacity: 1, y: 0 }} 
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 16 }}
-      role="alert" 
+      role="alert"
       aria-live="assertive"
       className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3
                  px-5 py-3 rounded-xl font-mono text-sm shadow-2xl outline-none"
-      style={{ 
-        background: COLOR.bgElevate, 
-        border: `1px solid ${alpha(COLOR.error, 20)}`, 
-        color: "var(--status-error-soft)" 
+      style={{
+        background: COLOR.bgElevate,
+        border:     `1px solid ${COLOR.borderMid}`,
+        color:      "var(--status-error-soft)",
       }}
     >
       <AlertCircle size={14} />
       <span>{message}</span>
-      <button 
-        onClick={onDismiss} 
+      <button
+        onClick={onDismiss}
         aria-label="Dismiss error"
         className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
       >
@@ -503,41 +474,43 @@ function ErrorToast({ message, onDismiss }: { message: string; onDismiss: () => 
 export default function PricingPage() {
   const { cycle, setCycle, toggleCycle, checkoutStatus, initiateCheckout, clearError } = usePricing();
   const pendingPlanId = checkoutStatus.type === "pending" ? checkoutStatus.planId : null;
-  const headerFadeUp = useFadeUp(0);
+  const headerFadeUp  = useFadeUp(0);
 
   return (
-    <div 
+    <div
       className="relative min-h-screen overflow-hidden"
       style={{ background: COLOR.bgBase, color: COLOR.textBody }}
     >
       <GridOverlay />
       <ScanLine />
-      <HeaderGlow />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
         <motion.div {...headerFadeUp} className="text-center mb-16">
-          <div 
+
+          {/* ── Subscription badge — transparent, no green fill ── */}
+          <div
             className="inline-flex items-center gap-2 text-[11px] font-mono uppercase
                        tracking-[0.22em] px-3 py-1 rounded mb-5"
-            style={{ 
-              color: COLOR.cyan, 
-              border: `1px solid ${alpha(COLOR.cyan, 20)}`, 
-              background: alpha(COLOR.cyan, 10),
+            style={{
+              color:      COLOR.textDim,
+              border:     `1px solid ${COLOR.borderSub}`,
+              background: "transparent",
             }}
           >
             <Sparkles size={10} />
             R3 v4 — Subscription
           </div>
-          <h1 
+
+          <h1
             className="text-5xl font-mono font-bold tracking-tight mb-4 leading-tight"
             style={{ color: COLOR.textPrimary }}
           >
             Build your studio.<br />
-            <span style={{ color: COLOR.cyan, textShadow: `0 0 40px ${alpha(COLOR.cyan, 20)}` }}>
+            <span style={{ color: COLOR.cyan }}>
               Scale when you're ready.
             </span>
           </h1>
-          <p 
+          <p
             className="text-[15px] font-mono max-w-xl mx-auto mb-8 leading-relaxed"
             style={{ color: COLOR.textDim }}
           >
@@ -549,15 +522,15 @@ export default function PricingPage() {
         <StatsStrip />
 
         {/* 3-column grid — matches SUBSCRIPTION_TIERS exactly */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-20">
           {PLANS.map((plan, i) => (
-            <PlanCard 
-              key={plan.id} 
-              plan={plan} 
-              cycle={cycle} 
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              cycle={cycle}
               index={i}
-              isPending={pendingPlanId === plan.id} 
-              onCheckout={initiateCheckout} 
+              isPending={pendingPlanId === plan.id}
+              onCheckout={initiateCheckout}
             />
           ))}
         </div>

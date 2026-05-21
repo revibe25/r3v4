@@ -7,15 +7,13 @@
  *   trpcVanilla   — Plain promise client (for hooks outside React tree)
  *   TRPCProvider  — React context provider (wrap App root)
  *
- * Usage in components:
- *   const { data } = trpc.daw['project.list'].useQuery();
- *   const save = trpc.daw['project.save'].useMutation();
- *
- * Usage in plain hooks (outside React):
- *   const result = await trpcVanilla.daw['project.save'].mutate({ ... });
- *
- * Auth is handled via httpOnly cookie ([wire§8]).
- * No token is read from localStorage — credentials are sent automatically by the browser.
+ * Auth flow:
+ *   - JWT token lives in useAuthStore (Zustand in-memory state)
+ *   - Token is restored from localStorage('r3_token') on app init via initAuth()
+ *   - getAuthHeaders() reads useAuthStore.getState().token on every request
+ *     so the Authorization header is always in sync with the live Zustand state
+ *   - This prevents the race condition where hasToken=true but localStorage
+ *     hasn't been written yet (e.g. immediately after login)
  */
 
 import {
@@ -27,6 +25,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import type { AppRouter } from '../../../shared/types/trpc';
+import { useAuthStore } from '../hooks/authStore';
 
 // ── Singleton QueryClient ─────────────────────────────────────────────────────
 
@@ -35,8 +34,8 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime:  1000 * 60 * 5,   // 5 min
       gcTime:     1000 * 60 * 10,  // 10 min
-      retry:      (failureCount, error) => {
-        // Don't retry on 401/403
+      retry: (failureCount, error) => {
+        // Never retry on 401/403 — retrying just spams the server
         const trpcError = error as { data?: { httpStatus?: number } };
         const status = trpcError?.data?.httpStatus;
         if (status === 401 || status === 403) return false;
@@ -49,10 +48,17 @@ export const queryClient = new QueryClient({
   },
 });
 
-// ── Token helper ──────────────────────────────────────────────────────────────
+// ── Auth header helper ────────────────────────────────────────────────────────
+//
+// Reads from useAuthStore.getState() — Zustand's synchronous out-of-React
+// accessor — so it always reflects the live token, even immediately after
+// login before the next render cycle. This is the same source as:
+//   useAuthStore(s => Boolean(s.token))   ← used by useSubscription enabled guard
+// Keeping both reads from the same store eliminates the localStorage key
+// mismatch that caused 401s right after login.
 
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
+  const token = useAuthStore.getState().token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -64,7 +70,7 @@ const API_URL = `${(import.meta.env?.VITE_API_URL as string | undefined) ?? ''}/
 
 export const trpc = createTRPCReact<AppRouter>();
 
-// ── Vanilla (promise-based) client for use in hooks ───────────────────────────
+// ── Vanilla (promise-based) client for use outside React tree ─────────────────
 
 export const trpcVanilla = createTRPCProxyClient<AppRouter>({
   links: [
@@ -102,7 +108,6 @@ export function TRPCProvider({ children }: TRPCProviderProps) {
           headers: getAuthHeaders,
           fetch: (url: RequestInfo | URL, options?: RequestInit) =>
             fetch(url, { ...options, credentials: 'include' }),
-          // Batch window: up to 10ms to collect concurrent requests
           maxURLLength: 2083,
         }),
       ],
@@ -129,7 +134,7 @@ export function invalidateDAWQueries(): void {
   queryClient.invalidateQueries({ queryKey: [['daw', 'project.list']] });
 }
 
-// ── Error classifier ──────────────────────────────────────────────────────────
+// ── Error classifiers ─────────────────────────────────────────────────────────
 
 export function isTRPCForbidden(err: unknown): boolean {
   return (err as { data?: { code?: string } })?.data?.code === 'FORBIDDEN';

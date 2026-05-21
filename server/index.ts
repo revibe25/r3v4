@@ -23,8 +23,8 @@
  *   STRIPE_WEBHOOK_SECRET — Stripe webhook endpoint secret
  *
  * Optional:
- *   PORT               — default 3001
- *   CLIENT_URL         — CORS allow-list (default: http://localhost:5173)
+ *   PORT               — default 3000
+ *   CLIENT_URL         — CORS allow-list (comma-separated; default: http://localhost:5173,http://localhost:5174,http://localhost:5177)
  *   JWT_EXPIRES        — default 7d
  *   DATABASE_SSL       — set to 'false' to disable SSL (local dev only)
  *
@@ -32,6 +32,14 @@
  *   F-01 — Removed 'unsafe-inline' from CSP scriptSrc (was nullifying XSS protection)
  *   F-06 — /health no longer leaks version, memory RSS, or collab room stats
  *   F-07 — Removed duplicate app.use('/api/trpc', trpcAuth) (global trpcAuth is sufficient)
+ *
+ * CORS Fix (2026-05-18):
+ *   - Consolidated dual cors() calls into single, properly configured middleware
+ *   - Added support for multiple origins via comma-separated CLIENT_URL
+ *   - Implemented origin function to validate against allowedOrigins array
+ *   - Supports localhost:5173 (R3 client), localhost:5174 (R3 alias), localhost:5177 (Agi-Suite)
+ *   - Filters empty strings from allowedOrigins (defense-in-depth against malformed env vars)
+ *   - Added CORS origins to startup log for transparency
  */
 
 import 'dotenv/config';
@@ -55,12 +63,19 @@ import { attachCollabServer } from './ws/collab';
 import { db }                 from './db';
 import { subscriptions }      from '../shared/schema';
 import { eq }                 from 'drizzle-orm';
-import type { SubscriptionTier, SubscriptionStatus } from '../shared/subscription.types';
+import type { SubscriptionTier } from '../shared/subscription.types';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const PORT       = parseInt(process.env.PORT ?? '3000', 10);
-const CLIENT_URL = process.env.CLIENT_URL ?? 'http://localhost:5173';
+const PORT = parseInt(process.env.PORT ?? '3000', 10);
+
+// Parse CLIENT_URL into array of allowed origins
+// Format: comma-separated list (e.g., "http://localhost:5173,http://localhost:5174,http://localhost:5177")
+// Filters out empty strings to prevent malformed env var attacks (defense-in-depth)
+const CLIENT_URL = process.env.CLIENT_URL ?? 'http://localhost:5173,http://localhost:5174,http://localhost:5177';
+const allowedOrigins = CLIENT_URL.split(',')
+  .map(url => url.trim())
+  .filter(url => url.length > 0);
 
 // ── Express app ───────────────────────────────────────────────────────────────
 
@@ -91,10 +106,26 @@ app.use(
 );
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
+// Consolidated CORS configuration supporting multiple origins
+// Origin validation: requests without Origin header are allowed (same-origin)
+// Requests with Origin header must match allowedOrigins array
 
 app.use(
   cors({
-    origin:      CLIENT_URL,
+    origin: (origin, cb) => {
+      // Allow requests without Origin header (same-origin requests)
+      if (!origin) {
+        cb(null, true);
+        return;
+      }
+      // Allow requests from whitelisted origins
+      if (allowedOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      // Reject requests from non-whitelisted origins
+      cb(new Error(`CORS not allowed: ${origin}`));
+    },
     credentials: true,
     methods:     ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -302,6 +333,7 @@ attachCollabServer(httpServer);
 
 httpServer.listen(PORT, () => {
   logger.info('[R3 v4] Server listening', { port: PORT });
+  logger.info('[R3 v4] CORS allowed origins:', { origins: allowedOrigins });
   logger.info('[R3 v4] tRPC at /api/trpc');
   logger.info('[R3 v4] WebSocket collab at /ws');
   logger.info('[R3 v4] Auth at /api/auth');

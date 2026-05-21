@@ -1,0 +1,23 @@
+[33mcommit 435e1e85ffc23c3042ca1da796f4e588ac8da042[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: r3v <r3v@r3v4.dev>
+Commit: r3v <r3v@r3v4.dev>
+
+    fix(daw-collab): neutralize broken aiMix.submitSuggestionOutcome wiring
+    
+    collaborative-daw-pro.tsx called a tRPC procedure that never existed
+    (aiMix.submitSuggestionOutcome) on a router formally deprecated in
+    favor of daw.* + sessionMetrics. Even with the correct endpoint, the
+    data shape was also wrong — local suggestion ID passed where the
+    server expects an aiDecisionLog row ID.
+    
+    Changes:
+    - Delete logSuggestionOutcome useCallback and its two call sites
+    - Update acceptSuggestion/rejectSuggestion deps arrays accordingly
+    - Replace with TODO block citing useMixSuggestions as migration target
+    - Update MixSuggestionsPanel docstring contract to match
+    
+    Interim fix per ASI Option B. Full migration to useMixSuggestions hook
+    deferred to Pro Artist collab tier launch. Beatmaker launch flows
+    through DAW.tsx which already uses the canonical hook.
+    
+    Refs: WIRE protocol, ASI/Mythos triage

@@ -613,7 +613,6 @@ function CollabDAWProInner() {
   const acceptSuggestion = useCallback((id: string) => {
     const s = suggestions.find(x => x.id === id);
     if (!s) return;
-    // Stamp outcome on suggestion object before removing from panel
     setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'accepted' as const } : x));
     setSuggestions(p => p.filter(x => x.id !== id));
     toast(`AI applied: ${s.label}`, 'ai');
@@ -672,11 +671,9 @@ function CollabDAWProInner() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const W = rect.width, H = rect.height;
 
-    // Background
     ctx.fillStyle = C.space;
     ctx.fillRect(0, 0, W, H);
 
-    // Scanlines
     for (let y = 0; y < H; y += 4) {
       ctx.fillStyle = 'rgba(255,255,255,0.008)';
       ctx.fillRect(0, y, W, 1);
@@ -1003,15 +1000,132 @@ function CollabDAWProInner() {
   };
   const totalTH = project.tracks.length * TL.trackHeight + TL.rulerHeight;
 
+  // ─── Ticker items ──────────────────────────────────────────────────────────
+  const TICKER_ITEMS = [
+    'R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony',
+    'Accessible','MultiTrack DAW','VST System','LLPTE Engine','Collaborative',
+  ];
+
   // ─── Render ───────────────────────────────────────────────────────────────────
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+        /* ── Acid Grid header classes (ported from instrument.tsx) ────────── */
+        .ag-header {
+          border-bottom: 3px solid var(--ag-border, #1c1c1c);
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 4px 24px rgba(0,0,0,.6);
+          flex-shrink: 0;
+          z-index: 100;
+        }
+        .ag-header-top {
+          display: flex;
+          align-items: stretch;
+          border-bottom: 1px solid var(--ag-border, #1c1c1c);
+        }
+        .ag-ghost-bpm {
+          position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+          font-family: 'Syne', sans-serif; font-weight: 800;
+          font-size: clamp(56px, 9vw, 110px);
+          color: transparent; -webkit-text-stroke: 1px rgba(163,230,53,0.04);
+          letter-spacing: -0.04em; pointer-events: none; user-select: none; z-index: 0;
+        }
+        .ag-wordmark-block {
+          padding: 12px 20px 10px;
+          border-right: 1px solid var(--ag-border, #1c1c1c);
+          display: flex; flex-direction: column; justify-content: center;
+          min-width: 176px; position: relative; z-index: 1; flex-shrink: 0;
+        }
+        .ag-wordmark {
+          font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+          letter-spacing: -0.02em; color: var(--ag-white, #f0f0f0); line-height: 1;
+        }
+        .ag-wordmark-slash {
+          color: var(--ag-acid, #a3e635); margin: 0 2px; font-size: 26px;
+          line-height: .9; text-shadow: 0 0 14px #a3e635;
+        }
+        .ag-wordmark-sub {
+          font-size: 7px; letter-spacing: .4em; text-transform: uppercase;
+          color: var(--ag-mid, #555); margin-top: 4px;
+          font-family: 'IBM Plex Mono', monospace;
+        }
+        .ag-status-block {
+          padding: 10px 14px;
+          border-right: 1px solid var(--ag-border, #1c1c1c);
+          display: flex; flex-direction: column; justify-content: center;
+          gap: 5px; z-index: 1; flex-shrink: 0;
+        }
+        .ag-status-line {
+          font-size: 8px; letter-spacing: .2em; text-transform: uppercase;
+          display: flex; align-items: center; gap: 6px;
+          font-family: 'IBM Plex Mono', monospace;
+        }
+        .ag-cursor-live {
+          display: inline-block; width: 7px; height: 12px;
+          background: var(--ag-acid, #a3e635); box-shadow: 0 0 8px #a3e635;
+          animation: ag-blink 1s step-end infinite; flex-shrink: 0;
+        }
+        .ag-cursor-standby {
+          display: inline-block; width: 7px; height: 12px;
+          background: #555; flex-shrink: 0;
+        }
+        .ag-status-live-text  { color: var(--ag-acid, #a3e635); }
+        .ag-status-dead-text  { color: #ff3b3b; }
+        .ag-bpm-block {
+          padding: 0 16px;
+          border-right: 1px solid var(--ag-border, #1c1c1c);
+          display: flex; align-items: center; gap: 10px; z-index: 1; flex-shrink: 0;
+        }
+        .ag-bpm-label {
+          font-size: 7px; letter-spacing: .3em; color: var(--ag-mid, #555);
+          text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg);
+          font-family: 'IBM Plex Mono', monospace;
+        }
+        .ag-bpm-number {
+          font-family: 'Syne', sans-serif; font-weight: 800; font-size: 36px;
+          letter-spacing: -0.04em; color: var(--ag-acid, #a3e635); line-height: 1;
+          text-shadow: 0 0 20px rgba(163,230,53,.4), 0 0 40px rgba(163,230,53,.15);
+        }
+        .ag-controls-block {
+          flex: 1; padding: 8px 12px;
+          display: flex; align-items: center;
+          gap: 4px; flex-wrap: wrap; z-index: 1; overflow: hidden;
+        }
+
+        /* ── Ticker ──────────────────────────────────────────────────────── */
+        .ag-ticker-row {
+          padding: 4px 0;
+          background: #080808;
+          overflow: hidden; position: relative; flex-shrink: 0;
+        }
+        .ag-ticker-row::before, .ag-ticker-row::after {
+          content: ''; position: absolute; top: 0; bottom: 0; width: 32px; z-index: 2;
+        }
+        .ag-ticker-row::before { left: 0; background: linear-gradient(90deg, #080808, transparent); }
+        .ag-ticker-row::after  { right: 0; background: linear-gradient(-90deg, #080808, transparent); }
+        .ag-ticker-inner {
+          display: flex; width: max-content;
+          animation: ag-scroll 28s linear infinite;
+        }
+        @keyframes ag-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+        .ag-ticker-item {
+          font-size: 9px; letter-spacing: .2em; text-transform: uppercase;
+          color: #fff; padding: 0 18px; white-space: nowrap;
+          display: flex; align-items: center; gap: 10px;
+          font-family: 'IBM Plex Mono', monospace;
+        }
+        .ag-ticker-sep { color: #a3e635; font-size: 10px; }
+
+        /* ── Animations ──────────────────────────────────────────────────── */
         @keyframes ag-blink { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes ag-pulse { 0%,100%{box-shadow:0 0 6px #a3e635} 50%{box-shadow:0 0 18px #a3e635,0 0 30px rgba(163,230,53,.3)} }
         @keyframes ag-slidein { from{transform:translateY(-8px);opacity:0} to{transform:translateY(0);opacity:1} }
         @keyframes ag-rec { 0%,100%{background:#ff3b3b} 50%{background:#ff3b3b88} }
+
+        /* ── Scrollbars ───────────────────────────────────────────────────── */
         ::-webkit-scrollbar { width:4px; height:4px; }
         ::-webkit-scrollbar-track { background:${C.surface}; }
         ::-webkit-scrollbar-thumb { background:${C.borderBright}; }
@@ -1065,232 +1179,203 @@ function CollabDAWProInner() {
           background:'radial-gradient(circle at 15% 50%, rgba(163,230,53,0.04) 0%, transparent 55%)',
         }} />
 
-        {/* ── TOP BAR ────────────────────────────────────────────────────────── */}
-        <div style={{
-          height:58, background:C.surface, borderBottom:`2px solid ${C.border}`,
-          display:'flex', alignItems:'stretch',
-          position:'relative', zIndex:100, flexShrink:0,
-          boxShadow:'0 2px 20px rgba(0,0,0,.7)',
-        }}>
+        {/* ── AG HEADER ──────────────────────────────────────────────────────── */}
+        <header className="ag-header" style={{ background: C.surface }}>
+          <div className="ag-header-top">
 
-          {/* Ghost BPM */}
-          <div style={{
-            position:'absolute', right:-8, top:'50%', transform:'translateY(-50%)',
-            fontFamily:FONT.display, fontWeight:800,
-            fontSize:'clamp(56px,9vw,110px)',
-            color:'transparent',
-            WebkitTextStroke:`1px rgba(163,230,53,0.04)`,
-            letterSpacing:'-0.04em', pointerEvents:'none', userSelect:'none', zIndex:0,
-          }}>{Math.round(project.tempo)}</div>
+            {/* Ghost BPM */}
+            <span className="ag-ghost-bpm" aria-hidden="true">{Math.round(project.tempo)}</span>
 
-          {/* R3 Wordmark */}
-          <div style={{
-            padding:'10px 20px', borderRight:`1px solid ${C.border}`,
-            display:'flex', flexDirection:'column', justifyContent:'center',
-            minWidth:180, position:'relative', zIndex:1,
-          }}>
-            <div style={{ fontFamily:FONT.display, fontWeight:800, fontSize:22, letterSpacing:'-0.02em', lineHeight:1, color:C.text }}>
-              R3<span style={{ color:C.neon, margin:'0 2px', textShadow:`0 0 14px ${C.neon}` }}>/</span>COLLAB
+            {/* Wordmark */}
+            <div className="ag-wordmark-block">
+              <div className="ag-wordmark">
+                R3<span className="ag-wordmark-slash">/</span>COLLAB
+              </div>
+              <div className="ag-wordmark-sub">Collaborative · Session</div>
             </div>
-            <div style={{ fontSize:7, letterSpacing:'.4em', textTransform:'uppercase', color:C.textMuted, marginTop:4 }}>
-              COLLABORATIVE · SESSION
-            </div>
-          </div>
 
-          {/* Connection + Collabs */}
-          <div style={{ padding:'0 14px', borderRight:`1px solid ${C.border}`, display:'flex', flexDirection:'column', justifyContent:'center', gap:4, zIndex:1 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:8, letterSpacing:'.2em', textTransform:'uppercase', color:connStatus==='connected' ? C.neon : C.magenta }}>
-              {connStatus==='connected'
-                ? <Wifi size={10} color={C.neon} />
-                : <WifiOff size={10} color={C.magenta} />}
-              {connStatus.toUpperCase()}
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:-4 }}>
-              {collaborators.map((c,i) => (
-                <div key={c.id} title={`${c.name} — ${c.lastAction}`} style={{
-                  width:24, height:24, background:c.color,
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                  border:`2px solid ${C.surface}`, fontSize:8, fontWeight:700, color:C.void,
-                  position:'relative', cursor:'pointer', zIndex:collaborators.length-i,
-                  marginLeft: i===0 ? 0 : -6,
-                }}>
-                  {c.name.split(' ').map(n=>n[0]).join('')}
-                  {c.status==='active' && (
-                    <div style={{ position:'absolute', bottom:-2, right:-2, width:7, height:7, background:C.neon, border:`1.5px solid ${C.surface}` }} />
-                  )}
+            {/* Connection status + collab avatars */}
+            <div className="ag-status-block">
+              <div className={`ag-status-line ${connStatus==='connected' ? 'ag-status-live-text' : 'ag-status-dead-text'}`}>
+                <span className={connStatus==='connected' ? 'ag-cursor-live' : 'ag-cursor-standby'} />
+                {connStatus==='connected'
+                  ? <Wifi size={9} style={{flexShrink:0}} />
+                  : <WifiOff size={9} style={{flexShrink:0}} />}
+                {connStatus.toUpperCase()}
+              </div>
+              <div style={{ display:'flex', alignItems:'center' }}>
+                {collaborators.map((c, i) => (
+                  <div key={c.id} title={`${c.name} — ${c.lastAction}`} style={{
+                    width:20, height:20, background:c.color,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    border:`2px solid ${C.surface}`, fontSize:7, fontWeight:700, color:C.void,
+                    position:'relative', cursor:'pointer', zIndex:collaborators.length-i,
+                    marginLeft: i===0 ? 0 : -5, flexShrink:0,
+                  }}>
+                    {c.name.split(' ').map(n=>n[0]).join('')}
+                    {c.status==='active' && (
+                      <div style={{ position:'absolute', bottom:-2, right:-2, width:5, height:5, background:C.neon, border:`1.5px solid ${C.surface}` }} />
+                    )}
+                  </div>
+                ))}
+                <div style={{ width:20, height:20, background:C.neon, display:'flex', alignItems:'center', justifyContent:'center', border:`2px solid ${C.surface}`, marginLeft:-5, flexShrink:0 }}>
+                  <User size={10} color={C.void} />
                 </div>
-              ))}
-              <div style={{ width:24, height:24, background:C.neon, display:'flex', alignItems:'center', justifyContent:'center', border:`2px solid ${C.surface}`, marginLeft:-6 }}>
-                <User size={12} color={C.void} />
               </div>
             </div>
-          </div>
 
-          <Divider />
-
-          {/* Transport */}
-          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 14px', zIndex:1 }}>
-            <AgBtn onClick={() => setCurrentBar(0)} title="Return to start (Home)"><SkipBack size={14} /></AgBtn>
-            <AgBtn onClick={togglePlay} active={transport==='playing'} title="Play/Pause (Space)">
-              {transport==='playing' ? <Pause size={14} /> : <Play size={14} />}
-            </AgBtn>
-            <AgBtn onClick={stop} title="Stop (Esc)"><Square size={14} /></AgBtn>
-            <AgBtn
-              onClick={() => setTransport(t => t==='recording' ? 'stopped' : 'recording')}
-              active={transport==='recording'}
-              activeColor={C.magenta}
-              title="Record (R)"
-            >
-              <div style={{
-                width:10, height:10,
-                background: transport==='recording' ? C.magenta : C.textMuted,
-                animation: transport==='recording' ? 'ag-rec 1s infinite' : 'none',
-              }} />
-            </AgBtn>
-          </div>
-
-          <Divider />
-
-          {/* BPM */}
-          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'0 16px', zIndex:1 }}>
-            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
-              <AgLabel>BPM</AgLabel>
+            {/* BPM + time sig */}
+            <div className="ag-bpm-block">
+              <span className="ag-bpm-label">BPM</span>
               <input
                 type="number" value={project.tempo} min={40} max={240}
                 onChange={e => pushHistory({ ...project, tempo: clamp(Number(e.target.value), 40, 240) })}
+                className="ag-bpm-number"
                 style={{
-                  background:C.void, border:`1px solid ${C.border}`,
-                  color:C.neon, padding:'2px 6px', fontSize:18, fontFamily:FONT.display,
-                  fontWeight:800, width:62, outline:'none', textAlign:'center', letterSpacing:'-0.03em',
+                  background:'transparent', border:'none', outline:'none',
+                  width:64, textAlign:'center', cursor:'ew-resize',
                 }}
               />
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
-              <AgLabel>SIG</AgLabel>
-              <div style={{ fontSize:14, fontWeight:700, color:C.textMuted, fontFamily:FONT.display }}>
-                {project.timeSignature[0]}/{project.timeSignature[1]}
-              </div>
-            </div>
-          </div>
-
-          <Divider />
-
-          {/* Position display */}
-          <div style={{ display:'flex', alignItems:'center', gap:12, padding:'0 14px', zIndex:1 }}>
-            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
-              <AgLabel>BAR</AgLabel>
-              <div style={{ fontSize:20, fontWeight:800, fontFamily:FONT.display, color:C.neon, lineHeight:1 }}>
-                {String(Math.floor(currentBar)+1).padStart(3,'0')}
-              </div>
-            </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
-              <AgLabel>TIME</AgLabel>
-              <div style={{ fontSize:11, fontWeight:600, fontFamily:FONT.mono, color:C.textMuted }}>
-                {formatTime(currentBar, project.tempo, TL.beatsPerBar)}
-              </div>
-            </div>
-          </div>
-
-          <Divider />
-
-          {/* Toggles */}
-          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
-            <AgBtn onClick={()=>setMetronome(v=>!v)} active={metronome} title="Metronome (M)"><Activity size={12} /> MET</AgBtn>
-            <AgBtn onClick={()=>setSnapGrid(v=>!v)}  active={snapGrid}  title="Snap Grid (G)"><Grid3x3 size={12} /> SNAP</AgBtn>
-            <AgBtn onClick={()=>setLoopOn(v=>!v)}     active={loopOn}     activeColor={C.cyan} title="Loop (L)">
-              <div style={{width:10,height:10,border:`2px solid currentColor`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:6,fontWeight:900}}>↺</div>LOOP
-            </AgBtn>
-          </div>
-
-          <Divider />
-
-          {/* Undo / Redo */}
-          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
-            <AgBtn onClick={undo} disabled={historyIdx===0}                  title="Undo (Cmd+Z)"><Undo2 size={12} /></AgBtn>
-            <AgBtn onClick={redo} disabled={historyIdx===history.length-1}   title="Redo (Cmd+Shift+Z)"><Redo2 size={12} /></AgBtn>
-          </div>
-
-          <Divider />
-
-          {/* Zoom */}
-          <div style={{ display:'flex', alignItems:'center', gap:4, padding:'0 10px', zIndex:1 }}>
-            <AgBtn onClick={()=>setZoom(z=>Math.max(z-0.2,TL.minZoom))} title="Zoom out"><ZoomOut size={12} /></AgBtn>
-            <span style={{ fontSize:9, color:C.textMuted, minWidth:32, textAlign:'center', fontWeight:600 }}>
-              {Math.round(zoom*100)}%
-            </span>
-            <AgBtn onClick={()=>setZoom(z=>Math.min(z+0.2,TL.maxZoom))} title="Zoom in"><ZoomIn size={12} /></AgBtn>
-          </div>
-
-          <Divider />
-
-          {/* View toggles */}
-          <div style={{ display:'flex', alignItems:'center', gap:3, padding:'0 10px', zIndex:1 }}>
-            <AgBtn onClick={()=>setShowMixer(v=>!v)}   active={showMixer}   title="Mixer"><Sliders size={12} /> MIX</AgBtn>
-            <AgBtn onClick={()=>setShowAI(v=>!v)}       active={showAI}      title="AI Panel"><Zap size={12} /> AI</AgBtn>
-            <AgBtn onClick={()=>setShowActivity(v=>!v)} active={showActivity} title="Activity"><Radio size={12} /> LOG</AgBtn>
-            <AgBtn onClick={()=>setShowVST(v=>!v)}         active={showVST}         title="VST Browser"><Music size={12} /> VST</AgBtn>
-            <AgBtn onClick={()=>setShowLoopStation(v=>!v)} active={showLoopStation} title="Loop Station"><Repeat2 size={12} /> 505</AgBtn>
-          </div>
-
-          {/* Master vol + CPU — pushed right */}
-          <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:12, padding:'0 16px', zIndex:1 }}>
-            <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
-              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                <AgLabel>CPU</AgLabel>
-                <div style={{ width:60, height:4, background:C.border }}>
-                  <div style={{
-                    height:'100%', width:`${cpuLoad*100}%`,
-                    background: cpuLoad>0.8 ? C.magenta : cpuLoad>0.6 ? C.yellow : C.neon,
-                    transition:'width .2s, background .2s',
-                  }} />
-                </div>
-                <span style={{ fontSize:8, color:C.textMuted, width:28, textAlign:'right' }}>{Math.round(cpuLoad*100)}%</span>
-              </div>
-              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                <AgLabel>LLPTE</AgLabel>
-                <span style={{ fontSize:8, color:C.neon, fontWeight:700, animation:'ag-pulse 2s infinite' }}>
-                  {llpteLatency}ms
+              <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+                <span style={{ fontSize:6, letterSpacing:'.3em', textTransform:'uppercase', color:C.textMuted, fontFamily:FONT.mono }}>SIG</span>
+                <span style={{ fontSize:13, fontWeight:700, color:C.textMuted, fontFamily:FONT.display, lineHeight:1 }}>
+                  {project.timeSignature[0]}/{project.timeSignature[1]}
                 </span>
               </div>
             </div>
-            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
-              <AgLabel>MASTER</AgLabel>
-              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+
+            {/* Controls block — transport + position + all toggles */}
+            <div className="ag-controls-block">
+
+              {/* Transport */}
+              <AgBtn onClick={() => setCurrentBar(0)} title="Return to start (Home)"><SkipBack size={13} /></AgBtn>
+              <AgBtn onClick={togglePlay} active={transport==='playing'} title="Play/Pause (Space)">
+                {transport==='playing' ? <Pause size={13} /> : <Play size={13} />}
+              </AgBtn>
+              <AgBtn onClick={stop} title="Stop (Esc)"><Square size={13} /></AgBtn>
+              <AgBtn
+                onClick={() => setTransport(t => t==='recording' ? 'stopped' : 'recording')}
+                active={transport==='recording'}
+                activeColor={C.magenta}
+                title="Record"
+              >
+                <div style={{
+                  width:9, height:9,
+                  background: transport==='recording' ? C.magenta : C.textMuted,
+                  animation: transport==='recording' ? 'ag-rec 1s infinite' : 'none',
+                  flexShrink:0,
+                }} />
+              </AgBtn>
+
+              <Divider />
+
+              {/* Position */}
+              <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+                <AgLabel>BAR</AgLabel>
+                <div style={{ fontSize:18, fontWeight:800, fontFamily:FONT.display, color:C.neon, lineHeight:1 }}>
+                  {String(Math.floor(currentBar)+1).padStart(3,'0')}
+                </div>
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+                <AgLabel>TIME</AgLabel>
+                <div style={{ fontSize:9, fontWeight:600, fontFamily:FONT.mono, color:C.textMuted }}>
+                  {formatTime(currentBar, project.tempo, TL.beatsPerBar)}
+                </div>
+              </div>
+
+              <Divider />
+
+              {/* Grid toggles */}
+              <AgBtn onClick={()=>setMetronome(v=>!v)} active={metronome} title="Metronome (M)"><Activity size={11} /> MET</AgBtn>
+              <AgBtn onClick={()=>setSnapGrid(v=>!v)}  active={snapGrid}  title="Snap Grid (G)"><Grid3x3 size={11} /> SNAP</AgBtn>
+              <AgBtn onClick={()=>setLoopOn(v=>!v)}    active={loopOn}    activeColor={C.cyan} title="Loop (L)">
+                <span style={{fontSize:11,fontWeight:900}}>↺</span> LOOP
+              </AgBtn>
+
+              <Divider />
+
+              {/* Undo / Redo */}
+              <AgBtn onClick={undo} disabled={historyIdx===0}                title="Undo (⌘Z)"><Undo2 size={11} /></AgBtn>
+              <AgBtn onClick={redo} disabled={historyIdx===history.length-1} title="Redo (⌘⇧Z)"><Redo2 size={11} /></AgBtn>
+
+              <Divider />
+
+              {/* Zoom */}
+              <AgBtn onClick={()=>setZoom(z=>Math.max(z-0.2,TL.minZoom))} title="Zoom out"><ZoomOut size={11} /></AgBtn>
+              <span style={{ fontSize:8, color:C.textMuted, minWidth:28, textAlign:'center', fontWeight:600, flexShrink:0 }}>
+                {Math.round(zoom*100)}%
+              </span>
+              <AgBtn onClick={()=>setZoom(z=>Math.min(z+0.2,TL.maxZoom))} title="Zoom in"><ZoomIn size={11} /></AgBtn>
+
+              <Divider />
+
+              {/* View toggles */}
+              <AgBtn onClick={()=>setShowMixer(v=>!v)}       active={showMixer}       title="Mixer"><Sliders size={11} /> MIX</AgBtn>
+              <AgBtn onClick={()=>setShowAI(v=>!v)}           active={showAI}          title="AI Panel"><Zap size={11} /> AI</AgBtn>
+              <AgBtn onClick={()=>setShowActivity(v=>!v)}     active={showActivity}    title="Activity Log"><Radio size={11} /> LOG</AgBtn>
+              <AgBtn onClick={()=>setShowVST(v=>!v)}           active={showVST}         title="VST Browser"><Music size={11} /> VST</AgBtn>
+              <AgBtn onClick={()=>setShowLoopStation(v=>!v)}   active={showLoopStation} title="Loop Station"><Repeat2 size={11} /> 505</AgBtn>
+
+              <Divider />
+
+              {/* CPU + LLPTE */}
+              <div style={{ display:'flex', flexDirection:'column', gap:3, flexShrink:0 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                  <AgLabel>CPU</AgLabel>
+                  <div style={{ width:48, height:3, background:C.border, flexShrink:0 }}>
+                    <div style={{
+                      height:'100%', width:`${cpuLoad*100}%`,
+                      background: cpuLoad>0.8 ? C.magenta : cpuLoad>0.6 ? C.yellow : C.neon,
+                      transition:'width .2s, background .2s',
+                    }} />
+                  </div>
+                  <span style={{ fontSize:7, color:C.textMuted, width:22, textAlign:'right' }}>{Math.round(cpuLoad*100)}%</span>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+                  <AgLabel>LLPTE</AgLabel>
+                  <span style={{ fontSize:7, color:C.neon, fontWeight:700, animation:'ag-pulse 2s infinite' }}>{llpteLatency}ms</span>
+                </div>
+              </div>
+
+              <Divider />
+
+              {/* Master volume */}
+              <div style={{ display:'flex', alignItems:'center', gap:5, flexShrink:0 }}>
                 <button
-                  onClick={()=>setMasterMuted(v=>!v)}
-                  style={{ background:'none', border:'none', cursor:'pointer', color:masterMuted?C.magenta:C.textMuted, padding:2 }}
+                  onClick={() => setMasterMuted(v=>!v)}
+                  style={{ background:'none', border:'none', cursor:'pointer', color:masterMuted?C.magenta:C.textMuted, padding:2, flexShrink:0 }}
                 >
-                  {masterMuted ? <VolumeX size={12} /> : <Volume2 size={12} />}
+                  {masterMuted ? <VolumeX size={11} /> : <Volume2 size={11} />}
                 </button>
                 <input
                   type="range" min={0} max={1} step={0.01}
                   value={masterMuted ? 0 : masterVol}
-                  onChange={e=>setMasterVol(Number(e.target.value))}
-                  style={{ width:70, height:3, accentColor:C.neon }}
+                  onChange={e => setMasterVol(Number(e.target.value))}
+                  style={{ width:60, height:2, accentColor:C.neon }}
                 />
-                <span style={{ fontSize:8, color:C.neon, minWidth:26, textAlign:'right' }}>
+                <span style={{ fontSize:7, color:C.neon, minWidth:24, textAlign:'right', flexShrink:0 }}>
                   {masterMuted ? '—' : `${Math.round(masterVol*100)}%`}
                 </span>
               </div>
-            </div>
-            <div style={{ display:'flex', gap:3 }}>
-              <AgBtn title="Upload"><Upload size={12} /></AgBtn>
-              <AgBtn title="Export"><Download size={12} /></AgBtn>
-              <AgBtn title="Share"><Share2 size={12} /></AgBtn>
+
+              {/* File actions */}
+              <AgBtn title="Export"><Download size={11} /></AgBtn>
+              <AgBtn title="Share"><Share2 size={11} /></AgBtn>
+
             </div>
           </div>
-        </div>
-        {/* Ticker */}
-        <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
-        <div style={{ overflow:"hidden", position:"relative", background:"#080808", padding:"5px 0", flexShrink:0 }}>
-          <div style={{ display:"flex", width:"max-content", animation:"ag-scroll 28s linear infinite" }}>
-            {["R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System","R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System"].map((item, i) => (
-              <span key={i} style={{ padding:"0 18px", fontSize:9, letterSpacing:"0.2em", textTransform:"uppercase", fontFamily:"\"IBM Plex Mono\",monospace", color:"#fff", whiteSpace:"nowrap" }}>
-                {item}<span style={{ color:"#a3e635", marginLeft:8 }}>/</span>
-              </span>
-            ))}
+
+          {/* Ticker */}
+          <div className="ag-ticker-row">
+            <div className="ag-ticker-inner">
+              {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+                <span key={i} className="ag-ticker-item">
+                  {item}<span className="ag-ticker-sep">/</span>
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        </header>
 
         {/* ── LLPTE STATUS STRIP ──────────────────────────────────────────────── */}
         <div style={{
@@ -1314,7 +1399,7 @@ function CollabDAWProInner() {
                 {i===2 && <span style={{marginLeft:6, color:C.neon, fontWeight:700}}>{llpteLatency}ms</span>}
               </div>
               {i < 4 && (
-                <div style={{ width:18, height:1, background:`linear-gradient(90deg,${C.neon},${C.border})`, flexShrink:0, animation:'none' }} />
+                <div style={{ width:18, height:1, background:`linear-gradient(90deg,${C.neon},${C.border})`, flexShrink:0 }} />
               )}
             </React.Fragment>
           ))}
@@ -1340,9 +1425,7 @@ function CollabDAWProInner() {
             </div>
             <div style={{ flex:1, overflow:'hidden' }}>
               <Suspense fallback={<div style={{ padding:16, fontSize:8, color:C.textMuted, fontFamily:FONT.mono, letterSpacing:'.2em' }}>LOADING VSTS…</div>}>
-                <VSTBrowser 
-          onPluginSelect={() => {}}
-        />
+                <VSTBrowser onPluginSelect={() => {}} />
               </Suspense>
             </div>
           </div>
