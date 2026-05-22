@@ -213,7 +213,7 @@ app.get('/api/admin/stats', async (req: Request, res: Response) => {
   // Global error handler — 4-parameter signature required by Express
   app.use(loopStationErrorHandler);
 
-  httpServer.listen(PORT, () => {
+  httpServer.listen(PORT, "0.0.0.0", () => {
     logger.info('R3 Server started', { port: PORT, env: NODE_ENV, ts: new Date().toISOString() });
   });
 }

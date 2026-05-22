@@ -331,7 +331,7 @@ const httpServer = createServer(app);
 
 attachCollabServer(httpServer);
 
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "0.0.0.0", () => {
   logger.info('[R3 v4] Server listening', { port: PORT });
   logger.info('[R3 v4] CORS allowed origins:', { origins: allowedOrigins });
   logger.info('[R3 v4] tRPC at /api/trpc');
