@@ -94,13 +94,6 @@ import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
 
 // ──────────────────────────────────────────────────────────────────────────────
-// EXPRESS APP SETUP
-// ──────────────────────────────────────────────────────────────────────────────
-
-const app = express();
-
-// ✅ FIX #1: GLOBAL ERROR HANDLER REGISTERED FIRST
-// Register IMMEDIATELY after app creation, before ANY middleware.
 // This catches errors from all downstream middleware and routes.
 // The 4-parameter signature (err, req, res, next) is REQUIRED by Express.
 app.use((err: any, req: Request, res: Response, next: Function) => {
@@ -271,6 +264,12 @@ async function main(): Promise<void> {
       });
     });
 
+    // ── Global error handler — MUST be LAST (4-parameter signature required) ──
+    // Express detects 4-parameter functions as error handlers.
+    // MUST come after all routes and other middleware.
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+      loopStationErrorHandler(err, req, res, _next);
+    });
     // ── Start server ───────────────────────────────────────────────────────
     await new Promise<void>((resolve, reject) => {
       httpServer.listen(PORT, '0.0.0.0', () => {
@@ -298,6 +297,12 @@ async function main(): Promise<void> {
   }
 }
 
+    // ── Global error handler — MUST be LAST (4-parameter signature required) ──
+    // Express detects 4-parameter functions as error handlers.
+    // MUST come after all routes and other middleware.
+    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+      loopStationErrorHandler(err, req, res, _next);
+    });
 // ── Start server and handle fatal errors ──────────────────────────────────────
 main().catch((err) => {
   logger.error('Server crashed', {
