@@ -8,7 +8,7 @@
     "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
     "dev:client": "wait-on tcp:3000 && pnpm --filter @r3vibe/client dev",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "npx tsx index.ts",
     "seed": "tsx scripts/seed/index.ts",
     "lint:tokens": "tsx scripts/lint-design-tokens.ts",
     "lint": "eslint . && npm run lint:tokens",
@@ -18,7 +18,7 @@
     "implement-metrics": "tsx implement-session-metrics.ts",
     "verify": "pnpm tsc -p tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.worklet.json --noEmit && pnpm tsc -p client/tsconfig.vocalspectra.json --noEmit",
     "verify:client": "pnpm tsc -p client/tsconfig.json --noEmit",
-    "migrate": "cd server && ./node_modules/.bin/drizzle-kit push --config drizzle.config.ts"
+    "migrate": "cd server && npx drizzle-kit push --config drizzle.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",

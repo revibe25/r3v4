@@ -2,6 +2,6 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "pnpm run build && pnpm run migrate && pnpm start"
+startCommand = "pnpm run migrate && pnpm start"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
