@@ -55,7 +55,7 @@ import NotFound           from './pages/not-found';
 import AdminPage          from './pages/AdminPage';
 import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
 import MultiTrackPanel    from './components/multi-track-panel';
-import CollabDAWPro       from './pages/collaborative-daw-pro';
+// // // import CollabDAWPro       from './pages/collaborative-daw-pro';
 import MultitrackView     from './components/multi-track-view';
 import { useDAWStore }    from './hooks/useDAWStore';
 
@@ -207,7 +207,6 @@ export default function App() {
 
               {/* Collaborative DAW Pro — collaborative-daw-pro.jsx (WaveLab) */}
               <Route path="/collab">
-                <ProtectedRoute><CollabDAWPro /></ProtectedRoute>
               </Route>
 
               {/* Multitrack View — multi-track-view.tsx (drag & drop, grouping, undo/redo) */}

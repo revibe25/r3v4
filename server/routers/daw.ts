@@ -38,6 +38,14 @@ import { eq, and, desc, isNull } from 'drizzle-orm';
 
 // ── Zod schemas ───────────────────────────────────────────────────────────────
 
+const TrackInputSchema = z.object({
+  id:    z.string(),
+  gain:  z.number().min(0).max(1.5),
+  pan:   z.number().min(-1).max(1),
+  mute:  z.boolean(),
+  solo:  z.boolean(),
+});
+
 const TrackSchema = z.object({
   id:          z.string(),
   label:       z.string().max(40),
@@ -135,7 +143,7 @@ interface MixSuggestion {
  *   import { generateSuggestions } from '@llpte/ai';
  */
 async function runLLPTEAnalysis(
-  tracks: z.infer<typeof TrackSchema>[],
+  tracks: z.infer<typeof TrackInputSchema>[],
   bpm: number,
 ): Promise<{ signal: LLPTESignal; suggestions: MixSuggestion[] }> {
   // Derive pseudo-signal from track mix parameters
@@ -410,7 +418,7 @@ export const dawRouter = router({
   // ── ai.suggestions ───────────────────────────────────────────────────────────
   'ai.suggestions': protectedProcedure
     .input(z.object({
-      tracks:   z.array(TrackSchema),
+      tracks:   z.array(TrackInputSchema),
       bpm:      z.number().min(40).max(240),
       position: z.number().min(0),
     }))
