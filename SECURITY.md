@@ -74,6 +74,25 @@ Documents which audit surfaces have been reviewed and which remain gaps.
 - **Action:** Audit RNG seeding for cryptographic quality; verify all tokens use crypto.getRandomValues() or similar; audit HMAC/JWT signing
 - **Target:** Pre-first-external-beta
 
+### Audit Surfaces — Critical Files (Mythos Lesson 2)
+
+Per MYTHOS-SKILL-v2.md mandatory gap-naming requirement, the following surfaces have been registered for audit:
+
+**Auth & Trust Chain:**
+- **server/middleware/auth.ts** — Authentication middleware; trust chain entry point. Status: Partial audit (timing oracle known; full auth audit pending pre-external-beta)
+- **server/base-procedures.ts** — Base protected procedure definition; all tRPC route guards depend on this. Status: Not yet audited
+- **crypto.timingSafeEqual** — Timing-safe equality check for token/credential comparison. Status: In use (line marked for verification that constant-time is enforced)
+
+**API Surface:**
+- **server/routes/internal.ts** — Unauthenticated internal routes; must verify no data exposure. Status: Not yet audited
+- **server/routers/adminRouter.ts** — Admin panel routes; must verify privilege checks. Status: Not yet audited
+
+**Real-Time & State:**
+- **ws/collab.ts** — WebSocket collaboration layer; cross-user room data isolation. Status: Not yet audited; high risk for multi-user data leaks
+- **session-metrics.service.ts** — Session ownership scoping; must verify metrics don't leak across users. Status: Not yet audited
+
+**Action:** Each surface must be read and approved by security owner before first external beta release. See Lesson 2 enforcement rule: "Any file listed as 'Must read before release' that was not read makes the audit incomplete."
+
 ### Regular Expressions (ReDoS)
 - **Status:** Not yet audited
 - **Components:** Any user-supplied input that reaches new RegExp() (search filters, route patterns, schema validation)
