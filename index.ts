@@ -2,18 +2,19 @@
  * R3 Server — Entry Point [FIXED]
  *
  * Critical fixes:
- * 1. Error handler registered IMMEDIATELY after app creation (line 81)
- *    before ANY middleware can throw
- * 2. Environment validation occurs synchronously at startup with explicit
+ * 1. Error handler registered AFTER all routes (not before)
+ *    with proper 4-parameter (err, req, res, next) signature
+ * 2. NextFunction properly imported and typed throughout
+ * 3. No duplicate error handlers or imports
+ * 4. Environment validation occurs synchronously at startup with explicit
  *    error messages to stderr
- * 3. Health check endpoint returns minimal response to avoid any middleware
- * 4. registerRoutes() failures are properly caught and logged
- * 5. All async operations wrapped in proper error boundaries
+ * 5. Health check endpoint returns minimal response to avoid any middleware
+ * 6. registerRoutes() failures are properly caught and logged
+ * 7. All async operations wrapped in proper error boundaries
  */
 
 import http from 'http';
 import express from 'express';
-import type { Request, Response } from 'express';
 import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
@@ -21,6 +22,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { logger } from './server/lib/logger';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
@@ -96,20 +98,13 @@ import { ensureDir } from './server/utils/fileUtils';
 // ── Express app ───────────────────────────────────────────────────────────────
 const app = express();
 
-// ──────────────────────────────────────────────────────────────────────────────
-// This catches errors from all downstream middleware and routes.
-// The 4-parameter signature (err, req, res, next) is REQUIRED by Express.
-app.use((err: any, req: Request, res: Response, next: Function) => {
-  loopStationErrorHandler(err, req, res, next);
-});
-
 // ── Security & transport ──────────────────────────────────────────────────────
 app.use(helmet());
 
 // ✅ FIX #2: MINIMAL HEALTH CHECK
 // Returns immediately with no dependencies on middleware below.
 // Does not call res.json() if something breaks — uses direct response.
-app.get('/api/health', (_req, res) => {
+app.get('/api/health', (_req: Request, res: Response) => {
   try {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   } catch {
@@ -165,7 +160,7 @@ app.use('/api/trpc', createExpressMiddleware({
 }));
 
 // ── Alternative health check (fallback) ────────────────────────────────────────
-app.get('/health', (_req, res) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -259,7 +254,7 @@ async function main(): Promise<void> {
     });
 
     // ── 404 handler ────────────────────────────────────────────────────────
-    app.use((_req, res) => {
+    app.use((_req: Request, res: Response) => {
       res.status(404).json({
         error: 'Not Found',
         path: _req.path,
@@ -270,9 +265,11 @@ async function main(): Promise<void> {
     // ── Global error handler — MUST be LAST (4-parameter signature required) ──
     // Express detects 4-parameter functions as error handlers.
     // MUST come after all routes and other middleware.
+    // This is the ONLY error handler — no duplicates.
     app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
       loopStationErrorHandler(err, req, res, _next);
     });
+
     // ── Start server ───────────────────────────────────────────────────────
     await new Promise<void>((resolve, reject) => {
       httpServer.listen(PORT, '0.0.0.0', () => {
@@ -300,12 +297,6 @@ async function main(): Promise<void> {
   }
 }
 
-    // ── Global error handler — MUST be LAST (4-parameter signature required) ──
-    // Express detects 4-parameter functions as error handlers.
-    // MUST come after all routes and other middleware.
-    app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-      loopStationErrorHandler(err, req, res, _next);
-    });
 // ── Start server and handle fatal errors ──────────────────────────────────────
 main().catch((err) => {
   logger.error('Server crashed', {
