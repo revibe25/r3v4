@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Install build dependencies + pnpm
 RUN apk add --no-cache python3 py3-pip && \
@@ -17,6 +17,9 @@ RUN pnpm install --frozen-lockfile --filter @r3vibe/server...
 # The ... suffix means: install server AND all its workspace dependencies
 # This includes shared/ and any root-level packages server/ imports from
 
+# Build TypeScript
+RUN pnpm build
+
 # Copy source
 COPY server/ ./server/
 COPY shared/ ./shared/
@@ -31,4 +34,4 @@ EXPOSE 3000
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser
 
-CMD ["pnpm", "exec", "tsx", "index.ts"]
+CMD ["node", "dist/index.js"]
