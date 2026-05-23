@@ -27,9 +27,9 @@ RUN addgroup --system appgroup && \
     adduser --system --ingroup appgroup appuser && \
     chown -R appuser:appgroup /app
 USER appuser
-EXPOSE 8080
+EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=30s \
-  CMD curl -f http://localhost:${PORT:-8080}/api/health || exit 1
+  CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
 CMD ["node", "dist/index.js"]
 
 # Force clean rebuild — remove this line on next deploy
