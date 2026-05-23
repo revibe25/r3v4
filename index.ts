@@ -93,6 +93,9 @@ import { attachCollabServer, getRoomStats } from './server/ws/collab';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
 
+// ── Express app ───────────────────────────────────────────────────────────────
+const app = express();
+
 // ──────────────────────────────────────────────────────────────────────────────
 // This catches errors from all downstream middleware and routes.
 // The 4-parameter signature (err, req, res, next) is REQUIRED by Express.
