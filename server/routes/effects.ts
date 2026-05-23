@@ -23,6 +23,11 @@ import { storage }     from "../storage";
 
 const router = Router();
 
+// Helper: normalize Express params (can be string | string[])
+const getStringParam = (p: string | string[] | undefined): string =>
+  Array.isArray(p) ? p[0] : (p || '');
+
+
 // ── Effect registry ───────────────────────────────────────────────────────────
 
 type EffectCategory =
@@ -121,7 +126,7 @@ router.get("/", requireUser, (_req, res) => {
 // ── GET /effects/:id ──────────────────────────────────────────────────────────
 
 router.get("/:id", requireUser, (req, res) => {
-  const effect = EFFECTS_REGISTRY.get(req.params.id);
+  const effect = EFFECTS_REGISTRY.get(getStringParam(req.params.id));
   if (!effect) {
     return res.status(404).json({ error: `Effect '${req.params.id}' not found` });
   }
@@ -134,7 +139,7 @@ router.post("/:id/apply", requireUser, async (req, res) => {
   // §SES.16 BLOCK fix: effectId comes from the URL path parameter only.
   // Do NOT fall back to req.body.effectId — that would decouple the handler
   // from the route and violate REST semantics.
-  const effectId = req.params.id;
+  const effectId = getStringParam(req.params.id);
 
   const parsed = applyEffectSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -168,7 +173,7 @@ router.post("/:id/apply", requireUser, async (req, res) => {
 // ── DELETE /effects/:id/apply ─────────────────────────────────────────────────
 
 router.delete("/:id/apply", requireUser, async (req, res) => {
-  const effectId = req.params.id;
+  const effectId = getStringParam(req.params.id);
 
   const bodySchema = z.object({ trackId: z.string().min(1) });
   const parsed = bodySchema.safeParse(req.body);
