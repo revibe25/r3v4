@@ -51,7 +51,7 @@ process.on('uncaughtException', (err: Error) => {
 
 // ── ENVIRONMENT VALIDATION (before any middleware setup) ───────────────────────
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
 
 // Production env validation: explicit, early, fail-fast
 if (NODE_ENV === 'production') {
