@@ -1,8 +1,9 @@
 {
   "include": [
+    "index.ts",
     "server/**/*",
     "shared/**/*"
-  ],
+],
   "exclude": [
     "node_modules",
     "build",
@@ -16,6 +17,8 @@
     "vite.config.ts"
   ],
   "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -26,14 +29,12 @@
     "jsx": "react-jsx",
     "incremental": true,
     "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
-    "noEmit": true,
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "types": [
       "node"

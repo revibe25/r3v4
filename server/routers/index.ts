@@ -26,13 +26,7 @@
 
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { subscriptionRouter } from './subscription';
-import { dawRouter }          from './daw';
-import { publicProc }         from '../trpc';
 import { router } from '../trpc';
-import { mixerRouter }  from './mixer.router';
-import { djRouter }     from './dj.router';
-import { aiMixRouter }  from './aiMix.router';
 import { protectedProcedure } from '../base-procedures';
 import { storage } from '../storage';
 import type { InsertSession, InsertProject, InsertPreset } from '../storage';
@@ -43,7 +37,7 @@ import {
 } from '../db/schema';
 
 // ── Sessions ──────────────────────────────────────────────────────────────────
-const sessionsRouter = router({
+export const sessionsRouter = router({
   list: protectedProcedure
     .query(({ ctx }) => storage.getSessionsByUser(ctx.user.id)),
 

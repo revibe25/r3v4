@@ -1848,9 +1848,9 @@ const FXRackInline = memo(({ trackId }: FXRackInlineProps) => {
   const updateTrack = useDAWStore(s => s.updateTrack);
   const toggleFXSlot = useDAWStore(s => s.toggleFXSlot);
   const track = tracks.find(t => t.id === trackId);
-  if (!track) return null;
 
   const addFX = useCallback((type: FXSlot['type']) => {
+    if (!track) return;
     updateTrack(trackId, {
       fxChain: [...track.fxChain, {
         id: `fx_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
@@ -1859,7 +1859,8 @@ const FXRackInline = memo(({ trackId }: FXRackInlineProps) => {
         params: { gain: 0, freq: 1000, q: 1, threshold: -20, ratio: 4, decay: 1, wet: 0.3 },
       }],
     });
-  }, [trackId, track.fxChain, updateTrack]);
+  }, [trackId, track?.fxChain, updateTrack]);
+  if (!track) return null;
 
   return (
     <div className="flex flex-col px-3 py-2 border-l-2 border-purple-500/40 min-w-[240px] bg-[var(--panel-deep)]">

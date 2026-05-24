@@ -43,6 +43,28 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   onClick,
   showWaveform = false,
 }) => {
+  // PATCH-M12: Null-guard on callback invocations
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) onClick(clip.id);
+    if (onStartDrag) onStartDrag(clip.id, e.clientX);
+  }, [clip.id, onClick, onStartDrag]);
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onStartResize) {
+      onStartResize(clip.id, e.clientX);
+    }
+  }, [clip.id, onStartResize]);
+
+  // PATCH-M13: Keyboard handler for accessibility
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (onClick) onClick(clip.id);
+    }
+  }, [clip.id, onClick]);
+
   // PATCH-M16: Input validation
   const validation = validateClip(clip);
   if (!validation.valid) {
@@ -65,27 +87,7 @@ export const ClipBlock: React.FC<ClipBlockProps> = ({
   const defaultColor = clip.type === 'midi' ? 'var(--track-indigo)' : 'var(--accent-purple)';
   const selectedColor = clip.type === 'midi' ? 'var(--looper-blue)' : 'var(--accent-violet-soft)';
   
-  // PATCH-M12: Null-guard on callback invocations
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onClick) onClick(clip.id);
-    if (onStartDrag) onStartDrag(clip.id, e.clientX);
-  }, [clip.id, onClick, onStartDrag]);
 
-  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onStartResize) {
-      onStartResize(clip.id, e.clientX);
-    }
-  }, [clip.id, onStartResize]);
-
-  // PATCH-M13: Keyboard handler for accessibility
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      if (onClick) onClick(clip.id);
-    }
-  }, [clip.id, onClick]);
 
   return (
     <div

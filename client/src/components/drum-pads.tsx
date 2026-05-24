@@ -583,7 +583,7 @@ export function DrumPads({
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
   // pressedPadsRef is a ref — intentionally excluded so this loop never restarts on pad hits
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [pads, getPadColor, animationMode]);
 
   // Draw waveform visualization

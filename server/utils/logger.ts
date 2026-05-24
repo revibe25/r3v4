@@ -28,7 +28,7 @@ function resolveArgs(
 export const logger = {
   info(msgOrMeta: string | Record<string, unknown>, metaOrMsg?: unknown): void {
     const { message, meta } = resolveArgs(msgOrMeta, metaOrMsg);
-    console.log(makeEntry("info", message, meta));
+    process.stdout.write(makeEntry("info", message, meta) + "\n");
   },
   warn(msgOrMeta: string | Record<string, unknown>, metaOrMsg?: unknown): void {
     const { message, meta } = resolveArgs(msgOrMeta, metaOrMsg);
