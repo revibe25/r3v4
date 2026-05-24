@@ -285,7 +285,7 @@ export const AudioReactiveScene = memo(({ fftRef, visible, accent = 'var(--statu
       cubeGeo.dispose();
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
     };
-  }, [accent]); // eslint-disable-line react-hooks/exhaustive-deps — fftRef is a stable ref
+  }, [accent]); // eslint-disable-line react-hooks/exhaustive-deps -- fftRef is a stable ref
 
   // Sync visibility — don't destroy/recreate just to hide
   useEffect(() => {

@@ -106,7 +106,7 @@ export function loopStationErrorHandler(
       code,
       ...(process.env.NODE_ENV === 'development' && {
         stack: err.stack,
-        cause: (err as any).cause instanceof Error ? (err as any).cause.message : undefined,
+        cause: 'cause' in err && err.cause instanceof Error ? err.cause.message : undefined,
       }),
     });
 

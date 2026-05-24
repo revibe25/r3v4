@@ -1,0 +1,7 @@
+dist/
+server/dist/
+.r3-backups/
+.audio_hook_backup_*/
+internal/archive/
+internal/dev/
+server/tools/create-pitch-deck-pro.js

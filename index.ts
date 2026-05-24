@@ -11,6 +11,7 @@
  * 5. Health check endpoint returns minimal response to avoid any middleware
  * 6. registerRoutes() failures are properly caught and logged
  * 7. All async operations wrapped in proper error boundaries
+ * 8. Located in server/ directory as monorepo best practice
  */
 
 import http from 'http';
@@ -22,7 +23,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { logger } from './server/lib/logger';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
@@ -183,7 +184,7 @@ async function main(): Promise<void> {
     }
 
     // ── Ensure loop storage directories exist ──────────────────────────────
-    const storageBase = process.env.LOOP_STORAGE_BASE ?? './server/storage';
+    const storageBase = process.env.LOOP_STORAGE_BASE ?? './storage';
     try {
       await Promise.all([
         ensureDir(`${storageBase}/loops`),
