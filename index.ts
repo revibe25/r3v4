@@ -81,6 +81,9 @@ if (NODE_ENV === 'production') {
   }
 }
 
+// ── Express app (must be before route imports to avoid circular TDZ) ───────────────
+import { app } from './server/app';
+
 // ── Imports (after env validation) ────────────────────────────────────────────
 import { trpcAuth, loopStationAuth } from './server/middleware/auth';
 import { loopStationErrorHandler } from './server/middleware/errorHandler';
@@ -96,8 +99,6 @@ import { attachCollabServer, getRoomStats } from './server/ws/collab';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
 
-// ── Express app ───────────────────────────────────────────────────────────────
-const app = express();
 
 // ── Security & transport ──────────────────────────────────────────────────────
 app.use(helmet());
