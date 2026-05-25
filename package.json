@@ -4,6 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "test": "playwright test",
+    "test:happy-path": "playwright test happy-path",
+    "test:report": "playwright show-report",
     "dev": "concurrently --kill-others-on-fail -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
     "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
     "dev:client": "wait-on tcp:3000 && pnpm --filter @r3vibe/client dev",
@@ -47,6 +50,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.59.1",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
