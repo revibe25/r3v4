@@ -12,7 +12,7 @@ COPY packages/llpte-core/package.json ./packages/llpte-core/
 COPY packages/llpte-adapters/package.json ./packages/llpte-adapters/
 COPY packages/llpte-execution/package.json ./packages/llpte-execution/
 COPY packages/llpte-transition-graph/package.json ./packages/llpte-transition-graph/
-RUN pnpm install --frozen-lockfile --filter @r3vibe/server...
+RUN pnpm install --frozen-lockfile
 
 COPY server/ ./server/
 COPY shared/ ./shared/
