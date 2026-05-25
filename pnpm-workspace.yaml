@@ -9,3 +9,15 @@ ignoredBuiltDependencies:
   - bcrypt
   - bufferutil
   - esbuild
+
+pnpm:
+  overrides:
+    "@smithy/types": "4.13.1"
+    "drizzle-orm": "0.45.2"
+    "postgres": "3.4.9"
+    "picomatch": ">=4.0.4"
+    "esbuild": "0.25.12"
+    "vite": ">=6.4.2"
+    "js-cookie": ">=3.0.7"
+    "qs": ">=6.15.2"
+    "ws": ">=8.20.1"
