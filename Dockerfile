@@ -33,3 +33,5 @@ HEALTHCHECK --interval=15s --timeout=5s --retries=3 --start-period=30s \
   CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
 CMD ["node", "dist/server/index.js"]
 
+
+# Cache bust: 1779683317
