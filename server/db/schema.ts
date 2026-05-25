@@ -12,12 +12,22 @@
  *           the last line of defence. A migration is required: see
  *           migrations/0001_add_not_null_ownership.sql
  */
-import { serial, numeric, bigint } from "drizzle-orm/pg-core";
+
 import { sql } from "drizzle-orm";
 import {
-  pgTable, text, varchar, jsonb, integer, boolean,
-  timestamp, real, index, uuid, json,
+  boolean,
+  index,
+  integer,
+  json,
+  jsonb,
+  pgTable,
+  real,
+  text,
+  timestamp,
+  uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
+
 import { createInsertSchema } from "drizzle-zod";
 
 // ── Re-export canonical subscription types so existing imports keep working ───
@@ -254,12 +264,17 @@ export const insertPresetSchema      = createInsertSchema(presets);
 export const insertAIDecisionSchema  = createInsertSchema(aiDecisionLog);
 
 export const sessionMetrics = pgTable("session_metrics", {
-  id:                serial("id").primaryKey(),
-  userId:            varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  sessionId:         varchar("session_id").references(() => sessions.id, { onDelete: "set null" }),
-  durationSeconds:   numeric("duration_seconds", { precision: 10, scale: 1 }),
-  timeSavedSeconds:  numeric("time_saved_seconds", { precision: 10, scale: 1 }),
-  peakEnergyScore:   numeric("peak_energy_score", { precision: 6, scale: 4 }),
-  mixQualityScore:   numeric("mix_quality_score", { precision: 6, scale: 4 }),
-  createdAt:         bigint("created_at", { mode: "number" }).notNull().default(sql`EXTRACT(EPOCH FROM NOW())::BIGINT`),
+  id:               uuid("id").defaultRandom().primaryKey(),
+  sessionId:        uuid("session_id").notNull(),
+  userId:           text("user_id").notNull(),
+  bpm:              integer("bpm").notNull().default(128),
+  trackIds:         jsonb("track_ids").$type<string[]>().notNull().default([]),
+  durationSeconds:  integer("duration_seconds").notNull().default(0),
+  timeSavedSeconds: integer("time_saved_seconds").notNull().default(0),
+  timeSavedMs:      integer("time_saved_ms").notNull().default(0),
+  peakEnergyScore:  real("peak_energy_score").default(0),
+  mixQualityScore:  real("mix_quality_score").default(0),
+  startedAt:        timestamp("started_at").notNull().defaultNow(),
+  endedAt:          timestamp("ended_at"),
+  createdAt:        timestamp("created_at").notNull().defaultNow(),
 });
