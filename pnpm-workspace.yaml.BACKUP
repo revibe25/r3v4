@@ -1,0 +1,11 @@
+packages:
+  - client
+  - server
+  - shared
+  - packages/*
+  - services/*
+
+ignoredBuiltDependencies:
+  - bcrypt
+  - bufferutil
+  - esbuild
