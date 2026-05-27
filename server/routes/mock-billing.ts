@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 /**
  * server/routes/mock-billing.ts
  *
@@ -86,7 +87,7 @@ router.post('/checkout', urlencoded, async (req: Request, res: Response) => {
     );
     res.redirect(payload.successUrl as string);
   } catch (err) {
-    console.error('[mock-billing] applyMockSubscription failed:', (err as Error).message);
+    logger.error('applyMockSubscription failed', { error: (err as Error).message });
     badToken(res, 'Subscription activation failed — check server logs.');
   }
 });
@@ -144,7 +145,7 @@ router.post('/portal/cancel', urlencoded, async (req: Request, res: Response) =>
         : `${returnUrl}?cancelled=true`,
     );
   } catch (err) {
-    console.error('[mock-billing] cancelMockSubscription failed:', (err as Error).message);
+    logger.error('cancelMockSubscription failed', { error: (err as Error).message });
     badToken(res, 'Cancellation failed — check server logs.');
   }
 });
