@@ -335,6 +335,17 @@ export default function VisualsPage() {
   const [colorAccent, setColorAccent] = useState('var(--accent-neon-green)');
 
   return (
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">Visuals · Live Mixing</div>
+              </div>
+            </div>
+          </header>
+
     <div style={{ minHeight: '100vh', background: 'var(--dj-black)', color: 'var(--daw-fg)', fontFamily: '"IBM Plex Mono", monospace', display: 'flex', flexDirection: 'column' }}>
 
 

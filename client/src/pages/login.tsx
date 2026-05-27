@@ -587,6 +587,17 @@ export default function LoginPage() {
     injectKeyframes();
     const mountTimer = setTimeout(() => setMounted(true), 60);
     return () => {
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">Login · Access</div>
+              </div>
+            </div>
+          </header>
+
       clearTimeout(mountTimer);
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     };

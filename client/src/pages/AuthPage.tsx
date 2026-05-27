@@ -170,6 +170,17 @@ export default function AuthPage() {
   const displayError = localErr ?? error;
 
   return (
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">Auth · Sign In</div>
+              </div>
+            </div>
+          </header>
+
     <>
       <style>{SCANLINES_CSS}</style>
       <div
