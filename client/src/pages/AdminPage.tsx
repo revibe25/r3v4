@@ -92,6 +92,17 @@ export default function AdminPage() {
   }, [token]);
 
   useEffect(() => { poll(); const id = setInterval(poll, 5000); return () => clearInterval(id); }, [poll]);
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">Admin · System Settings</div>
+              </div>
+            </div>
+          </header>
+
 
   const dbOk = stats?.db.status === 'ok';
 

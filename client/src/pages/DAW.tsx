@@ -2681,6 +2681,23 @@ export default function DAW() {
     }
 
     return () => {
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">Arrangement · Multi-Track DAW</div>
+              </div>
+              <div className="ag-status-block">
+                <div className={`ag-status-line ${isInitialized ? 'ag-status-live-text' : 'ag-status-dead-text'}`}>
+                  <span className={isInitialized ? 'ag-cursor-live' : 'ag-cursor-standby'} />
+                  {isInitialized ? 'LIVE' : 'STANDBY'}
+                </div>
+              </div>
+            </div>
+          </header>
+
       try {
         const prevRaw = localStorage.getItem(CONSTANTS.LOCAL_STORAGE_KEYS.SESSIONS);
         if (!prevRaw) return;

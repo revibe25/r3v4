@@ -220,6 +220,17 @@ export default function VSTPage() {
   };
 
   return (
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">VST · Plugin Browser</div>
+              </div>
+            </div>
+          </header>
+
     <div style={{
       display:       'flex',
       flexDirection: 'column',

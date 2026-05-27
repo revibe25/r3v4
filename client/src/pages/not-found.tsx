@@ -127,6 +127,17 @@ const STYLES = `
 
 export default function NotFound() {
   return (
+          <header className="ag-header">
+            <div className="ag-header-top">
+              <div className="ag-wordmark-block">
+                <div className="ag-wordmark" data-testid="text-title">
+                  R3<span className="ag-wordmark-slash">/</span>NATIVE
+                </div>
+                <div className="ag-wordmark-sub">404 · Not Found</div>
+              </div>
+            </div>
+          </header>
+
     <>
       <style>{STYLES}</style>
       <div className="r3-404-shell">
