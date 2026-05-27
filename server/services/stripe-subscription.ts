@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 /**
  * server/services/stripe-subscription.ts
  *
@@ -233,14 +234,14 @@ export async function handleStripeWebhook(rawBody: Buffer, signature: string): P
     }
 
     default:
-      console.info(`[stripe] unhandled event type: ${event.type}`);
+      logger.info('unhandled stripe event type', { eventType: event.type });
   }
 }
 
 async function syncSubscription(sub: Stripe.Subscription): Promise<void> {
   const userId = sub.metadata?.r3UserId;
   if (!userId) {
-    console.warn('[stripe] subscription missing r3UserId metadata', sub.id);
+    logger.warn('subscription missing r3UserId metadata', { subscriptionId: sub.id });
     return;
   }
 

@@ -1,3 +1,4 @@
+import { logger } from "../utils/logger";
 /**
  * server/db/index.ts
  * Drizzle ORM + node-postgres connection for R3 v4.
@@ -40,7 +41,7 @@ const pool = new Pool({
 
 // Fail fast if pool cannot connect on startup
 pool.on('error', (err) => {
-  console.error('[db] Unexpected pool error:', err.message);
+  logger.error('Unexpected pool error', { message: err.message });
 });
 
 export const db = drizzle(pool, { schema });

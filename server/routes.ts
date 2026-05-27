@@ -125,7 +125,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
         res.status(201).json(sample);
       } catch (error) {
         logger.error("Error uploading sample:", error as Record<string, unknown>);
-        if (req.file) await fs.unlink(req.file.path).catch(console.error);
+        if (req.file) await fs.unlink(req.file.path).catch((err) => logger.error('Failed to unlink uploaded file', { error: err instanceof Error ? err.message : String(err) }));
         res.status(500).json({ error: "Failed to upload sample" });
       }
     },
