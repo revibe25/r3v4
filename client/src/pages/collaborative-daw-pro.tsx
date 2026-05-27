@@ -4,6 +4,10 @@
 // Route: /collab (App.tsx)
 
 import { PageNav } from '@/components/page-nav';
+import { useCollabSocket } from '@/hooks/useCollabSocket';
+import { useDAWStore } from '@/hooks/useDAWStore';
+import { useMixSuggestions } from '@/hooks/useMixSuggestions';
+import type { TrackInput as MixTrackInput } from '@/hooks/useMixSuggestions';
 import React, {
   useState, useRef, useEffect, useCallback, useMemo, memo, lazy, Suspense
 } from 'react';
@@ -179,17 +183,8 @@ const INIT_PROJECT: Project = {
   ],
 };
 
-const INIT_COLLABS: Collaborator[] = [
-  { id:'u1', name:'Alex Martinez', color:'#a3e635', cursor:{x:450,y:180}, status:'active', lastAction:'Editing "Full Drums"',  timestamp:Date.now()-30000,  editingTrackId:'t1' },
-  { id:'u2', name:'Jordan Kim',    color:'#00F5FF', cursor:{x:780,y:320}, status:'active', lastAction:'Adjusting EQ',          timestamp:Date.now()-15000  },
-  { id:'u3', name:'Sam Rivera',    color:'#ff3b3b', cursor:{x:580,y:240}, status:'idle',   lastAction:'Added marker',          timestamp:Date.now()-120000 },
-];
 
-const INIT_SUGGESTIONS: LLPTESuggestion[] = [
-  { id:'s1', trackId:'t1', type:'gain_adjust',  confidence:0.87, displayedConfidence:0.87, decision:{gain:0.78}, outcome:'auto_applied', label:'Reduce kick gain −2dB' },
-  { id:'s2', trackId:'t2', type:'conflict_flag', confidence:0.74, displayedConfidence:0.74, decision:{band:'80Hz'}, outcome:'ignored',     label:'Freq clash @ 80Hz with t1' },
-  { id:'s3', trackId:'t3', type:'eq_suggest',   confidence:0.61, displayedConfidence:0.61, decision:{cut:'2kHz'}, outcome:'ignored',      label:'Cut 2kHz harshness −3dB' },
-];
+
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
@@ -359,7 +354,7 @@ function CollabDAWProInner() {
   const [scrollTop, setScrollTop]                   = useState(0);
   const [selectedClipIds, setSelectedClipIds]       = useState<string[]>([]);
   const [selectedTrackId, setSelectedTrackId]       = useState<string|null>(null);
-  const [collaborators, setCollaborators]           = useState<Collaborator[]>(INIT_COLLABS);
+  const [collaborators, setCollaborators]           = useState<Collaborator[]>([]);
   const [activities, setActivities]                 = useState<Activity[]>([
     { id:1, user:'You',           action:'Created session',    timestamp:Date.now()-300000, type:'collab' },
     { id:2, user:'Alex Martinez', action:'Joined session',     timestamp:Date.now()-240000, type:'collab' },
@@ -370,7 +365,7 @@ function CollabDAWProInner() {
   const [showAI, setShowAI]                         = useState(true);
   const [showVST, setShowVST]                       = useState(false);
   const [showLoopStation, setShowLoopStation]       = useState(false);
-  const [connStatus, setConnStatus]                 = useState<ConnectionStatus>('connected');
+  const [connStatus, setConnStatus]                 = useState<ConnectionStatus>('disconnected');
   const [metronome, setMetronome]                   = useState(false);
   const [snapGrid, setSnapGrid]                     = useState(true);
   const [loopOn, setLoopOn]                         = useState(false);
@@ -381,8 +376,67 @@ function CollabDAWProInner() {
   const [contextMenu, setContextMenu]               = useState<{x:number;y:number}|null>(null);
   const [history, setHistory]                       = useState<Project[]>([INIT_PROJECT]);
   const [historyIdx, setHistoryIdx]                 = useState(0);
-  const [suggestions, setSuggestions]               = useState<LLPTESuggestion[]>(INIT_SUGGESTIONS);
+    // ── AI suggestions — live LLPTE via useMixSuggestions ─────────────────────
+  const mixAI = useMixSuggestions();
+  const suggestions: LLPTESuggestion[] = (mixAI.suggestions ?? []).map(
+    (s: { type: string; confidence: number; description: string; params: Record<string, unknown> }, i: number): LLPTESuggestion => ({
+      id:                  `ms_${i}`,
+      trackId:             'mix',
+      type: ((): LLPTESuggestion['type'] => {
+        switch (s.type) {
+          case 'arrangement': return 'transition';
+          case 'mastering':   return 'eq_suggest';
+          case 'harmony':     return 'conflict_flag';
+          default:            return 'gain_adjust';
+        }
+      })(),
+      confidence:          s.confidence,
+      displayedConfidence: s.confidence,
+      decision:            s.params,
+      outcome:             (mixAI.acceptedIds.has(i)
+                            ? 'accepted'
+                            : mixAI.rejectedIds.has(i)
+                            ? 'rejected'
+                            : 'ignored') as LLPTEDecision,
+      label:               s.description,
+    })
+  );
   const [llpteLatency]                              = useState(10);
+
+  // ── WebSocket collab — wired to useCollabSocket + useDAWStore ──────────────
+  const collab         = useCollabSocket();
+  const collabUsers    = useDAWStore((s) => s.collabUsers);
+  const storeConnected = useDAWStore((s) => s.collabConnected);
+
+  // Sync WebSocket peer list into local collaborator display state
+  useEffect(() => {
+    setCollaborators(
+      collabUsers.map((u) => ({
+        id:             u.id,
+        name:           u.name,
+        color:          u.color,
+        cursor:         { x: 0, y: 0 },
+        status:         'active' as CollabStatus,
+        lastAction:     `Online since ${new Date(u.joinedAt).toLocaleTimeString()}`,
+        timestamp:      u.joinedAt,
+        editingTrackId: u.activeTrackId ?? undefined,
+      }))
+    );
+  }, [collabUsers]);
+
+  // Sync WebSocket connection flag → connStatus display
+  useEffect(() => {
+    setConnStatus(storeConnected ? 'connected' : 'disconnected');
+  }, [storeConnected]);
+
+  // Auto-join default collab room on mount; leave cleanly on unmount
+  useEffect(() => {
+    const userId  = crypto.randomUUID().slice(0, 8);
+    const palette = [C.neon, C.cyan, C.magenta, C.yellow];
+    const color   = palette[Math.floor(Math.random() * palette.length)];
+    collab.joinRoom('COLLAB-MAIN', userId, `USER_${userId.slice(0, 4)}`, color);
+    return () => { collab.leaveRoom(); };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const [cpuLoad, setCpuLoad]                       = useState(0.38);
   const [vuLevels, setVuLevels]                     = useState<Record<string,number>>({});
   const [peakedTracks, setPeakedTracks]             = useState<Set<string>>(new Set());
@@ -493,22 +547,23 @@ function CollabDAWProInner() {
   }, [transport, project.tracks]);
 
   // Simulated collab activity
-  useEffect(() => {
+    useEffect(() => {
+    if (collabUsers.length === 0) return; // No collaborators to simulate
     const interval = setInterval(() => {
       if (Math.random() > 0.65) {
-        const collab  = INIT_COLLABS[Math.floor(Math.random() * INIT_COLLABS.length)];
-        const actions = ['Adjusted fader','Moved clip','Added FX','Muted track','Set loop'];
-        const action  = actions[Math.floor(Math.random() * actions.length)];
-        addActivity(action, collab.name, 'edit');
+        const user = collabUsers[Math.floor(Math.random() * collabUsers.length)];
+        const actions = ["Adjusted fader","Moved clip","Added FX","Muted track","Set loop"];
+        const action = actions[Math.floor(Math.random() * actions.length)];
+        addActivity(action, user.name, "edit");
         setCollaborators(p => p.map(c =>
-          c.id === collab.id
+          c.id === user.id
             ? { ...c, cursor:{x:200+Math.random()*800, y:80+Math.random()*400}, lastAction:action, timestamp:Date.now() }
             : c
         ));
       }
-    }, 9000);
+    }, 3000);
     return () => clearInterval(interval);
-  }, [addActivity]);
+  }, [collabUsers, addActivity]);
 
   // ── Timestamp ticker ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -611,18 +666,32 @@ function CollabDAWProInner() {
   // via sessionMetrics.recordOutcome with proper decisionId tracking.
 
   const acceptSuggestion = useCallback((id: string) => {
-    const s = suggestions.find(x => x.id === id);
-    if (!s) return;
-    setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'accepted' as const } : x));
-    setSuggestions(p => p.filter(x => x.id !== id));
-    toast(`AI applied: ${s.label}`, 'ai');
-    addActivity(`Accepted AI: ${s.label}`, 'You', 'ai');
-  }, [suggestions, toast, addActivity]);
+    const idx = parseInt(id.replace('ms_', ''), 10);
+    if (!isNaN(idx)) {
+      mixAI.accept(idx);
+      toast('AI suggestion applied', 'ai');
+      addActivity('Applied AI suggestion', 'You', 'ai');
+    }
+  }, [mixAI, toast, addActivity]);
 
   const rejectSuggestion = useCallback((id: string) => {
-    setSuggestions(p => p.map(x => x.id === id ? { ...x, outcome: 'rejected' as const } : x));
-    setSuggestions(p => p.filter(x => x.id !== id));
-  }, []);
+    const idx = parseInt(id.replace('ms_', ''), 10);
+    if (!isNaN(idx)) mixAI.reject(idx);
+  }, [mixAI]);
+
+  // ── On-demand LLPTE analysis triggered from AI panel ──────────────────────
+  const runAIAnalysis = useCallback(() => {
+    const trackInputs: MixTrackInput[] = project.tracks.map((t) => ({
+      id:   t.id,
+      gain: t.volume,
+      pan:  t.pan,
+      mute: t.muted,
+      solo: t.solo,
+    }));
+    mixAI.analyse(trackInputs, project.tempo, currentBar);
+    addActivity('Ran LLPTE analysis', 'You', 'ai');
+    toast('Analysing mix…', 'ai');
+  }, [project.tracks, project.tempo, currentBar, mixAI, addActivity, toast]);
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────────
   useEffect(() => {
