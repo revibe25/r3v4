@@ -21,3 +21,10 @@
 - Vite path traversal (GHSA-4w7w-66w2-5vf9)
 - brace-expansion DoS
 - pnpm config deprecation warnings
+
+
+**Status:** ✅ FIXED (2026-05-29)
+**Solution:** Removed duplicate schema definition that used sessionId-based rate limit key.
+Kept corrected version using usageDate (server-generated daily key).
+**Verification:** `pnpm tsc --noEmit` — no TS2451/TS2300 errors on aiTransitionUsage
+**Migration:** Schema cleanup only, no data migration needed

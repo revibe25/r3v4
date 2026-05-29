@@ -2660,6 +2660,8 @@ export default function DAW() {
 
   const [showHelp, setShowHelp] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  useEffect(() => { setIsInitialized(true); }, []);
 
   // Auto-save hook
   useAutoSave(CONSTANTS.AUTO_SAVE_INTERVAL_MS);

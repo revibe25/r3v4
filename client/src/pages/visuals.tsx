@@ -335,6 +335,7 @@ export default function VisualsPage() {
   const [colorAccent, setColorAccent] = useState('var(--accent-neon-green)');
 
   return (
+    <>
           <header className="ag-header">
             <div className="ag-header-top">
               <div className="ag-wordmark-block">
@@ -398,6 +399,7 @@ export default function VisualsPage() {
         onColorAccentChange={setColorAccent}
       />
     </div>
+    </>
   );
 }
 
@@ -440,6 +442,7 @@ function BandMeterHUD() {
   };
 
   return (
+    <>
     <div style={{ position: 'absolute', bottom: 16, left: 16, display: 'flex', gap: 4, alignItems: 'flex-end', height: 64 }}>
       {BANDS.map((band, i) => (
         <div key={band} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
@@ -454,5 +457,6 @@ function BandMeterHUD() {
         </div>
       ))}
     </div>
+  </>
   );
 }

@@ -1,0 +1,65 @@
+name: Mythos Production Deployment Gate
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TSC gate — 0 errors required
+        run: |
+          ERROR_COUNT=$(npx tsc --noEmit 2>&1 | grep -c "error TS" || true)
+          if [ "$ERROR_COUNT" -gt 0 ]; then
+            echo "BLOCK: $ERROR_COUNT TSC errors — production gate failed"
+            exit 1
+          fi
+          echo "TSC clean"
+
+      - name: Blast radius evaluation
+        id: blast
+        run: node .github/scripts/blast-radius.js
+
+      - name: Enforce Mythos barrier — CRITICAL → DEFER
+        if: steps.blast.outputs.level == 'critical'
+        run: |
+          echo "DEFER: blast_radius=critical (auth_change or payment_change on runtime)"
+          echo "Detected actions: ${{ steps.blast.outputs.actions }}"
+          echo "Manual review required before any runtime promotion."
+          exit 1
+
+      - name: Enforce Mythos barrier — HIGH → ALLOW_STAGING ceiling
+        if: steps.blast.outputs.level == 'high'
+        run: |
+          echo "BLOCK_RUNTIME: blast_radius=high (schema_change or deploy-class on runtime)"
+          echo "Detected actions: ${{ steps.blast.outputs.actions }}"
+          echo "Maximum allowed outcome: ALLOW_STAGING. Deploy manually after staging verification."
+          exit 1
+
+      - name: Credential vault isolation check
+        run: node .github/scripts/credential-isolation.js
+
+      - name: Deploy to Railway (low/medium blast radius only)
+        run: npx @railway/cli@latest up --detach --service r3
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

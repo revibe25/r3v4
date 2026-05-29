@@ -1,0 +1,608 @@
+adminRouter.ts(20,24): error TS2307: Cannot find module '../trpc' or its corresponding type declarations.
+adminRouter.ts(21,36): error TS2307: Cannot find module '../base-procedures' or its corresponding type declarations.
+adminRouter.ts(22,20): error TS2307: Cannot find module '../db' or its corresponding type declarations.
+adminRouter.ts(23,23): error TS2307: Cannot find module '../db/schema' or its corresponding type declarations.
+adminRouter.ts(106,50): error TS7031: Binding element 'ctx' implicitly has an 'any' type.
+adminRouter.ts(136,24): error TS7031: Binding element 'ctx' implicitly has an 'any' type.
+adminRouter.ts(136,29): error TS7031: Binding element 'input' implicitly has an 'any' type.
+client/client/hooks/useSessionLifecycle.ts(25,22): error TS2307: Cannot find module '../utils/trpc' or its corresponding type declarations.
+client/client/hooks/useSessionLifecycle.ts(31,8): error TS2307: Cannot find module '../stores/session-metrics.store' or its corresponding type declarations.
+client/client/hooks/useSessionLifecycle.ts(32,42): error TS2307: Cannot find module '../../shared/session-metrics.types' or its corresponding type declarations.
+client/client/hooks/useSessionLifecycle.ts(71,17): error TS7006: Parameter 'result' implicitly has an 'any' type.
+client/client/hooks/useSessionLifecycle.ts(74,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+client/client/hooks/useSessionLifecycle.ts(94,19): error TS7006: Parameter 'err' implicitly has an 'any' type.
+client/client/src/lib/audio-context-manager.ts(15,20): error TS2304: Cannot find name 'AudioContext'.
+client/client/src/lib/audio-context-manager.ts(35,34): error TS2304: Cannot find name 'AudioContext'.
+client/client/src/lib/audio-context-manager.ts(37,26): error TS2304: Cannot find name 'AudioContext'.
+client/client/src/lib/audio-context-manager.ts(53,24): error TS2304: Cannot find name 'AudioContext'.
+client/client/src/lib/audio-node-factory.ts(11,9): error TS2304: Cannot find name 'AudioScheduledSourceNode'.
+client/client/src/lib/audio-node-factory.ts(17,9): error TS2304: Cannot find name 'AudioScheduledSourceNode'.
+client/client/src/lib/audio-node-factory.ts(32,9): error TS2304: Cannot find name 'OscillatorType'.
+client/client/src/lib/audio-node-factory.ts(34,37): error TS2304: Cannot find name 'OscillatorNode'.
+client/client/src/lib/audio-node-factory.ts(45,37): error TS2304: Cannot find name 'ConstantSourceNode'.
+client/client/src/lib/audio-node-factory.ts(58,18): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/automation/automation-engine.ts(5,41): error TS2307: Cannot find module '@shared/types/automation.types' or its corresponding type declarations.
+client/src/audio/automation/automation-engine.ts(9,44): error TS2304: Cannot find name 'AudioParam'.
+client/src/audio/automation/automation-engine.ts(12,38): error TS2304: Cannot find name 'AudioParam'.
+client/src/audio/automation/automation-lane.ts(3,38): error TS2307: Cannot find module '@shared/types/automation.types' or its corresponding type declarations.
+client/src/audio/automation/automation-lane.ts(7,19): error TS2304: Cannot find name 'AudioParam'.
+client/src/audio/automation/automation-lane.ts(10,34): error TS2304: Cannot find name 'AudioParam'.
+client/src/audio/clips/audio-clip-loader.ts(9,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/clips/audio-clip-loader.ts(72,20): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/clips/audio-clip-loader.ts(87,50): error TS2304: Cannot find name 'window'.
+client/src/audio/clips/audio-clip-loader.ts(87,74): error TS2304: Cannot find name 'window'.
+client/src/audio/clips/audio-clip-loader.ts(288,17): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/clips/audio-clip.ts(12,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/clips/audio-clip.ts(57,61): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/clips/audio-clip.ts(65,20): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/clips/audio-clip.ts(67,20): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/clips/audio-clip.ts(72,20): error TS2304: Cannot find name 'AudioBufferSourceNode'.
+client/src/audio/clips/audio-clip.ts(73,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/clips/audio-clip.ts(95,50): error TS2304: Cannot find name 'window'.
+client/src/audio/clips/audio-clip.ts(95,74): error TS2304: Cannot find name 'window'.
+client/src/audio/core/analysis-engine.ts(4,28): error TS2307: Cannot find module '@/engine/midi-engine' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(5,39): error TS2307: Cannot find module '@/audio/automation/automation-engine' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(6,30): error TS2307: Cannot find module '@/audio/fx/fx-chain' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(7,48): error TS2307: Cannot find module '@/audio/effects/compressor' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(8,38): error TS2307: Cannot find module '@/audio/effects/delay' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(9,40): error TS2307: Cannot find module '@/audio/effects/filter' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(10,40): error TS2307: Cannot find module '@/audio/effects/reverb' or its corresponding type declarations.
+client/src/audio/core/analysis-engine.ts(63,12): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/analysis-engine.ts(64,15): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/analysis-engine.ts(65,30): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/core/analysis-engine.ts(66,26): error TS2304: Cannot find name 'AudioBufferSourceNode'.
+client/src/audio/core/analysis-engine.ts(92,31): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/analysis-engine.ts(94,25): error TS2304: Cannot find name 'window'.
+client/src/audio/core/analysis-engine.ts(94,49): error TS2304: Cannot find name 'window'.
+client/src/audio/core/analysis-engine.ts(102,36): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/core/analysis-engine.ts(132,40): error TS2304: Cannot find name 'AudioBufferSourceNode'.
+client/src/audio/core/audio-context.ts(18,10): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(19,28): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(20,31): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(28,36): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(31,13): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(56,53): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-context.ts(87,19): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-graph.ts(13,11): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/audio-graph.ts(15,11): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/audio-graph.ts(16,11): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/audio-graph.ts(40,21): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/audio-graph.ts(43,24): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/audio-graph.ts(44,25): error TS2304: Cannot find name 'AudioDestinationNode'.
+client/src/audio/core/audio-graph.ts(46,20): error TS2304: Cannot find name 'DynamicsCompressorNode'.
+client/src/audio/core/audio-graph.ts(47,21): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/core/audio-graph.ts(138,17): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/core/audio-graph.ts(147,20): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/core/beat-detector.ts(1,33): error TS2307: Cannot find module '@/audio/core/audio-context' or its corresponding type declarations.
+client/src/audio/core/beat-detector.ts(29,17): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/beat-detector.ts(30,22): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/core/beat-detector.ts(66,36): error TS2339: Property 'mediaDevices' does not exist on type 'WorkerNavigator'.
+client/src/audio/core/instrument-engine.ts(18,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(24,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(66,16): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/core/instrument-engine.ts(67,23): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/instrument-engine.ts(68,21): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/core/instrument-engine.ts(70,11): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/core/instrument-engine.ts(73,13): error TS2304: Cannot find name 'AudioBufferSourceNode'.
+client/src/audio/core/instrument-engine.ts(75,23): error TS2304: Cannot find name 'BiquadFilterNode'.
+client/src/audio/core/instrument-engine.ts(76,21): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/core/instrument-engine.ts(81,33): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(81,46): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(113,21): error TS2304: Cannot find name 'window'.
+client/src/audio/core/instrument-engine.ts(113,45): error TS2304: Cannot find name 'window'.
+client/src/audio/core/instrument-engine.ts(174,27): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/core/instrument-engine.ts(204,49): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(228,50): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(293,32): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(293,46): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(319,22): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(483,30): error TS2304: Cannot find name 'window'.
+client/src/audio/core/instrument-engine.ts(537,30): error TS2304: Cannot find name 'window'.
+client/src/audio/core/instrument-engine.ts(576,41): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(589,45): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/core/instrument-engine.ts(597,45): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/dj-controls/beat-sync.ts(2,62): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/beat-sync.ts(3,32): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/beat-sync.ts(64,37): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/dj-controls/beat-sync.ts(178,8): error TS7006: Parameter 'marker' implicitly has an 'any' type.
+client/src/audio/dj-controls/crossfader.ts(3,56): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/crossfader.ts(126,48): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/dj-controls/crossfader.ts(127,80): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/dj-controls/crossfader.ts(134,48): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/dj-controls/crossfader.ts(135,80): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/dj-controls/cue-management.ts(2,52): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/cue-management.ts(3,47): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/cue-management.ts(138,36): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(138,63): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(147,34): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(155,30): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(192,18): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(193,17): error TS7031: Binding element 'index' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(193,24): error TS7031: Binding element 'position' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(193,34): error TS7031: Binding element 'label' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(193,41): error TS7031: Binding element 'color' implicitly has an 'any' type.
+client/src/audio/dj-controls/cue-management.ts(232,36): error TS7006: Parameter 'cue' implicitly has an 'any' type.
+client/src/audio/dj-controls/tempo-controls.ts(3,39): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/dj-controls/tempo-controls.ts(4,32): error TS2307: Cannot find module '@shared/dj.types' or its corresponding type declarations.
+client/src/audio/effects/compressor.ts(3,39): error TS2307: Cannot find module '@shared/effects.types' or its corresponding type declarations.
+client/src/audio/effects/compressor.ts(101,27): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/compressor.ts(104,37): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/compressor.ts(105,37): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/delay.ts(2,34): error TS2307: Cannot find module '@shared/effects.types' or its corresponding type declarations.
+client/src/audio/effects/distortion.ts(2,39): error TS2307: Cannot find module '@shared/effects.types' or its corresponding type declarations.
+client/src/audio/effects/filter.ts(2,35): error TS2307: Cannot find module '@shared/effects.types' or its corresponding type declarations.
+client/src/audio/effects/filter.ts(29,50): error TS2304: Cannot find name 'BiquadFilterType'.
+client/src/audio/effects/ir-reverb-engine.ts(30,22): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/effects/ir-reverb-engine.ts(31,22): error TS2304: Cannot find name 'ConvolverNode'.
+client/src/audio/effects/ir-reverb-engine.ts(32,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/effects/ir-reverb-engine.ts(33,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/effects/ir-reverb-engine.ts(34,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/effects/ir-reverb-engine.ts(35,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/effects/ir-reverb-engine.ts(36,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/effects/ir-reverb-engine.ts(43,13): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/effects/ir-reverb-engine.ts(86,22): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/ir-reverb-engine.ts(87,28): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/ir-reverb-engine.ts(98,62): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/effects/reverb.ts(2,35): error TS2307: Cannot find module '@shared/effects.types' or its corresponding type declarations.
+client/src/audio/engine/AudioEngine.ts(9,24): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/engine/AudioEngine.ts(37,28): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/engine/AudioEngine.ts(46,40): error TS7006: Parameter 'e' implicitly has an 'any' type.
+client/src/audio/fx/compressor.ts(74,23): error TS2304: Cannot find name 'DynamicsCompressorNode'.
+client/src/audio/fx/compressor.ts(75,23): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/compressor.ts(77,28): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/compressor.ts(279,27): error TS2304: Cannot find name 'AudioParam'.
+client/src/audio/fx/fx-nodebase.ts(7,21): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/fx-nodebase.ts(9,19): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/fx-nodebase.ts(10,20): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/fx-nodebase.ts(12,31): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/fx-nodebase.ts(13,31): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/fx-nodebase.ts(46,24): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/fx/vst-fx-node.ts(41,20): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/fx/vst-fx-node.ts(54,29): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-fx-node.ts(74,26): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/fx/vst-fx-node.ts(520,53): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-scanner.ts(35,15): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-scanner.ts(79,15): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-sidechain.ts(3,38): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/audio/fx/vst-sidechain.ts(8,18): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/fx/vst-sidechain.ts(9,13): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/fx/vst-sidechain.ts(11,15): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/fx/vst-sidechain.ts(16,25): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-sidechain.ts(19,29): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/fx/vst-sidechain.ts(25,17): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/indicators/meter-node.ts(8,22): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/indicators/meter-node.ts(24,19): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/mixer/effect-chain.ts(6,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/audio/mixer/effect-chain.ts(50,34): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/mixer/effect-chain.ts(51,34): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(52,34): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(58,45): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(58,60): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(72,19): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/mixer/effect-chain.ts(92,16): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(93,16): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/effect-chain.ts(447,15): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/mixer/master-bus.ts(7,21): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/mixer/master-bus.ts(8,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/mixer-channel.ts(13,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/audio/mixer/mixer-channel.ts(21,21): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/mixer/mixer-channel.ts(24,19): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/mixer-channel.ts(26,21): error TS2304: Cannot find name 'StereoPannerNode'.
+client/src/audio/mixer/mixer-channel.ts(27,22): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/mixer-channel.ts(28,20): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/mixer/mixer-channel.ts(31,26): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/audio/mixer/mixer-channel.ts(84,24): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/recorder/recorder-engine.ts(7,20): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/recorder/recorder-engine.ts(8,18): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/recorder/recorder-engine.ts(20,21): error TS2304: Cannot find name 'AudioWorkletNode'.
+client/src/audio/recorder/recorder-engine.ts(25,33): error TS7006: Parameter 'event' implicitly has an 'any' type.
+client/src/audio/recorder/recorder-engine.ts(32,19): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/recorder/wav-encoder.ts(14,27): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/audio/voice-pool.ts(23,14): error TS2304: Cannot find name 'AudioBufferSourceNode'.
+client/src/audio/voice-pool.ts(24,14): error TS2304: Cannot find name 'GainNode'.
+client/src/audio/voice-pool.ts(31,28): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/voice-pool.ts(32,28): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/voice-pool.ts(34,20): error TS2304: Cannot find name 'AudioContext'.
+client/src/audio/voice-pool.ts(34,47): error TS2304: Cannot find name 'AudioNode'.
+client/src/audio/voice-pool.ts(39,19): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/components/dj-controls/index.ts(1,28): error TS6142: Module './djcontrols' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/djcontrols.tsx', but '--jsx' is not set.
+client/src/components/dj-controls/index.ts(2,22): error TS6142: Module './knob' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/knob.tsx', but '--jsx' is not set.
+client/src/components/dj-controls/index.ts(3,26): error TS6142: Module './transbtn' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/transbtn.tsx', but '--jsx' is not set.
+client/src/components/dj-controls/index.ts(4,25): error TS6142: Module './vumeter' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/vumeter.tsx', but '--jsx' is not set.
+client/src/components/dj-controls/index.ts(5,30): error TS6142: Module './modeswitcher' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/modeswitcher.tsx', but '--jsx' is not set.
+client/src/components/dj-controls/index.ts(6,33): error TS6142: Module './waveformdisplay' was resolved to '/home/r3v/Stable/client/src/components/dj-controls/waveformdisplay.tsx', but '--jsx' is not set.
+client/src/components/session-summary/index.ts(1,29): error TS6142: Module './SessionChip' was resolved to '/home/r3v/Stable/client/src/components/session-summary/SessionChip.tsx', but '--jsx' is not set.
+client/src/components/session-summary/index.ts(2,37): error TS6142: Module './SessionSummaryPanel' was resolved to '/home/r3v/Stable/client/src/components/session-summary/SessionSummaryPanel.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(2,15): error TS6142: Module './collapsible' was resolved to '/home/r3v/Stable/client/src/components/ui/collapsible.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(3,15): error TS6142: Module './button' was resolved to '/home/r3v/Stable/client/src/components/ui/button.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(4,15): error TS6142: Module './card' was resolved to '/home/r3v/Stable/client/src/components/ui/card.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(5,15): error TS6142: Module './dialog' was resolved to '/home/r3v/Stable/client/src/components/ui/dialog.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(6,15): error TS6142: Module './input' was resolved to '/home/r3v/Stable/client/src/components/ui/input.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(7,15): error TS6142: Module './slider' was resolved to '/home/r3v/Stable/client/src/components/ui/slider.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(8,15): error TS6142: Module './tabs' was resolved to '/home/r3v/Stable/client/src/components/ui/tabs.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(9,15): error TS6142: Module './alert' was resolved to '/home/r3v/Stable/client/src/components/ui/alert.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(10,15): error TS6142: Module './badge' was resolved to '/home/r3v/Stable/client/src/components/ui/badge.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(11,15): error TS6142: Module './label' was resolved to '/home/r3v/Stable/client/src/components/ui/label.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(12,15): error TS6142: Module './select' was resolved to '/home/r3v/Stable/client/src/components/ui/select.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(13,15): error TS6142: Module './separator' was resolved to '/home/r3v/Stable/client/src/components/ui/separator.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(14,15): error TS6142: Module './scroll-area' was resolved to '/home/r3v/Stable/client/src/components/ui/scroll-area.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(15,15): error TS6142: Module './tooltip' was resolved to '/home/r3v/Stable/client/src/components/ui/tooltip.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(16,15): error TS6142: Module './toast' was resolved to '/home/r3v/Stable/client/src/components/ui/toast.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(17,15): error TS6142: Module './toaster' was resolved to '/home/r3v/Stable/client/src/components/ui/toaster.tsx', but '--jsx' is not set.
+client/src/components/ui/index.ts(19,15): error TS6142: Module './collapsible-card' was resolved to '/home/r3v/Stable/client/src/components/ui/collapsible-card.tsx', but '--jsx' is not set.
+client/src/config/performance.config.ts(181,12): error TS2304: Cannot find name 'window'.
+client/src/db/clipDB.ts(2,27): error TS2307: Cannot find module '@/types/daw.types' or its corresponding type declarations.
+client/src/engine/audio/audioEngine.ts(6,16): error TS2304: Cannot find name 'AudioContext'.
+client/src/engine/audio/audioEngine.ts(9,18): error TS2304: Cannot find name 'AudioContext'.
+client/src/engine/audio/audioEngine.ts(11,22): error TS2304: Cannot find name 'AudioContext'.
+client/src/features/loopstation/types/loopstation.types.ts(117,20): error TS2304: Cannot find name 'BiquadFilterType'.
+client/src/hooks/use-audio-engine.ts(4,73): error TS2307: Cannot find module '@/audio/core/instrument-engine' or its corresponding type declarations.
+client/src/hooks/use-audio-engine.ts(5,35): error TS2307: Cannot find module '@/audio/mixer/mixer-channel' or its corresponding type declarations.
+client/src/hooks/use-audio-engine.ts(28,13): error TS2339: Property 'repeat' does not exist on type 'KeyboardEvent'.
+client/src/hooks/use-audio-engine.ts(29,19): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/use-audio-engine.ts(32,21): error TS2339: Property 'key' does not exist on type 'KeyboardEvent'.
+client/src/hooks/use-audio-engine.ts(45,5): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-audio-engine.ts(46,18): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-ir-reverb.ts(39,54): error TS2304: Cannot find name 'AudioContext'.
+client/src/hooks/use-midi.ts(53,28): error TS2304: Cannot find name 'MIDIAccess'.
+client/src/hooks/use-midi.ts(63,45): error TS2304: Cannot find name 'MIDIMessageEvent'.
+client/src/hooks/use-midi.ts(82,41): error TS2304: Cannot find name 'MIDIInput'.
+client/src/hooks/use-midi.ts(88,56): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/hooks/use-midi.ts(95,15): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/hooks/use-midi.ts(96,22): error TS2304: Cannot find name 'MIDIAccess'.
+client/src/hooks/use-midi.ts(103,36): error TS2304: Cannot find name 'MIDIConnectionEvent'.
+client/src/hooks/use-midi.ts(106,71): error TS2304: Cannot find name 'MIDIInput'.
+client/src/hooks/use-midi.ts(107,27): error TS2304: Cannot find name 'MIDIInput'.
+client/src/hooks/use-midi.ts(118,42): error TS7006: Parameter 'input' implicitly has an 'any' type.
+client/src/hooks/use-midi.ts(119,21): error TS2304: Cannot find name 'MIDIInput'.
+client/src/hooks/use-mobile.ts(8,19): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-mobile.ts(12,5): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-mobile.ts(14,18): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-toast.ts(6,8): error TS2307: Cannot find module '@/components/ui/toast' or its corresponding type declarations.
+client/src/hooks/use-toast.ts(158,22): error TS7006: Parameter 'open' implicitly has an 'any' type.
+client/src/hooks/use-waveform-audio-engine.ts(8,52): error TS2304: Cannot find name 'AudioContext'.
+client/src/hooks/use-waveform-audio-engine.ts(16,34): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-waveform-audio-engine.ts(22,28): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-waveform-audio-engine.ts(22,52): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-waveform-audio-engine.ts(26,12): error TS2304: Cannot find name 'window'.
+client/src/hooks/use-waveform-audio-engine.ts(36,53): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/hooks/use-waveform-audio-engine.ts(51,46): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/hooks/useAutoLeveling.ts(26,22): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+client/src/hooks/useAutoLeveling.ts(33,17): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/hooks/useAutoLeveling.ts(34,17): error TS2304: Cannot find name 'GainNode'.
+client/src/hooks/useAutoLeveling.ts(35,17): error TS2304: Cannot find name 'BiquadFilterNode'.
+client/src/hooks/useAutoLeveling.ts(80,19): error TS2304: Cannot find name 'AudioContext'.
+client/src/hooks/useAutoLeveling.ts(81,19): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/hooks/useBilling.ts(15,16): error TS2304: Cannot find name 'window'.
+client/src/hooks/useBilling.ts(32,9): error TS2304: Cannot find name 'window'.
+client/src/hooks/useBilling.ts(39,9): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCloudSync.ts(182,5): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCloudSync.ts(183,5): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCloudSync.ts(185,7): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCloudSync.ts(186,7): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCollabSocket.ts(23,11): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCollabSocket.ts(24,10): error TS2304: Cannot find name 'window'.
+client/src/hooks/useCollabSocket.ts(24,68): error TS2304: Cannot find name 'window'.
+client/src/hooks/useDAWEngine.ts(36,23): error TS2304: Cannot find name 'AudioContextState'.
+client/src/hooks/useDAWEngine.ts(53,7): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(54,7): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(56,5): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(57,5): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(59,7): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(60,7): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/hooks/useDAWEngine.ts(247,40): error TS2304: Cannot find name 'AudioContextState'.
+client/src/hooks/useKeyboardShortcuts.ts(47,29): error TS2693: 'HTMLInputElement' only refers to a type, but is being used as a value here.
+client/src/hooks/useKeyboardShortcuts.ts(48,29): error TS2693: 'HTMLTextAreaElement' only refers to a type, but is being used as a value here.
+client/src/hooks/useKeyboardShortcuts.ts(53,19): error TS2339: Property 'key' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(72,21): error TS2339: Property 'ctrlKey' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(72,34): error TS2339: Property 'metaKey' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(74,13): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(77,20): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(80,27): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(83,27): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(86,27): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(86,49): error TS2339: Property 'shiftKey' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(90,19): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(90,40): error TS2339: Property 'shiftKey' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(91,19): error TS2339: Property 'code' does not exist on type 'KeyboardEvent'.
+client/src/hooks/useKeyboardShortcuts.ts(98,5): error TS2304: Cannot find name 'window'.
+client/src/hooks/useKeyboardShortcuts.ts(99,18): error TS2304: Cannot find name 'window'.
+client/src/hooks/useMidiSequencer.ts(60,20): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/hooks/useMidiSequencer.ts(61,15): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/hooks/useMidiSequencer.ts(61,56): error TS7006: Parameter 'access' implicitly has an 'any' type.
+client/src/hooks/useMixSuggestions.ts(16,22): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+client/src/hooks/useMixSuggestions.ts(65,23): error TS7006: Parameter 'data' implicitly has an 'any' type.
+client/src/hooks/useMixSuggestions.ts(110,15): error TS7006: Parameter 'err' implicitly has an 'any' type.
+client/src/hooks/useSessionExport.ts(39,36): error TS2304: Cannot find name 'OfflineAudioContext'.
+client/src/hooks/useSessionExport.ts(108,40): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/hooks/useSessionMetrics.ts(8,23): error TS2307: Cannot find module '@/lib/trpc' or its corresponding type declarations.
+client/src/hooks/useeffectchain.ts(15,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/hooks/useeffectchain.ts(222,30): error TS7006: Parameter 'effect' implicitly has an 'any' type.
+client/src/lib/midi.ts(23,10): error TS2304: Cannot find name 'MIDIPortDeviceState'.
+client/src/lib/midi.ts(24,15): error TS2304: Cannot find name 'MIDIPortConnectionState'.
+client/src/lib/midi.ts(124,31): error TS2304: Cannot find name 'MIDIInput'.
+client/src/lib/midi.ts(135,71): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/lib/midi.ts(142,15): error TS2304: Cannot find name 'MIDIAccess'.
+client/src/lib/midi.ts(158,28): error TS7006: Parameter 'input' implicitly has an 'any' type.
+client/src/lib/midi.ts(162,33): error TS2304: Cannot find name 'MIDIInput'.
+client/src/lib/midi.ts(162,53): error TS2304: Cannot find name 'MIDIMessageEvent'.
+client/src/lib/midi.ts(193,28): error TS7006: Parameter 'input' implicitly has an 'any' type.
+client/src/lib/midi.ts(204,13): error TS2339: Property 'requestMIDIAccess' does not exist on type 'WorkerNavigator'.
+client/src/lib/midi.ts(204,48): error TS7006: Parameter 'midiAccess' implicitly has an 'any' type.
+client/src/lib/midi.ts(216,28): error TS7006: Parameter 'input' implicitly has an 'any' type.
+client/src/lib/trpc.ts(26,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+react@18.3.29/node_modules/@types/react/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+client/src/pages/multi-track-panel/audio-engine.ts(7,16): error TS2304: Cannot find name 'AudioContext'.
+client/src/pages/multi-track-panel/audio-engine.ts(11,23): error TS2304: Cannot find name 'window'.
+client/src/pages/multi-track-panel/audio-engine.ts(11,47): error TS2304: Cannot find name 'window'.
+client/src/pages/multi-track-panel/audio-engine.ts(22,44): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/pages/multi-track-panel/audio-engine.ts(33,32): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/pages/multi-track-panel/types.ts(22,17): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/pages/multi-track-panel/utils.ts(65,26): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/pages/multi-track-panel/utils.ts(75,16): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/pages/multi-track-panel/utils.ts(78,3): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/pages/multi-track-panel/utils.ts(80,3): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/pages/pricing/usePricing.ts(57,7): error TS2304: Cannot find name 'window'.
+client/src/pages/pricing/usePricing.ts(63,7): error TS2304: Cannot find name 'window'.
+client/src/pages/pricing/usePricing.ts(77,7): error TS2304: Cannot find name 'window'.
+client/src/renderers/timelineRenderer.ts(5,14): error TS2304: Cannot find name 'CanvasRenderingContext2D'.
+client/src/store/audio-store.ts(18,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/store/audio-store.ts(19,33): error TS2307: Cannot find module '@/audio/core/audio-context' or its corresponding type declarations.
+client/src/store/audio-store.ts(20,50): error TS2307: Cannot find module '@/audio/mixer/mixer-channel' or its corresponding type declarations.
+client/src/store/audio-store.ts(28,17): error TS2304: Cannot find name 'AudioContext'.
+client/src/store/audio-store.ts(466,40): error TS7006: Parameter 'error' implicitly has an 'any' type.
+client/src/store/clip-store.ts(16,17): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/store/fx-store.ts(33,35): error TS2307: Cannot find module '@/audio/mixer/mixer-channel' or its corresponding type declarations.
+client/src/store/fx-store.ts(34,35): error TS2307: Cannot find module '@/audio/fx/fx-nodebase' or its corresponding type declarations.
+client/src/store/fx-store.ts(584,46): error TS7006: Parameter 'f' implicitly has an 'any' type.
+client/src/store/meter-store.ts(2,32): error TS2307: Cannot find module '@shared/types/meter.types' or its corresponding type declarations.
+client/src/store/vst-store.ts(16,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/store/vst-store.ts(17,38): error TS2307: Cannot find module '@/audio/fx/vst-sidechain' or its corresponding type declarations.
+client/src/store/vst-store.ts(49,30): error TS2304: Cannot find name 'AudioContext'.
+client/src/store/vst-store.ts(117,40): error TS2304: Cannot find name 'AudioContext'.
+client/src/store/vst-store.ts(130,20): error TS2307: Cannot find module '@/audio/fx/vst-performance-monitor' or its corresponding type declarations.
+client/src/store/vst-store.ts(131,20): error TS2307: Cannot find module '@/audio/fx/vst-sidechain' or its corresponding type declarations.
+client/src/store/vst-store.ts(132,20): error TS2307: Cannot find module '@/audio/fx/vst-automation-engine' or its corresponding type declarations.
+client/src/tokens.ts(23,15): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/tokens.ts(25,11): error TS2812: Property 'textContent' does not exist on type 'HTMLStyleElement'. Try changing the 'lib' compiler option to include 'dom'.
+client/src/tokens.ts(27,13): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/tokens.ts(28,5): error TS18047: 'style' is possibly 'null'.
+client/src/tokens.ts(28,11): error TS2812: Property 'id' does not exist on type 'HTMLStyleElement'. Try changing the 'lib' compiler option to include 'dom'.
+client/src/tokens.ts(29,5): error TS18047: 'style' is possibly 'null'.
+client/src/tokens.ts(29,11): error TS2812: Property 'textContent' does not exist on type 'HTMLStyleElement'. Try changing the 'lib' compiler option to include 'dom'.
+client/src/tokens.ts(30,5): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/types/audio-engine.types.ts(72,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/types/audio.ts(20,12): error TS2304: Cannot find name 'AudioContext'.
+client/src/types/audio.ts(24,10): error TS2304: Cannot find name 'AudioContextState'.
+client/src/types/audio.ts(31,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/types/audio.ts(42,11): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(43,16): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(62,10): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(63,11): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(66,24): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(202,10): error TS2304: Cannot find name 'GainNode'.
+client/src/types/audio.ts(203,11): error TS2304: Cannot find name 'GainNode'.
+client/src/types/audio.ts(204,12): error TS2304: Cannot find name 'DynamicsCompressorNode'.
+client/src/types/audio.ts(215,24): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(248,15): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(249,15): error TS2304: Cannot find name 'AudioNode'.
+client/src/types/audio.ts(250,17): error TS2304: Cannot find name 'AnalyserNode'.
+client/src/types/audio.ts(344,17): error TS2304: Cannot find name 'AudioContext'.
+client/src/types/audio.ts(460,17): error TS2304: Cannot find name 'AudioContext'.
+client/src/types/audio.ts(734,44): error TS2307: Cannot find module '@/audio/fx/vst-performance-monitor' or its corresponding type declarations.
+client/src/types/audio.ts(735,42): error TS2307: Cannot find module '@/audio/fx/vst-automation-engine' or its corresponding type declarations.
+client/src/types/audio.ts(850,30): error TS2307: Cannot find module '@/audio/mixer/mixer-channel' or its corresponding type declarations.
+client/src/utils/audio-utils.ts(20,10): error TS2304: Cannot find name 'AudioParam'.
+client/src/utils/audio.ts(45,19): error TS2304: Cannot find name 'window'.
+client/src/utils/audio.ts(50,21): error TS2304: Cannot find name 'window'.
+client/src/utils/audio.ts(131,29): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/utils/audio.ts(137,5): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/utils/audio.ts(140,36): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/utils/audioHelpers.ts(14,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/utils/audioHelpers.ts(107,17): error TS2304: Cannot find name 'AudioContext'.
+client/src/utils/audioHelpers.ts(110,4): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(121,12): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(122,12): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(124,4): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(129,27): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(154,11): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(156,4): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/audioHelpers.ts(158,26): error TS2304: Cannot find name 'AudioBuffer'.
+client/src/utils/projectSerializer.ts(16,8): error TS2307: Cannot find module '@/types/audio' or its corresponding type declarations.
+client/src/utils/projectSerializer.ts(60,16): error TS2584: Cannot find name 'document'. Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+client/src/utils/projectSerializer.ts(280,45): error TS7006: Parameter 'sum' implicitly has an 'any' type.
+client/src/utils/projectSerializer.ts(280,50): error TS7006: Parameter 'chain' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(43,13): error TS7006: Parameter 'env' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(43,18): error TS7006: Parameter 'sample' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(43,26): error TS7006: Parameter 'threshDB' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(43,36): error TS7006: Parameter 'ratio' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(61,11): error TS7006: Parameter 'inputs' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(61,19): error TS7006: Parameter 'outputs' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(61,28): error TS7006: Parameter 'parameters' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(66,17): error TS7006: Parameter 'name' implicitly has an 'any' type.
+client/src/worklets/instrument-processor.worklet.ts(66,23): error TS7006: Parameter 'i' implicitly has an 'any' type.
+client/tailwind.config.ts(40,5): error TS1117: An object literal cannot have multiple properties with the same name.
+client/tests/setup.ts(4,12): error TS2304: Cannot find name 'window'.
+client/tests/setup.ts(4,39): error TS2304: Cannot find name 'window'.
+client/tests_VocalSpectra.null.test_Version2.ts(2,30): error TS2307: Cannot find module '../DSP/Core' or its corresponding type declarations.
+client/tests_VocalSpectra.realtime.test_Version2.ts(2,30): error TS2307: Cannot find module '../DSP/Core' or its corresponding type declarations.
+client/tests_VocalSpectra.smoothing.test_Version2.ts(2,30): error TS2307: Cannot find module '../DSP/Core' or its corresponding type declarations.
+client/vite.config.ts(42,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+config/tailwind.config.ts(1,29): error TS2307: Cannot find module 'tailwindcss' or its corresponding type declarations.
+  There are types at '/home/r3v/Stable/node_modules/tailwindcss/dist/lib.d.mts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+index.ts(17,8): error TS1192: Module '"http"' has no default export.
+index.ts(18,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+index.ts(21,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+cors@2.8.19/node_modules/@types/cors/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+index.ts(23,8): error TS1192: Module '"/home/r3v/Stable/node_modules/.pnpm/dotenv@17.4.2/node_modules/dotenv/lib/main"' has no default export.
+index.ts(286,31): error TS7006: Parameter 'err' implicitly has an 'any' type.
+packages/llpte-adapters/src/webAudioAdapter.ts(14,16): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-adapters/src/webAudioAdapter.ts(15,39): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-adapters/src/webAudioAdapter.ts(18,16): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-adapters/src/webAudioAdapter.ts(21,20): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-adapters/src/webAudioAdapter.ts(24,17): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-adapters/src/webAudioAdapter.ts(29,36): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-adapters/src/webAudioAdapter.ts(37,33): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-ai/src/AutoLevelEngine.test.ts(10,55): error TS2307: Cannot find module '../../../../shared/auto-level.types' or its corresponding type declarations.
+packages/llpte-ai/src/aiAdapter.ts(20,14): error TS2304: Cannot find name 'window'.
+packages/llpte-ai/src/aiAdapter.ts(21,13): error TS2304: Cannot find name 'window'.
+packages/llpte-core/src/AutoLevelPipeline.ts(102,21): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-core/src/AutoLevelPipeline.ts(123,15): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-core/src/AutoLevelPipeline.ts(124,14): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-core/src/AutoLevelPipeline.ts(125,15): error TS2304: Cannot find name 'BiquadFilterNode'.
+packages/llpte-core/src/engine/engine/workers/index.ts(1,15): error TS2307: Cannot find module './audioEngine.worker' or its corresponding type declarations.
+packages/llpte-core/src/engine/engine/workers/index.ts(2,15): error TS2307: Cannot find module './mixer.worker' or its corresponding type declarations.
+packages/llpte-core/src/engine/engine/workers/index.ts(3,15): error TS2307: Cannot find module './effects.worker' or its corresponding type declarations.
+packages/llpte-core/src/engine/workers/index.ts(1,15): error TS2307: Cannot find module './audioEngine.worker' or its corresponding type declarations.
+packages/llpte-core/src/engine/workers/index.ts(2,15): error TS2307: Cannot find module './mixer.worker' or its corresponding type declarations.
+packages/llpte-core/src/engine/workers/index.ts(3,15): error TS2307: Cannot find module './effects.worker' or its corresponding type declarations.
+packages/llpte-core/tests/pipeline.test.ts(8,28): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-core/tests/pipeline.test.ts(13,66): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-core/tests/pipeline.test.ts(15,26): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-core/tests/pipeline.test.ts(15,85): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-core/tests/pipeline.test.ts(16,24): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-core/tests/pipeline.test.ts(16,79): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-execution/src/AutoLevelExecutor.ts(22,14): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/src/AutoLevelExecutor.ts(23,14): error TS2304: Cannot find name 'BiquadFilterNode'.
+packages/llpte-execution/src/AutoLevelExecutor.ts(24,14): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-execution/src/crossfade.ts(32,16): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-execution/src/crossfade.ts(62,11): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-execution/src/crossfade.ts(63,11): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/src/crossfade.ts(64,11): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/tests/crossfade.test.ts(5,28): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-execution/tests/crossfade.test.ts(13,19): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-execution/tests/crossfade.test.ts(15,26): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/tests/crossfade.test.ts(15,85): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/tests/crossfade.test.ts(16,26): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-execution/tests/crossfade.test.ts(16,81): error TS2304: Cannot find name 'AudioContext'.
+packages/llpte-execution/tests/crossfade.test.ts(35,166): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-execution/tests/crossfade.test.ts(42,25): error TS2304: Cannot find name 'GainNode'.
+packages/llpte-signal/src/TrackAnalyzer.ts(113,17): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/TrackAnalyzer.ts(115,14): error TS2304: Cannot find name 'AudioParam'.
+packages/llpte-signal/src/TrackAnalyzer.ts(117,18): error TS2304: Cannot find name 'BiquadFilterNode'.
+packages/llpte-signal/src/TrackAnalyzer.ts(201,19): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(34,17): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(40,34): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(89,36): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(93,41): error TS2304: Cannot find name 'AnalyserNode'.
+scripts/mutation-tracer.debug.ts(34,12): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.debug.ts(34,56): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.debug.ts(343,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(20,8): error TS2307: Cannot find module '../mutation-tracer.debug' or its corresponding type declarations.
+scripts/mutation-tracer.test.ts(28,8): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(29,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(41,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(42,20): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(47,21): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(59,20): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(62,21): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(80,20): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(91,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(105,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(112,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(123,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(131,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(154,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(165,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(173,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(181,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(189,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(209,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(215,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(222,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(236,20): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(245,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(257,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(273,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(281,25): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(282,25): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(291,23): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(299,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(301,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(302,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(304,20): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(310,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(312,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(314,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(316,6): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(318,13): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(370,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(389,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(401,24): error TS2304: Cannot find name 'window'.
+scripts/mutation-tracer.test.ts(411,23): error TS2304: Cannot find name 'window'.
+scripts/vite.config.snippet.ts(10,44): error TS2307: Cannot find module 'vite' or its corresponding type declarations.
+  There are types at '/home/r3v/Stable/node_modules/vite/dist/node/index.d.ts', but this result could not be resolved under your current 'moduleResolution' setting. Consider updating to 'node16', 'nodenext', or 'bundler'.
+scripts/vite.config.snippet.ts(11,19): error TS2307: Cannot find module '@vitejs/plugin-react' or its corresponding type declarations.
+scripts/vite.config.snippet.ts(12,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/app.ts(1,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/lib/storage-s3.ts(26,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+multer@2.1.0/node_modules/@types/multer/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/lib/storage-s3.ts(27,8): error TS1259: Module '"multer-s3"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/lib/storage-s3.ts(28,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/lib/storage-s3.ts(102,18): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/lib/storage-s3.ts(102,24): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/lib/storage-s3.ts(102,30): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/middleware/auth.ts(16,8): error TS1192: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+jsonwebtoken@9.0.10/node_modules/@types/jsonwebtoken/index"' has no default export.
+server/routes.ts(35,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+multer@2.1.0/node_modules/@types/multer/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes.ts(36,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes.ts(37,8): error TS1192: Module '"fs/promises"' has no default export.
+server/routes.ts(49,23): error TS7006: Parameter 'req' implicitly has an 'any' type.
+server/routes.ts(49,28): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/routes.ts(49,34): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/routes.ts(60,14): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/routes.ts(60,20): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/routes.ts(60,26): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/routes.ts(69,16): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/routes.ts(69,22): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/routes.ts(69,28): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/routes.ts(128,61): error TS7006: Parameter 'err' implicitly has an 'any' type.
+server/routes/auth.ts(15,8): error TS1192: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+bcrypt@6.0.0/node_modules/@types/bcrypt/index"' has no default export.
+server/routes/auth.ts(16,8): error TS1192: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+jsonwebtoken@9.0.10/node_modules/@types/jsonwebtoken/index"' has no default export.
+server/routes/auth.ts(39,3): error TS2322: Type 'string | null' is not assignable to type 'string'.
+  Type 'null' is not assignable to type 'string'.
+server/routes/internal.ts(20,9): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes/internal.ts(23,18): error TS7052: Element implicitly has an 'any' type because type 'Headers' has no index signature. Did you mean to call 'req.headers.get'?
+server/routes/internal.ts(25,9): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes/internal.ts(35,3): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type '(req: Request, res: Response, next: () => void) => void' is not assignable to parameter of type 'RequestHandlerParams<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+      Type '(req: Request, res: Response, next: () => void) => void' is not assignable to type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>'.
+        Types of parameters 'req' and 'req' are incompatible.
+          Type 'Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is missing the following properties from type 'Request': cache, credentials, destination, integrity, and 14 more.
+server/routes/internal.ts(46,16): error TS2554: Expected 0 arguments, but got 1.
+server/routes/internal.ts(52,11): error TS2349: This expression is not callable.
+  Type 'Number' has no call signatures.
+server/routes/loops.ts(7,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+multer@2.1.0/node_modules/@types/multer/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes/loops.ts(8,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes/loops.ts(23,16): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/routes/loops.ts(23,22): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/routes/loops.ts(23,28): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/routes/mock-billing.ts(21,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes/mock-billing.ts(39,16): error TS2304: Cannot find name 'Router'.
+server/routes/waveform.ts(27,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+multer@2.1.0/node_modules/@types/multer/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes/waveform.ts(28,8): error TS1259: Module '"node:path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/routes/waveform.ts(68,14): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/routes/waveform.ts(68,20): error TS7006: Parameter 'file' implicitly has an 'any' type.
+server/routes/waveform.ts(68,26): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+server/scripts/seed/database.seed.ts(4,9): error TS2304: Cannot find name 'pg'.
+server/scripts/seed/database.seed.ts(5,13): error TS2304: Cannot find name 'plans'.
+server/services/audio-analysis.ts(17,8): error TS1192: Module '"fs/promises"' has no default export.
+server/services/mock-billing.ts(27,8): error TS1192: Module '"crypto"' has no default export.
+server/static.ts(2,8): error TS1192: Module '"fs"' has no default export.
+server/static.ts(3,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/static.ts(5,34): error TS2709: Cannot use namespace 'Express' as a type.
+server/static.ts(16,17): error TS7006: Parameter '_req' implicitly has an 'any' type.
+server/static.ts(16,23): error TS7006: Parameter 'res' implicitly has an 'any' type.
+server/utils/fileUtils.ts(7,8): error TS1192: Module '"fs/promises"' has no default export.
+server/utils/fileUtils.ts(8,8): error TS1259: Module '"path"' can only be default-imported using the 'allowSyntheticDefaultImports' flag
+server/utils/fileUtils.ts(42,27): error TS7006: Parameter 'e' implicitly has an 'any' type.
+server/utils/fileUtils.ts(42,87): error TS7006: Parameter 'e' implicitly has an 'any' type.
+server/ws/collab.ts(37,8): error TS1192: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+jsonwebtoken@9.0.10/node_modules/@types/jsonwebtoken/index"' has no default export.
+shared/schema-subscription.ts(69,14): error TS2451: Cannot redeclare block-scoped variable 'aiTransitionUsage'.
+shared/schema-subscription.ts(94,13): error TS2300: Duplicate identifier 'AiTransitionUsage'.
+shared/schema-subscription.ts(109,14): error TS2451: Cannot redeclare block-scoped variable 'aiTransitionUsage'.
+shared/schema-subscription.ts(110,20): error TS2304: Cannot find name 'varchar'.
+shared/schema-subscription.ts(111,40): error TS2304: Cannot find name 'users'.
+shared/schema-subscription.ts(114,20): error TS2304: Cannot find name 'integer'.
+shared/schema-subscription.ts(117,12): error TS2304: Cannot find name 'primaryKey'.
+shared/schema-subscription.ts(121,13): error TS2300: Duplicate identifier 'AiTransitionUsage'.
+test-import.ts(1,8): error TS1259: Module '"/home/r3v/Stable/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express/index"' can only be default-imported using the 'allowSyntheticDefaultImports' flag

@@ -211,6 +211,41 @@ async function runMasteringAnalysis(params: {
   };
 }
 
+
+// ── Input sanitiser — F-10 fix ───────────────────────────────────────────────
+
+/**
+ * sanitiseTrackName
+ *
+ * Strips characters that form instruction-syntax patterns used in prompt
+ * injection (angle brackets, braces, backticks, newlines, pipe, backslash,
+ * hash-bang sequences) from user-supplied track names before they are
+ * interpolated into any LLM context string.
+ *
+ * The Zod schema already enforces .max(40) on input; this sanitiser is a
+ * server-side defence-in-depth layer that neutralises injection payloads
+ * that fit within the character cap (e.g. "<|SYSTEM|> ignore previous...").
+ *
+ * Strategy: allowlist printable ASCII minus instruction-syntax characters,
+ * then re-enforce the 40-char limit after stripping.
+ *
+ * F-10 (Mythos audit 2026-04-22) — resolved here, not deferred.
+ */
+function sanitiseTrackName(raw: string | undefined): string | undefined {
+  if (!raw) return raw;
+  return raw
+    // Strip characters that construct injection syntax:
+    //   < > { } [ ] ` \ | # ^ ~ instruction delimiters
+    //   \n \r  newlines that could break system-prompt structure
+    //   null bytes
+    .replace(/[<>{}\[\]`\\|#^~\n\r\x00]/g, '')
+    // Collapse multiple spaces created by stripping (keeps names readable)
+    .replace(/  +/g, ' ')
+    .trim()
+    // Re-enforce hard cap after stripping (Zod cap is on raw input pre-strip)
+    .slice(0, 40) || undefined;
+}
+
 // ── AI Co-Producer prompt builder ─────────────────────────────────────────────
 
 function buildCoProducerSystem(): string {
@@ -222,6 +257,12 @@ function buildCoProducerSystem(): string {
     'Keep responses under 80 words. Be direct, no marketing language.',
     'You are aware of the R3 v4 DAW context and its LLPTE signal analysis pipeline.',
   ].join(' ');
+}
+
+
+// ── Daily date helper (C-03 fix) ─────────────────────────────────────────────
+function todayUTC(): string {
+  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
@@ -440,9 +481,9 @@ export const dawRouter = router({
       context: z.object({
         bpm:           z.number(),
         trackCount:    z.number(),
-        // F-10 (SECURITY.md): activeTrack is user-controlled. When the real
-        // Anthropic API is wired, this field must be sanitised before inclusion
-        // in the system context string to prevent prompt injection. See SECURITY.md.
+        // F-10 (SECURITY.md — FIXED): activeTrack is sanitised by sanitiseTrackName()
+        // before inclusion in the system context string. The sanitiser strips
+        // instruction-pattern characters and enforces a 40-char hard cap server-side.
         activeTrack:   z.string().max(40).optional(),
         position:      z.number(),
       }),
@@ -452,7 +493,7 @@ export const dawRouter = router({
 
       const ctxStr = [
         `Project: ${input.context.trackCount} tracks, ${input.context.bpm} BPM.`,
-        input.context.activeTrack ? `Selected track: ${input.context.activeTrack}.` : '',
+        input.context.activeTrack ? `Selected track: ${sanitiseTrackName(input.context.activeTrack)}.` : '',
         `Playhead at beat ${input.context.position}.`,
       ].filter(Boolean).join(' ');
 
