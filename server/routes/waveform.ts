@@ -23,7 +23,7 @@
  *      directory does not yet exist (e.g. fresh checkout, cleared uploads/).
  */
 
-import { Router }                    from "express";
+import { Router } from 'express';
 import multer                        from "multer";
 import path                          from "node:path";
 import { mkdirSync, existsSync, createReadStream } from "node:fs";

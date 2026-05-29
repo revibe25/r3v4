@@ -5,6 +5,7 @@ export default function AudioTest() {
 
   if (!ready) {
     return (
+      <>
           <header className="ag-header">
             <div className="ag-header-top">
               <div className="ag-wordmark-block">
@@ -19,6 +20,7 @@ export default function AudioTest() {
       <div style={{ padding: 20 }}>
         <button onClick={start}>Start Audio</button>
       </div>
+          </>
     );
   }
 

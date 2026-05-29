@@ -1,7 +1,6 @@
 {
   "name": "@r3vibe/server",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
   "scripts": {
     "test": "playwright test",
@@ -16,6 +15,7 @@
     "lint:tokens": "tsx scripts/lint-design-tokens.ts",
     "lint": "eslint . && npm run lint:tokens",
     "lint:fix": "eslint . --fix",
+    "type": "module",
     "typecheck": "pnpm -r exec tsc --noEmit",
     "test:coverage": "vitest run --coverage",
     "implement-metrics": "tsx implement-session-metrics.ts",
@@ -69,6 +69,7 @@
     "@vitest/coverage-v8": "3.2.4",
     "autoprefixer": "^10.5.0",
     "concurrently": "^9.2.1",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.4",
     "eslint-formatter-unix": "^9.0.1",
     "eslint-plugin-react": "^7.37.5",

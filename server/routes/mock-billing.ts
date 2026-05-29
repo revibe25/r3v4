@@ -18,7 +18,7 @@ import { logger } from "../utils/logger";
  */
 
 import type { Request, Response } from 'express';
-import express, { Router } from 'express';
+import express from 'express';
 import {
   verifyMockToken,
   applyMockSubscription,

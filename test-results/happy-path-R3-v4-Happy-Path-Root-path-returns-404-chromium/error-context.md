@@ -7,7 +7,7 @@
 # Test info
 
 - Name: happy-path.spec.ts >> R3 v4 Happy Path >> Root path returns 404
-- Location: tests/happy-path.spec.ts:19:3
+- Location: tests/happy-path.spec.ts:19:7
 
 # Error details
 

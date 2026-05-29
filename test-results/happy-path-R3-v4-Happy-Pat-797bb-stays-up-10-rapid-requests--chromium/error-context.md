@@ -7,7 +7,7 @@
 # Test info
 
 - Name: happy-path.spec.ts >> R3 v4 Happy Path >> Server stays up (10 rapid requests)
-- Location: tests/happy-path.spec.ts:24:3
+- Location: tests/happy-path.spec.ts:24:7
 
 # Error details
 

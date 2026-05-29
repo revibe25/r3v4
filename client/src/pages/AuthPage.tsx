@@ -170,6 +170,7 @@ export default function AuthPage() {
   const displayError = localErr ?? error;
 
   return (
+    <>
           <header className="ag-header">
             <div className="ag-header-top">
               <div className="ag-wordmark-block">
@@ -403,5 +404,6 @@ export default function AuthPage() {
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </>
+      </>
   );
 }

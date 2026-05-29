@@ -7,7 +7,7 @@
 # Test info
 
 - Name: happy-path.spec.ts >> R3 v4 Happy Path >> Health endpoint returns 200
-- Location: tests/happy-path.spec.ts:7:3
+- Location: tests/happy-path.spec.ts:7:7
 
 # Error details
 

@@ -127,6 +127,7 @@ const STYLES = `
 
 export default function NotFound() {
   return (
+    <>
           <header className="ag-header">
             <div className="ag-header-top">
               <div className="ag-wordmark-block">
@@ -181,5 +182,6 @@ export default function NotFound() {
         </div>
       </div>
     </>
+  </>
   );
 }

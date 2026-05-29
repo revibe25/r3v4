@@ -11,7 +11,7 @@
  * - Token lifecycle: JWT with configurable expiry, stateless validation
  */
 
-import { Router } from "express";
+import { Router } from 'express';
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";

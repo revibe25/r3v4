@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+const express = require('express');
 import fs from "fs";
 import path from "path";
 

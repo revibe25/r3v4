@@ -6,7 +6,7 @@
  *
  * Consumers: Agi-Suite api-server (server-to-server only)
  */
-import { Router, type Request, type Response } from "express";
+import { Router } from 'express';
 import { count, sum, avg } from "drizzle-orm";
 import { db }              from "../db";
 import { sessionMetrics }  from "../../shared/schema-session-metrics";

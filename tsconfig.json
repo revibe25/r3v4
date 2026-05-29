@@ -1,53 +1,19 @@
 {
-  "include": [
-    "index.ts",
-    "server/**/*",
-    "shared/**/*"
-],
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "**/*.test.ts",
-    "client/**/*",
-    "shared/dist",
-    "scripts/seed",
-    "**/seed/**",
-    "../vite.config.ts",
-    "vite.config.ts"
-  ],
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": ".",
     "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "lib": [
-      "ES2020"
-    ],
-    "jsx": "react-jsx",
-    "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
     "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": false,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "types": [
-      "node"
-    ],
-    "paths": {
-      "@shared/*": [
-        "./shared/*"
-      ]
-    }
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "noImplicitAny": true
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalEsm": true,
-    "compilerResolver": true
-  }
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
