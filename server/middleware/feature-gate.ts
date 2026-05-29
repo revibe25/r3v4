@@ -44,7 +44,7 @@ import {
 } from '../../shared/subscription.types';
 import { db } from '../db';
 import { aiTransitionUsage } from '../../shared/schema-subscription';
-import { eq, and, count } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 
 interface GuestCounter {
@@ -155,17 +155,21 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
   const userId: string | undefined = ctx.user?.id;
 
   if (userId) {
-    const [usage] = await db
-      .select({ total: count() })
+    // C-03 FIX: query by (userId, usageDate) — sessionId column was removed
+    // from aiTransitionUsage by the C-03 audit. Rate limit is now daily (UTC).
+    const usageDate = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+    const [row] = await db
+      .select({ total: aiTransitionUsage.transitionCount })
       .from(aiTransitionUsage)
       .where(
         and(
           eq(aiTransitionUsage.userId, userId),
-          eq(aiTransitionUsage.sessionId, sessionId),
+          eq(aiTransitionUsage.usageDate, usageDate),
         ),
       );
 
-    const used = Number(usage?.total ?? 0);
+    const used = Number(row?.total ?? 0);
 
     if (used >= numericLimit) {
       throw new TRPCError({
@@ -186,15 +190,19 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
     const result = await next();
 
     try {
-      await db.insert(aiTransitionUsage).values({
-        id: crypto.randomUUID(),
-        userId,
-        sessionId,
-      });
+      // Upsert — composite PK (userId, usageDate) makes this atomic.
+      // No id column; no sessionId column.
+      await db
+        .insert(aiTransitionUsage)
+        .values({ userId, usageDate, transitionCount: 1 })
+        .onConflictDoUpdate({
+          target: [aiTransitionUsage.userId, aiTransitionUsage.usageDate],
+          set: {
+            transitionCount: sql`${aiTransitionUsage.transitionCount} + 1`,
+            updatedAt: new Date(),
+          },
+        });
     } catch (err) {
-      // Log but do not fail the request - a missing usage record is preferable
-      // to failing a completed AI transition. Monitor for repeated failures
-      // as they indicate a schema or DB connectivity issue.
       process.stderr.write(`[feature-gate] failed to record AI usage: ${String(err)}\n`);
     }
 

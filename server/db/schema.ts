@@ -31,6 +31,8 @@ import {
 import { createInsertSchema } from "drizzle-zod";
 
 // ── Re-export canonical subscription types so existing imports keep working ───
+// Subscription, NewSubscription, StripeEvent are type aliases defined in
+// schema-subscription.ts (derived from $inferSelect/$inferInsert).
 export type {
   Subscription,
   NewSubscription,

@@ -6,6 +6,7 @@
  */
 import { useState, useCallback, useRef } from "react";
 import { trpc }  from "@/lib/trpc";
+import { useAuthStore } from "@/hooks/authStore";
 import type { AutoLevelSessionStats } from "../../../shared/auto-level.types";
 
 const EMPTY_STATS: AutoLevelSessionStats = {
@@ -23,9 +24,22 @@ export function useSessionMetrics() {
   const [stats, setStats]           = useState<AutoLevelSessionStats>(EMPTY_STATS);
   const startedAtRef                = useRef<number>(Date.now());
 
+  // Reactive — flips enabled when initAuth() sets the token
+  const token = useAuthStore((s) => s.token);
+
   const startMut  = trpc.sessionMetrics.start.useMutation();
   const stopMut   = trpc.sessionMetrics.stop.useMutation();
-  const totalsQ          = trpc.sessionMetrics.totals.useQuery();
+
+  // FIX: guard prevents 401 storm on unauthenticated mounts
+  const totalsQ = trpc.sessionMetrics.totals.useQuery(undefined, {
+    enabled: Boolean(token),
+    retry: (count: number, error: unknown) => {
+      if ((error as { data?: { code?: string } })?.data?.code === "UNAUTHORIZED")
+        return false;
+      return count < 2;
+    },
+  });
+
   const recordDecisionMut = trpc.sessionMetrics.recordDecision.useMutation();
 
   /** Call when the DAW session begins (tracks loaded, transport started). */
