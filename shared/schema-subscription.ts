@@ -13,6 +13,9 @@ import {
   pgEnum,
   index,
   uniqueIndex,
+  varchar,
+  integer,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 // import { relations } from 'drizzle-orm';
 import { SUBSCRIPTION_TIERS, SUBSCRIPTION_STATUSES, BILLING_CYCLES } from './subscription.types';
@@ -81,9 +84,10 @@ export const stripeEvents = pgTable(
  * The composite PK on (userId, usageDate) makes the upsert atomic — no race.
  */
 export const aiTransitionUsage = pgTable("ai_transition_usage", {
-  userId:          varchar("user_id")
-                     .references(() => users.id, { onDelete: "cascade" })
-                     .notNull(),
+  // userId is plain text — no FK to users.id.
+  // shared/ cannot import server/db/schema.ts (layer violation).
+  // This is a rate-limit table, not an ownership table; the FK is not required.
+  userId:          text("user_id").notNull(),
   usageDate:       text("usage_date").notNull(),           // ISO date string "YYYY-MM-DD" (UTC)
   transitionCount: integer("transition_count").notNull().default(0),
   updatedAt:       timestamp("updated_at").notNull().defaultNow(),
@@ -94,4 +98,9 @@ export const aiTransitionUsage = pgTable("ai_transition_usage", {
 
 export type AiTransitionUsage    = typeof aiTransitionUsage.$inferSelect;
 export type NewAiTransitionUsage = typeof aiTransitionUsage.$inferInsert;
+
+// ── Type aliases for server/db/schema.ts re-exports ──────────────────────────
+export type Subscription    = typeof subscriptions.$inferSelect;
+export type NewSubscription = typeof subscriptions.$inferInsert;
+export type StripeEvent     = typeof stripeEvents.$inferSelect;
 
