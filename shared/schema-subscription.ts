@@ -66,29 +66,32 @@ export const stripeEvents = pgTable(
 
 // ── AI transition usage (rate limiting Explorer tier) ────────────────────────
 
-export const aiTransitionUsage = pgTable(
-  'ai_transition_usage',
-  {
-    id: text('id').primaryKey(),
-    userId: text('user_id').notNull(),
-    sessionId: text('session_id').notNull(),
-    usedAt: timestamp('used_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => ({
-    userSessionIdx: index('ai_usage_user_session_idx').on(t.userId, t.sessionId),
-  }),
-);
 
-// ── Relations ────────────────────────────────────────────────────────────────
-// Wire to your existing users table — adjust 'users' import to match your schema
+/**
+ * aiTransitionUsage — C-03 fix (Mythos audit 2026-04-22)
+ *
+ * Rate-limit key changed from (userId, sessionId) to (userId, usageDate).
+ * The sessionId column was client-controllable via the X-Session-Id header,
+ * allowing any authenticated user to rotate it per-request and bypass the
+ * per-session AI transition cap. Scoping to a server-generated daily date
+ * (UTC) eliminates the bypass entirely: the key is now fully server-controlled.
+ *
+ * Daily limit enforcement: the router increments `transitionCount` and rejects
+ * requests where transitionCount >= tier daily limit BEFORE calling the LLM.
+ * The composite PK on (userId, usageDate) makes the upsert atomic — no race.
+ */
+export const aiTransitionUsage = pgTable("ai_transition_usage", {
+  userId:          varchar("user_id")
+                     .references(() => users.id, { onDelete: "cascade" })
+                     .notNull(),
+  usageDate:       text("usage_date").notNull(),           // ISO date string "YYYY-MM-DD" (UTC)
+  transitionCount: integer("transition_count").notNull().default(0),
+  updatedAt:       timestamp("updated_at").notNull().defaultNow(),
+}, (table) => ({
+  pk:      primaryKey({ columns: [table.userId, table.usageDate] }),
+  userIdx: index("ai_transition_usage_user_idx").on(table.userId),
+}));
 
-// export const subscriptionRelations = relations(subscriptions, ({ one }) => ({
-//   user: one(users, { fields: [subscriptions.userId], references: [users.id] }),
-// }));
+export type AiTransitionUsage    = typeof aiTransitionUsage.$inferSelect;
+export type NewAiTransitionUsage = typeof aiTransitionUsage.$inferInsert;
 
-// ── Types inferred from schema ───────────────────────────────────────────────
-
-export type Subscription = typeof subscriptions.$inferSelect;
-export type NewSubscription = typeof subscriptions.$inferInsert;
-export type StripeEvent = typeof stripeEvents.$inferSelect;
-export type AiTransitionUsage = typeof aiTransitionUsage.$inferSelect;
