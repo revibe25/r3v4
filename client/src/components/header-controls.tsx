@@ -1,5 +1,5 @@
 // @ts-nocheck
-// client/src/components/header-controls.tsx
+// client/src/components/header-controls.tsx [POLISHED]
 import React, { useRef, useState, useMemo, useCallback, memo } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient, getQueryFn, apiRequest } from '@/lib/queryClient';
@@ -61,6 +61,7 @@ const S = {
   bgPanel:    'var(--dj-surface)',
   border:     'var(--dj-border)',
   accent:     '#a3e635',
+  accentGlow: '#a3e63588',
   textDim:    '#555',
   textMuted:  'var(--dj-dim)',
   textActive: 'var(--white)',
@@ -82,19 +83,31 @@ const BarButton = React.forwardRef<
       ref={ref}
       onClick={onClick}
       title={title}
-      className="flex items-center gap-1 h-7 px-2 transition-colors"
+      className="flex items-center gap-1.5 h-7 px-2 transition-all"
       style={{
         background:   active ? S.accent    : 'transparent',
         color:        active ? 'var(--dj-black)'       : S.textDim,
         border:       `1px solid ${active ? S.accent : S.border}`,
         borderRadius: 0,
         fontFamily:   S.font,
+        fontSize:     10,
+        letterSpacing: '0.05em',
+        fontWeight:    active ? 500 : 400,
+        boxShadow:     active ? `inset 0 0 8px ${S.accentGlow}, 0 0 6px ${S.accent}22` : 'none',
       }}
       onMouseEnter={e => {
-        if (!active) (e.currentTarget as HTMLElement).style.color = S.textActive;
+        if (!active) {
+          (e.currentTarget as HTMLElement).style.color = S.textActive;
+          (e.currentTarget as HTMLElement).style.borderColor = 'var(--dj-dim)';
+          (e.currentTarget as HTMLElement).style.background = 'rgba(163, 230, 53, 0.06)';
+        }
       }}
       onMouseLeave={e => {
-        if (!active) (e.currentTarget as HTMLElement).style.color = S.textDim;
+        if (!active) {
+          (e.currentTarget as HTMLElement).style.color = S.textDim;
+          (e.currentTarget as HTMLElement).style.borderColor = S.border;
+          (e.currentTarget as HTMLElement).style.background = 'transparent';
+        }
       }}
     >
       {children}
@@ -210,7 +223,7 @@ export const HeaderControls = memo(function HeaderControls({
       >
         {/* ── Logo / identity ──────────────────────────────────────────────── */}
         <div
-          className="flex items-center gap-2 px-3 py-2 border-r flex-shrink-0"
+          className="flex items-center gap-3 px-4 py-2 border-r flex-shrink-0"
           style={{ borderColor: S.border }}
         >
           <div
@@ -237,15 +250,15 @@ export const HeaderControls = memo(function HeaderControls({
 
         {/* ── BPM / Metronome ──────────────────────────────────────────────── */}
         <div
-          className="flex items-center gap-2 px-3 py-2 border-r"
+          className="flex items-center gap-3 px-4 py-2 border-r"
           style={{ borderColor: S.border }}
         >
           <Tooltip>
             <TooltipTrigger asChild>
               <BarButton onClick={onMetronomeToggle} active={metronomeOn}>
                 <Clock className="w-3 h-3" />
-                <span className="text-[10px] uppercase" style={{ letterSpacing: 1 }}>
-                  {metronomeOn ? 'CLICK ON' : 'CLICK'}
+                <span className="text-[9px] uppercase" style={{ letterSpacing: 1 }}>
+                  {metronomeOn ? 'CLICK' : 'CLICK'}
                 </span>
               </BarButton>
             </TooltipTrigger>
@@ -256,7 +269,7 @@ export const HeaderControls = memo(function HeaderControls({
 
           {/* BPM readout */}
           <div
-            className="flex items-center gap-1.5 px-2 h-7 border"
+            className="flex items-center gap-2 px-2 h-7 border"
             style={{ borderColor: S.border, background: S.bg }}
           >
             <span
@@ -280,7 +293,7 @@ export const HeaderControls = memo(function HeaderControls({
           />
 
           <span
-            className="text-[10px] tabular-nums hidden lg:block"
+            className="text-[9px] tabular-nums hidden lg:block"
             style={{ color: S.textDim, letterSpacing: 1 }}
           >
             {msPerBeat}ms
@@ -289,7 +302,7 @@ export const HeaderControls = memo(function HeaderControls({
 
         {/* ── Theme selector ───────────────────────────────────────────────── */}
         <div
-          className="flex items-center px-3 py-2 border-r"
+          className="flex items-center px-4 py-2 border-r"
           style={{ borderColor: S.border }}
         >
           <DropdownMenu>
@@ -297,18 +310,27 @@ export const HeaderControls = memo(function HeaderControls({
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="flex items-center gap-1.5 h-7 px-2"
+                    className="flex items-center gap-2 h-7 px-2"
                     style={{
                       background:   'transparent',
                       color:        S.textDim,
                       border:       `1px solid ${S.border}`,
                       borderRadius: 0,
                       fontFamily:   S.font,
+                      transition:   'all 0.15s ease-out',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.color = S.textActive;
+                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--dj-dim)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.color = S.textDim;
+                      (e.currentTarget as HTMLElement).style.borderColor = S.border;
                     }}
                   >
                     <ThemeIcon className="w-3 h-3" />
                     <span
-                      className="text-[10px] uppercase hidden sm:inline"
+                      className="text-[9px] uppercase hidden sm:inline"
                       style={{ letterSpacing: 1 }}
                     >
                       {themeMetadata?.label ?? theme}
@@ -330,7 +352,7 @@ export const HeaderControls = memo(function HeaderControls({
               }}
             >
               <DropdownMenuLabel
-                className="text-[10px] uppercase"
+                className="text-[9px] uppercase"
                 style={{ color: S.textDim, letterSpacing: 2 }}
               >
                 Theme
@@ -355,7 +377,7 @@ export const HeaderControls = memo(function HeaderControls({
                       <Icon className="w-3 h-3" />
                       <div>
                         <div className="text-xs font-medium">{meta?.label ?? t}</div>
-                        <div className="text-[10px]" style={{ color: S.textDim }}>
+                        <div className="text-[9px]" style={{ color: S.textDim }}>
                           {meta?.description ?? ''}
                         </div>
                       </div>
@@ -368,12 +390,12 @@ export const HeaderControls = memo(function HeaderControls({
         </div>
 
         {/* ── Session controls (pushed to right) ───────────────────────────── */}
-        <div className="flex items-center gap-0.5 px-3 py-2 ml-auto">
+        <div className="flex items-center gap-2 px-4 py-2 ml-auto">
           <Tooltip>
             <TooltipTrigger asChild>
               <BarButton onClick={onSave}>
                 <Save className="w-3 h-3" />
-                <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                <span className="text-[9px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
                   Save
                 </span>
               </BarButton>
@@ -383,37 +405,34 @@ export const HeaderControls = memo(function HeaderControls({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <div style={{ marginLeft: 2 }}>
-                <BarButton
-                  onClick={() => setLoadDialogOpen(v => !v)}
-                  active={loadDialogOpen}
-                >
-                  <FolderOpen className="w-3 h-3" />
-                  <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
-                    Sessions{loadDialogOpen && filteredSessions.length > 0
-                      ? ` (${filteredSessions.length})`
-                      : ''}
-                  </span>
-                </BarButton>
-              </div>
+              <BarButton
+                onClick={() => setLoadDialogOpen(v => !v)}
+                active={loadDialogOpen}
+              >
+                <FolderOpen className="w-3 h-3" />
+                <span className="text-[9px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                  Sessions{loadDialogOpen && filteredSessions.length > 0
+                    ? ` (${filteredSessions.length})`
+                    : ''}
+                </span>
+              </BarButton>
             </TooltipTrigger>
             <TooltipContent style={tipStyle}>Browse saved sessions</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <div style={{ marginLeft: 2 }}>
-                <BarButton onClick={() => fileInputRef.current?.click()}>
-                  <Upload className="w-3 h-3" />
-                  <span className="text-[10px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
-                    Load
-                  </span>
-                </BarButton>
-              </div>
+              <BarButton onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-3 h-3" />
+                <span className="text-[9px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
+                  Load
+                </span>
+              </BarButton>
             </TooltipTrigger>
             <TooltipContent style={tipStyle}>Load session from file</TooltipContent>
           </Tooltip>
         </div>
+
         <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
           <LogoutButton variant="compact" />
         </div>
@@ -427,11 +446,11 @@ export const HeaderControls = memo(function HeaderControls({
         >
           {/* Filter bar */}
           <div
-            className="flex items-center gap-2 px-3 py-1.5 border-b"
+            className="flex items-center gap-2 px-4 py-2 border-b"
             style={{ background: S.bgPanel, borderColor: S.border }}
           >
             <span
-              className="text-[10px] uppercase"
+              className="text-[9px] uppercase"
               style={{ color: S.textDim, letterSpacing: 2 }}
             >
               Saved Sessions
@@ -441,7 +460,7 @@ export const HeaderControls = memo(function HeaderControls({
               placeholder="Filter…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="ml-auto h-5 px-2 text-[10px] bg-transparent outline-none"
+              className="ml-auto h-5 px-2 text-[9px] bg-transparent outline-none"
               style={{
                 border:       `1px solid ${S.border}`,
                 color:        S.textActive,
@@ -455,22 +474,23 @@ export const HeaderControls = memo(function HeaderControls({
           {/* Session rows */}
           <div className="max-h-40 overflow-y-auto">
             {sessionsError ? (
-              <div className="px-3 py-2 text-[10px]" style={{ color: '#ef4444' }}>
+              <div className="px-4 py-2 text-[9px]" style={{ color: '#ef4444' }}>
                 Failed to load sessions
               </div>
             ) : filteredSessions.length === 0 ? (
-              <div className="px-3 py-2 text-[10px]" style={{ color: S.textDim }}>
+              <div className="px-4 py-2 text-[9px]" style={{ color: S.textDim }}>
                 {sessions.length === 0 ? 'No saved sessions' : 'No matches'}
               </div>
             ) : (
               filteredSessions.map(session => (
                 <button
                   key={session.id}
-                  className="w-full flex items-center gap-3 px-3 py-1.5 border-b text-left"
+                  className="w-full flex items-center gap-3 px-4 py-1.5 border-b text-left"
                   style={{
                     borderColor: `${S.border}55`,
                     background:  'transparent',
                     fontFamily:  S.font,
+                    transition:  'background 0.1s',
                   }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--t-b1)'; }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
@@ -479,7 +499,7 @@ export const HeaderControls = memo(function HeaderControls({
                     setLoadDialogOpen(false);
                   }}
                 >
-                  <span className="text-xs flex-1" style={{ color: S.textActive }}>
+                  <span className="text-[10px] flex-1" style={{ color: S.textActive }}>
                     {session.name}
                   </span>
                   {session.bpm != null && (
