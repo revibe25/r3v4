@@ -1,7 +1,7 @@
 FROM node:22-alpine
 
 # Cache bust: 1780117783 — forces Railway to rebuild from scratch
-ARG CACHEBUST=1780119075
+ARG CACHEBUST=1780119076
 RUN echo "build $CACHEBUST"
 
 RUN apk add --no-cache python3 py3-pip curl && \
