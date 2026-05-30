@@ -12,43 +12,10 @@
 # Error details
 
 ```
-Test timeout of 30000ms exceeded.
-```
-
-```
-Error: page.click: Test timeout of 30000ms exceeded.
+Error: page.click: Test ended.
 Call log:
   - waiting for locator('[data-test=play-button]')
 
-```
-
-# Page snapshot
-
-```yaml
-- main [ref=e2]:
-  - generic [ref=e3]:
-    - generic [ref=e4]:
-      - img [ref=e5]
-      - heading "Application failed to respond" [level=1] [ref=e8]
-    - generic [ref=e9]:
-      - paragraph [ref=e10]: This error appears to be caused by the application.
-      - paragraph [ref=e11]:
-        - text: If this is your project, check out your
-        - link "deploy logs" [ref=e12] [cursor=pointer]:
-          - /url: https://docs.railway.com/guides/logs
-        - text: to see what went wrong. Refer to our
-        - link "docs on Fixing Common Errors" [ref=e13] [cursor=pointer]:
-          - /url: https://docs.railway.com/guides/fixing-common-errors
-        - text: for help, or reach out over our
-        - link "Help Station" [ref=e14] [cursor=pointer]:
-          - /url: https://station.railway.com
-        - text: .
-      - paragraph [ref=e15]: If you are a visitor, please contact the application owner or try again later.
-      - paragraph [ref=e17]:
-        - text: "Request ID:"
-        - text: evTHz0tPQmSyqqbuc9o55Q
-      - link "Go to Railway" [ref=e19] [cursor=pointer]:
-        - /url: https://railway.com
 ```
 
 # Test source
@@ -59,7 +26,7 @@ Call log:
   3  | test('user can play and stop audio', async ({ page }) => {
   4  |   await page.goto('/');
 > 5  |   await page.click('[data-test=play-button]');
-     |              ^ Error: page.click: Test timeout of 30000ms exceeded.
+     |              ^ Error: page.click: Test ended.
   6  |   await expect(page.locator('[data-test=playing-indicator]')).toBeVisible();
   7  |   await page.click('[data-test=stop-button]');
   8  |   await expect(page.locator('[data-test=playing-indicator]')).toHaveCount(0);

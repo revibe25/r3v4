@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: e2e/audio.spec.ts >> volume control works
-- Location: tests/e2e/audio.spec.ts:11:5
+- Name: e2e/audio.spec.js >> volume control works
+- Location: tests/e2e/audio.spec.js:9:5
 
 # Error details
 
@@ -46,7 +46,7 @@ Call log:
       - paragraph [ref=e15]: If you are a visitor, please contact the application owner or try again later.
       - paragraph [ref=e17]:
         - text: "Request ID:"
-        - text: 13GmlCGpSPWCObJDezItjw
+        - text: _PRE0RLuT8W5D1yJezItjw
       - link "Go to Railway" [ref=e19] [cursor=pointer]:
         - /url: https://railway.com
 ```
@@ -55,21 +55,19 @@ Call log:
 
 ```ts
   1  | import { test, expect } from '@playwright/test';
-  2  | 
-  3  | test('user can play and stop audio', async ({ page }) => {
-  4  |   await page.goto('/');
-  5  |   await page.click('[data-test=play-button]');
-  6  |   await expect(page.locator('[data-test=playing-indicator]')).toBeVisible();
-  7  |   await page.click('[data-test=stop-button]');
-  8  |   await expect(page.locator('[data-test=playing-indicator]')).toHaveCount(0);
-  9  | });
-  10 | 
-  11 | test('volume control works', async ({ page }) => {
-  12 |   await page.goto('/');
-  13 |   const slider = page.locator('[data-test=volume-slider]');
-> 14 |   await slider.fill('0.7');
-     |                ^ Error: locator.fill: Test timeout of 30000ms exceeded.
-  15 |   await expect(slider).toHaveValue('0.7');
-  16 | });
-  17 | 
+  2  | test('user can play and stop audio', async ({ page }) => {
+  3  |     await page.goto('/');
+  4  |     await page.click('[data-test=play-button]');
+  5  |     await expect(page.locator('[data-test=playing-indicator]')).toBeVisible();
+  6  |     await page.click('[data-test=stop-button]');
+  7  |     await expect(page.locator('[data-test=playing-indicator]')).toHaveCount(0);
+  8  | });
+  9  | test('volume control works', async ({ page }) => {
+  10 |     await page.goto('/');
+  11 |     const slider = page.locator('[data-test=volume-slider]');
+> 12 |     await slider.fill('0.7');
+     |                  ^ Error: locator.fill: Test timeout of 30000ms exceeded.
+  13 |     await expect(slider).toHaveValue('0.7');
+  14 | });
+  15 | 
 ```

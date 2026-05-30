@@ -40,6 +40,16 @@ export type {
   AiTransitionUsage,
 } from '../../shared/schema-subscription';
 
+// ── Re-export canonical subscription TABLE DEFINITIONS so drizzle-kit sees them ─
+export {
+  subscriptionTierEnum,
+  subscriptionStatusEnum,
+  billingCycleEnum,
+  subscriptions,
+  stripeEvents,
+  aiTransitionUsage,
+} from '../../shared/schema-subscription';
+
 // ==================== USERS ====================
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -54,6 +64,8 @@ export const users = pgTable("users", {
   tier: text("tier").notNull().default("explorer"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  trialStartedAt: timestamp("trial_started_at"),
+  trialExpiresAt: timestamp("trial_expires_at"),
   isAdmin: boolean("is_admin").notNull().default(false),
 });
 
