@@ -53,7 +53,9 @@
         "../packages/llpte-transition-graph/src/*"
       ]
     },
-    "declaration": false
+    "declaration": false,
+    "ignoreDeprecations": "6.0",
+    "rootDir": ".."
   },
   "include": [
     "./**/*.ts"
