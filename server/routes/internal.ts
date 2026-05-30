@@ -6,7 +6,7 @@
  *
  * Consumers: Agi-Suite api-server (server-to-server only)
  */
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { count, sum, avg } from "drizzle-orm";
 import { db }              from "../db";
 import { sessionMetrics }  from "../../shared/schema-session-metrics";
@@ -15,12 +15,12 @@ const router = Router();
 
 const INTERNAL_SECRET = process.env["INTERNAL_SECRET"];
 
-function requireInternalSecret(req: Request, res: Response, next: () => void) {
+function requireInternalSecret(req: Request, res: Response, next: NextFunction) {
   if (!INTERNAL_SECRET) {
     res.status(503).json({ error: "INTERNAL_SECRET not configured" });
     return;
   }
-  const header = req.headers["x-internal-secret"];
+  const header = (req.headers as Record<string, string | string[] | undefined>)["x-internal-secret"];
   if (header !== INTERNAL_SECRET) {
     res.status(401).json({ error: "Unauthorized" });
     return;

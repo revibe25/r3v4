@@ -18,7 +18,7 @@ import { logger } from "../utils/logger";
  */
 
 import type { Request, Response } from 'express';
-import express from 'express';
+import express, { Router } from 'express';
 import {
   verifyMockToken,
   applyMockSubscription,
@@ -36,7 +36,7 @@ import {
   TIER_DEFINITIONS,
 } from '../../shared/subscription.types';
 
-const router = Router();
+const router = express.Router();
 
 // Urlencoded parser for form POSTs — scoped to this router only
 const urlencoded = express.urlencoded({ extended: false });
