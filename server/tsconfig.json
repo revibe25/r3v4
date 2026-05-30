@@ -16,7 +16,8 @@
       "multer-s3": [
         "./types/multer-s3.d.ts"
       ]
-    }
+    },
+    "declaration": false
   },
   "include": [
     "./**/*.ts"
