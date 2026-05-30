@@ -7,11 +7,31 @@ Items below require human decision before any automated action.
     r3audit
     r3execute
     r3setup
-    Dockerfile
     Sending
+    pnpm
+    tsc
+    ui-modernization-phase1
+    eslint
+    vitest
+    HealthCheckResponse
+    should
+    ubmitSuggestionOutcome wiring
+    :
+    16
+    8
+    Dockerfile
+    0
+    react-use
+    js-cookie
+    drizzle-kit
+    esbuild
+    express
+    qs
+    Fix
+    tsc_F-10
+    )
 
 [ ] NON-STANDARD EXTENSION FILES:
-    client/tsconfig.worklet.json.ts6bak
     client/src/hooks/useSessionMetricsSync.ts.mythos
     client/src/stores/session-store.ts.mythos
     client/src/stores/session-metrics-store.ts.mythos
@@ -19,37 +39,35 @@ Items below require human decision before any automated action.
 
 [ ] UNVERIFIED SCRIPTS:
     find_api_auth.sh  [UNVERIFIED — human review required]
-    client/src/extract-wrapper.sh  [UNVERIFIED — human review required]
+    master_sync_drizzle_journal.sh  [UNVERIFIED — human review required]
+    c03_diagnostic.sh  [UNVERIFIED — human review required]
     scripts/max-checker.sh  [UNVERIFIED — human review required]
-    add_ticker.py  [UNVERIFIED — human review required]
+    inspect-init-constants.py  [UNVERIFIED — human review required]
     services/ai-mix/src/ai_mix.py  [UNVERIFIED — human review required]
     services/ai-mix/src/main.py  [UNVERIFIED — human review required]
-    scripts/relocate_dsp.py  [UNVERIFIED — human review required]
     scripts/scripts_security_due_check_Version2.py  [UNVERIFIED — human review required]
     scripts/scripts_verify_artifacts_exist_Version2.py  [UNVERIFIED — human review required]
 
 [ ] PARALLEL DUPLICATE DIRECTORIES:
-    components:
-      client/components
-      client/client/src/components
-      client/src/components
-      client/src/features/loopstation/components
-      client/src/pages/multi-track-panel/components
     hooks:
-      client/hooks
       client/client/hooks
-      client/client/src/hooks
       client/src/hooks
       client/src/audio/hooks
       client/src/features/loopstation/hooks
-    stores:
-      client/stores
-      client/client/src/stores
-      client/src/stores
+      tools/src/hooks
+    components:
+      client/src/components
+      client/src/features/loopstation/components
+      client/src/pages/multi-track-panel/components
 
 [ ] MIGRATION SCRIPTS — confirm applied before any removal:
-    wire_patches_v5_to_v5_1.py
     r3hygiene.py
+    r3-hygiene-execute.py
+    patch_skills_13.py
+    fix-logging-phase1.py
+    fix_f10_prompt_injection.py
+    fix_c03_session_bypass.py
+    fix_f10_prompt_injection_v2.py
     scripts/r3_master_fix.py
 
 [ ] LOCKFILE CONFLICTS:
