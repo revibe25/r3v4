@@ -4,7 +4,7 @@
 // Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
 // ─────────────────────────────────────────────────────────────────────────────
 /**
- * client/src/components/page-nav.tsx
+ * client/src/components/page-nav.tsx [POLISHED]
  * R3 v4 — global navigation bar.
  *
  * Design: acid-hardware strip — IBM Plex Mono, lime-green accent (#a3e635),
@@ -34,9 +34,6 @@ import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 
 // ── Layout token ─────────────────────────────────────────────────────────────
-// Exported so App.tsx can inject `--nav-h` as a CSS custom property.
-// Pages needing to fill the remaining viewport should use:
-//   height: calc(100vh - var(--nav-h))
 export const NAV_HEIGHT_PX = 44;
 
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
@@ -51,6 +48,7 @@ const T = {
   border:    'var(--dj-border)',
   accent:    '#a3e635',
   accentDim: '#a3e63522',
+  accentGlow: '#a3e63588',
   dim:       'var(--dj-dim)',
   dimHover:  'var(--text-dim)',
   font:      "'IBM Plex Mono', 'JetBrains Mono', monospace",
@@ -64,16 +62,6 @@ const TIER_STYLE: Record<string, { color: string; border: string }> = {
 };
 
 // ── Page definitions — ordered by intended user journey ──────────────────────
-//
-//   1. /pricing     — visitor lands here first (App.tsx root redirect)
-//   2. /auth        — login / register (hidden when authenticated)
-//   3. /instrument  — first tool after login
-//   4. /daw         — main production suite
-//   5. /loopstation — loop recorder console
-//   6. /multitrack  — multitrack DAW (MultiTrackPanel)
-//   7. /collab      — collaborative DAW pro (WaveLab)
-//   8. /mixer       — drag & drop mixer view (MultitrackView)
-//
 const PAGES = [
   { href: '/pricing',    label: 'Pricing',    icon: Tag,     authOnly: false, hideWhenAuthed: false },
   { href: '/auth',       label: 'Login',      icon: LogIn,   authOnly: false, hideWhenAuthed: true  },
@@ -95,7 +83,7 @@ export function PageNav() {
   const tier            = useAuthStore(s => s.user?.tier ?? 'explorer');
   const isAdmin         = userEmail === ADMIN_EMAIL;
 
-  // Suppress nav entirely on auth/login pages — clean UX, no self-referential links
+  // Suppress nav entirely on auth/login pages
   if (NAV_HIDDEN_ON.includes(location)) return null;
 
   const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
@@ -107,12 +95,12 @@ export function PageNav() {
         display:     'flex',
         alignItems:  'center',
         height:       NAV_HEIGHT_PX,
-        padding:     '0 12px',
+        padding:     '0 16px',
         background:   T.bg,
         borderBottom: `1px solid ${T.border}`,
         fontFamily:   T.font,
         flexShrink:   0,
-        gap:          0,
+        gap:          12,
         userSelect:  'none',
         boxSizing:   'border-box',
       }}
@@ -123,8 +111,9 @@ export function PageNav() {
           display:    'flex',
           alignItems: 'center',
           flex:        1,
-          gap:         2,
+          gap:         4,
           overflow:   'hidden',
+          minWidth:    0,
         }}
       >
         {PAGES.map(({ href, label, icon: Icon, authOnly, hideWhenAuthed }) => {
@@ -141,7 +130,7 @@ export function PageNav() {
               style={{
                 display:        'flex',
                 alignItems:     'center',
-                gap:             5,
+                gap:             6,
                 height:          28,
                 padding:        '0 10px',
                 background:      active ? T.accentDim : 'transparent',
@@ -154,14 +143,16 @@ export function PageNav() {
                 textDecoration: 'none',
                 whiteSpace:     'nowrap',
                 cursor:         'pointer',
-                transition:     'color 0.12s, background 0.12s, border-color 0.12s',
-                boxShadow:       active ? `0 0 8px ${T.accent}33` : 'none',
+                transition:     'all 0.15s ease-out',
+                boxShadow:       active ? `inset 0 0 12px ${T.accentGlow}, 0 0 8px ${T.accent}22` : 'none',
+                flexShrink:      0,
               }}
               onMouseEnter={e => {
                 if (!active) {
                   const el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dimHover;
                   el.style.borderColor = 'var(--dj-dim)';
+                  el.style.background  = 'rgba(163, 230, 53, 0.08)';
                 }
               }}
               onMouseLeave={e => {
@@ -169,6 +160,7 @@ export function PageNav() {
                   const el = e.currentTarget as HTMLAnchorElement;
                   el.style.color       = T.dim;
                   el.style.borderColor = T.border;
+                  el.style.background  = 'transparent';
                 }
               }}
             >
@@ -179,21 +171,32 @@ export function PageNav() {
         })}
       </div>
 
+      {/* ── Vertical separator ──────────────────────────────────────────── */}
+      <div
+        style={{
+          width:      '1px',
+          height:     28,
+          background: T.border,
+          flexShrink: 0,
+        }}
+      />
+
       {/* ── Right cluster ───────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
 
         {/* Tier badge — only when authenticated */}
         {isAuthenticated && (
           <span
             style={{
-              padding:       '2px 7px',
+              padding:       '3px 8px',
               border:        `1px solid ${tierStyle.border}`,
               color:          tierStyle.color,
-              fontSize:       8,
+              fontSize:       7,
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
               fontFamily:     T.font,
-              lineHeight:     1,
+              lineHeight:     1.2,
+              fontWeight:     500,
             }}
           >
             {tier}
@@ -207,7 +210,7 @@ export function PageNav() {
             style={{
               display:       'flex',
               alignItems:    'center',
-              gap:            4,
+              gap:            5,
               height:         28,
               padding:       '0 10px',
               background:    'transparent',
@@ -218,17 +221,20 @@ export function PageNav() {
               textDecoration: 'none',
               fontFamily:     T.font,
               cursor:        'pointer',
-              transition:    'color 0.12s, border-color 0.12s',
+              transition:    'all 0.15s ease-out',
+              flexShrink:     0,
             }}
             onMouseEnter={e => {
               const el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.accent;
               el.style.color       = T.accent;
+              el.style.boxShadow   = `0 0 8px ${T.accent}22`;
             }}
             onMouseLeave={e => {
               const el = e.currentTarget as HTMLAnchorElement;
               el.style.borderColor = T.border;
               el.style.color       = T.dim;
+              el.style.boxShadow   = 'none';
             }}
           >
             <Shield size={10} strokeWidth={1.5} />
@@ -255,19 +261,21 @@ export function PageNav() {
             cursor:         'pointer',
             padding:         0,
             flexShrink:      0,
-            transition:     'color 0.12s, border-color 0.12s, background 0.12s',
+            transition:     'all 0.15s ease-out',
           }}
           onMouseEnter={e => {
             const el = e.currentTarget as HTMLButtonElement;
             el.style.background  = T.accentDim;
             el.style.color       = T.accent;
             el.style.borderColor = T.accent;
+            el.style.boxShadow   = `0 0 8px ${T.accent}22`;
           }}
           onMouseLeave={e => {
             const el = e.currentTarget as HTMLButtonElement;
             el.style.background  = 'transparent';
             el.style.color       = T.dim;
             el.style.borderColor = T.border;
+            el.style.boxShadow   = 'none';
           }}
           onClick={() => { /* intentional no-op — settings panel TBD */ }}
         >
@@ -276,7 +284,7 @@ export function PageNav() {
 
         {/* Logout */}
         {isAuthenticated && (
-          <div style={{ marginLeft: 2 }}>
+          <div style={{ marginLeft: 4 }}>
             <LogoutButton variant="full" />
           </div>
         )}
