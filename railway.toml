@@ -2,8 +2,8 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "npm start"
+startCommand = "node dist/server/index.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
-# Cache bust: 1779496951
+# Updated: 1780117783
