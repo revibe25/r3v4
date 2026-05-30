@@ -42,6 +42,7 @@ import { Switch, Route, Redirect } from 'wouter';
 import { TRPCProvider }          from './lib/trpc';
 import { ProtectedRoute }         from './components/ProtectedRoute';
 import { SubscriptionProvider }   from './hooks/useSubscription';
+import { TrialGate }              from './components/TrialGate';
 import { ThemeProvider }          from './components/theme-provider';
 import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
 import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
@@ -54,6 +55,7 @@ import VSTPage            from './pages/vst';
 import { LoopStation505 } from './features/loopstation/LoopStation505';
 import VisualsPage        from './pages/visuals';
 import NotFound           from './pages/not-found';
+import SubscribePage      from './pages/subscribe';
 import AdminPage          from './pages/AdminPage';
 import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
 import MultiTrackPanel    from './pages/multi-track-panel';
@@ -152,6 +154,7 @@ export default function App() {
         trpc.subscription.getMySubscription queries and needs React Query ctx.
       */}
       <SubscriptionProvider>
+        <TrialGate>
         <ThemeProvider>
         {/*
           Expose nav height as a CSS custom property so child pages can use
@@ -235,6 +238,9 @@ export default function App() {
                 <ProtectedRoute><VisualsPage /></ProtectedRoute>
               </Route>
 
+              {/* ── Subscribe ───────────────────────────────────────────── */}
+              <Route path="/subscribe" component={SubscribePage} />
+
               {/* ── Root → Pricing (visitor entry point) ─────────────────── */}
               <Route path="/">
                 <Redirect to="/pricing" />
@@ -253,6 +259,7 @@ export default function App() {
           </div>
         </div>
         </ThemeProvider>
+              </TrialGate>
       </SubscriptionProvider>
     </TRPCProvider>
   );

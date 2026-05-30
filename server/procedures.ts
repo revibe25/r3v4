@@ -16,6 +16,7 @@
  */
 
 import { router, publicProcedure } from './trpc';
+import { trialRouter }        from './routers/trial';
 import { dawRouter }          from './routers/daw';
 import { subscriptionRouter } from './routers/subscription';
 import { sessionsRouter }        from "./routers/sessions";
@@ -36,6 +37,7 @@ export const appRouter = router({
   ping: publicProcedure.query(() => ({ pong: true, ts: Date.now() })),
 
   // ── DAW (project, AI, mastering, collab) ──────────────────────────────────
+  trial:        trialRouter,
   daw: dawRouter,
 
   // ── Subscription (Stripe checkout, portal, plan status) ──────────────────

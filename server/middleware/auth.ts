@@ -115,3 +115,24 @@ export function loopStationAuth(req: Request, res: Response, next: NextFunction)
   req.user = payload;
   next();
 }
+
+// ── Trial enforcement ────────────────────────────────────────────────────────
+import { db as _db } from "../db";
+import { users as _users } from "../db/schema";
+import { eq as _eq } from "drizzle-orm";
+import { TRPCError as _TRPCError } from "@trpc/server";
+
+export async function assertTrialActive(userId: string): Promise<void> {
+  const [user] = await _db
+    .select({ trialExpiresAt: _users.trialExpiresAt, tier: _users.tier })
+    .from(_users)
+    .where(_eq(_users.id, userId))
+    .limit(1);
+
+  if (!user) throw new _TRPCError({ code: "UNAUTHORIZED" });
+  if (user.tier && user.tier !== "explorer") return; // subscribed — pass
+  if (!user.trialExpiresAt) return;                  // no trial yet — pass (client gates)
+  if (new Date(user.trialExpiresAt) < new Date()) {
+    throw new _TRPCError({ code: "FORBIDDEN", message: "trial_expired" });
+  }
+}
