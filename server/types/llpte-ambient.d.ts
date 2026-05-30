@@ -2,13 +2,10 @@
 // Used by root tsconfig during Docker build (server-only install, no workspace symlinks)
 // server/tsconfig.json path aliases handle local/IDE compilation independently
 // Mythos: dev-build-isolated, code_change, blast-radius=low, ALLOW_RUNTIME
+// server/types/llpte-ambient.d.ts
 declare module '@llpte/llpte-signal' {
-  export interface RawAudioBuffer {
-    [key: string]: unknown;
-  }
-  export interface AnalysisResult {
-    [key: string]: unknown;
-  }
+  export interface RawAudioBuffer { [key: string]: unknown }
+  export interface AnalysisResult { [key: string]: unknown }
   export function analyzeAudio(buffer: RawAudioBuffer): Promise<AnalysisResult>;
   export function clearAnalysisCache(): void;
 }
