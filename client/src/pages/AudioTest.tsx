@@ -5,22 +5,21 @@ export default function AudioTest() {
 
   if (!ready) {
     return (
-      <>
-          <header className="ag-header">
-            <div className="ag-header-top">
-              <div className="ag-wordmark-block">
-                <div className="ag-wordmark" data-testid="text-title">
-                  R3<span className="ag-wordmark-slash">/</span>NATIVE
-                </div>
-                <div className="ag-wordmark-sub">Audio · Device Testing</div>
+      <div>
+        <header className="ag-header">
+          <div className="ag-header-top">
+            <div className="ag-wordmark-block">
+              <div className="ag-wordmark" data-testid="text-title">
+                R3<span className="ag-wordmark-slash">/</span>NATIVE
               </div>
+              <div className="ag-wordmark-sub">Audio · Device Testing</div>
             </div>
-          </header>
-
-      <div style={{ padding: 20 }}>
-        <button onClick={start}>Start Audio</button>
+          </div>
+        </header>
+        <div style={{ padding: 20 }}>
+          <button onClick={start}>Start Audio</button>
+        </div>
       </div>
-          </>
     );
   }
 

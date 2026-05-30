@@ -1,6 +1,6 @@
 # ASI Hygiene & Repository Safety Audit Report
 **Repository:** `/home/r3v/Stable`
-**Generated:** 2026-05-10 10:42:41
+**Generated:** 2026-05-28 21:43:29
 **Protocol:** Expert-Level ASI Hygiene & Repository Safety Protocol v1.0
 **Status:** PRE-EXECUTION — No destructive actions may occur before human review
 
@@ -9,16 +9,16 @@
 ## Summary Statistics
 | Metric | Count |
 |---|---|
-| Total files scanned | 1184 |
-| Backup / snapshot files | 376 |
-| High-risk files | 557 |
-| Backup groups (unique base names) | 236 |
-| Shell scripts | 18 |
-| Python scripts | 17 |
+| Total files scanned | 1653 |
+| Backup / snapshot files | 272 |
+| High-risk files | 663 |
+| Backup groups (unique base names) | 179 |
+| Shell scripts | 41 |
+| Python scripts | 30 |
 | Dependency manager(s) detected | pnpm + npm |
 | Lockfile conflicts | 1 |
-| Parallel duplicate directories | 3 |
-| Empty directories | 6 |
+| Parallel duplicate directories | 2 |
+| Empty directories | 9 |
 
 ---
 ## Section A — Active Files Report
@@ -30,22 +30,40 @@ These must never be modified or removed without operator confirmation.
 
 | File | Infra Flags | Referenced By |
 |---|---|---|
+| `)` | docker | 0 files |
 | `.env` | name/path match | 1 files |
 | `.env.production` | name/path match | 0 files |
 | `.github/dependabot.yml` | name/path match | 0 files |
+| `.github/workflows/SECURITY.md` | name/path match | 0 files |
+| `:` | docker, startup | 0 files |
 | `App.tsx` | docker | 2 files |
-| `Dockerfile` | docker, startup, env_var | 0 files |
-| `README.md` | docker | 0 files |
-| `SECURITY.md` | docker | 0 files |
-| `add_ticker.py` | docker, env_var | 0 files |
+| `Dockerfile` | docker, startup | 0 files |
+| `FIX_IMPLEMENTATION_GUIDE.md` | docker, deployment, env_var | 0 files |
+| `Fix` | docker, env_var | 0 files |
+| `MYTHOS-SKILL-v2.md` | docker, cron, deployment | 0 files |
+| `SECURITY.md` | cron | 0 files |
+| `SECURITY_AUDIT_2026-05-26.md` | deployment | 0 files |
+| `_audit/sync_map.txt` | docker, ci_cd, cron, env_var | 0 files |
+| `_full_engine_audit.txt` | docker, ci_cd, cron, startup, env_var | 0 files |
 | `admin.sh` | docker, env_var | 0 files |
 | `adminRouter.ts` | docker, env_var | 0 files |
+| `agents/verifier.js` | docker, env_var | 2 files |
+| `apply-fix.sh` | docker | 0 files |
+| `apply-phase4-engine-patch.sh` | docker, env_var | 0 files |
+| `asi-audit-register.py` | docker, env_var | 0 files |
 | `asi-hygiene-master.sh` | docker, env_var | 0 files |
 | `asi-upgrade-fixed.sh` | docker, env_var | 0 files |
 | `asi_hygiene_audit_report.md` | docker, ci_cd, cron, deployment, env_var | 0 files |
 | `asi_mastery_troubleshooter.sh` | docker | 0 files |
 | `audit_r3.txt` | docker, ci_cd, deployment, startup, env_var | 0 files |
 | `audit_theme_config.py` | docker, env_var | 1 files |
+| `backups/headers-20260527-155544/AdminPage.tsx` | docker | 0 files |
+| `backups/headers-20260527-155544/AudioTest.tsx` | docker | 0 files |
+| `backups/headers-20260527-155544/AuthPage.tsx` | docker | 0 files |
+| `backups/headers-20260527-155544/DAW.tsx` | docker | 0 files |
+| `backups/headers-20260527-155544/login.tsx` | docker, ci_cd | 0 files |
+| `backups/headers-20260527-155544/visuals.tsx` | docker | 0 files |
+| `backups/headers-20260527-155544/vst.tsx` | docker, ci_cd | 0 files |
 | `client/DSP/Core.ts` | docker | 0 files |
 | `client/DSP/GainComputer.ts` | docker | 0 files |
 | `client/DSP/LDE.ts` | docker | 0 files |
@@ -53,21 +71,12 @@ These must never be modified or removed without operator confirmation.
 | `client/build_and_integrate_VocalSpectra.sh` | docker, ci_cd, env_var | 0 files |
 | `client/build_and_test_vocalspectra_Version2.sh` | docker, ci_cd, env_var | 0 files |
 | `client/client/hooks/useSessionLifecycle.ts` | docker | 0 files |
-| `client/client/src/components/AudioGate.tsx` | docker | 0 files |
-| `client/client/src/components/ErrorBoundary.tsx` | docker, env_var | 0 files |
-| `client/client/src/components/auth/ProtectedRoute.tsx` | docker | 0 files |
-| `client/client/src/hooks/useAudioContext.ts` | docker | 0 files |
 | `client/client/src/lib/audio-context-manager.ts` | docker | 0 files |
 | `client/client/src/lib/audio-node-factory.ts` | docker, cron | 0 files |
 | `client/client/src/lib/router-compat.ts` | docker | 0 files |
-| `client/client/src/stores/authStore.ts` | docker | 0 files |
-| `client/components/session-summary/SessionChip.tsx` | docker | 0 files |
-| `client/components/session-summary/SessionSummaryPanel.tsx` | docker | 0 files |
-| `client/components/session-summary/index.ts` | docker | 2 files |
 | `client/config/vite.config.js` | docker, cron | 0 files |
-| `client/hooks/useSessionLifecycle.ts` | docker | 0 files |
+| `client/fix-jsx-parent.sh` | docker, env_var | 0 files |
 | `client/package-lock.json` | docker, cron, startup | 0 files |
-| `client/patch_vite_config.py` | docker, ci_cd, env_var | 1 files |
 | `client/src/App.tsx` | docker | 2 files |
 | `client/src/MultitrackViewWrapper.tsx` | docker | 0 files |
 | `client/src/TODO-remove-ts-nocheck.md` | docker, ci_cd | 0 files |
@@ -121,20 +130,13 @@ These must never be modified or removed without operator confirmation.
 | `client/src/components/MixSuggestionsPanel.tsx` | docker, ci_cd | 0 files |
 | `client/src/components/MixerWithAI.tsx` | docker, env_var | 0 files |
 | `client/src/components/ProtectedRoute.tsx` | docker | 0 files |
-| `client/src/components/TimeSavingsPanel.tsx` | docker | 0 files |
-| `client/src/components/admin/AgentMeshPanel.tsx` | docker, ci_cd | 0 files |
-| `client/src/components/admin/AgentSuite.tsx` | docker, ci_cd, env_var | 0 files |
-| `client/src/components/advanced-meter.tsx` | docker, cron | 0 files |
-| `client/src/components/audio-visualizer.tsx` | docker | 0 files |
-| `client/src/components/beat-intro.tsx` | docker, cron | 0 files |
-| `client/src/components/channel-strip.tsx` | docker | 0 files |
-| `client/src/components/collapsible-fx-panel.tsx` | docker | 0 files |
-| `client/src/components/daw/AudioReactiveScene.tsx` | docker | 0 files |
 
 ### A.2 — Files With Active Inbound References
 
 | File | Referenced By (count) |
 |---|---|
+| `express` | 25 |
+| `vitest` | 16 |
 | `tsconfig.json` | 11 |
 | `config/tsconfig.json` | 11 |
 | `packages/llpte-adapters/tsconfig.json` | 11 |
@@ -146,8 +148,11 @@ These must never be modified or removed without operator confirmation.
 | `client/tsconfig.json` | 11 |
 | `server/tsconfig.json` | 11 |
 | `shared/tsconfig.json` | 11 |
+| `pnpm` | 8 |
+| `drizzle-kit` | 3 |
 | `client/index.html` | 2 |
 | `client/src/setup.ts` | 2 |
+| `client/src/audio/worklets/audio-worklet.d.ts` | 2 |
 | `client/src/components/index.ts` | 2 |
 | `client/src/config/index.ts` | 2 |
 | `client/src/engine/index.ts` | 2 |
@@ -190,7 +195,9 @@ These must never be modified or removed without operator confirmation.
 | `docs/LLPTE/demo/index.html` | 2 |
 | `server/types/express.d.ts` | 2 |
 | `tools/dashboard/index.html` | 2 |
+| `playwright-report/index.html` | 2 |
 | `.eslintrc.json` | 1 |
+| `eslint` | 1 |
 | `client/public/ir/cathedral.wav` | 1 |
 | `client/public/ir/club-room.wav` | 1 |
 | `client/public/ir/large-hall.wav` | 1 |
@@ -201,18 +208,26 @@ These must never be modified or removed without operator confirmation.
 | `client/public/worklets/vst-processor.worklet.js` | 1 |
 | `client/src/audio/recorder/recorder-worklet.ts` | 1 |
 | `client/src/audio/engine/worklet/processor.ts` | 1 |
+| `client/src/components/vumeter.tsx` | 1 |
 | `client/src/worklets/instrument-processor.worklet.ts` | 1 |
-| `client/src/styles/theme.css` | 1 |
 
 ---
 ## Section B — Suspected Dead Files Report
 
 Files appearing unused based on zero inbound references. **NOT confirmed safe to remove.** All require validation passes 1–3.
 
-**98 files with zero detected inbound references.**
+**116 files with zero detected inbound references.**
 
 | File | Extension | Size | Notes |
 |---|---|---|---|
+| `_backup_phase4_1779763759/EventEngine.js` | .js | 272B | No notes |
+| `_backup_phase4_1779763759/FrameStore.js` | .js | 281B | No notes |
+| `_backup_phase4_1779763759/MasterTimeline.js` | .js | 507B | No notes |
+| `_backup_phase4_1779763759/SignalEngine.js` | .js | 586B | No notes |
+| `_backup_phase4_1779763759/VisualEngine.js` | .js | 304B | No notes |
+| `backups/headers-20260527-155544/not-found.tsx` | .tsx | 6,034B | No notes |
+| `barrier-check.js` | .js | 1,841B | No notes |
+| `c03_diagnostic.sh` | .sh | 1,471B | No notes |
 | `client/DSP/DeEsser.ts` | .ts | 290B | No notes |
 | `client/DSP/DynamicEQ.ts` | .ts | 292B | No notes |
 | `client/DSP/FFTAnalyzer.ts` | .ts | 528B | No notes |
@@ -241,18 +256,15 @@ Files appearing unused based on zero inbound references. **NOT confirmed safe to
 | `client/src/components/dj-controls/types.ts` | .ts | 2,862B | No notes |
 | `client/src/components/types.ts` | .ts | 1,558B | No notes |
 | `client/src/components/ui/modular-rack.tsx` | .tsx | 216B | No notes |
-| `client/src/components/vumeter.tsx` | .tsx | 317B | No notes |
 | `client/src/config/music-nav-links.ts` | .ts | 338B | No notes |
 | `client/src/config/performance.config.ts` | .ts | 5,981B | No notes |
-| `client/src/design-tokens/runtime-guard.ts` | .ts | 491B | No notes |
-| `client/src/design-tokens/tokens.ts` | .ts | 391B | No notes |
 | `client/src/engine/audio/audioEngine.ts` | .ts | 1,039B | No notes |
 | `client/src/engine/preset-engine.ts` | .ts | 13,070B | No notes |
 | `client/src/engine/workers/audioEngine.worker.ts` | .ts | 39B | No notes |
 | `client/src/engine/workers/effects.worker.ts` | .ts | 34B | No notes |
 | `client/src/engine/workers/mixer.worker.ts` | .ts | 32B | No notes |
 | `client/src/features/loopstation/state/initialState.ts` | .ts | 1,028B | No notes |
-| `client/src/features/loopstation/types/loopstation.types.ts` | .ts | 4,739B | No notes |
+| `client/src/features/loopstation/types/loopstation.types.ts` | .ts | 4,805B | No notes |
 | `client/src/lib/logger.ts` | .ts | 815B | No notes |
 | `client/src/lib/theme-config.ts` | .ts | 2,895B | No notes |
 | `client/src/pages/multi-track-panel/audio-engine.ts` | .ts | 1,303B | No notes |
@@ -261,14 +273,12 @@ Files appearing unused based on zero inbound references. **NOT confirmed safe to
 | `client/src/pages/multi-track-panel/constants.ts` | .ts | 1,617B | No notes |
 | `client/src/pages/multi-track-panel/types.ts` | .ts | 2,073B | No notes |
 | `client/src/pages/multi-track-panel/utils.ts` | .ts | 2,708B | No notes |
-| `client/src/pages/not-found.tsx` | .tsx | 6,034B | No notes |
-| `client/src/pages/pricing/tokens/colors.ts` | .ts | 307B | No notes |
-| `client/src/pages/pricing/tokens/opacity.ts` | .ts | 458B | No notes |
-| `client/src/pages/pricing/tokens/primitive.ts` | .ts | 579B | No notes |
+| `client/src/pages/not-found.tsx` | .tsx | 6,480B | No notes |
 | `client/src/plugins/plugin.types.ts` | .ts | 358B | No notes |
 | `client/src/services/upload.ts` | .ts | 4,429B | No notes |
 | `client/src/styles/tokens/colors.ts` | .ts | 327B | No notes |
 | `client/src/styles/tokens/motion.ts` | .ts | 317B | No notes |
+| `client/src/tokens.ts` | .ts | 884B | No notes |
 | `client/src/types/audio-engine.types.ts` | .ts | 3,706B | No notes |
 | `client/src/types/audiobuffer-to-wav.d.ts` | .ts | 138B | No notes |
 | `client/src/types/daw.types.ts` | .ts | 451B | No notes |
@@ -284,6 +294,8 @@ Files appearing unused based on zero inbound references. **NOT confirmed safe to
 | `client/src/visualization/glow.ts` | .ts | 224B | No notes |
 | `config/postcss.config.js` | .js | 80B | No notes |
 | `find_api_auth.sh` | .sh | 1,627B | No notes |
+| `fix-js-cookie.sh` | .sh | 983B | No notes |
+| `fix-processor-ts.js` | .js | 1,233B | No notes |
 | `p0_theme_additions.css` | .css | 2,857B | No notes |
 | `packages/llpte-adapters/src/types.ts` | .ts | 270B | No notes |
 | `packages/llpte-ai/src/types.ts` | .ts | 406B | No notes |
@@ -291,12 +303,14 @@ Files appearing unused based on zero inbound references. **NOT confirmed safe to
 | `packages/llpte-core/src/types/effects.types.ts` | .ts | 948B | No notes |
 | `packages/llpte-execution/src/types.ts` | .ts | 675B | No notes |
 | `packages/llpte-signal/src/types.ts` | .ts | 693B | No notes |
+| `patch-js-cookie-both.sh` | .sh | 976B | No notes |
+| `patch_headers_v2.py` | .py | 32B | No notes |
 | `scripts/max-checker.sh` | .sh | 11,290B | No notes |
 | `server/config.ts` | .ts | 1,457B | No notes |
 | `server/lib/engine-stubs.ts` | .ts | 2,728B | No notes |
 | `server/scripts/seed/config.ts` | .ts | 239B | No notes |
 | `server/types/custom-modules.d.ts` | .ts | 395B | No notes |
-| `server/utils/logger.ts` | .ts | 2,749B | No notes |
+| `server/utils/logger.ts` | .ts | 2,765B | No notes |
 | `services/ai-mix/src/ai_mix.py` | .py | 607B | No notes |
 | `shared/audio.types.ts` | .ts | 2,120B | No notes |
 | `shared/auto-level.types.ts` | .ts | 6,827B | No notes |
@@ -311,6 +325,17 @@ Files appearing unused based on zero inbound references. **NOT confirmed safe to
 | `shared/types/meter.types.ts` | .ts | 202B | No notes |
 | `shared/types/transport.types.ts` | .ts | 217B | No notes |
 | `shared/waveform.types.ts` | .ts | 5,989B | No notes |
+| `tools/scripts/_backup_singleton_1779764215/engineSingleton.js` | .js | 137B | No notes |
+| `tools/scripts/tools/src/engine/engineSingleton.js` | .js | 137B | No notes |
+| `tools/src/engine/BeatDetector.js` | .js | 384B | No notes |
+| `tools/src/engine/EventEngine.js` | .js | 272B | No notes |
+| `tools/src/engine/FrameStore.js` | .js | 281B | No notes |
+| `tools/src/engine/LatencyCompensator.js` | .js | 471B | No notes |
+| `tools/src/engine/MasterTimeline.js` | .js | 507B | No notes |
+| `tools/src/engine/SignalEngine.js` | .js | 586B | No notes |
+| `tools/src/engine/VisualBus.js` | .js | 191B | No notes |
+| `tools/src/engine/VisualEngine.js` | .js | 304B | No notes |
+| `tools/src/engine/engineSingleton.js` | .js | 138B | No notes |
 
 > Zero references does not mean dead — dynamic imports, config-driven loading, CLI scripts, and runtime-loaded modules may not be detected by static analysis alone.
 
@@ -340,53 +365,25 @@ Required process before removing any backup:
 3. Keep single most-recent verified-stable backup per file
 4. Never remove all backups of a file
 
-### D.1 — Backup Groups (236 groups, 376 total backup files)
+### D.1 — Backup Groups (179 groups, 272 total backup files)
 
 #### `client/src/pages/collaborative-daw-pro.tsx`
 - Base file exists: ✓
-- Backup variants: 20
-- Unique content versions (by hash): 12
+- Backup variants: 9
+- Unique content versions (by hash): 3
 - Safe to consolidate: YES — hash comparison complete
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/src/pages/collaborative-daw-pro.tsx.bak_20260509_233618` | 89,278B | 2026-05-09 23:36 | `84de6d03ac0f` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_205108` | 86,773B | 2026-05-09 20:51 | `cf96986b3841` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_205153` | 86,773B | 2026-05-09 20:51 | `cf96986b3841` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_201722` | 86,000B | 2026-05-09 18:56 | `e3c386ee5c23` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_204725` | 86,000B | 2026-05-09 18:56 | `e3c386ee5c23` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_204917` | 86,000B | 2026-05-09 18:56 | `e3c386ee5c23` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260509_205103` | 86,000B | 2026-05-09 18:56 | `e3c386ee5c23` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260508_223202` | 84,210B | 2026-05-08 22:32 | `f4508cc0ca70` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak.20260508_223008` | 84,210B | 2026-05-08 22:30 | `f4508cc0ca70` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_221533` | 84,210B | 2026-05-08 22:15 | `f4508cc0ca70` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_221518` | 82,603B | 2026-05-08 01:50 | `89547c40a24a` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_015027` | 82,642B | 2026-05-08 01:42 | `2dac190ea645` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_014230` | 81,982B | 2026-05-08 01:41 | `be6f77879cd3` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_013007` | 78,768B | 2026-05-08 01:30 | `0ce576ad51e5` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_014133` | 78,768B | 2026-05-08 01:17 | `0ce576ad51e5` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_011239` | 78,867B | 2026-05-08 01:12 | `87ae96ac2d1f` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260508_011707` | 78,867B | 2026-05-04 22:21 | `87ae96ac2d1f` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260504_222102` | 78,885B | 2026-05-04 22:21 | `5e7ef4a4d985` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak-20260504_214400` | 78,818B | 2026-05-04 21:44 | `138b57a0ba13` |
-| `client/src/pages/collaborative-daw-pro.tsx.bak_sweep` | 78,926B | 2026-05-04 20:09 | `12f10bad7cc7` |
-
-#### `client/src/pages/DAW.tsx`
-- Base file exists: ✓
-- Backup variants: 8
-- Unique content versions (by hash): 6
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/DAW.tsx.bak_20260510_000750` | 80,183B | 2026-05-10 00:07 | `417c9a08de34` |
-| `client/src/pages/DAW.tsx.bak-20260504_222102` | 79,260B | 2026-05-04 22:21 | `f8ef04058397` |
-| `client/src/pages/DAW.tsx.bak-20260504_214400` | 79,176B | 2026-05-04 21:44 | `6cbc881f5c48` |
-| `client/src/pages/DAW.tsx.bak-20260504_214136` | 79,176B | 2026-05-04 21:41 | `6cbc881f5c48` |
-| `client/src/pages/DAW.tsx.bak-20260504_214009` | 79,176B | 2026-05-04 21:40 | `6cbc881f5c48` |
-| `client/src/pages/DAW.tsx.bak_sweep` | 79,264B | 2026-05-04 20:09 | `7749a092a04e` |
-| `client/src/pages/DAW.tsx.bak_20260503_212833` | 76,861B | 2026-05-03 19:50 | `597da05489c2` |
-| `client/src/pages/DAW.tsx.bak_20260503_195014` | 76,862B | 2026-04-30 21:09 | `d47991bfc688` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260527_153621` | 94,302B | 2026-05-26 21:39 | `fcafa41f048f` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260527_153852` | 94,302B | 2026-05-26 21:39 | `fcafa41f048f` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-20260527_153914` | 94,302B | 2026-05-26 21:39 | `fcafa41f048f` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-demo-20260526_213946` | 94,223B | 2026-05-26 21:39 | `cb6944575265` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260526_212145` | 92,152B | 2026-05-20 21:27 | `3b49ba412af4` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260526_212201` | 92,152B | 2026-05-20 21:27 | `3b49ba412af4` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260526_212815` | 92,152B | 2026-05-20 21:27 | `3b49ba412af4` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260526_213148` | 92,152B | 2026-05-20 21:27 | `3b49ba412af4` |
+| `client/src/pages/collaborative-daw-pro.tsx.bak-collab-fix-20260526_213344` | 92,152B | 2026-05-20 21:27 | `3b49ba412af4` |
 
 #### `client/src/App.tsx`
 - Base file exists: ✓
@@ -452,21 +449,6 @@ Required process before removing any backup:
 | `client/src/store/index.ts.bak-20260502_194153` | 3,938B | 2026-05-02 19:39 | `4c280f46bfc3` |
 | `client/src/store/index.ts.bak-20260502_193907` | 3,938B | 2026-04-30 21:09 | `4c280f46bfc3` |
 
-#### `client/src/components/header-controls.tsx`
-- Base file exists: ✓
-- Backup variants: 6
-- Unique content versions (by hash): 4
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/components/header-controls.tsx.bak-20260504_220351` | 20,854B | 2026-05-04 22:03 | `3b6391299823` |
-| `client/src/components/header-controls.tsx.bak-20260504_215325` | 20,638B | 2026-05-04 21:53 | `facd2a0a9c0c` |
-| `client/src/components/header-controls.tsx.bak-20260504_212747` | 18,871B | 2026-05-04 21:27 | `3342a4cdd70c` |
-| `client/src/components/header-controls.tsx.bak-20260504_212646` | 18,871B | 2026-05-04 21:26 | `3342a4cdd70c` |
-| `client/src/components/header-controls.tsx.bak` | 18,871B | 2026-05-04 21:15 | `3342a4cdd70c` |
-| `client/src/components/header-controls.tsx.bak_sweep` | 18,884B | 2026-05-04 20:09 | `4161ff43b00d` |
-
 #### `client/src/features/loopstation/hooks/useLoopStation505.ts`
 - Base file exists: ✓
 - Backup variants: 6
@@ -482,6 +464,35 @@ Required process before removing any backup:
 | `client/src/features/loopstation/hooks/useLoopStation505.ts.bak.1777611311` | 27,655B | 2026-04-30 23:55 | `bef66cfdb079` |
 | `client/src/features/loopstation/hooks/useLoopStation505.ts.bak.p5fix` | 27,596B | 2026-04-30 21:09 | `d4121ec6ddd2` |
 
+#### `shared/schema-subscription.ts`
+- Base file exists: ✓
+- Backup variants: 6
+- Unique content versions (by hash): 3
+- Safe to consolidate: YES — hash comparison complete
+
+| Backup File | Size | Last Modified | SHA256 (first 12) |
+|---|---|---|---|
+| `shared/schema-subscription.ts.bak_c03_surgical_1780018179` | 6,373B | 2026-05-28 20:29 | `b7d9b3ad457f` | ← **RECOMMENDED KEEP**
+| `shared/schema-subscription.ts.bak_c03_manual` | 6,373B | 2026-05-28 20:12 | `b7d9b3ad457f` |
+| `shared/schema-subscription.ts.bak_c03_dup` | 6,373B | 2026-05-28 20:06 | `b7d9b3ad457f` |
+| `shared/schema-subscription.ts.bak_c03` | 4,925B | 2026-04-30 20:19 | `249eb87a122f` |
+| `shared/schema-subscription.ts.bak-20260430_201117` | 4,933B | 2026-04-30 20:11 | `6ecc401cfd06` |
+| `shared/schema-subscription.ts.bak-20260430_200116` | 4,933B | 2026-04-30 20:01 | `6ecc401cfd06` |
+
+#### `client/src/components/header-controls.tsx`
+- Base file exists: ✓
+- Backup variants: 5
+- Unique content versions (by hash): 4
+- Safe to consolidate: YES — hash comparison complete
+
+| Backup File | Size | Last Modified | SHA256 (first 12) |
+|---|---|---|---|
+| `client/src/components/header-controls.tsx.bak-20260504_220351` | 20,854B | 2026-05-04 22:03 | `3b6391299823` |
+| `client/src/components/header-controls.tsx.bak-20260504_215325` | 20,638B | 2026-05-04 21:53 | `facd2a0a9c0c` |
+| `client/src/components/header-controls.tsx.bak-20260504_212747` | 18,871B | 2026-05-04 21:27 | `3342a4cdd70c` |
+| `client/src/components/header-controls.tsx.bak-20260504_212646` | 18,871B | 2026-05-04 21:26 | `3342a4cdd70c` |
+| `client/src/components/header-controls.tsx.bak_sweep` | 18,884B | 2026-05-04 20:09 | `4161ff43b00d` |
+
 #### `client/src/features/loopstation/state/initialState.ts`
 - Base file exists: ✓
 - Backup variants: 5
@@ -495,48 +506,6 @@ Required process before removing any backup:
 | `client/src/features/loopstation/state/initialState.ts.bak-20260508_224522` | 911B | 2026-05-08 00:51 | `277f7fd3b390` |
 | `client/src/features/loopstation/state/initialState.ts.bak_20260508_005115` | 804B | 2026-05-04 22:17 | `a19dca0e7320` |
 | `client/src/features/loopstation/state/initialState.ts.bak-20260504_221745` | 106B | 2026-05-04 22:17 | `6f9280de9070` |
-
-#### `client/src/pages/instrument.tsx`
-- Base file exists: ✓
-- Backup variants: 5
-- Unique content versions (by hash): 5
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/instrument.tsx.bak.20260509_212201` | 74,845B | 2026-05-09 18:56 | `b8418ef8fff7` |
-| `client/src/pages/instrument.tsx.bak-20260509_005030` | 74,924B | 2026-05-09 00:15 | `41d0c8af2f04` |
-| `client/src/pages/instrument.tsx.bak-20260509_001542` | 74,875B | 2026-05-08 23:59 | `4ee4e4f198a2` |
-| `client/src/pages/instrument.tsx.bak_sweep` | 74,887B | 2026-05-04 20:09 | `9310b4d79a61` |
-| `client/src/pages/instrument.tsx.bak-20260508_235916` | 74,857B | 2026-05-04 20:09 | `24b29db21ba4` |
-
-#### `client/src/pages/multi-track-panel/index.tsx`
-- Base file exists: ✓
-- Backup variants: 5
-- Unique content versions (by hash): 3
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/index.tsx.bak_20260508_010251` | 71,717B | 2026-05-08 01:02 | `7568167ebdbf` |
-| `client/src/pages/multi-track-panel/index.tsx.bak_20260508_010330` | 71,717B | 2026-05-08 01:02 | `7568167ebdbf` |
-| `client/src/pages/multi-track-panel/index.tsx.bak_20260508_010127` | 71,858B | 2026-05-04 21:01 | `c7b86ff37d00` |
-| `client/src/pages/multi-track-panel/index.tsx.bak_20260508_010208` | 71,858B | 2026-05-04 21:01 | `c7b86ff37d00` |
-| `client/src/pages/multi-track-panel/index.tsx.bak_sweep` | 71,903B | 2026-05-04 20:09 | `9a6947ce7853` |
-
-#### `server/routers/daw.ts`
-- Base file exists: ✓
-- Backup variants: 5
-- Unique content versions (by hash): 3
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/routers/daw.ts.bak.20260430_171849` | 23,922B | 2026-04-30 17:18 | `e54e428d7ef8` |
-| `server/routers/daw.ts.bak.20260430_155522` | 23,922B | 2026-04-30 15:55 | `e54e428d7ef8` |
-| `server/routers/daw.ts.bak.20260422_154539` | 19,598B | 2026-04-22 15:45 | `286623987b69` |
-| `server/routers/daw.ts.bak.20260422_145616` | 19,564B | 2026-04-22 14:56 | `d62b5da9405f` |
-| `server/routers/daw.ts.bak.20260422_145510` | 19,564B | 2026-04-22 14:55 | `d62b5da9405f` |
 
 #### `client/src/MultitrackViewWrapper.tsx`
 - Base file exists: ✓
@@ -590,18 +559,30 @@ Required process before removing any backup:
 | `client/src/features/loopstation/components/TrackPad.tsx.bak-20260508_224630` | 35,721B | 2026-05-04 20:09 | `f2a384b7fef1` |
 | `client/src/features/loopstation/components/TrackPad.tsx.bak_sweep` | 35,770B | 2026-05-04 20:09 | `9e49ae29ebf3` |
 
-#### `server/routers/sessions.ts`
+#### `client/src/pages/pricing/PricingPage.tsx`
 - Base file exists: ✓
 - Backup variants: 4
-- Unique content versions (by hash): 3
+- Unique content versions (by hash): 2
 - Safe to consolidate: YES — hash comparison complete
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `server/routers/sessions.ts.bak.20260430_155522` | 2,304B | 2026-04-30 15:55 | `ff7c84dbb489` |
-| `server/routers/sessions.ts.bak.20260422_145616` | 2,254B | 2026-04-22 14:56 | `1b70d6523ab9` |
-| `server/routers/sessions.ts.bak.20260422_145510` | 2,254B | 2026-04-22 14:55 | `1b70d6523ab9` |
-| `server/routers/sessions.ts.bak-20260421_173355` | 926B | 2026-04-21 17:33 | `90aa58afd64f` |
+| `client/src/pages/pricing/PricingPage.tsx.bak.direct.1779162321` | 22,278B | 2026-05-18 22:45 | `f20756b63a7d` |
+| `client/src/pages/pricing/PricingPage.tsx.bak.audit.1779146891` | 22,278B | 2026-05-18 18:28 | `f20756b63a7d` |
+| `client/src/pages/pricing/PricingPage.tsx.bak.audit.1779082442` | 22,278B | 2026-05-18 00:34 | `f20756b63a7d` |
+| `client/src/pages/pricing/PricingPage.tsx.bak.audit.1779082243` | 22,710B | 2026-05-18 00:30 | `893fb66f1f21` |
+
+#### `package.json`
+- Base file exists: ✓
+- Backup variants: 3
+- Unique content versions (by hash): 3
+- Safe to consolidate: NO — all variants have unique content
+
+| Backup File | Size | Last Modified | SHA256 (first 12) |
+|---|---|---|---|
+| `package.json.bak_c01_v2` | 3,524B | 2026-05-28 19:48 | `5a98a6167c8d` |
+| `package.json.bak_c01` | 3,454B | 2026-05-27 21:25 | `cf7d1cebd825` |
+| `package.json.bak-20260511_232714` | 3,242B | 2026-05-11 22:33 | `ba02d0c3ae2e` |
 
 #### `packages/llpte-ai/tsconfig.json`
 - Base file exists: ✓
@@ -614,18 +595,6 @@ Required process before removing any backup:
 | `packages/llpte-ai/tsconfig.json.bak-ts-fix-20260419_230659` | 515B | 2026-03-04 19:41 | `f0b82a5ce5c8` |
 | `packages/llpte-ai/tsconfig.json.bak-ts-fix-20260419_231354` | 515B | 2026-03-04 19:41 | `f0b82a5ce5c8` |
 | `packages/llpte-ai/tsconfig.json.bak-ts-fix-20260419_231734` | 515B | 2026-03-04 19:41 | `f0b82a5ce5c8` |
-
-#### `client/src/audio/core/audio-graph.ts`
-- Base file exists: ✓
-- Backup variants: 3
-- Unique content versions (by hash): 3
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/core/audio-graph.ts.bak-20260509_005147` | 12,780B | 2026-05-09 00:51 | `7a9945f744c1` |
-| `client/src/audio/core/audio-graph.ts.bak-20260509_005141` | 12,784B | 2026-05-04 21:01 | `8627950a93d7` |
-| `client/src/audio/core/audio-graph.ts.bak_sweep` | 12,795B | 2026-05-04 20:09 | `1eca07da6393` |
 
 #### `client/src/audio/mixer/solo-manager.ts`
 - Base file exists: ✓
@@ -651,7 +620,7 @@ Required process before removing any backup:
 | `client/src/components/multi-track-panel.tsx.bak-20260502_195734` | 72,049B | 2026-05-02 19:02 | `93eac31f2a34` |
 | `client/src/components/multi-track-panel.tsx.bak.20260428-211310` | 812B | 2026-04-30 21:09 | `32e18c046ee1` |
 
-#### `client/src/pages/vst.tsx`
+#### `client/src/hooks/authStore.ts`
 - Base file exists: ✓
 - Backup variants: 3
 - Unique content versions (by hash): 3
@@ -659,33 +628,9 @@ Required process before removing any backup:
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/src/pages/vst.tsx.bak-20260509_005030` | 11,265B | 2026-05-08 22:56 | `552d3c1c00fe` |
-| `client/src/pages/vst.tsx.bak-20260508_225603` | 11,361B | 2026-05-04 20:09 | `4c98a172dfcc` |
-| `client/src/pages/vst.tsx.bak_sweep` | 11,363B | 2026-05-04 20:09 | `be315425c90b` |
-
-#### `client/src/pages/login.tsx`
-- Base file exists: ✓
-- Backup variants: 3
-- Unique content versions (by hash): 3
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/login.tsx.bak_20260509_233618` | 35,203B | 2026-05-09 23:36 | `d006555bf27a` |
-| `client/src/pages/login.tsx.bak` | 35,228B | 2026-05-04 21:01 | `2dc5a149e2c7` |
-| `client/src/pages/login.tsx.bak_sweep` | 35,219B | 2026-05-04 20:09 | `fef7fa246766` |
-
-#### `client/src/pages/multi-track-panel/utils.ts`
-- Base file exists: ✓
-- Backup variants: 3
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/utils.ts.bak_sweep` | 2,716B | 2026-05-04 20:09 | `af8b5ef50e97` |
-| `client/src/pages/multi-track-panel/utils.ts.bak.20260430_162302` | 2,716B | 2026-04-30 21:09 | `af8b5ef50e97` |
-| `client/src/pages/multi-track-panel/utils.ts.bak.20260430_162250` | 2,716B | 2026-04-30 21:09 | `af8b5ef50e97` |
+| `client/src/hooks/authStore.ts.bak-20260520_224142` | 6,851B | 2026-05-13 13:39 | `a1ddc478d6b2` |
+| `client/src/hooks/authStore.ts.bak_sweep` | 6,858B | 2026-05-04 20:09 | `d59b91e4ece8` |
+| `client/src/hooks/authStore.ts.bak-20260503_221732` | 6,860B | 2026-04-30 21:09 | `c4a5a0acc071` |
 
 #### `client/src/services/upload.ts`
 - Base file exists: ✓
@@ -699,18 +644,6 @@ Required process before removing any backup:
 | `client/src/services/upload.ts.bak-20260509_005141` | 4,433B | 2026-05-04 21:01 | `84154624d066` |
 | `client/src/services/upload.ts.bak_sweep` | 4,447B | 2026-05-04 20:09 | `a404d8ad3de1` |
 
-#### `client/src/utils/auth.ts`
-- Base file exists: ✓
-- Backup variants: 3
-- Unique content versions (by hash): 3
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/utils/auth.ts.bak_20260503_214341` | 5,250B | 2026-05-03 21:17 | `44f0fc139c7f` |
-| `client/src/utils/auth.ts.bak_20260503_211755` | 5,191B | 2026-05-03 21:16 | `9e7bdab0ec07` |
-| `client/src/utils/auth.ts.bak_20260503_211623` | 5,192B | 2026-04-30 21:09 | `123596c14009` |
-
 #### `client/src/styles/theme.css`
 - Base file exists: ✓
 - Backup variants: 3
@@ -723,19 +656,20 @@ Required process before removing any backup:
 | `client/src/styles/theme.css.bak-20260508_011712` | 7,387B | 2026-05-04 17:37 | `cb03cfc8e45b` |
 | `client/src/styles/theme.css.bak.20260429_141304` | 761B | 2026-04-29 13:37 | `9f345a8a929b` |
 
-#### `.env`
+#### `server/routers/daw.ts`
 - Base file exists: ✓
-- Backup variants: 2
+- Backup variants: 3
 - Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
+- Safe to consolidate: YES — hash comparison complete
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `.env.save` | 129B | 2026-05-10 00:19 | `dda459e773cc` |
-| `.env.bak_20260423_223845` | 242B | 2026-04-22 21:08 | `8ab0a9538d16` |
+| `server/routers/daw.ts.bak_f10_v2` | 21,286B | 2026-05-28 19:48 | `8c1e54b78ce2` |
+| `server/routers/daw.ts.bak_f10` | 21,013B | 2026-05-10 20:19 | `4d7a82285871` |
+| `server/routers/daw.ts.bak_c03` | 21,013B | 2026-05-10 20:19 | `4d7a82285871` |
 
 #### `.eslintignore`
-- Base file exists: ✗ MISSING
+- Base file exists: ✓
 - Backup variants: 2
 - Unique content versions (by hash): 2
 - Safe to consolidate: NO — all variants have unique content
@@ -767,28 +701,6 @@ Required process before removing any backup:
 | `packages/llpte-signal/tsconfig.json.bak-rootdir` | 624B | 2026-04-19 23:07 | `b929bc7a6a5b` |
 | `packages/llpte-signal/tsconfig.json.bak-composite` | 600B | 2026-04-04 00:50 | `a11763a219f3` |
 
-#### `client/vite.config.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/vite.config.ts.bak` | 12,557B | 2026-04-27 19:33 | `432fa7b9047e` | ← **RECOMMENDED KEEP**
-| `client/vite.config.ts.bak_20260422_205323` | 12,440B | 2026-04-22 20:22 | `6da946d02861` |
-
-#### `client/tsconfig.worklet.json`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/tsconfig.worklet.json.bak` | 473B | 2026-04-27 20:12 | `6771411c5ad4` | ← **RECOMMENDED KEEP**
-| `client/tsconfig.worklet.json.ts6bak` | 452B | 2026-04-27 19:51 | `cac2c84e2478` |
-
 #### `client/src/audio-init.js`
 - Base file exists: ✓
 - Backup variants: 2
@@ -800,7 +712,7 @@ Required process before removing any backup:
 | `client/src/audio-init.js.bak_20260503_195014` | 2,540B | 2026-04-30 21:34 | `8e00bafa9cef` |
 | `client/src/audio-init.js.bak-1777602867` | 2,536B | 2026-04-30 21:34 | `3e9e55ab643c` |
 
-#### `client/src/audio/core/audio-context.ts`
+#### `client/src/audio/mixer/mixer-channel.ts`
 - Base file exists: ✓
 - Backup variants: 2
 - Unique content versions (by hash): 2
@@ -808,8 +720,8 @@ Required process before removing any backup:
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/src/audio/core/audio-context.ts.bak-20260504_212211` | 4,590B | 2026-05-04 21:22 | `19ffd832b793` |
-| `client/src/audio/core/audio-context.ts.bak_sweep` | 4,596B | 2026-05-04 20:09 | `4a452b18e649` |
+| `client/src/audio/mixer/mixer-channel.ts.bak-20260512_205325` | 12,047B | 2026-05-12 20:53 | `62c365fe91b0` |
+| `client/src/audio/mixer/mixer-channel.ts.bak_sweep` | 12,065B | 2026-05-04 20:09 | `3b9838b98889` |
 
 #### `client/src/audio/transport/transport-engine.ts`
 - Base file exists: ✓
@@ -822,17 +734,6 @@ Required process before removing any backup:
 | `client/src/audio/transport/transport-engine.ts.bak-20260509_005147` | 2,043B | 2026-05-09 00:51 | `59f1d7d7fc7d` |
 | `client/src/audio/transport/transport-engine.ts.bak-20260509_005141` | 2,046B | 2026-05-04 21:01 | `03aa650e4f74` |
 
-#### `client/src/audio/engine/VIL.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/engine/VIL.ts.bak_20260510_001422` | 265B | 2026-05-10 00:14 | `1f692a344515` |
-| `client/src/audio/engine/VIL.ts.bak_20260510_000750` | 131B | 2026-05-10 00:07 | `024076d547c8` |
-
 #### `client/src/components/drum-pads.tsx`
 - Base file exists: ✓
 - Backup variants: 2
@@ -844,6 +745,17 @@ Required process before removing any backup:
 | `client/src/components/drum-pads.tsx.bak_sweep` | 113,751B | 2026-05-04 20:09 | `82b752780bc4` |
 | `client/src/components/drum-pads.tsx.bak.20260428_221407` | 113,359B | 2026-04-30 21:09 | `9f22cba21f0d` |
 
+#### `client/src/components/mix-suggestions/MixSuggestionsPanel.tsx`
+- Base file exists: ✓
+- Backup variants: 2
+- Unique content versions (by hash): 2
+- Safe to consolidate: NO — all variants have unique content
+
+| Backup File | Size | Last Modified | SHA256 (first 12) |
+|---|---|---|---|
+| `client/src/components/mix-suggestions/MixSuggestionsPanel.tsx.bak.20260515_212203` | 26,461B | 2026-05-15 21:22 | `2898e412e3e1` |
+| `client/src/components/mix-suggestions/MixSuggestionsPanel.tsx.bak_sweep` | 26,473B | 2026-05-04 20:09 | `88800f249344` |
+
 #### `client/src/features/loopstation/engine/loopEngine.ts`
 - Base file exists: ✓
 - Backup variants: 2
@@ -854,17 +766,6 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/features/loopstation/engine/loopEngine.ts.bak-20260504_220735` | 97,846B | 2026-05-04 22:07 | `4614e35bccf6` |
 | `client/src/features/loopstation/engine/loopEngine.ts.bak_sweep` | 97,967B | 2026-05-04 20:09 | `90582caec4a7` |
-
-#### `client/src/hooks/authStore.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/hooks/authStore.ts.bak_sweep` | 6,858B | 2026-05-04 20:09 | `d59b91e4ece8` |
-| `client/src/hooks/authStore.ts.bak-20260503_221732` | 6,860B | 2026-04-30 21:09 | `c4a5a0acc071` |
 
 #### `client/src/hooks/useMidiSequencer.ts`
 - Base file exists: ✓
@@ -888,94 +789,6 @@ Required process before removing any backup:
 | `client/src/lib/trpc.ts.bak_sweep` | 5,200B | 2026-05-04 20:09 | `f594aa6cf1cf` |
 | `client/src/lib/trpc.ts.bak_20260503_213940` | 5,201B | 2026-04-30 21:09 | `0a99cc41f847` |
 
-#### `client/src/pages/visuals.tsx`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/visuals.tsx.bak_sweep` | 16,938B | 2026-05-04 20:09 | `28cb73f9fa66` |
-| `client/src/pages/visuals.tsx.bak-20260509_005030` | 16,930B | 2026-05-04 20:09 | `4dacbc74ae13` |
-
-#### `client/src/pages/multi-track-panel/audio-engine.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/audio-engine.ts.bak.20260430_162302` | 1,308B | 2026-04-30 21:09 | `4bf94fe2999b` |
-| `client/src/pages/multi-track-panel/audio-engine.ts.bak.20260430_162250` | 1,308B | 2026-04-30 21:09 | `4bf94fe2999b` |
-
-#### `client/src/pages/multi-track-panel/constants.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/constants.ts.bak.20260430_162302` | 806B | 2026-04-30 21:09 | `e54da6658884` |
-| `client/src/pages/multi-track-panel/constants.ts.bak.20260430_162250` | 806B | 2026-04-30 21:09 | `e54da6658884` |
-
-#### `client/src/pages/multi-track-panel/types.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/types.ts.bak.20260430_162302` | 2,073B | 2026-04-30 21:09 | `cf5d157561d2` |
-| `client/src/pages/multi-track-panel/types.ts.bak.20260430_162250` | 2,073B | 2026-04-30 21:09 | `cf5d157561d2` |
-
-#### `client/src/pages/multi-track-panel/components/preferences-modal.tsx`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/components/preferences-modal.tsx.bak.20260430_162302` | 5,368B | 2026-04-30 21:09 | `0b3f6bbf4b01` |
-| `client/src/pages/multi-track-panel/components/preferences-modal.tsx.bak.20260430_162250` | 5,368B | 2026-04-30 21:09 | `0b3f6bbf4b01` |
-
-#### `client/src/pages/multi-track-panel/components/vst-panel-modal.tsx`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/components/vst-panel-modal.tsx.bak.20260430_162302` | 2,750B | 2026-04-30 21:09 | `877b4f55bfa2` |
-| `client/src/pages/multi-track-panel/components/vst-panel-modal.tsx.bak.20260430_162250` | 2,750B | 2026-04-30 21:09 | `877b4f55bfa2` |
-
-#### `client/src/pages/multi-track-panel/components/mixer-view.tsx`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/components/mixer-view.tsx.bak.20260430_162302` | 238B | 2026-04-30 21:09 | `4422578406c9` |
-| `client/src/pages/multi-track-panel/components/mixer-view.tsx.bak.20260430_162250` | 238B | 2026-04-30 21:09 | `4422578406c9` |
-
-#### `client/src/pages/multi-track-panel/components/timeline-view.tsx`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/multi-track-panel/components/timeline-view.tsx.bak.20260430_162302` | 247B | 2026-04-30 21:09 | `5c9873e74283` |
-| `client/src/pages/multi-track-panel/components/timeline-view.tsx.bak.20260430_162250` | 247B | 2026-04-30 21:09 | `5c9873e74283` |
-
 #### `client/src/store/audio-store.ts`
 - Base file exists: ✓
 - Backup variants: 2
@@ -987,61 +800,6 @@ Required process before removing any backup:
 | `client/src/store/audio-store.ts.bak_sweep` | 14,374B | 2026-05-04 20:09 | `78108750350d` |
 | `client/src/store/audio-store.ts.bak-20260503_222258` | 14,375B | 2026-05-02 19:02 | `1d666947795a` |
 
-#### `client/src/utils/projectSerializer.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/utils/projectSerializer.ts.bak_20260503_213940` | 7,493B | 2026-05-03 21:36 | `f5241202d1ac` |
-| `client/src/utils/projectSerializer.ts.bak_20260503_213637` | 7,494B | 2026-04-30 21:09 | `5fcc8ad4654e` |
-
-#### `server/index.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/index.ts.bak` | 12,695B | 2026-04-21 17:57 | `51844647d8b5` | ← **RECOMMENDED KEEP**
-| `server/index.ts.bak-20260421_174518` | 12,695B | 2026-04-21 17:45 | `51844647d8b5` |
-
-#### `server/db/schema.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/db/schema.ts.bak.20260430_171849` | 11,733B | 2026-04-30 17:18 | `6450a09ea342` |
-| `server/db/schema.ts.bak.20260422_154539` | 12,150B | 2026-04-22 15:45 | `e3e045d9fb84` |
-
-#### `server/routers/adminRouter.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 2
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/routers/adminRouter.ts.bak.20260430_171849` | 5,083B | 2026-04-30 17:18 | `705aa7a21b15` |
-| `server/routers/adminRouter.ts.bak.20260422_154539` | 4,515B | 2026-04-22 15:45 | `6d789d13fd0a` |
-
-#### `shared/schema-subscription.ts`
-- Base file exists: ✓
-- Backup variants: 2
-- Unique content versions (by hash): 1
-- Safe to consolidate: YES — hash comparison complete
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `shared/schema-subscription.ts.bak-20260430_201117` | 4,933B | 2026-04-30 20:11 | `6ecc401cfd06` | ← **RECOMMENDED KEEP**
-| `shared/schema-subscription.ts.bak-20260430_200116` | 4,933B | 2026-04-30 20:01 | `6ecc401cfd06` |
-
 #### `.gitignore`
 - Base file exists: ✓
 - Backup variants: 1
@@ -1051,6 +809,16 @@ Required process before removing any backup:
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
 | `.gitignore.bak-20260419_232534` | 1,970B | 2026-04-19 22:01 | `dce6ac367fb7` |
+
+#### `.env`
+- Base file exists: ✓
+- Backup variants: 1
+- Unique content versions (by hash): 1
+- Safe to consolidate: NO — all variants have unique content
+
+| Backup File | Size | Last Modified | SHA256 (first 12) |
+|---|---|---|---|
+| `.env.bak_20260423_223845` | 242B | 2026-04-22 21:08 | `8ab0a9538d16` |
 
 #### `.railwayignore`
 - Base file exists: ✓
@@ -1112,7 +880,7 @@ Required process before removing any backup:
 |---|---|---|---|
 | `packages/llpte-core/tsconfig.json.bak-ts-fix-20260419_231734` | 616B | 2026-03-05 22:55 | `e581df625e7d` |
 
-#### `client/tsconfig.json`
+#### `client/SECURITY.md`
 - Base file exists: ✓
 - Backup variants: 1
 - Unique content versions (by hash): 1
@@ -1120,17 +888,7 @@ Required process before removing any backup:
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/tsconfig.json.bak` | 966B | 2026-04-28 01:07 | `39e854b394c1` | ← **RECOMMENDED KEEP**
-
-#### `client/tsconfig.node.json`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/tsconfig.node.json.bak` | 0B | 2026-04-19 22:01 | `e3b0c44298fc` | ← **RECOMMENDED KEEP**
+| `client/SECURITY.md.bak-20260512` | 2,219B | 2026-05-12 19:50 | `166c0a604f4d` | ← **RECOMMENDED KEEP**
 
 #### `client/src/audio/voice-pool.ts`
 - Base file exists: ✓
@@ -1141,146 +899,6 @@ Required process before removing any backup:
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
 | `client/src/audio/voice-pool.ts.bak_sweep` | 2,852B | 2026-05-04 20:09 | `19fedf521cb0` |
-
-#### `client/src/audio/automation/automation-engine.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/automation/automation-engine.ts.bak_sweep` | 1,350B | 2026-05-04 20:09 | `dcb0557af899` |
-
-#### `client/src/audio/automation/automation-lane.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/automation/automation-lane.ts.bak_sweep` | 1,285B | 2026-05-04 20:09 | `4d0eac67227c` |
-
-#### `client/src/audio/clips/audio-clip.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/clips/audio-clip.ts.bak_sweep` | 12,542B | 2026-05-04 20:09 | `34771a231022` |
-
-#### `client/src/audio/clips/clip-track.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/clips/clip-track.ts.bak_sweep` | 12,469B | 2026-05-04 20:09 | `725755f3858c` |
-
-#### `client/src/audio/clips/audio-clip-loader.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/clips/audio-clip-loader.ts.bak_sweep` | 13,987B | 2026-05-04 20:09 | `80db887148c1` |
-
-#### `client/src/audio/core/analysis-engine.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/core/analysis-engine.ts.bak_sweep` | 7,125B | 2026-05-04 20:09 | `0fd2a9d5f6b9` |
-
-#### `client/src/audio/core/beat-detector.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/core/beat-detector.ts.bak_sweep` | 4,483B | 2026-05-04 20:09 | `7b54eb90a164` |
-
-#### `client/src/audio/core/instrument-engine.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/core/instrument-engine.ts.bak_sweep` | 21,996B | 2026-05-04 20:09 | `0eaaac650a8f` |
-
-#### `client/src/audio/dj-controls/crossfader.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/dj-controls/crossfader.ts.bak_sweep` | 5,386B | 2026-05-04 20:09 | `161bb61f3497` |
-
-#### `client/src/audio/dj-controls/cue-management.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/dj-controls/cue-management.ts.bak_sweep` | 6,245B | 2026-05-04 20:09 | `acd5cd79f69d` |
-
-#### `client/src/audio/dj-controls/tempo-controls.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/dj-controls/tempo-controls.ts.bak_sweep` | 5,575B | 2026-05-04 20:09 | `e45e6a2bbe20` |
-
-#### `client/src/audio/dj-controls/beat-sync.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/dj-controls/beat-sync.ts.bak_sweep` | 6,917B | 2026-05-04 20:09 | `5739a38ea0bc` |
-
-#### `client/src/audio/effects/compressor.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/effects/compressor.ts.bak_sweep` | 5,095B | 2026-05-04 20:09 | `9740abb0020c` |
-
-#### `client/src/audio/effects/ir-reverb-engine.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/effects/ir-reverb-engine.ts.bak_sweep` | 4,796B | 2026-05-04 20:09 | `22f5ff3f2fd4` |
 
 #### `client/src/audio/fx/compressor.ts`
 - Base file exists: ✓
@@ -1442,16 +1060,6 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/audio/mixer/effect-chain.ts.bak_sweep` | 18,532B | 2026-05-04 20:09 | `8a12050f4e1d` |
 
-#### `client/src/audio/mixer/mixer-channel.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/mixer/mixer-channel.ts.bak_sweep` | 12,065B | 2026-05-04 20:09 | `3b9838b98889` |
-
 #### `client/src/audio/recorder/recorder-worklet.ts`
 - Base file exists: ✓
 - Backup variants: 1
@@ -1481,16 +1089,6 @@ Required process before removing any backup:
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
 | `client/src/audio/voice/voice-assistant.ts.bak_sweep` | 470B | 2026-05-04 20:09 | `001b3e5648aa` |
-
-#### `client/src/audio/engine/AudioEngine.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/audio/engine/AudioEngine.ts.bak` | 1,287B | 2026-05-04 22:36 | `328c3b65fb2e` |
 
 #### `client/src/audio/engine/worklet/processor.ts`
 - Base file exists: ✓
@@ -2022,16 +1620,6 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/components/tracks/clip-drag-handler.tsx.bak_sweep` | 2,606B | 2026-05-04 20:09 | `4af4bfa70279` |
 
-#### `client/src/components/mix-suggestions/MixSuggestionsPanel.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/components/mix-suggestions/MixSuggestionsPanel.tsx.bak_sweep` | 26,473B | 2026-05-04 20:09 | `88800f249344` |
-
 #### `client/src/config/performance.config.ts`
 - Base file exists: ✓
 - Backup variants: 1
@@ -2171,26 +1759,6 @@ Required process before removing any backup:
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
 | `client/src/hooks/useSessionMetricsSync.ts.mythos` | 939B | 2026-04-30 21:09 | `82eb26c5b297` |
-
-#### `client/src/hooks/useMixSuggestions.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/hooks/useMixSuggestions.ts.bak` | 6,645B | 2026-05-04 18:41 | `3d40a2efcbbb` |
-
-#### `client/src/hooks/useAutoLeveling.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/hooks/useAutoLeveling.ts.bak` | 10,822B | 2026-05-04 18:41 | `e8828f884e99` |
 
 #### `client/src/hooks/use-analysis-engine.ts`
 - Base file exists: ✓
@@ -2522,15 +2090,15 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/lib/theme-config.ts.bak-20260504_215325` | 3,484B | 2026-05-04 21:53 | `4fd23d13a83c` |
 
-#### `client/src/pages/multi-track-panel.tsx`
-- Base file exists: ✗ MISSING
+#### `client/src/pages/AudioTest.tsx`
+- Base file exists: ✓
 - Backup variants: 1
 - Unique content versions (by hash): 1
 - Safe to consolidate: NO — all variants have unique content
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/src/pages/multi-track-panel.tsx.bak_20260503_195200` | 72,047B | 2026-04-30 21:09 | `679ea0fa55e2` |
+| `client/src/pages/AudioTest.tsx.bak.20260528_184544` | 880B | 2026-05-28 18:45 | `5bef2a866866` |
 
 #### `client/src/pages/AuthPage.tsx`
 - Base file exists: ✓
@@ -2540,67 +2108,7 @@ Required process before removing any backup:
 
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
-| `client/src/pages/AuthPage.tsx.bak_sweep` | 13,860B | 2026-05-04 20:09 | `4b69f8bf0934` |
-
-#### `client/src/pages/not-found.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/not-found.tsx.bak_sweep` | 6,035B | 2026-05-04 20:09 | `bac36bf2cfcd` |
-
-#### `client/src/pages/AdminPage.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/AdminPage.tsx.bak_sweep` | 8,628B | 2026-05-04 20:09 | `64274e2dafee` |
-
-#### `client/src/pages/admin/AgentSuitePage.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/admin/AgentSuitePage.tsx.bak_sweep` | 8,086B | 2026-05-04 20:09 | `c3dfb526e7f6` |
-
-#### `client/src/pages/pricing/pricing.data.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/pricing/pricing.data.ts.bak_sweep` | 7,749B | 2026-05-04 20:09 | `41f93df649e5` |
-
-#### `client/src/pages/pricing/usePricing.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/pricing/usePricing.ts.bak_sweep` | 2,887B | 2026-05-04 20:09 | `5d2cbacf5a09` |
-
-#### `client/src/pages/pricing/PricingPage.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/pages/pricing/PricingPage.tsx.bak_sweep` | 19,897B | 2026-05-04 20:09 | `29e1fb2612d8` |
+| `client/src/pages/AuthPage.tsx.bak.20260528_184544` | 14,287B | 2026-05-28 18:45 | `9231e96b856f` |
 
 #### `client/src/project/project-loader.ts`
 - Base file exists: ✓
@@ -2692,56 +2200,6 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/stores/session-metrics-store.ts.mythos` | 439B | 2026-04-30 21:09 | `f568cfaa59ce` |
 
-#### `client/src/utils/performance-monitor.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/utils/performance-monitor.ts.bak_20260503_213940` | 9,336B | 2026-04-30 21:09 | `f663eb171237` |
-
-#### `client/src/utils/audioHelpers.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/utils/audioHelpers.ts.bak_20260503_214341` | 9,832B | 2026-04-30 21:09 | `dd22b27728c4` |
-
-#### `client/src/utils/audio.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/utils/audio.ts.bak_20260503_214918` | 5,305B | 2026-04-30 21:09 | `762b8532c5de` |
-
-#### `client/src/visual/oscilloscope.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/visual/oscilloscope.tsx.bak_20260503_213637` | 5,100B | 2026-04-30 21:09 | `5716274f67be` |
-
-#### `client/src/worklets/instrument-processor.worklet.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/worklets/instrument-processor.worklet.ts.bak_sweep` | 4,595B | 2026-05-04 20:09 | `84cab9eef698` |
-
 #### `client/src/context/ThemeProvider.tsx`
 - Base file exists: ✓
 - Backup variants: 1
@@ -2752,16 +2210,6 @@ Required process before removing any backup:
 |---|---|---|---|
 | `client/src/context/ThemeProvider.tsx.bak_sweep` | 682B | 2026-05-04 20:09 | `edec5ea6e0cc` |
 
-#### `client/src/vj/VJCanvas.tsx`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `client/src/vj/VJCanvas.tsx.bak_20260503_213637` | 1,074B | 2026-04-30 21:09 | `ebdb1041a343` |
-
 #### `client/src/collaboration/presence.ts`
 - Base file exists: ✓
 - Backup variants: 1
@@ -2771,46 +2219,6 @@ Required process before removing any backup:
 | Backup File | Size | Last Modified | SHA256 (first 12) |
 |---|---|---|---|
 | `client/src/collaboration/presence.ts.bak_20260509_233618` | 788B | 2026-05-09 23:36 | `dfc6635763a7` |
-
-#### `nginx/nginx.conf`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `nginx/nginx.conf.bak` | 875B | 2026-04-21 23:29 | `e86d016f7de5` | ← **RECOMMENDED KEEP**
-
-#### `server/middleware/feature-gate.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/middleware/feature-gate.ts.bak` | 8,067B | 2026-04-21 19:01 | `58cf94303f13` |
-
-#### `server/routers/sessionMetrics.router.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/routers/sessionMetrics.router.ts.bak` | 3,452B | 2026-04-20 18:02 | `854f97737253` |
-
-#### `server/routes/auth.ts`
-- Base file exists: ✓
-- Backup variants: 1
-- Unique content versions (by hash): 1
-- Safe to consolidate: NO — all variants have unique content
-
-| Backup File | Size | Last Modified | SHA256 (first 12) |
-|---|---|---|---|
-| `server/routes/auth.ts.bak.20260422_144602` | 14,743B | 2026-04-22 14:46 | `f40c810dd8b3` |
 
 #### `server/services/session-metrics.service.ts`
 - Base file exists: ✓
@@ -2857,22 +2265,40 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 
 | File | Infra Flags | Risk Category |
 |---|---|---|
+| `)` | docker | DEPLOYMENT |
 | `.env` | name/path match | BUILD |
 | `.env.production` | name/path match | BUILD |
 | `.github/dependabot.yml` | name/path match | BUILD |
+| `.github/workflows/SECURITY.md` | name/path match | BUILD |
+| `:` | docker, startup | DEPLOYMENT |
 | `App.tsx` | docker | DEPLOYMENT |
-| `Dockerfile` | docker, startup, env_var | DEPLOYMENT |
-| `README.md` | docker | DEPLOYMENT |
-| `SECURITY.md` | docker | DEPLOYMENT |
-| `add_ticker.py` | docker, env_var | DEPLOYMENT |
+| `Dockerfile` | docker, startup | DEPLOYMENT |
+| `FIX_IMPLEMENTATION_GUIDE.md` | docker, deployment, env_var | DEPLOYMENT |
+| `Fix` | docker, env_var | DEPLOYMENT |
+| `MYTHOS-SKILL-v2.md` | docker, cron, deployment | DEPLOYMENT |
+| `SECURITY.md` | cron | BUILD |
+| `SECURITY_AUDIT_2026-05-26.md` | deployment | DEPLOYMENT |
+| `_audit/sync_map.txt` | docker, ci_cd, cron, env_var | DEPLOYMENT |
+| `_full_engine_audit.txt` | docker, ci_cd, cron, startup, env_var | DEPLOYMENT |
 | `admin.sh` | docker, env_var | DEPLOYMENT |
 | `adminRouter.ts` | docker, env_var | DEPLOYMENT |
+| `agents/verifier.js` | docker, env_var | DEPLOYMENT |
+| `apply-fix.sh` | docker | DEPLOYMENT |
+| `apply-phase4-engine-patch.sh` | docker, env_var | DEPLOYMENT |
+| `asi-audit-register.py` | docker, env_var | DEPLOYMENT |
 | `asi-hygiene-master.sh` | docker, env_var | DEPLOYMENT |
 | `asi-upgrade-fixed.sh` | docker, env_var | DEPLOYMENT |
 | `asi_hygiene_audit_report.md` | docker, ci_cd, cron, deployment, env_var | DEPLOYMENT |
 | `asi_mastery_troubleshooter.sh` | docker | DEPLOYMENT |
 | `audit_r3.txt` | docker, ci_cd, deployment, startup, env_var | DEPLOYMENT |
 | `audit_theme_config.py` | docker, env_var | DEPLOYMENT |
+| `backups/headers-20260527-155544/AdminPage.tsx` | docker | DEPLOYMENT |
+| `backups/headers-20260527-155544/AudioTest.tsx` | docker | DEPLOYMENT |
+| `backups/headers-20260527-155544/AuthPage.tsx` | docker | DEPLOYMENT |
+| `backups/headers-20260527-155544/DAW.tsx` | docker | DEPLOYMENT |
+| `backups/headers-20260527-155544/login.tsx` | docker, ci_cd | DEPLOYMENT |
+| `backups/headers-20260527-155544/visuals.tsx` | docker | DEPLOYMENT |
+| `backups/headers-20260527-155544/vst.tsx` | docker, ci_cd | DEPLOYMENT |
 | `client/DSP/Core.ts` | docker | DEPLOYMENT |
 | `client/DSP/GainComputer.ts` | docker | DEPLOYMENT |
 | `client/DSP/LDE.ts` | docker | DEPLOYMENT |
@@ -2880,21 +2306,12 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/build_and_integrate_VocalSpectra.sh` | docker, ci_cd, env_var | DEPLOYMENT |
 | `client/build_and_test_vocalspectra_Version2.sh` | docker, ci_cd, env_var | DEPLOYMENT |
 | `client/client/hooks/useSessionLifecycle.ts` | docker | DEPLOYMENT |
-| `client/client/src/components/AudioGate.tsx` | docker | DEPLOYMENT |
-| `client/client/src/components/ErrorBoundary.tsx` | docker, env_var | DEPLOYMENT |
-| `client/client/src/components/auth/ProtectedRoute.tsx` | docker | DEPLOYMENT |
-| `client/client/src/hooks/useAudioContext.ts` | docker | DEPLOYMENT |
 | `client/client/src/lib/audio-context-manager.ts` | docker | DEPLOYMENT |
 | `client/client/src/lib/audio-node-factory.ts` | docker, cron | DEPLOYMENT |
 | `client/client/src/lib/router-compat.ts` | docker | DEPLOYMENT |
-| `client/client/src/stores/authStore.ts` | docker | DEPLOYMENT |
-| `client/components/session-summary/SessionChip.tsx` | docker | DEPLOYMENT |
-| `client/components/session-summary/SessionSummaryPanel.tsx` | docker | DEPLOYMENT |
-| `client/components/session-summary/index.ts` | docker | DEPLOYMENT |
 | `client/config/vite.config.js` | docker, cron | DEPLOYMENT |
-| `client/hooks/useSessionLifecycle.ts` | docker | DEPLOYMENT |
+| `client/fix-jsx-parent.sh` | docker, env_var | DEPLOYMENT |
 | `client/package-lock.json` | docker, cron, startup | DEPLOYMENT |
-| `client/patch_vite_config.py` | docker, ci_cd, env_var | DEPLOYMENT |
 | `client/src/App.tsx` | docker | DEPLOYMENT |
 | `client/src/MultitrackViewWrapper.tsx` | docker | DEPLOYMENT |
 | `client/src/TODO-remove-ts-nocheck.md` | docker, ci_cd | DEPLOYMENT |
@@ -3066,13 +2483,11 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/src/context/ThemeProvider.tsx` | docker | DEPLOYMENT |
 | `client/src/contexts/VSTContext.tsx` | docker | DEPLOYMENT |
 | `client/src/db/clipDB.ts` | docker | DEPLOYMENT |
-| `client/src/design-tokens/theme.ts` | docker | DEPLOYMENT |
 | `client/src/engine/link-engine.ts` | docker, cron | DEPLOYMENT |
 | `client/src/engine/master-engine.ts` | docker | DEPLOYMENT |
 | `client/src/engine/midi-engine.ts` | docker, startup | DEPLOYMENT |
 | `client/src/engine/transport-engine.ts` | docker, cron | DEPLOYMENT |
 | `client/src/engine/workers/index.ts` | docker | DEPLOYMENT |
-| `client/src/extract-wrapper.sh` | docker | DEPLOYMENT |
 | `client/src/features/loopstation/LoopStation505.tsx` | docker | DEPLOYMENT |
 | `client/src/features/loopstation/WIRING.md` | docker | DEPLOYMENT |
 | `client/src/features/loopstation/components/FXKnob.tsx` | docker | DEPLOYMENT |
@@ -3106,13 +2521,18 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/src/hooks/useBilling.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useCloudSync.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useCollabSocket.ts` | docker | DEPLOYMENT |
+| `client/src/hooks/useCollaborativeState.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useDAWEngine.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useDAWStore.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useFXChain.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useInertialDrag.ts` | docker | DEPLOYMENT |
+| `client/src/hooks/useKeyboardShortcuts.ts` | docker | DEPLOYMENT |
+| `client/src/hooks/useLLPTESuggestions.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useLoopEngineFFTRef.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useMidiSequencer.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useMixSuggestions.ts` | docker, ci_cd | DEPLOYMENT |
+| `client/src/hooks/usePerformanceMonitor.ts` | docker | DEPLOYMENT |
+| `client/src/hooks/useSessionExport.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useSessionLifecycle.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useSessionMetrics.ts` | docker | DEPLOYMENT |
 | `client/src/hooks/useSubscription.tsx` | docker | DEPLOYMENT |
@@ -3128,9 +2548,9 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/src/pages/AdminPage.tsx` | docker | DEPLOYMENT |
 | `client/src/pages/AudioTest.tsx` | docker | DEPLOYMENT |
 | `client/src/pages/AuthPage.tsx` | docker | DEPLOYMENT |
-| `client/src/pages/DAW.tsx` | docker, startup | DEPLOYMENT |
+| `client/src/pages/DAW.tsx` | docker | DEPLOYMENT |
 | `client/src/pages/admin/AgentSuitePage.tsx` | docker | DEPLOYMENT |
-| `client/src/pages/collaborative-daw-pro.tsx` | docker, ci_cd, env_var | DEPLOYMENT |
+| `client/src/pages/collaborative-daw-pro.tsx` | docker, ci_cd | DEPLOYMENT |
 | `client/src/pages/instrument.tsx` | docker | DEPLOYMENT |
 | `client/src/pages/login.tsx` | docker, ci_cd | DEPLOYMENT |
 | `client/src/pages/multi-track-panel/components/preferences-modal.tsx` | docker | DEPLOYMENT |
@@ -3139,11 +2559,6 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/src/pages/pricing/PricingPage.tsx` | docker, startup | DEPLOYMENT |
 | `client/src/pages/pricing/pricing.data.ts` | docker | DEPLOYMENT |
 | `client/src/pages/pricing/tokens.ts` | docker | DEPLOYMENT |
-| `client/src/pages/pricing/tokens/component.ts` | docker | DEPLOYMENT |
-| `client/src/pages/pricing/tokens/css-bridge.ts` | docker | DEPLOYMENT |
-| `client/src/pages/pricing/tokens/index.ts` | docker | DEPLOYMENT |
-| `client/src/pages/pricing/tokens/semantic.ts` | docker | DEPLOYMENT |
-| `client/src/pages/pricing/tokens/tokens.ts` | docker | DEPLOYMENT |
 | `client/src/pages/pricing/usePricing.ts` | docker | DEPLOYMENT |
 | `client/src/pages/visuals.tsx` | docker | DEPLOYMENT |
 | `client/src/pages/vst.tsx` | docker, ci_cd | DEPLOYMENT |
@@ -3162,6 +2577,7 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/src/stores/mixerStore.ts` | docker | DEPLOYMENT |
 | `client/src/stores/session-metrics.store.ts` | docker | DEPLOYMENT |
 | `client/src/stores/timelineStore.ts` | docker | DEPLOYMENT |
+| `client/src/styles/theme.css` | docker | DEPLOYMENT |
 | `client/src/types/audio.ts` | docker | DEPLOYMENT |
 | `client/src/types/globals.d.ts` | docker | DEPLOYMENT |
 | `client/src/utils/audio.ts` | docker | DEPLOYMENT |
@@ -3181,9 +2597,11 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `client/vitest.config.ts` | docker | DEPLOYMENT |
 | `client/worklet-types/audio-worklet-global.d.ts` | docker | DEPLOYMENT |
 | `config/tailwind.config.ts` | docker | DEPLOYMENT |
+| `db.sh` | docker, env_var | DEPLOYMENT |
 | `db/schema/r3-platform.schema.ts` | docker, deployment | DEPLOYMENT |
 | `deploy.sh` | docker, deployment, env_var | DEPLOYMENT |
 | `docker-compose.yml` | docker | DEPLOYMENT |
+| `docs/00_SUMMARY_AND_NEXT_STEPS.md` | docker, ci_cd, cron, deployment, env_var | DEPLOYMENT |
 | `docs/ADMIN_TROUBLESHOOTING.md` | docker, deployment, env_var | DEPLOYMENT |
 | `docs/AI_MIXING.md` | docker, ci_cd | DEPLOYMENT |
 | `docs/API_REFERENCE.md` | docker, ci_cd, deployment | DEPLOYMENT |
@@ -3196,11 +2614,13 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `docs/DEVELOPMENT.md` | docker, ci_cd, deployment, startup, env_var | DEPLOYMENT |
 | `docs/DJ_CONTROLS.md` | docker, ci_cd | DEPLOYMENT |
 | `docs/EFFECTS_GUIDE.md` | docker | DEPLOYMENT |
+| `docs/EXECUTIVE_SUMMARY.md` | docker, deployment | DEPLOYMENT |
 | `docs/LLPTE/BENCHMARKS.md` | docker, ci_cd | DEPLOYMENT |
 | `docs/LLPTE/IP_THESIS.md` | docker, ci_cd | DEPLOYMENT |
 | `docs/LLPTE/LICENSING_PITCH.md` | docker, ci_cd, deployment | DEPLOYMENT |
 | `docs/LLPTE/LLPTE_WHITEPAPER.md` | docker, deployment | DEPLOYMENT |
 | `docs/LLPTE/PRIOR_ART_SEARCH.md` | docker, ci_cd, cron | DEPLOYMENT |
+| `docs/MUTATION_REPLAY_IMPLEMENTATION_SPEC.md` | docker, ci_cd, deployment, env_var | DEPLOYMENT |
 | `docs/ONBOARDING.md` | docker | DEPLOYMENT |
 | `docs/PITCH.md` | docker, ci_cd, deployment | DEPLOYMENT |
 | `docs/PRD_R3V4_v4.4.0.md` | docker, ci_cd, deployment, env_var | DEPLOYMENT |
@@ -3209,9 +2629,10 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `docs/README.md` | docker, ci_cd, env_var | DEPLOYMENT |
 | `docs/RESTORE_CHEATSHEET.md` | docker, env_var | DEPLOYMENT |
 | `docs/SALE_PACKAGE.md` | docker, ci_cd, deployment | DEPLOYMENT |
-| `docs/SECURITY.md` | docker | DEPLOYMENT |
 | `docs/SKILLS.md` | docker, deployment, env_var | DEPLOYMENT |
+| `docs/TECH_DEBT.md` | docker | DEPLOYMENT |
 | `docs/TRIPLE-CHECK-PASS-2.md` | docker, ci_cd, deployment, env_var | DEPLOYMENT |
+| `docs/WIRE_RESPONSE_MUTATION_REPLAY.md` | docker, deployment | DEPLOYMENT |
 | `docs/asi_enhanced.md` | docker, ci_cd | DEPLOYMENT |
 | `docs/auth.md` | docker | DEPLOYMENT |
 | `docs/docs_DEMO_CHECKLIST_Version2.md` | docker | DEPLOYMENT |
@@ -3229,11 +2650,32 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `drizzle/migrations/0004_parched_moon_knight.sql` | name/path match | MIGRATION |
 | `drizzle/migrations/0005_overjoyed_gambit.sql` | name/path match | MIGRATION |
 | `drizzle/migrations/0006_materialized_views.sql` | name/path match | MIGRATION |
+| `drizzle/migrations/0007_conscious_peter_parker.sql` | name/path match | MIGRATION |
 | `eslint.config.mjs` | docker | DEPLOYMENT |
 | `final-hygiene-fix.sh` | docker, env_var | DEPLOYMENT |
+| `fix-collab.py` | docker, env_var | DEPLOYMENT |
+| `fix-logging-corrected.py` | docker, env_var | DEPLOYMENT |
+| `fix-logging-phase1.py` | docker, env_var | DEPLOYMENT |
+| `fix_c01_esbuild_override.py` | docker, env_var | DEPLOYMENT |
+| `fix_c01_esbuild_override_v2.py` | docker, env_var | DEPLOYMENT |
+| `fix_c03_proper.sh` | docker | DEPLOYMENT |
+| `fix_c03_session_bypass.py` | docker, ci_cd, env_var | DEPLOYMENT |
+| `fix_c03_surgical.sh` | docker | DEPLOYMENT |
+| `fix_collab_AUDITED_v2_FIXED.py` | docker, env_var | DEPLOYMENT |
+| `fix_eslint_config.py` | docker, env_var | DEPLOYMENT |
+| `fix_f10_prompt_injection.py` | docker, env_var | DEPLOYMENT |
+| `fix_f10_prompt_injection_v2.py` | docker, env_var | DEPLOYMENT |
+| `fix_green_bars_direct.sh` | docker | DEPLOYMENT |
+| `fix_pricing_audit.sh` | docker | DEPLOYMENT |
+| `fixduplicate.sh` | docker, env_var | DEPLOYMENT |
 | `human_review_queue.txt` | docker | DEPLOYMENT |
 | `index.ts` | docker, deployment, env_var | DEPLOYMENT |
+| `inspect-init-constants.py` | docker, env_var | DEPLOYMENT |
+| `lint-cleanup-imports.py` | docker, startup, env_var | DEPLOYMENT |
+| `master_sync_drizzle_journal.sh` | docker, deployment, env_var | DEPLOYMENT |
 | `nginx/nginx.conf` | name/path match | BUILD |
+| `nixpacks.toml` | docker, startup | DEPLOYMENT |
+| `p0-p1-deploy.sh` | docker, deployment | DEPLOYMENT |
 | `package.json` | docker, deployment | DEPLOYMENT |
 | `packages/llpte-adapters/README.md` | docker | DEPLOYMENT |
 | `packages/llpte-adapters/package.json` | docker | DEPLOYMENT |
@@ -3302,32 +2744,80 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `packages/llpte-transition-graph/vitest.config.ts` | docker | DEPLOYMENT |
 | `patch-collab-daw.sh` | docker, env_var | DEPLOYMENT |
 | `patch_remove_panel_borders.py` | docker, env_var | DEPLOYMENT |
+| `patch_skills_13.py` | deployment, env_var | DEPLOYMENT |
+| `playwright-report/data/0e2bd2c24aad641557da14061ba7e08123aa9357.md` | docker | DEPLOYMENT |
+| `playwright-report/data/127cb6917238f2f44ccdd18c0584a4a6935522db.md` | docker, deployment, env_var | DEPLOYMENT |
+| `playwright-report/data/13e89867ecc2761e153698b6175442477efaa457.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/23f4210040bb02393152e78d55eca9a24db0e832.md` | docker, deployment, env_var | DEPLOYMENT |
+| `playwright-report/data/26bf8029326a280f3863f20ba984080267ebeadb.md` | docker | DEPLOYMENT |
+| `playwright-report/data/3bab5518a5d1483c5c6cda8733561ad1ff302c84.md` | docker | DEPLOYMENT |
+| `playwright-report/data/3d0132c90c7cae559fc8a92c8ad5f682dcfd22d0.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/3f747a54f3648c296a58d514358e9c46c2117d57.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/454eb2469c2ea96f10a5eb9694d6e342f6e91f14.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/4f3c5e1d5d69e315bbea76a4fbb095afb58b66cb.md` | docker | DEPLOYMENT |
+| `playwright-report/data/514d8e7d2403f2405a9cb9bf12e792608529915c.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/5ae1b41b6579055caec5961ace5a57bb47381924.md` | docker, deployment, env_var | DEPLOYMENT |
+| `playwright-report/data/6b35771b6c42f61e6e4574ff003ec9382eca0f19.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/80b835618fc462db13ed56e31466f98dfb88dc85.md` | docker | DEPLOYMENT |
+| `playwright-report/data/8707e7c77acb572cc0eb446630b13038dcbf943c.md` | docker | DEPLOYMENT |
+| `playwright-report/data/a195fd1a7c09c2c2a38dd9db881056583a3e3c9a.md` | docker | DEPLOYMENT |
+| `playwright-report/data/ab0ef2584e195d18aa6798ed79b28c240e96440d.md` | docker | DEPLOYMENT |
+| `playwright-report/data/b383d621260c2b73daea680bbc153d06ce533fd5.md` | deployment | DEPLOYMENT |
+| `playwright-report/data/b978faf61e1d8474e0db986688d1c6e53cc899ab.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/bc1d1c492a9995a776c58b6fa54c99cd5c7d8948.md` | deployment | DEPLOYMENT |
+| `playwright-report/data/c57d964bcfe3cfb3c631b790e3b28df8d0f4a9ea.md` | docker | DEPLOYMENT |
+| `playwright-report/data/c76709ecc5be2c4378c09f83e28ae7797084fd5a.md` | docker | DEPLOYMENT |
+| `playwright-report/data/dbf0602c8d2bcb4fee2f0cfec69ce1d5c68ec03e.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/de8d98bf30df6f8981b1a752320a59b2c5521d62.md` | docker | DEPLOYMENT |
+| `playwright-report/data/e2343d562759d2b64c3d1f0eceae203415ed1928.md` | docker | DEPLOYMENT |
+| `playwright-report/data/e493e45c09318f9c09f6e55dcf9ff4ed3199fd8e.md` | docker, deployment | DEPLOYMENT |
+| `playwright-report/data/e6aab242f8d00eb76c29f85a2c3876d5dfa40485.md` | docker | DEPLOYMENT |
+| `playwright-report/data/efcb1c9113ed0e0ad3bc7aecf46d83d8ddc6e1c5.md` | docker, deployment | DEPLOYMENT |
+| `playwright.config.ts` | docker, deployment, env_var | DEPLOYMENT |
 | `pnpm-lock.yaml` | docker, cron, deployment, startup | DEPLOYMENT |
 | `pnpm-workspace.yaml` | name/path match | BUILD |
+| `pricing_audit_fix.sh` | docker, env_var | DEPLOYMENT |
+| `pricing_audit_patch.py` | docker, env_var | DEPLOYMENT |
 | `r3-audit-round3.sh` | docker, env_var | DEPLOYMENT |
+| `r3-cors-fix-option-a.sh` | docker, env_var | DEPLOYMENT |
+| `r3-cors-fix-option-b.sh` | docker, env_var | DEPLOYMENT |
+| `r3-hygiene-execute.py` | docker, env_var | DEPLOYMENT |
 | `r3-project-clean.sh` | docker, deployment, startup, env_var | DEPLOYMENT |
 | `r3_audit_round3.sh` | docker, env_var | DEPLOYMENT |
 | `r3audit` | docker, deployment, env_var | DEPLOYMENT |
 | `r3execute` | docker, deployment, env_var | DEPLOYMENT |
 | `r3hygiene.py` | docker, ci_cd, cron, deployment, startup, env_var | DEPLOYMENT |
 | `r3setup` | docker, ci_cd, cron, deployment, env_var | DEPLOYMENT |
-| `railway.toml` | deployment | DEPLOYMENT |
+| `railway.toml` | docker, deployment | DEPLOYMENT |
+| `remediate-dependabot.sh` | docker, env_var | DEPLOYMENT |
+| `run_all_patches.sh` | docker, env_var | DEPLOYMENT |
+| `run_all_patches_v2.sh` | docker, env_var | DEPLOYMENT |
+| `run_all_patches_v2_fixed.sh` | docker, env_var | DEPLOYMENT |
+| `scripts/00_PHASE2_IMPLEMENTATION_COMPLETE.md` | docker, deployment, env_var | DEPLOYMENT |
+| `scripts/INTEGRATION_GUIDE.md` | docker, deployment, env_var | DEPLOYMENT |
 | `scripts/docs_WIRE_Version2.txt` | docker | DEPLOYMENT |
 | `scripts/enforce-ui-design-system.sh` | docker, env_var | DEPLOYMENT |
 | `scripts/github_workflows_docs_and_security_audit_Version2 (1).yml` | docker, ci_cd | DEPLOYMENT |
 | `scripts/github_workflows_docs_audit_Version2.yml` | docker | DEPLOYMENT |
+| `scripts/install-mutation-tracer.sh` | docker, env_var | DEPLOYMENT |
 | `scripts/lint-design-tokens.ts` | docker | DEPLOYMENT |
+| `scripts/mutation-tracer.debug.ts` | docker | DEPLOYMENT |
+| `scripts/mutation-tracer.test.ts` | docker | DEPLOYMENT |
 | `scripts/r3_master_fix.py` | docker, ci_cd, env_var | DEPLOYMENT |
-| `scripts/relocate_dsp.py` | docker, env_var | DEPLOYMENT |
 | `scripts/scripts_security_due_check_Version2.py` | docker | DEPLOYMENT |
 | `scripts/scripts_verify_artifacts_exist_Version2.py` | docker | DEPLOYMENT |
+| `scripts/trpc-tracer.debug.ts` | docker | DEPLOYMENT |
+| `scripts/vite.config.snippet.ts` | docker, env_var | DEPLOYMENT |
 | `secrets/r3v4_secrets_20260415_205734.tar.gz.gpg` | name/path match | SECURITY |
+| `server/app.ts` | docker | DEPLOYMENT |
 | `server/base-procedures.ts` | docker | DEPLOYMENT |
 | `server/db/index.ts` | docker, deployment, env_var | DEPLOYMENT |
 | `server/db/migrations/0000_damp_norman_osborn.sql` | name/path match | MIGRATION |
+| `server/db/migrations/0002_c03_ai_transition_daily_window.sql` | name/path match | MIGRATION |
+| `server/db/migrations/0005_overjoyed_gambit.sql` | name/path match | MIGRATION |
 | `server/db/migrations/materialized-views.sql` | name/path match | MIGRATION |
 | `server/db/schema.ts` | docker, deployment | DEPLOYMENT |
-| `server/index.ts` | docker, deployment, env_var | DEPLOYMENT |
+| `server/drizzle.config.ts` | docker, env_var | DEPLOYMENT |
 | `server/lib/logger.ts` | docker, env_var | DEPLOYMENT |
 | `server/lib/storage-s3.ts` | docker, deployment, startup, env_var | DEPLOYMENT |
 | `server/middleware/auth.ts` | docker, env_var | DEPLOYMENT |
@@ -3339,7 +2829,7 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `server/package.json` | deployment | DEPLOYMENT |
 | `server/procedures.ts` | docker | DEPLOYMENT |
 | `server/routers/adminRouter.ts` | docker, env_var | DEPLOYMENT |
-| `server/routers/aiMix.router.ts` | docker | DEPLOYMENT |
+| `server/routers/aiMix.router.ts` | docker, deployment | DEPLOYMENT |
 | `server/routers/daw.ts` | docker, ci_cd | DEPLOYMENT |
 | `server/routers/dj.router.ts` | docker | DEPLOYMENT |
 | `server/routers/index.ts` | docker | DEPLOYMENT |
@@ -3395,6 +2885,23 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `shared/types/automation-additions.ts` | docker | DEPLOYMENT |
 | `shared/types/project.types.ts` | docker | DEPLOYMENT |
 | `shared/types/trpc.ts` | docker | DEPLOYMENT |
+| `test-import.ts` | docker | DEPLOYMENT |
+| `test-results/e2e-audio-user-can-play-and-stop-audio-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-audio-volume-control-works-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-core-App-loads-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-core-Basic-navigation-works-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-core-Critical-flow-play-audio-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-effects-user-can-enable-multiple-effects-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-multiuser-multi-user-session-sync-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-performance-audio-playback-starts-quickly-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-upload-upload-and-play-audio-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-visual-effects-panel-renders-correctly-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-visual-waveform-renders-correctly-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/e2e-websocket-WebSocket-session-sync-chromium/error-context.md` | docker | DEPLOYMENT |
+| `test-results/happy-path-R3-v4-Happy-Pat-797bb-stays-up-10-rapid-requests--chromium/error-context.md` | docker, deployment, env_var | DEPLOYMENT |
+| `test-results/happy-path-R3-v4-Happy-Path-Health-endpoint-returns-200-chromium/error-context.md` | docker, deployment, env_var | DEPLOYMENT |
+| `test-results/happy-path-R3-v4-Happy-Path-Root-path-returns-404-chromium/error-context.md` | docker, deployment, env_var | DEPLOYMENT |
+| `test-results/happy-path-R3-v4-Happy-Path-Server-responds-to-requests-chromium/error-context.md` | docker | DEPLOYMENT |
 | `tests/e2e/audio.spec.ts` | docker | DEPLOYMENT |
 | `tests/e2e/core.spec.ts` | docker | DEPLOYMENT |
 | `tests/e2e/effects.spec.ts` | docker | DEPLOYMENT |
@@ -3403,16 +2910,24 @@ Files tied to infrastructure, deployment, runtime, or recovery. No modification 
 | `tests/e2e/upload.spec.ts` | docker | DEPLOYMENT |
 | `tests/e2e/visual.spec.ts` | docker | DEPLOYMENT |
 | `tests/e2e/websocket.spec.ts` | docker | DEPLOYMENT |
+| `tests/happy-path.spec.ts` | docker, deployment, env_var | DEPLOYMENT |
 | `tools/auth_god.py` | docker, ci_cd, deployment, startup, env_var | DEPLOYMENT |
 | `tools/dashboard/stack-rating.jsx` | docker, ci_cd | DEPLOYMENT |
 | `tools/patch_instrument_pagenav_import.py` | docker, env_var | DEPLOYMENT |
 | `tools/r3_fix_store_barrel.py` | docker, env_var | DEPLOYMENT |
 | `tools/r3_master_fix.py` | docker, env_var | DEPLOYMENT |
+| `tools/scripts/enforce-singleton-engine.sh` | docker, env_var | DEPLOYMENT |
 | `tools/src/App.jsx` | docker | DEPLOYMENT |
 | `tools/src/broken.json` | docker | DEPLOYMENT |
+| `tools/src/engine/initEngine.js` | docker | DEPLOYMENT |
+| `tools/src/engine/startEngine.js` | docker | DEPLOYMENT |
+| `tools/src/hooks/useAudioFrame.js` | docker | DEPLOYMENT |
+| `tools/src/useAudioFrame.js` | docker | DEPLOYMENT |
+| `tsc_F-10` | docker, ci_cd, cron | DEPLOYMENT |
 | `turbo.json` | name/path match | BUILD |
+| `update-collab-demo-hook.sh` | docker | DEPLOYMENT |
 | `vitest.config.ts` | docker, ci_cd | DEPLOYMENT |
-| `wire_patches_v5_to_v5_1.py` | docker, ci_cd, deployment, env_var | DEPLOYMENT |
+| `vitest.workspace.ts` | docker | DEPLOYMENT |
 
 ### E.2 — Anomalous Files at Repository Root
 
@@ -3431,8 +2946,29 @@ Run `file <name>` on each to determine type before any action.
 | `r3audit` | 8,536B |
 | `r3execute` | 26,718B |
 | `r3setup` | 70,380B |
-| `Dockerfile` | 1,937B |
 | `Sending` | 0B |
+| `pnpm` | 0B |
+| `tsc` | 0B |
+| `ui-modernization-phase1` | 0B |
+| `eslint` | 0B |
+| `vitest` | 0B |
+| `HealthCheckResponse` | 0B |
+| `should` | 0B |
+| `ubmitSuggestionOutcome wiring` | 1,128B |
+| `:` | 13,067B |
+| `16` | 0B |
+| `8` | 0B |
+| `Dockerfile` | 1,343B |
+| `0` | 0B |
+| `react-use` | 0B |
+| `js-cookie` | 0B |
+| `drizzle-kit` | 0B |
+| `esbuild` | 0B |
+| `express` | 0B |
+| `qs` | 0B |
+| `Fix` | 3,032B |
+| `tsc_F-10` | 66,693B |
+| `)` | 3,816B |
 
 ### E.4 — TypeScript Config Variants
 
@@ -3441,13 +2977,9 @@ Run `file <name>` on each to determine type before any action.
 | `client/config/tsconfig.node.json` |
 | `client/config/tsconfig.worklet.json` |
 | `client/tsconfig.json` |
-| `client/tsconfig.json.bak` |
 | `client/tsconfig.node.json` |
-| `client/tsconfig.node.json.bak` |
 | `client/tsconfig.vocalspectra.json` |
 | `client/tsconfig.worklet.json` |
-| `client/tsconfig.worklet.json.bak` |
-| `client/tsconfig.worklet.json.ts6bak` |
 | `config/tsconfig.json` |
 | `packages/llpte-adapters/tsconfig.bench.json` |
 | `packages/llpte-adapters/tsconfig.json` |
@@ -3480,35 +3012,72 @@ Run `file <name>` on each to determine type before any action.
 | Script | Classification | Destructive Ops | Rollback | Calls | Env Vars | Referenced By |
 |---|---|---|---|---|---|---|
 | `admin.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 6 vars | 0 |
+| `apply-fix.sh` | ROLLBACK_TOOL — preserve | no | ✓ | apply-all-fixes.sh | 3 vars | 0 |
+| `apply-phase4-engine-patch.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 6 vars | 0 |
 | `asi-hygiene-master.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 19 vars | 0 |
 | `asi-upgrade-fixed.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 7 vars | 0 |
 | `asi_mastery_troubleshooter.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 3 vars | 0 |
+| `c03_diagnostic.sh` | UNVERIFIED — human review required | no | - | - | 0 vars | 0 |
 | `client/build_and_integrate_VocalSpectra.sh` | ROLLBACK_TOOL — preserve | ⚠️ YES | ✓ | - | 20 vars | 0 |
 | `client/build_and_test_vocalspectra_Version2.sh` | ROLLBACK_TOOL — preserve | ⚠️ YES | ✓ | - | 20 vars | 0 |
+| `client/fix-jsx-parent.sh` | ONE_TIME_PATCH — verify if applied | no | - | - | 3 vars | 0 |
 | `client/src/add-visual-alias-wouter.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 8 vars | 0 |
 | `client/src/add-visual-alias.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 7 vars | 0 |
-| `client/src/extract-wrapper.sh` | UNVERIFIED — human review required | no | - | - | 0 vars | 0 |
+| `db.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 14 vars | 0 |
 | `deploy.sh` | LIKELY_ACTIVE | no | - | - | 7 vars | 0 |
 | `final-hygiene-fix.sh` | ONE_TIME_PATCH — verify if applied | no | - | - | 7 vars | 0 |
 | `find_api_auth.sh` | UNVERIFIED — human review required | no | - | - | 0 vars | 0 |
+| `fix-js-cookie.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 1 vars | 0 |
+| `fix_c03_proper.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 7 vars | 0 |
+| `fix_c03_surgical.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 6 vars | 0 |
+| `fix_green_bars_direct.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 3 vars | 0 |
+| `fix_pricing_audit.sh` | LIKELY_ACTIVE | no | ✓ | fix_pricing_audit.sh | 16 vars | 1 |
+| `fixduplicate.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 2 vars | 0 |
+| `master_sync_drizzle_journal.sh` | UNVERIFIED — human review required | no | - | - | 17 vars | 0 |
+| `p0-p1-deploy.sh` | LIKELY_ACTIVE | no | - | p0-p1-deploy.sh | 7 vars | 1 |
 | `patch-collab-daw.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 7 vars | 0 |
+| `patch-js-cookie-both.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 2 vars | 0 |
+| `pricing_audit_fix.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 1 vars | 0 |
 | `r3-audit-round3.sh` | TOOLING — verify if still active | no | - | - | 20 vars | 0 |
+| `r3-cors-fix-option-a.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 14 vars | 0 |
+| `r3-cors-fix-option-b.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 14 vars | 0 |
 | `r3-project-clean.sh` | LIKELY_ACTIVE | ⚠️ YES | ✓ | r3-project-clean.sh | 20 vars | 1 |
 | `r3_audit_round3.sh` | TOOLING — verify if still active | no | - | - | 20 vars | 0 |
+| `remediate-dependabot.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 12 vars | 0 |
+| `run_all_patches.sh` | LIKELY_ACTIVE | no | - | scripts/security/run_all_patches.sh | 9 vars | 1 |
+| `run_all_patches_v2.sh` | LIKELY_ACTIVE | no | - | run_all_patches_v2.sh | 9 vars | 1 |
+| `run_all_patches_v2_fixed.sh` | LIKELY_ACTIVE | no | - | run_all_patches_v2_fixed.sh | 10 vars | 1 |
 | `scripts/enforce-ui-design-system.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 5 vars | 0 |
+| `scripts/install-mutation-tracer.sh` | ROLLBACK_TOOL — preserve | ⚠️ YES | ✓ | - | 18 vars | 0 |
 | `scripts/max-checker.sh` | UNVERIFIED — human review required | no | - | - | 20 vars | 0 |
+| `tools/scripts/enforce-singleton-engine.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 6 vars | 0 |
+| `update-collab-demo-hook.sh` | ROLLBACK_TOOL — preserve | no | ✓ | - | 14 vars | 0 |
 
 ### F.2 — Python Script Analysis
 
 | Script | Classification | Migration Logic | CLI | Destructive | Imports | Referenced By |
 |---|---|---|---|---|---|---|
-| `add_ticker.py` | UNVERIFIED — human review required | - | - | - | 1 | 0 |
+| `asi-audit-register.py` | CLI_TOOL — verify if still used | - | ✓ | - | 4 | 0 |
 | `audit_theme_config.py` | LIKELY_ACTIVE | - | ✓ | - | 4 | 1 |
-| `client/patch_vite_config.py` | LIKELY_ACTIVE | - | ✓ | - | 8 | 1 |
+| `fix-collab.py` | ONE_TIME_PATCH — verify if applied | - | - | - | 2 | 0 |
+| `fix-logging-corrected.py` | CLI_TOOL — verify if still used | - | ✓ | - | 4 | 0 |
+| `fix-logging-phase1.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 8 | 0 |
+| `fix_c01_esbuild_override.py` | CLI_TOOL — verify if still used | - | ✓ | - | 4 | 0 |
+| `fix_c01_esbuild_override_v2.py` | CLI_TOOL — verify if still used | - | ✓ | - | 4 | 0 |
+| `fix_c03_session_bypass.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 5 | 0 |
+| `fix_collab_AUDITED_v2_FIXED.py` | ONE_TIME_PATCH — verify if applied | - | - | - | 2 | 0 |
+| `fix_eslint_config.py` | CLI_TOOL — verify if still used | - | ✓ | - | 4 | 0 |
+| `fix_f10_prompt_injection.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 4 | 0 |
+| `fix_f10_prompt_injection_v2.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 4 | 0 |
+| `inspect-init-constants.py` | UNVERIFIED — human review required | - | - | - | 2 | 0 |
+| `lint-cleanup-imports.py` | LIKELY_ACTIVE | - | ✓ | - | 8 | 1 |
+| `patch_headers_v2.py` | ONE_TIME_PATCH — verify if applied | - | - | - | 0 | 0 |
 | `patch_remove_panel_borders.py` | LIKELY_ACTIVE | - | ✓ | - | 5 | 1 |
+| `patch_skills_13.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | - | - | 2 | 0 |
+| `pricing_audit_patch.py` | LIKELY_ACTIVE | - | ✓ | - | 7 | 1 |
+| `r3-hygiene-execute.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | ⚠️ YES | 8 | 1 |
 | `r3hygiene.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 12 | 0 |
 | `scripts/r3_master_fix.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 10 | 3 |
-| `scripts/relocate_dsp.py` | UNVERIFIED — human review required | - | - | ⚠️ YES | 1 | 0 |
 | `scripts/scripts_security_due_check_Version2.py` | UNVERIFIED — human review required | - | - | - | 3 | 0 |
 | `scripts/scripts_verify_artifacts_exist_Version2.py` | UNVERIFIED — human review required | - | - | - | 2 | 0 |
 | `services/ai-mix/src/ai_mix.py` | UNVERIFIED — human review required | - | - | - | 2 | 0 |
@@ -3518,7 +3087,6 @@ Run `file <name>` on each to determine type before any action.
 | `tools/patch_instrument_pagenav_import.py` | CLI_TOOL — verify if still used | - | ✓ | - | 5 | 0 |
 | `tools/r3_fix_store_barrel.py` | LIKELY_ACTIVE | - | ✓ | - | 4 | 1 |
 | `tools/r3_master_fix.py` | LIKELY_ACTIVE | - | ✓ | - | 6 | 3 |
-| `wire_patches_v5_to_v5_1.py` | MIGRATION — preserve until confirmed applied | ⚠️ YES | ✓ | - | 8 | 2 |
 
 ---
 ## Section G — Human Review Queue
@@ -3534,9 +3102,8 @@ The following directory names exist at multiple levels of the tree. Determine wh
 
 | Directory Name | Locations |
 |---|---|
-| `components` | `client/components`<br>`client/client/src/components`<br>`client/src/components`<br>`client/src/features/loopstation/components`<br>`client/src/pages/multi-track-panel/components` |
-| `hooks` | `client/hooks`<br>`client/client/hooks`<br>`client/client/src/hooks`<br>`client/src/hooks`<br>`client/src/audio/hooks`<br>`client/src/features/loopstation/hooks` |
-| `stores` | `client/stores`<br>`client/client/src/stores`<br>`client/src/stores` |
+| `components` | `client/src/components`<br>`client/src/features/loopstation/components`<br>`client/src/pages/multi-track-panel/components` |
+| `hooks` | `client/client/hooks`<br>`client/src/hooks`<br>`client/src/audio/hooks`<br>`client/src/features/loopstation/hooks`<br>`tools/src/hooks` |
 
 ### G.3 — Empty Directories
 
@@ -3545,9 +3112,12 @@ The following directory names exist at multiple levels of the tree. Determine wh
 | `client/client/src/tokens` | Confirm intentional placeholder or remove |
 | `client/src/features/DAW` | Confirm intentional placeholder or remove |
 | `client/src/hook` | Confirm intentional placeholder or remove |
-| `client/stores` | Confirm intentional placeholder or remove |
 | `logs` | Confirm intentional placeholder or remove |
+| `scripts/security` | Confirm intentional placeholder or remove |
 | `server/storage/loops` | Confirm intentional placeholder or remove |
+| `storage/loops` | Confirm intentional placeholder or remove |
+| `storage/projects` | Confirm intentional placeholder or remove |
+| `tools/scripts/_backup_phase4_1779763609` | Confirm intentional placeholder or remove |
 
 ### G.4 — Non-Standard Extension Files (.mythos, .ts6bak, .null., etc.)
 
@@ -3556,19 +3126,22 @@ The following directory names exist at multiple levels of the tree. Determine wh
 | `client/src/hooks/useSessionMetricsSync.ts.mythos` | `.mythos` | Explain purpose before any action |
 | `client/src/stores/session-metrics-store.ts.mythos` | `.mythos` | Explain purpose before any action |
 | `client/src/stores/session-store.ts.mythos` | `.mythos` | Explain purpose before any action |
-| `client/tsconfig.worklet.json.ts6bak` | `.ts6bak` | Explain purpose before any action |
 | `server/services/session-metrics.service.ts.mythos` | `.mythos` | Explain purpose before any action |
 
 ### G.5 — Scripts Flagged for Human Review
 
 | Script | Classification | Notes |
 |---|---|---|
-| `add_ticker.py` | UNVERIFIED — human review required | - |
-| `client/src/extract-wrapper.sh` | UNVERIFIED — human review required | - |
+| `c03_diagnostic.sh` | UNVERIFIED — human review required | - |
+| `client/fix-jsx-parent.sh` | ONE_TIME_PATCH — verify if applied | - |
 | `final-hygiene-fix.sh` | ONE_TIME_PATCH — verify if applied | - |
 | `find_api_auth.sh` | UNVERIFIED — human review required | - |
+| `fix-collab.py` | ONE_TIME_PATCH — verify if applied | - |
+| `fix_collab_AUDITED_v2_FIXED.py` | ONE_TIME_PATCH — verify if applied | - |
+| `inspect-init-constants.py` | UNVERIFIED — human review required | - |
+| `master_sync_drizzle_journal.sh` | UNVERIFIED — human review required | - |
+| `patch_headers_v2.py` | ONE_TIME_PATCH — verify if applied | - |
 | `scripts/max-checker.sh` | UNVERIFIED — human review required | - |
-| `scripts/relocate_dsp.py` | UNVERIFIED — human review required | DESTRUCTIVE OPS: {'os.remove'} |
 | `scripts/scripts_security_due_check_Version2.py` | UNVERIFIED — human review required | - |
 | `scripts/scripts_verify_artifacts_exist_Version2.py` | UNVERIFIED — human review required | - |
 | `services/ai-mix/src/ai_mix.py` | UNVERIFIED — human review required | - |

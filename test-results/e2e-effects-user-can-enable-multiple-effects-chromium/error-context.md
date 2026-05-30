@@ -12,13 +12,58 @@
 # Error details
 
 ```
-Error: browserType.launch: Executable doesn't exist at /home/r3v/.cache/ms-playwright/chromium_headless_shell-1223/chrome-linux/headless_shell
-╔════════════════════════════════════════════════════════════╗
-║ Looks like Playwright was just installed or updated.       ║
-║ Please run the following command to download new browsers: ║
-║                                                            ║
-║     pnpm exec playwright install                           ║
-║                                                            ║
-║ <3 Playwright Team                                         ║
-╚════════════════════════════════════════════════════════════╝
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-test=effect-reverb]')
+
+```
+
+# Page snapshot
+
+```yaml
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e5]
+      - heading "Application failed to respond" [level=1] [ref=e8]
+    - generic [ref=e9]:
+      - paragraph [ref=e10]: This error appears to be caused by the application.
+      - paragraph [ref=e11]:
+        - text: If this is your project, check out your
+        - link "deploy logs" [ref=e12] [cursor=pointer]:
+          - /url: https://docs.railway.com/guides/logs
+        - text: to see what went wrong. Refer to our
+        - link "docs on Fixing Common Errors" [ref=e13] [cursor=pointer]:
+          - /url: https://docs.railway.com/guides/fixing-common-errors
+        - text: for help, or reach out over our
+        - link "Help Station" [ref=e14] [cursor=pointer]:
+          - /url: https://station.railway.com
+        - text: .
+      - paragraph [ref=e15]: If you are a visitor, please contact the application owner or try again later.
+      - paragraph [ref=e17]:
+        - text: "Request ID:"
+        - text: EVHx91LTQXCLK8BhjVra_w
+      - link "Go to Railway" [ref=e19] [cursor=pointer]:
+        - /url: https://railway.com
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | test('user can enable multiple effects', async ({ page }) => {
+  4  |   await page.goto('/');
+  5  |   const effects = ['reverb', 'delay', 'eq'];
+  6  |   for (const effect of effects) {
+> 7  |     await page.click(`[data-test=effect-${effect}]`);
+     |                ^ Error: page.click: Test timeout of 30000ms exceeded.
+  8  |     await expect(page.locator(`[data-test=${effect}-active]`)).toBeVisible();
+  9  |   }
+  10 | });
+  11 | 
 ```
