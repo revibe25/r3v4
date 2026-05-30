@@ -22,7 +22,9 @@ COPY tsconfig.json ./
 COPY server/drizzle.config.ts ./
 COPY drizzle/ ./drizzle/
 
-# Build TypeScript → dist/ (must be AFTER all source is copied)
+# Build LLPTE packages first — server imports from their dist/
+RUN pnpm --filter "@llpte/*" build
+# Build server TypeScript → dist/
 RUN pnpm build
 RUN addgroup --system appgroup && \
     adduser --system --ingroup appgroup appuser && \
