@@ -1,34 +1,54 @@
 {
+  "include": [
+    "index.ts",
+    "server/**/*",
+    "shared/**/*"
+],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/*.test.ts",
+    "client/**/*",
+    "shared/dist",
+    "scripts/seed",
+    "**/seed/**",
+    "../vite.config.ts",
+    "vite.config.ts"
+  ],
   "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
     "lib": [
       "ES2020"
     ],
+    "jsx": "react-jsx",
+    "incremental": true,
+    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": false,
-    "noImplicitAny": true,
-    "paths": {}
+    "isolatedModules": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@llpte/llpte-signal": ["./packages/llpte-signal/src/index.ts"],
+      "@shared/*": [
+        "./shared/*"
+      ]
+    }
   },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "client",
-    "packages",
-    "scripts",
-    "config",
-    "vitest.config.ts",
-    "vitest.workspace.ts",
-    "playwright.config.ts",
-    "test-import.ts"
-  ]
+  "ts-node": {
+    "esm": true,
+    "experimentalEsm": true,
+    "compilerResolver": true
+  }
 }
