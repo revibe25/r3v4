@@ -31,7 +31,7 @@ COPY drizzle/  ./drizzle/
 RUN pnpm --filter "@llpte/*" build
 
 # Layer 4: build server
-RUN cd server && tsc --project ./tsconfig.json
+RUN pnpm --filter @r3vibe/server build
 
 # Layer 5: runtime hardening
 RUN addgroup --system appgroup && \
