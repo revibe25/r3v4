@@ -54,11 +54,12 @@
       ]
     },
     "declaration": false,
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "rootDir": ".."
   },
   "include": [
-    "./**/*.ts"
+    "./**/*.ts",
+    "../index.ts"
   ],
   "exclude": [
     "node_modules",
