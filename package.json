@@ -9,7 +9,7 @@
     "dev": "concurrently --kill-others-on-fail -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
     "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
     "dev:client": "wait-on tcp:3000 && pnpm --filter @r3vibe/client dev",
-    "build": "tsc",
+    "build": "tsc -p server/tsconfig.json",
     "start": "npx tsx index.ts",
     "seed": "tsx scripts/seed/index.ts",
     "lint:tokens": "tsx scripts/lint-design-tokens.ts",
@@ -92,5 +92,6 @@
   "optionalDependencies": {
     "bufferutil": "^4.1.0"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.0",
+  "type": "module"
 }
