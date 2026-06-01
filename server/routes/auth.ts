@@ -134,6 +134,12 @@ router.post("/register", async (req, res) => {
   const { email, username, password } = parsed.data;
 
   try {
+    // ── Hash password with bcrypt FIRST (§SES.8 timing-oracle fix) ───────────
+    // Always incur bcrypt cost before any uniqueness check so that taken-
+    // username / taken-email 409 responses are indistinguishable by timing
+    // from a successful registration (~300 ms at cost-factor 12 either way).
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
     // ── Check username uniqueness ─────────────────────────────────────────────
     const existingByUsername = await storage.getUserByUsername(username);
     if (existingByUsername) {
@@ -151,9 +157,6 @@ router.post("/register", async (req, res) => {
         });
       }
     }
-
-    // ── Hash password with bcrypt ─────────────────────────────────────────────
-    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
     // ── Create user in database ───────────────────────────────────────────────
     const user = await storage.createUser({
