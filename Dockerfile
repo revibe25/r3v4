@@ -28,7 +28,7 @@ COPY index.ts tsconfig.json ./
 COPY drizzle/  ./drizzle/
 
 # Layer 3: build LLPTE packages first (server imports from their dist/)
-RUN pnpm --filter "@llpte/*" build
+RUN pnpm --filter @llpte/llpte-signal build && pnpm --filter @llpte/llpte-core build && pnpm --filter @llpte/llpte-ai build && pnpm --filter @llpte/llpte-adapters build && pnpm --filter @llpte/llpte-execution build && pnpm --filter @llpte/llpte-transition-graph build
 
 # Layer 4: build server
 RUN pnpm --filter @r3vibe/server build

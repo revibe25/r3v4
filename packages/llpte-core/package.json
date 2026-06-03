@@ -1,57 +1,8 @@
 {
   "name": "@llpte/llpte-core",
-  "version": "0.1.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "build:watch": "tsc --project tsconfig.json --watch",
-    "test": "vitest run --config vitest.config.ts",
-    "test:watch": "vitest --config vitest.config.ts",
-    "typecheck": "tsc --noEmit --project tsconfig.json",
-    "bench": "tsx --tsconfig tsconfig.bench.json benchmarks/run.bench.ts",
-    "lint": "tsc --noEmit"
-  },
-  "dependencies": {
-    "eventemitter3": "^5.0.4",
-    "nanoid": "^5.1.9",
-    "zod": "^4.3.6"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^3.2.4"
-  },
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./types": {
-      "types": "./src/types/index.ts",
-      "default": "./src/types/index.ts"
-    },
-    "./engine": {
-      "types": "./src/engine/index.ts",
-      "default": "./src/engine/index.ts"
-    },
-    "./mixer": {
-      "types": "./src/mixer/index.ts",
-      "default": "./src/mixer/index.ts"
-    },
-    "./dj": {
-      "types": "./src/dj/index.ts",
-      "default": "./src/dj/index.ts"
-    },
-    "./effects": {
-      "types": "./src/effects/index.ts",
-      "default": "./src/effects/index.ts"
-    },
-    "./arrangement": {
-      "types": "./src/arrangement/index.ts",
-      "default": "./src/arrangement/index.ts"
-    }
-  }
+  "version": "1.0.0",
+  "description": "R3 LLPTE Core",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module"
 }

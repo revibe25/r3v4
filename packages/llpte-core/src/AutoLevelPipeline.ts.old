@@ -1,0 +1,12 @@
+// AutoLevelPipeline - Stubbed (missing @llpte packages)
+
+export class AutoLevelPipeline {
+  constructor() {}
+  process(data: any): void {
+    console.warn('AutoLevelPipeline disabled - missing @llpte dependencies');
+  }
+  destroy(): void {}
+}
+
+export type TrackAnalyzerConfig = any;
+export type TrackAudioNodes = any;
