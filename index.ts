@@ -100,7 +100,6 @@ import { mountAgentWS }                     from './server/ws-agent';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
 import { serveStatic } from './server/static';
-import { serveStatic } from './server/static';
 
 
 // ── Security & transport ──────────────────────────────────────────────────────
