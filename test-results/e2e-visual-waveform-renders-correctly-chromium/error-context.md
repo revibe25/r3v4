@@ -1,0 +1,290 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: e2e/visual.spec.ts >> waveform renders correctly
+- Location: tests/e2e/visual.spec.ts:3:1
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.setInputFiles: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-test=file-input]')
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation "Main navigation" [ref=e4]:
+    - generic [ref=e5]:
+      - link "Pricing" [ref=e6] [cursor=pointer]:
+        - /url: /pricing
+        - img [ref=e7]
+        - text: Pricing
+      - link "Login" [ref=e10] [cursor=pointer]:
+        - /url: /auth
+        - img [ref=e11]
+        - text: Login
+    - generic [ref=e15]:
+      - button "DARK" [ref=e16] [cursor=pointer]: DARK
+      - button "Settings (coming soon)" [ref=e18] [cursor=pointer]:
+        - img [ref=e19]
+  - generic [ref=e23]:
+    - img
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - img [ref=e27]
+          - text: R3 v4 — Subscription
+        - heading "Build your studio. Scale when you're ready." [level=1] [ref=e29]:
+          - text: Build your studio.
+          - text: Scale when you're ready.
+        - paragraph [ref=e30]: Professional DJ & DAW tools in the browser. No installs, no dongles.
+        - group "Billing cycle" [ref=e31]:
+          - button "Monthly" [ref=e32] [cursor=pointer]
+          - button "Switch to monthly billing" [ref=e33] [cursor=pointer]
+          - button "Annual" [pressed] [ref=e35] [cursor=pointer]
+          - generic [ref=e36]: Save ~20%
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - img [ref=e40]
+            - generic [ref=e43]: Audio latency
+          - generic [ref=e44]: < 3ms
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - img [ref=e47]
+            - generic [ref=e52]: Active studios
+          - generic [ref=e53]: 4K+
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - img [ref=e56]
+            - generic [ref=e58]: Uptime SLA
+          - generic [ref=e59]: 99.9%
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - img [ref=e62]
+            - generic [ref=e66]: Track length
+          - generic [ref=e67]: ∞
+      - generic [ref=e68]:
+        - article "Explorer" [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - img [ref=e73]
+              - generic [ref=e76]: Explorer
+            - paragraph [ref=e77]: Start your journey — free forever
+            - generic [ref=e78]: $0forever
+            - button "Start Free" [ref=e79] [cursor=pointer]:
+              - text: Start Free
+              - img [ref=e80]
+            - list [ref=e83]:
+              - listitem [ref=e84]:
+                - img [ref=e86]
+                - generic [ref=e88]: 10 track uploads
+              - listitem [ref=e89]:
+                - img [ref=e91]
+                - generic [ref=e93]: 1 saved project
+              - listitem [ref=e94]:
+                - img [ref=e96]
+                - generic [ref=e98]: 3 AI transitions / session
+              - listitem [ref=e99]:
+                - img [ref=e101]
+                - generic [ref=e103]: mp3 playback
+              - listitem [ref=e104]:
+                - img [ref=e106]
+                - generic [ref=e108]: Basic effects library
+              - listitem [ref=e109]:
+                - img [ref=e111]
+                - generic [ref=e113]: Community support
+              - listitem [ref=e114]:
+                - img [ref=e116]
+                - generic [ref=e118]: Energy curve analysis
+              - listitem [ref=e119]:
+                - img [ref=e121]
+                - generic [ref=e123]: AI mix dashboard
+              - listitem [ref=e124]:
+                - img [ref=e126]
+                - generic [ref=e128]: Cloud export
+              - listitem [ref=e129]:
+                - img [ref=e131]
+                - generic [ref=e133]: Stem separation
+        - article "Creator" [ref=e134]:
+          - generic [ref=e135]:
+            - generic [ref=e136]:
+              - img [ref=e138]
+              - generic [ref=e140]: Creator
+            - paragraph [ref=e141]: Your full creative studio
+            - generic [ref=e142]:
+              - generic [ref=e143]:
+                - generic [ref=e144]: $
+                - generic [ref=e145]: "8"
+                - generic [ref=e146]: /mo
+              - paragraph [ref=e147]: Billed $96/yr
+            - button "Start Creator Trial" [ref=e148] [cursor=pointer]:
+              - text: Start Creator Trial
+              - img [ref=e149]
+            - list [ref=e152]:
+              - listitem [ref=e153]:
+                - img [ref=e155]
+                - generic [ref=e157]: 200 track uploads
+              - listitem [ref=e158]:
+                - img [ref=e160]
+                - generic [ref=e162]: 25 saved projects
+              - listitem [ref=e163]:
+                - img [ref=e165]
+                - generic [ref=e167]: Unlimited AI transitions
+              - listitem [ref=e168]:
+                - img [ref=e170]
+                - generic [ref=e172]: mp3 / wav / flac playback
+              - listitem [ref=e173]:
+                - img [ref=e175]
+                - generic [ref=e177]: mp3 320k export
+              - listitem [ref=e178]:
+                - img [ref=e180]
+                - generic [ref=e182]: 60 min recording
+              - listitem [ref=e183]:
+                - img [ref=e185]
+                - generic [ref=e187]: Energy curve & key analysis
+              - listitem [ref=e188]:
+                - img [ref=e190]
+                - generic [ref=e192]: AI mix dashboard
+              - listitem [ref=e193]:
+                - img [ref=e195]
+                - generic [ref=e197]: Full effects + chain stacking
+              - listitem [ref=e198]:
+                - img [ref=e200]
+                - generic [ref=e202]: Email support (48h)
+        - article "Pro Artist" [ref=e203]:
+          - generic [ref=e204]:
+            - generic [ref=e205]:
+              - img [ref=e207]
+              - generic [ref=e211]: Pro Artist
+            - paragraph [ref=e212]: Perform without limits
+            - generic [ref=e213]:
+              - generic [ref=e214]:
+                - generic [ref=e215]: $
+                - generic [ref=e216]: "20"
+                - generic [ref=e217]: /mo
+              - paragraph [ref=e218]: Billed $240/yr
+            - button "Get Pro Artist" [ref=e219] [cursor=pointer]:
+              - text: Get Pro Artist
+              - img [ref=e220]
+            - list [ref=e223]:
+              - listitem [ref=e224]:
+                - img [ref=e226]
+                - generic [ref=e228]: Unlimited tracks & projects
+              - listitem [ref=e229]:
+                - img [ref=e231]
+                - generic [ref=e233]: Unlimited recording
+              - listitem [ref=e234]:
+                - img [ref=e236]
+                - generic [ref=e238]: All export formats (wav / flac / mp3)
+              - listitem [ref=e239]:
+                - img [ref=e241]
+                - generic [ref=e243]: AI automix mode
+              - listitem [ref=e244]:
+                - img [ref=e246]
+                - generic [ref=e248]: Transition graph editor
+              - listitem [ref=e249]:
+                - img [ref=e251]
+                - generic [ref=e253]: Stem separation
+              - listitem [ref=e254]:
+                - img [ref=e256]
+                - generic [ref=e258]: Rekordbox & Serato import
+              - listitem [ref=e259]:
+                - img [ref=e261]
+                - generic [ref=e263]: Project sharing
+              - listitem [ref=e264]:
+                - img [ref=e266]
+                - generic [ref=e268]: Priority sample library + early access
+              - listitem [ref=e269]:
+                - img [ref=e271]
+                - generic [ref=e273]: Email support (24h)
+      - generic [ref=e274]:
+        - generic [ref=e275]:
+          - img [ref=e276]
+          - generic [ref=e279]: Limits & Storage
+        - generic [ref=e280]:
+          - generic [ref=e281]:
+            - paragraph [ref=e282]: Explorer
+            - generic [ref=e283]:
+              - paragraph [ref=e284]: Uploads
+              - paragraph [ref=e285]: 10 tracks
+            - generic [ref=e286]:
+              - paragraph [ref=e287]: Projects
+              - paragraph [ref=e288]: "1"
+            - generic [ref=e289]:
+              - paragraph [ref=e290]: Stems
+              - paragraph [ref=e291]: —
+          - generic [ref=e292]:
+            - paragraph [ref=e293]: Creator
+            - generic [ref=e294]:
+              - paragraph [ref=e295]: Uploads
+              - paragraph [ref=e296]: 200 tracks
+            - generic [ref=e297]:
+              - paragraph [ref=e298]: Projects
+              - paragraph [ref=e299]: "25"
+            - generic [ref=e300]:
+              - paragraph [ref=e301]: Stems
+              - paragraph [ref=e302]: —
+          - generic [ref=e303]:
+            - paragraph [ref=e304]: Pro Artist
+            - generic [ref=e305]:
+              - paragraph [ref=e306]: Uploads
+              - paragraph [ref=e307]: Unlimited
+            - generic [ref=e308]:
+              - paragraph [ref=e309]: Projects
+              - paragraph [ref=e310]: Unlimited
+            - generic [ref=e311]:
+              - paragraph [ref=e312]: Stems
+              - paragraph [ref=e313]: ✓
+      - generic [ref=e314]:
+        - paragraph [ref=e315]: Frequently Asked Questions
+        - generic [ref=e316]:
+          - button "Can I use my own audio hardware?" [ref=e318] [cursor=pointer]:
+            - generic [ref=e319]: Can I use my own audio hardware?
+            - img [ref=e321]
+          - button "How does the AI mix assistant work?" [ref=e324] [cursor=pointer]:
+            - generic [ref=e325]: How does the AI mix assistant work?
+            - img [ref=e327]
+          - button "What happens to my projects if I downgrade?" [ref=e330] [cursor=pointer]:
+            - generic [ref=e331]: What happens to my projects if I downgrade?
+            - img [ref=e333]
+          - button "Can I import from Rekordbox or Serato?" [ref=e336] [cursor=pointer]:
+            - generic [ref=e337]: Can I import from Rekordbox or Serato?
+            - img [ref=e339]
+      - paragraph [ref=e341]: 14-day free trial on Creator & Pro Artist · No credit card required · Cancel anytime
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | test('waveform renders correctly', async ({ page }) => {
+  4  |   await page.goto('/');
+> 5  |   await page.setInputFiles('[data-test=file-input]', 'tests/e2e/fixtures/sample.wav');
+     |   ^ Error: page.setInputFiles: Test timeout of 30000ms exceeded.
+  6  |   await page.click('[data-test=play-button]');
+  7  |   await page.waitForSelector('[data-test=waveform]');
+  8  |   expect(await page.locator('[data-test=waveform]').screenshot()).toMatchSnapshot('waveform.png');
+  9  | });
+  10 | 
+  11 | test('effects panel renders correctly', async ({ page }) => {
+  12 |   await page.goto('/');
+  13 |   await page.click('[data-test=open-effects]');
+  14 |   expect(await page.locator('[data-test=effects-panel]').screenshot()).toMatchSnapshot('effects-panel.png');
+  15 | });
+  16 | 
+```

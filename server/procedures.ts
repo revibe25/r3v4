@@ -28,6 +28,7 @@ import { aiMixRouter }         from "./routers/aiMix.router";
 import { projectsRouter }      from "./routers/index";
 import { presetsRouter }       from "./routers/index";
 import { settingsRouter }      from "./routers/index";
+import { agentRouter }         from "./routers/agent";
 
 export const appRouter = router({
   sessions:       sessionsRouter,
@@ -48,6 +49,7 @@ export const appRouter = router({
   projects:     projectsRouter,
   presets:      presetsRouter,
   settings:     settingsRouter,
+  agent:        agentRouter,
 })
 
 export type AppRouter = typeof appRouter;

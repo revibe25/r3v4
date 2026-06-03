@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { analyzeAudio, clearAnalysisCache } from '../../llpte-signal/src/analyzer';
-import { LLPTETransitionGraph } from '../../llpte-transition-graph/src/transitionGraph';
-import { executeCrossfade, buildFullCrossfade } from '../../llpte-execution/src/crossfade';
+import { analyzeAudio, clearAnalysisCache } from '@llpte/llpte-signal';
+import { LLPTETransitionGraph } from '@llpte/llpte-transition-graph';
+import { executeCrossfade, buildFullCrossfade } from '@llpte/llpte-execution';
 import { PERFORMANCE_TARGETS, CROSSFADE_DURATION_MS } from '../src/constants';
-import type { RawAudioBuffer } from '../../llpte-signal/src/types';
+import type { RawAudioBuffer } from '@llpte/llpte-signal';
 
 function mockAudioParam(): AudioParam {
   return { value:1,defaultValue:1,minValue:0,maxValue:1,automationRate:'a-rate',

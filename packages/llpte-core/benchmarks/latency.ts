@@ -18,8 +18,8 @@ import {
   rankTransitions,
   DEFAULT_WEIGHTS,
   WEIGHT_PROFILES,
-} from '../../llpte-transition-graph/src/scoreModel';
-import type { TrackSignal, TransitionWeights } from '../../llpte-transition-graph/src/types';
+} from '@llpte/llpte-transition-graph';
+import type { TrackSignal, TransitionWeights } from '@llpte/llpte-transition-graph';
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 

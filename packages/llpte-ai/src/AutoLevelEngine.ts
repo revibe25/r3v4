@@ -20,7 +20,7 @@ import {
   LUFS_TARGET,
   CLIPPING_THRESHOLD_DBFS,
   linearTodBFS,
-} from '../../llpte-signal/src/analyzers/TrackAnalyzer';
+} from '@llpte/llpte-signal';
 
 // ── Internal-only type (not part of shared contract) ─────────
 

@@ -96,8 +96,11 @@ import loopProjectRoutes from './server/routes/loopProjects';
 import midiRoutes from './server/routes/midi';
 import { loopStationLimiter } from './server/middleware/rateLimit';
 import { attachCollabServer, getRoomStats } from './server/ws/collab';
+import { mountAgentWS }                     from './server/ws-agent';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
+import { serveStatic } from './server/static';
+import { serveStatic } from './server/static';
 
 
 // ── Security & transport ──────────────────────────────────────────────────────
@@ -177,6 +180,7 @@ async function main(): Promise<void> {
     
     try {
       attachCollabServer(httpServer);
+      mountAgentWS(httpServer);
     } catch (err) {
       logger.warn('Failed to attach collaboration server', {
         error: err instanceof Error ? err.message : String(err)
@@ -255,6 +259,8 @@ async function main(): Promise<void> {
       });
     });
 
+    serveStatic(app);
+    serveStatic(app);
     // ── 404 handler ────────────────────────────────────────────────────────
     app.use((_req: Request, res: Response) => {
       res.status(404).json({

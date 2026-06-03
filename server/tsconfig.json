@@ -13,6 +13,12 @@
       "@shared/*": [
         "../shared/*"
       ],
+      "@r3vibe/shared": [
+        "../shared/src/index.ts"
+      ],
+      "@r3vibe/shared/*": [
+        "../shared/src/*"
+      ],
       "multer-s3": [
         "./types/multer-s3.d.ts"
       ],

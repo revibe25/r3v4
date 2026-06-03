@@ -2,16 +2,24 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
+  testMatch: '**/*.spec.ts',
+  timeout: 30000,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: 1,
+  workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  
+
   use: {
-    baseURL: process.env.BASE_URL || 'https://r3v4-production.up.railway.app',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+  },
+
+  webServer: {
+    command: 'pnpm start',
+    url: 'http://127.0.0.1:3000/health',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
   },
 
   projects: [

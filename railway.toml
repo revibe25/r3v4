@@ -1,9 +1,7 @@
 [build]
-builder = "dockerfile"
+builder = "DOCKERFILE"
 
 [deploy]
-startCommand = "node dist/server/index.js"
+startCommand = "node server/dist/server/index.js"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-
-# Updated: 1780117783

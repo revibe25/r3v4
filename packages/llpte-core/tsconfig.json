@@ -1,42 +1,7 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "composite": true
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "dist",
-    "node_modules",
-    "src/__tests__",
-    "src/engine/workers",
-    "src/engine/engine/workers"
-  ],
-  "references": [
-    {
-      "path": "../llpte-signal"
-    },
-    {
-      "path": "../llpte-ai"
-    },
-    {
-      "path": "../llpte-execution"
-    }
-  ]
+    "rootDir": "./src"
+  }
 }

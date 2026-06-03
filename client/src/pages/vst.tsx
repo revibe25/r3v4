@@ -108,14 +108,15 @@ function FxChainStatusGrid() {
       display:             'grid',
       gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
       gap:                 1,
-      background:          T.border,
-      border:              `1px solid ${T.border}`,
+      background:          'rgba(0,0,0,0.4)',
+      border:              '1px solid rgba(255,255,255,0.04)',
+      borderRadius:        2,
       marginBottom:        24,
     }}>
       {FX_NODES.map(node => (
         <div key={node.id} style={{
-          background:  T.surface,
-          padding:     '10px 14px',
+          background:  'linear-gradient(135deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0) 100%)',
+          padding:     '12px 16px',
           borderLeft:  `3px solid ${STATUS_COLOR[node.status]}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -245,8 +246,8 @@ export default function VSTPage() {
       {/* Sub-header strip */}
       <div style={{
         padding:      '7px 20px',
-        borderBottom: `1px solid ${T.border}`,
-        background:   T.surface,
+        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        background:   'rgba(8,8,8,0.6)',
         display:      'flex',
         alignItems:   'center',
         gap:          16,
@@ -288,7 +289,7 @@ export default function VSTPage() {
         <SectionHeader num="01 —" label="FX Chain Status" tag="LLPTE WIRED" />
         <FxChainStatusGrid />
 
-        <div style={{ border: `1px solid ${T.border}`, background: T.surface }}>
+        <div style={{ border: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,0,0,0)', borderRadius: 2 }}>
           <VSTBrowser
             onPluginSelect={handlePluginSelect}
             channelId="master"

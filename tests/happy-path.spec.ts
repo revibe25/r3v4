@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'https://r3v4-production.up.railway.app';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 test.describe('R3 v4 Happy Path', () => {
   
@@ -16,9 +16,9 @@ test.describe('R3 v4 Happy Path', () => {
     expect(page.url()).toContain('r3v4');
   });
 
-  test('Root path returns 404', async ({ request }) => {
+  test('Root path serves SPA', async ({ request }) => {
     const response = await request.get(`${BASE_URL}/`);
-    expect(response.status()).toBe(404);
+    expect(response.status()).toBe(200);
   });
 
   test('Server stays up (10 rapid requests)', async ({ request }) => {
