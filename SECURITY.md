@@ -28,3 +28,17 @@
 Kept corrected version using usageDate (server-generated daily key).
 **Verification:** `pnpm tsc --noEmit` — no TS2451/TS2300 errors on aiTransitionUsage
 **Migration:** Schema cleanup only, no data migration needed
+
+## Pending Audit Surfaces
+
+The following surfaces are tracked in MYTHOS-SKILL-v2.md and scheduled for full audit review:
+
+| Surface | Status | Notes |
+|---|---|---|
+| `server/middleware/auth.ts` | Pending | Auth middleware audit — scheduled |
+| `server/base-procedures.ts` | Pending | tRPC base procedures audit — scheduled |
+| `server/routes/internal.ts` | Pending | Internal routes audit — scheduled |
+| `server/routers/adminRouter.ts` | Pending | Admin router audit — scheduled |
+| `ws/collab.ts` | Pending | WebSocket collab audit — scheduled |
+| `session-metrics.service.ts` | Pending | Session metrics service audit — scheduled |
+| `crypto.timingSafeEqual` | Pending | Timing-safe comparison usage audit — scheduled |
