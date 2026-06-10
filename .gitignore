@@ -104,3 +104,4 @@ client/MYTHOS_AUDIT.*.txt
 tests/e2e/.auth/
 !tests/e2e/.auth/.gitkeep
 node_modules/
+client/public/sounds/
