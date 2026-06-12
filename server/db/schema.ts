@@ -292,3 +292,21 @@ export const sessionMetrics = pgTable("session_metrics", {
   endedAt:          timestamp("ended_at"),
   createdAt:        timestamp("created_at").notNull().defaultNow(),
 });
+
+// ==================== DIAGNOSTIC FINDINGS ====================
+export const diagnosticFindings = pgTable("diagnostic_findings", {
+  id:        uuid("id").defaultRandom().primaryKey(),
+  severity:  text("severity").notNull(),  // 'info' | 'warn' | 'error' | 'critical'
+  category:  text("category").notNull(),
+  message:   text("message").notNull(),
+  fix:       text("fix"),
+  autoApply: boolean("auto_apply").default(false).notNull(),
+  sessionId: text("session_id"),
+  projectId: text("project_id"),
+  agentId:   text("agent_id").notNull(),
+  resolved:  boolean("resolved").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type DiagnosticFinding       = typeof diagnosticFindings.$inferSelect;
+export type InsertDiagnosticFinding = typeof diagnosticFindings.$inferInsert;
