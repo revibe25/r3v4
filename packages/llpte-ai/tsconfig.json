@@ -23,10 +23,7 @@
   ],
   "exclude": [
     "node_modules",
-    "dist",
-    "tests",
-    "benchmarks",
-    "src/**/*.test.ts"
+    "dist"
   ],
   "references": [
     {

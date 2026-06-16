@@ -118,9 +118,8 @@ export const projects = pgTable("projects", {
   filePath: text("file_path"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-
   state:     text('state').notNull().default('{}'),
-  deletedAt:  timestamp('deleted_at', { withTimezone: true }),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 }, (table) => ({
   userIdIdx: index("projects_user_id_idx").on(table.userId),
 }));
@@ -159,7 +158,7 @@ export const presets = pgTable("presets", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
   userIdIdx: index("presets_user_id_idx").on(table.userId),
-  typeIdx: index("presets_type_idx").on(table.type),
+  typeIdx:   index("presets_type_idx").on(table.type),
 }));
 
 // ==================== SETTINGS ====================
@@ -168,115 +167,88 @@ export const settings = pgTable("settings", {
   userId: varchar("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .unique(),
-  audioBufferSize: integer("audio_buffer_size").notNull().default(2048),
-  sampleRate: integer("sample_rate").notNull().default(48000),
-  bitDepth: integer("bit_depth").notNull().default(24),
-  midiEnabled: boolean("midi_enabled").notNull().default(true),
-  audioInputDevice: text("audio_input_device").notNull().default("default"),
+  audioBufferSize:   integer("audio_buffer_size").notNull().default(2048),
+  sampleRate:        integer("sample_rate").notNull().default(48000),
+  bitDepth:          integer("bit_depth").notNull().default(24),
+  midiEnabled:       boolean("midi_enabled").notNull().default(true),
+  audioInputDevice:  text("audio_input_device").notNull().default("default"),
   audioOutputDevice: text("audio_output_device").notNull().default("default"),
-  theme: text("theme").notNull().default("dark"),
-  autoSave: boolean("auto_save").notNull().default(true),
-  autoSaveInterval: integer("auto_save_interval").notNull().default(300000),
-  masterVolume: real("master_volume").notNull().default(0.8),
-  metronomeEnabled: boolean("metronome_enabled").notNull().default(false),
-  metronomeBpm: integer("metronome_bpm").notNull().default(120),
-  metronomeVolume: real("metronome_volume").notNull().default(0.5),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  theme:             text("theme").notNull().default("dark"),
+  autoSave:          boolean("auto_save").notNull().default(true),
+  autoSaveInterval:  integer("auto_save_interval").notNull().default(300000),
+  masterVolume:      real("master_volume").notNull().default(0.8),
+  metronomeEnabled:  boolean("metronome_enabled").notNull().default(false),
+  metronomeBpm:      integer("metronome_bpm").notNull().default(120),
+  metronomeVolume:   real("metronome_volume").notNull().default(0.5),
+  createdAt:         timestamp("created_at").notNull().defaultNow(),
+  updatedAt:         timestamp("updated_at").notNull().defaultNow(),
 });
 
 // ==================== MIDI MAPPINGS ====================
 export const midiMappings = pgTable("midi_mappings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  deviceId: text("device_id").notNull(),
-  deviceName: text("device_name").notNull(),
+  name:        text("name").notNull(),
+  deviceId:    text("device_id").notNull(),
+  deviceName:  text("device_name").notNull(),
   mappingData: jsonb("mapping_data").notNull().$type<Record<string, unknown>>(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  createdAt:   timestamp("created_at").notNull().defaultNow(),
+  updatedAt:   timestamp("updated_at").notNull().defaultNow(),
 }, (table) => ({
   userIdIdx: index("midi_mappings_user_id_idx").on(table.userId),
 }));
 
 // ==================== LEGACY TABLES ====================
 export const effectPresetsTable = pgTable("effect_presets", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  settings: json("settings").notNull(),
-  category: text("category").default("general"),
-  author: text("author"),
+  id:        uuid("id").defaultRandom().primaryKey(),
+  name:      text("name").notNull(),
+  settings:  json("settings").notNull(),
+  category:  text("category").default("general"),
+  author:    text("author"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const effectChainsTable = pgTable("effect_chains", {
-  id: text("id").primaryKey(),
-  name: text("name").notNull(),
-  nodes: text("nodes").notNull(),
+  id:        text("id").primaryKey(),
+  name:      text("name").notNull(),
+  nodes:     text("nodes").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const djCuesTable = pgTable("dj_cues", {
-  id: text("id").primaryKey(),
-  trackId: text("track_id").notNull(),
-  index: integer("index").notNull(),
+  id:       text("id").primaryKey(),
+  trackId:  text("track_id").notNull(),
+  index:    integer("index").notNull(),
   position: real("position").notNull(),
-  label: text("label"),
-  color: text("color"),
+  label:    text("label"),
+  color:    text("color"),
 });
 
 export const waveformEditsTable = pgTable("waveform_edits", {
-  id: text("id").primaryKey(),
-  sampleId: text("sample_id").notNull(),
-  editType: text("edit_type").notNull(),
-  params: text("params").notNull(),
+  id:        text("id").primaryKey(),
+  sampleId:  text("sample_id").notNull(),
+  editType:  text("edit_type").notNull(),
+  params:    text("params").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-
 export const aiDecisionLog = pgTable("ai_decision_log", {
-  id:                   text("id").primaryKey(),
-  sessionId:            text("session_id").notNull(),
-  nodeId:               text("node_id").notNull(),
-  actionType:           text("action_type").notNull(),
-  trackId:              text("track_id"),
-  inputConfidence:      real("input_confidence").notNull(),
-  displayedConfidence:  real("displayed_confidence").notNull(),
-  decision:             jsonb("decision").notNull(),
-  outcome:              text("outcome").notNull(),
-  latencyMs:            integer("latency_ms").notNull(),
-  timestamp:            text("timestamp").notNull(),
+  id:                  text("id").primaryKey(),
+  sessionId:           text("session_id").notNull(),
+  nodeId:              text("node_id").notNull(),
+  actionType:          text("action_type").notNull(),
+  trackId:             text("track_id"),
+  inputConfidence:     real("input_confidence").notNull(),
+  displayedConfidence: real("displayed_confidence").notNull(),
+  decision:            jsonb("decision").notNull(),
+  outcome:             text("outcome").notNull(),
+  latencyMs:           integer("latency_ms").notNull(),
+  timestamp:           text("timestamp").notNull(),
 });
 
-// ==================== TYPESCRIPT TYPES ====================
-export type User               = typeof users.$inferSelect;
-export type InsertUser         = typeof users.$inferInsert;
-export type Usage              = typeof usage.$inferSelect;
-export type InsertUsage        = typeof usage.$inferInsert;
-export type Session            = typeof sessions.$inferSelect;
-export type InsertSession      = typeof sessions.$inferInsert;
-export type Project            = typeof projects.$inferSelect;
-export type InsertProject      = typeof projects.$inferInsert;
-export type Sample             = typeof samples.$inferSelect;
-export type InsertSample       = typeof samples.$inferInsert;
-export type Preset             = typeof presets.$inferSelect;
-export type InsertPreset       = typeof presets.$inferInsert;
-export type Settings           = typeof settings.$inferSelect;
-export type InsertSettings     = typeof settings.$inferInsert;
-export type MidiMapping        = typeof midiMappings.$inferSelect;
-export type InsertMidiMapping  = typeof midiMappings.$inferInsert;
-export type AIDecisionLog      = typeof aiDecisionLog.$inferSelect;
-export type InsertAIDecisionLog = typeof aiDecisionLog.$inferInsert;
-
-// ==================== ZOD INSERT SCHEMAS ====================
-export const insertSessionSchema = createInsertSchema(sessions);
-export const insertProjectSchema = createInsertSchema(projects);
-export const insertSampleSchema  = createInsertSchema(samples);
-export const insertPresetSchema      = createInsertSchema(presets);
-export const insertAIDecisionSchema  = createInsertSchema(aiDecisionLog);
-
+// ==================== SESSION METRICS ====================
 export const sessionMetrics = pgTable("session_metrics", {
   id:               uuid("id").defaultRandom().primaryKey(),
   sessionId:        uuid("session_id").notNull(),
@@ -306,7 +278,38 @@ export const diagnosticFindings = pgTable("diagnostic_findings", {
   agentId:   text("agent_id").notNull(),
   resolved:  boolean("resolved").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  agentResolvedIdx: index("diag_agent_resolved_idx").on(table.agentId, table.resolved),
+  severityIdx:      index("diag_severity_idx").on(table.severity),
+  sessionIdx:       index("diag_session_id_idx").on(table.sessionId),
+}));
 
+// ==================== TYPESCRIPT TYPES ====================
+export type User                = typeof users.$inferSelect;
+export type InsertUser          = typeof users.$inferInsert;
+export type Usage               = typeof usage.$inferSelect;
+export type InsertUsage         = typeof usage.$inferInsert;
+export type Session             = typeof sessions.$inferSelect;
+export type InsertSession       = typeof sessions.$inferInsert;
+export type Project             = typeof projects.$inferSelect;
+export type InsertProject       = typeof projects.$inferInsert;
+export type Sample              = typeof samples.$inferSelect;
+export type InsertSample        = typeof samples.$inferInsert;
+export type Preset              = typeof presets.$inferSelect;
+export type InsertPreset        = typeof presets.$inferInsert;
+export type Settings            = typeof settings.$inferSelect;
+export type InsertSettings      = typeof settings.$inferInsert;
+export type MidiMapping         = typeof midiMappings.$inferSelect;
+export type InsertMidiMapping   = typeof midiMappings.$inferInsert;
+export type AIDecisionLog       = typeof aiDecisionLog.$inferSelect;
+export type InsertAIDecisionLog = typeof aiDecisionLog.$inferInsert;
 export type DiagnosticFinding       = typeof diagnosticFindings.$inferSelect;
 export type InsertDiagnosticFinding = typeof diagnosticFindings.$inferInsert;
+
+// ==================== ZOD INSERT SCHEMAS ====================
+export const insertSessionSchema             = createInsertSchema(sessions);
+export const insertProjectSchema             = createInsertSchema(projects);
+export const insertSampleSchema              = createInsertSchema(samples);
+export const insertPresetSchema              = createInsertSchema(presets);
+export const insertAIDecisionSchema          = createInsertSchema(aiDecisionLog);
+export const insertDiagnosticFindingSchema   = createInsertSchema(diagnosticFindings);
