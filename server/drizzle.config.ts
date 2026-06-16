@@ -9,4 +9,5 @@ export default defineConfig({
     ssl: false,
   },
   verbose: true,
+  tablesFilter: ["!agi_agents", "!metrics_kv"],
 });

@@ -258,13 +258,8 @@ async function main(): Promise<void> {
       });
     });
 
-    const env = process.env.NODE_ENV || 'development';
-    if (env === 'production') {
-      serveStatic(app);
-      serveStatic(app);
-    } else {
-      console.log('[dev] Static serving skipped - client dev server runs on port 5174');
-    }
+    serveStatic(app);
+    serveStatic(app);
     // ── 404 handler ────────────────────────────────────────────────────────
     app.use((_req: Request, res: Response) => {
       res.status(404).json({
