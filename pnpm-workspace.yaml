@@ -3,3 +3,9 @@ packages:
   - 'server'
   - 'client'
   - 'packages/*'
+
+pnpm:
+  overrides:
+    shell-quote: '>=1.8.4'
+    esbuild: '>=0.25.0'
+    qs: '>=6.15.2'
