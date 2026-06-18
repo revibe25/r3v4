@@ -1,34 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": [
-      "ES2020"
-    ],
-    "strict": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "declaration": false,
-    "noImplicitAny": true,
-    "paths": {}
-  },
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "client",
-    "packages",
-    "scripts",
-    "config",
-    "vitest.config.ts",
-    "vitest.workspace.ts",
-    "playwright.config.ts",
-    "test-import.ts"
-  ]
+    "baseUrl": ".",
+    "paths": {
+      "@r3vibe/shared": ["./shared/dist"],
+      "@r3vibe/shared/*": ["./shared/*"]
+    }
+  }
 }

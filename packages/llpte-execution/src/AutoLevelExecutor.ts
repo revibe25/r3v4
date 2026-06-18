@@ -13,7 +13,7 @@ import type {
   GainAdjustment,
   EQSuggestion,
   AutoLevelEvent,
-} from '../../../shared/auto-level.types';
+} from '@r3vibe/shared/auto-level.types';
 
 // ── Audio Node Registry ──────────────────────────────────────
 

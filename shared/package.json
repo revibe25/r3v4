@@ -2,21 +2,17 @@
   "name": "@r3vibe/shared",
   "version": "1.0.0",
   "type": "module",
-  "private": true,
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "drizzle-orm": "^0.45.2"
-  },
-  "devDependencies": {
-    "typescript": "^5.9.3"
+    "build": "tsc --project tsconfig.json"
   },
   "exports": {
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+    ".": "./dist/index.d.ts",
+    "./*": "./dist/*.d.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["./dist/*.d.ts"]
     }
-  }
+  },
+  "files": ["dist"]
 }

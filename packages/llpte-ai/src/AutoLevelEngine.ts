@@ -14,7 +14,7 @@ import type {
   EQBand,
   SpectralMaskingReport,
   TrackId,
-} from '../../../shared/auto-level.types';
+} from '@r3vibe/shared/auto-level.types';
 
 import {
   LUFS_TARGET,

@@ -105,3 +105,13 @@ tests/e2e/.auth/
 !tests/e2e/.auth/.gitkeep
 node_modules/
 client/public/sounds/
+# Diagnostic and temporary files
+dead-file-audit-*.md
+diagnostic-*.sh
+r3vibe-build-fix-*.sh
+r3vibe-consolidated-cleanup-*.sh
+package.json.patch
+Accept:
+GET
+Host:
+User-Agent:

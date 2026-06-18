@@ -1,4 +1,4 @@
-import type { AutoLevelEvent, AutoLevelSessionStats } from '../../../shared/auto-level.types';
+import type { AutoLevelEvent, AutoLevelSessionStats } from '@r3vibe/shared/auto-level.types';
 
 // PipelineNodeState - includes all LLPTE nodes + metrics
 export interface PipelineNodeState {

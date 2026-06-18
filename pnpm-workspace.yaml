@@ -1,23 +1,5 @@
 packages:
-  - client
-  - server
-  - shared
-  - packages/*
-  - services/*
-
-ignoredBuiltDependencies:
-  - bcrypt
-  - bufferutil
-  - esbuild
-
-pnpm:
-  overrides:
-    "@smithy/types": "4.13.1"
-    "drizzle-orm": "0.45.2"
-    "esbuild": ">=0.25.0"
-    "js-cookie": ">=3.0.7"
-    "picomatch": ">=4.0.4"
-    "postgres": "3.4.9"
-    "qs": ">=6.15.2"
-    "vite": ">=6.4.2"
-    "ws": ">=8.20.1"
+  - 'shared'
+  - 'server'
+  - 'client'
+  - 'packages/*'

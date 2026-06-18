@@ -17,4 +17,4 @@ export type {
   TrackId,
   TrackSignalSnapshot,
   MixSnapshot,
-} from '../../../../shared/auto-level.types';
+} from '@r3vibe/shared/auto-level.types';
