@@ -1,0 +1,150 @@
+R3 v4 Priority #1-4 Implementation Checklist
+=============================================
+Date: 2026-06-20 23:39:38
+User: r3v
+Host: penguin
+Directory: /home/r3v/Stable
+
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 1: SETUP (5 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:41] Step 1.1 - EXECUTING
+/home/r3v/Stable
+[23:39:41] Step 1.1 - SUCCESS
+
+[23:39:42] Step 1.3 - EXECUTING
+cp: cannot stat '/mnt/user-data/outputs/precheck.sh': No such file or directory
+[23:39:42] Step 1.3 - SUCCESS
+
+[23:39:43] Step 1.5 - EXECUTING
+chmod: cannot access 'r3v4-complete.sh': No such file or directory
+[23:39:43] Step 1.5 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 2: PRE-FLIGHT VALIDATION (2 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:44] Step 2.1 - EXECUTING
+./checklist.sh: line 58: ./precheck.sh: No such file or directory
+[23:39:44] Step 2.1 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 3: DRY RUN - SAFE PREVIEW (5 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:44] Step 3.1 - EXECUTING
+./checklist.sh: line 58: ./r3v4-complete.sh: No such file or directory
+[23:39:44] Step 3.1 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 4: EXECUTE IMPLEMENTATION (15 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:44] Step 4.1 - EXECUTING
+./checklist.sh: line 58: ./r3v4-complete.sh: No such file or directory
+[23:39:45] Step 4.1 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 5: POST-EXECUTION VALIDATION (2 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:45] Step 5.1 - EXECUTING
+./checklist.sh: line 58: ./postcheck.sh: No such file or directory
+[23:39:45] Step 5.1 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 6: MANUAL ACTIONS REQUIRED (5 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:45] Step 6.2 - EXECUTING
+R3_INTERNAL_URL=http://localhost:3001
+R3_INTERNAL_URL=http://localhost:3001
+[23:39:45] Step 6.2 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 7: BUILD & VERIFICATION (10 minutes)
+════════════════════════════════════════════════════════════════════════
+
+[23:39:45] Step 7.1 - EXECUTING
+Scope: all 11 workspace projects
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+Done in 5.9s using pnpm v10.33.0
+[23:39:53] Step 7.1 - SUCCESS
+
+[23:40:13] Step 7.2 - EXECUTING
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(34,17): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(40,34): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(89,36): error TS2304: Cannot find name 'AnalyserNode'.
+packages/llpte-signal/src/analyzers/TrackAnalyzer.ts(93,41): error TS2304: Cannot find name 'AnalyserNode'.
+[23:40:38] Step 7.2 - SUCCESS
+
+[23:41:16] Step 7.3 - EXECUTING
+
+> @r3vibe/server@1.0.0 build /home/r3v/Stable
+> pnpm --filter @llpte/llpte-signal build && pnpm --filter @llpte/llpte-core build && pnpm --filter @llpte/llpte-ai build && pnpm --filter @llpte/llpte-adapters build && pnpm --filter @llpte/llpte-execution build && pnpm --filter @llpte/llpte-transition-graph build && pnpm --filter @r3vibe/server build
+
+
+> @llpte/llpte-signal@0.1.0 build /home/r3v/Stable/packages/llpte-signal
+> tsc --project tsconfig.json
+
+src/analyzers/TrackAnalyzer.ts(13,8): error TS6305: Output file '/home/r3v/Stable/shared/dist/auto-level.types.d.ts' has not been built from source file '/home/r3v/Stable/shared/auto-level.types.ts'.
+src/analyzers/TrackAnalyzer.ts(14,38): error TS6305: Output file '/home/r3v/Stable/shared/dist/auto-level.types.d.ts' has not been built from source file '/home/r3v/Stable/shared/auto-level.types.ts'.
+src/types/signal.types.ts(20,8): error TS6305: Output file '/home/r3v/Stable/shared/dist/auto-level.types.d.ts' has not been built from source file '/home/r3v/Stable/shared/auto-level.types.ts'.
+/home/r3v/Stable/packages/llpte-signal:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @llpte/llpte-signal@0.1.0 build: `tsc --project tsconfig.json`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.
+[23:41:23] Step 7.3 - SUCCESS
+
+[23:41:37] Step 7.4 - EXECUTING
+[WebServer] npm warn Unknown env config "_jsr-registry". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown project config "override.js-cookie". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown project config "override.qs". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown project config "override.esbuild". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown global config "enable-pre-post-scripts". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown global config "resolution-mode". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown global config "store-dir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[WebServer] npm warn Unknown global config "network-concurrency". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+[WebServer] [deprecation] server/routers/aiMix.router.ts is loaded but unused. Use daw.ai.suggestions instead.
+
+[WebServer] /home/r3v/Stable/server/middleware/agentAuth.ts:10
+[WebServer]   throw new Error('AGENT_SERVICE_TOKEN env var is required but not set');
+[WebServer]         ^
+[WebServer] 
+[WebServer] Error: AGENT_SERVICE_TOKEN env var is required but not set
+[WebServer]     at <anonymous> (/home/r3v/Stable/server/middleware/agentAuth.ts:10:9)
+[WebServer]     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+[WebServer]     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+[WebServer]     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+[WebServer] 
+[WebServer] Node.js v22.22.2
+Error: Process from config.webServer was not able to start. Exit code: 1
+
+
+To open last HTML report run:
+[36m[39m
+[36m  pnpm exec playwright show-report[39m
+[36m[39m
+ ELIFECYCLE  Test failed. See above for more details.
+[23:41:54] Step 7.4 - SUCCESS
+
+════════════════════════════════════════════════════════════════════════
+  SECTION 8: FINAL STATUS & NEXT STEPS
+════════════════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════════════════
+FINAL STATUS
+════════════════════════════════════════════════════════════════════════
+Completed: 15 / 14 steps
+End Time: 2026-06-20 23:41:54
+
+If all steps completed successfully, ready for:
+  1. Final git commit
+  2. Railway deployment
+  3. Production verification
+

@@ -36,6 +36,7 @@ import { insertSampleSchema } from "./db/schema";
 import { storage } from "./storage";
 import { trpcAuth, requireUser } from "./middleware/auth";
 import authRouter from "./routes/auth";
+import { internalRouter } from "./routes/internal";
 import { uploadLimiter } from "./middleware/rateLimit";
 const uploadDir = path.join(process.cwd(), "uploads");
 const samplesDir = path.join(uploadDir, "samples");
@@ -137,5 +138,8 @@ export async function registerRoutes(httpServer, app) {
             res.status(500).json({ error: "Failed to analyze audio", detail: msg });
         }
     });
+    // -- INTERNAL ROUTES (Agi-Suite integration) --
+    app.use('/internal', internalRouter);
+    // -- INTERNAL ROUTES --
     return httpServer;
 }

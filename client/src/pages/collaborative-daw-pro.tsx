@@ -401,7 +401,7 @@ function CollabDAWProInner() {
       label:               s.description,
     })
   );
-  const [llpteLatency]                              = useState(10);
+  const llpteLatency = mixAI.latencyMs ?? 0;
 
   // ── WebSocket collab — wired to useCollabSocket + useDAWStore ──────────────
   const collab         = useCollabSocket();

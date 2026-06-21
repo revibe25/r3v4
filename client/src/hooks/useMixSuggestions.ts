@@ -180,6 +180,8 @@ export function useMixSuggestions() {
     rejectedIds,
     acceptRate,
     isLoading: status === "loading",
+    latencyMs,  // Real server-measured latency
+    latencyMs,  // Real server-measured latency
     analyse,
     accept,
     reject,

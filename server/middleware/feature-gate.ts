@@ -96,6 +96,9 @@ export const attachSubscription = middleware(async ({ ctx, next }) => {
 
 export function requireTier(required: SubscriptionTier) {
   return middleware(async ({ ctx, next }) => {
+    // ADMIN BYPASS: Admins bypass all tier checks
+    if (ctx.user?.is_admin) { return next(); }
+
     const tier: SubscriptionTier = ctx.subscription?.tier ?? 'explorer';
 
     if (!tierAtLeast(tier, required)) {
@@ -118,6 +121,9 @@ export function requireTier(required: SubscriptionTier) {
 
 export function requireFeature(feature: keyof TierFeatures) {
   return middleware(async ({ ctx, next }) => {
+    // ADMIN BYPASS: Admins bypass all tier checks
+    if (ctx.user?.is_admin) { return next(); }
+
     const tier: SubscriptionTier = ctx.subscription?.tier ?? 'explorer';
 
     if (!canUseFeature(tier, feature)) {

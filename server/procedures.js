@@ -28,6 +28,7 @@ import { projectsRouter } from "./routers/index";
 import { presetsRouter } from "./routers/index";
 import { settingsRouter } from "./routers/index";
 import { agentRouter } from "./routers/agent";
+import { diagnosticsRouter } from './routers/diagnostics';
 export const appRouter = router({
     sessions: sessionsRouter,
     sessionMetrics: sessionMetricsRouter,
@@ -46,4 +47,5 @@ export const appRouter = router({
     presets: presetsRouter,
     settings: settingsRouter,
     agent: agentRouter,
+    diagnostics: diagnosticsRouter,
 });

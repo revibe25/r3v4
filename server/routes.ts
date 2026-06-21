@@ -39,6 +39,7 @@ import { insertSampleSchema } from "./db/schema";
 import { storage } from "./storage";
 import { trpcAuth, requireUser } from "./middleware/auth";
 import authRouter from "./routes/auth";
+import { internalRouter } from "./routes/internal";
 import { uploadLimiter } from "./middleware/rateLimit";
 
 const uploadDir   = path.join(process.cwd(), "uploads");
@@ -151,6 +152,11 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       }
     },
   );
+
+  // -- INTERNAL ROUTES (Agi-Suite integration) --
+  app.use('/internal', internalRouter);
+
+  // -- INTERNAL ROUTES --
 
   return httpServer;
 }

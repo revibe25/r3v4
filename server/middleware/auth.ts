@@ -21,9 +21,9 @@ import type { SubscriptionTier } from '../../shared/subscription.types';
 export interface AuthPayload {
   id: string;
   username?: string;
-  /** undefined when user registered without email */
   email?: string;
   tier: SubscriptionTier;
+  is_admin?: boolean;
 }
 
 const RAW_SECRET = process.env.JWT_SECRET ?? '';
