@@ -291,19 +291,4 @@ export const sessionMetrics = pgTable("session_metrics", {
   startedAt:        timestamp("started_at").notNull().defaultNow(),
   endedAt:          timestamp("ended_at"),
   createdAt:        timestamp("created_at").notNull().defaultNow(),
-  "viewer",       // Read-only dashboards
-]);
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id).notNull(),
-  instanceId: varchar("instance_id", { length: 255 }).notNull(), // "penguin", "prod-1", etc.
-  role: teamRoleEnum("role").notNull().default("viewer"),
-  grantedAt: timestamp("granted_at").defaultNow(),
-  grantedBy: integer("granted_by").references(() => users.id),
-});
-
-export const permissions = pgTable("permissions", {
-  id: serial("id").primaryKey(),
-  role: teamRoleEnum("role").notNull(),
-  resource: varchar("resource", { length: 100 }).notNull(), // "instance", "project", "user", "billing"
-  action: varchar("action", { length: 100 }).notNull(),    // "create", "read", "update", "delete", "admin"
 });
