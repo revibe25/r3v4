@@ -74,6 +74,10 @@ const ProjectStateSchema = z.object({
     loopEnd: z.number().min(0),
 });
 function requireTier(ctx, minTier) {
+    // ✓ ADMIN BYPASS: Admins have unrestricted access to all features
+    if (ctx.user?.is_admin) {
+        return; // Skip all tier checks for admins
+    }
     const ORDER = ['explorer', 'creator', 'pro_artist'];
     const userTier = (ctx.subscription?.tier ?? 'explorer');
     if (ORDER.indexOf(userTier) < ORDER.indexOf(minTier)) {

@@ -77,6 +77,10 @@ export const attachSubscription = middleware(async ({ ctx, next }) => {
 });
 export function requireTier(required) {
     return middleware(async ({ ctx, next }) => {
+        // ADMIN BYPASS: Admins bypass all tier checks
+        if (ctx.user?.is_admin) {
+            return next();
+        }
         const tier = ctx.subscription?.tier ?? 'explorer';
         if (!tierAtLeast(tier, required)) {
             throw new TRPCError({
@@ -96,6 +100,10 @@ export function requireTier(required) {
 }
 export function requireFeature(feature) {
     return middleware(async ({ ctx, next }) => {
+        // ADMIN BYPASS: Admins bypass all tier checks
+        if (ctx.user?.is_admin) {
+            return next();
+        }
         const tier = ctx.subscription?.tier ?? 'explorer';
         if (!canUseFeature(tier, feature)) {
             const tiers = ['explorer', 'creator', 'pro_artist'];

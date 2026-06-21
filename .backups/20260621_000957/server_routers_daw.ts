@@ -85,12 +85,7 @@ const ProjectStateSchema = z.object({
 
 type Tier = 'explorer' | 'creator' | 'pro_artist';
 
-function requireTier(ctx: { user?: { is_admin?: boolean } | null; subscription?: { tier: string } | null }, minTier: Tier): void {
-  // ✓ ADMIN BYPASS: Admins have unrestricted access to all features
-  if (ctx.user?.is_admin) {
-    return;  // Skip all tier checks for admins
-  }
-
+function requireTier(ctx: { subscription?: { tier: string } | null }, minTier: Tier): void {
   const ORDER: Tier[] = ['explorer','creator','pro_artist'];
   const userTier  = (ctx.subscription?.tier ?? 'explorer') as Tier;
   if (ORDER.indexOf(userTier) < ORDER.indexOf(minTier)) {
@@ -100,6 +95,9 @@ function requireTier(ctx: { user?: { is_admin?: boolean } | null; subscription?:
     });
   }
 }
+
+// ── LLPTE helpers ─────────────────────────────────────────────────────────────
+
 interface LLPTESignal {
   rms:            number;
   peak:           number;

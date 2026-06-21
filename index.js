@@ -90,6 +90,7 @@ import { attachCollabServer, getRoomStats } from './server/ws/collab';
 import { mountAgentWS } from './server/ws-agent';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
+import { serveStatic } from './server/static';
 // ── Security & transport ──────────────────────────────────────────────────────
 app.use(helmet());
 // ✅ FIX #2: MINIMAL HEALTH CHECK
@@ -227,6 +228,8 @@ async function main() {
                 ts: new Date().toISOString(),
             });
         });
+        serveStatic(app);
+        serveStatic(app);
         // ── 404 handler ────────────────────────────────────────────────────────
         app.use((_req, res) => {
             res.status(404).json({
