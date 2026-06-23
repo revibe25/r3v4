@@ -3,7 +3,7 @@
     "index.ts",
     "server/**/*",
     "shared/**/*"
-],
+  ],
   "exclude": [
     "node_modules",
     "build",
@@ -24,7 +24,9 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "lib": [
-      "ES2020"
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
     ],
     "jsx": "react-jsx",
     "incremental": true,
@@ -40,7 +42,9 @@
       "node"
     ],
     "paths": {
-      "@llpte/llpte-signal": ["./packages/llpte-signal/src/index.ts"],
+      "@llpte/llpte-signal": [
+        "./packages/llpte-signal/src/index.ts"
+      ],
       "@shared/*": [
         "./shared/*"
       ]

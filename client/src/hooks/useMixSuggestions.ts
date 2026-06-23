@@ -40,6 +40,7 @@ export function useMixSuggestions() {
   const [status, setStatus]           = useState<SuggestionStatus>("idle");
   const [acceptedIds, setAcceptedIds] = useState<Set<number>>(new Set());
   const [rejectedIds, setRejectedIds] = useState<Set<number>>(new Set());
+  const [latencyMs, setLatencyMs]     = useState<number>(0);  // ← ADD THIS LINE
 
   // Parallel array — decisionIdsRef.current[idx] is the aiDecisionLog row id
   // for suggestions[idx]. null entries indicate the row write failed or the
@@ -65,7 +66,8 @@ export function useMixSuggestions() {
     onSuccess: async (data) => {
       const newSuggestions = data.suggestions as MixSuggestion[];
       // PRD §8.5 — server returns real measured latency for aiDecisionLog
-      const latencyMs      = (data as { latencyMs?: number }).latencyMs ?? 0;
+      const latency        = (data as { latencyMs?: number }).latencyMs ?? 0;
+      setLatencyMs(latency);  // ← UPDATE STATE INSTEAD
       setSuggestions(newSuggestions);
       setStatus("done");
       setAcceptedIds(new Set());
@@ -97,7 +99,7 @@ export function useMixSuggestions() {
                 confidence:  s.confidence,
               },
               outcome:    "ignored",
-              latencyMs:  latencyMs,
+              latencyMs:  latency,  // ← USE LOCAL VARIABLE
             })
             .catch((err: unknown) => {
               console.error("[useMixSuggestions] surface log failed:", err);
@@ -181,9 +183,8 @@ export function useMixSuggestions() {
     acceptRate,
     isLoading: status === "loading",
     latencyMs,  // Real server-measured latency
-    latencyMs,  // Real server-measured latency
-    analyse,
     accept,
     reject,
+    analyse,
   };
 }
