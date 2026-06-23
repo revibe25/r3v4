@@ -1,13 +1,14 @@
 {
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../shared" }
+  ],
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -16,24 +17,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "composite": true
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests",
-    "benchmarks",
-    "src/**/*.test.ts"
-  ],
-  "references": [
-    {
-      "path": "../../shared"
-    },
-    {
-      "path": "../llpte-signal"
+    "types": [],
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
     }
-  ]
+  }
 }

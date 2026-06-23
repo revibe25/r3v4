@@ -14,7 +14,7 @@ import type {
   EQBand,
   SpectralMaskingReport,
   TrackId,
-} from '../../../shared/auto-level.types';
+} from '@shared/auto-level.types';
 
 import {
   LUFS_TARGET,

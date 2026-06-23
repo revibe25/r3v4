@@ -7,7 +7,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AutoLevelEngine } from './AutoLevelEngine';
-import type { MixSnapshot, TrackSignalSnapshot } from '../../../../shared/auto-level.types';
+import type { MixSnapshot, TrackSignalSnapshot } from '@shared/auto-level.types';
 
 // ── Helpers ────────────────────────────────────────────────────
 

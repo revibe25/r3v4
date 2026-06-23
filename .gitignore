@@ -105,3 +105,15 @@ tests/e2e/.auth/
 !tests/e2e/.auth/.gitkeep
 node_modules/
 client/public/sounds/
+
+# Server compiled output
+server/**/*.js
+server/**/*.js.map
+server/**/*.d.ts
+server/**/*.d.ts.map
+!server/db/migrations/*.js
+shared/types/*.js
+shared/types/*.js.map
+shared/types/*.d.ts
+shared/types/*.d.ts.map
+MYTHOS_DEFENSE*.md

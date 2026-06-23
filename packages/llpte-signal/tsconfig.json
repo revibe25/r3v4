@@ -18,8 +18,15 @@
     "outDir": "./dist",
     "types": [],
     "composite": true,
-    "rootDir": "./src"
-  },
+  "include": ["src/**/*"],  // ✓ Only compile this package's source
+    "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    }
+  }
+},
   "include": [
     "src/**/*"
   ],
@@ -28,10 +35,5 @@
     "dist",
     "tests",
     "benchmarks"
-  ],
-  "references": [
-    {
-      "path": "../../shared"
-    }
   ]
 }

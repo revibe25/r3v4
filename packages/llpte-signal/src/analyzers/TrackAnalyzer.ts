@@ -10,8 +10,8 @@ import type {
   MixSnapshot,
   TrackSignalSnapshot,
   TrackId,
-} from '../../../../shared/auto-level.types';
-import { AUTO_LEVEL_CONSTANTS } from '../../../../shared/auto-level.types';
+} from '@shared/auto-level.types';
+import { AUTO_LEVEL_CONSTANTS } from '@shared/auto-level.types';
 
 // ── Re-exported constants (consumed by AutoLevelEngine) ──────
 

@@ -1,4 +1,9 @@
 {
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../../shared" }
+  ],
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
@@ -12,9 +17,11 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "composite": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "benchmarks"]
+    "types": [],
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    }
+  }
 }
