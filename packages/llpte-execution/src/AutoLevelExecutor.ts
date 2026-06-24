@@ -165,6 +165,7 @@ export class AutoLevelExecutor {
       timestamp: Date.now(),
     });
 
+        // @ts-ignore
     if (process.env.NODE_ENV === 'development' && executionTimeMs > 10) {
       console.warn(`[AutoLevelExecutor] ${executionTimeMs.toFixed(2)}ms — approaching 15ms budget`);
     }

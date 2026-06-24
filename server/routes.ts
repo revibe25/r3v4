@@ -122,7 +122,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
           return res.status(400).json({ error: "Invalid sample data", details: parsed.error.issues });
         }
 
-        const sample = await storage.createSample(parsed.data);
+    const sample = await storage.createSample({ ...parsed.data, waveformData: parsed.data.waveformData ? JSON.parse(JSON.stringify(parsed.data.waveformData)) : null });
         res.status(201).json(sample);
       } catch (error) {
         logger.error("Error uploading sample:", error as Record<string, unknown>);

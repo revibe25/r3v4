@@ -1,14 +1,25 @@
 {
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "references": [
-    { "path": "../../shared" }
+    {
+      "path": "../../shared"
+    }
   ],
   "compilerOptions": {
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -17,11 +28,15 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "types": [],
+    "types": [
+      "node"
+    ],
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": [
+        "../../shared/*"
+      ]
     }
   }
 }
