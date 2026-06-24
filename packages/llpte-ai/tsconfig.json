@@ -9,6 +9,12 @@
   "references": [
     {
       "path": "../../shared"
+    },
+    {
+      "path": "../llpte-signal"
+    },
+    {
+      "path": "../llpte-core"
     }
   ],
   "compilerOptions": {
