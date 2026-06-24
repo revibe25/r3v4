@@ -1,21 +1,23 @@
-/**
- * vitest.config.ts — workspace root
- *
- * Coverage thresholds enforce quality on the packages that matter most:
- * the llpte-* pipeline engine and server services. UI components are excluded
- * (they're hard to test in isolation and low-risk to change).
- *
- * Run:
- *   pnpm vitest run --coverage          # all packages
- *   pnpm vitest run --coverage --watch  # watch mode
- */
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@llpte/llpte-core': path.resolve(__dirname, './packages/llpte-core/src'),
+      '@llpte/llpte-signal': path.resolve(__dirname, './packages/llpte-signal/src'),
+      '@llpte/llpte-ai': path.resolve(__dirname, './packages/llpte-ai/src'),
+      '@llpte/llpte-adapters': path.resolve(__dirname, './packages/llpte-adapters/src'),
+      '@llpte/llpte-execution': path.resolve(__dirname, './packages/llpte-execution/src'),
+      '@llpte/llpte-transition-graph': path.resolve(__dirname, './packages/llpte-transition-graph/src'),
+      '@r3vibe/shared': path.resolve(__dirname, './shared'),
+    },
+  },
   test: {
     include: [
       'packages/*/tests/**/*.test.ts',
-      'packages/*/src/**/*.test.ts', 'apps/*/src/**/*.test.ts',
+      'packages/*/src/**/*.test.ts',
+      'apps/*/src/**/*.test.ts',
     ],
     exclude: [
       '**/node_modules/**',
@@ -38,15 +40,10 @@ export default defineConfig({
         'packages/llpte-signal/src/**',
         'packages/llpte-transition-graph/src/**',
         'packages/llpte-adapters/src/**',
-        'packages/llpte-ai/src/**',
       ],
       exclude: [
-        '**/*.types.ts',
-        '**/*.d.ts',
-        '**/dist/**',
-        '**/node_modules/**',
-        '**/benchmarks/**',
-        '**/src/**/index.ts',
+        'packages/*/src/**/*.test.ts',
+        'node_modules/**',
       ],
     },
   },
