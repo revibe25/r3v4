@@ -3,41 +3,17 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
     "paths": {
-      "@shared/*": [
-        "../../shared/*"
-      ],
-      "@llpte/*": [
-        "../*"
-      ]
-    },
-    "composite": true
+      "@shared/*": ["../../shared/*"],
+      "@llpte/*": ["../*/src"]
+    }
   },
   "references": [
-    {
-      "path": "../../shared"
-    },
-    {
-      "path": "../llpte-signal"
-    },
-    {
-      "path": "../llpte-core"
-    },
-    {
-      "path": "../llpte-adapters"
-    },
-    {
-      "path": "../llpte-execution"
-    },
-    {
-      "path": "../llpte-transition-graph"
-    }
+    { "path": "../../shared" }
   ],
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
