@@ -4,18 +4,40 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@shared/*": ["../../shared/*"],
-      "@llpte/*": ["../*"]
-    }
+      "@shared/*": [
+        "../../shared/*"
+      ],
+      "@llpte/*": [
+        "../*"
+      ]
+    },
+    "composite": true
   },
   "references": [
-    { "path": "../../shared" },
-    { "path": "../llpte-signal" },
-    { "path": "../llpte-core" },
-    { "path": "../llpte-adapters" },
-    { "path": "../llpte-execution" },
-    { "path": "../llpte-transition-graph" }
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../llpte-signal"
+    },
+    {
+      "path": "../llpte-core"
+    },
+    {
+      "path": "../llpte-adapters"
+    },
+    {
+      "path": "../llpte-execution"
+    },
+    {
+      "path": "../llpte-transition-graph"
+    }
   ],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
