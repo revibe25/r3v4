@@ -1,27 +1,21 @@
 {
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../shared" }
-  ],
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "types": [],
-    "composite": true,
-    "baseUrl": ".",
+    "rootDir": "./src",
     "paths": {
-      "@shared/*": ["../../shared/*"]
+      "@shared/*": ["../../shared/*"],
+      "@llpte/*": ["../*"]
     }
-  }
+  },
+  "references": [
+    { "path": "../../shared" },
+    { "path": "../llpte-signal" },
+    { "path": "../llpte-core" },
+    { "path": "../llpte-adapters" },
+    { "path": "../llpte-execution" },
+    { "path": "../llpte-transition-graph" }
+  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
