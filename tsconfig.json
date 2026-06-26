@@ -30,7 +30,7 @@
     ],
     "jsx": "react-jsx",
     "incremental": true,
-    "tsBuildInfoFile": "./node_modules/typescript/tsbuildinfo",
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
