@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
@@ -10,7 +13,6 @@
   },
   "references": [
     { "path": "../../shared" },
-    { "path": "../llpte-signal" },
     { "path": "../llpte-core" },
     { "path": "../llpte-adapters" },
     { "path": "../llpte-execution" },
