@@ -38,7 +38,7 @@ export type {
   NewSubscription,
   StripeEvent,
   AiTransitionUsage,
-} from '../../shared/schema-subscription';
+} from '@shared/schema-subscription';
 
 // ── Re-export canonical subscription TABLE DEFINITIONS so drizzle-kit sees them ─
 export {
@@ -48,7 +48,7 @@ export {
   subscriptions,
   stripeEvents,
   aiTransitionUsage,
-} from '../../shared/schema-subscription';
+} from '@shared/schema-subscription';
 
 // ==================== USERS ====================
 export const users = pgTable("users", {

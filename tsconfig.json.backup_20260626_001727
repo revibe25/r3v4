@@ -1,5 +1,24 @@
 {
+  "include": [
+    "index.ts",
+    "server/**/*",
+    "shared/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    "dist",
+    "**/*.test.ts",
+    "client/**/*",
+    "shared/dist",
+    "scripts/seed",
+    "**/seed/**",
+    "../vite.config.ts",
+    "vite.config.ts"
+  ],
   "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -11,6 +30,7 @@
     ],
     "jsx": "react-jsx",
     "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -34,46 +54,5 @@
     "esm": true,
     "experimentalEsm": true,
     "compilerResolver": true
-  },
-  "references": [
-    {
-      "path": "packages/llpte-core"
-    },
-    {
-      "path": "packages/llpte-signal"
-    },
-    {
-      "path": "packages/llpte-ai"
-    },
-    {
-      "path": "packages/llpte-execution"
-    },
-    {
-      "path": "packages/llpte-adapters"
-    },
-    {
-      "path": "packages/llpte-transition-graph"
-    },
-    {
-      "path": "server"
-    },
-    {
-      "path": "shared"
-    }
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "**/dist",
-    "**/dist/**/*",
-    "packages/*/dist",
-    "packages/*/dist/**/*",
-    "server/dist",
-    "server/dist/**/*",
-    "shared/dist",
-    "shared/dist/**/*",
-    "**/*.test.ts",
-    "**/node_modules/**/*"
-  ]
+  }
 }

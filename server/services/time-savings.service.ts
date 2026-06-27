@@ -1,4 +1,4 @@
-import type { TimeSavingsBreakdown } from "../../shared/session-metrics.types";
+import type { TimeSavingsBreakdown } from "@shared/session-metrics.types";
 
 /**
  * Estimates time saved by R3 automation features per session.

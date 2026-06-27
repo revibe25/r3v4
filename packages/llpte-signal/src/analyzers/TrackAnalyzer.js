@@ -5,7 +5,7 @@
 // Produces TrackSignalSnapshot each frame for AutoLevelEngine.
 // Also exports constants consumed by AutoLevelEngine.
 // ─────────────────────────────────────────────────────────────
-import { AUTO_LEVEL_CONSTANTS } from '../../../../shared/auto-level.types';
+import { AUTO_LEVEL_CONSTANTS } from '@shared/auto-level.types';
 // ── Re-exported constants (consumed by AutoLevelEngine) ──────
 export const LUFS_TARGET = AUTO_LEVEL_CONSTANTS.TARGET_LUFS;
 export const CLIPPING_THRESHOLD_DBFS = AUTO_LEVEL_CONSTANTS.CLIPPING_THRESHOLD_DBTP;

@@ -1,0 +1,97 @@
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90m/home/r3v/Stable[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m packages/llpte-execution/tests/crossfade.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 43[2mms[22m[39m
+[90mstderr[2m | packages/llpte-ai/tests/ai.test.ts[2m > [22m[2mgetAIMixSuggestion[2m > [22m[2mfallback on failure[2m > [22m[2mreturns fallback when fetch throws
+[22m[39m[llpte-ai] AI service unavailable, using fallback: Error: network error
+    at [90m/home/r3v/Stable/[39mpackages/llpte-ai/tests/ai.test.ts:72:42
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+[90mstderr[2m | packages/llpte-ai/tests/ai.test.ts[2m > [22m[2mgetAIMixSuggestion[2m > [22m[2mfallback on failure[2m > [22m[2mreturns fallback on non-ok HTTP status
+[22m[39m[llpte-ai] AI service unavailable, using fallback: Error: AI service returned 503: Service Unavailable
+    at getAIMixSuggestion [90m(/home/r3v/Stable/[39mpackages/llpte-ai/src/aiAdapter.ts:54:13[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+    at [90m/home/r3v/Stable/[39mpackages/llpte-ai/tests/ai.test.ts:80:22
+
+[90mstderr[2m | packages/llpte-ai/tests/ai.test.ts[2m > [22m[2mgetAIMixSuggestion[2m > [22m[2mfallback on failure[2m > [22m[2mfallback durationMs is a positive number
+[22m[39m[llpte-ai] AI service unavailable, using fallback: Error: offline
+    at [90m/home/r3v/Stable/[39mpackages/llpte-ai/tests/ai.test.ts:84:42
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+[90mstderr[2m | packages/llpte-ai/tests/ai.test.ts[2m > [22m[2mgetAIMixSuggestion[2m > [22m[2mfallback on failure[2m > [22m[2mfallback curve is a non-empty string
+[22m[39m[llpte-ai] AI service unavailable, using fallback: Error: offline
+    at [90m/home/r3v/Stable/[39mpackages/llpte-ai/tests/ai.test.ts:89:42
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:302:11
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:1903:26
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2323:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2272:10[90m)[39m
+    at [90mfile:///home/r3v/Stable/[39mnode_modules/[4m.pnpm[24m/@vitest+runner@4.1.9/node_modules/[4m@vitest/runner[24m/dist/chunk-artifact.js:2955:64
+
+ [32m✓[39m packages/llpte-transition-graph/tests/transitionGraph.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 56[2mms[22m[39m
+ [32m✓[39m packages/llpte-ai/tests/ai.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 182[2mms[22m[39m
+ [32m✓[39m packages/llpte-transition-graph/tests/scoreModel.test.ts [2m([22m[2m19 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+ [31m❯[39m packages/llpte-ai/src/AutoLevelEngine.test.ts [2m([22m[2m18 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 340[2mms[22m[39m
+       [32m✓[39m detects clipping when truePeak > -0.5 dBFS[32m 54[2mms[22m[39m
+       [32m✓[39m emergency cuts gain on clipping track with high confidence[32m 6[2mms[22m[39m
+       [32m✓[39m clipping track appears in clippingAlerts[32m 7[2mms[22m[39m
+       [32m✓[39m suggests gain boost for quiet tracks[32m 4[2mms[22m[39m
+       [32m✓[39m suggests gain cut for loud tracks[32m 4[2mms[22m[39m
+       [32m✓[39m skips silent tracks (LUFS below -60)[32m 4[2mms[22m[39m
+       [32m✓[39m does not boost beyond max gain limit[32m 3[2mms[22m[39m
+       [32m✓[39m does not cut below max gain cut limit[32m 4[2mms[22m[39m
+       [32m✓[39m detects masking when two tracks have high energy in same band[32m 6[2mms[22m[39m
+       [32m✓[39m does not flag masking for tracks with different spectral content[32m 6[2mms[22m[39m
+       [32m✓[39m generates EQ suggestions for masked tracks[32m 5[2mms[22m[39m
+       [32m✓[39m completes analysis without error for large RMS spread[32m 11[2mms[22m[39m
+       [32m✓[39m returns valid recommendation for balanced mixes[32m 12[2mms[22m[39m
+[31m       [31m×[31m completes analysis in ≤15ms for 8 tracks[39m[32m 182[2mms[22m[39m
+       [32m✓[39m reports processing time in the recommendation[32m 4[2mms[22m[39m
+       [32m✓[39m returns high confidence (>0.9) for clipping emergency cuts[32m 3[2mms[22m[39m
+       [32m✓[39m filters out suggestions below minimum confidence[32m 2[2mms[22m[39m
+       [32m✓[39m reset() clears smoothed gain state without throwing[32m 4[2mms[22m[39m
+ [32m✓[39m packages/llpte-core/tests/pipeline.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 496[2mms[22m[39m
+ [32m✓[39m packages/llpte-signal/tests/analyzer.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 1284[2mms[22m[39m
+     [33m[2m✓[22m[39m produces a valid Camelot key string [33m 368[2mms[22m[39m
+ [32m✓[39m packages/llpte-transition-graph/src/__tests__/scoreModel.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m packages/llpte-ai/src/AutoLevelEngine.test.ts[2m > [22mAutoLevelEngine[2m > [22minference performance[2m > [22mcompletes analysis in ≤15ms for 8 tracks
+[31m[1mAssertionError[22m: expected 62.68530799999985 to be less than 15[39m
+[36m [2m❯[22m packages/llpte-ai/src/AutoLevelEngine.test.ts:[2m252:23[22m[39m
+    [90m250|[39m       [35mconst[39m elapsed  [33m=[39m performance[33m.[39m[34mnow[39m() [33m-[39m start[33m;[39m
+    [90m251|[39m
+    [90m252|[39m       [34mexpect[39m(elapsed)[33m.[39m[34mtoBeLessThan[39m([34m15[39m)[33m;[39m
+    [90m   |[39m                       [31m^[39m
+    [90m253|[39m       [34mexpect[39m(rec[33m.[39mprocessingTimeMs)[33m.[39m[34mtoBeGreaterThanOrEqual[39m([34m0[39m)[33m;[39m
+    [90m254|[39m     })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m7 passed[39m[22m[90m (8)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m108 passed[39m[22m[90m (109)[39m
+[2m   Start at [22m 23:29:47
+[2m   Duration [22m 2.80s[2m (transform 2.01s, setup 0ms, import 3.42s, tests 2.49s, environment 3ms)[22m
+

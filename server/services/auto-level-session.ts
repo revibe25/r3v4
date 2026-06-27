@@ -1,7 +1,7 @@
 // ============================================================
 // AutoLevelSession — server-side session stats persistence
 // ============================================================
-import type { SessionStats } from "../../shared/auto-level.types";
+import type { SessionStats } from "@shared/auto-level.types";
 
 interface StoredSession extends SessionStats {
   endTime?:     number;

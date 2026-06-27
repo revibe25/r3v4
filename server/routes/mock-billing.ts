@@ -27,14 +27,14 @@ import {
   renderPortalPage,
 } from '../services/mock-billing';
 import { db }           from '../db';
-import { subscriptions } from '../../shared/schema-subscription';
+import { subscriptions } from '@shared/schema-subscription';
 import { eq }           from 'drizzle-orm';
 import type {
   SubscriptionTier,
-  BillingCycle} from '../../shared/subscription.types';
+  BillingCycle} from '@shared/subscription.types';
 import {
   TIER_DEFINITIONS,
-} from '../../shared/subscription.types';
+} from '@shared/subscription.types';
 
 const router = express.Router();
 

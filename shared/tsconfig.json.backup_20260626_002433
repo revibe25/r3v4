@@ -3,16 +3,15 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
-    "lib": [
-      "ES2020"
-    ],
-    "rootDir": "./",
+    "lib": ["ES2020"],
+    "outDir": "dist",
+    "rootDir": ".",
     "strict": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "noEmit": false,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "composite": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -24,7 +23,7 @@
   "exclude": [
     "dist",
     "node_modules",
+    "drizzle.config.ts",
     "types/**/*"
-  ],
-  "extends": "../tsconfig.json"
+  ]
 }

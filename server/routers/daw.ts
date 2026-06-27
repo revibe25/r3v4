@@ -18,7 +18,7 @@ import { TRPCError } from '@trpc/server';
 import { router }              from '../trpc';
 import { protectedProcedure } from '../base-procedures';
 import { db } from '../db';
-import { projects } from '../../shared/schema';
+import { projects } from '@shared/schema';
 import { eq, and, desc, isNull } from 'drizzle-orm';
 
 // ── Zod schemas ───────────────────────────────────────────────────────────────

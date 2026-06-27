@@ -1,2 +1,2 @@
-// Worker implementations — future use
+// Worker implementations — reserved for future use
 export {};
