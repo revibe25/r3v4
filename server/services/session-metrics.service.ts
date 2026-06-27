@@ -1,7 +1,7 @@
 import { randomUUID }   from "crypto";
 import { eq }           from "drizzle-orm";
 import { db } from "../db";
-import { sessionMetrics } from "../../shared/schema-session-metrics";
+import { sessionMetrics } from "@shared/schema-session-metrics";
 import { calculateTimeSavings } from "./time-savings.service";
 import { aiDecisionLog }         from "../db/schema";
 import type { InsertAIDecisionLog } from "../db/schema";
@@ -9,7 +9,7 @@ import type {
   SessionStartInput,
   SessionStopInput,
   SessionMetricsSummary,
-} from "../../shared/session-metrics.types";
+} from "@shared/session-metrics.types";
 
 export async function startSession(
   userId: string,

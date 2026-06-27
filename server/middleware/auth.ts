@@ -16,7 +16,7 @@
 import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../lib/logger';
-import type { SubscriptionTier } from '../../shared/subscription.types';
+import type { SubscriptionTier } from '@shared/subscription.types';
 
 export interface AuthPayload {
   id: string;

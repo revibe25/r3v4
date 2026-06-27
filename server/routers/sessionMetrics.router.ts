@@ -15,7 +15,7 @@ import {
   updateAIDecisionOutcome,
 } from "../services/session-metrics.service";
 import { db }             from "../db";
-import { sessionMetrics } from "../../shared/schema-session-metrics";
+import { sessionMetrics } from "@shared/schema-session-metrics";
 import { aiDecisionLog }   from "../db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
 

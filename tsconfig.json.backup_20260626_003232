@@ -60,20 +60,5 @@
     {
       "path": "shared"
     }
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "**/dist",
-    "**/dist/**/*",
-    "packages/*/dist",
-    "packages/*/dist/**/*",
-    "server/dist",
-    "server/dist/**/*",
-    "shared/dist",
-    "shared/dist/**/*",
-    "**/*.test.ts",
-    "**/node_modules/**/*"
   ]
 }

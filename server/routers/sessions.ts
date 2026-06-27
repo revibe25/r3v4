@@ -4,7 +4,7 @@ import { router }             from "../trpc";
 import { protectedProcedure } from "../base-procedures";
 import { db }                 from "../db";
 import { aiDecisionLog }      from "../db/schema";
-import { sessionMetrics }     from "../../shared/schema-session-metrics";
+import { sessionMetrics }     from "@shared/schema-session-metrics";
 import {
   startSession,
   stopSession,

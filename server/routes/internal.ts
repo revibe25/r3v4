@@ -9,7 +9,7 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { count, sum, avg } from "drizzle-orm";
 import { db }              from "../db";
-import { sessionMetrics }  from "../../shared/schema-session-metrics";
+import { sessionMetrics }  from "@shared/schema-session-metrics";
 
 const router = Router();
 

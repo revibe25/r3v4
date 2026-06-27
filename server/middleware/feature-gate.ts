@@ -36,14 +36,14 @@ import { middleware } from '../trpc';
 import { getUserSubscription } from '../services/stripe-subscription';
 import type {
   SubscriptionTier,
-  TierFeatures} from '../../shared/subscription.types';
+  TierFeatures} from '@shared/subscription.types';
 import {
   tierAtLeast,
   canUseFeature,
   TIER_DEFINITIONS,
-} from '../../shared/subscription.types';
+} from '@shared/subscription.types';
 import { db } from '../db';
-import { aiTransitionUsage } from '../../shared/schema-subscription';
+import { aiTransitionUsage } from '@shared/schema-subscription';
 import { eq, and, sql } from 'drizzle-orm';
 
 

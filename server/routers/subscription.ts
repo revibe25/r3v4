@@ -27,7 +27,7 @@ import {
   createPortalSession,
   getUserSubscription,
 } from '../services/stripe-subscription';
-import { BILLING_CYCLES } from '../../shared/subscription.types';
+import { BILLING_CYCLES } from '@shared/subscription.types';
 
 export const subscriptionRouter = router({
   getMySubscription: protectedProcedure.query(async ({ ctx }) => {

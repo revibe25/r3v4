@@ -23,16 +23,16 @@ import { logger } from "../utils/logger";
 
 import Stripe from 'stripe';
 import { db } from '../db';
-import { subscriptions, stripeEvents } from '../../shared/schema-subscription';
+import { subscriptions, stripeEvents } from '@shared/schema-subscription';
 import { eq } from 'drizzle-orm';
 import type {
   SubscriptionTier,
   BillingCycle,
   SubscriptionStatus,
-  UserSubscription} from '../../shared/subscription.types';
+  UserSubscription} from '@shared/subscription.types';
 import {
   TIER_DEFINITIONS,
-} from '../../shared/subscription.types';
+} from '@shared/subscription.types';
 
 /**
  * Lazy Stripe client — instantiated on first use, not at module load.
