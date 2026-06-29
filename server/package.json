@@ -54,7 +54,7 @@
     "@types/node": "^20.19.30",
     "@types/uuid": "^9.0.8",
     "@types/ws": "^8.5.13",
-    "@vitest/coverage-v8": "4.1.8",
+    "@vitest/coverage-v8": "4.1.9",
     "drizzle-kit": "^0.31.10",
     "esbuild": "^0.25.12",
     "nanoid": "^5.0.0",
