@@ -119,7 +119,7 @@ export function useMidiSequencer(): SequencerAPI {
       sequenceRef.current = seq;
 
       // If transport is running, start the new sequence
-      if (Tone.getTransport().state === 'started') seq.start(0);
+      if (Tone.Transport().state === 'started') seq.start(0);
     };
 
     rebuild();

@@ -66,7 +66,7 @@ export function useDAWEngine(): EngineAPI {
     // Sync BPM from store → Tone.Transport (reactive)
     const unsub = useDAWStore.subscribe(
       s => s.bpm,
-      bpm => { Tone.getTransport().bpm.value = bpm; },
+      bpm => { Tone.Transport().bpm.value = bpm; },
       { fireImmediately: true },
     );
     return () => unsub();
