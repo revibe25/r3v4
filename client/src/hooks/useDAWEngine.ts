@@ -137,7 +137,7 @@ export function useDAWEngine(): EngineAPI {
   useEffect(() => {
     const tick = () => {
       if (useDAWStore.getState().playing) {
-        const pos = Tone.getTransport().position;
+        const pos = Tone.Transport.position;
         // Convert "bars:beats:sixteenths" to beats
         if (typeof pos === 'string') {
           const parts = pos.split(':').map(Number);
@@ -149,7 +149,7 @@ export function useDAWEngine(): EngineAPI {
           // Loop enforcement
           const { loopEnabled, loopStart, loopEnd } = useDAWStore.getState();
           if (loopEnabled && posBeats >= loopEnd) {
-            Tone.getTransport().position = `${Math.floor(loopStart / timeSignature[0])}:${loopStart % timeSignature[0]}:0`;
+            Tone.Transport.position = `${Math.floor(loopStart / timeSignature[0])}:${loopStart % timeSignature[0]}:0`;
           }
         }
       }
@@ -167,18 +167,18 @@ export function useDAWEngine(): EngineAPI {
   const togglePlay = useCallback(() => {
     const { playing, setPlaying } = useDAWStore.getState();
     if (playing) {
-      Tone.getTransport().pause();
+      Tone.Transport.pause();
       setPlaying(false);
     } else {
       Tone.start().then(() => {
-        Tone.getTransport().start();
+        Tone.Transport.start();
         setPlaying(true);
       });
     }
   }, []);
 
   const stop = useCallback(() => {
-    Tone.getTransport().stop();
+    Tone.Transport.stop();
     useDAWStore.getState().setPlaying(false);
     useDAWStore.getState().setRecording(false);
     useDAWStore.getState().setPosition(0);
@@ -189,7 +189,7 @@ export function useDAWEngine(): EngineAPI {
     if (!recording) {
       Tone.start().then(() => {
         if (!playing) {
-          Tone.getTransport().start();
+          Tone.Transport.start();
           setPlaying(true);
         }
         setRecording(true);
@@ -225,7 +225,7 @@ export function useDAWEngine(): EngineAPI {
     const { timeSignature } = useDAWStore.getState();
     const bar   = Math.floor(beat / timeSignature[0]);
     const beats = beat % timeSignature[0];
-    Tone.getTransport().position = `${bar}:${beats}:0`;
+    Tone.Transport.position = `${bar}:${beats}:0`;
     useDAWStore.getState().setPosition(beat);
   }, []);
 
