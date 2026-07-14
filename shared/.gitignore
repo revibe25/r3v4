@@ -1,0 +1,3 @@
+shared/dist/
+packages/*/dist/
+**/.tsbuildinfo
