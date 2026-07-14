@@ -1,0 +1,7 @@
+/**
+ * R3 Native — Global Styles Entry Point
+ * Import order matters: reset → theme → utilities
+ */
+
+@import './reset.css';
+@import './theme.css';

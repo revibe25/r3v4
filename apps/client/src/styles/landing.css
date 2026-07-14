@@ -1,0 +1,191 @@
+/* ==================== LANDING PAGE STYLES ==================== */
+/* Built with R3 Native color system (r3-theme.css) */
+
+:root {
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* ==================== CONTAINER ==================== */
+.landing-page {
+  min-height: 100vh;
+  background: #000000;
+  color: var(--r3-white);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 120px 48px 60px;
+}
+
+/* ==================== RESPONSIVE: MOBILE ==================== */
+@media (max-width: 768px) {
+  .container {
+    padding: 100px 24px 40px;
+  }
+
+  /* Hero */
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+  }
+
+  .hero-content h1 {
+    font-size: 36px;
+  }
+
+  .hero-visual {
+    height: 300px;
+    order: -1; /* Put visual first on mobile */
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+
+  /* Features Grid */
+  .features {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Founder Section */
+  .founder-section {
+    padding: 40px 24px;
+  }
+
+  .founder-section h2 {
+    font-size: 32px;
+  }
+
+  .founder-features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* Pricing */
+  .pricing-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card.featured {
+    transform: scale(1); /* Remove scale on mobile */
+  }
+
+  /* CTA */
+  .cta-section {
+    padding: 40px 24px;
+  }
+
+  .cta-section h2 {
+    font-size: 32px;
+  }
+}
+
+/* ==================== RESPONSIVE: TABLET ==================== */
+@media (max-width: 1024px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .hero-content h1 {
+    font-size: 48px;
+  }
+
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .founder-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pricing-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pricing-card.featured {
+    grid-column: 1 / -1;
+    max-width: 400px;
+    margin: 0 auto;
+    transform: scale(1);
+  }
+}
+
+/* ==================== RESPONSIVE: DESKTOP ==================== */
+@media (min-width: 1025px) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+
+  .features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+
+  .founder-features {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .pricing-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .pricing-card.featured {
+    transform: scale(1.05);
+  }
+}
+
+/* ==================== TOUCH TARGETS (Mobile) ==================== */
+@media (hover: none) and (pointer: coarse) {
+  .btn-primary,
+  .btn-secondary {
+    min-height: 44px; /* Apple HIG standard */
+    min-width: 44px;
+    padding: 12px 24px;
+  }
+
+  .feature-card {
+    cursor: pointer;
+  }
+
+  /* Increase tap target for links */
+  a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  /* Fallback for light mode (if needed) */
+  .landing-page {
+    background: #ffffff;
+    color: #000000;
+  }
+}
