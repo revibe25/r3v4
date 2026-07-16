@@ -42,3 +42,6 @@ The following surfaces are tracked in MYTHOS-SKILL-v2.md and scheduled for full 
 | `ws/collab.ts` | Pending | WebSocket collab audit — scheduled |
 | `session-metrics.service.ts` | Pending | Session metrics service audit — scheduled |
 | `crypto.timingSafeEqual` | Pending | Timing-safe comparison usage audit — scheduled |
+
+## Mythos Five-Lesson Security Audit — Remediation Summary
+[Insert pages 2-9 from the PDF here]
