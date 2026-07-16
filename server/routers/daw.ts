@@ -248,6 +248,25 @@ function sanitiseTrackName(raw: string | undefined): string | undefined {
     .slice(0, 40) || undefined;
 }
 
+// ── Input sanitiser — F-10 follow-up (messages[].content) ───────────────────
+
+/**
+ * sanitiseChatMessage
+ *
+ * Defense-in-depth for the messages[].content attack surface (F-10 follow-up).
+ * Does NOT make raw string-concatenation into a system prompt safe — the real
+ * fix, once ai.chat is wired to a live model, is structural role separation.
+ * Strips instruction-delimiter syntax, null bytes, excessive newlines; caps
+ * at the existing 2000-char schema limit.
+ */
+function sanitiseChatMessage(raw: string): string {
+  return raw
+    .replace(/[<>{}\[\]`\\|#^~\x00]/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+    .slice(0, 2000);
+}
+
 // ── AI Co-Producer prompt builder ─────────────────────────────────────────────
 
 function buildCoProducerSystem(): string {
@@ -499,7 +518,7 @@ export const dawRouter = router({
         `Playhead at beat ${input.context.position}.`,
       ].filter(Boolean).join(' ');
 
-      const userMsg = input.messages.at(-1)?.content ?? '';
+      const userMsg = sanitiseChatMessage(input.messages.at(-1)?.content ?? '');
 
       const stubs: [RegExp, string][] = [
         [/reverb|space|room/i, `For techno at ${input.context.bpm} BPM, use a plate reverb with pre-delay 18–22ms and decay 0.8–1.2s. Keep wet <15% on percussive elements to preserve transient punch.`],
