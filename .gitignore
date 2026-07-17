@@ -118,3 +118,17 @@ shared/types/*.d.ts
 shared/types/*.d.ts.map
 MYTHOS_DEFENSE*.md
 repo_discovery_*.md
+# Build artifacts
+test-results/
+playwright-report/
+*.backup*
+
+# Local scripts
+fix-*.sh
+COMPLETE_BUILD_FIX.sh
+
+# Temporary test files
+tests_*.js
+client/DSP/
+client/client/
+client/patch_*.py
