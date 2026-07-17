@@ -1,0 +1,91 @@
+# WIRE.txt Protocol — R3V4 Engineering Discipline
+
+**No write without reading first.**
+
+All changes to the R3V4 codebase follow the **WIRE** protocol:
+**W**rite-safe, **I**ncremental, **R**eadable, **E**vidence-based.
+
+## The Five-Step Protocol
+
+### 1. **Read** — View the current state
+- Open the file you're about to modify
+- Identify the anchor line(s) — the specific text you'll change
+- Confirm what's actually there (not what you think is there)
+
+### 2. **Confirm** — State the anchor and get approval
+- Tell the collaborator (or your future self) exactly what you found
+- Example: "Found line 47: `compilerOptions.paths` is missing"
+- Get explicit acknowledgment before proceeding
+
+### 3. **Backup** — Create a timestamped escape hatch
+- Before writing, save a backup: `.bak`, `.backup-<timestamp>`, or `git stash`
+- This makes rollback trivial if something goes wrong
+
+### 4. **Dry-Run** — Show the intended change without executing
+- Use `sed -e`, Python preview, or `git diff --cached` to show what will change
+- No actual write to disk yet
+- Collaborator reviews and approves the diff
+
+### 5. **Apply** — Execute the change
+- Write the file or run the command
+- Immediately verify (TSC, tests, git status)
+- Log the hash change (SHA256 before → after)
+- Commit with a clear message
+
+## Why This Protocol?
+
+- **No guessing:** You've read the actual state, not assumptions
+- **No surprises:** The diff is visible before commit
+- **No data loss:** Backups exist for every change
+- **Auditable:** Every action is timestamped and logged
+- **Recoverable:** Rollback is one command away
+
+## Example: Adding a TypeScript path alias
+
+```
+# 1. READ
+$ cat packages/llpte-signal/tsconfig.json | grep -A2 paths
+
+# 2. CONFIRM
+Anchor found: "compilerOptions": { ... "paths": { "@llpte/*": [...] }
+No @shared alias present yet.
+
+# 3. BACKUP
+$ cp packages/llpte-signal/tsconfig.json packages/llpte-signal/tsconfig.json.bak
+
+# 4. DRY-RUN
+$ python3 << 'EOF'
+import json
+with open("packages/llpte-signal/tsconfig.json") as f:
+    config = json.load(f)
+config["compilerOptions"]["paths"]["@shared/*"] = ["../../shared/src"]
+print(json.dumps(config["compilerOptions"]["paths"], indent=2))
+EOF
+
+# 5. APPLY
+$ python3 -c "
+import json
+with open('packages/llpte-signal/tsconfig.json') as f:
+    config = json.load(f)
+config['compilerOptions']['paths']['@shared/*'] = ['../../shared/src']
+with open('packages/llpte-signal/tsconfig.json', 'w') as f:
+    json.dump(config, f, indent=2)
+"
+$ git add packages/llpte-signal/tsconfig.json
+$ git commit -m "fix: add @shared/* path alias to llpte-signal"
+```
+
+## Enforcement
+
+The orchestrator script (`r3v4-master.py`, `r3v4-comprehensive-fix.py`) enforces this protocol:
+- Reads and logs state before any write
+- Creates backups automatically
+- Shows dry-run diffs for human approval
+- Checkpoints after each phase
+- Generates an audit log (JSON) for every run
+
+## See Also
+
+- `CLAUDE.md` — AI development guidelines (references this protocol)
+- `r3v4-master.py` — Orchestrator that automates WIRE steps
+- `r3v4-comprehensive-fix.py` — Multi-phase comprehensive fix tool

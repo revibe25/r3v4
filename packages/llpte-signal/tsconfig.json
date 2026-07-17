@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "paths": {
+      "@llpte/*": [
+        "../../packages/*/src"
+      ],
+      "@shared/*": [
+        "../../shared/src"
+      ]
+    },
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
@@ -8,8 +16,15 @@
     "declarationMap": true
   },
   "references": [
-    { "path": "../../shared" }
+    {
+      "path": "../../shared"
+    }
   ],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
