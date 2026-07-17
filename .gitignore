@@ -173,3 +173,8 @@ vitest.workspace.js
 # Shared overrides
 shared/components/
 shared/theme/
+# Build outputs (generated, not committed)
+packages/*/dist
+server/dist
+shared/dist
+client/dist
