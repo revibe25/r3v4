@@ -132,3 +132,44 @@ tests_*.js
 client/DSP/
 client/client/
 client/patch_*.py
+
+# Build artifacts
+test-results/
+playwright-report/
+*.backup*
+
+# Local scripts & tools
+fix-*.sh
+COMPLETE_BUILD_FIX.sh
+LLPTE_E2E_TEST_TEMPLATE.js
+VERIFY_LLPTE_PACKAGES.sh
+App.js
+Deets-git*
+FETCH_HEAD
+
+# Temporary test files
+tests_*.js
+client/DSP/
+client/client/
+client/patch_*.py
+client/tests_*.js
+
+# Config duplicates
+client/tailwind.config.js
+client/vitest.config.js
+client/vite.config.js
+client/*.tsx
+config/tailwind.config.js
+scripts/vite.config.snippet.js
+
+# Backup files
+*.pub
+*.tar.gz
+tsc-report.txt
+package-lock.json
+vitest.config.js
+vitest.workspace.js
+
+# Shared overrides
+shared/components/
+shared/theme/
