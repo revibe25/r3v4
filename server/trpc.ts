@@ -20,7 +20,7 @@
  *           use this weaker constant for JWT verification.
  */
 
-/// <reference path="./types/express.d.ts" />
+
 import { initTRPC, TRPCError }  from '@trpc/server';
 import type { Request, Response } from 'express';
 import type { AuthPayload }       from './middleware/auth';

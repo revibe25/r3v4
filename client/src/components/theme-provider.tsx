@@ -38,7 +38,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'dark';
   });
 
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(
+    typeof window === 'undefined' ? false : true
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -89,7 +91,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Apply theme classes and CSS variables
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
     try {
       const root = document.documentElement;
@@ -109,14 +111,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       // Set data attribute
       root.setAttribute('data-theme', theme);
 
-      // Set CSS custom properties for theme colors
+      // Set only dynamic metadata variables here.
+      // The actual visual palette lives in theme.css under
+      // html[data-theme="..."] so CSS remains the source of truth.
       root.style.setProperty('--theme-accent', themeData.accent);
-      
-      // Set gradient variables
       root.style.setProperty('--theme-gradient-from', themeData.gradient.from);
       root.style.setProperty('--theme-gradient-to', themeData.gradient.to);
+
       if (themeData.gradient.via) {
         root.style.setProperty('--theme-gradient-via', themeData.gradient.via);
+      } else {
+        root.style.removeProperty('--theme-gradient-via');
       }
     } catch (err) {
       console.error('Error applying theme variables:', err);
@@ -126,8 +131,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const themeMetadata = THEMES[theme];
   const isDark = themeMetadata.isDark;
   const isLight = !themeMetadata.isDark;
-
-  if (!mounted) return null;
 
   return (
     <ThemeContext.Provider

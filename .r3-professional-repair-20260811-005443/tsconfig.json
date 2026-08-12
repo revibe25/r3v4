@@ -1,0 +1,79 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "react-jsx",
+    "incremental": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@llpte/llpte-signal": [
+        "./packages/llpte-signal/src/index.ts"
+      ],
+      "@shared/*": [
+        "./shared/*"
+      ]
+    }
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalEsm": true,
+    "compilerResolver": true
+  },
+  "references": [
+    {
+      "path": "packages/llpte-core"
+    },
+    {
+      "path": "packages/llpte-signal"
+    },
+    {
+      "path": "packages/llpte-ai"
+    },
+    {
+      "path": "packages/llpte-execution"
+    },
+    {
+      "path": "packages/llpte-adapters"
+    },
+    {
+      "path": "packages/llpte-transition-graph"
+    },
+    {
+      "path": "server"
+    },
+    {
+      "path": "shared"
+    }
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "**/dist",
+    "**/dist/**/*",
+    "packages/*/dist",
+    "packages/*/dist/**/*",
+    "server/dist",
+    "server/dist/**/*",
+    "shared/dist",
+    "shared/dist/**/*",
+    "**/*.test.ts",
+    "**/node_modules/**/*"
+  ]
+}

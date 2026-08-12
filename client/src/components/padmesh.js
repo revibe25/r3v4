@@ -1,0 +1,26 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+// P4-EXEMPT: Three.js mesh component — #eaeaea #ff7a18 are material color props;
+// CSS variables cannot be resolved by the Three.js material system at runtime.
+// FILE: client/src/components/PadMesh.tsx
+import * as THREE from 'three';
+import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo } from 'react';
+export function PadMesh({ active, velocity, position, }) {
+    const mesh = useRef(null);
+    const material = useMemo(() => new THREE.MeshStandardMaterial({
+        color: '#eaeaea',
+        metalness: 0.65,
+        roughness: 0.25,
+        emissive: new THREE.Color('#ff7a18'),
+        emissiveIntensity: 0,
+    }), []);
+    useFrame(() => {
+        const targetZ = active ? velocity * 1.6 : 0;
+        const targetScale = active ? 1 + velocity * 0.18 : 1;
+        const targetGlow = active ? velocity * 2.2 : 0;
+        mesh.current.position.z += (targetZ - mesh.current.position.z) * 0.28;
+        mesh.current.scale.y += (targetScale - mesh.current.scale.y) * 0.22;
+        material.emissiveIntensity += (targetGlow - material.emissiveIntensity) * 0.25;
+    });
+    return (_jsx("mesh", { ref: mesh, position: position, castShadow: true, receiveShadow: true, material: material, children: _jsx("boxGeometry", { args: [1.1, 0.28, 1.1, 16, 4, 16] }) }));
+}

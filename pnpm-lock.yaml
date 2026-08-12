@@ -27,14 +27,11 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.1098.0
+        specifier: ^3.1045.0
         version: 3.1101.0
       '@aws-sdk/s3-request-presigner':
-        specifier: ^3.1098.0
+        specifier: ^3.1045.0
         version: 3.1101.0
-      '@r3vibe/shared':
-        specifier: workspace:*
-        version: link:shared
       '@trpc/server':
         specifier: 11.12.0
         version: 11.12.0(typescript@5.9.3)
@@ -63,19 +60,19 @@ importers:
         specifier: ^7.5.1
         version: 7.5.1(express@5.2.1)
       helmet:
-        specifier: ^8.3.0
+        specifier: ^8.1.0
         version: 8.3.0
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
       morgan:
-        specifier: ^1.11.0
+        specifier: ^1.10.1
         version: 1.11.0
       multer:
-        specifier: ^2.2.0
+        specifier: ^2.1.1
         version: 2.2.0
       pg:
-        specifier: ^8.22.0
+        specifier: ^8.20.0
         version: 8.22.0
       postgres:
         specifier: 3.4.9
@@ -87,10 +84,10 @@ importers:
         specifier: ^2.2.6
         version: 2.2.6
       uuid:
-        specifier: ^14.0.1
+        specifier: ^14.0.0
         version: 14.0.1
       ws:
-        specifier: ^8.21.1
+        specifier: ^8.21.0
         version: 8.21.1(bufferutil@4.1.0)
       zod:
         specifier: ^3.25.76
@@ -100,10 +97,10 @@ importers:
         version: 3.5.4(zod@3.25.76)
     devDependencies:
       '@eslint/js':
-        specifier: ^9.39.5
+        specifier: ^9.39.4
         version: 9.39.5
       '@playwright/test':
-        specifier: ^1.62.0
+        specifier: ^1.59.1
         version: 1.62.1
       '@types/bcrypt':
         specifier: ^6.0.0
@@ -121,7 +118,7 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3
       '@types/express-serve-static-core':
-        specifier: ^5.1.2
+        specifier: ^5.1.1
         version: 5.1.3
       '@types/jsonwebtoken':
         specifier: ^9.0.10
@@ -130,10 +127,10 @@ importers:
         specifier: ^1.9.10
         version: 1.9.10
       '@types/multer':
-        specifier: ^2.2.0
+        specifier: ^2.1.0
         version: 2.2.0
       '@types/node':
-        specifier: ^22.20.1
+        specifier: ^22.19.18
         version: 22.20.1
       '@types/pg':
         specifier: ^8.20.0
@@ -148,22 +145,22 @@ importers:
         specifier: ^8.18.1
         version: 8.18.1
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.65.0
+        specifier: ^8.59.2
         version: 8.65.0(@typescript-eslint/parser@8.65.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       '@typescript-eslint/parser':
-        specifier: ^8.65.0
+        specifier: ^8.59.2
         version: 8.65.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: 4.1.9
         version: 4.1.9(vitest@4.1.10)
       autoprefixer:
-        specifier: ^10.5.4
+        specifier: ^10.5.0
         version: 10.5.4(postcss@8.5.26)
       concurrently:
-        specifier: ^9.2.4
+        specifier: ^9.2.1
         version: 9.2.4
       eslint:
-        specifier: ^9.39.5
+        specifier: ^9.39.4
         version: 9.39.5(jiti@2.7.0)
       eslint-formatter-unix:
         specifier: ^9.0.1
@@ -175,7 +172,7 @@ importers:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.39.5(jiti@2.7.0))
       globals:
-        specifier: ^17.8.0
+        specifier: ^17.6.0
         version: 17.8.0
       jiti:
         specifier: ^2.7.0
@@ -187,34 +184,34 @@ importers:
         specifier: '>=8.5.23'
         version: 8.5.26
       prettier:
-        specifier: ^3.9.6
+        specifier: ^3.8.3
         version: 3.9.6
       tailwindcss:
-        specifier: ^4.3.3
+        specifier: ^4.3.0
         version: 4.3.3
       ts-morph:
         specifier: ^27.0.2
         version: 27.0.2
       tsx:
-        specifier: ^4.23.1
+        specifier: ^4.21.0
         version: 4.23.1
       turbo:
-        specifier: ^2.10.7
+        specifier: ^2.9.14
         version: 2.10.8
       typescript:
         specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
-        specifier: ^8.65.0
+        specifier: ^8.59.2
         version: 8.65.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
       vite:
         specifier: '>=6.4.3'
         version: 8.2.0(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1)
       vitest:
-        specifier: ^4.1.10
+        specifier: ^4.1.8
         version: 4.1.10(@types/node@22.20.1)(@vitest/coverage-v8@4.1.9)(vite@8.2.0(@types/node@22.20.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1))
       wait-on:
-        specifier: ^9.1.0
+        specifier: ^9.0.6
         version: 9.1.0
     optionalDependencies:
       bufferutil:
@@ -491,12 +488,6 @@ importers:
       '@types/uuid':
         specifier: ^9.0.8
         version: 9.0.8
-      '@typescript-eslint/eslint-plugin':
-        specifier: ^8.65.0
-        version: 8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3))(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
-      '@typescript-eslint/parser':
-        specifier: ^8.65.0
-        version: 8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
       '@vitejs/plugin-react':
         specifier: ^6.0.3
         version: 6.0.5(vite@8.2.0(@types/node@25.9.5)(esbuild@0.28.1)(jiti@1.21.7)(tsx@4.23.1))
@@ -661,9 +652,6 @@ importers:
       '@llpte/llpte-signal':
         specifier: workspace:*
         version: link:../packages/llpte-signal
-      '@r3vibe/shared':
-        specifier: workspace:*
-        version: link:../shared
       '@trpc/client':
         specifier: 11.18.0
         version: 11.18.0(@trpc/server@11.18.0(typescript@5.9.3))(typescript@5.9.3)
@@ -850,6 +838,9 @@ packages:
   '@aws-sdk/core@3.977.4':
     resolution: {integrity: sha512-CEkcQlMOQJCvul60U7wdAOACjtdgFWDsfJI+6wUOGdhGNV2lGbuJpi/R50QLpFG3Tp+sQxa/RmzC3X7KHbhuTA==}
     engines: {node: '>=20.0.0'}
+    deprecated: |-
+      Deprecated due to Document number parsing bug in JSON, see
+        https://github.com/aws/aws-sdk-js-v3/issues/8246. Newer version available.
 
   '@aws-sdk/credential-provider-env@3.972.65':
     resolution: {integrity: sha512-lJT2aRw9wCV8jPHyFJjdZLD4HTydL6/22AnCSOB8e/LqOc55nEJGLHkJQeSxhn8QiqyjFwPKQFtMw0ovjRUY/g==}
@@ -7038,7 +7029,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.3':
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 20.19.43
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -7067,7 +7058,7 @@ snapshots:
 
   '@types/morgan@1.9.10':
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 20.19.43
 
   '@types/ms@2.1.0': {}
 
@@ -7091,7 +7082,7 @@ snapshots:
 
   '@types/pg@8.20.3':
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 20.19.43
       pg-protocol: 1.15.0
       pg-types: 2.2.0
 
@@ -7125,7 +7116,7 @@ snapshots:
 
   '@types/send@1.2.1':
     dependencies:
-      '@types/node': 22.20.1
+      '@types/node': 20.19.43
 
   '@types/serve-static@1.15.10':
     dependencies:
@@ -7155,22 +7146,6 @@ snapshots:
     dependencies:
       '@types/node': 20.19.43
 
-  '@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3))(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
-      '@typescript-eslint/scope-manager': 8.65.0
-      '@typescript-eslint/type-utils': 8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.65.0
-      eslint: 10.8.0(jiti@1.21.7)
-      ignore: 7.0.6
-      natural-compare: 1.4.0
-      ts-api-utils: 2.5.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -7183,18 +7158,6 @@ snapshots:
       ignore: 7.0.6
       natural-compare: 1.4.0
       ts-api-utils: 2.5.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/scope-manager': 8.65.0
-      '@typescript-eslint/types': 8.65.0
-      '@typescript-eslint/typescript-estree': 8.65.0(typescript@5.9.3)
-      '@typescript-eslint/visitor-keys': 8.65.0
-      debug: 4.4.3
-      eslint: 10.8.0(jiti@1.21.7)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color
@@ -7229,18 +7192,6 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@typescript-eslint/type-utils@8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@typescript-eslint/types': 8.65.0
-      '@typescript-eslint/typescript-estree': 8.65.0(typescript@5.9.3)
-      '@typescript-eslint/utils': 8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)
-      debug: 4.4.3
-      eslint: 10.8.0(jiti@1.21.7)
-      ts-api-utils: 2.5.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@typescript-eslint/type-utils@8.65.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
       '@typescript-eslint/types': 8.65.0
@@ -7266,17 +7217,6 @@ snapshots:
       semver: 7.8.5
       tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.9.3)
-      typescript: 5.9.3
-    transitivePeerDependencies:
-      - supports-color
-
-  '@typescript-eslint/utils@8.65.0(eslint@10.8.0(jiti@1.21.7))(typescript@5.9.3)':
-    dependencies:
-      '@eslint-community/eslint-utils': 4.10.1(eslint@10.8.0(jiti@1.21.7))
-      '@typescript-eslint/scope-manager': 8.65.0
-      '@typescript-eslint/types': 8.65.0
-      '@typescript-eslint/typescript-estree': 8.65.0(typescript@5.9.3)
-      eslint: 10.8.0(jiti@1.21.7)
       typescript: 5.9.3
     transitivePeerDependencies:
       - supports-color

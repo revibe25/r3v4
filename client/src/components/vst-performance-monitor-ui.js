@@ -1,0 +1,44 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+// client/src/components/vst-performance-monitor-ui.tsx
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: VST performance threshold warning — engine degraded state
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
+import { useState, useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Activity, Zap, AlertTriangle, TrendingUp, MemoryStick, Clock } from 'lucide-react';
+const TL = "w-full grid bg-[#0a0a0a] border-b border-[var(--t-b2x)] rounded-none h-auto p-0";
+const TT = "rounded-none border-r border-[var(--t-b2x)] last:border-r-0 text-[10px] tracking-widest uppercase font-mono py-2.5 text-[var(--daw-fg)] hover:text-[#a3e635] transition-colors data-[state=active]:bg-transparent data-[state=active]:text-[#a3e635] data-[state=active]:border-b-2 data-[state=active]:border-b-[#a3e635] data-[state=active]:shadow-none";
+function MonoBar({ value, max = 100, warn = 50, danger = 80 }) {
+    const pct = Math.min((value / max) * 100, 100);
+    const color = value >= danger ? '#ef4444' : value >= warn ? 'var(--status-warn)' : '#a3e635';
+    return _jsx("div", { className: "h-1.5 bg-[#0d0d0d] border border-[var(--t-b2x)] overflow-hidden", children: _jsx("div", { className: "h-full transition-all duration-100", style: { width: `${pct}%`, background: color } }) });
+}
+function StatBox({ icon, label, value, pct, warn, danger }) {
+    return (_jsxs("div", { className: "border border-[var(--t-b2x)] p-4 space-y-3", children: [_jsxs("div", { className: "flex items-center gap-2", children: [_jsx("span", { className: "text-[#555]", children: icon }), _jsx("span", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)]", children: label })] }), _jsx("div", { className: "text-xl font-mono text-[var(--daw-fg)] tracking-wider", children: value }), _jsx(MonoBar, { value: pct, warn: warn, danger: danger })] }));
+}
+export function VSTPerformanceUI({ monitor, vstIds }) {
+    const [metrics, setMetrics] = useState(new Map());
+    const [totalCPU, setTotalCPU] = useState(0);
+    useEffect(() => { const id = setInterval(() => { setMetrics(monitor.getAllMetrics()); setTotalCPU(monitor.getTotalCPUUsage()); }, 100); return () => clearInterval(id); }, [monitor]);
+    const cpuColor = totalCPU >= 80 ? 'text-red-400' : totalCPU >= 50 ? 'text-yellow-400' : 'text-[#a3e635]';
+    return (_jsxs("div", { className: "w-full bg-[var(--void)] text-[var(--daw-fg)] font-mono", children: [_jsxs("div", { className: "flex items-center justify-between mb-4 border-b border-[var(--t-b2x)] pb-3", children: [_jsxs("span", { className: "flex items-center gap-2 text-xs tracking-widest uppercase text-[var(--daw-fg)]", children: [_jsx(Activity, { className: "h-3.5 w-3.5 text-[#555]" }), " Performance Monitor"] }), _jsxs("span", { className: `text-xs font-mono tracking-wider ${cpuColor}`, children: [totalCPU.toFixed(1), "% CPU"] })] }), _jsxs(Tabs, { defaultValue: "overview", children: [_jsx(TabsList, { className: `${TL} grid-cols-3`, children: ['overview', 'details', 'optimization'].map(tab => (_jsx(TabsTrigger, { value: tab, className: TT, children: tab }, tab))) }), _jsxs("div", { className: "pt-5", children: [_jsx(TabsContent, { value: "overview", className: "mt-0", children: _jsx(SystemOverview, { totalCPU: totalCPU, metrics: metrics }) }), _jsx(TabsContent, { value: "details", className: "mt-0", children: _jsxs("div", { className: "space-y-3 max-h-[400px] overflow-y-auto pr-1", children: [(vstIds ?? []).map(id => { const m = metrics.get(id); if (!m)
+                                            return null; return _jsx(VSTMetricsRow, { vstId: id, metrics: m }, id); }).filter(Boolean), vstIds.length === 0 && _jsx("p", { className: "text-[10px] tracking-widest uppercase text-[#555] text-center py-8", children: "No active VST plugins" })] }) }), _jsx(TabsContent, { value: "optimization", className: "mt-0", children: _jsx(OptimizationPanel, { monitor: monitor, vstIds: vstIds, metrics: metrics }) })] })] })] }));
+}
+function SystemOverview({ totalCPU, metrics }) {
+    const totalMemory = Array.from(metrics.values()).reduce((s, m) => s + m.memoryUsage, 0);
+    const avgLatency = metrics.size > 0 ? Array.from(metrics.values()).reduce((s, m) => s + m.latency, 0) / metrics.size : 0;
+    return (_jsxs("div", { className: "grid grid-cols-2 gap-3 lg:grid-cols-4", children: [_jsx(StatBox, { icon: _jsx(Zap, { className: "h-3.5 w-3.5" }), label: "Total CPU", value: `${totalCPU.toFixed(1)}%`, pct: totalCPU, warn: 50, danger: 80 }), _jsx(StatBox, { icon: _jsx(MemoryStick, { className: "h-3.5 w-3.5" }), label: "Memory", value: `${totalMemory.toFixed(0)} MB`, pct: (totalMemory / 1024) * 100 }), _jsx(StatBox, { icon: _jsx(Clock, { className: "h-3.5 w-3.5" }), label: "Avg Latency", value: `${avgLatency.toFixed(1)} ms`, pct: (avgLatency / 50) * 100, warn: 40, danger: 80 }), _jsx(StatBox, { icon: _jsx(Activity, { className: "h-3.5 w-3.5" }), label: "Active VSTs", value: metrics.size.toString(), pct: (metrics.size / 10) * 100 })] }));
+}
+function VSTMetricsRow({ vstId, metrics }) {
+    return (_jsxs("div", { className: "border border-[var(--t-b2x)] p-4 space-y-4", children: [_jsxs("div", { className: "flex items-center justify-between", children: [_jsx("span", { className: "text-xs tracking-wider text-[var(--daw-fg)]", children: vstId }), metrics.bufferUnderruns > 0 && (_jsxs("span", { className: "flex items-center gap-1 text-[10px] tracking-wider text-red-400 border border-red-900/40 px-2 py-0.5", children: [_jsx(AlertTriangle, { className: "h-3 w-3" }), metrics.bufferUnderruns, " underrun", metrics.bufferUnderruns > 1 ? 's' : ''] }))] }), _jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsxs("div", { children: [_jsxs("div", { className: "flex justify-between mb-1", children: [_jsx("span", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)]", children: "CPU" }), _jsxs("span", { className: "text-[10px] font-mono text-[#a3e635]", children: [metrics.cpuUsage.toFixed(1), "%"] })] }), _jsx(MonoBar, { value: metrics.cpuUsage, warn: 50, danger: 80 })] }), _jsxs("div", { children: [_jsxs("div", { className: "flex justify-between mb-1", children: [_jsx("span", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)]", children: "Latency" }), _jsxs("span", { className: "text-[10px] font-mono text-[#a3e635]", children: [metrics.latency.toFixed(1), " ms"] })] }), _jsx(MonoBar, { value: metrics.latency, max: 50, warn: 20, danger: 40 })] })] }), _jsxs("div", { className: "grid grid-cols-2 gap-4", children: [_jsxs("div", { className: "border border-[var(--t-b2x)] px-3 py-2", children: [_jsx("div", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)] mb-1", children: "Proc. Time" }), _jsxs("div", { className: "text-sm font-mono text-[var(--daw-fg)]", children: [metrics.processingTime.toFixed(2), " ms"] })] }), _jsxs("div", { className: "border border-[var(--t-b2x)] px-3 py-2", children: [_jsx("div", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)] mb-1", children: "Peak Time" }), _jsxs("div", { className: "text-sm font-mono text-[var(--daw-fg)]", children: [metrics.peakProcessingTime.toFixed(2), " ms"] })] })] })] }));
+}
+function OptimizationPanel({ monitor, vstIds, metrics }) {
+    const recs = [];
+    (vstIds ?? []).forEach(id => { const items = monitor.getOptimizationRecommendations(id); if (items.length > 0)
+        recs.push({ vstId: id, items }); });
+    if (recs.length === 0)
+        return (_jsxs("div", { className: "border border-dashed border-[var(--t-b2x)] py-12 text-center", children: [_jsx(TrendingUp, { className: "h-8 w-8 mx-auto mb-3 text-[var(--dj-dimmer)]" }), _jsx("p", { className: "text-[10px] tracking-widest uppercase text-[var(--daw-fg)]", children: "All systems optimal" }), _jsx("p", { className: "text-[10px] text-[#555] mt-1 tracking-wider", children: "No recommendations at this time" })] }));
+    return (_jsx("div", { className: "space-y-3 max-h-[400px] overflow-y-auto pr-1", children: recs.map(({ vstId, items }) => (_jsxs("div", { className: "border border-yellow-900/30 bg-yellow-900/5 p-4 space-y-2", children: [_jsxs("div", { className: "flex items-center gap-2", children: [_jsx(AlertTriangle, { className: "h-3.5 w-3.5 text-yellow-500" }), _jsx("span", { className: "text-xs tracking-wider text-yellow-400", children: vstId })] }), _jsx("ul", { className: "space-y-1.5 pl-5", children: items.map((rec, i) => _jsxs("li", { className: "text-[10px] tracking-wider text-[var(--daw-fg)] flex gap-2", children: [_jsx("span", { className: "text-[#555]", children: "\u2014" }), _jsx("span", { children: rec })] }, i)) })] }, vstId))) }));
+}

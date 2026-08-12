@@ -228,8 +228,10 @@ async function main() {
                 ts: new Date().toISOString(),
             });
         });
-        serveStatic(app);
-        serveStatic(app);
+        // Only serve static assets in production; Vite handles client in dev
+        if (process.env.NODE_ENV === 'production') {
+            serveStatic(app);
+        }
         // ── 404 handler ────────────────────────────────────────────────────────
         app.use((_req, res) => {
             res.status(404).json({

@@ -7,15 +7,30 @@
     "declaration": true,
     "declarationMap": true,
     "paths": {
-      "@shared/*": ["./shared/*"],
-      "@llpte/llpte-signal": ["./packages/llpte-signal/dist/index"]
+      "@shared/*": [
+        "./shared/*"
+      ],
+      "@llpte/llpte-signal": [
+        "../llpte-signal/dist/index"
+      ]
     }
   },
   "references": [
-    { "path": "../../shared" },
-    { "path": "../llpte-signal" },
-    { "path": "../llpte-core" }
+    {
+      "path": "../../shared"
+    },
+    {
+      "path": "../llpte-signal"
+    },
+    {
+      "path": "../llpte-core"
+    }
   ],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

@@ -12,7 +12,7 @@
  * It has no runtime effect — jwt.js calls ms() on any string value internally.
  */
 
-/// <reference path="../types/express.d.ts" />
+
 import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../lib/logger';

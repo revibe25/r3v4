@@ -1,173 +1,1223 @@
+/*
+ * R3 NATIVE / R3v4
+ * Canonical Theme System
+ *
+ * Architecture:
+ *   theme-config.ts
+ *          ↓
+ *   ThemeProvider
+ *          ↓
+ *   html[data-theme="..."]
+ *          ↓
+ *   semantic CSS variables
+ *
+ * Components should consume semantic variables rather than
+ * hard-coded theme-specific colors.
+ */
+
+/* ============================================================
+   BASE / R3 CORE
+   ============================================================ */
+
 :root {
+  color-scheme: dark;
+
+  /* Core surfaces */
   --bg: #000000;
-  --fg: #eaeaea;
+  --bg-base: #000000;
+  --surface: #0c0c0c;
+  --surface-mid: #111111;
   --panel: #050505;
-  --neon-lime: #bfff00;
-  --neon-soft: #dfff66;
-  --border: #bfff00;
-  --glow-sm: 0 0 4px #bfff00;
-  --glow-md: 0 0 12px #bfff00, 0 0 24px #bfff00;
-  --glow-lg: 0 0 32px #bfff00, 0 0 64px #bfff00;
-}
-.neon-border { border: 1.5px solid var(--neon-lime); box-shadow: var(--glow-sm); }
-.neon-lift:hover { box-shadow: var(--glow-md); border-color: var(--neon-soft); }
-.neon-text { color: var(--neon-lime); text-shadow: 0 0 6px var(--neon-lime); }
-.neon-panel { background: var(--panel); border: 1px solid var(--neon-lime); box-shadow: var(--glow-sm);}
-@keyframes neonPulse {0%,100%{box-shadow:var(--glow-sm);}50%{box-shadow:var(--glow-lg);}}
-.neon-pulse { animation: neonPulse 2s infinite ease-in-out; }
-/* ─────────────────────────────────────────────────────────────────────────────
-   P0 REMEDIATION — DAW/Looper core tokens
-   Append this block to client/src/styles/theme.css (inside :root).
-   These replace all hardcoded hex in DJ_*, RED/SURF/etc, T-object b1-b4,
-   and the inline _BLACK/_SURFACE/_BORDER blocks.
-   ───────────────────────────────────────────────────────────────────────────── */
+  --panel-deep: #040404;
+  --panel-void: #000000;
 
-:root {
-  /* ── Surface / background ramp ─────────────────────────────────── */
-  --dj-black:     #000000;   /* absolute black — all primary looper bg */
-  --dj-surface:   #0c0c0c;   /* DJ_SURFACE / SURF / _SURFACE           */
-  --dj-surface2:  #111111;   /* DJ_SURFACE2 / SURF2 / _SURFACE2        */
-  --dj-surface3:  #161616;   /* SURF3 only                             */
-  --dj-border:    #222222;   /* DJ_BORDER / BORDER / _BORDER           */
-  --dj-dim:       #444444;   /* DJ_DIM / DIM                           */
-  --dj-dimmer:    #333333;   /* DJ_DIMMER / DIMMER                     */
-  --dj-muted:     #666666;   /* MUTED                                  */
-
-  /* ── T-object background shades (looper timeline / live session) ─ */
-  --t-b1:  #0f0f0f;
-  --t-b2:  #141414;
-  --t-b3:  #1e1e1e;
-  --t-b4:  #282828;
-
-  /* ── VU / signal semantic (meter only, not general UI) ─────────── */
-  --signal-clip:  #ff2200;   /* RED — overload / clip indicator        */
-  --signal-warn:  #ffaa00;   /* AMBER — near-clip / warning zone       */
-
-  /* ── Looper track accent palette (TRACK_COLORS, T-object accents) ─ */
-  --looper-acid:    #39ff14;   /* playing / active / solo               */
-  --looper-acid-2:  #32cd32;   /* T-object acid, subtle playing alt     */
-  --looper-acid-dim:#4d6b18;   /* ACID_DIM — Three.js scene (ref only)  */
-  --looper-cyan:    #22d3ee;   /* cue / headphone monitor               */
-  --looper-orange:  #ff6b00;   /* mute / overdub                        */
-  --looper-red:     #ff1a1a;   /* record / clear / waiting_record       */
-  --looper-purple:  #c084fc;   /* MIDI / pitch / harmony                */
-  --looper-yellow:  #f5d000;   /* scene / snapshot                      */
-  --looper-pink:    #f472b6;   /* PAD / creative FX                     */
-  --looper-blue:    #3b82f6;   /* delay / time-based FX                 */
-  --looper-teal:    #14b8a6;   /* stereo width                          */
-  --looper-lime:    #84cc16;   /* bitcrusher / tone FX / creator accent */
-}
-
-/* ── P0 addendum: waveform-editor track palette ── */
-:root {
-  --track-pink:   #ec4899;
-  --track-cyan:   #06b6d4;
-  --track-orange: #f97316;
-  --track-indigo: #6366f1;
-}
-
-/* ── P1: subscription tier accent palette ── */
-:root {
-  --tier-explorer:   #3A7D44;
-  --tier-creator:    #1A3C5E;
-  --tier-pro-artist: #B35A00;
-}
-
-/* ── P3: inline literal tokens ────────────────────────────── */
-:root {
-  /* Near-black surface ramp (fills gaps between existing t-b* tokens) */
-  --void:   #060606;   /* absolute darkest — primary DAW bg */
-  --t-b0:   #090909;   /* near-black layer 0 */
-  --t-b0x:  #080808;   /* near-black layer 0 alt */
-  --t-b0xx: #070707;   /* near-black layer 0 alt2 */
-  --t-b2x:  #1a1a1a;   /* between t-b2/t-b3 — heavy use in collab DAW */
-  --t-b3x:  #252525;   /* between t-b3/t-b4 */
-  --z950:   #09090b;   /* zinc-950 — timeline / node canvas bg */
+  /* Borders */
+  --border: #222222;
+  --dj-border: #222222;
+  --dj-dim: #444444;
+  --dj-dimmer: #333333;
 
   /* Text */
-  --daw-fg:    #f0f0f0;  /* primary DAW text */
-  --white:     #ffffff;  /* pure white — button labels, active states */
-  --daw-sub:   #aaaaaa;  /* secondary text */
-  --daw-ghost: #cccccc;  /* ghost / disabled */
+  --fg: #eaeaea;
+  --text-primary: #f0f0f0;
+  --text-secondary: #aaaaaa;
+  --text-muted: #666666;
+  --text-dim: #444444;
 
-  /* Accent extensions */
-  --accent-violet:      #a855f7;  /* violet-500 — AI ghost notes, MIDI */
-  --accent-violet-soft: #a78bfa;  /* violet-400 — soft AI overlay */
-  --accent-amber:       #fbbf24;  /* amber-400 — automation lanes, cues */
-  --accent-green:       #22c55e;  /* green-500 — active LED, plugin enabled */
-  --accent-neon-green:  #00ff88;  /* neon green — 3D scene accent */
-  --signal-clip-alt:    #ff2244;  /* clip indicator variant */
-  --signal-clip-hard:   #ff0033;  /* hard clip */
+  /* R3 default accent */
+  --accent: #bfff00;
+  --theme-accent: #bfff00;
+  --accent-neon-lime: #d4ff40;
+  --accent-neon: #39ff14;
+
+  /* Semantic states */
+  --status-ok: #22c55e;
+  --status-ok-dim: #3d7c00;
+  --status-warn: #ffaa00;
+  --status-error: #ff2244;
+
+  /* Signal colors */
+  --signal-clip: #ff2200;
+  --signal-warn: #ffaa00;
+
+  /* DAW compatibility */
+  --dj-black: #000000;
+  --dj-surface: #0c0c0c;
+  --dj-surface2: #111111;
+  --dj-surface3: #161616;
+  --dj-muted: #666666;
+
+  --daw-fg: #f0f0f0;
+  --daw-sub: #aaaaaa;
+  --daw-ghost: #cccccc;
+
+  /* Looper palette */
+  --looper-acid: #39ff14;
+  --looper-acid-2: #32cd32;
+  --looper-acid-dim: #4d6b18;
+  --looper-cyan: #22d3ee;
+  --looper-orange: #ff6b00;
+  --looper-red: #ff1a1a;
+  --looper-purple: #c084fc;
+  --looper-yellow: #f5d000;
+  --looper-pink: #f472b6;
+  --looper-blue: #3b82f6;
+  --looper-teal: #14b8a6;
+  --looper-lime: #84cc16;
+
+  /* Track colors */
+  --track-pink: #ec4899;
+  --track-cyan: #06b6d4;
+  --track-orange: #f97316;
+  --track-indigo: #6366f1;
+
+  /* Geometry */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+
+  /* Effects */
+  --glow-sm: 0 0 4px color-mix(in srgb, var(--accent) 70%, transparent);
+  --glow-md:
+    0 0 12px color-mix(in srgb, var(--accent) 70%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 35%, transparent);
+  --glow-lg:
+    0 0 32px color-mix(in srgb, var(--accent) 80%, transparent),
+    0 0 64px color-mix(in srgb, var(--accent) 35%, transparent);
+
+  /* Compatibility aliases */
+  --void: #060606;
+  --t-b0: #090909;
+  --t-b0x: #080808;
+  --t-b0xx: #070707;
+  --t-b1: #0f0f0f;
+  --t-b2: #141414;
+  --t-b2x: #1a1a1a;
+  --t-b3: #1e1e1e;
+  --t-b3x: #252525;
+  --t-b4: #282828;
+
+  --white: #ffffff;
 }
 
-/* ── P4: remaining unmapped values ──────────────────────────── */
+/* ============================================================
+   DARK — canonical original R3-style dark mode
+   ============================================================ */
+
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #000000;
+  --bg-base: #000000;
+  --surface: #0c0c0c;
+  --surface-mid: #111111;
+  --panel: #050505;
+
+  --border: #222222;
+  --dj-border: #222222;
+
+  --fg: #eaeaea;
+  --text-primary: #f0f0f0;
+  --text-secondary: #aaaaaa;
+  --text-muted: #666666;
+
+  --accent: #bfff00;
+  --theme-accent: #bfff00;
+}
+
+/* ============================================================
+   ACID — R3 DAW core palette
+   ============================================================ */
+
+html[data-theme="acid"] {
+  color-scheme: dark;
+
+  --bg: #000000;
+  --bg-base: #000000;
+  --surface: #090909;
+  --surface-mid: #101010;
+  --panel: #050505;
+
+  --border: #283500;
+  --dj-border: #283500;
+
+  --fg: #f1f1f1;
+  --text-primary: #f4f4f4;
+  --text-secondary: #b5b5b5;
+  --text-muted: #666666;
+
+  --accent: #a3e635;
+  --theme-accent: #a3e635;
+  --accent-neon: #39ff14;
+}
+
+/* ============================================================
+   LIGHT
+   ============================================================ */
+
+html.light,
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #fafafa;
+  --bg-base: #fafafa;
+  --surface: #ffffff;
+  --surface-mid: #f0f0f0;
+  --panel: #ffffff;
+
+  --border: #d4d4d8;
+  --dj-border: #d4d4d8;
+  --dj-dim: #71717a;
+
+  --fg: #18181b;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --text-dim: #a1a1aa;
+
+  --accent: #5b21b6;
+  --theme-accent: #5b21b6;
+
+  --signal-clip: #dc2626;
+  --signal-warn: #d97706;
+}
+
+/* ============================================================
+   NEON
+   ============================================================ */
+
+html[data-theme="neon"] {
+  color-scheme: dark;
+
+  --bg: #030505;
+  --bg-base: #030505;
+  --surface: #071010;
+  --surface-mid: #0b1717;
+  --panel: #050909;
+
+  --border: #16494a;
+  --dj-border: #16494a;
+
+  --fg: #e8ffff;
+  --text-primary: #ecffff;
+  --text-secondary: #91bcbc;
+  --text-muted: #527777;
+
+  --accent: #00f5ff;
+  --theme-accent: #00f5ff;
+}
+
+/* ============================================================
+   CHROME
+   ============================================================ */
+
+html[data-theme="chrome"] {
+  color-scheme: dark;
+
+  --bg: #08090a;
+  --bg-base: #08090a;
+  --surface: #111315;
+  --surface-mid: #1a1d20;
+  --panel: #0d0f11;
+
+  --border: #3c4146;
+  --dj-border: #3c4146;
+  --dj-dim: #777e85;
+
+  --fg: #f1f3f5;
+  --text-primary: #f4f5f6;
+  --text-secondary: #adb3b9;
+  --text-muted: #6f767d;
+
+  --accent: #e8eaed;
+  --theme-accent: #e8eaed;
+}
+
+/* ============================================================
+   FOREST
+   ============================================================ */
+
+html[data-theme="forest"] {
+  color-scheme: dark;
+
+  --bg: #01140f;
+  --bg-base: #01140f;
+  --surface: #05221a;
+  --surface-mid: #083126;
+  --panel: #031b15;
+
+  --border: #145b48;
+  --dj-border: #145b48;
+  --dj-dim: #467b6c;
+
+  --fg: #e7fff6;
+  --text-primary: #edfff8;
+  --text-secondary: #a6cfc1;
+  --text-muted: #5f9381;
+
+  --accent: #10b981;
+  --theme-accent: #10b981;
+}
+
+/* ============================================================
+   SUNSET
+   ============================================================ */
+
+html[data-theme="sunset"] {
+  color-scheme: dark;
+
+  --bg: #160907;
+  --bg-base: #160907;
+  --surface: #21100c;
+  --surface-mid: #301710;
+  --panel: #1b0c09;
+
+  --border: #713324;
+  --dj-border: #713324;
+  --dj-dim: #9b5a48;
+
+  --fg: #fff2ec;
+  --text-primary: #fff5f0;
+  --text-secondary: #d7a99a;
+  --text-muted: #8f6255;
+
+  --accent: #f97316;
+  --theme-accent: #f97316;
+}
+
+/* ============================================================
+   AURORA
+   ============================================================ */
+
+html[data-theme="aurora"] {
+  color-scheme: dark;
+
+  --bg: #04050c;
+  --bg-base: #04050c;
+  --surface: #090b18;
+  --surface-mid: #101329;
+  --panel: #070913;
+
+  --border: #31265c;
+  --dj-border: #31265c;
+  --dj-dim: #695d91;
+
+  --fg: #f8f3ff;
+  --text-primary: #fbf8ff;
+  --text-secondary: #c5b9d9;
+  --text-muted: #74698b;
+
+  --accent: #d946ef;
+  --theme-accent: #d946ef;
+}
+
+/* ============================================================
+   GLOBAL BASE
+   ============================================================ */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  margin: 0;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.neon-border {
+  border: 1.5px solid var(--accent);
+  box-shadow: var(--glow-sm);
+}
+
+.neon-lift:hover {
+  box-shadow: var(--glow-md);
+  border-color: var(--accent);
+}
+
+.neon-text {
+  color: var(--accent);
+  text-shadow:
+    0 0 6px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.neon-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--glow-sm);
+}
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    box-shadow: var(--glow-sm);
+  }
+
+  50% {
+    box-shadow: var(--glow-lg);
+  }
+}
+
+.neon-pulse {
+  animation: neonPulse 2s infinite ease-in-out;
+}
+
+/* ============================================================
+   R3 NATIVE — PROFESSIONAL SURFACE SYSTEM
+   Visual-only enhancement layer.
+   Preserves existing layout and component architecture.
+   ============================================================ */
+
 :root {
-  --panel:        #050505;   /* PRD appendix --panel token (was missing) */
-  --panel-deep:   #040404;   /* deepest panel layer */
-  --b8lime:       #b8ff00;   /* neon lime variant (≠ bfff00, used in AG theme) */
-  --zinc-600:     #52525b;
-  --zinc-700:     #3f3f46;
-  --zinc-800:     #27272a;
-  --zinc-400:     #a1a1aa;
-  --slate-400:    #94a3b8;
-  --green-400:    #4ade80;
-  --neutral-700:  #3a3a3a;
-  --amber-500:    #eab308;
-  --orange-400:   #fb923c;
-  --acid-dim:     #4d6b18;   /* looper-acid-dim (Three.js only — do not CSS-var in JSX) */
+  --r3-black-000: #050605;
+  --r3-black-100: #080a08;
+  --r3-black-200: #0b0e0b;
+  --r3-black-300: #0f120f;
+  --r3-black-400: #131713;
+  --r3-black-500: #181d18;
+
+  --r3-acid: #b7ff00;
+  --r3-acid-bright: #c9ff33;
+  --r3-acid-soft: #94cc00;
+  --r3-acid-dim: #557600;
+
+  --r3-text-strong: #f3f6ef;
+  --r3-text: #d6dbd2;
+  --r3-text-muted: #899188;
+  --r3-text-dim: #5d645c;
+
+  --r3-border: rgba(211, 222, 207, 0.105);
+  --r3-border-strong: rgba(211, 222, 207, 0.16);
+  --r3-border-acid: rgba(183, 255, 0, 0.28);
+
+  --r3-glow-soft:
+    0 0 18px rgba(183, 255, 0, 0.08);
+
+  --r3-glow:
+    0 0 24px rgba(183, 255, 0, 0.12);
+
+  --r3-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.28);
+
+  --r3-shadow-deep:
+    0 18px 55px rgba(0, 0, 0, 0.42);
+
+  --r3-radius: 8px;
+  --r3-radius-small: 5px;
+
+  --r3-border-width: 1px;
 }
 
-/* theme-config accent tokens — P3 remediation */
+/* ------------------------------------------------------------
+   GLOBAL SURFACE
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"],
+html[data-theme="acid"] {
+  color-scheme: dark;
+
+  --bg-base: var(--r3-black-000);
+  --bg: var(--r3-black-100);
+  --surface: var(--r3-black-200);
+  --surface-mid: var(--r3-black-300);
+  --panel: var(--r3-black-300);
+  --panel-deep: var(--r3-black-100);
+  --panel-void: var(--r3-black-000);
+
+  --text-primary: var(--r3-text-strong);
+  --text-secondary: var(--r3-text);
+  --text-muted: var(--r3-text-muted);
+  --text-dim: var(--r3-text-dim);
+
+  --accent: var(--r3-acid);
+  --theme-accent: var(--r3-acid);
+
+  --border: var(--r3-border);
+
+  --radius-sm: var(--r3-radius-small);
+  --radius-md: var(--r3-radius);
+}
+
+/* ------------------------------------------------------------
+   APPLICATION BACKDROP
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"] body,
+html[data-theme="acid"] body {
+  background:
+    radial-gradient(
+      circle at 82% 8%,
+      rgba(183, 255, 0, 0.035),
+      transparent 28%
+    ),
+    linear-gradient(
+      180deg,
+      #070807 0%,
+      #050605 100%
+    );
+
+  color: var(--r3-text);
+}
+
+/* ------------------------------------------------------------
+   UNIVERSAL BOX MODEL
+   Prevents border additions from changing component geometry.
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"] *,
+html[data-theme="acid"] * {
+  box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------
+   COMPONENT EDGE SYSTEM
+   Thin but deliberate.
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    button,
+    input,
+    select,
+    textarea,
+    [role="button"],
+    [role="dialog"],
+    [role="menu"],
+    [role="listbox"],
+    [class*="panel"],
+    [class*="Panel"],
+    [class*="card"],
+    [class*="Card"],
+    [class*="surface"],
+    [class*="Surface"]
+  ) {
+  border-color: var(--r3-border);
+}
+
+/* ------------------------------------------------------------
+   PANELS / CARDS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    [class*="panel"],
+    [class*="Panel"],
+    [class*="card"],
+    [class*="Card"],
+    [class*="surface"],
+    [class*="Surface"]
+  ) {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.018),
+      rgba(255, 255, 255, 0.004)
+    ),
+    var(--panel);
+
+  border: var(--r3-border-width) solid var(--r3-border);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.018),
+    var(--r3-shadow);
+}
+
+/* ------------------------------------------------------------
+   INTERACTIVE CONTROLS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    button,
+    [role="button"]
+  ) {
+  border: var(--r3-border-width) solid var(--r3-border);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.028),
+      rgba(255,255,255,0.008)
+    );
+
+  color: var(--r3-text);
+
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+html[data-theme="dark"]
+  :where(
+    button,
+    [role="button"]
+  ):hover {
+  border-color: var(--r3-border-strong);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(183,255,0,0.045),
+      rgba(255,255,255,0.012)
+    );
+
+  color: var(--r3-text-strong);
+}
+
+/* ------------------------------------------------------------
+   ACID PRIMARY ACTIONS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    button[data-variant="primary"],
+    button[data-primary="true"],
+    .primary,
+    .btn-primary
+  ) {
+  border-color: rgba(183, 255, 0, 0.42);
+
+  color: #091000;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--r3-acid-bright),
+      var(--r3-acid)
+    );
+
+  box-shadow:
+    0 0 0 1px rgba(183,255,0,0.05),
+    0 6px 20px rgba(183,255,0,0.10);
+}
+
+html[data-theme="dark"]
+  :where(
+    button[data-variant="primary"],
+    button[data-primary="true"],
+    .primary,
+    .btn-primary
+  ):hover {
+  border-color: rgba(201, 255, 51, 0.68);
+
+  box-shadow:
+    0 0 0 1px rgba(183,255,0,0.08),
+    0 0 26px rgba(183,255,0,0.16);
+}
+
+/* ------------------------------------------------------------
+   INPUTS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    input,
+    select,
+    textarea
+  ) {
+  border: var(--r3-border-width) solid var(--r3-border);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.018),
+      rgba(0,0,0,0.10)
+    ),
+    var(--r3-black-100);
+
+  color: var(--r3-text-strong);
+
+  outline: none;
+
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+html[data-theme="dark"]
+  :where(
+    input,
+    select,
+    textarea
+  ):hover {
+  border-color: var(--r3-border-strong);
+}
+
+html[data-theme="dark"]
+  :where(
+    input,
+    select,
+    textarea
+  ):focus {
+  border-color: var(--r3-border-acid);
+
+  box-shadow:
+    0 0 0 2px rgba(183,255,0,0.055),
+    var(--r3-glow-soft);
+}
+
+/* ------------------------------------------------------------
+   FOCUS VISIBILITY
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    button,
+    [role="button"],
+    input,
+    select,
+    textarea,
+    a
+  ):focus-visible {
+  outline: 1px solid rgba(183,255,0,0.62);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------
+   STATUS / SIGNAL ELEMENTS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    [data-status="active"],
+    [data-status="success"],
+    [data-state="active"]
+  ) {
+  border-color: var(--r3-border-acid);
+  box-shadow: var(--r3-glow-soft);
+}
+
+/* ------------------------------------------------------------
+   DIVIDERS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  hr {
+  border: 0;
+  border-top: 1px solid var(--r3-border);
+}
+
+/* ------------------------------------------------------------
+   SCROLLBARS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"] * {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(183,255,0,0.24)
+    rgba(255,255,255,0.025);
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.018);
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: rgba(183,255,0,0.20);
+  border: 1px solid rgba(0,0,0,0.35);
+}
+
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(183,255,0,0.38);
+}
+
+/* ------------------------------------------------------------
+   TEXT HIERARCHY
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6
+  ) {
+  color: var(--r3-text-strong);
+  letter-spacing: -0.015em;
+}
+
+html[data-theme="dark"]
+  :where(
+    small,
+    [data-muted="true"],
+    .muted
+  ) {
+  color: var(--r3-text-muted);
+}
+
+/* ------------------------------------------------------------
+   MICRO-SEPARATOR
+   Gives dense DAW interfaces better visual rhythm without
+   altering spacing or layout.
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    [data-divider="true"]
+  ) {
+  border-color: var(--r3-border);
+}
+
+/* ------------------------------------------------------------
+   DISABLED STATES
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"]
+  :where(
+    button,
+    input,
+    select,
+    textarea,
+    [role="button"]
+  ):disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ------------------------------------------------------------
+   REDUCE GLOW FOR USERS WHO REQUEST LESS MOTION/EFFECT
+   ------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="dark"] * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+
+/* ============================================================
+   R3 NATIVE — PREMIUM MATTE / ACID VISUAL SYSTEM
+   ------------------------------------------------------------
+   Philosophy:
+   matte black / precision green / technical restraint
+
+   This layer intentionally preserves the existing UI geometry.
+   It upgrades visual hierarchy without redesigning the product.
+   ============================================================ */
+
 :root {
-  --accent-indigo: #4f46e5;
-  --accent-fuchsia: #d946ef;
+  /* ----------------------------------------------------------
+     R3 CORE MATERIALS
+     ---------------------------------------------------------- */
+
+  --r3-void: #070807;
+  --r3-black: #0a0b0a;
+  --r3-matte: #0d0f0d;
+  --r3-surface: #111411;
+  --r3-surface-raised: #151815;
+  --r3-surface-hover: #191d19;
+  --r3-surface-active: #1d221d;
+
+  /* ----------------------------------------------------------
+     R3 STRUCTURAL COLORS
+     ---------------------------------------------------------- */
+
+  --r3-border: rgba(224, 255, 228, 0.105);
+  --r3-border-strong: rgba(224, 255, 228, 0.17);
+  --r3-border-accent: rgba(185, 255, 0, 0.38);
+
+  --r3-divider: rgba(255, 255, 255, 0.065);
+
+  /* ----------------------------------------------------------
+     R3 TYPOGRAPHY
+     ---------------------------------------------------------- */
+
+  --r3-text: #f0f4ef;
+  --r3-text-secondary: #aeb6ae;
+  --r3-text-muted: #737b73;
+  --r3-text-dim: #505650;
+
+  /* ----------------------------------------------------------
+     R3 ACID
+     ---------------------------------------------------------- */
+
+  --r3-acid: #baff00;
+  --r3-acid-bright: #d2ff4d;
+  --r3-acid-deep: #8fca00;
+  --r3-acid-dim: rgba(186, 255, 0, 0.12);
+  --r3-acid-soft: rgba(186, 255, 0, 0.06);
+
+  /* ----------------------------------------------------------
+     R3 STATUS
+     ---------------------------------------------------------- */
+
+  --r3-success: #baff00;
+  --r3-warning: #e7c95c;
+  --r3-danger: #ff5c63;
+  --r3-info: #82d9ff;
+
+  /* ----------------------------------------------------------
+     R3 DEPTH
+     ---------------------------------------------------------- */
+
+  --r3-shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.42);
+
+  --r3-shadow-md:
+    0 8px 24px rgba(0, 0, 0, 0.30);
+
+  --r3-shadow-lg:
+    0 18px 48px rgba(0, 0, 0, 0.38);
+
+  --r3-glow-acid:
+    0 0 0 1px rgba(186, 255, 0, 0.10),
+    0 0 18px rgba(186, 255, 0, 0.055);
+
+  /* ----------------------------------------------------------
+     R3 GEOMETRY
+     ---------------------------------------------------------- */
+
+  --r3-radius-sm: 5px;
+  --r3-radius-md: 8px;
+  --r3-radius-lg: 11px;
+
+  /* ----------------------------------------------------------
+     R3 MOTION
+     ---------------------------------------------------------- */
+
+  --r3-transition:
+    140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* p_final_patch — bulk accent tokens */
-:root {
-  --accent-orange:      #ff6600;
-  --accent-yellow:      #ffcc00;
-  --accent-blue:        #0088ff;
-  --accent-cyan:         #00F5FF;
-  --accent-purple:       #b048f8;
-  --accent-pink:        #f72585;
-  --accent-neon:        #39ff14;
-  --accent-neon-teal:   #06ffa5;
-  --accent-neon-lime:   #d4ff40;
-  --accent-blue-deep:   #003366;
-  --status-ok-dim:      #3d7c00;
-  --panel-void:         #000000;
+/* ============================================================
+   MATTE FOUNDATION
+   ============================================================ */
+
+html[data-theme="dark"],
+html[data-theme="acid"],
+html.dark {
+  background:
+    radial-gradient(
+      circle at 50% -20%,
+      rgba(186, 255, 0, 0.025),
+      transparent 34%
+    ),
+    var(--r3-void);
+
+  color: var(--r3-text);
 }
 
+html[data-theme="dark"] body,
+html[data-theme="acid"] body,
+html.dark body {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.008),
+      transparent 22%
+    ),
+    var(--r3-void);
 
-/* ── Text semantic tokens (alias layer) ─────────────────────── */
-:root {
-  --text-primary:   var(--daw-fg);     /* #f0f0f0 — primary body text */
-  --text-secondary: var(--daw-sub);    /* #aaaaaa — secondary text */
-  --text-muted:     var(--dj-muted);   /* #666666 — muted / disabled */
-  --text-dim:       #888888;           /* dim text — between secondary and muted */
+  color: var(--r3-text);
 }
 
-/* ── Agi-Suite semantic layer (--ag-*) ──────────────────────── */
-/* Consolidated from inline :root blocks previously duplicated in
-   instrument.tsx and multi-track-panel/index.tsx. Aliases to
-   primitives wherever possible; hex only when no primitive parent. */
-:root {
-  --ag-black:   var(--void);              /* darkest surface */
-  --ag-ink:     #0a0a0a;                  /* deep ink */
-  --ag-panel:   #0d0d0d;                  /* panel surface */
-  --ag-card:    var(--t-b1);              /* card surface */
-  --ag-border:  var(--dj-border);         /* card / panel border */
-  --ag-mute:    #2a2a2a;                  /* muted border / divider */
-  --ag-dim:     var(--neutral-700);       /* dim element */
-  --ag-mid:     var(--dj-muted);          /* mid-tone text/element */
-  --ag-soft:    var(--text-dim);          /* soft text */
-  --ag-acid:    #a3e635;                  /* primary accent — acid lime */
-  --ag-acid2:   var(--looper-lime);       /* secondary accent — lime */
-  --ag-acid-d:  var(--looper-acid-dim);   /* dim accent */
-  --ag-white:   var(--daw-fg);            /* primary text on dark */
-  --ag-err:     #ff3b3b;                  /* error red */
-  --ag-rec:     #ef4444;                  /* record red */
-  --ag-cyan:    var(--accent-cyan);       /* PRD §3 canonical active-state cyan */
-  --ag-glow:    rgba(163,230,53,0.12);    /* acid glow rgba */
+/* ============================================================
+   UNIVERSAL STRUCTURAL SEPARATION
+   ------------------------------------------------------------
+   Thin borders are deliberately subtle.
+   They should be discovered, not shouted.
+   ============================================================ */
+
+html[data-theme="dark"] *,
+html[data-theme="acid"] *,
+html.dark * {
+  border-color: var(--r3-border);
 }
+
+/* ============================================================
+   PANELS / CARDS / SURFACES
+   ============================================================ */
+
+html[data-theme="dark"] [class*="card"],
+html[data-theme="dark"] [class*="panel"],
+html[data-theme="dark"] [class*="Card"],
+html[data-theme="dark"] [class*="Panel"],
+html[data-theme="acid"] [class*="card"],
+html[data-theme="acid"] [class*="panel"],
+html[data-theme="acid"] [class*="Card"],
+html[data-theme="acid"] [class*="Panel"],
+html.dark [class*="card"],
+html.dark [class*="panel"],
+html.dark [class*="Card"],
+html.dark [class*="Panel"] {
+  background-color: var(--r3-surface);
+  border: 1px solid var(--r3-border);
+  box-shadow: var(--r3-shadow-sm);
+}
+
+/* ============================================================
+   INTERACTIVE SURFACES
+   ============================================================ */
+
+html[data-theme="dark"] button,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="acid"] button,
+html[data-theme="acid"] input,
+html[data-theme="acid"] textarea,
+html[data-theme="acid"] select,
+html.dark button,
+html.dark input,
+html.dark textarea,
+html.dark select {
+  transition:
+    background-color var(--r3-transition),
+    border-color var(--r3-transition),
+    box-shadow var(--r3-transition),
+    color var(--r3-transition),
+    transform var(--r3-transition);
+}
+
+/* ------------------------------------------------------------
+   BUTTONS
+   ------------------------------------------------------------ */
+
+html[data-theme="dark"] button,
+html[data-theme="acid"] button,
+html.dark button {
+  border-color: var(--r3-border);
+}
+
+html[data-theme="dark"] button:hover,
+html[data-theme="acid"] button:hover,
+html.dark button:hover {
+  border-color: var(--r3-border-strong);
+  background-color: var(--r3-surface-hover);
+}
+
+html[data-theme="dark"] button:focus-visible,
+html[data-theme="acid"] button:focus-visible,
+html.dark button:focus-visible {
+  outline: none;
+  border-color: var(--r3-border-accent);
+  box-shadow: var(--r3-glow-acid);
+}
+
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="acid"] input,
+html[data-theme="acid"] textarea,
+html[data-theme="acid"] select,
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background: var(--r3-black);
+  color: var(--r3-text);
+  border: 1px solid var(--r3-border);
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="acid"] input:focus,
+html[data-theme="acid"] textarea:focus,
+html[data-theme="acid"] select:focus,
+html.dark input:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: var(--r3-border-accent);
+  box-shadow: 0 0 0 1px rgba(186, 255, 0, 0.07);
+  outline: none;
+}
+
+/* ============================================================
+   PRIMARY ACID SIGNAL
+   ------------------------------------------------------------
+   Acid green is treated as DATA / ENERGY / STATE.
+   ============================================================ */
+
+html[data-theme="dark"] [data-active="true"],
+html[data-theme="acid"] [data-active="true"],
+html.dark [data-active="true"] {
+  border-color: var(--r3-border-accent);
+  box-shadow: var(--r3-glow-acid);
+}
+
+html[data-theme="dark"] [aria-current="page"],
+html[data-theme="acid"] [aria-current="page"],
+html.dark [aria-current="page"] {
+  color: var(--r3-acid);
+  border-color: var(--r3-border-accent);
+}
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+
+html[data-theme="dark"] a:hover,
+html[data-theme="acid"] a:hover,
+html.dark a:hover {
+  color: var(--r3-acid-bright);
+}
+
+/* ============================================================
+   SLIDERS
+   ============================================================ */
+
+html[data-theme="dark"] input[type="range"],
+html[data-theme="acid"] input[type="range"],
+html.dark input[type="range"] {
+  accent-color: var(--r3-acid);
+}
+
+/* ============================================================
+   CHECKBOXES / RADIOS
+   ============================================================ */
+
+html[data-theme="dark"] input[type="checkbox"],
+html[data-theme="dark"] input[type="radio"],
+html[data-theme="acid"] input[type="checkbox"],
+html[data-theme="acid"] input[type="radio"],
+html.dark input[type="checkbox"],
+html.dark input[type="radio"] {
+  accent-color: var(--r3-acid);
+}
+
+/* ============================================================
+   SELECTION
+   ============================================================ */
+
+html[data-theme="dark"] ::selection,
+html[data-theme="acid"] ::selection,
+html.dark ::selection {
+  background: rgba(186, 255, 0, 0.22);
+  color: #ffffff;
+}
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+
+html[data-theme="dark"] *,
+html[data-theme="acid"] *,
+html.dark * {
+  scrollbar-color:
+    rgba(186, 255, 0, 0.22)
+    rgba(255, 255, 255, 0.025);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar,
+html[data-theme="acid"] ::-webkit-scrollbar,
+html.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+html[data-theme="acid"] ::-webkit-scrollbar-track,
+html.dark ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.20);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+html[data-theme="acid"] ::-webkit-scrollbar-thumb,
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.105);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+html[data-theme="acid"] ::-webkit-scrollbar-thumb:hover,
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background:
+    rgba(186, 255, 0, 0.36);
+  background-clip: padding-box;
+}
+
+/* ============================================================
+   TECHNICAL HAIRLINE
+   ------------------------------------------------------------
+   Gives major surfaces the "precision hardware" character
+   without adding decorative graphics or changing layout.
+   ============================================================ */
+
+html[data-theme="dark"] [data-r3-surface],
+html[data-theme="acid"] [data-r3-surface],
+html.dark [data-r3-surface] {
+  border: 1px solid var(--r3-border);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.012),
+      transparent
+    ),
+    var(--r3-surface);
+}
+
+/* ============================================================
+   REDUCE VISUAL NOISE
+   ============================================================ */
+
+html[data-theme="dark"] .text-muted,
+html[data-theme="acid"] .text-muted,
+html.dark .text-muted {
+  color: var(--r3-text-muted);
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme="dark"] *,
+  html[data-theme="acid"] *,
+  html.dark * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* ============================================================
+   END R3 NATIVE PREMIUM VISUAL SYSTEM
+   ============================================================ */
+

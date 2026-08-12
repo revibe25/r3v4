@@ -1,0 +1,204 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--status-warn) (amber)
+// Reason: Navigation warning state — subscription/auth degraded indicator
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * client/src/components/page-nav.tsx [POLISHED]
+ * R3 v4 — global navigation bar.
+ *
+ * Design: acid-hardware strip — IBM Plex Mono, lime-green accent (#a3e635),
+ * emissive active state, tier badge, per-item auth awareness.
+ *
+ * Key behaviours
+ * ──────────────
+ * • Returns null on NAV_HIDDEN_ON routes (e.g. /auth) — keeps auth page clean.
+ * • Hides the Login button when the user is already authenticated.
+ * • Exposes NAV_HEIGHT_PX as a named export so App.tsx can inject --nav-h.
+ * • Active page gets accent background + emissive border; others are dimmed.
+ * • Tier badge (FREE / PRO / ELITE) shown next to logout when authenticated.
+ * • Admin link only appears for the designated admin email.
+ * • Settings button wired for future panel (no-op intentional, documented).
+ *
+ * Routing: Wouter useLocation() — NOT react-router-dom.
+ * Auth   : @/stores/authStore (the stores/ copy used by this component).
+ */
+import { Link, useLocation } from 'wouter';
+import { Tag, LogIn, Music, Radio, Repeat2, Settings, Shield, Layers, Users, Sliders, Plug, } from 'lucide-react';
+import { LogoutButton } from '@/components/logout-button';
+import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
+import { ThemeSwitcher } from '@/components/theme-switcher';
+// ── Layout token ─────────────────────────────────────────────────────────────
+export const NAV_HEIGHT_PX = 44;
+// ── Routes where nav is suppressed entirely ───────────────────────────────────
+const NAV_HIDDEN_ON = ['/auth', '/login'];
+// ── Admin gate ────────────────────────────────────────────────────────────────
+const ADMIN_EMAIL = 'earnestathepco@gmail.com';
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const T = {
+    bg: 'var(--dj-surface)',
+    border: 'var(--dj-border)',
+    accent: '#a3e635',
+    accentDim: '#a3e63522',
+    accentGlow: '#a3e63588',
+    dim: 'var(--dj-dim)',
+    dimHover: 'var(--text-dim)',
+    font: "'IBM Plex Mono', 'JetBrains Mono', monospace",
+};
+// ── Tier badge colours ────────────────────────────────────────────────────────
+const TIER_STYLE = {
+    explorer: { color: '#555', border: 'var(--dj-dimmer)' },
+    creator: { color: 'var(--status-warn)', border: '#f59e0b44' },
+    pro_artist: { color: '#a3e635', border: '#a3e63544' },
+};
+// ── Page definitions — ordered by intended user journey ──────────────────────
+const PAGES = [
+    { href: '/pricing', label: 'Pricing', icon: Tag, authOnly: false, hideWhenAuthed: false },
+    { href: '/auth', label: 'Login', icon: LogIn, authOnly: false, hideWhenAuthed: true },
+    { href: '/instrument', label: 'Instrument', icon: Music, authOnly: true, hideWhenAuthed: false },
+    { href: '/daw', label: 'Studio', icon: Radio, authOnly: true, hideWhenAuthed: false },
+    { href: '/loopstation', label: 'Loop', icon: Repeat2, authOnly: true, hideWhenAuthed: false },
+    { href: '/multitrack', label: 'Multitrack', icon: Layers, authOnly: true, hideWhenAuthed: false },
+    { href: '/collab', label: 'Collab', icon: Users, authOnly: true, hideWhenAuthed: false },
+    { href: '/mixer', label: 'Mixer', icon: Sliders, authOnly: true, hideWhenAuthed: false },
+    { href: '/vst', label: 'VST', icon: Plug, authOnly: true, hideWhenAuthed: false },
+];
+// ── Component ─────────────────────────────────────────────────────────────────
+export function PageNav() {
+    const [location] = useLocation();
+    const isAuthenticated = useAuthStore(selectIsAuthed);
+    const userEmail = useAuthStore(s => s.user?.email ?? '');
+    const tier = useAuthStore(s => s.user?.tier ?? 'explorer');
+    const isAdmin = userEmail === ADMIN_EMAIL;
+    // Suppress nav entirely on auth/login pages
+    if (NAV_HIDDEN_ON.includes(location))
+        return null;
+    const tierStyle = TIER_STYLE[tier] ?? TIER_STYLE.explorer;
+    return (_jsxs("nav", { "aria-label": "Main navigation", style: {
+            display: 'flex',
+            alignItems: 'center',
+            height: NAV_HEIGHT_PX,
+            padding: '0 16px',
+            background: T.bg,
+            borderBottom: `1px solid ${T.border}`,
+            fontFamily: T.font,
+            flexShrink: 0,
+            gap: 12,
+            userSelect: 'none',
+            boxSizing: 'border-box',
+        }, children: [_jsx("div", { style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    flex: 1,
+                    gap: 4,
+                    overflow: 'hidden',
+                    minWidth: 0,
+                }, children: PAGES.map(({ href, label, icon: Icon, authOnly, hideWhenAuthed }) => {
+                    if (hideWhenAuthed && isAuthenticated)
+                        return null;
+                    if (authOnly && !isAuthenticated)
+                        return null;
+                    const active = location === href;
+                    return (_jsxs(Link, { href: href, "aria-current": active ? 'page' : undefined, style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            height: 28,
+                            padding: '0 10px',
+                            background: active ? T.accentDim : 'transparent',
+                            color: active ? T.accent : T.dim,
+                            border: `1px solid ${active ? T.accent : T.border}`,
+                            borderRadius: 0,
+                            fontSize: 9,
+                            letterSpacing: '0.14em',
+                            textTransform: 'uppercase',
+                            textDecoration: 'none',
+                            whiteSpace: 'nowrap',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease-out',
+                            boxShadow: active ? `inset 0 0 12px ${T.accentGlow}, 0 0 8px ${T.accent}22` : 'none',
+                            flexShrink: 0,
+                        }, onMouseEnter: e => {
+                            if (!active) {
+                                const el = e.currentTarget;
+                                el.style.color = T.dimHover;
+                                el.style.borderColor = 'var(--dj-dim)';
+                                el.style.background = 'rgba(163, 230, 53, 0.08)';
+                            }
+                        }, onMouseLeave: e => {
+                            if (!active) {
+                                const el = e.currentTarget;
+                                el.style.color = T.dim;
+                                el.style.borderColor = T.border;
+                                el.style.background = 'transparent';
+                            }
+                        }, children: [_jsx(Icon, { size: 10, strokeWidth: 1.5 }), label] }, href));
+                }) }), _jsx("div", { style: {
+                    width: '1px',
+                    height: 28,
+                    background: T.border,
+                    flexShrink: 0,
+                } }), _jsxs("div", { style: { display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }, children: [isAuthenticated && (_jsx("span", { style: {
+                            padding: '3px 8px',
+                            border: `1px solid ${tierStyle.border}`,
+                            color: tierStyle.color,
+                            fontSize: 7,
+                            letterSpacing: '0.18em',
+                            textTransform: 'uppercase',
+                            fontFamily: T.font,
+                            lineHeight: 1.2,
+                            fontWeight: 500,
+                        }, children: tier })), isAuthenticated && isAdmin && (_jsxs("a", { href: "/admin", style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            height: 28,
+                            padding: '0 10px',
+                            background: 'transparent',
+                            border: `1px solid ${T.border}`,
+                            color: T.dim,
+                            fontSize: 9,
+                            letterSpacing: '0.14em',
+                            textDecoration: 'none',
+                            fontFamily: T.font,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease-out',
+                            flexShrink: 0,
+                        }, onMouseEnter: e => {
+                            const el = e.currentTarget;
+                            el.style.borderColor = T.accent;
+                            el.style.color = T.accent;
+                            el.style.boxShadow = `0 0 8px ${T.accent}22`;
+                        }, onMouseLeave: e => {
+                            const el = e.currentTarget;
+                            el.style.borderColor = T.border;
+                            el.style.color = T.dim;
+                            el.style.boxShadow = 'none';
+                        }, children: [_jsx(Shield, { size: 10, strokeWidth: 1.5 }), "ADMIN"] })), _jsx(ThemeSwitcher, {}), _jsx("button", { "aria-label": "Settings (coming soon)", title: "Settings (coming soon)", style: {
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: 28,
+                            width: 28,
+                            background: 'transparent',
+                            border: `1px solid ${T.border}`,
+                            color: T.dim,
+                            cursor: 'pointer',
+                            padding: 0,
+                            flexShrink: 0,
+                            transition: 'all 0.15s ease-out',
+                        }, onMouseEnter: e => {
+                            const el = e.currentTarget;
+                            el.style.background = T.accentDim;
+                            el.style.color = T.accent;
+                            el.style.borderColor = T.accent;
+                            el.style.boxShadow = `0 0 8px ${T.accent}22`;
+                        }, onMouseLeave: e => {
+                            const el = e.currentTarget;
+                            el.style.background = 'transparent';
+                            el.style.color = T.dim;
+                            el.style.borderColor = T.border;
+                            el.style.boxShadow = 'none';
+                        }, onClick: () => { }, children: _jsx(Settings, { size: 11, strokeWidth: 1.5 }) }), isAuthenticated && (_jsx("div", { style: { marginLeft: 4 }, children: _jsx(LogoutButton, { variant: "full" }) }))] })] }));
+}
