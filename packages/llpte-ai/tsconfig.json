@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
+    "isolatedModules": false,
     "declaration": true,
     "declarationMap": true,
     "paths": {
@@ -31,6 +32,8 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ]
 }

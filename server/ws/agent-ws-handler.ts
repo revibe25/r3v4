@@ -5,18 +5,25 @@ import { WebSocketServer, WebSocket } from 'ws';
 
 const AGENT_TOKEN = process.env.AGENT_SERVICE_TOKEN!;
 
-interface AuthedSocket extends WebSocket {
+type AuthedSocket = WebSocket & {
   agentId?: string;
-  authed?:  boolean;
-}
+  authed?: boolean;
+};
 
-type DSPParamCallback = (agentId: string, nodeId: string, param: string, value: number) => void;
+type DSPParamCallback = (
+  agentId: string,
+  nodeId: string,
+  param: string,
+  value: number,
+) => void;
 
 export function createAgentWSHandler(
   wss: WebSocketServer,
   onDSPParam: DSPParamCallback = defaultDSPParamHandler,
 ): void {
-  wss.on('connection', (ws: AuthedSocket) => {
+  wss.on('connection', (rawWs) => {
+    const ws = rawWs as AuthedSocket;
+
     const authTimer = setTimeout(() => {
       if (!ws.authed) {
         ws.close(4401, 'Authentication timeout');
@@ -25,6 +32,7 @@ export function createAgentWSHandler(
 
     ws.on('message', (raw) => {
       let msg: any;
+
       try {
         msg = JSON.parse(raw.toString());
       } catch {
@@ -33,16 +41,28 @@ export function createAgentWSHandler(
 
       if (msg.type === 'agent:auth') {
         if (msg.token !== AGENT_TOKEN || !msg.agentId) {
-          ws.send(JSON.stringify({ type: 'agent:auth:error', error: 'Invalid token' }));
+          ws.send(
+            JSON.stringify({
+              type: 'agent:auth:error',
+              error: 'Invalid token',
+            }),
+          );
+
           ws.close(4403, 'Forbidden');
           return;
         }
 
-        ws.authed  = true;
+        ws.authed = true;
         ws.agentId = msg.agentId;
         clearTimeout(authTimer);
 
-        ws.send(JSON.stringify({ type: 'agent:auth:ack', agentId: msg.agentId }));
+        ws.send(
+          JSON.stringify({
+            type: 'agent:auth:ack',
+            agentId: msg.agentId,
+          }),
+        );
+
         console.log(`[AgentWS] Agent authenticated: ${msg.agentId}`);
         return;
       }
@@ -52,14 +72,27 @@ export function createAgentWSHandler(
         return;
       }
 
-      if (msg.type === 'dsp:param' && typeof msg.nodeId === 'string') {
-        onDSPParam(ws.agentId!, msg.nodeId, msg.param, msg.value);
+      if (
+        msg.type === 'dsp:param' &&
+        typeof msg.nodeId === 'string'
+      ) {
+        onDSPParam(
+          ws.agentId!,
+          msg.nodeId,
+          msg.param,
+          msg.value,
+        );
       }
     });
 
     ws.on('close', () => {
       clearTimeout(authTimer);
-      if (ws.agentId) console.log(`[AgentWS] Agent disconnected: ${ws.agentId}`);
+
+      if (ws.agentId) {
+        console.log(
+          `[AgentWS] Agent disconnected: ${ws.agentId}`,
+        );
+      }
     });
   });
 
@@ -68,9 +101,11 @@ export function createAgentWSHandler(
 
 function defaultDSPParamHandler(
   agentId: string,
-  nodeId:  string,
-  param:   string,
-  value:   number,
+  nodeId: string,
+  param: string,
+  value: number,
 ): void {
-  console.log(`[AgentWS] DSP param from ${agentId}: node=${nodeId} ${param}=${value}`);
+  console.log(
+    `[AgentWS] DSP param from ${agentId}: node=${nodeId} ${param}=${value}`,
+  );
 }

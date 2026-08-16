@@ -77,7 +77,7 @@ if (NODE_ENV === 'production') {
 import { app } from './server/app';
 // ── Imports (after env validation) ────────────────────────────────────────────
 import { trpcAuth, loopStationAuth } from './server/middleware/auth';
-import { loopStationErrorHandler } from './server/middleware/errorHandler';
+import { errorHandler } from './server/middleware/errorHandler';
 import { stripeWebhookHandler } from './server/routes/stripe-webhook';
 import { appRouter } from './server/procedures';
 import { createContext } from './server/trpc';
@@ -245,7 +245,7 @@ async function main() {
         // MUST come after all routes and other middleware.
         // This is the ONLY error handler — no duplicates.
         app.use((err, req, res, _next) => {
-            loopStationErrorHandler(err, req, res, _next);
+            errorHandler(err, req, res, _next);
         });
         // ── Start server ───────────────────────────────────────────────────────
         await new Promise((resolve, reject) => {

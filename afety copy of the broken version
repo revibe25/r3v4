@@ -1,0 +1,138 @@
+[1mdiff --git a/server/trpc.ts b/server/trpc.ts[m
+[1mindex f62a04d..c2ccb46 100644[m
+[1m--- a/server/trpc.ts[m
+[1m+++ b/server/trpc.ts[m
+[36m@@ -1,118 +1,24 @@[m
+[31m-/**[m
+[31m- * server/trpc.ts[m
+[31m- *[m
+[31m- * Fix A  — ctx.sessionId never populated (AI rate limiter was dead code)[m
+[31m- * Fix B  — Duplicate user type definition[m
+[31m- * Fix C  — protectedProcedure did not block unauthenticated callers[m
+[31m- * NEW    — Add subscription to TRPCContext so feature-gate.ts middlewares[m
+[31m- *          (requireTier, requireFeature, checkAiTransitionLimit) can read[m
+[31m- *          ctx.subscription without TypeScript errors.[m
+[31m- * NEW    — Export AuthenticatedContext so requireAuth can narrow ctx.user[m
+[31m- *          from AuthPayload | undefined → AuthPayload, propagating through[m
+[31m- *          the full middleware chain to every protectedProcedure handler.[m
+[31m- * Fix D  — Removed duplicate protectedProcedure export from this file.[m
+[31m- *[m
+[31m- * Security patches applied (Mythos audit 2026-04-22):[m
+[31m- *   C-06 — Removed dead `JWT_SECRET` constant. It was never used (auth.ts[m
+[31m- *           has its own SECRET) but the inconsistent fallback string[m
+[31m- *           ('dev-secret-change-in-production' vs auth.ts's longer fallback)[m
+[31m- *           was a maintenance hazard — a future refactor could accidentally[m
+[31m- *           use this weaker constant for JWT verification.[m
+[31m- */[m
+[32m+[m[32mimport { initTRPC } from '@trpc/server';[m
+[32m+[m[32mimport type { Request } from 'express';[m
+[32m+[m[32mimport { optionalAuth } from './middleware/auth';[m
+ [m
+[31m-[m
+[31m-import { initTRPC, TRPCError }  from '@trpc/server';[m
+[31m-import type { Request, Response } from 'express';[m
+[31m-import type { AuthPayload }       from './middleware/auth';[m
+[31m-import type { UserSubscription }  from '../shared/subscription.types';[m
+[31m-import type {[m
+[31m-  MixerEngine,[m
+[31m-  DJEngine} from './lib/engine-stubs';[m
+[31m-import {[m
+[31m-  mixerEngine,[m
+[31m-  djEngine,[m
+[31m-} from './lib/engine-stubs';[m
+[31m-[m
+[31m-// Express.Request.user is declared in server/types/express.d.ts — single source.[m
+[31m-// Duplicate augmentation removed to prevent TS2717 (conflicting declarations).[m
+[31m-[m
+[31m-// ── Base context (unauthenticated) ────────────────────────────────────────────[m
+ export interface TRPCContext {[m
+   req: Request;[m
+[31m-  res: Response;[m
+[31m-  /** Populated by trpcAuth middleware. Undefined for unauthenticated requests. */[m
+[31m-  user?: AuthPayload;[m
+[31m-  /**[m
+[31m-   * Populated by attachSubscription in feature-gate.ts.[m
+[31m-   * undefined = not yet fetched (pre-attachSubscription).[m
+[31m-   * null       = user has no subscription row (treated as explorer).[m
+[31m-   */[m
+[31m-  subscription?: UserSubscription | null;[m
+[31m-  /**[m
+[31m-   * Audio session ID from the X-Session-Id request header.[m
+[31m-   * Required by checkAiTransitionLimit to scope per-session counts.[m
+[31m-   * Client contract: set once per recording/mix session, reuse for all[m
+[31m-   * AI transition calls. Example: X-Session-Id: <uuid>[m
+[31m-   *[m
+[31m-   * NOTE (SECURITY.md C-03): this value is fully client-controlled.[m
+[31m-   * An authenticated user can rotate this header on every request to[m
+[31m-   * bypass per-session AI transition limits. See SECURITY.md for the[m
+[31m-   * fix plan (server-side session binding or userId-only scoping).[m
+[31m-   */[m
+[31m-  sessionId: string | undefined;[m
+[31m-  /** Audio mixer engine — stub implementation */[m
+[31m-  mixerEngine: MixerEngine;[m
+[31m-  /** DJ engine — stub implementation */[m
+[31m-  djEngine: DJEngine;[m
+[31m-}[m
+[31m-[m
+[31m-/**[m
+[31m- * Narrowed context: user is AuthPayload (non-optional).[m
+[31m- * Used as the output context type of requireAuth so that every procedure[m
+[31m- * chained after it has ctx.user typed as AuthPayload, not AuthPayload | undefined.[m
+[31m- */[m
+[31m-export type AuthenticatedContext = Omit<TRPCContext, 'user'> & { user: AuthPayload };[m
+[31m-[m
+[31m-export function createContext({ req, res }: { req: Request; res: Response }): TRPCContext {[m
+[31m-  return {[m
+[31m-    req,[m
+[31m-    res,[m
+[31m-    user: req.user,[m
+[31m-    sessionId: (req.headers['x-session-id'] as string | undefined) || undefined,[m
+[31m-    mixerEngine,[m
+[31m-    djEngine,[m
+[31m-    // subscription is populated later by attachSubscription middleware[m
+[31m-  };[m
+[32m+[m[32m  user?: Request['user'];[m
+ }[m
+ [m
+ const t = initTRPC.context<TRPCContext>().create();[m
+ [m
+[31m-export const router     = t.router;[m
+[31m-export const publicProc = t.procedure;[m
+[31m-export const middleware  = t.middleware;[m
+[31m-[m
+[31m-/**[m
+[31m- * requireAuth — throws UNAUTHORIZED if ctx.user is absent.[m
+[31m- * Returns AuthenticatedContext so that downstream middlewares and handlers[m
+[31m- * see ctx.user as AuthPayload (non-optional). Must be chained first in[m
+[31m- * protectedProcedure before attachSubscription.[m
+[31m- *[m
+[31m- * Exported for use by procedures.ts only.[m
+[31m- * Do NOT use this to build a procedure directly — import protectedProcedure[m
+[31m- * from procedures.ts, which composes requireAuth + attachSubscription.[m
+[31m- */[m
+[31m-export const requireAuth = middleware(({ ctx, next }) => {[m
+[31m-  if (!ctx.user?.id) {[m
+[31m-    throw new TRPCError({[m
+[31m-      code: 'UNAUTHORIZED',[m
+[31m-      message: 'You must be logged in to access this resource.',[m
+[31m-    });[m
+[32m+[m[32mexport const router = t.router;[m
+[32m+[m[32mexport const publicProcedure = t.procedure;[m
+[32m+[m[32mexport const authedProcedure = t.procedure.use(({ ctx, next }) => {[m
+[32m+[m[32m  if (!ctx.user) {[m
+[32m+[m[32m    throw new Error('Unauthorized');[m
+   }[m
+[31m-  // Cast to AuthenticatedContext — user is guaranteed non-null after the throw above.[m
+[31m-  return next({ ctx: ctx as unknown as AuthenticatedContext });[m
+[32m+[m[32m  return next({[m
+[32m+[m[32m    ctx: {[m
+[32m+[m[32m      ...ctx,[m
+[32m+[m[32m      user: ctx.user,[m
+[32m+[m[32m    },[m
+[32m+[m[32m  });[m
+ });[m
+[31m-[m
+[31m-// ── protectedProcedure is NOT exported from this file ─────────────────────────[m
+[31m-// The single canonical definition is in base-procedures.ts:[m
+[31m-//   publicProc.use(requireAuth).use(attachSubscription)[m
+[31m-export const publicProcedure = t.procedure;[m

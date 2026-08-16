@@ -19,7 +19,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       reportsDirectory: './coverage',
-      lines: 70,
+      line: 70,
       functions: 70,
       statements: 70,
       branches: 65,

@@ -11,9 +11,9 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "noEmit": false,
-    "emitDeclarationOnly": true,
     "composite": true,
+    "isolatedModules": false,
+    "outDir": "./dist",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true

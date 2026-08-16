@@ -26,7 +26,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
     "@aws-sdk/s3-request-presigner": "^3.1045.0",
-    "@trpc/server": "11.12.0",
+    "@trpc/server": "11.18.0",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
@@ -67,7 +67,7 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
-    "@vitest/coverage-v8": "4.1.9",
+    "@vitest/coverage-v8": "4.1.10",
     "autoprefixer": "^10.5.0",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.4",
@@ -86,7 +86,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.11",
-    "vitest": "^4.1.8",
+    "vitest": "4.1.10",
     "wait-on": "^9.0.6"
   },
   "optionalDependencies": {

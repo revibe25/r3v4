@@ -1,16 +1,13 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
+import path from "path";
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.test.ts'],
-    environment: 'node',
     globals: true,
-    pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
+    environment: "node",
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
     },
-    testTimeout: 10000,
   },
 });

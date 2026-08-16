@@ -28,7 +28,11 @@
       "@shared/*": [
         "./shared/*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./server/types"
+    ]
   },
   "ts-node": {
     "esm": true,

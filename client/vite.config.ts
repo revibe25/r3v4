@@ -226,7 +226,8 @@ export default defineConfig(({ mode }): UserConfig => {
     optimizeDeps: {
       // Override the dev pre-bundler target. Vite's internal default (~chrome87)
       // cannot compile @floating-ui/core ≥1.7 which ships ES2022 destructuring.
-      esbuildOptions: {
+      /* [ASI-AUDIT] Migrated */
+    rolldownOptions: {
         target: 'es2022',
       },
       include: [

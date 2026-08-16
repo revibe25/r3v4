@@ -1,0 +1,104 @@
+/* ═══════════════════════════════════════════════════════════════════════════════
+   R3 NATIVE v2.0.0 — Design Token Bridge
+   Purpose: Merge the HTML prototype's r3-* token system into the existing
+            ag-* / --dj-* / --t-* design system without collision.
+   Strategy: r3-* becomes the "instrument panel" namespace; ag-* remains the
+            "global DAW" namespace. Where semantics overlap, we alias.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@layer tokens {
+  :root {
+    /* ── R3 Core Surface Ramp (instrument-specific) ──────────────────────── */
+    --r3-base:      var(--void, #070807);
+    --r3-panel:     var(--ag-panel, #0d0d0d);
+    --r3-elevated:  var(--t-b1, #0f0f0f);
+    --r3-input:     var(--t-b2, #141414);
+    --r3-hover:     var(--t-b2x, #1a1a1a);
+
+    /* ── R3 Border Ramp ──────────────────────────────────────────────────── */
+    --r3-border1:   var(--dj-border, #1c2117);
+    --r3-border2:   var(--t-b2, #141414);
+    --r3-border3:   var(--t-b3, #1e1e1e);
+    --r3-border4:   var(--t-b3x, #252525);
+
+    /* ── R3 Text Ramp ────────────────────────────────────────────────────── */
+    --r3-text1:     var(--daw-fg, #f5f5f5);
+    --r3-text2:     var(--daw-sub, #c7c7c7);
+    --r3-text3:     var(--text-dim, #858585);
+    --r3-text4:     var(--dj-muted, #646464);
+    --r3-text5:     var(--dj-dim, #4d4d4d);
+
+    /* ── R3 Accent (lime) — aliased to ag-acid with HTML's specific hex ──── */
+    --r3-accent:    #c8ff00;
+    --r3-accent2:   var(--ag-acid, #a3e635);
+    --r3-warn:      var(--signal-warn, #ffaa00);
+    --r3-danger:    var(--signal-clip, #ff4444);
+
+    /* ── R3 Typography ───────────────────────────────────────────────────── */
+    --r3-sans:      'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --r3-mono:      'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+    /* ── R3 Effects ──────────────────────────────────────────────────────── */
+    --r3-focus:     0 0 0 2px var(--r3-base), 0 0 0 3px rgba(200, 255, 0, 0.75);
+    --r3-shadow:    0 10px 30px rgba(0, 0, 0, 0.25);
+    --r3-inset:     inset 0 1px 0 rgba(255, 255, 255, 0.025), inset 0 -1px 0 rgba(0, 0, 0, 0.65);
+
+    /* ── R3 Soft Accents (for glows and transparent overlays) ────────────── */
+    --r3-accent-soft:   rgba(200, 255, 0, 0.10);
+    --r3-accent-line:   rgba(200, 255, 0, 0.28);
+    --r3-panel-hi:      #111111;
+    --r3-panel-low:     #090909;
+
+    /* ── R3 Metal Gradient (instrument chrome) ───────────────────────────── */
+    --r3-metal:     linear-gradient(180deg, #171717 0%, #0e0e0e 48%, #090909 100%);
+  }
+
+  /* ── Global Instrument Body Override ───────────────────────────────────── */
+  /* This class is applied ONLY to the instrument page shell, never globally */
+  .r3-instrument-body {
+    background:
+      radial-gradient(circle at 50% -15%, rgba(200, 255, 0, 0.025), transparent 34%),
+      linear-gradient(180deg, #090909 0%, #060606 100%);
+    font-family: var(--r3-sans);
+    color: var(--r3-text2);
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Scanline overlay — applied only within instrument shell */
+  .r3-instrument-body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.12;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+    mix-blend-mode: screen;
+  }
+
+  /* ── Scrollbar Override (instrument context only) ──────────────────────── */
+  .r3-instrument-body ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .r3-instrument-body ::-webkit-scrollbar-track {
+    background: var(--r3-base);
+  }
+  .r3-instrument-body ::-webkit-scrollbar-thumb {
+    background: #292929;
+    border-radius: 4px;
+  }
+
+  /* ── Selection ─────────────────────────────────────────────────────────── */
+  .r3-instrument-body ::selection {
+    background: rgba(200, 255, 0, 0.18);
+    color: #fff;
+  }
+}

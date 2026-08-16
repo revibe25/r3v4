@@ -3,12 +3,22 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "rootDir": "..",
+    "outDir": "./dist",
+    "composite": true,
+    "declaration": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "baseUrl": ".",
+    "ignoreDeprecations": "5.0",
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
     "paths": {
       "@shared/*": [
         "../shared/*"
@@ -28,17 +38,17 @@
       "@llpte/llpte-signal/*": [
         "../packages/llpte-signal/src/*"
       ],
-      "@llpte/llpte-ai": [
-        "../packages/llpte-ai/src/index.ts"
-      ],
-      "@llpte/llpte-ai/*": [
-        "../packages/llpte-ai/src/*"
-      ],
       "@llpte/llpte-core": [
         "../packages/llpte-core/src/index.ts"
       ],
       "@llpte/llpte-core/*": [
         "../packages/llpte-core/src/*"
+      ],
+      "@llpte/llpte-ai": [
+        "../packages/llpte-ai/src/index.ts"
+      ],
+      "@llpte/llpte-ai/*": [
+        "../packages/llpte-ai/src/*"
       ],
       "@llpte/llpte-adapters": [
         "../packages/llpte-adapters/src/index.ts"
@@ -58,14 +68,12 @@
       "@llpte/llpte-transition-graph/*": [
         "../packages/llpte-transition-graph/src/*"
       ]
-    },
-    "declaration": false,
-    "ignoreDeprecations": "5.0",
-    "rootDir": ".",
-    "composite": true
+    }
   },
   "include": [
-    "./**/*.ts"
+    "./**/*.ts",
+    "../shared/**/*",
+    "../packages/**/*"
   ],
   "exclude": [
     "node_modules",
@@ -76,7 +84,7 @@
     "../client/**",
     "vite-dev.ts",
     "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  "composite": true
+    "**/*.spec.ts",
+    "drizzle/migrations/**"
+  ]
 }

@@ -100,7 +100,7 @@ function requireTier(ctx: { user?: { is_admin?: boolean } | null; subscription?:
     });
   }
 }
-interface LLPTESignal {
+export interface LLPTESignal {
   rms:            number;
   peak:           number;
   spectralCentroid: number;
@@ -108,7 +108,7 @@ interface LLPTESignal {
   lufsIntegrated: number;
 }
 
-interface MixSuggestion {
+export interface MixSuggestion {
   type:        'mix' | 'arrangement' | 'mastering' | 'harmony' | 'rhythm';
   confidence:  number;
   description: string;

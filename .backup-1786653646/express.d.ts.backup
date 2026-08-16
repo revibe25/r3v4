@@ -1,0 +1,21 @@
+// server/types/express.d.ts
+/**
+ * Type augmentation for Express Request object to include authenticated user
+ * This file is loaded via typeRoots in server/tsconfig.json
+ */
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        email: string;
+        role?: string;
+        sessionId?: string;
+        createdAt?: Date;
+      };
+    }
+  }
+}
+
+export {};

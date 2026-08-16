@@ -36,7 +36,7 @@ async function getDummyHash(): Promise<string> {
   if (_dummyHash === null) {
     _dummyHash = await bcrypt.hash("__r3_dummy_password__", BCRYPT_ROUNDS);
   }
-  return _dummyHash;
+  return _dummyHash!;
 }
 
 // ── Validation schemas ────────────────────────────────────────────────────────

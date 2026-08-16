@@ -1,0 +1,44 @@
+{
+  "name": "@r3vibe/agent-os",
+  "version": "0.1.0",
+  "description": "Agent-OS: Openclaw + Hermes-Agent orchestration layer for R3 Native DAW",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk/index.d.ts",
+      "import": "./dist/sdk/index.js"
+    },
+    "./openclaw": {
+      "types": "./dist/openclaw/index.d.ts",
+      "import": "./dist/openclaw/index.js"
+    },
+    "./hermes": {
+      "types": "./dist/hermes/index.d.ts",
+      "import": "./dist/hermes/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@trpc/client": "^11.0.0",
+    "zod": "^3.22.0",
+    "pino": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^2.0.0"
+  }
+}

@@ -119,6 +119,9 @@ export function registerAudioInitTriggers(): () => void {
       // Dynamic import — Tone.js must NOT be imported at module scope in a
       // utility that loads before any user gesture.
       const Tone = await import('tone');
+      if (typeof Tone?.start !== 'function') {
+        throw new Error('[R3 Audio] Tone.start is not a function; import destructuring failed');
+      }
       await Tone.start();
       console.debug('[R3 Audio] AudioContext resumed via user gesture.');
     } catch (audioErr) {

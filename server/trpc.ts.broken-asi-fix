@@ -1,0 +1,24 @@
+import { initTRPC } from '@trpc/server';
+import type { Request } from 'express';
+import { optionalAuth } from './middleware/auth';
+
+export interface TRPCContext {
+  req: Request;
+  user?: Request['user'];
+}
+
+const t = initTRPC.context<TRPCContext>().create();
+
+export const router = t.router;
+export const publicProcedure = t.procedure;
+export const authedProcedure = t.procedure.use(({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new Error('Unauthorized');
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      user: ctx.user,
+    },
+  });
+});
