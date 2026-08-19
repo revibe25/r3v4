@@ -59,7 +59,7 @@
     "framer-motion": "^11.18.2",
     "fuse.js": "^7.3.0",
     "gsap": "^3.15.0",
-    "immer": "^11.1.8",
+    "immer": "^11.1.17",
     "input-otp": "^1.4.2",
     "js-cookie": "^3.0.7",
     "lamejs": "^1.2.1",

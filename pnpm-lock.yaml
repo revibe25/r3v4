@@ -362,8 +362,8 @@ importers:
         specifier: ^3.15.0
         version: 3.15.0
       immer:
-        specifier: ^11.1.8
-        version: 11.1.16
+        specifier: ^11.1.17
+        version: 11.1.17
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -450,7 +450,7 @@ importers:
         version: 3.25.76
       zustand:
         specifier: ^4.5.7
-        version: 4.5.7(@types/react@18.3.31)(immer@11.1.16)(react@18.3.1)
+        version: 4.5.7(@types/react@18.3.31)(immer@11.1.17)(react@18.3.1)
     devDependencies:
       '@playwright/test':
         specifier: ^1.59.1
@@ -3680,8 +3680,8 @@ packages:
     resolution: {integrity: sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==}
     engines: {node: '>= 4'}
 
-  immer@11.1.16:
-    resolution: {integrity: sha512-Xs7H9rBc+kti1J6RueUvbEBkmOz7jqj11XYgf+YMXAYzu8EeE7hwZ9poLXdVfVnGmJu7QAf41T7H2KuF6QoK6Q==}
+  immer@11.1.17:
+    resolution: {integrity: sha512-8Vu44Y0MuMBlTQz/jQ8HEMYNq/bBqk87MnBwYR5mC8AthfhEXidZ5aT/oA/CUqboa8THKltnD9L3xyqhU/Sy1Q==}
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -6824,7 +6824,7 @@ snapshots:
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@standard-schema/utils': 0.3.0
-      immer: 11.1.16
+      immer: 11.1.17
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
       reselect: 5.2.0
@@ -8689,7 +8689,7 @@ snapshots:
 
   ignore@7.0.6: {}
 
-  immer@11.1.16: {}
+  immer@11.1.17: {}
 
   import-fresh@3.3.1:
     dependencies:
@@ -9726,7 +9726,7 @@ snapshots:
       decimal.js-light: 2.5.1
       es-toolkit: 1.50.0
       eventemitter3: 5.0.4
-      immer: 11.1.16
+      immer: 11.1.17
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       react-is: 17.0.2
@@ -10786,10 +10786,10 @@ snapshots:
     optionalDependencies:
       react: 18.3.1
 
-  zustand@4.5.7(@types/react@18.3.31)(immer@11.1.16)(react@18.3.1):
+  zustand@4.5.7(@types/react@18.3.31)(immer@11.1.17)(react@18.3.1):
     dependencies:
       use-sync-external-store: 1.6.0(react@18.3.1)
     optionalDependencies:
       '@types/react': 18.3.31
-      immer: 11.1.16
+      immer: 11.1.17
       react: 18.3.1
