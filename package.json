@@ -9,7 +9,7 @@
     "dev": "concurrently --kill-others-on-fail -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
     "dev:server": "NODE_OPTIONS='--import dotenv/config' tsx watch --ignore ./client --ignore ./node_modules index.ts",
     "dev:client": "wait-on tcp:3000 && pnpm --filter @r3vibe/client dev",
-    "build": "pnpm --filter @r3vibe/shared build && pnpm --filter @llpte/llpte-signal build && pnpm --filter @llpte/llpte-core build && pnpm --filter @llpte/llpte-ai build && pnpm --filter @llpte/llpte-adapters build && pnpm --filter @llpte/llpte-execution build && pnpm --filter @llpte/llpte-transition-graph build && pnpm --filter @r3vibe/server build",
+    "build": "pnpm --filter @r3vibe/shared build && pnpm --filter @llpte/llpte-signal build && pnpm --filter @llpte/llpte-core build && pnpm --filter @llpte/llpte-ai build && pnpm --filter @llpte/[...]",
     "start": "npx tsx index.ts",
     "seed": "tsx scripts/seed/index.ts",
     "lint:tokens": "tsx scripts/lint-design-tokens.ts",
@@ -19,7 +19,7 @@
     "typecheck": "pnpm -r exec tsc --noEmit",
     "test:coverage": "vitest run --coverage",
     "implement-metrics": "tsx implement-session-metrics.ts",
-    "verify": "pnpm tsc -p tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.worklet.json --noEmit && pnpm tsc -p client/tsconfig.vocalspectra.json --noEmit",
+    "verify": "pnpm tsc -p tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.json --noEmit && pnpm tsc -p client/tsconfig.worklet.json --noEmit && pnpm tsc -p client/tsconfig.vocalspectra.json[...]",
     "verify:client": "pnpm tsc -p client/tsconfig.json --noEmit",
     "migrate": "cd server && npx drizzle-kit push --config drizzle.config.ts --force"
   },
@@ -91,6 +91,11 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.1.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": ">=0.25.0"
+    }
   },
   "packageManager": "pnpm@10.33.0",
   "type": "module"
