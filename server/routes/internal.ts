@@ -6,6 +6,7 @@
  *
  * Consumers: Agi-Suite api-server (server-to-server only)
  */
+import crypto from 'crypto';
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import { count, sum, avg } from "drizzle-orm";
 import { db }              from "../db";
@@ -15,13 +16,19 @@ const router = Router();
 
 const INTERNAL_SECRET = process.env["INTERNAL_SECRET"];
 
-function requireInternalSecret(req: Request, res: Response, next: NextFunction) {
+export function requireInternalSecret(req: Request, res: Response, next: NextFunction) {
   if (!INTERNAL_SECRET) {
     res.status(503).json({ error: "INTERNAL_SECRET not configured" });
     return;
   }
-  const header = (req.headers as Record<string, string | string[] | undefined>)["x-internal-secret"];
-  if (header !== INTERNAL_SECRET) {
+  const headerRaw = (req.headers as Record<string, string | string[] | undefined})["x-internal-secret"];
+  const header = Array.isArray(headerRaw) ? headerRaw[0] : (headerRaw ?? '');
+
+  const headerBuf = Buffer.from(header);
+  const secretBuf = Buffer.from(INTERNAL_SECRET);
+
+  // Avoid timingSafeEqual throwing when lengths differ by checking length first.
+  if (headerBuf.length !== secretBuf.length || !crypto.timingSafeEqual(headerBuf, secretBuf)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
