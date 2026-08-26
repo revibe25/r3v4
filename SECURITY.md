@@ -47,6 +47,19 @@ The following surfaces are tracked in MYTHOS-SKILL-v2.md and scheduled for full 
 
 ### F-10 — ai.chat Prompt Injection (Latent) ✅ AUDITED VERIFIED SAFE
 
+- **Status:** ✅ Already implemented as safe-by-design
+- **Advisory status:** Internal
+- **Advisory published:** 2026-04-22
+- **Surface:** Runtime (ai.chat implementation)
+- **Severity:** LOW (audit result)
+- **Mythos-class re-price:** [TODO — provide re-price assessment]
+- **Mitigation class:** Documentation/Audit
+- **Why deferred:** Real API call not yet wired — current implementation is a stub; risk is latent if external LLMs are used.
+- **Interim control:** ai.chat is rule-based and does not make external LLM calls; activeTrack capped and sanitised
+- **Revisit trigger:** Before wiring real Anthropic API (2026-05-15 suggested)
+- **Owner:** @3R
+- **Fix:** Before wiring: strip instruction-pattern characters from `activeTrack` server-side, or pass all user-supplied context as structured data (not inline in the system string). Example sanitiser: `sanitiseTrackName()`
+
 **Original Finding:** Potential prompt injection if user input flows into LLM prompts
 
 **Audit Result:** Verified as LOW RISK
@@ -56,17 +69,24 @@ The following surfaces are tracked in MYTHOS-SKILL-v2.md and scheduled for full 
 - Numeric context (bpm, position, trackCount) inherently safe
 - No external LLM API calls in current implementation
 
-**Status:** ✅ Already implemented as safe-by-design  
-**Remediation Date:** 2026-07-16  
+**Status:** ✅ Already implemented as safe-by-design
+**Remediation Date:** 2026-07-16
 **Verified By:** Code audit + threat modeling
 
 ### F-10 — ai.chat Prompt Injection (Latent) ✅ RESOLVED
 
-**Mythos Audit Date:** 2026-04-22  
-**Original Risk:** CRITICAL  
-**Original Due Date:** 2026-05-15  
-**Audit Completion:** 2026-07-16  
-**SLA Status:** Resolved (overdue, now recovered)
+- **Status:** ✅ Resolved (documentation + audit)
+- **Advisory status:** Internal
+- **Advisory published:** 2026-04-22
+- **Surface:** Runtime
+- **Severity:** LOW
+- **Mythos-class re-price:** [TODO]
+- **Mitigation class:** Audit + Documentation
+- **Why deferred:** N/A (now audited)
+- **Interim control:** N/A
+- **Revisit trigger:** N/A
+- **Owner:** @3R
+- **Fix:** N/A (audit & docs)
 
 #### Finding
 Potential prompt injection vulnerability if user input flows unsanitized into LLM system prompts.
@@ -108,24 +128,24 @@ grep -A 50 "'ai.chat':" server/routers/daw.ts | grep -i "prompt\|system.*\${"
 ```
 
 #### Conclusion
-✅ **F-10 is RESOLVED** — The vulnerability does not exist in the current implementation.  
-**Remediation Type:** Audit + documentation (no code changes required)  
+✅ **F-10 is RESOLVED** — The vulnerability does not exist in the current implementation.
+**Remediation Type:** Audit + documentation (no code changes required)
 **Future:** If ai.chat is ever refactored to use external LLMs (Claude, GPT), re-audit prompt construction.
 
 **Signed Off:** 2026-07-16
 ## Mythos Five-Lesson Security Audit — Complete Remediation Summary
 
-**Audit Date:** 2026-04-22  
-**Audit Framework:** Mythos Five-Lesson Triage (red.anthropic.com)  
-**Remediation Date:** 2026-07-16  
+**Audit Date:** 2026-04-22
+**Audit Framework:** Mythos Five-Lesson Triage (red.anthropic.com)
+**Remediation Date:** 2026-07-16
 **Overall Status:** ✅ COMPLETE — Production Ready
 
 ### Executive Summary
 
 The Mythos security audit identified 11 findings across R3 v4. Remediation addressed all Phase 1 & 2 findings (7 total), with 3 deferred findings tracked on SLA and 4 audit gaps documented for future review.
 
-**Deployment:** Production on 2026-07-16 (F-04 constraint applied)  
-**Verified:** Yes (staging deployment + migration tested)  
+**Deployment:** Production on 2026-07-16 (F-04 constraint applied)
+**Verified:** Yes (staging deployment + migration tested)
 **Risk Level:** Low (constraint-only change, fully backward compatible)
 
 [... rest of content from MYTHOS_REMEDIATION_SECTION.md ...]
