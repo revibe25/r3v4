@@ -15,10 +15,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "tsx": "^4.0.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.0.0",
     "vitest": "4.1.10",
-    "@vitest/coverage-v8": "4.1.10"
+    "@vitest/coverage-v8": "4.1.11"
   },
   "exports": {
     ".": {
