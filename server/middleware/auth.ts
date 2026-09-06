@@ -9,6 +9,7 @@ declare module 'express' {
       username: string;
       email?: string;
       tier: SubscriptionTier;
+      is_admin?: boolean;
     };
   }
 }
@@ -18,6 +19,7 @@ export interface AuthPayload {
   username: string;
   email?: string;
   tier: SubscriptionTier;
+  is_admin?: boolean;
 }
 
 export function optionalAuth(req: Request, res: Response, next: NextFunction) {
@@ -28,7 +30,7 @@ export function optionalAuth(req: Request, res: Response, next: NextFunction) {
   const token = authHeader.split(' ')[1];
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as AuthPayload;
-    req.user = payload;
+    req.user = payload; // Pass through is_admin from JWT if present
   } catch {
     // ignore invalid token
   }
@@ -42,13 +44,20 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+export function requireUser(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (req.user?.tier !== 'admin') {
+  if (!req.user?.is_admin) {
     return res.status(403).json({ error: 'Forbidden' });
   }
   next();
 }
 
-// ── tRPC procedure aliases ───────────────────────────────────────────────────
-export const trpcAuth = requireAuth;
-export const requireUser = requireAuth;
+export function trpcAuth(req: Request) {
+  return req.user;
+}
