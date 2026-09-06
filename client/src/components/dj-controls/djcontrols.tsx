@@ -7,9 +7,9 @@ import {
 } from './types';
 import { Knob } from './knob';
 import { TransBtn } from './transbtn';
-import { VUMeter } from './vumeter';
+import { VUMeter } from '../three/vumeter';
 import { ModeSwitcher } from './modeswitcher';
-import { WaveformDisplay } from './waveformdisplay';
+import { WaveformDisplay } from '../three/waveformdisplay';
 
 type PanelMode = 'compact' | 'normal' | 'professional';
 

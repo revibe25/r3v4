@@ -34,8 +34,8 @@ import type {
 } from '../hooks/useDAWStore';
 
 // ─── Component imports ──────────────────────────────────────────────────────
-import { AudioReactiveScene } from '../components/daw/AudioReactiveScene';
-import { WaveformMesh } from '../components/daw/WaveformMesh';
+import { AudioReactiveScene } from '../components/three/AudioReactiveScene';
+import { WaveformMesh } from '../components/three/WaveformMesh';
 import { SessionChip } from '../components/session-summary/SessionChip';
 import { SessionSummaryPanel } from '../components/session-summary/SessionSummaryPanel';
 import { API_BASE } from '../config';

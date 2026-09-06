@@ -1,7 +1,7 @@
 import { getAudioContext } from "@/audio/core/audio-context";
 // client/src/engine/audio-engine.ts
 
-export interface AudioState {
+export interface BeatDetectorState {
   bpm: number;
   rms: number;
   spectrum: Float32Array;
@@ -22,8 +22,8 @@ interface AudioEngineConfig {
   bpmSmoothing?: number; // 0 → 1
 }
 
-type BeatCallback = (state: AudioState) => void;
-type UpdateCallback = (state: AudioState) => void;
+type BeatCallback = (state: BeatDetectorState) => void;
+type UpdateCallback = (state: BeatDetectorState) => void;
 
 export class AudioEngine {
   private ctx!: AudioContext;
@@ -37,7 +37,7 @@ export class AudioEngine {
   private updateCallbacks: UpdateCallback[] = [];
   private config: AudioEngineConfig;
 
-  state: AudioState = {
+  state: BeatDetectorState = {
     bpm: 120,
     rms: 0,
     spectrum: new Float32Array(1024) as unknown as Float32Array,
