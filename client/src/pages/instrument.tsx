@@ -120,20 +120,20 @@ export default function Instrument() {
       const h = canvas.height;
       ctx.fillStyle = "#0a0a0a";
       ctx.fillRect(0, 0, w, h);
-      if (audio.state?.fftData) {
-        const data = audio.state.fftData;
-        const barW = w / data.length;
-        for (let i = 0; i < data.length; i++) {
-          const barH = (data[i] / 255) * h * 0.8;
-          ctx.fillStyle = "hsl(" + ((i / data.length) * 280 + 180) + ", 80%, 60%)";
-          ctx.fillRect(i * barW, h - barH, barW - 1, barH);
-        }
-      }
+//       if (audio.state?.fftData) {
+//         const data = audio.state.fftData;
+//         const barW = w / data.length;
+//         for (let i = 0; i < data.length; i++) {
+//           const barH = (data[i] / 255) * h * 0.8;
+//           ctx.fillStyle = "hsl(" + ((i / data.length) * 280 + 180) + ", 80%, 60%)";
+//           ctx.fillRect(i * barW, h - barH, barW - 1, barH);
+//         }
+//       }
       animId = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(animId);
-  }, [audio.state?.fftData]);
+  }, []);
 
   return (
     <div className="instrument-page" onKeyDown={handleKeyDown} tabIndex={0}>
