@@ -20,7 +20,7 @@ import { logger } from "../utils/logger";
 import { requireUser } from "../middleware/requireUser";
 import { randomUUID } from "crypto";
 
-const router = Router();
+const router: import("express").Router = Router();
 
 // ── Environment config ────────────────────────────────────────────────────────
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev_secret_do_not_use_in_production_32x";
@@ -95,7 +95,7 @@ function signToken(payload: {
   id: string;
   email?: string;
   username?: string;
-  tier: string;
+  tier: "explorer" | "creator" | "pro_artist";
 }): string {
   return jwt.sign({ ...payload, jti: randomUUID() }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES,
@@ -171,7 +171,7 @@ router.post("/register", async (req, res) => {
       id: user.id,
       email: (user.email as string | null) ?? undefined,
       username: user.username as string,
-      tier: (user.tier as string | undefined) ?? "explorer",
+      tier: (user.tier as "explorer" | "creator" | "pro_artist" | undefined) ?? "explorer",
     });
 
     logger.info({ userId: user.id, username }, "User registered successfully");
@@ -249,7 +249,7 @@ router.post("/login", async (req, res) => {
       id: u.id as string,
       email: (u.email as string | null) ?? undefined,
       username: u.username as string,
-      tier: (u.tier as string | undefined) ?? "explorer",
+      tier: (u.tier as "explorer" | "creator" | "pro_artist" | undefined) ?? "explorer",
     });
 
     logger.info(
@@ -368,4 +368,4 @@ router.post("/change-password", requireUser, async (req, res) => {
 });
 
 export default router;
-export const authRouter = router;
+export const authRouter: import("express").Router = router;
