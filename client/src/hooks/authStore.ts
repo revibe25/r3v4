@@ -42,7 +42,7 @@ interface AuthState {
   error:       string | null;
 
   // Actions
-  login:       (email: string, password: string) => Promise<void>;
+  login:       (credential: string, password: string) => Promise<void>;
   register:    (email: string, password: string) => Promise<void>;
   logout:      () => void;
   initAuth:    () => Promise<void>;
@@ -90,12 +90,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error:   null,
 
   // ── login ──────────────────────────────────────────────────────────────────
-  login: async (email, password) => {
+  login: async (credential, password) => {
     set({ loading: true, error: null });
     try {
       const { token, user } = await authFetch<{ token: string; user: AuthUser }>(
         '/api/auth/login',
-        { credential: email.trim().toLowerCase(), password },
+        { credential: credential.trim().toLowerCase(), password },
       );
       // [wire§8] removed — auth via httpOnly cookie
       localStorage.setItem('r3_token', token);

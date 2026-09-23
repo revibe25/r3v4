@@ -367,5 +367,22 @@ router.post("/change-password", requireUser, async (req, res) => {
   }
 });
 
+// ── GET /api/health ────────────────────────────────────────────────────────
+// Simple health check for client-side status monitoring.
+// Used by R3/NATIVE auth page to show ONLINE/OFFLINE/DEGRADED status.
+// Response: { status: 'ok' | 'degraded', timestamp: number }
+//
+// NOTE: Mounted under /api/auth (matches this router's mount prefix).
+// If your Express app mounts this router at /api/auth, the URL becomes
+// /api/auth/health — update the HTML page's healthUrl config accordingly
+// OR mount a separate health router at /api/health in server/index.ts.
+
+router.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: Date.now(),
+  });
+});
+
 export default router;
 export const authRouter: import("express").Router = router;

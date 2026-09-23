@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 type InsertEffectPreset = typeof effectPresetsTable.$inferInsert;
 type InsertEffectChain  = typeof effectChainsTable.$inferInsert;
 
-const router = Router();
+const router: import("express").Router = Router();
 
 router.get('/presets', async (_req, res) => { try { res.json(await db.select().from(effectPresetsTable)); } catch { res.status(500).json({ error: 'Failed to fetch presets' }); } });
 router.get('/presets/:id', async (req, res) => { try { const r = await db.select().from(effectPresetsTable).where(eq(effectPresetsTable.id, req.params.id)); if (!r.length) return res.status(404).json({ error: 'Not found' }); res.json(r[0]); } catch { res.status(500).json({ error: 'Failed to fetch preset' }); } });

@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { safeResolve, writeJSON, readJSON, deleteFile, listFiles } from '../utils/fileUtils';
 import { logger } from '../lib/logger';
 
-const router = Router();
+const router: import("express").Router = Router();
 const PROJECTS_DIR = safeResolve('projects');
 
 const TrackSchema = z.object({ idx:z.number().int().min(0).max(99), name:z.string().max(80).optional(), loopId:z.string().optional(), filename:z.string().optional(), volume:z.number().min(0).max(1).default(1), muted:z.boolean().default(false), fx:z.object({ filterFreq:z.number().optional(), delayTime:z.number().optional(), delayFeedback:z.number().optional(), reverbDecay:z.number().optional(), compThreshold:z.number().optional() }).passthrough().optional() });

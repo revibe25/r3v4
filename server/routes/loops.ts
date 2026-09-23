@@ -12,7 +12,7 @@ import { safeResolve, writeFile, readFile, deleteFile, listFiles, statFile } fro
 import { logger }        from '../lib/logger';
 import { uploadLimiter } from '../middleware/rateLimit';
 
-const router = Router();
+const router: import("express").Router = Router();
 const MAX_LOOP_BYTES = (Number(process.env.MAX_LOOP_SIZE_MB) || 10) * 1024 * 1024;
 const ALLOWED_MIMES  = new Set(['audio/wav','audio/webm','audio/ogg','audio/mpeg']);
 const LOOPS_DIR      = safeResolve('loops');

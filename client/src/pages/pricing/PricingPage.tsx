@@ -161,7 +161,7 @@ function PriceDisplay({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
 
   if (isFree(plan)) {
     return (
-      <div className="mb-6">
+      <div className="mb-3">
         <span className="text-4xl font-mono" style={{ color: COLOR.textBody }}>$0</span>
         <span className="text-sm font-mono ml-1.5" style={{ color: COLOR.textDim }}>forever</span>
       </div>
@@ -169,7 +169,7 @@ function PriceDisplay({ plan, cycle }: { plan: Plan; cycle: BillingCycle }) {
   }
 
   return (
-    <div className="mb-6">
+    <div className="mb-3">
       <div className="flex items-end gap-0.5">
         <span className="text-sm font-mono mb-1.5" style={{ color: COLOR.textDim }}>$</span>
         <motion.span
@@ -202,7 +202,7 @@ function PlanCta({ plan, accent, isPending, onCheckout }: {
       onClick={() => { if (!isPending) onCheckout(plan); }}
       disabled={isPending}
       aria-busy={isPending}
-      className="w-full py-2.5 px-4 text-sm font-mono tracking-wide transition-all
+      className="w-full py-2 px-3 text-sm font-mono tracking-wide transition-all
                  duration-200 mb-6 flex items-center justify-center gap-2
                  disabled:opacity-60 disabled:cursor-not-allowed group/btn"
       style={plan.popular
@@ -225,7 +225,7 @@ function FeatureRow({ feature }: { feature: Plan["features"][number] }) {
   const lc = !feature.included ? COLOR.textGhost
     : feature.highlight ? COLOR.textBody : COLOR.textMuted;
   return (
-    <li className="flex items-start gap-2.5 py-[3px]">
+    <li className="flex items-start gap-1.5 py-1">
       <span className="mt-0.5 shrink-0" style={{ color: cc }}>
         <Check size={12} strokeWidth={2.5} />
       </span>
@@ -268,7 +268,7 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
       {/* Gradient top bar removed — was creating visual clutter */}
       {/* Plan badge removed — was creating green corner blocks  */}
 
-      <div className="p-6 flex flex-col flex-1">
+      <div className="p-4 flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-1">
           <span style={{ color: accent }}>{PLAN_ICON[plan.id]}</span>
           <span
@@ -285,7 +285,7 @@ function PlanCard({ plan, cycle, index, isPending, onCheckout }: {
         <PriceDisplay plan={plan} cycle={cycle} />
         <PlanCta plan={plan} accent={accent} isPending={isPending} onCheckout={onCheckout} />
         <div className="h-px mb-4" style={{ background: COLOR.borderSub }} />
-        <ul className="flex flex-col flex-1">
+        <ul className="flex flex-col flex-1 text-xs overflow-y-auto max-h-40">
           {plan.features.map(f => <FeatureRow key={f.label} feature={f} />)}
         </ul>
       </div>
@@ -300,7 +300,7 @@ function StatsStrip() {
   return (
     <motion.div
       {...fadeUpProps}
-      className="grid grid-cols-4 overflow-hidden mb-14"
+      className="grid grid-cols-4 overflow-hidden mb-8"
       style={{ border: `1px solid ${COLOR.borderSub}`, background: COLOR.borderSub, gap: "1px" }}
     >
       {STAT_ITEMS.map(({ value, label, Icon }) => (
@@ -327,7 +327,7 @@ function StorageTable() {
   return (
     <motion.div
       {...fadeUpProps}
-      className="overflow-hidden mb-16"
+      className="overflow-hidden mb-10"
       style={{ border: `1px solid ${COLOR.borderSub}` }}
     >
       <div
@@ -368,7 +368,7 @@ function FAQ() {
   const shouldReduceMotion = useReducedMotion();
 
   return (
-    <div className="max-w-2xl mx-auto mb-12">
+    <div className="max-w-2xl mx-auto mb-8">
       <p
         className="text-[11px] font-mono uppercase tracking-[0.18em] text-center mb-6"
         style={{ color: COLOR.textDim }}
@@ -484,8 +484,8 @@ export default function PricingPage() {
       <GridOverlay />
       <ScanLine />
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-20">
-        <motion.div {...headerFadeUp} className="text-center mb-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-8 py-8">
+        <motion.div {...headerFadeUp} className="text-center mb-8">
 
           {/* ── Subscription badge — transparent, no green fill ── */}
           <div
@@ -502,7 +502,7 @@ export default function PricingPage() {
           </div>
 
           <h1
-            className="text-5xl font-mono font-bold tracking-tight mb-4 leading-tight"
+            className="text-4xl font-mono font-bold tracking-tight mb-3 leading-tight"
             style={{ color: COLOR.textPrimary }}
           >
             Build your studio.<br />
@@ -511,7 +511,7 @@ export default function PricingPage() {
             </span>
           </h1>
           <p
-            className="text-[15px] font-mono max-w-xl mx-auto mb-8 leading-relaxed"
+            className="text-[13px] font-mono max-w-2xl mx-auto mb-6 leading-relaxed"
             style={{ color: COLOR.textDim }}
           >
             Professional DJ &amp; DAW tools in the browser. No installs, no dongles.
@@ -522,7 +522,7 @@ export default function PricingPage() {
         <StatsStrip />
 
         {/* 3-column grid — matches SUBSCRIPTION_TIERS exactly */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3 mb-8">
           {PLANS.map((plan, i) => (
             <PlanCard
               key={plan.id}
@@ -535,10 +535,10 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <StorageTable />
-        <FAQ />
+        { /* <StorageTable /> */ }
+        { /* <FAQ /> */ }
 
-        <p className="text-center text-[12px] font-mono" style={{ color: COLOR.textGhost }}>
+        <p className="hidden text-center text-[12px] font-mono" style={{ color: COLOR.textGhost }}>
           14-day free trial on Creator &amp; Pro Artist&nbsp;·&nbsp;No credit card required&nbsp;·&nbsp;Cancel anytime
         </p>
       </div>

@@ -1,3 +1,4 @@
+import express from "express";
 /**
  * routes/midi.ts
  * POST /api/midi/mappings  GET /api/midi/mappings
@@ -8,7 +9,7 @@ import { z } from 'zod';
 import { safeResolve, writeJSON, readJSON } from '../utils/fileUtils';
 import { logger } from '../lib/logger';
 
-const router     = Router();
+const router: express.Router = Router();
 const MIDI_FILE  = safeResolve('midi-mappings.json');
 const MappingEntrySchema   = z.object({ key: z.string().regex(/^\d+-(?:cc|note)-\d+$/), action: z.string().min(1).max(80), label: z.string().max(80).optional() });
 const MappingsPayloadSchema = z.object({ mappings: z.array(MappingEntrySchema).max(512) });

@@ -118,3 +118,11 @@ shared/types/*.d.ts
 shared/types/*.d.ts.map
 MYTHOS_DEFENSE*.md
 r3v4-repo-check/
+
+# R3/NATIVE auth integration
+.env.local
+
+# accidental empty files from shell redirects
+/playwright
+/pnpm
+/tsc

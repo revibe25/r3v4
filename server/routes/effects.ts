@@ -21,7 +21,7 @@ import { requireUser } from "../middleware/requireUser";
 import { logger }      from "../utils/logger";
 import { storage }     from "../storage";
 
-const router = Router();
+const router: import("express").Router = Router();
 
 // Helper: normalize Express params (can be string | string[])
 const getStringParam = (p: string | string[] | undefined): string =>

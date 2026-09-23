@@ -11,7 +11,7 @@ import { count, sum, avg } from "drizzle-orm";
 import { db }              from "../db";
 import { sessionMetrics }  from "@shared/schema-session-metrics";
 
-const router = Router();
+const router: import("express").Router = Router();
 
 const INTERNAL_SECRET = process.env["INTERNAL_SECRET"];
 

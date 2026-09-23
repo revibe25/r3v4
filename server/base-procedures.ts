@@ -35,6 +35,6 @@ import { attachSubscription }      from './middleware/feature-gate';
  * requireTier / requireFeature / checkAiTransitionLimit all read
  * ctx.subscription — they must be chained AFTER this procedure.
  */
-export const protectedProcedure = publicProc
+export const protectedProcedure: any = publicProc
   .use(requireAuth)
   .use(attachSubscription);

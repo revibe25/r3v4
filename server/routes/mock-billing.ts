@@ -36,7 +36,7 @@ import {
   TIER_DEFINITIONS,
 } from '@shared/subscription.types';
 
-const router = express.Router();
+const router: express.Router = express.Router();
 
 // Urlencoded parser for form POSTs — scoped to this router only
 const urlencoded = express.urlencoded({ extended: false });

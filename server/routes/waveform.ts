@@ -33,7 +33,7 @@ import { safeResolve }               from "../utils/fileUtils";            // §
 import { requireUser }               from "../middleware/requireUser";
 import { logger }                    from "../utils/logger";
 
-const router = Router();
+const router: import("express").Router = Router();
 
 // ── Upload directories ────────────────────────────────────────────────────────
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");

@@ -118,11 +118,25 @@ export function registerAudioInitTriggers(): () => void {
     try {
       // Dynamic import — Tone.js must NOT be imported at module scope in a
       // utility that loads before any user gesture.
-      const Tone = await import('tone');
-      if (typeof Tone?.start !== 'function') {
-        throw new Error('[R3 Audio] Tone.start is not a function; import destructuring failed');
+      const ToneModule = await import('tone');
+      // oxc wraps CJS modules — try every known shape before giving up
+      const mod: any = (ToneModule as any).default ?? ToneModule;
+      if (typeof mod.start === 'function') {
+        await mod.start();
+      } else if (typeof mod.getContext === 'function') {
+        const ctx = mod.getContext();
+        if (ctx?.rawContext?.state === 'suspended') {
+          await ctx.rawContext.resume();
+        }
+      } else {
+        // Last resort: resume any suspended AudioContext directly
+        const ac: any = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
+        if (ac) {
+          const instance = new ac();
+          if (instance.state === 'suspended') await instance.resume();
+        }
+        console.debug('[R3 Audio] Used raw AudioContext fallback.');
       }
-      await Tone.start();
       console.debug('[R3 Audio] AudioContext resumed via user gesture.');
     } catch (audioErr) {
       // Non-fatal: Tone.js may not yet be in the chunk for the current route.
