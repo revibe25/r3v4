@@ -74,8 +74,8 @@ cmd_migrate() {
             exit 0
         fi
     fi
-    print_status "Running: drizzle-kit push"
-    ./server/node_modules/.bin/drizzle-kit push --config server/drizzle.config.ts
+    print_status "Running: drizzle-kit migrate"
+    ./server/node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts
     print_success "Migrations complete"
 }
 cmd_query() {
