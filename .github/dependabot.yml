@@ -8,13 +8,67 @@ updates:
       day: "monday"
       time: "06:00"
       timezone: "America/Chicago"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 10
     groups:
       security-fixes:
         applies-to: security-updates
         patterns: ["*"]
-      dependencies:
-        patterns: ["*"]
+      query-stack:
+        patterns:
+          - "@tanstack/react-query"
+          - "@trpc/*"
+      frontend-ui:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@radix-ui/*"
+          - "framer-motion"
+          - "tailwind*"
+          - "lucide-react"
+          - "clsx"
+          - "class-variance-authority"
+          - "next-themes"
+          - "zustand"
+          - "wouter"
+      frontend-tooling:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "typescript"
+          - "eslint"
+          - "prettier"
+          - "vitest"
+          - "playwright"
+          - "@types/*"
+      backend-runtime:
+        patterns:
+          - "express"
+          - "@aws-sdk/*"
+          - "drizzle-*"
+          - "pg"
+          - "postgres"
+          - "stripe"
+          - "@anthropic-ai/*"
+          - "jsonwebtoken"
+          - "helmet"
+          - "cors"
+          - "morgan"
+          - "multer"
+          - "cookie-parser"
+      core-runtime:
+        patterns:
+          - "dotenv"
+          - "zod"
+          - "superjson"
+          - "uuid"
+          - "nanoid"
+      workspace-build:
+        patterns:
+          - "pnpm"
+          - "turbo"
+          - "tsx"
+          - "ts-morph"
+          - "esbuild"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
