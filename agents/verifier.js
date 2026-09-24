@@ -16,6 +16,21 @@ const SEC_MD = path.join(PROJECT_ROOT, 'SECURITY.md');
 const SKILL = path.join(PROJECT_ROOT, 'MYTHOS-SKILL-v2.md');
 const SARIF_OUT = path.join(PROJECT_ROOT, 'output/security-findings.sarif.json');
 
+const REQUIRED_DEFERRED_FIELDS = [
+  { name: 'Status', aliases: ['status:'] },
+  { name: 'Advisory status', aliases: ['advisory status:'] },
+  { name: 'Advisory published', aliases: ['advisory published:'] },
+  { name: 'Surface', aliases: ['surface:'] },
+  { name: 'Severity', aliases: ['severity:', 'our severity:'] },
+  { name: 'Mythos-class re-price', aliases: ['mythos-class re-price:'] },
+  { name: 'Mitigation class', aliases: ['mitigation class:', 'mitigation:'] },
+  { name: 'Why deferred', aliases: ['why deferred:'] },
+  { name: 'Interim control', aliases: ['interim control:'] },
+  { name: 'Revisit trigger', aliases: ['revisit trigger:'] },
+  { name: 'Owner', aliases: ['owner:'] },
+  { name: 'Fix', aliases: ['fix:', 'fix'] }
+];
+
 // Helper: Check version/attestation consistency in skill doc
 function checkVersion(skillFile) {
   const txt = fs.readFileSync(skillFile, 'utf8');
@@ -40,11 +55,16 @@ function checkSurfaces(skillFile, secFile) {
   return holes;
 }
 
-function hasField(lines, aliases) {
+function hasAnyField(lines, aliases) {
   const normalized = lines.map(line => line.toLowerCase());
   return aliases.some(alias =>
     normalized.some(line => line.includes(alias.toLowerCase()))
   );
+}
+
+function extractDeferredFindingName(lines) {
+  const heading = lines.find(line => /^###\s+/.test(line));
+  return heading?.replace(/^###\s+/, '').trim() || 'Unknown deferred finding';
 }
 
 // Helper: Detect deferred findings (blocked) missing required fields
@@ -54,43 +74,38 @@ function checkBlockedFindings(secFile) {
   const lines = txt.split('\n');
   let current = [];
   let inFinding = false;
+
   for (const line of lines) {
-    if (/^### /.test(line)) {
+    if (/^###\s+/.test(line)) {
       inFinding = true;
       current = [line];
-    } else if (inFinding) {
-      current.push(line);
-      if (line.trim() === '') {
-        // Only scan deferred findings for all required fields
-        if (/Status:\s*Deferred/i.test(current.join('\n'))) {
-          const mustHave = [
-            ['Status:', 'Status:'],
-            ['Advisory status:', 'Advisory status:'],
-            ['Advisory published:', 'Advisory published:'],
-            ['Surface:', 'Surface:'],
-            ['Severity:', 'Severity:', 'Our severity:'],
-            ['Mythos-class re-price:', 'Mythos-class re-price:'],
-            ['Mitigation class:', 'Mitigation class:', 'Mitigation:'],
-            ['Why deferred:', 'Why deferred:'],
-            ['Interim control:', 'Interim control:'],
-            ['Revisit trigger:', 'Revisit trigger:'],
-            ['Owner:', 'Owner:'],
-            ['Fix:', 'Fix:']
-          ];
+      continue;
+    }
 
-          const missing = mustHave
-            .filter(([primary, ...aliases]) => !hasField(current, [primary, ...aliases]))
-            .map(([primary]) => primary);
+    if (!inFinding) continue;
 
-          if (missing.length) {
-            blocks.push({ finding: current[0], missing });
-          }
+    current.push(line);
+
+    if (line.trim() === '') {
+      const sectionText = current.join('\n');
+      if (/^Status:\s*Deferred\b/i.test(sectionText)) {
+        const missing = REQUIRED_DEFERRED_FIELDS
+          .filter(({ aliases }) => !hasAnyField(current, aliases))
+          .map(({ name }) => name);
+
+        if (missing.length > 0) {
+          blocks.push({
+            finding: extractDeferredFindingName(current),
+            missing
+          });
         }
-        inFinding = false;
-        current = [];
       }
+
+      inFinding = false;
+      current = [];
     }
   }
+
   return blocks;
 }
 
@@ -115,30 +130,31 @@ async function main() {
 
     if (unreviewedSurfaces.length > 0) {
       findings.push({
-        level: "error",
+        level: 'error',
         message: `Audit surfaces present in policy but missing in reviewed findings: ${unreviewedSurfaces.join(', ')}`,
-        ruleId: "audit-gap"
+        ruleId: 'audit-gap'
       });
     }
+
     if (blockedFindings.length > 0) {
       blockedFindings.forEach(b => {
         findings.push({
-          level: "error",
+          level: 'error',
           message: `Deferred finding missing required fields: ${b.finding} (missing: ${b.missing.join(', ')})`,
-          ruleId: "defer-incomplete"
+          ruleId: 'defer-incomplete'
         });
       });
     }
 
     // 5. SARIF-format output
     const sarif = {
-      version: "2.1.0",
+      version: '2.1.0',
       runs: [{
-        tool: {driver: {name: "mythos-aris-verifier", version}},
+        tool: { driver: { name: 'mythos-aris-verifier', version } },
         results: findings.map(f => ({
           level: f.level,
           ruleId: f.ruleId,
-          message: {text: f.message}
+          message: { text: f.message }
         }))
       }]
     };
@@ -146,15 +162,16 @@ async function main() {
     // 6. Write results
     fs.mkdirSync(path.dirname(SARIF_OUT), { recursive: true });
     fs.writeFileSync(SARIF_OUT, JSON.stringify(sarif, null, 2));
+
     if (findings.length > 0) {
       findings.forEach(f => console.error(`ERROR: ${f.message}`));
       process.exit(1);
-    } else {
-      console.log("PASS: All audit gates closed.");
-      process.exit(0);
     }
+
+    console.log('PASS: All audit gates closed.');
+    process.exit(0);
   } catch (e) {
-    console.error("Verifier error:", e?.message || e);
+    console.error('Verifier error:', e?.message || e);
     process.exit(2);
   }
 }
