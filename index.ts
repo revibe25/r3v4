@@ -85,7 +85,7 @@ if (NODE_ENV === 'production') {
 import { app } from './server/app';
 
 // ── Imports (after env validation) ────────────────────────────────────────────
-import { trpcAuth, requireAuth } from './server/middleware/auth';
+import { trpcAuth, requireAuth, requireAdmin } from './server/middleware/auth';
 import { errorHandler } from './server/middleware/errorHandler';
 import { stripeWebhookHandler } from './server/routes/stripe-webhook';
 import { appRouter } from './server/procedures';
@@ -221,15 +221,7 @@ async function main(): Promise<void> {
     app.use('/api', loopStationLimiter, requireAuth, midiRoutes);
 
     // ── Admin stats endpoint ───────────────────────────────────────────────
-    app.get('/api/admin/stats', async (req: Request, res: Response) => {
-      const parts = (req.headers['authorization'] ?? '').split(' ');
-      if (parts[0] !== 'Bearer' || !parts[1]) {
-        return res.status(401).json({ error: 'Authentication required.' });
-      }
-      if (!req.user?.email || req.user.email !== process.env.ADMIN_EMAIL) {
-        return res.status(403).json({ error: 'Forbidden.' });
-      }
-      
+    app.get('/api/admin/stats', requireAdmin, async (_req: Request, res: Response) => {
       let dbStatus = 'ok', dbLatencyMs = 0;
       try {
         const { db } = await import('./server/db/index.js');

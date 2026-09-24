@@ -37,7 +37,7 @@ import path from "path";
 import fs from "fs/promises";
 import { insertSampleSchema } from "./db/schema";
 import { storage } from "./storage";
-import { trpcAuth, requireUser } from "./middleware/auth";
+import { requireUser } from "./middleware/auth";
 import authRouter from "./routes/auth";
 import { internalRouter } from "./routes/internal";
 import { uploadLimiter } from "./middleware/rateLimit";
@@ -88,7 +88,6 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // and writes the decoded payload to req.user when valid. Non-blocking:
   // always calls next(). An invalid or absent token is silently ignored here;
   // routes that require authentication enforce it via requireUser below.
-  app.use(trpcAuth);
 
   // ── AUTH ROUTES ───────────────────────────────────────────────────────────
   app.use('/api/auth', authRouter);
