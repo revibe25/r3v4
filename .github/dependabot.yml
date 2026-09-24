@@ -17,7 +17,7 @@ updates:
         patterns:
           - "@tanstack/react-query"
           - "@trpc/*"
-      frontend-ui:
+      frontend-runtime:
         patterns:
           - "react"
           - "react-dom"
@@ -55,20 +55,16 @@ updates:
           - "morgan"
           - "multer"
           - "cookie-parser"
-      core-runtime:
+          - "qs"
+      workspace-tooling:
         patterns:
-          - "dotenv"
-          - "zod"
-          - "superjson"
-          - "uuid"
-          - "nanoid"
-      workspace-build:
-        patterns:
-          - "pnpm"
-          - "turbo"
           - "tsx"
           - "ts-morph"
+          - "turbo"
           - "esbuild"
+          - "nanoid"
+          - "autoprefixer"
+          - "concurrently"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]

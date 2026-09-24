@@ -1,5 +1,5 @@
 {
-  "name": "@r3vibe/server",
+  "name": "r3v4",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -24,31 +24,6 @@
     "db:generate": "./server/node_modules/.bin/drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "./server/node_modules/.bin/drizzle-kit migrate --config drizzle.config.ts",
     "db:check": "./server/node_modules/.bin/drizzle-kit check --config drizzle.config.ts"
-  },
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.1045.0",
-    "@aws-sdk/s3-request-presigner": "^3.1045.0",
-    "@trpc/server": "11.18.0",
-    "bcrypt": "^6.0.0",
-    "compression": "^1.8.1",
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "drizzle-orm": "0.45.2",
-    "drizzle-zod": "^0.7.1",
-    "express": "^5.2.1",
-    "express-rate-limit": "^7.5.1",
-    "helmet": "^8.1.0",
-    "jsonwebtoken": "^9.0.3",
-    "morgan": "^1.10.1",
-    "multer": "^2.1.1",
-    "pg": "^8.20.0",
-    "postgres": "3.4.9",
-    "stripe": "^20.4.1",
-    "superjson": "^2.2.6",
-    "uuid": "^14.0.0",
-    "ws": "^8.21.0",
-    "zod": "^3.25.76",
-    "zod-validation-error": "^3.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
