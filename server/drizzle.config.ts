@@ -1,12 +1,3 @@
-import { defineConfig } from "drizzle-kit";
-
-export default defineConfig({
-  dialect: "postgresql",
-  schema: "./db/schema.ts",
-  out: "./drizzle/migrations",
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-    ssl: false,
-  },
-  verbose: true,
-});
+// RETIRED 2026-09: migrations are managed from the repo root.
+// Use: pnpm db:generate / pnpm db:migrate (root drizzle.config.ts → drizzle/migrations).
+throw new Error("server/drizzle.config.ts is retired — run drizzle-kit from the repo root with ./drizzle.config.ts");
