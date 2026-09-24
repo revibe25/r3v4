@@ -40,6 +40,13 @@ function checkSurfaces(skillFile, secFile) {
   return holes;
 }
 
+function hasField(lines, aliases) {
+  const normalized = lines.map(line => line.toLowerCase());
+  return aliases.some(alias =>
+    normalized.some(line => line.includes(alias.toLowerCase()))
+  );
+}
+
 // Helper: Detect deferred findings (blocked) missing required fields
 function checkBlockedFindings(secFile) {
   const txt = fs.readFileSync(secFile, 'utf8');
@@ -55,22 +62,26 @@ function checkBlockedFindings(secFile) {
       current.push(line);
       if (line.trim() === '') {
         // Only scan deferred findings for all required fields
-        if (/Status:\s*Deferred/.test(current.join('\n'))) {
+        if (/Status:\s*Deferred/i.test(current.join('\n'))) {
           const mustHave = [
-            'Status:',
-            'Advisory status:',
-            'Advisory published:',
-            'Surface:',
-            'Severity:',
-            'Mythos-class re-price:',
-            'Mitigation class:',
-            'Why deferred:',
-            'Interim control:',
-            'Revisit trigger:',
-            'Owner:',
-            'Fix:'
+            ['Status:', 'Status:'],
+            ['Advisory status:', 'Advisory status:'],
+            ['Advisory published:', 'Advisory published:'],
+            ['Surface:', 'Surface:'],
+            ['Severity:', 'Severity:', 'Our severity:'],
+            ['Mythos-class re-price:', 'Mythos-class re-price:'],
+            ['Mitigation class:', 'Mitigation class:', 'Mitigation:'],
+            ['Why deferred:', 'Why deferred:'],
+            ['Interim control:', 'Interim control:'],
+            ['Revisit trigger:', 'Revisit trigger:'],
+            ['Owner:', 'Owner:'],
+            ['Fix:', 'Fix:']
           ];
-          const missing = mustHave.filter(fld => !current.some(ln => ln.includes(fld)));
+
+          const missing = mustHave
+            .filter(([primary, ...aliases]) => !hasField(current, [primary, ...aliases]))
+            .map(([primary]) => primary);
+
           if (missing.length) {
             blocks.push({ finding: current[0], missing });
           }
