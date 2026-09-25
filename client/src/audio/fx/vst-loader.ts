@@ -1,4 +1,5 @@
 // @ts-nocheck
+import vstProcessorWorkletUrl from './vst-processor.worklet.ts?worker&url';
 // client/src/audio/fx/vst-loader.ts
 
 interface VSTExports extends WebAssembly.Exports {
@@ -65,13 +66,13 @@ export interface VSTMetadata {
 
 export class VSTLoader {
   private static workletRegistered = false;
-  private static workletUrl = /* @vite-ignore */ new URL('../../public/worklets/vst-processor.worklet.js', import.meta.url);
+  private static workletUrl = vstProcessorWorkletUrl;
 
   static async ensureWorkletRegistered(audioCtx: AudioContext): Promise<void> {
     if (this.workletRegistered) return;
 
     try {
-      await audioCtx.audioWorklet.addModule(this.workletUrl.href);
+      await audioCtx.audioWorklet.addModule(this.workletUrl);
       this.workletRegistered = true;
       console.log('VST AudioWorklet registered');
     } catch (error) {

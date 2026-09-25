@@ -27,7 +27,7 @@
 import { Link, useLocation } from 'wouter';
 import {
   Tag, LogIn, Music, Radio, Repeat2,
-  Settings, Shield, Layers, Users, Sliders, Plug,
+  Settings, Shield, Layers, Users, Plug,
 } from 'lucide-react';
 import { LogoutButton } from '@/components/logout-button';
 import { useAuthStore, selectIsAuthed } from '@/hooks/authStore';
@@ -70,7 +70,6 @@ const PAGES = [
   { href: '/loopstation',label: 'Loop',       icon: Repeat2, authOnly: true,  hideWhenAuthed: false },
   { href: '/multitrack', label: 'Multitrack', icon: Layers,  authOnly: true,  hideWhenAuthed: false },
   { href: '/collab',     label: 'Collab',     icon: Users,   authOnly: true,  hideWhenAuthed: false },
-  { href: '/mixer',      label: 'Mixer',      icon: Sliders, authOnly: true,  hideWhenAuthed: false },
   { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
 ] as const;
 

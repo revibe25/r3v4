@@ -1,3 +1,4 @@
+import instrumentProcessorWorkletUrl from '../../worklets/instrument-processor.worklet.ts?worker&url';
 export interface AudioState {
   pads: PadState[];
   keys: KeyState[];
@@ -166,11 +167,7 @@ class AudioEngine {
     // Falls back to direct connection if worklet loading fails (test env,
     // bundler without worklet support, or HTTP context without HTTPS).
     try {
-      const workletUrl = new URL(
-        '../../worklets/instrument-processor.worklet.ts',
-        import.meta.url,
-      );
-      await this.ctx.audioWorklet.addModule(workletUrl);
+      await this.ctx.audioWorklet.addModule(instrumentProcessorWorkletUrl);
       this.procNode = new AudioWorkletNode(this.ctx, 'instrument-processor');
       limiter.connect(this.procNode);
       this.procNode.connect(this.ctx.destination);

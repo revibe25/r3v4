@@ -13,7 +13,6 @@
  *   /loopstation   → LoopStation505           (protected — loop recorder)
  *   /multitrack    → MultiTrackPanel          (protected — multitrack DAW)
  *   /collab        → CollabDAWPro             (protected — collaborative DAW pro)
- *   /mixer         → MultitrackView           (protected — drag & drop mixer view)
  *   /visuals       → VisualsPage              (protected — Three.js)
  *   /admin         → AdminPage               (protected)
  *   *              → NotFound
@@ -47,7 +46,6 @@ import { ThemeProvider }          from './components/theme-provider';
 import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
 import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
 
-import LoginPage        from './pages/login';
 import PricingPage        from './pages/pricing/PricingPage';
 import DAW                from './pages/DAW';
 import InstrumentPage     from './pages/instrument';
@@ -60,86 +58,6 @@ import AdminPage          from './pages/AdminPage';
 import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
 import MultiTrackPanel    from './pages/multi-track-panel';
 import CollabDAWPro       from './pages/collaborative-daw-pro';
-import MultitrackView     from './components/multi-track-view';
-import { useDAWStore }    from './hooks/useDAWStore';
-
-// ── /mixer route adapter ─────────────────────────────────────────────────────
-// Bridges useDAWStore (StoreTrack shape) to MultitrackView (ViewTrack shape).
-// Neither the store nor the component is modified — all adaptation is here.
-
-import type { Track as StoreTrack } from './hooks/useDAWStore';
-import type { Track as ViewTrack  } from './components/multi-track-view';
-
-/** Maps store FXSlot.type → component FXType union (nearest semantic fit). */
-const FX_TYPE_MAP: Record<string, ViewTrack['fxChain'][number]> = {
-  eq:         'EQ',
-  compressor: 'Compressor',
-  reverb:     'Reverb',
-  delay:      'Delay',
-  filter:     'EQ',          // no Filter in ViewTrack
-  distortion: 'Saturation',  // no Distortion in ViewTrack
-};
-
-/** Pure adapter: StoreTrack → ViewTrack. No side effects. */
-function adaptTrack(t: StoreTrack): ViewTrack {
-  return {
-    id:      t.id,
-    name:    t.label,
-    armed:   t.armed,
-    muted:   t.mute,
-    solo:    t.solo,
-    volume:  t.gain,
-    pan:     t.pan,
-    input:   t.inputSource ?? '',
-    fxChain: t.fxChain.map(fx => FX_TYPE_MAP[fx.type] ?? 'EQ'),
-    meter:   undefined,
-    color:   t.color,
-    locked:  false,
-    hidden:  false,
-    groupId: undefined,
-  };
-}
-
-/**
- * MultitrackViewWrapper
- * Connects useDAWStore to MultitrackView, satisfying all required props.
- * Replaces bare <MultitrackView /> at /mixer — tracks is never undefined.
- */
-function MultitrackViewWrapper() {
-  const {
-    tracks, playing, recording, position,
-    setPlaying, setRecording, updateTrack, removeTrack, addTrack,
-  } = useDAWStore();
-
-  return (
-    <MultitrackView
-      tracks={tracks.map(adaptTrack)}
-      transport={{ isPlaying: playing, isRecording: recording, position }}
-      hideTransport={true}
-      onTogglePlay={()    => setPlaying(!playing)}
-      onToggleRecord={()  => setRecording(!recording)}
-      onArmTrack={(id)    => updateTrack(id, { armed: !tracks.find(t => t.id === id)?.armed })}
-      onToggleMute={(id)  => updateTrack(id, { mute:  !tracks.find(t => t.id === id)?.mute  })}
-      onToggleSolo={(id)  => updateTrack(id, { solo:  !tracks.find(t => t.id === id)?.solo  })}
-      onUpdateTrack={(id, data) => {
-        const patch: Partial<StoreTrack> = {};
-        if (data.name   !== undefined) patch.label       = data.name;
-        if (data.volume !== undefined) patch.gain        = data.volume;
-        if (data.muted  !== undefined) patch.mute        = data.muted;
-        if (data.armed  !== undefined) patch.armed       = data.armed;
-        if (data.solo   !== undefined) patch.solo        = data.solo;
-        if (data.pan    !== undefined) patch.pan         = data.pan;
-        if (data.input  !== undefined) patch.inputSource = data.input;
-        updateTrack(id, patch);
-      }}
-      onDeleteTrack={(id)    => removeTrack(id)}
-      onDuplicateTrack={(id) => {
-        const src = tracks.find(t => t.id === id);
-        if (src) addTrack({ ...src, label: `${src.label} (copy)` });
-      }}
-    />
-  );
-}
 
 export default function App() {
   // ── Inject CSS custom properties once on mount ───────────────────────────
@@ -194,9 +112,9 @@ export default function App() {
           >
             <Switch>
               {/* ── Public ───────────────────────────────────────────────── */}
-              <Route path="/auth"    component={LoginPage} />
+              <Route path="/auth"    component={AuthHtmlRedirect} />
               <Route path="/pricing" component={PricingPage} />
-              <Route path="/login" component={LoginPage} />
+              <Route path="/login" component={AuthHtmlRedirect} />
 
               {/* ── Protected — ordered by user journey ──────────────────── */}
               <Route path="/instrument">
@@ -227,10 +145,6 @@ export default function App() {
               </Route>
 
               {/* Multitrack View — multi-track-view.tsx (drag & drop, grouping, undo/redo) */}
-              <Route path="/mixer">
-                <ProtectedRoute><MultitrackViewWrapper /></ProtectedRoute>
-              </Route>
-
               <Route path="/visuals">
                 <ProtectedRoute><VisualsPage /></ProtectedRoute>
               </Route>

@@ -3,6 +3,5 @@ export const MUSIC_NAV_LINKS = [
   { href: "/daw",        label: "🎚 Studio" },
   { href: "/collab",     label: "⬡ Collab" },
   { href: "/multitrack", label: "📼 Multitrack" },
-  { href: "/mixer",      label: "⟳ Mixer" },
   { href: "/instrument", label: "🎹 Instrument" },
 ] as const;
