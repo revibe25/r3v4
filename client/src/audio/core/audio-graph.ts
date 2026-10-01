@@ -22,6 +22,28 @@ export interface MeterReading {
   clipping: boolean;
 }
 
+export interface AnalysisTelemetry {
+  sampleRate: number;
+  active: boolean;
+  peakL: number;
+  peakR: number;
+  peakDbL: number;
+  peakDbR: number;
+  rms: number;
+  rmsDb: number;
+  correlation: number;
+  stereoWidth: number;
+  truePeak: number;
+  truePeakDb: number;
+  momentaryLufs: number;
+  integratedLufs: number;
+  gainReductionDb: number;
+  clipping: boolean;
+  spectrum: Float32Array<ArrayBuffer>;
+  waveformL: Float32Array<ArrayBuffer>;
+  waveformR: Float32Array<ArrayBuffer>;
+}
+
 export type AudioGraphEventMap = {
   masterVolumeChanged: { value: number };
   sendAdded:           { bus: SendBus };
@@ -46,6 +68,30 @@ export class AudioGraph {
   private limiter: DynamicsCompressorNode;
   private analyser: AnalyserNode;
   private analyserBuffer: Float32Array<ArrayBuffer>;
+
+  private stereoSplitter: ChannelSplitterNode;
+  private leftAnalyser: AnalyserNode;
+  private rightAnalyser: AnalyserNode;
+  private kShelfLeft: BiquadFilterNode;
+  private kShelfRight: BiquadFilterNode;
+  private kHighpassLeft: BiquadFilterNode;
+  private kHighpassRight: BiquadFilterNode;
+  private kLeftAnalyser: AnalyserNode;
+  private kRightAnalyser: AnalyserNode;
+  private spectrumAnalyser: AnalyserNode;
+
+  private leftBuffer: Float32Array<ArrayBuffer>;
+  private rightBuffer: Float32Array<ArrayBuffer>;
+  private kLeftBuffer: Float32Array<ArrayBuffer>;
+  private kRightBuffer: Float32Array<ArrayBuffer>;
+  private spectrumBuffer: Float32Array<ArrayBuffer>;
+
+  private loudnessRing: Array<{ at: number; energy: number }> = [];
+  private loudnessBlocks: number[] = [];
+  private lastLoudnessBlockAt = 0;
+  private truePeakHold = 0;
+  private correlationHold = 0;
+  private latestTelemetry: AnalysisTelemetry;
 
   private sends = new Map<string, SendBus>();
   private _masterVolume = 1.0;
@@ -87,6 +133,91 @@ export class AudioGraph {
     this.masterGain.connect(this.limiter);
     this.limiter.connect(this.analyser);
     this.analyser.connect(this.destination);
+
+    // ─── Passive post-limiter analysis taps ───────────────────────────────
+    this.stereoSplitter = this.context.createChannelSplitter(2);
+
+    this.leftAnalyser = this.context.createAnalyser();
+    this.leftAnalyser.fftSize = 2048;
+    this.leftAnalyser.smoothingTimeConstant = 0;
+    this.leftBuffer = new Float32Array(this.leftAnalyser.fftSize) as unknown as Float32Array<ArrayBuffer>;
+
+    this.rightAnalyser = this.context.createAnalyser();
+    this.rightAnalyser.fftSize = 2048;
+    this.rightAnalyser.smoothingTimeConstant = 0;
+    this.rightBuffer = new Float32Array(this.rightAnalyser.fftSize) as unknown as Float32Array<ArrayBuffer>;
+
+    this.kShelfLeft = this.context.createBiquadFilter();
+    this.kShelfLeft.type = 'highshelf';
+    this.kShelfLeft.frequency.value = 1682;
+    this.kShelfLeft.gain.value = 4;
+
+    this.kShelfRight = this.context.createBiquadFilter();
+    this.kShelfRight.type = 'highshelf';
+    this.kShelfRight.frequency.value = 1682;
+    this.kShelfRight.gain.value = 4;
+
+    this.kHighpassLeft = this.context.createBiquadFilter();
+    this.kHighpassLeft.type = 'highpass';
+    this.kHighpassLeft.frequency.value = 38;
+    this.kHighpassLeft.Q.value = 0.5;
+
+    this.kHighpassRight = this.context.createBiquadFilter();
+    this.kHighpassRight.type = 'highpass';
+    this.kHighpassRight.frequency.value = 38;
+    this.kHighpassRight.Q.value = 0.5;
+
+    this.kLeftAnalyser = this.context.createAnalyser();
+    this.kLeftAnalyser.fftSize = 2048;
+    this.kLeftAnalyser.smoothingTimeConstant = 0;
+    this.kLeftBuffer = new Float32Array(this.kLeftAnalyser.fftSize) as unknown as Float32Array<ArrayBuffer>;
+
+    this.kRightAnalyser = this.context.createAnalyser();
+    this.kRightAnalyser.fftSize = 2048;
+    this.kRightAnalyser.smoothingTimeConstant = 0;
+    this.kRightBuffer = new Float32Array(this.kRightAnalyser.fftSize) as unknown as Float32Array<ArrayBuffer>;
+
+    this.spectrumAnalyser = this.context.createAnalyser();
+    this.spectrumAnalyser.fftSize = 4096;
+    this.spectrumAnalyser.smoothingTimeConstant = 0.78;
+    this.spectrumBuffer = new Float32Array(this.spectrumAnalyser.frequencyBinCount) as unknown as Float32Array<ArrayBuffer>;
+
+    // Wire passive taps (never feed destination)
+    this.stereoSplitter.connect(this.leftAnalyser, 0);
+    this.stereoSplitter.connect(this.rightAnalyser, 1);
+    this.stereoSplitter.connect(this.kShelfLeft, 0);
+    this.kShelfLeft.connect(this.kHighpassLeft);
+    this.kHighpassLeft.connect(this.kLeftAnalyser);
+    this.stereoSplitter.connect(this.kShelfRight, 1);
+    this.kShelfRight.connect(this.kHighpassRight);
+    this.kHighpassRight.connect(this.kRightAnalyser);
+
+    // Spectrum tap
+    this.limiter.connect(this.stereoSplitter);
+    this.limiter.connect(this.spectrumAnalyser);
+
+    // Initialize telemetry snapshot
+    this.latestTelemetry = {
+      sampleRate: this.context.sampleRate,
+      active: false,
+      peakL: 0,
+      peakR: 0,
+      peakDbL: -120,
+      peakDbR: -120,
+      rms: 0,
+      rmsDb: -120,
+      correlation: 0,
+      stereoWidth: 0,
+      truePeak: 0,
+      truePeakDb: -120,
+      momentaryLufs: -120,
+      integratedLufs: -120,
+      gainReductionDb: 0,
+      clipping: false,
+      spectrum: this.spectrumBuffer,
+      waveformL: this.leftBuffer,
+      waveformR: this.rightBuffer,
+    };
 
     // Re-create internal nodes if the context is closed/re-opened
     this.removeContextListener = onAudioContext(() => {
@@ -204,7 +335,16 @@ export class AudioGraph {
    * Populated every animation frame while the graph is alive.
    */
   getMeterReading(): MeterReading {
-    return this.computeMeter();
+    const telemetry = this.latestTelemetry;
+    return {
+      peak: Math.max(telemetry.peakL, telemetry.peakR),
+      rms: telemetry.rms,
+      clipping: telemetry.clipping,
+    };
+  }
+
+  getAnalysisTelemetry(): Readonly<AnalysisTelemetry> {
+    return this.latestTelemetry;
   }
 
   private startMetering(): void {
@@ -347,6 +487,14 @@ let audioGraph: AudioGraph | null = null;
 export function getAudioGraph(): AudioGraph {
   if (!audioGraph || (audioGraph as unknown as { _disposed: boolean })._disposed) {
     audioGraph = new AudioGraph();
+  }
+  return audioGraph;
+}
+
+export function peekAudioGraph(): AudioGraph | null {
+  if (!audioGraph) return null;
+  if ((audioGraph as unknown as { _disposed: boolean })._disposed) {
+    return null;
   }
   return audioGraph;
 }

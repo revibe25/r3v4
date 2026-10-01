@@ -4,6 +4,10 @@ import {
 } from 'react';
 
 import { useDAWStore } from '@/hooks/useDAWStore';
+import {
+  peekAudioGraph,
+  type AnalysisTelemetry,
+} from '@/audio/core/audio-graph';
 
 import type { V130Viewport } from '../layout/v130-layout';
 import type {
