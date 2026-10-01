@@ -4,6 +4,7 @@
 // Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getAudioContext } from "../audio/core/audio-context";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const BPM          = 126;
@@ -273,13 +274,12 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
   useEffect(() => () => {
     clearInterval(schedRef.current ?? undefined);
     cancelAnimationFrame(rafRef.current ?? 0);
-    ctxRef.current?.close();
+    ctxRef.current = null;
   }, []);
 
   const getCtx = useCallback(() => {
     if (!ctxRef.current) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      ctxRef.current = new AudioCtx();
+      ctxRef.current = getAudioContext();
       const master = ctxRef.current.createGain();
       master.gain.value = 0.82;
       master.connect(ctxRef.current.destination);

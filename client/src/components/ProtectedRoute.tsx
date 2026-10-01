@@ -8,8 +8,9 @@
  * Wouter-based route guard for R3 v4.
  *
  * Renders children only when the user is authenticated.
- * On mount it calls initAuth() to rehydrate from localStorage.
- * Redirects to /auth if unauthenticated after hydration.
+ * Auth is initialized once by client/src/main.tsx before the app renders.
+ * Redirects to /auth when the centralized auth hydration has completed
+ * and the user is unauthenticated.
  *
  * Usage in App.tsx:
  *   <Route path="/daw">
@@ -22,7 +23,7 @@
  * Uses <Redirect> from wouter (not <Navigate>).
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Redirect } from 'wouter';
 import { useAuthStore, selectIsAuthed } from '../hooks/authStore';
 
@@ -38,12 +39,6 @@ export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
   const { loading, error } = useAuthStore();
   const isAuthed = useAuthStore(selectIsAuthed);
   const tier     = useAuthStore(s => s.user?.tier ?? 'explorer');
-  const initAuth = useAuthStore(s => s.initAuth);
-
-  // Re-hydrate token on mount (no-op if already loaded or no token stored)
-  useEffect(() => {
-    initAuth();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loading: token check in progress
   if (loading) {

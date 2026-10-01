@@ -84,6 +84,7 @@
     "vite-dev.ts",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "drizzle/migrations/**"
+    "drizzle/migrations/**",
+    "drizzle/_archive-pre-baseline/**"
   ]
 }

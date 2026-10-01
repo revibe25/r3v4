@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import type { SubscriptionTier } from '@shared/schema';
+import { eq } from 'drizzle-orm';
+import { db } from '../db';
+import { users } from '../db/schema';
 
 declare module 'express' {
   interface Request {
@@ -19,23 +22,100 @@ export interface AuthPayload {
   username: string;
   email?: string;
   tier: SubscriptionTier;
+  /**
+   * Server-hydrated authorization state.
+   * Never trusted from the JWT.
+   */
   is_admin?: boolean;
 }
 
-export function optionalAuth(req: Request, res: Response, next: NextFunction) {
+interface VerifiedJwtClaims {
+  id: string;
+}
+
+async function hydrateAuthenticatedUser(req: Request): Promise<boolean> {
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next();
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return false;
   }
-  const token = authHeader.split(' ')[1];
+
+  const token = authHeader.slice(7).trim();
+
+  if (!token) {
+    return false;
+  }
+
+  let claims: VerifiedJwtClaims;
+
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret') as AuthPayload;
-    req.user = payload; // Pass through is_admin from JWT if present
+    claims = jwt.verify(
+      token,
+      process.env.JWT_SECRET ?? "dev_secret_do_not_use_in_production_32x",
+    ) as VerifiedJwtClaims;
   } catch {
-    // ignore invalid token
+    return false;
   }
+
+  if (!claims || typeof claims.id !== "string" || claims.id.length === 0) {
+    return false;
+  }
+
+  const [user] = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      email: users.email,
+      tier: users.tier,
+      isAdmin: users.isAdmin,
+    })
+    .from(users)
+    .where(eq(users.id, claims.id))
+    .limit(1);
+
+  if (!user) {
+    return false;
+  }
+
+  req.user = {
+    id: user.id,
+    username: user.username,
+    email: user.email ?? undefined,
+    tier: user.tier as SubscriptionTier,
+    is_admin: user.isAdmin,
+  };
+
+  return true;
+}
+
+/**
+ * SINGLE APPLICATION JWT DECODER.
+ *
+ * index.ts installs this once globally.
+ * JWT establishes identity; PostgreSQL establishes current
+ * authorization state.
+ */
+export async function trpcAuth(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    await hydrateAuthenticatedUser(req);
+  } catch {
+    // Authentication/database failures never create authenticated state.
+    delete req.user;
+  }
+
   next();
 }
+
+/**
+ * Compatibility alias.
+ *
+ * This does not decode JWT separately; it is the same middleware.
+ */
+export const optionalAuth = trpcAuth;
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
@@ -56,8 +136,4 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     return res.status(403).json({ error: 'Forbidden' });
   }
   next();
-}
-
-export function trpcAuth(req: Request) {
-  return req.user;
 }

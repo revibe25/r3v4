@@ -92,6 +92,11 @@ export async function enforceUsage(
       return;
     }
 
+    if ((user as Record<string, unknown>).isAdmin === true) {
+      next();
+      return;
+    }
+
     const rawTier = (user as Record<string, unknown>).tier;
     const tier: SubscriptionTier = isPlan(rawTier) ? rawTier : "explorer";
     const limit = MIX_LIMITS[tier] ?? DEFAULT_LIMIT;

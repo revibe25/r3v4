@@ -132,6 +132,8 @@ export default defineConfig(({ mode }): UserConfig => {
       alias: {
         '@':       r('./src'),
         '@shared': r('../shared'),
+        'tone':                r('./node_modules/tone/build/esm/index.js'),
+        'automation-events':   r('../node_modules/.pnpm/automation-events@7.1.19/node_modules/automation-events/build/es2019/module.js'),
       },
       extensions: ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'],
     },
@@ -226,11 +228,7 @@ export default defineConfig(({ mode }): UserConfig => {
     optimizeDeps: {
       // Override the dev pre-bundler target. Vite's internal default (~chrome87)
       // cannot compile @floating-ui/core ≥1.7 which ships ES2022 destructuring.
-      /* [ASI-AUDIT] Migrated */
-    rolldownOptions: {
-        target: 'es2022',
-      },
-      include: [
+include: [
         'react',
         'react-dom',
         'react-dom/client',
@@ -251,10 +249,12 @@ export default defineConfig(({ mode }): UserConfig => {
         'class-variance-authority',
         'tailwind-merge',
         'date-fns',
+        'tone',
+        'automation-events',
       ],
       // tone and webmidi are ESM-only and load lazily — let Vite handle them
       // on demand rather than forcing them into the pre-bundle.
-      exclude: ['tone', 'webmidi'],
+      exclude: ['webmidi'],
     },
 
     // ── Web Workers / Worklets ────────────────────────────────────────────────

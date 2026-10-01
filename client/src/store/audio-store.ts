@@ -463,9 +463,7 @@ export const useAudioStore = create<AudioStore>()(
 
           // Close audio context
           if (audioContext) {
-            audioContext.close().catch(error => {
-              console.error('[AudioStore] Error closing audio context:', error);
-            });
+            // Shared AudioContext is owned by audio-context.ts; do not close it.
           }
 
           set({

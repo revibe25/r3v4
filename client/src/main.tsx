@@ -1,6 +1,6 @@
 import './styles/r3-tokens.css';
 import './index.css';
-import { useAuthStore } from "./store/auth-store"
+import { useAuthStore } from "./hooks/authStore"
 import './styles/theme.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

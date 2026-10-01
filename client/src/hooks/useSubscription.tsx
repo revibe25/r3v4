@@ -55,6 +55,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   // Gate query on Zustand auth store token — avoids a guaranteed 401
   // on every page load for unauthenticated visitors.
   const hasToken = useAuthStore(s => Boolean(s.token));
+  const isAdmin = useAuthStore(s => s.user?.isAdmin === true);
 
   const { data, isLoading } = trpc.subscription.getMySubscription.useQuery(undefined, {
     enabled: hasToken,
@@ -82,9 +83,12 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         : null,
       tier,
       isLoading,
-      can: (feature) => canUseFeature(tier, feature),
-      atLeast: (required) => tierAtLeast(tier, required),
-      checkUsage: (limit, currentUsage) => checkLimit(tier, limit, currentUsage),
+      can: (feature) => isAdmin || canUseFeature(tier, feature),
+      atLeast: (required) => isAdmin || tierAtLeast(tier, required),
+      checkUsage: (limit, currentUsage) =>
+        isAdmin
+          ? { allowed: true, limit: 'unlimited', remaining: 'unlimited' }
+          : checkLimit(tier, limit, currentUsage),
       isExplorer: tier === 'explorer',
       isCreator: tier === 'creator',
       isProArtist: tier === 'pro_artist',
@@ -103,7 +107,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
         window.location.href = result.url;
       },
     }),
-    [data, tier, isLoading, checkoutMutation, portalMutation],
+    [data, tier, isLoading, isAdmin, checkoutMutation, portalMutation],
   );
 
   return (

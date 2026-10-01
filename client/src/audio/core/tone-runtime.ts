@@ -57,9 +57,20 @@ export function initializeToneFromGesture(): Promise<ToneRuntime> {
 
     // Tone is not loaded until after the gesture.
     const imported = await import("tone");
-    const tone = (
-      (imported as any).default ?? imported
-    ) as ToneRuntime;
+    const importedModule = imported as any;
+    const tone =
+      typeof importedModule.setContext === "function"
+        ? (importedModule as ToneRuntime)
+        : (importedModule.default as ToneRuntime | undefined);
+
+    if (
+      !tone ||
+      typeof (tone as any).setContext !== "function"
+    ) {
+      throw new Error(
+        "R3 Tone runtime: installed Tone module does not expose setContext."
+      );
+    }
 
     // Tone 14.x supports disposeOld as the second parameter.
     (tone as any).setContext(canonicalContext, true);

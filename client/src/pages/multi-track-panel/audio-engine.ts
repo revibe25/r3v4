@@ -1,3 +1,4 @@
+import { getAudioContext } from "@/audio/core/audio-context";
 /**
  * pages/multi-track-panel/audio-engine.ts
  * Minimal Web Audio engine for MultiTrackPanel.
@@ -8,14 +9,14 @@ export class AudioEngine {
 
   async initialize(): Promise<void> {
     try {
-      this.ctx = new (window.AudioContext ?? (window as any).webkitAudioContext)();
+      this.ctx = getAudioContext();
     } catch (err) {
       console.error('[AudioEngine] init failed:', err);
     }
   }
 
   cleanup(): void {
-    try { this.ctx?.close(); } catch { /* ignore */ }
+    // Shared AudioContext is owned by audio-context.ts; do not close it.
     this.ctx = null;
   }
 

@@ -26,6 +26,7 @@
 
 import crypto from 'crypto';
 import { db }                   from '../db';
+import { users }                from '../db/schema';
 import { subscriptions }        from '@shared/schema-subscription';
 import { eq }                   from 'drizzle-orm';
 import type {
@@ -150,13 +151,14 @@ export async function applyMockSubscription(
     now.getTime() + (billingCycle === 'annual' ? 365 : 30) * 86_400_000,
   );
 
-  const existing = await db
-    .select({ id: subscriptions.id })
-    .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .limit(1);
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: subscriptions.id })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
 
-  const fields = {
+    const fields = {
     tier,
     status:              'trialing'  as const,
     billingCycle,
@@ -171,39 +173,61 @@ export async function applyMockSubscription(
     updatedAt:           now,
   };
 
-  if (existing[0]) {
-    await db
-      .update(subscriptions)
-      .set(fields)
-      .where(eq(subscriptions.userId, userId));
-  } else {
-    await db.insert(subscriptions).values({
-      id: `mock_${userId}`,
-      userId,
-      ...fields,
-    });
-  }
+    if (existing[0]) {
+      await tx
+        .update(subscriptions)
+        .set(fields)
+        .where(eq(subscriptions.userId, userId));
+    } else {
+      await tx.insert(subscriptions).values({
+        id: `mock_${userId}`,
+        userId,
+        ...fields,
+      });
+    }
+
+    await tx
+      .update(users)
+      .set({
+        tier,
+        updatedAt: now,
+      })
+      .where(eq(users.id, userId));
+  });
 }
 
 /** Reverts a user's subscription to the free Explorer tier. */
 export async function cancelMockSubscription(userId: string): Promise<void> {
-  const existing = await db
-    .select({ id: subscriptions.id })
-    .from(subscriptions)
-    .where(eq(subscriptions.userId, userId))
-    .limit(1);
+  await db.transaction(async (tx) => {
+    const existing = await tx
+      .select({ id: subscriptions.id })
+      .from(subscriptions)
+      .where(eq(subscriptions.userId, userId))
+      .limit(1);
 
-  if (!existing[0]) return;
+    if (!existing[0]) return;
 
-  await db
-    .update(subscriptions)
-    .set({
-      tier:             'explorer',
-      status:           'canceled',
-      cancelAtPeriodEnd: false,
-      updatedAt:        new Date(),
-    })
-    .where(eq(subscriptions.userId, userId));
+    const now = new Date();
+
+    await tx
+      .update(subscriptions)
+      .set({
+        tier:              'explorer',
+        status:            'canceled',
+        canceledAt:        now,
+        cancelAtPeriodEnd: false,
+        updatedAt:         now,
+      })
+      .where(eq(subscriptions.userId, userId));
+
+    await tx
+      .update(users)
+      .set({
+        tier:      'explorer',
+        updatedAt: now,
+      })
+      .where(eq(users.id, userId));
+  });
 }
 
 // ── HTML renderer ─────────────────────────────────────────────────────────────

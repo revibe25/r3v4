@@ -1,4 +1,5 @@
 import instrumentProcessorWorkletUrl from '../../worklets/instrument-processor.worklet.ts?worker&url';
+import { getAudioContext } from "./audio-context";
 export interface AudioState {
   pads: PadState[];
   keys: KeyState[];
@@ -67,6 +68,8 @@ class AudioEngine {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private analyser: AnalyserNode | null = null;
+  private outputNode: GainNode | null = null;
+  private outputDestination: AudioNode | null = null;
   private voicePool: { 
     gain: GainNode; 
     inUse: boolean; 
@@ -111,10 +114,12 @@ class AudioEngine {
   async init() {
     if (this.ctx) return;
 
-    this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.ctx = getAudioContext();
 
     // Set up master gain
     this.masterGain = this.ctx.createGain();
+    this.outputNode = this.ctx.createGain();
+    this.outputNode.gain.setValueAtTime(1, this.ctx.currentTime);
     // 0.72 = -2.8 dBFS — headroom for voice summing.
     // With 32 voices at gain=1.0 and masterGain=0.95, any 2+ simultaneous
     // note-ons sum to >0 dBFS and clip. 0.72 gives ~4 voices of headroom
@@ -179,6 +184,39 @@ class AudioEngine {
 
     await this.generateDefaultSamples();
   }
+
+  /**
+   * Connect the final processed Instrument output to an external destination.
+   * The default standalone destination remains AudioContext.destination.
+   */
+  connectOutput(destination: AudioNode): void {
+    if (!this.ctx || !this.outputNode) {
+      throw new Error('Instrument audio engine is not initialized');
+    }
+    if (destination.context !== this.ctx) {
+      throw new Error('Instrument output destination must use the canonical AudioContext');
+    }
+    try {
+      this.outputNode.disconnect();
+    } catch {}
+    this.outputNode.connect(destination);
+    this.outputDestination = destination;
+  }
+
+  /** Remove the current external Instrument output connection. */
+  disconnectOutput(): void {
+    if (!this.outputNode) return;
+    try {
+      this.outputNode.disconnect();
+    } catch {}
+    this.outputDestination = null;
+  }
+
+  /** Expose the final processed Instrument output for future DAW routing. */
+  getOutputNode(): GainNode | null {
+    return this.outputNode;
+  }
+
 
   private async generateDefaultSamples() {
     if (!this.ctx) return;
@@ -719,9 +757,8 @@ class AudioEngine {
       this.procNode = null;
     }
 
-    if (this.ctx) {
-      this.ctx.close();
-    }
+    // AudioContext is shared and owned by the canonical singleton.
+    // Engine cleanup must not close the shared context.
   }
 }
 

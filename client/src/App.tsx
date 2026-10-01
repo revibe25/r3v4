@@ -37,7 +37,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Switch, Route, Redirect } from 'wouter';
+import { Switch, Route, Redirect, useLocation } from 'wouter';
 import { TRPCProvider }          from './lib/trpc';
 import { ProtectedRoute }         from './components/ProtectedRoute';
 import { SubscriptionProvider }   from './hooks/useSubscription';
@@ -56,10 +56,24 @@ import NotFound           from './pages/not-found';
 import SubscribePage      from './pages/subscribe';
 import AdminPage          from './pages/AdminPage';
 import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
-import MultiTrackPanel    from './pages/multi-track-panel';
+import MultitrackV130     from './features/multitrack-v130/MultitrackV130';
 import CollabDAWPro       from './pages/collaborative-daw-pro';
 
+function AuthHtmlRedirect() {
+  useEffect(() => {
+    window.location.replace(`/auth.html${window.location.search}`);
+  }, []);
+
+  return null;
+}
+
 export default function App() {
+  const [location] = useLocation();
+
+  const isDocumentPage =
+    location === "/pricing" ||
+    location === "/subscribe";
+
   // ── Inject CSS custom properties once on mount ───────────────────────────
   useEffect(() => {
     injectTokenCSS();
@@ -105,7 +119,7 @@ export default function App() {
           <div
             style={{
               flex:      1,
-              overflow:  'hidden',
+              overflow:  isDocumentPage ? 'auto' : 'hidden',
               position:  'relative',
               minHeight: 0,
             }}
@@ -129,9 +143,9 @@ export default function App() {
                 <ProtectedRoute><LoopStation505 /></ProtectedRoute>
               </Route>
 
-              {/* Multitrack DAW — MultiTrackPanel (multi-track-panel.tsx is canonical, modular is dead) */}
+              {/* Multitrack DAW — R3 NATIVE Multitrack v1.3.0 */}
               <Route path="/multitrack">
-                <ProtectedRoute><MultiTrackPanel /></ProtectedRoute>
+                <ProtectedRoute><MultitrackV130 /></ProtectedRoute>
               </Route>
 
               {/* Collaborative DAW Pro — collaborative-daw-pro.jsx (WaveLab) */}

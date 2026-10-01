@@ -1,3 +1,4 @@
+import { getAudioContext } from "@/audio/core/audio-context";
 // CRIT-4: Never instantiate AudioContext at module level — it is a browser-only
 // global and will throw in SSR, Vitest (jsdom), or any Node import path.
 // Use the lazy singleton below; call getAudioEngine() only after mount.
@@ -8,7 +9,7 @@ export class AudioEngine {
 
   get context(): AudioContext {
     if (!this.ctx) {
-      this.ctx = new AudioContext()
+      this.ctx = getAudioContext()
     }
     return this.ctx
   }
@@ -28,7 +29,7 @@ export class AudioEngine {
 
   async destroy(): Promise<void> {
     this.stop()
-    await this.ctx?.close()
+    // Shared AudioContext is owned by audio-context.ts; do not close it.
     this.ctx = null
   }
 }

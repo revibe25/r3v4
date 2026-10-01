@@ -8,6 +8,7 @@ import { CompressorEffect as Compressor } from '@/audio/effects/compressor';
 import { DelayEffect as Delay } from '@/audio/effects/delay';
 import { FilterEffect as Filter } from '@/audio/effects/filter';
 import { ReverbEffect as Reverb } from '@/audio/effects/reverb';
+import { getAudioContext } from "./audio-context";
 
 // Example ML drum classifier (TensorFlow.js or similar)
 
@@ -91,7 +92,7 @@ export class AudioEngine {
 
   async initialize(): Promise<AudioContext> {
     if (this.context) return this.context;
-    this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.context = getAudioContext();
     this.masterGain = this.context.createGain();
     this.masterGain.gain.setTargetAtTime(1, this.context.currentTime, 0.015);
     this.masterGain.connect(this.context.destination);
@@ -209,7 +210,7 @@ export class AudioEngine {
     this.analyserNodes.clear();
     this.trackStates.clear();
     this.visualCallbacks = [];
-    if (this.context && this.context.state !== 'closed') this.context.close();
+    // Shared AudioContext is owned by audio-context.ts; do not close it here.
     this.context = null;
   }
 }

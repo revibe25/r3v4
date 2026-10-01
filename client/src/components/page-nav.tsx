@@ -39,8 +39,6 @@ export const NAV_HEIGHT_PX = 44;
 // ── Routes where nav is suppressed entirely ───────────────────────────────────
 const NAV_HIDDEN_ON: string[] = ['/auth', '/login'];
 
-// ── Admin gate ────────────────────────────────────────────────────────────────
-const ADMIN_EMAIL = 'earnestathepco@gmail.com';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
@@ -78,9 +76,8 @@ const PAGES = [
 export function PageNav() {
   const [location] = useLocation();
   const isAuthenticated = useAuthStore(selectIsAuthed);
-  const userEmail       = useAuthStore(s => s.user?.email ?? '');
   const tier            = useAuthStore(s => s.user?.tier ?? 'explorer');
-  const isAdmin         = userEmail === ADMIN_EMAIL;
+  const isAdmin         = useAuthStore(s => s.user?.isAdmin === true);
 
   // Suppress nav entirely on auth/login pages
   if (NAV_HIDDEN_ON.includes(location)) return null;

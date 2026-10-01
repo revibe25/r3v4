@@ -23,6 +23,7 @@ import { logger } from "../utils/logger";
 
 import Stripe from 'stripe';
 import { db } from '../db';
+import { users } from '../db/schema';
 import { subscriptions, stripeEvents } from '@shared/schema-subscription';
 import { eq } from 'drizzle-orm';
 import type {
@@ -33,6 +34,11 @@ import type {
 import {
   TIER_DEFINITIONS,
 } from '@shared/subscription.types';
+import {
+  isMockMode,
+  createMockCheckoutUrl,
+  createMockPortalUrl,
+} from './mock-billing';
 
 /**
  * Lazy Stripe client — instantiated on first use, not at module load.
@@ -78,24 +84,97 @@ export async function getOrCreateStripeCustomer(
   name?: string,
 ): Promise<string> {
   const existing = await db
-    .select({ stripeCustomerId: subscriptions.stripeCustomerId })
+    .select({
+      stripeCustomerId: subscriptions.stripeCustomerId,
+    })
     .from(subscriptions)
     .where(eq(subscriptions.userId, userId))
     .limit(1);
 
-  if (existing[0]?.stripeCustomerId) return existing[0].stripeCustomerId;
+  const existingCustomerId = existing[0]?.stripeCustomerId ?? null;
+  const migratingMockCustomer = existingCustomerId?.startsWith('mock_') ?? false;
 
-  const customer = await stripe.customers.create({ email, name, metadata: { r3UserId: userId } });
+  // Never pass a mock-billing identity into the real Stripe API.
+  // Mock subscriptions use IDs such as mock_cus_..., mock_sub_..., and
+  // mock_price_..., which do not exist in the Stripe TEST/LIVE account.
+  if (existingCustomerId && !migratingMockCustomer) {
+    return existingCustomerId;
+  }
 
-  await db
-    .insert(subscriptions)
-    .values({ id: `free_${userId}`, userId, tier: 'explorer', status: 'active', stripeCustomerId: customer.id })
-    .onConflictDoUpdate({
-      target: subscriptions.userId,
-      set: { stripeCustomerId: customer.id, updatedAt: new Date() },
-    });
+  const customer = await stripe.customers.create({
+    email,
+    name,
+    metadata: { r3UserId: userId },
+  });
+
+  if (migratingMockCustomer) {
+    // Replace the legacy mock billing identity with a clean real-Stripe
+    // customer identity. Remove all mock subscription/payment-period state so
+    // no database row can represent a hybrid mock/real subscription.
+    await db
+      .update(subscriptions)
+      .set({
+        tier: 'explorer',
+        status: 'active',
+        billingCycle: null,
+        stripeCustomerId: customer.id,
+        stripeSubscriptionId: null,
+        stripePriceId: null,
+        currentPeriodStart: null,
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        trialStart: null,
+        trialEnd: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.userId, userId));
+  } else {
+    await db
+      .insert(subscriptions)
+      .values({
+        id: `free_${userId}`,
+        userId,
+        tier: 'explorer',
+        status: 'active',
+        stripeCustomerId: customer.id,
+      })
+      .onConflictDoUpdate({
+        target: subscriptions.userId,
+        set: {
+          stripeCustomerId: customer.id,
+          updatedAt: new Date(),
+        },
+      });
+  }
 
   return customer.id;
+}
+
+const STRIPE_PRICE_ENV_KEYS = {
+  creator: {
+    monthly: 'STRIPE_CREATOR_MONTHLY_PRICE_ID',
+    annual: 'STRIPE_CREATOR_YEARLY_PRICE_ID',
+  },
+  pro_artist: {
+    monthly: 'STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID',
+    annual: 'STRIPE_PRO_ARTIST_YEARLY_PRICE_ID',
+  },
+} as const;
+
+function getConfiguredStripePriceId(
+  tier: Exclude<SubscriptionTier, 'explorer'>,
+  billingCycle: BillingCycle,
+): string {
+  const envKey = STRIPE_PRICE_ENV_KEYS[tier][billingCycle];
+  const priceId = process.env[envKey];
+
+  if (!priceId || !priceId.startsWith('price_') || priceId === 'price_placeholder') {
+    throw new Error(
+      `Invalid Stripe Price configuration: ${envKey} is missing or still configured as a placeholder.`,
+    );
+  }
+
+  return priceId;
 }
 
 export interface CreateCheckoutOptions {
@@ -110,10 +189,19 @@ export interface CreateCheckoutOptions {
 }
 
 export async function createCheckoutSession(opts: CreateCheckoutOptions): Promise<string> {
+  if (isMockMode()) {
+    return createMockCheckoutUrl({
+      userId: opts.userId,
+      tier: opts.tier,
+      billingCycle: opts.billingCycle,
+      successUrl: opts.successUrl,
+      cancelUrl: opts.cancelUrl,
+      trialDays: opts.trialDays,
+    });
+  }
+
   const { tier, billingCycle } = opts;
-  const tierDef = TIER_DEFINITIONS[tier];
-  const priceId = billingCycle === 'annual' ? tierDef.stripePriceIdAnnual : tierDef.stripePriceIdMonthly;
-  if (!priceId) throw new Error(`No Stripe price configured for ${tier} ${billingCycle}`);
+  const priceId = getConfiguredStripePriceId(tier, billingCycle);
 
   const customerId = await getOrCreateStripeCustomer(opts.userId, opts.email, opts.name);
 
@@ -135,6 +223,10 @@ export async function createCheckoutSession(opts: CreateCheckoutOptions): Promis
 }
 
 export async function createPortalSession(userId: string, returnUrl: string): Promise<string> {
+  if (isMockMode()) {
+    return createMockPortalUrl({ userId, returnUrl });
+  }
+
   const row = await db
     .select({ stripeCustomerId: subscriptions.stripeCustomerId })
     .from(subscriptions)
@@ -182,6 +274,8 @@ export async function getUserSubscription(userId: string): Promise<UserSubscript
   };
 }
 
+type StripeDbTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
 export async function handleStripeWebhook(rawBody: Buffer, signature: string): Promise<void> {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) throw new Error('STRIPE_WEBHOOK_SECRET is not set');
@@ -193,52 +287,73 @@ export async function handleStripeWebhook(rawBody: Buffer, signature: string): P
     throw new Error(`Webhook signature verification failed: ${(err as Error).message}`);
   }
 
-  // Idempotency guard
-  const already = await db
-    .select({ id: stripeEvents.id })
-    .from(stripeEvents)
-    .where(eq(stripeEvents.id, event.id))
-    .limit(1);
+  await db.transaction(async (tx) => {
+    // Atomic event claim.
+    // The primary key on stripe_events.id serializes concurrent deliveries.
+    // If processing below throws, this insert rolls back and Stripe can retry.
+    const claimed = await tx
+      .insert(stripeEvents)
+      .values({
+        id: event.id,
+        type: event.type,
+        payload: JSON.stringify(event),
+      })
+      .onConflictDoNothing({ target: stripeEvents.id })
+      .returning({ id: stripeEvents.id });
 
-  if (already.length > 0) return;
+    // Already claimed/processed by another successful transaction.
+    if (claimed.length === 0) return;
 
-  await db.insert(stripeEvents).values({
-    id: event.id,
-    type: event.type,
-    payload: JSON.stringify(event),
-  });
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const subscriptionId =
+          typeof session.subscription === 'string'
+            ? session.subscription
+            : session.subscription?.id ?? null;
 
-  switch (event.type) {
-    case 'customer.subscription.created':
-    case 'customer.subscription.updated':
-      await syncSubscription(event.data.object as Stripe.Subscription);
-      break;
+        if (subscriptionId) {
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          await syncSubscription(tx, subscription);
+        } else {
+          logger.info('checkout session completed without subscription', {
+            sessionId: session.id,
+          });
+        }
+        break;
+      }
 
-    case 'customer.subscription.deleted':
-      await cancelSubscription(event.data.object as Stripe.Subscription);
-      break;
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+        await syncSubscription(tx, event.data.object as Stripe.Subscription);
+        break;
 
-    case 'invoice.payment_failed': {
-      // Fix 3: In 2026-02-25.clover, Invoice.subscription moved to
-      // invoice.parent.subscription_details.subscription.
-      // The intersection covers both the new and compatibility-fallback location.
-      type InvoiceWithSub = Stripe.Invoice & {
-        subscription?: string | null;
-        parent?: { type: string; subscription_details?: { subscription?: string | null } };
-      };
-      const inv = event.data.object as InvoiceWithSub;
-      const subscriptionId =
-        inv.parent?.subscription_details?.subscription ?? inv.subscription;
-      if (subscriptionId) await markPastDue(subscriptionId);
-      break;
+      case 'customer.subscription.deleted':
+        await cancelSubscription(tx, event.data.object as Stripe.Subscription);
+        break;
+
+      case 'invoice.payment_failed': {
+        // Fix 3: In 2026-02-25.clover, Invoice.subscription moved to
+        // invoice.parent.subscription_details.subscription.
+        // The intersection covers both the new and compatibility-fallback location.
+        type InvoiceWithSub = Stripe.Invoice & {
+          subscription?: string | null;
+          parent?: { type: string; subscription_details?: { subscription?: string | null } };
+        };
+        const inv = event.data.object as InvoiceWithSub;
+        const subscriptionId =
+          inv.parent?.subscription_details?.subscription ?? inv.subscription;
+        if (subscriptionId) await markPastDue(tx, subscriptionId);
+        break;
+      }
+
+      default:
+        logger.info('unhandled stripe event type', { eventType: event.type });
     }
-
-    default:
-      logger.info('unhandled stripe event type', { eventType: event.type });
-  }
+  });
 }
 
-async function syncSubscription(sub: Stripe.Subscription): Promise<void> {
+async function syncSubscription(tx: StripeDbTx, sub: Stripe.Subscription): Promise<void> {
   const userId = sub.metadata?.r3UserId;
   if (!userId) {
     logger.warn('subscription missing r3UserId metadata', { subscriptionId: sub.id });
@@ -255,11 +370,29 @@ async function syncSubscription(sub: Stripe.Subscription): Promise<void> {
   const periodStart = sub.items.data[0]?.current_period_start ?? 0;
   const periodEnd   = sub.items.data[0]?.current_period_end   ?? 0;
 
-  await db
-    .insert(subscriptions)
-    .values({
-      id: sub.id,
-      userId,
+  // Canonical entitlement lives in subscriptions.tier.
+  // users.tier is a denormalized cache used by auth/legacy consumers.
+  // Keep both synchronized atomically.
+await tx
+  .insert(subscriptions)
+  .values({
+    id: sub.id,
+    userId,
+    tier,
+    status,
+    billingCycle,
+    stripeCustomerId: sub.customer as string,
+    stripeSubscriptionId: sub.id,
+    stripePriceId: priceId,
+    currentPeriodStart: periodStart ? new Date(periodStart * 1000) : null,
+    currentPeriodEnd:   periodEnd   ? new Date(periodEnd   * 1000) : null,
+    cancelAtPeriodEnd: sub.cancel_at_period_end,
+    trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
+    trialEnd:   sub.trial_end   ? new Date(sub.trial_end   * 1000) : null,
+  })
+  .onConflictDoUpdate({
+    target: subscriptions.userId,
+    set: {
       tier,
       status,
       billingCycle,
@@ -271,35 +404,47 @@ async function syncSubscription(sub: Stripe.Subscription): Promise<void> {
       cancelAtPeriodEnd: sub.cancel_at_period_end,
       trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
       trialEnd:   sub.trial_end   ? new Date(sub.trial_end   * 1000) : null,
-    })
-    .onConflictDoUpdate({
-      target: subscriptions.userId,
-      set: {
-        tier, status, billingCycle,
-        stripeCustomerId: sub.customer as string,
-        stripeSubscriptionId: sub.id,
-        stripePriceId: priceId,
-        currentPeriodStart: periodStart ? new Date(periodStart * 1000) : null,
-        currentPeriodEnd:   periodEnd   ? new Date(periodEnd   * 1000) : null,
-        cancelAtPeriodEnd: sub.cancel_at_period_end,
-        trialStart: sub.trial_start ? new Date(sub.trial_start * 1000) : null,
-        trialEnd:   sub.trial_end   ? new Date(sub.trial_end   * 1000) : null,
-        updatedAt: new Date(),
-      },
-    });
+      updatedAt: new Date(),
+    },
+  });
+
+await tx
+  .update(users)
+  .set({
+    tier,
+    updatedAt: new Date(),
+  })
+  .where(eq(users.id, userId));
 }
 
-async function cancelSubscription(sub: Stripe.Subscription): Promise<void> {
+async function cancelSubscription(tx: StripeDbTx, sub: Stripe.Subscription): Promise<void> {
   const userId = sub.metadata?.r3UserId;
   if (!userId) return;
-  await db
-    .update(subscriptions)
-    .set({ tier: 'explorer', status: 'canceled', canceledAt: new Date(), cancelAtPeriodEnd: false, updatedAt: new Date() })
-    .where(eq(subscriptions.userId, userId));
+
+  // Cancellation returns the entitlement to Explorer and synchronizes
+  // the denormalized users.tier cache atomically with the subscription row.
+await tx
+  .update(subscriptions)
+  .set({
+    tier: 'explorer',
+    status: 'canceled',
+    canceledAt: new Date(),
+    cancelAtPeriodEnd: false,
+    updatedAt: new Date(),
+  })
+  .where(eq(subscriptions.userId, userId));
+
+await tx
+  .update(users)
+  .set({
+    tier: 'explorer',
+    updatedAt: new Date(),
+  })
+  .where(eq(users.id, userId));
 }
 
-async function markPastDue(subscriptionId: string): Promise<void> {
-  await db
+async function markPastDue(tx: StripeDbTx, subscriptionId: string): Promise<void> {
+  await tx
     .update(subscriptions)
     .set({ status: 'past_due', updatedAt: new Date() })
     .where(eq(subscriptions.stripeSubscriptionId, subscriptionId));

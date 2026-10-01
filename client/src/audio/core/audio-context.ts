@@ -62,6 +62,9 @@ export async function ensureAudioRunning(): Promise<AudioContext> {
     _initializing = ctx.resume().then(() => {
       _initializing = null;
       return ctx;
+    }, (error) => {
+      _initializing = null;
+      throw error;
     });
   }
 

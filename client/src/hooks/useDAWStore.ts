@@ -214,6 +214,19 @@ interface DAWStore {
   setMetronome: (v: boolean) => void;
   setMasterGain: (v: number) => void;
 
+  // ── Actions: Project hydration ──────────────────────────────────────────
+  hydrateProject: (project: {
+    bpm: number;
+    timeSignature: [number, number];
+    masterGain: number;
+    tracks: Track[];
+    regions: TrackRegion[];
+    midiPatterns: MidiPattern[];
+    loopEnabled: boolean;
+    loopStart: number;
+    loopEnd: number;
+  }) => void;
+
   // ── Actions: Tracks ───────────────────────────────────────────────────────
   addTrack: (track: Omit<Track, 'id'>) => string;
   removeTrack: (id: string) => void;
@@ -392,6 +405,24 @@ export const useDAWStore = create<DAWStore>()(
     setLoopPoints: (start, end) => set({ loopStart: start, loopEnd: end }),
     setMetronome: (v) => set({ metronomeEnabled: v }),
     setMasterGain: (v) => set({ masterGain: Math.max(0, Math.min(1.5, v)) }),
+
+    // ── Project hydration ──────────────────────────────────────────────────
+    hydrateProject: (project) =>
+      set({
+        bpm: Math.max(40, Math.min(240, project.bpm)),
+        timeSignature: project.timeSignature,
+        masterGain: Math.max(0, Math.min(1.5, project.masterGain)),
+        tracks: project.tracks,
+        regions: project.regions,
+        midiPatterns: project.midiPatterns,
+        loopEnabled: project.loopEnabled,
+        loopStart: Math.max(0, project.loopStart),
+        loopEnd: Math.max(0, project.loopEnd),
+        selectedTrackId: null,
+        selectedRegionId: null,
+        activePatternId: project.midiPatterns[0]?.id ?? null,
+        sequencerStep: -1,
+      }),
 
     // ── Track actions ────────────────────────────────────────────────────────
     addTrack: (track) => {

@@ -1,5 +1,6 @@
 // client/src/components/microphone-input.tsx
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { getAudioContext } from "@/audio/core/audio-context";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const ACID       = "#a3e635";
@@ -735,7 +736,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   const startMicrophone = useCallback(async () => {
     try {
       setError(""); setWarning("");
-      if (!ctxRef.current) ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (!ctxRef.current) ctxRef.current = getAudioContext();
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { ...(selDevice ? { deviceId: { exact: selDevice } } : {}), echoCancellation: echoCxl, noiseSuppression: noiseSupp, autoGainControl: autoGain, channelCount: 2 },
       });
@@ -892,7 +893,7 @@ export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipReco
   // ─── Cleanup ──────────────────────────────────────────────────────────────
   useEffect(() => () => {
     stopMicrophone();
-    ctxRef.current?.close();
+    ctxRef.current = null;
     clips.forEach(c => URL.revokeObjectURL(c.url));
   }, []);
 
