@@ -39,7 +39,7 @@ export interface AnalysisTelemetry {
   integratedLufs: number;
   gainReductionDb: number;
   clipping: boolean;
-  spectrum: Float32Array<ArrayBuffer>;
+  spectrum: Uint8Array;
   waveformL: Float32Array<ArrayBuffer>;
   waveformR: Float32Array<ArrayBuffer>;
 }
@@ -84,7 +84,7 @@ export class AudioGraph {
   private rightBuffer: Float32Array<ArrayBuffer>;
   private kLeftBuffer: Float32Array<ArrayBuffer>;
   private kRightBuffer: Float32Array<ArrayBuffer>;
-  private spectrumBuffer: Float32Array<ArrayBuffer>;
+  private spectrumBuffer: Uint8Array;
 
   private loudnessRing: Array<{ at: number; energy: number }> = [];
   private loudnessBlocks: number[] = [];
@@ -180,7 +180,7 @@ export class AudioGraph {
     this.spectrumAnalyser = this.context.createAnalyser();
     this.spectrumAnalyser.fftSize = 4096;
     this.spectrumAnalyser.smoothingTimeConstant = 0.78;
-    this.spectrumBuffer = new Float32Array(this.spectrumAnalyser.frequencyBinCount) as unknown as Float32Array<ArrayBuffer>;
+    this.spectrumBuffer = new Uint8Array(this.spectrumAnalyser.frequencyBinCount);
 
     // Wire passive taps (never feed destination)
     this.stereoSplitter.connect(this.leftAnalyser, 0);
