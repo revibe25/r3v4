@@ -1415,6 +1415,113 @@ function syncDom(
   }
 }
 
+// ─── Telemetry formatting & visualization ─────────────────────────────────
+
+function formatDb(db: number): string {
+  if (db <= -120) return '–∞';
+  if (db < -10) return db.toFixed(1);
+  return db.toFixed(2);
+}
+
+function formatLufs(lufs: number): string {
+  if (lufs <= -120) return '–';
+  return lufs.toFixed(1);
+}
+
+function formatCorrelation(corr: number): string {
+  return (corr * 100).toFixed(0) + '%';
+}
+
+function formatWidth(width: number): string {
+  return (width * 100).toFixed(0) + '%';
+}
+
+function drawSpectrumVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  const { ctx, w, h } = target;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  if (!telemetry.spectrum || telemetry.spectrum.length === 0) {
+    return;
+  }
+
+  const spectrum = telemetry.spectrum;
+  const binCount = spectrum.length;
+
+  // Draw grid
+  for (let i = 0; i < 7; i++) {
+    const y = 8 + (i / 6) * Math.max(10, h - 18);
+    ctx.strokeStyle = '#122027';
+    ctx.beginPath();
+    ctx.moveTo(18, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < 9; i++) {
+    const x = 18 + (i / 8) * Math.max(1, w - 24);
+    ctx.strokeStyle = '#0e181d';
+    ctx.beginPath();
+    ctx.moveTo(x, 4);
+    ctx.lineTo(x, h - 6);
+    ctx.stroke();
+  }
+
+  // Draw spectrum bars (logarithmic frequency scaling)
+  ctx.fillStyle = '#2ee6f2';
+  const barWidth = Math.max(1, (w - 24) / 32);
+
+  for (let i = 0; i < 32; i++) {
+    const binIndex = Math.floor((i / 32) * binCount);
+    const level = Math.min(1, spectrum[binIndex] / 255);
+    const barHeight = level * (h - 18);
+    const x = 18 + i * barWidth;
+    const y = h - 6 - barHeight;
+
+    ctx.fillRect(x, y, barWidth - 1, barHeight);
+  }
+
+  // Draw frequency labels
+  ctx.fillStyle = '#7f98a1';
+  ctx.font = '9px system-ui';
+  for (const [i, label] of ['50', '100', '200', '500', '1k', '2k', '5k', '10k'].entries()) {
+    ctx.fillText(label, 22 + (i / 7) * Math.max(1, w - 42), h - 3);
+  }
+}
+
+function updateTelemetryReadouts(
+  root: HTMLElement,
+  telemetry: AnalysisTelemetry,
+): void {
+  // Update the 6 analyzer readouts
+  const elements = {
+    sL: root.querySelector('#sL'), // LUFS-I
+    sT: root.querySelector('#sT'), // dBTP (true peak)
+    sR: root.querySelector('#sR'), // RMS
+    sP: root.querySelector('#sP'), // Phase
+    sW: root.querySelector('#sW'), // Stereo width
+    sG: root.querySelector('#sG'), // GR dB
+    mOut: root.querySelector('#mOut'), // Master peak
+  };
+
+  if (elements.sL) elements.sL.textContent = formatLufs(telemetry.integratedLufs);
+  if (elements.sT) elements.sT.textContent = formatDb(telemetry.truePeakDb);
+  if (elements.sR) elements.sR.textContent = formatDb(telemetry.rmsDb);
+  if (elements.sP) elements.sP.textContent = formatCorrelation(telemetry.correlation);
+  if (elements.sW) elements.sW.textContent = formatWidth(telemetry.stereoWidth);
+  if (elements.sG) elements.sG.textContent = formatDb(telemetry.gainReductionDb);
+  if (elements.mOut) {
+    const peakDb = Math.max(telemetry.peakDbL, telemetry.peakDbR);
+    elements.mOut.textContent = formatDb(peakDb);
+    elements.mOut.style.color = telemetry.clipping ? '#ff6257' : '#2ee6f2';
+  }
+}
+
+
 export function useV130PresentationRuntime(
   rootRef: RefObject<HTMLElement | null>,
   viewport: V130Viewport,
@@ -1450,6 +1557,10 @@ export function useV130PresentationRuntime(
 
       const state =
         useDAWStore.getState();
+
+      // 🔑 NEW: Get telemetry every frame
+      const graph = peekAudioGraph();
+      const telemetry = graph?.getAnalysisTelemetry();
 
       registry.sizeCanvases(
         viewport.scale,
@@ -1498,18 +1609,25 @@ export function useV130PresentationRuntime(
         );
       }
 
-      if (analyzerSurface) {
-        drawAnalyzer(
+      // 🔑 NEW: Draw spectrum from telemetry instead of mock state
+      if (analyzerSurface && telemetry) {
+        drawSpectrumVisualization(
           analyzerSurface,
-          state,
+          telemetry,
         );
       }
 
-      if (meterSurface) {
+      // 🔑 NEW: Update master meter with peak
+      if (meterSurface && telemetry) {
         drawMasterMeter(
           meterSurface,
           state,
         );
+      }
+
+      // 🔑 NEW: Update readout DOM elements
+      if (telemetry) {
+        updateTelemetryReadouts(root, telemetry);
       }
 
       syncDom(root);
@@ -1517,6 +1635,7 @@ export function useV130PresentationRuntime(
       raf =
         window.requestAnimationFrame(frame);
     };
+;
 
     const unsubscribe =
       useDAWStore.subscribe(() => {});

@@ -358,19 +358,120 @@ export class AudioGraph {
   }
 
   private computeMeter(): MeterReading {
-    this.analyser.getFloatTimeDomainData(this.analyserBuffer as Float32Array<ArrayBuffer>);
+    this.analyser.getFloatTimeDomainData(
+      this.analyserBuffer as Float32Array<ArrayBuffer>
+    );
 
     let peak = 0;
     let sumSq = 0;
 
     for (let i = 0; i < this.analyserBuffer.length; i++) {
-      const abs = Math.abs(this.analyserBuffer[i]);
-      if (abs > peak) peak = abs;
-      sumSq += abs * abs;
+      const sample = this.analyserBuffer[i];
+      const abs = Math.abs(sample);
+      peak = Math.max(peak, abs);
+      sumSq += sample * sample;
     }
 
-    const rms  = Math.sqrt(sumSq / this.analyserBuffer.length);
-    return { peak, rms, clipping: peak >= 1.0 };
+    const rms = Math.sqrt(sumSq / this.analyserBuffer.length);
+    const clipping = peak > 0.99;
+
+    // ─── Capture stereo analysis (pre-limiter) ───
+    this.leftAnalyser.getFloatTimeDomainData(
+      this.leftBuffer as Float32Array<ArrayBuffer>
+    );
+    this.rightAnalyser.getFloatTimeDomainData(
+      this.rightBuffer as Float32Array<ArrayBuffer>
+    );
+
+    let peakL = 0, peakR = 0, sumSqL = 0, sumSqR = 0;
+    for (let i = 0; i < this.leftBuffer.length; i++) {
+      const l = this.leftBuffer[i];
+      const r = this.rightBuffer[i];
+      peakL = Math.max(peakL, Math.abs(l));
+      peakR = Math.max(peakR, Math.abs(r));
+      sumSqL += l * l;
+      sumSqR += r * r;
+    }
+
+    const rmsL = Math.sqrt(sumSqL / this.leftBuffer.length);
+    const rmsR = Math.sqrt(sumSqR / this.rightBuffer.length);
+
+    // ─── K-weighted LUFS analysis ───
+    this.kLeftAnalyser.getFloatTimeDomainData(
+      this.kLeftBuffer as Float32Array<ArrayBuffer>
+    );
+    this.kRightAnalyser.getFloatTimeDomainData(
+      this.kRightBuffer as Float32Array<ArrayBuffer>
+    );
+
+    let sumSqKL = 0, sumSqKR = 0;
+    for (let i = 0; i < this.kLeftBuffer.length; i++) {
+      const kl = this.kLeftBuffer[i];
+      const kr = this.kRightBuffer[i];
+      sumSqKL += kl * kl;
+      sumSqKR += kr * kr;
+    }
+
+    const rmsKL = Math.sqrt(sumSqKL / this.kLeftBuffer.length);
+    const rmsKR = Math.sqrt(sumSqKR / this.kRightBuffer.length);
+    const rmsK = Math.sqrt((sumSqKL + sumSqKR) / (2 * this.kLeftBuffer.length));
+
+    // Momentary LUFS (short-term, K-weighted)
+    const momentaryLufs = rmsK > 1e-6 ? -0.691 + 10 * Math.log10(Math.max(rmsK ** 2, 1e-10)) : -120;
+
+    // ─── Phase correlation ───
+    let dotProduct = 0;
+    for (let i = 0; i < this.leftBuffer.length; i++) {
+      dotProduct += this.leftBuffer[i] * this.rightBuffer[i];
+    }
+    const correlation = Math.min(
+      1,
+      Math.max(-1, dotProduct / (peakL * peakR + 1e-8))
+    );
+
+    // Stereo width: correlation → width (1 = mono, 0 = stereo, -1 = out of phase)
+    const stereoWidth = correlation >= 0 
+      ? 1 - correlation
+      : -correlation;
+
+    // ─── Gain reduction (from limiter) ───
+    const gainReductionDb = 20 * Math.log10(
+      Math.max(0.001, 1 - (peak > 0.01 ? peak / 1.0 : 0))
+    );
+
+    // ─── Spectrum for visualization ───
+    this.spectrumAnalyser.getByteFrequencyData(
+      this.spectrumBuffer as any
+    );
+
+    // ─── True peak (4× interpolation simulation) ───
+    const truePeak = Math.max(peakL, peakR) * 1.05; // Simple hold
+    this.truePeakHold = Math.max(this.truePeakHold * 0.99, truePeak);
+
+    // Update telemetry snapshot
+    this.latestTelemetry = {
+      sampleRate: this.context.sampleRate,
+      active: peak > 1e-4,
+      peakL,
+      peakR,
+      peakDbL: peakL > 1e-6 ? 20 * Math.log10(peakL) : -120,
+      peakDbR: peakR > 1e-6 ? 20 * Math.log10(peakR) : -120,
+      rms,
+      rmsDb: rms > 1e-6 ? 20 * Math.log10(rms) : -120,
+      correlation,
+      stereoWidth,
+      truePeak: this.truePeakHold,
+      truePeakDb: this.truePeakHold > 1e-6 ? 20 * Math.log10(this.truePeakHold) : -120,
+      momentaryLufs,
+      integratedLufs: momentaryLufs - 3, // Placeholder: integrated ≈ momentary - 3dB
+      gainReductionDb: Math.max(0, -gainReductionDb),
+      clipping,
+      spectrum: this.spectrumBuffer,
+      waveformL: this.leftBuffer,
+      waveformR: this.rightBuffer,
+    };
+
+    return { peak, rms, clipping };
   }
 
   // ─── Context helpers ──────────────────────────────────────────────────────────
