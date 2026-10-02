@@ -589,6 +589,7 @@ export function getAudioGraph(): AudioGraph {
   if (!audioGraph || (audioGraph as unknown as { _disposed: boolean })._disposed) {
     audioGraph = new AudioGraph();
   }
+  (window as any).audioGraph = audioGraph;
   return audioGraph;
 }
 
@@ -597,12 +598,19 @@ export function peekAudioGraph(): AudioGraph | null {
   if ((audioGraph as unknown as { _disposed: boolean })._disposed) {
     return null;
   }
+  (window as any).audioGraph = audioGraph;
   return audioGraph;
 }
 
 /** Convenience re-export for code that imported the old `audioGraph` constant */
 export { getAudioGraph as audioGraph };
 
+
+declare global {
+  interface Window {
+    audioGraph?: AudioGraph | null;
+  }
+}
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function clamp(value: number, min: number, max: number): number {
