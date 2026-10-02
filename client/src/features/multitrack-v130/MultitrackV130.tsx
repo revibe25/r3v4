@@ -1,8 +1,10 @@
 import {
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 
+import { getAudioGraph } from '@/audio/core/audio-graph';
 import { useV130Runtime } from './runtime/useV130Runtime';
 import { useV130CanvasRegistry } from './renderers/useV130CanvasRegistry';
 import { useV130PresentationRuntime } from './renderers/useV130PresentationRuntime';
@@ -23,6 +25,11 @@ export default function MultitrackV130() {
     useState<HTMLDivElement | null>(
       null,
     );
+
+  // Initialize audio graph singleton
+  useLayoutEffect(() => {
+    getAudioGraph();
+  }, []);
 
   const viewport =
     useV130Viewport(host);
