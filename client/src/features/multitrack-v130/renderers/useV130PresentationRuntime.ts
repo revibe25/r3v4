@@ -1499,13 +1499,13 @@ function updateTelemetryReadouts(
 ): void {
   // Update the 6 analyzer readouts
   const elements = {
-    sL: root.querySelector('#sL'), // LUFS-I
-    sT: root.querySelector('#sT'), // dBTP (true peak)
-    sR: root.querySelector('#sR'), // RMS
-    sP: root.querySelector('#sP'), // Phase
-    sW: root.querySelector('#sW'), // Stereo width
-    sG: root.querySelector('#sG'), // GR dB
-    mOut: root.querySelector('#mOut'), // Master peak
+    sL: root.querySelector('#sL') as HTMLElement | null, // LUFS-I
+    sT: root.querySelector('#sT') as HTMLElement | null, // dBTP (true peak)
+    sR: root.querySelector('#sR') as HTMLElement | null, // RMS
+    sP: root.querySelector('#sP') as HTMLElement | null, // Phase
+    sW: root.querySelector('#sW') as HTMLElement | null, // Stereo width
+    sG: root.querySelector('#sG') as HTMLElement | null, // GR dB
+    mOut: root.querySelector('#mOut') as HTMLElement | null, // Master peak
   };
 
   if (elements.sL) elements.sL.textContent = formatLufs(telemetry.integratedLufs);
