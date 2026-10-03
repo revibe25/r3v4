@@ -90,7 +90,6 @@ export class AudioGraph {
   private loudnessBlocks: number[] = [];
   private lastLoudnessBlockAt = 0;
   private truePeakHold = 0;
-  private correlationHold = 0;
   private latestTelemetry: AnalysisTelemetry;
 
   private sends = new Map<string, SendBus>();
@@ -414,30 +413,123 @@ export class AudioGraph {
 
     const rmsKL = Math.sqrt(sumSqKL / this.kLeftBuffer.length);
     const rmsKR = Math.sqrt(sumSqKR / this.kRightBuffer.length);
-    const rmsK = Math.sqrt((sumSqKL + sumSqKR) / (2 * this.kLeftBuffer.length));
+    const rmsK = Math.sqrt((sumSqKL + sumSqKR) / this.kLeftBuffer.length);
 
     // Momentary LUFS (short-term, K-weighted)
-    const momentaryLufs = rmsK > 1e-6 ? -0.691 + 10 * Math.log10(Math.max(rmsK ** 2, 1e-10)) : -120;
+    const momentaryLufs =
+      rmsK > 1e-6
+        ? -0.691 + 10 * Math.log10(Math.max(rmsK ** 2, 1e-10))
+        : -120;
+
+    // ─── Integrated LUFS: 400 ms blocks with absolute + relative gating ───
+    const now = this.context.currentTime;
+    const blockWindowSeconds = 0.4;
+
+    if (
+      this.loudnessRing.length === 0 ||
+      now > this.loudnessRing[this.loudnessRing.length - 1].at
+    ) {
+      this.loudnessRing.push({
+        at: now,
+        energy: rmsK ** 2,
+      });
+    }
+
+    const ringCutoff = now - blockWindowSeconds;
+    while (
+      this.loudnessRing.length > 0 &&
+      this.loudnessRing[0].at < ringCutoff
+    ) {
+      this.loudnessRing.shift();
+    }
+
+    if (
+      this.loudnessRing.length > 0 &&
+      (
+        this.lastLoudnessBlockAt === 0 ||
+        now - this.lastLoudnessBlockAt >= blockWindowSeconds
+      )
+    ) {
+      this.lastLoudnessBlockAt = now;
+
+      const blockEnergy =
+        this.loudnessRing.reduce(
+          (sum, sample) => sum + sample.energy,
+          0,
+        ) / this.loudnessRing.length;
+
+      const blockLufs =
+        blockEnergy > 1e-10
+          ? -0.691 + 10 * Math.log10(blockEnergy)
+          : -120;
+
+      if (Number.isFinite(blockLufs)) {
+        this.loudnessBlocks.push(blockLufs);
+      }
+    }
+
+    let integratedLufs = -120;
+
+    const absoluteGatedBlocks =
+      this.loudnessBlocks.filter(
+        (lufs) =>
+          Number.isFinite(lufs) &&
+          lufs >= -70,
+      );
+
+    if (absoluteGatedBlocks.length > 0) {
+      const ungatedEnergy =
+        absoluteGatedBlocks.reduce(
+          (sum, lufs) =>
+            sum + 10 ** ((lufs + 0.691) / 10),
+          0,
+        ) / absoluteGatedBlocks.length;
+
+      const ungatedLufs =
+        -0.691 + 10 * Math.log10(ungatedEnergy);
+
+      const relativeGate =
+        Math.max(-70, ungatedLufs - 10);
+
+      const gatedBlocks =
+        absoluteGatedBlocks.filter(
+          (lufs) => lufs >= relativeGate,
+        );
+
+      if (gatedBlocks.length > 0) {
+        const gatedEnergy =
+          gatedBlocks.reduce(
+            (sum, lufs) =>
+              sum + 10 ** ((lufs + 0.691) / 10),
+            0,
+          ) / gatedBlocks.length;
+
+        integratedLufs =
+          -0.691 + 10 * Math.log10(gatedEnergy);
+      }
+    }
 
     // ─── Phase correlation ───
     let dotProduct = 0;
     for (let i = 0; i < this.leftBuffer.length; i++) {
       dotProduct += this.leftBuffer[i] * this.rightBuffer[i];
     }
-    const correlation = Math.min(
-      1,
-      Math.max(-1, dotProduct / (peakL * peakR + 1e-8))
-    );
+    const sumL2 = sumSqL;
+    const sumR2 = sumSqR;
+    const denominator = Math.sqrt(sumL2 * sumR2);
+    const correlation =
+      denominator > 1e-10
+        ? Math.min(1, Math.max(-1, dotProduct / denominator))
+        : 0;
 
     // Stereo width: correlation → width (1 = mono, 0 = stereo, -1 = out of phase)
-    const stereoWidth = correlation >= 0 
-      ? 1 - correlation
-      : -correlation;
+    // ✅ PATCH 4: Stereo width (1 - |correlation|)
+    const stereoWidth = 1 - Math.abs(correlation);
 
     // ─── Gain reduction (from limiter) ───
-    const gainReductionDb = 20 * Math.log10(
-      Math.max(0.001, 1 - (peak > 0.01 ? peak / 1.0 : 0))
-    );
+    // ✅ PATCH 6: Gain reduction (use limiter.reduction API)
+    const gainReductionDb = this.limiter.reduction;
+    // Hardware-backed, not inferred
 
     // ─── Spectrum for visualization ───
     this.spectrumAnalyser.getByteFrequencyData(
@@ -445,7 +537,10 @@ export class AudioGraph {
     );
 
     // ─── True peak (4× interpolation simulation) ───
-    const truePeak = Math.max(peakL, peakR) * 1.05; // Simple hold
+    // ✅ PATCH 5: True-peak (simplified, documented approximation)
+    const truePeak = Math.max(peakL, peakR);
+    this.truePeakHold = Math.max(this.truePeakHold * 0.99, truePeak);
+    // AnalyserNode 2048-sample window = 46ms @ 44.1kHz (sufficient for UI)
     this.truePeakHold = Math.max(this.truePeakHold * 0.99, truePeak);
 
     // Update telemetry snapshot
@@ -463,7 +558,7 @@ export class AudioGraph {
       truePeak: this.truePeakHold,
       truePeakDb: this.truePeakHold > 1e-6 ? 20 * Math.log10(this.truePeakHold) : -120,
       momentaryLufs,
-      integratedLufs: momentaryLufs - 3, // Placeholder: integrated ≈ momentary - 3dB
+      integratedLufs,
       gainReductionDb: Math.max(0, -gainReductionDb),
       clipping,
       spectrum: this.spectrumBuffer,
