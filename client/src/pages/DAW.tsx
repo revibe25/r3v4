@@ -19,6 +19,9 @@
  * @requires  Zustand
  */
 
+import { getAudioGraph } from '@/audio/core/audio-graph';
+import { useV130Analyzer } from '../hooks/useV130Analyzer';
+import { MasterAnalyzer } from '../components/MasterAnalyzer';
 import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
   useId, useReducer, useLayoutEffect,
@@ -2715,6 +2718,7 @@ export default function DAW() {
 
   const { restoreLocalSnapshot } = useCloudSync();
   const engine = useDAWEngine();
+  const { audioGraphRef } = useV130Analyzer(getAudioGraph());
   const collab = useCollabSocket();
   const seq = useMidiSequencer();
 
