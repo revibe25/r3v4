@@ -1,0 +1,346 @@
+import { useEffect } from 'react';
+
+import { useDAWEngine } from '@/hooks/useDAWEngine';
+import { useDAWStore } from '@/hooks/useDAWStore';
+import { getV130MidiEngine } from '../adapters/midi-adapter';
+import { serializeV130Project } from '../adapters/project-adapter';
+
+type V130RuntimeEngine = ReturnType<typeof useDAWEngine>;
+
+function qs<T extends Element>(
+  root: HTMLElement,
+  selector: string,
+): T | null {
+  return root.querySelector<T>(selector);
+}
+
+function setPressed(
+  el: Element | null,
+  pressed: boolean,
+): void {
+  el?.setAttribute('aria-pressed', String(pressed));
+}
+
+function setText(
+  el: Element | null,
+  value: string,
+): void {
+  if (el) el.textContent = value;
+}
+
+function positionToClock(
+  position: number,
+  numerator: number,
+): {
+  bar: number;
+  beat: number;
+  tick: number;
+} {
+  const safe = Math.max(0, position);
+  const barIndex = Math.floor(safe / numerator);
+  const beatIndex = Math.floor(safe % numerator);
+
+  return {
+    bar: barIndex + 1,
+    beat: beatIndex + 1,
+    tick: Math.floor((safe % 1) * 1000),
+  };
+}
+
+export function useV130Runtime(
+  rootRef: React.RefObject<HTMLElement | null>,
+): void {
+  const engine: V130RuntimeEngine =
+    useDAWEngine();
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const store = useDAWStore;
+    const midi = getV130MidiEngine();
+
+    const playButton =
+      qs<HTMLButtonElement>(root, '#bPlay');
+
+    const stopButton =
+      qs<HTMLButtonElement>(root, '#bStop');
+
+    const recordButton =
+      qs<HTMLButtonElement>(root, '#bRec');
+
+    const bpmInput =
+      qs<HTMLInputElement>(root, '#bpm');
+
+    const loopButton =
+      qs<HTMLButtonElement>(root, '#tbLoop');
+
+    const metButton =
+      qs<HTMLButtonElement>(root, '#tbMet');
+
+    const timeline =
+      qs<HTMLCanvasElement>(root, '#cvO');
+
+    const engineButton =
+      qs<HTMLButtonElement>(root, '#engBtn');
+
+    const engineText =
+      qs<HTMLElement>(root, '#engTxt');
+
+    const timeOutput =
+      qs<HTMLElement>(root, '#tTime');
+
+    const barOutput =
+      qs<HTMLElement>(root, '#tBar');
+
+    const beatOutput =
+      qs<HTMLElement>(root, '#tBeat');
+
+    const tickOutput =
+      qs<HTMLElement>(root, '#tTick');
+
+    const bpmDisplay =
+      qs<HTMLElement>(root, '#pBpm');
+
+    if (!playButton || !stopButton || !recordButton) {
+      return;
+    }
+
+    const onPlay = () => {
+      engine.togglePlay();
+    };
+
+    const onStop = () => {
+      engine.stop();
+    };
+
+    const onRecord = () => {
+      engine.toggleRecord();
+    };
+
+    const onBpmInput = () => {
+      if (!bpmInput) return;
+
+      const value = Number(bpmInput.value);
+      if (!Number.isFinite(value)) return;
+
+      store.getState().setBpm(value);
+    };
+
+    const onLoop = () => {
+      const s = store.getState();
+
+      if (s.loopEnabled) {
+        s.setLoopEnabled(false);
+        return;
+      }
+
+      s.setLoopPoints(
+        s.loopStart,
+        s.loopEnd > s.loopStart
+          ? s.loopEnd
+          : s.loopStart + 4,
+      );
+      s.setLoopEnabled(true);
+    };
+
+    const onMetronome = () => {
+      const s = store.getState();
+      s.setMetronome(!s.metronomeEnabled);
+    };
+
+    const onTimelinePointer = (
+      event: PointerEvent,
+    ) => {
+      if (!timeline) return;
+
+      const rect =
+        timeline.getBoundingClientRect();
+
+      if (rect.width <= 0) return;
+
+      const x =
+        Math.max(
+          0,
+          Math.min(
+            rect.width,
+            event.clientX - rect.left,
+          ),
+        );
+
+      const normalized = x / rect.width;
+
+      // V130 reference surface is 48 bars × 4 beats.
+      const targetBeat =
+        normalized * 48 * 4;
+
+      engine.seekTo(targetBeat);
+    };
+
+    playButton.addEventListener(
+      'click',
+      onPlay,
+    );
+
+    stopButton.addEventListener(
+      'click',
+      onStop,
+    );
+
+    recordButton.addEventListener(
+      'click',
+      onRecord,
+    );
+
+    bpmInput?.addEventListener(
+      'change',
+      onBpmInput,
+    );
+
+    loopButton?.addEventListener(
+      'click',
+      onLoop,
+    );
+
+    metButton?.addEventListener(
+      'click',
+      onMetronome,
+    );
+
+    timeline?.addEventListener(
+      'pointerdown',
+      onTimelinePointer,
+    );
+
+    void midi.start().catch(() => {
+      // MIDI is optional; runtime remains usable without hardware access.
+    });
+
+    const sync = (
+      state = store.getState(),
+    ) => {
+      setPressed(
+        playButton,
+        state.playing,
+      );
+
+      setPressed(
+        recordButton,
+        state.recording,
+      );
+
+      setPressed(
+        loopButton,
+        state.loopEnabled,
+      );
+
+      setPressed(
+        metButton,
+        state.metronomeEnabled,
+      );
+
+      if (bpmInput) {
+        bpmInput.value =
+          state.bpm.toFixed(2);
+      }
+
+      setText(
+        bpmDisplay,
+        `${state.bpm.toFixed(2)} BPM`,
+      );
+
+      const clock =
+        positionToClock(
+          state.position,
+          state.timeSignature[0],
+        );
+
+      setText(
+        barOutput,
+        String(clock.bar),
+      );
+
+      setText(
+        beatOutput,
+        String(clock.beat),
+      );
+
+      setText(
+        tickOutput,
+        String(clock.tick).padStart(3, '0'),
+      );
+
+      setText(
+        timeOutput,
+        state.position.toFixed(3),
+      );
+
+      setText(
+        engineText,
+        state.playing
+          ? 'Running'
+          : 'Offline',
+      );
+
+      engineButton?.classList.toggle(
+        'run',
+        state.playing,
+      );
+    };
+
+    sync();
+
+    const unsubscribe =
+      store.subscribe((state) => {
+        sync(state);
+      });
+
+    return () => {
+      playButton.removeEventListener(
+        'click',
+        onPlay,
+      );
+
+      stopButton.removeEventListener(
+        'click',
+        onStop,
+      );
+
+      recordButton.removeEventListener(
+        'click',
+        onRecord,
+      );
+
+      bpmInput?.removeEventListener(
+        'change',
+        onBpmInput,
+      );
+
+      loopButton?.removeEventListener(
+        'click',
+        onLoop,
+      );
+
+      metButton?.removeEventListener(
+        'click',
+        onMetronome,
+      );
+
+      timeline?.removeEventListener(
+        'pointerdown',
+        onTimelinePointer,
+      );
+
+      unsubscribe();
+
+      void midi.stop().catch(() => {});
+    };
+  }, [rootRef, engine]);
+
+  // Keep the adapter boundary intentionally live.
+  // This proves the V130 runtime is attached to canonical persistence
+  // without creating a second project state system.
+  useEffect(() => {
+    void serializeV130Project;
+  }, []);
+}

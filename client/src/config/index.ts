@@ -2,7 +2,7 @@
 
 const raw = import.meta.env.VITE_API_URL as string | undefined;
 
-if (!raw || raw.trim() === '') {
+if ((!raw || raw.trim() === '') && import.meta.env.PROD) {
   console.warn(
     '[Config] VITE_API_URL is not set. API calls will target the current origin. ' +
     'Set VITE_API_URL in your .env file for production.'

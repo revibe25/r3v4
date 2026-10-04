@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 // @ts-nocheck
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { getAudioContext } from "@/audio/core/audio-context";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export type VisualizationMode = 'bars' | 'wave' | 'circular' | 'particles' | 'oscilloscope' | 'spectrogram' | 'terrain' | 'galaxy' | 'dna' | 'flame' | 'matrix' | 'aurora';
@@ -187,7 +188,7 @@ export function AudioVisualizer({
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       });
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = getAudioContext();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = FFT_SIZE;
       analyser.smoothingTimeConstant = SMOOTHING;
@@ -213,7 +214,7 @@ export function AudioVisualizer({
       sourceRef.current.mediaStream.getTracks().forEach((t) => t.stop());
       sourceRef.current.disconnect();
     }
-    if (audioCtxRef.current) audioCtxRef.current.close();
+    audioCtxRef.current = null;
     audioCtxRef.current = null;
     analyserRef.current = null;
     sourceRef.current = null;

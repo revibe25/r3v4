@@ -1,0 +1,141 @@
+# R3 NATIVE Multitrack v1.3.0 — Reference Contract
+
+This file freezes the exact reference HTML contract used for the staged migration.
+
+## Source identity
+
+- Source: `r3-native-multitrack-v1.3.0-CORRECTED.html`
+- SHA256: `b38da47b26317782f54fad381925379f203760e4193419aa7d050bd271c2e9b0`
+- Bytes: `194850`
+- Lines: `42`
+
+## Visual coordinate system
+
+- DESIGN_W: 1536
+- DESIGN_H: 1024
+- Viewport model: scale = min(containerWidth / 1536, containerHeight / 1024)
+- Logical stage expands to the design coordinate system before CSS scaling.
+- Canvas backing resolution follows devicePixelRatio × stage scale, capped at 3.
+
+## Layout
+
+- Header: 58px
+- Mode bar: 26px
+- Main workspace: remaining flexible height
+- Footer: 32px
+- Left sidebar: 150px
+- Timeline rail: 44px
+- Right panel rail: 30px
+- Right stack: routing + takes
+- Bottom-left controller area: pads + piano
+- Mixer: 490px
+- DSP: 330px
+- Analyzer: remaining flexible width
+
+## Panels
+
+```
+side
+arr
+routing
+takes
+padsP
+pianoP
+mixer
+dsp
+ana
+```
+
+## Data / behavior
+
+- 48 bars
+- 16 steps per bar
+- 7 tracks
+- 4 buses
+- markers
+- chord progression
+- synth gate
+- 4 vocal take sets
+- automation lane
+- 4 send rows
+- per-track mute / solo / arm / bus / input / gain / pan / reverb
+- master gain
+- DSP state
+- vocal processing state
+- panel state
+- undo / redo
+- project serialization / loading / sanitation
+
+## Runtime ownership migration rule
+
+The following reference responsibilities must be adapted to canonical R3 services rather than duplicated:
+
+- AudioContext
+- MIDI access
+- project persistence
+- application transport authority
+- subscription / application state
+
+The v1.3 feature boundary may own presentation, derived state, rendering, and feature-local orchestration, but not a second global authority for those services.
+
+## Renderer
+
+The reference uses Canvas 2D for:
+- arrangement surfaces
+- waveforms
+- automation
+- takes
+- analyzer
+- master meter
+- visual 2D/3D projection
+
+The 3D mode is a Canvas 2D projection, not a requirement for a second Three.js scene.
+
+## Public controller
+
+The reference exports:
+
+`window.R3Multitrack`
+
+with:
+- state
+- data
+- history
+- panels
+- dsp
+- play
+- pause
+- stop
+- seek
+- render
+- setMode
+- padHit
+- setTake
+- engine
+
+The final React implementation does not need to expose this global API, but equivalent capabilities must remain available through explicit module contracts.
+
+## Source section boundaries
+
+```
+01 core
+02 canvas
+03 sidebar
+04 data
+05 mixer
+06 dsp
+07 engine
+08 panels
+09 app
+```
+
+## Migration rule
+
+Do not alter the reference geometry or behavior to fit the existing legacy Multitrack implementation.
+
+Instead:
+1. preserve the reference contract,
+2. adapt its authorities to the R3 stack,
+3. split presentation into isolated feature modules,
+4. validate each module against the reference,
+5. switch the live route only after parity gates pass.

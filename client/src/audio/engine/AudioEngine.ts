@@ -1,6 +1,7 @@
 // client/src/audio/engine/AudioEngine.ts
 
 import { VisualIntelligenceLayer } from './VIL';
+import { getAudioContext } from '@/audio/core/audio-context';
 
 export class AudioEngine {
   private Tone: any = null;
@@ -12,21 +13,18 @@ export class AudioEngine {
   async init() {
     if (this.started) return;
 
-    this.Tone = await import('tone');
+      this.Tone = await import('tone');
 
-    const ctx = new this.Tone.Context({
-      latencyHint: 'interactive',
-    });
+      // Bind Tone to the canonical native AudioContext.
+      const audioCtx = getAudioContext();
+      this.Tone.setContext(audioCtx);
 
-    this.Tone.setContext(ctx);
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
 
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
-    }
+      await this.Tone.start();
 
-    await this.Tone.start();
-
-    const audioCtx = ctx.rawContext;
 
     // 🔥 LOAD WORKLET
     await audioCtx.audioWorklet.addModule(

@@ -1,0 +1,696 @@
+client/src/pages/instrument.tsx:3:// Reason: Audio engine playhead indicator — live cursor on instrument surface
+client/src/pages/instrument.tsx:15: * @module pages/instrument
+client/src/pages/instrument.tsx:24:import { MicrophoneInput } from '@/components/microphone-input';
+client/src/pages/instrument.tsx:27:import { DrumPads } from '@/components/drum-pads';
+client/src/pages/instrument.tsx:28:import { PianoKeys } from '@/components/piano-keys';
+client/src/pages/instrument.tsx:29:import { FXPanel } from '@/components/fx-panel';
+client/src/pages/instrument.tsx:30:import { DJControls } from '@/components/dj-controls';
+client/src/pages/instrument.tsx:31:import { TransportControls } from '@/components/transport-controls';
+client/src/pages/instrument.tsx:32:import { AudioVisualizer } from '@/components/audio-visualizer';
+client/src/pages/instrument.tsx:34:import { VSTBrowser } from '@/components/vst-browser';
+client/src/pages/instrument.tsx:35:import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
+client/src/pages/instrument.tsx:37:import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
+client/src/pages/instrument.tsx:45:  fx: Record<string, boolean>;
+client/src/pages/instrument.tsx:66:  transport: { arm: 'A', record: 'R', play: 'Space', stop: 'S' },
+client/src/pages/instrument.tsx:77:.ag-shell {
+client/src/pages/instrument.tsx:90:.ag-frame {
+client/src/pages/instrument.tsx:100:.ag-frame::before {
+client/src/pages/instrument.tsx:109:.ag-header { border-bottom: 3px solid var(--ag-border); position: relative; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
+client/src/pages/instrument.tsx:110:.ag-header-top { display: flex; align-items: stretch; border-bottom: 1px solid var(--ag-border); }
+client/src/pages/instrument.tsx:198:.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; min-height: 0; }
+client/src/pages/instrument.tsx:199:@media(min-width:1024px)                       { .ag-content { grid-template-columns: 1fr 490px; } }
+client/src/pages/instrument.tsx:200:@media(min-width:1600px)                       { .ag-content { grid-template-columns: 1fr 580px; } }
+client/src/pages/instrument.tsx:201:@media(min-width:1920px)                       { .ag-content { grid-template-columns: 1fr 680px; } }
+client/src/pages/instrument.tsx:203:.ag-left { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+client/src/pages/instrument.tsx:204:@media(min-width:1024px){ .ag-left { border-right: 3px solid var(--ag-border); } }
+client/src/pages/instrument.tsx:206:.ag-right { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+client/src/pages/instrument.tsx:227:.ag-frame [class*="rounded"],
+client/src/pages/instrument.tsx:228:.ag-frame .bg-card\/50, .ag-frame .bg-card\/30 { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:229:.ag-frame .bg-card\/50, .ag-frame .bg-card\/30 {
+client/src/pages/instrument.tsx:236:.ag-frame .ag-panel > *:not(.ag-panel-ghost) {
+client/src/pages/instrument.tsx:239:.ag-frame button[aria-expanded] {
+client/src/pages/instrument.tsx:245:.ag-frame button[aria-expanded]:hover {
+client/src/pages/instrument.tsx:248:.ag-frame button[aria-expanded]:hover .text-foreground,
+client/src/pages/instrument.tsx:249:.ag-frame button[aria-expanded]:hover .text-muted-foreground,
+client/src/pages/instrument.tsx:250:.ag-frame button[aria-expanded]:hover svg { color: var(--ag-black) !important; }
+client/src/pages/instrument.tsx:251:.ag-frame button[aria-expanded="true"] { border-left: 3px solid var(--ag-acid) !important; box-shadow: inset 3px 0 12px rgba(163,230,53,.08) !important; }
+client/src/pages/instrument.tsx:252:.ag-frame button[aria-expanded="true"] .text-foreground { color: var(--ag-acid) !important; }
+client/src/pages/instrument.tsx:253:.ag-frame [role="region"] > div { background: var(--ag-panel) !important; border-radius: 0 !important; }
+client/src/pages/instrument.tsx:254:.ag-frame button[aria-expanded] .text-foreground {
+client/src/pages/instrument.tsx:264:.ag-frame section.relative {
+client/src/pages/instrument.tsx:271:.ag-frame [data-testid^="pad-"] {
+client/src/pages/instrument.tsx:275:  border-bottom: 2px solid var(--dj-surface2) !important;
+client/src/pages/instrument.tsx:289:.ag-frame [data-testid^="pad-"]:hover {
+client/src/pages/instrument.tsx:292:  background: linear-gradient(180deg, var(--dj-dimmer) 0%, var(--panel-mid) 60%, var(--t-b2x) 100%) !important;
+client/src/pages/instrument.tsx:298:.ag-frame [data-testid^="pad-"]:active,
+client/src/pages/instrument.tsx:299:.ag-frame [data-testid^="pad-"][data-active="true"],
+client/src/pages/instrument.tsx:300:.ag-frame [data-testid^="pad-"].active {
+client/src/pages/instrument.tsx:309:.ag-frame [data-testid^="pad-"].has-sample,
+client/src/pages/instrument.tsx:310:.ag-frame [data-testid^="pad-"][data-has-sample="true"] {
+client/src/pages/instrument.tsx:315:.ag-frame .grid.grid-cols-4 { gap: 3px !important; }
+client/src/pages/instrument.tsx:316:.ag-frame .grid.grid-cols-4 > * { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:319:.ag-frame section.relative > div:first-child {
+client/src/pages/instrument.tsx:325:.ag-frame section.relative h3 {
+client/src/pages/instrument.tsx:332:.ag-frame section.relative > div:last-child {
+client/src/pages/instrument.tsx:339:.ag-frame section.relative button:not([data-testid^="pad-"]) {
+client/src/pages/instrument.tsx:348:.ag-frame section.relative button:not([data-testid^="pad-"]):hover {
+client/src/pages/instrument.tsx:355:.ag-frame .animate-pulse { animation: ag-rec-blink 0.8s ease-in-out infinite !important; }
+client/src/pages/instrument.tsx:359:.ag-frame [role="combobox"], .ag-frame .select-trigger {
+client/src/pages/instrument.tsx:370:.ag-frame [data-testid^="piano-key-"].rounded-b-lg {
+client/src/pages/instrument.tsx:376:  color: var(--dj-dimmer) !important;
+client/src/pages/instrument.tsx:382:.ag-frame [data-testid^="piano-key-"].rounded-b-lg:active,
+client/src/pages/instrument.tsx:383:.ag-frame [data-testid^="piano-key-"].rounded-b-lg.bg-white {
+client/src/pages/instrument.tsx:386:  color: var(--dj-dimmer) !important;
+client/src/pages/instrument.tsx:391:.ag-frame [data-testid^="piano-key-"].rounded-b-lg:hover:not(:active) {
+client/src/pages/instrument.tsx:394:  color: var(--dj-dimmer) !important;
+client/src/pages/instrument.tsx:399:.ag-frame [data-testid^="piano-key-"].rounded-b-md {
+client/src/pages/instrument.tsx:401:  background: var(--dj-black) !important;
+client/src/pages/instrument.tsx:402:  border: 1px solid var(--dj-border) !important;
+client/src/pages/instrument.tsx:403:  border-bottom: 3px solid var(--dj-black) !important;
+client/src/pages/instrument.tsx:406:.ag-frame [data-testid^="piano-key-"].rounded-b-md:active,
+client/src/pages/instrument.tsx:407:.ag-frame [data-testid^="piano-key-"].rounded-b-md.bg-black {
+client/src/pages/instrument.tsx:408:  background: var(--dj-black) !important;
+client/src/pages/instrument.tsx:409:  border-color: var(--dj-dimmer) !important;
+client/src/pages/instrument.tsx:412:.ag-frame [data-testid^="piano-key-"].rounded-b-md:hover:not(:active) {
+client/src/pages/instrument.tsx:414:  border-color: var(--dj-dimmer) !important;
+client/src/pages/instrument.tsx:419:.ag-frame [data-testid^="piano-key-"].rounded-b-lg span {
+client/src/pages/instrument.tsx:423:.ag-frame [data-testid^="piano-key-"].rounded-b-md span {
+client/src/pages/instrument.tsx:427:.ag-frame [data-testid^="piano-key-"]:active span,
+client/src/pages/instrument.tsx:428:.ag-frame [data-testid^="piano-key-"]:hover span { color: var(--dj-dimmer) !important; }
+client/src/pages/instrument.tsx:431:.ag-frame .bg-gradient-to-t.from-blue-400\/40 {
+client/src/pages/instrument.tsx:434:.ag-frame .bg-gradient-to-t.from-blue-500\/50 {
+client/src/pages/instrument.tsx:439:.ag-frame .rounded-full[style*="backgroundColor"] {
+client/src/pages/instrument.tsx:444:.ag-frame .rounded-full.bg-blue-500,
+client/src/pages/instrument.tsx:445:.ag-frame .rounded-full.bg-blue-600 {
+client/src/pages/instrument.tsx:451:.ag-frame section.relative .rounded-xl.border {
+client/src/pages/instrument.tsx:457:.ag-frame [role="tablist"] {
+client/src/pages/instrument.tsx:461:.ag-frame [role="tab"] {
+client/src/pages/instrument.tsx:466:.ag-frame [role="tab"][data-state="active"] {
+client/src/pages/instrument.tsx:472:.ag-frame [role="slider"] {
+client/src/pages/instrument.tsx:476:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none {
+client/src/pages/instrument.tsx:479:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none > span:first-child {
+client/src/pages/instrument.tsx:482:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none span[data-orientation] {
+client/src/pages/instrument.tsx:491:.ag-frame [style*="borderRadius: 18"],
+client/src/pages/instrument.tsx:492:.ag-frame [style*="borderRadius: 12"],
+client/src/pages/instrument.tsx:493:.ag-frame [style*="borderRadius: 10"],
+client/src/pages/instrument.tsx:494:.ag-frame [style*="borderRadius: 8"],
+client/src/pages/instrument.tsx:495:.ag-frame [style*="border-radius: 18"],
+client/src/pages/instrument.tsx:496:.ag-frame [style*="border-radius: 12"] {
+client/src/pages/instrument.tsx:501:.ag-frame [style*="borderRadius"][style*="cursor: pointer"]:not([aria-expanded]),
+client/src/pages/instrument.tsx:502:.ag-frame [style*="border-radius"][style*="cursor: pointer"]:not([aria-expanded]) {
+client/src/pages/instrument.tsx:507:.ag-frame [style*="background: rgba"][style*="border:"] {
+client/src/pages/instrument.tsx:513:.ag-frame [style*="boxShadow"][style*="border"][style*="background"] {
+client/src/pages/instrument.tsx:518:.ag-frame .flex.items-end.justify-center.gap-0\\.5 > div {
+client/src/pages/instrument.tsx:523:.ag-frame [style*="letterSpacing"][style*="textTransform: uppercase"][style*="fontSize: 9"] {
+client/src/pages/instrument.tsx:532:.ag-frame [style*="borderRadius: 18"][style*="backdropFilter"] {
+client/src/pages/instrument.tsx:541:.ag-frame [style*="borderRadius: 18"][style*="backdropFilter"] > div:first-child {
+client/src/pages/instrument.tsx:547:.ag-frame [style*="borderRadius: 8"][style*="background: linear-gradient"][style*="10b981"] {
+client/src/pages/instrument.tsx:552:.ag-frame [style*="borderRadius: 8"][style*="background: linear-gradient"][style*="10b981"] svg {
+client/src/pages/instrument.tsx:556:/* DJ transport buttons */
+client/src/pages/instrument.tsx:557:.ag-frame [style*="borderRadius: 10"][style*="cursor: pointer"] {
+client/src/pages/instrument.tsx:561:.ag-frame [style*="borderRadius: 10"][style*="background: rgba(41,55,79"] {
+client/src/pages/instrument.tsx:566:.ag-frame [style*="borderRadius: 10"][style*="background: rgba(41,55,79"]:hover {
+client/src/pages/instrument.tsx:571:/* Active transport button */
+client/src/pages/instrument.tsx:572:.ag-frame [style*="10b981"][style*="borderRadius: 10"] {
+client/src/pages/instrument.tsx:580:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] {
+client/src/pages/instrument.tsx:583:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] button {
+client/src/pages/instrument.tsx:587:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] button[style*="10b981"] {
+client/src/pages/instrument.tsx:592:.ag-frame [style*="borderRadius: 20"] {
+client/src/pages/instrument.tsx:599:.ag-frame [style*="borderRadius: 8"][style*="width: 28"][style*="height: 28"] {
+client/src/pages/instrument.tsx:606:.ag-frame [style*="touchAction: none"][style*="cursor"] {
+client/src/pages/instrument.tsx:611:.ag-frame [style*="height: 4"][style*="borderRadius"][style*="background"] {
+client/src/pages/instrument.tsx:614:.ag-frame [style*="height: 2"][style*="borderRadius"][style*="background"] {
+client/src/pages/instrument.tsx:619:.ag-frame [style*="flex: 1"][style*="height"][style*="borderRadius"][style*="transition"] {
+client/src/pages/instrument.tsx:624:.ag-frame [style*="borderRadius: 4"][style*="cursor: pointer"][style*="fontFamily"] {
+client/src/pages/instrument.tsx:632:/* Any buttons in transport area that aren't pads */
+client/src/pages/instrument.tsx:633:.ag-frame .flex.items-center.gap-2 button,
+client/src/pages/instrument.tsx:634:.ag-frame .flex.items-center.gap-1 button {
+client/src/pages/instrument.tsx:641:.ag-frame .inline-flex.items-center.justify-center.gap-2 {
+client/src/pages/instrument.tsx:648:.ag-frame .border.bg-background {
+client/src/pages/instrument.tsx:654:.ag-frame .border.bg-background:hover {
+client/src/pages/instrument.tsx:661:.ag-frame .bg-primary.text-primary-foreground {
+client/src/pages/instrument.tsx:667:.ag-frame .bg-primary.text-primary-foreground:hover {
+client/src/pages/instrument.tsx:672:.ag-frame .bg-destructive.text-destructive-foreground {
+client/src/pages/instrument.tsx:679:.ag-frame .bg-transparent.hover\:bg-accent {
+client/src/pages/instrument.tsx:682:.ag-frame .bg-transparent.hover\:bg-accent:hover {
+client/src/pages/instrument.tsx:686:/* Cards inside transport */
+client/src/pages/instrument.tsx:687:.ag-frame .rounded-lg { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:688:.ag-frame .rounded-md { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:689:.ag-frame .rounded-xl { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:690:.ag-frame .rounded-full:not([data-testid]) { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:693:.ag-frame .rounded-t { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:694:.ag-frame .rounded { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:700:/* The outer visualizer wrapper */
+client/src/pages/instrument.tsx:701:.ag-frame [style*="borderRadius: 12"][style*="fontFamily"][style*="JetBrains"] {
+client/src/pages/instrument.tsx:707:/* Header bar of visualizer */
+client/src/pages/instrument.tsx:708:.ag-frame [style*="background: linear-gradient"][style*="rgba(255,255,255,0.03)"][style*="cursor: pointer"] {
+client/src/pages/instrument.tsx:714:.ag-frame [style*="borderRadius: 6"][style*="background: linear-gradient"][style*="width: 24"] {
+client/src/pages/instrument.tsx:720:/* Start/Stop button in visualizer */
+client/src/pages/instrument.tsx:721:.ag-frame [style*="borderRadius: 4"][style*="fontSize: 10"][style*="fontWeight: 600"] {
+client/src/pages/instrument.tsx:727:.ag-frame [style*="borderRadius: 6"][style*="cursor: pointer"][style*="fontSize: 10"],
+client/src/pages/instrument.tsx:728:.ag-frame [style*="borderRadius: 4"][style*="cursor: pointer"][style*="fontSize: 10"] {
+client/src/pages/instrument.tsx:736:.ag-frame [style*="boxShadow"][style*="00f0ff"],
+client/src/pages/instrument.tsx:737:.ag-frame [style*="boxShadow"][style*="ff00aa"] {
+client/src/pages/instrument.tsx:743:.ag-frame [style*="borderRadius: 20"][style*="cursor: pointer"] {
+client/src/pages/instrument.tsx:748:.ag-frame input[type="range"] {
+client/src/pages/instrument.tsx:758:.ag-frame [style*="background: linear-gradient(180deg"][style*="borderRadius: 16"] {
+client/src/pages/instrument.tsx:766:.ag-frame [style*="borderRadius: 16"] > div:first-child {
+client/src/pages/instrument.tsx:771:.ag-frame [style*="borderRadius: 12"][style*="cursor: pointer"][style*="width: 36"] {
+client/src/pages/instrument.tsx:776:.ag-frame [style*="borderRadius: 12"][style*="background: rgba(239,68,68"] {
+client/src/pages/instrument.tsx:783:.ag-frame [style*="borderRadius: 4"][style*="padding: 4px"][style*="cursor: pointer"] {
+client/src/pages/instrument.tsx:788:.ag-frame [style*="background: rgba(16,185,129"][style*="cursor: pointer"] {
+client/src/pages/instrument.tsx:795:.ag-frame [style*="touchAction: none"][style*="cursor: grab"] {
+client/src/pages/instrument.tsx:800:.ag-frame canvas {
+client/src/pages/instrument.tsx:805:.ag-frame [style*="height: 6"][style*="borderRadius: 2"] {
+client/src/pages/instrument.tsx:814:.ag-frame .flex.flex-wrap.items-center.gap-3.p-3.bg-background {
+client/src/pages/instrument.tsx:824:.ag-frame .flex.items-center.gap-3.bg-muted\/50 {
+client/src/pages/instrument.tsx:832:.ag-frame [data-orientation="vertical"].w-px.h-6 {
+client/src/pages/instrument.tsx:837:.ag-frame [data-radix-collection-item],
+client/src/pages/instrument.tsx:838:.ag-frame [data-state][role="button"] {
+client/src/pages/instrument.tsx:845:.ag-frame [role="menu"], .ag-frame [role="listbox"] {
+client/src/pages/instrument.tsx:852:.ag-frame [role="menuitem"], .ag-frame [role="option"] {
+client/src/pages/instrument.tsx:858:.ag-frame [role="menuitem"]:focus, .ag-frame [role="option"]:focus,
+client/src/pages/instrument.tsx:859:.ag-frame [role="menuitem"][data-highlighted], .ag-frame [role="option"][data-highlighted] {
+client/src/pages/instrument.tsx:864:.ag-frame [role="dialog"],
+client/src/pages/instrument.tsx:901:.ag-frame [class*="bg-background\/60"] {
+client/src/pages/instrument.tsx:904:.ag-frame [class*="border-border\/30"],
+client/src/pages/instrument.tsx:905:.ag-frame [class*="border-border\/40"] {
+client/src/pages/instrument.tsx:910:.ag-frame [class*="hover:bg-muted\/30"] {
+client/src/pages/instrument.tsx:913:.ag-frame [class*="hover:bg-muted\/30"]:hover {
+client/src/pages/instrument.tsx:918:.ag-frame [class*="bg-red-500\/10"], .ag-frame [class*="bg-red-600\/20"] {
+client/src/pages/instrument.tsx:923:.ag-frame .w-16.flex-shrink-0 {
+client/src/pages/instrument.tsx:929:.ag-frame [class*="bg-background\/80"][class*="border-t"] {
+client/src/pages/instrument.tsx:935:.ag-frame [class*="bg-black\/40"] {
+client/src/pages/instrument.tsx:939:.ag-frame .text-emerald-400 { color: var(--ag-acid) !important; }
+client/src/pages/instrument.tsx:940:.ag-frame .bg-emerald-600 { background: var(--ag-acid) !important; color: var(--ag-black) !important; }
+client/src/pages/instrument.tsx:941:.ag-frame .hover\:bg-emerald-700:hover { background: var(--ag-acid2) !important; }
+client/src/pages/instrument.tsx:944:.ag-frame [class*="rounded-t"] { border-radius: 0 !important; }
+client/src/pages/instrument.tsx:960:.ag-frame input[type="number"] {
+client/src/pages/instrument.tsx:968:.ag-frame input[type="number"]:focus {
+client/src/pages/instrument.tsx:974:.ag-frame *:focus-visible {
+client/src/pages/instrument.tsx:981:.ag-frame ::-webkit-scrollbar { width: 6px; height: 6px; background: var(--ag-black); }
+client/src/pages/instrument.tsx:982:.ag-frame ::-webkit-scrollbar-track { background: var(--ag-ink); border-left: 1px solid var(--ag-border); }
+client/src/pages/instrument.tsx:983:.ag-frame ::-webkit-scrollbar-thumb { background: var(--ag-border); border-radius: 0; box-shadow: inset 0 0 4px rgba(163,230,53,.15); }
+client/src/pages/instrument.tsx:984:.ag-frame ::-webkit-scrollbar-thumb:hover { background: var(--ag-acid); box-shadow: 0 0 8px rgba(163,230,53,.4); }
+client/src/pages/instrument.tsx:985:.ag-content::-webkit-scrollbar { width: 6px; background: var(--ag-black); }
+client/src/pages/instrument.tsx:986:.ag-content::-webkit-scrollbar-track { background: var(--ag-ink); border-left: 1px solid var(--ag-border); }
+client/src/pages/instrument.tsx:987:.ag-content::-webkit-scrollbar-thumb { background: var(--ag-border); border-radius: 0; box-shadow: inset 0 0 4px rgba(163,230,53,.15); }
+client/src/pages/instrument.tsx:988:.ag-content::-webkit-scrollbar-thumb:hover { background: var(--ag-acid); box-shadow: 0 0 8px rgba(163,230,53,.4); }
+client/src/pages/instrument.tsx:991:.ag-frame [class*="bg-green-500\/10"] {
+client/src/pages/instrument.tsx:996:.ag-frame [class*="text-green-700"], .ag-frame [class*="text-green-400"] {
+client/src/pages/instrument.tsx:999:.ag-frame [class*="bg-red-500\/10"], .ag-frame [class*="bg-destructive"] {
+client/src/pages/instrument.tsx:1058:.ag-left  { min-height: 0; }
+client/src/pages/instrument.tsx:1059:.ag-right { min-height: 0; }
+client/src/pages/instrument.tsx:1063:  .ag-left  { height: auto; border-right: none !important; }
+client/src/pages/instrument.tsx:1064:  .ag-right { height: auto; }
+client/src/pages/instrument.tsx:1065:  .ag-content { overflow-y: auto; }
+client/src/pages/instrument.tsx:1084:  .ag-frame { border-left-width: 2px !important; border-right-width: 2px !important; }
+client/src/pages/instrument.tsx:1234:  //    onPad is intentionally NOT wired: drum-pads.tsx owns its own
+client/src/pages/instrument.tsx:1236:  //    pad hit (playPadWithFx fires once from drum-pads MIDI handler,
+client/src/pages/instrument.tsx:1243:      // octaveShift: 0 from use-midi (piano-keys adds its own internal offset)
+client/src/pages/instrument.tsx:1307:    fx:  state.fx as unknown as Record<string, boolean>,
+client/src/pages/instrument.tsx:1311:  }), [state.bpm, state.fx, state.filterVal, state.pitchSemitones, state.recordedEvents]);
+client/src/pages/instrument.tsx:1322:      // exportSession() is bound to instrumentEngine.exportSession
+client/src/pages/instrument.tsx:1366:      <div className="ag-shell">
+client/src/pages/instrument.tsx:1367:        <div className="ag-frame">
+client/src/pages/instrument.tsx:1382:          <header className="ag-header">
+client/src/pages/instrument.tsx:1383:            <div className="ag-header-top">
+client/src/pages/instrument.tsx:1457:          <div className="ag-content">
+client/src/pages/instrument.tsx:1460:            <div className="ag-left">
+client/src/pages/instrument.tsx:1494:            <div className="ag-right">
+client/src/pages/instrument.tsx:1517:                  body: <FXPanel fx={state.fx} onToggle={toggleFX} /> },
+client/src/components/AILevelAssist.tsx:17:// Reason: AI warning state — directly adjacent to LLPTE pipeline output
+client/src/components/logout-button.tsx:12:  bg:     'var(--dj-surface)',
+client/src/components/logout-button.tsx:13:  border: 'var(--dj-border)',
+client/src/components/logout-button.tsx:175:                e.currentTarget.style.borderColor = 'var(--dj-dim)';
+client/src/components/admin/AgentSuite.tsx:117:7. Post-login redirect: /instrument only, never /daw
+client/src/components/admin/AgentSuite.tsx:152:7. Post-login redirect: /instrument only, never /daw
+client/src/components/admin/AgentSuite.tsx:340:  transport:play · transport:stop · ai:sendToAI · suggestion:respond
+client/src/components/admin/AgentSuite.tsx:346:  Gain adjustment:   45s manual → 0.5s AI
+client/src/components/admin/AgentSuite.tsx:376:  Post-login redirect: /instrument — NEVER /daw
+client/src/components/admin/AgentSuite.tsx:425:  Shared types:   shared/audio.types.ts · mixer.types.ts · dj.types.ts · effects.types.ts · waveform.types.ts
+client/src/components/admin/AgentSuite.tsx:618:  ✗ Advanced MIDI piano-roll composition
+client/src/components/music-page-shell.tsx:6:  transportBar?: ReactNode;
+client/src/components/music-page-shell.tsx:12:  transportBar,
+client/src/components/music-page-shell.tsx:17:      <header className="ag-header">
+client/src/components/music-page-shell.tsx:21:      {transportBar}
+client/src/components/music-page-shell.tsx:22:      <main className="ag-frame ag-content">{children}</main>
+client/src/components/trpc-components.tsx:72:// Usage: load presets by type (e.g. type="synth" or type="fx")
+client/src/components/visuals/VisualizerCanvas.tsx:2:// 11-mode canvas visualizer engine.
+client/src/components/vst-sidechain-ui.tsx:2:// client/src/components/vst-sidechain-ui.tsx
+client/src/components/vst-sidechain-ui.tsx:7:import { VSTFXNode } from '@/audio/fx/vst-fx-node';
+client/src/components/vst-sidechain-ui.tsx:9:import type { SidechainRouter } from '@/audio/fx/vst-sidechain';
+client/src/components/vst-sidechain-ui.tsx:49:          <ArrowRight className="h-8 w-8 mx-auto mb-3 text-[var(--dj-dimmer)]" />
+client/src/components/vst-sidechain-ui.tsx:111:  const vstPlugins=targetCh?.getEffects().filter(fx=>fx instanceof VSTFXNode)??[];
+client/src/components/vst-sidechain-ui.tsx:113:  const vstOpts=vstPlugins.map(v=>({value:v.id,label:v.id}));
+client/src/components/vst-sidechain-ui.tsx:117:    const targetVST=vstPlugins.find(v=>v.id===targetVSTId);
+client/src/components/vst-sidechain-ui.tsx:135:              {vstOpts.length===0?<p className="text-[10px] tracking-wider text-[#555] mt-1">No VST plugins on this channel</p>:<MonoSelect value={targetVSTId} onValueChange={setTargetVSTId} options={vstOpts} placeholder="Select VST..." />}
+client/src/components/vst-automation-ui.tsx:1:// client/src/components/vst-automation-ui.tsx
+client/src/components/vst-automation-ui.tsx:191:        <span className="absolute bottom-1 left-1 text-[9px] text-[var(--dj-dimmer)] tracking-widest">ADSR</span>
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:47:  bg:        'var(--dj-surface)',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:48:  border:    'var(--dj-border)',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:52:  dim:       'var(--dj-dim)',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:59:  explorer:   { color: '#555',    border: 'var(--dj-dimmer)'      },
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:68:  { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:74:  { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:154:                  el.style.borderColor = 'var(--dj-dim)';
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:74:          <p style={{ color: 'var(--dj-dim)', fontSize: 11, letterSpacing: '0.2em' }}>
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:106:        <p style={{ color: 'var(--dj-dim)', fontSize: 10 }}>
+client/src/components/page-nav.tsx:45:  bg:        'var(--dj-surface)',
+client/src/components/page-nav.tsx:46:  border:    'var(--dj-border)',
+client/src/components/page-nav.tsx:50:  dim:       'var(--dj-dim)',
+client/src/components/page-nav.tsx:57:  explorer:   { color: '#555',    border: 'var(--dj-dimmer)'      },
+client/src/components/page-nav.tsx:66:  { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx:71:  { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx:150:                  el.style.borderColor = 'var(--dj-dim)';
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:47:  bg:        'var(--dj-surface)',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:48:  border:    'var(--dj-border)',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:52:  dim:       'var(--dj-dim)',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:59:  explorer:   { color: '#555',    border: 'var(--dj-dimmer)'      },
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:68:  { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:73:  { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:153:                  el.style.borderColor = 'var(--dj-dim)';
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1:// client/src/components/microphone-input.tsx
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:8:const BLK        = "var(--dj-black)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:9:const SURF       = "var(--dj-surface)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:10:const SURF2      = "var(--dj-surface2)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:11:const SURF3      = "var(--dj-surface3)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:12:const BORDER     = "var(--dj-border)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:14:const DIM        = "var(--dj-dim)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:15:const DIMMER     = "var(--dj-dimmer)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:16:const MUTED      = "var(--dj-muted)";
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:749:      else if (e.name === "NotFoundError") setError("No microphone found.");
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:882:  // with the instrument page's global Space→play() and Ctrl+R→record() bindings.
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:945:        .mic-root select option { background:var(--dj-surface); color:#a3e635; }
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1088:                  {["-60","-30","-12","-6","0 dB"].map(l => <span key={l} style={{ fontSize: 7, color: "var(--dj-dimmer)", fontFamily: "inherit" }}>{l}</span>)}
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1277:              {isActive && <div style={{ fontSize: 8, color: DIM, marginTop: 4, letterSpacing: 0.5 }}>Stop microphone to change device.</div>}
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1312:              {[["Space","ARM / STOP microphone"],["R","Start / stop recording"],["M","Mute / unmute"]].map(([k,d],i) => (
+client/src/components/vst-master-panel.tsx:2:// client/src/components/vst-master-panel.tsx
+client/src/components/vst-master-panel.tsx:4:import { VSTProjectSerializer } from '@/audio/fx/vst-project-serializer';
+client/src/components/vst-master-panel.tsx:5:import type { SerializedVSTChain } from '@/audio/fx/vst-project-serializer';
+client/src/components/vst-master-panel.tsx:6:import type { FXChain } from '@/audio/fx/fx-chain';
+client/src/components/vst-master-panel.tsx:9:import { VSTProjectManagerUI } from './vst-project-manager-ui';
+client/src/components/vst-master-panel.tsx:10:import { VSTAutomationUI } from './vst-automation-ui';
+client/src/components/vst-master-panel.tsx:11:import { VSTSidechainUI } from './vst-sidechain-ui';
+client/src/components/vst-master-panel.tsx:12:import { VSTPerformanceUI } from './vst-performance-monitor-ui';
+client/src/components/vst-master-panel.tsx:19:import type { SidechainRouter }  from '@/audio/fx/vst-sidechain';
+client/src/components/vst-master-panel.tsx:64:    <div className="border border-[var(--dj-border)] p-8 text-center">
+client/src/components/vst-master-panel.tsx:67:      <p className="text-xs text-[var(--dj-dim)] mt-1 tracking-wider">Coming soon...</p>
+client/src/components/vst-master-panel.tsx:206:                // Build chains Map directly from channel fxChains
+client/src/components/vst-master-panel.tsx:208:                channels.forEach(ch => chains.set(ch.id, ch.fxChain));
+client/src/components/vst-master-panel.tsx:228:                      effects: chain.getAllEffects().map(fx => ({
+client/src/components/vst-master-panel.tsx:229:                        id: fx.id,
+client/src/components/vst-master-panel.tsx:230:                        type: (fx as any).type ?? 'vst',
+client/src/components/vst-master-panel.tsx:231:                        bypassed: fx.bypassed ?? false,
+client/src/components/vst-master-panel.tsx:293:                vstIds={channels.map(c => c.id)}
+client/src/components/vst-project-manager-ui.tsx:1:// client/src/components/vst-project-manager-ui.tsx
+client/src/components/vst-project-manager-ui.tsx:4:import type { SerializedVSTChain } from '@/audio/fx/vst-project-serializer';
+client/src/components/vst-project-manager-ui.tsx:5:import { VSTProjectSerializer } from '@/audio/fx/vst-project-serializer';
+client/src/components/vst-project-manager-ui.tsx:22:    try{const data=onSave();const fn=projectName.trim()||`project_${Date.now()}`;VSTProjectSerializer.exportToFile(data,`${fn}.vstchain`);flash('ok',`Saved "${fn}.vstchain"`);}
+client/src/components/vst-project-manager-ui.tsx:55:            className="w-full bg-[#0d0d0d] border border-[#2a2a2a] text-[var(--daw-fg)] font-mono text-xs tracking-wider px-3 py-2 focus:outline-none focus:border-[#a3e635] placeholder:text-[var(--dj-dimmer)] disabled:opacity-40 rounded-none" />
+client/src/components/vst-project-manager-ui.tsx:59:          <button onClick={()=>document.getElementById('vst-file-input')?.click()} disabled={loading} className={G}><Upload className="h-3 w-3" /> Load File</button>
+client/src/components/vst-project-manager-ui.tsx:60:          <input id="vst-file-input" type="file" accept=".vstchain" className="hidden" onChange={e=>{const f=e.target.files?.[0];if(f)handleLoad(f);e.target.value='';}} />
+client/src/components/vst-project-manager-ui.tsx:71:            <FileJson className="h-6 w-6 mx-auto mb-2 text-[var(--dj-dimmer)]" />
+client/src/components/vst-project-manager-ui.tsx:87:  const fxCount=backup.data.chains.reduce((s,c)=>s+c.effects.length,0);
+client/src/components/vst-project-manager-ui.tsx:98:          <span className="text-[var(--dj-dimmer)]">·</span>
+client/src/components/vst-project-manager-ui.tsx:99:          <span className="text-[var(--daw-fg)]">{fxCount} effect{fxCount!==1?'s':''}</span>
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:73:          <p style={{ color: 'var(--dj-dim)', fontSize: 11, letterSpacing: '0.2em' }}>
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:105:        <p style={{ color: 'var(--dj-dim)', fontSize: 10 }}>
+client/src/components/subscription/UpgradePrompt.tsx:97:        background: 'var(--dj-surface)',
+client/src/components/subscription/UpgradePrompt.tsx:119:            color: 'var(--dj-muted)',
+client/src/components/subscription/UpgradePrompt.tsx:148:      <p style={{ margin: '0 0 24px', fontSize: '14px', color: 'var(--dj-muted)', lineHeight: 1.6 }}>
+client/src/components/subscription/UpgradePrompt.tsx:158:              background: 'var(--dj-surface2)',
+client/src/components/subscription/UpgradePrompt.tsx:177:                  background: billing === cycle ? 'var(--dj-surface3)' : 'transparent',
+client/src/components/subscription/UpgradePrompt.tsx:178:                  color: billing === cycle ? 'var(--fg)' : 'var(--dj-muted)',
+client/src/components/subscription/UpgradePrompt.tsx:192:            <span style={{ fontSize: '14px', color: 'var(--dj-muted)' }}> / month</span>
+client/src/components/subscription/UpgradePrompt.tsx:216:              background: loading ? 'var(--dj-dim)' : color,
+client/src/components/subscription/UpgradePrompt.tsx:231:          <p style={{ marginTop: '12px', fontSize: '11px', color: 'var(--dj-muted)', textAlign: 'center' }}>
+client/src/components/vst-plugin-manager.tsx:2:// vst-plugin-manager.tsx
+client/src/components/vst-plugin-manager.tsx:22:  type: 'vst3' | 'au';
+client/src/components/vst-plugin-manager.tsx:45:    type: 'vst3' as const,
+client/src/components/vst-plugin-manager.tsx:64:    setNewPlugin({ name: '', path: '', type: 'vst3', manufacturer: '' });
+client/src/components/vst-plugin-manager.tsx:123:                placeholder="/path/to/plugin.vst3"
+client/src/components/vst-plugin-manager.tsx:152:                    type: e.target.value as 'vst2' | 'vst3' | 'au',
+client/src/components/vst-plugin-manager.tsx:156:                <option value="vst3">VST3</option>
+client/src/components/vst-plugin-manager.tsx:157:                <option value="vst2">VST2</option>
+client/src/components/vst-browser.tsx:3:// Reason: VST load/compatibility warning — adjacent to sanctioned vst.tsx
+client/src/components/vst-browser.tsx:7: * client/src/components/vst-browser.tsx
+client/src/components/vst-browser.tsx:10: * Fully restyled to match the ag- hardware aesthetic from instrument.tsx:
+client/src/components/vst-browser.tsx:24:import { VSTScanner } from '@/audio/fx/vst-scanner';
+client/src/components/vst-browser.tsx:25:import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
+client/src/components/vst-browser.tsx:28:import { useVSTStore } from '@/store/vst-store';
+client/src/components/vst-browser.tsx:31:// Mirrors the CSS custom properties in instrument.tsx STYLES block.
+client/src/components/vst-browser.tsx:40:  mid:     'var(--dj-muted)',
+client/src/components/vst-browser.tsx:56:  instrument: AG.acid,
+client/src/components/vst-browser.tsx:81:  @keyframes vst-spin  { to { transform: rotate(360deg); } }
+client/src/components/vst-browser.tsx:82:  @keyframes vst-sweep { from { left: -60%; } to { left: 100%; } }
+client/src/components/vst-browser.tsx:83:  @keyframes vst-pulse { from { opacity: 0.5; } to { opacity: 1; } }
+client/src/components/vst-browser.tsx:304:            style={{ animation: isScanning ? 'vst-spin 1s linear infinite' : 'none' }}
+client/src/components/vst-browser.tsx:319:            animation: 'vst-sweep 1.2s linear infinite',
+client/src/components/vst-browser.tsx:414:                Place .vst3 / .vst files in /plugins then press SCAN
+client/src/components/vst-browser.tsx:504:        background: hovered ? 'var(--dj-surface2)' : AG.card,
+client/src/components/vst-browser.tsx:512:        animation: loading ? 'vst-pulse 0.5s ease infinite alternate' : 'none',
+client/src/components/vst-browser.tsx:624:        animation: loading ? 'vst-pulse 0.5s ease infinite alternate' : 'none',
+client/src/components/vst-performance-monitor-ui.tsx:1:// client/src/components/vst-performance-monitor-ui.tsx
+client/src/components/vst-performance-monitor-ui.tsx:14:interface VSTPerformanceUIProps { monitor:VSTPerformanceMonitor; vstIds:string[]; }
+client/src/components/vst-performance-monitor-ui.tsx:35:export function VSTPerformanceUI({ monitor, vstIds }: VSTPerformanceUIProps) {
+client/src/components/vst-performance-monitor-ui.tsx:59:              {(vstIds??[]).map(id=>{const m=metrics.get(id);if(!m)return null;return <VSTMetricsRow key={id} vstId={id} metrics={m} />;}).filter(Boolean)}
+client/src/components/vst-performance-monitor-ui.tsx:60:              {vstIds.length===0&&<p className="text-[10px] tracking-widest uppercase text-[#555] text-center py-8">No active VST plugins</p>}
+client/src/components/vst-performance-monitor-ui.tsx:63:          <TabsContent value="optimization" className="mt-0"><OptimizationPanel monitor={monitor} vstIds={vstIds} metrics={metrics} /></TabsContent>
+client/src/components/vst-performance-monitor-ui.tsx:83:function VSTMetricsRow({ vstId, metrics }: { vstId:string; metrics:PerformanceMetrics }) {
+client/src/components/vst-performance-monitor-ui.tsx:87:        <span className="text-xs tracking-wider text-[var(--daw-fg)]">{vstId}</span>
+client/src/components/vst-performance-monitor-ui.tsx:106:function OptimizationPanel({ monitor, vstIds, metrics }: { monitor:VSTPerformanceMonitor; vstIds:string[]; metrics:Map<string,PerformanceMetrics> }) {
+client/src/components/vst-performance-monitor-ui.tsx:107:  const recs:{vstId:string;items:string[]}[]=[];
+client/src/components/vst-performance-monitor-ui.tsx:108:  (vstIds??[]).forEach(id=>{const items=monitor.getOptimizationRecommendations(id);if(items.length>0)recs.push({vstId:id,items});});
+client/src/components/vst-performance-monitor-ui.tsx:111:      <TrendingUp className="h-8 w-8 mx-auto mb-3 text-[var(--dj-dimmer)]" />
+client/src/components/vst-performance-monitor-ui.tsx:118:      {recs.map(({vstId,items})=>(
+client/src/components/vst-performance-monitor-ui.tsx:119:        <div key={vstId} className="border border-yellow-900/30 bg-yellow-900/5 p-4 space-y-2">
+client/src/components/vst-performance-monitor-ui.tsx:120:          <div className="flex items-center gap-2"><AlertTriangle className="h-3.5 w-3.5 text-yellow-500"/><span className="text-xs tracking-wider text-yellow-400">{vstId}</span></div>
+client/src/components/studio/TransportBar.tsx:6:import { TransportControls } from '@/components/transport-controls';
+client/src/components/threestage.tsx:44:      <hemisphereLight intensity={0.35} groundColor="var(--dj-surface2)" />
+client/src/components/waveform-editor.tsx:16:import { useTransportState } from '@/hooks/use-transport-state';
+client/src/components/waveform-editor.tsx:85:  fxChain: string[];
+client/src/components/waveform-editor.tsx:127:    volume: 0.8, pan: 0, input: 'Input 1-2', fxChain: ['Compressor', 'EQ'],
+client/src/components/waveform-editor.tsx:136:    volume: 0.7, pan: -0.2, input: 'Input 3', fxChain: ['Compressor', 'Saturator'],
+client/src/components/waveform-editor.tsx:145:    volume: 0.75, pan: 0.3, input: 'Input 4', fxChain: ['Delay', 'Reverb'],
+client/src/components/waveform-editor.tsx:154:    volume: 0.85, pan: 0, input: 'Input 1', fxChain: ['De-Esser', 'Compressor', 'EQ', 'Reverb'],
+client/src/components/waveform-editor.tsx:238:  const { transport, togglePlay, toggleRecord, setPosition, setBpm } = useTransportState();
+client/src/components/waveform-editor.tsx:254:      solo: false, volume: 0.8, pan: 0, input: `Input ${idx + 1}`, fxChain: [],
+client/src/components/waveform-editor.tsx:490:    const playheadPos = ((transport.position / ((transport as any).duration || 1)) * 100 - scrollOffset) / (100 / zoomLevel) * width;
+client/src/components/waveform-editor.tsx:492:      ctx.strokeStyle = transport.isPlaying ? 'rgba(16, 185, 129, 0.9)' : 'rgba(248, 113, 113, 0.7)';
+client/src/components/waveform-editor.tsx:500:      ctx.fillStyle = transport.isPlaying ? 'rgba(16, 185, 129, 1)' : 'rgba(248, 113, 113, 1)';
+client/src/components/waveform-editor.tsx:545:  }, [showGrid, scrollOffset, zoomLevel, selection, transport, loopEnabled, loopStart, loopEnd, markers]);
+client/src/components/waveform-editor.tsx:735:          const pos = (transport.position / ((transport as any).duration || 1)) * 100;
+client/src/components/waveform-editor.tsx:762:  }, [togglePlay, toggleRecord, undo, redo, transport]);
+client/src/components/waveform-editor.tsx:794:            isActive ? `${color} opacity-100` : 'bg-[var(--dj-surface2)] opacity-60'
+client/src/components/waveform-editor.tsx:818:        border: '1px solid var(--dj-border)',
+client/src/components/waveform-editor.tsx:819:        background: 'var(--dj-black)',
+client/src/components/waveform-editor.tsx:830:          background: 'var(--dj-surface)',
+client/src/components/waveform-editor.tsx:831:          borderColor: 'var(--dj-border)',
+client/src/components/waveform-editor.tsx:842:            <Music className="w-3.5 h-3.5" style={{ color: 'var(--dj-black)' }} />
+client/src/components/waveform-editor.tsx:848:            <p className="text-[9px] leading-tight mt-0.5" style={{ color: 'var(--dj-dim)', letterSpacing: 1 }}>
+client/src/components/waveform-editor.tsx:867:        style={{ background: 'var(--dj-surface)', borderColor: 'var(--dj-border)' }}
+client/src/components/waveform-editor.tsx:870:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:888:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:901:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:922:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:937:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:999:              borderColor: 'var(--dj-border)',
+client/src/components/waveform-editor.tsx:1002:            <div className="flex items-center justify-between px-2 py-1.5 border-b border-[var(--dj-border)] sticky top-0 z-10 bg-[var(--dj-surface)] ">
+client/src/components/waveform-editor.tsx:1019:                className={`border-b border-[var(--dj-border)]/30 ${track.collapsed ? 'h-6' : ''} transition-all`}
+client/src/components/waveform-editor.tsx:1023:                <div className="flex items-center gap-1 px-2 py-1 bg-[var(--dj-surface)] hover:bg-[var(--dj-surface2)] transition-colors">
+client/src/components/waveform-editor.tsx:1060:                          track.armed ? 'bg-[var(--signal-clip)] text-foreground' : 'bg-[var(--t-b2x)] text-[var(--dj-dim)] hover:text-[var(--text-dim)]'
+client/src/components/waveform-editor.tsx:1068:                          track.muted ? 'bg-[var(--dj-border)] text-[var(--text-dim)]' : 'bg-[var(--t-b2x)] text-[var(--dj-dim)] hover:text-[var(--text-dim)]'
+client/src/components/waveform-editor.tsx:1076:                          track.solo ? 'bg-[#a3e635] text-black' : 'bg-[var(--t-b2x)] text-[var(--dj-dim)] hover:text-[var(--text-dim)]'
+client/src/components/waveform-editor.tsx:1103:                    {track.fxChain.length > 0 && (
+client/src/components/waveform-editor.tsx:1105:                        {track.fxChain.map((fx, i) => (
+client/src/components/waveform-editor.tsx:1106:                          <span key={i} className="text-[7px] px-1 py-0 rounded bg-[var(--dj-surface2)] text-[#555]">
+client/src/components/waveform-editor.tsx:1107:                            {fx}
+client/src/components/waveform-editor.tsx:1120:              className="w-full py-2 text-[10px] text-[#555] hover:text-[#a3e635] hover:bg-[var(--dj-surface2)] transition-colors"
+client/src/components/waveform-editor.tsx:1130:          <div className="h-5 bg-[var(--dj-surface)] border-b border-[var(--dj-border)] relative flex-shrink-0">
+client/src/components/waveform-editor.tsx:1167:              className="w-full border-t border-[var(--dj-border)] flex-shrink-0"
+client/src/components/waveform-editor.tsx:1176:              className="w-full border-t border-[var(--dj-border)] flex-shrink-0"
+client/src/components/waveform-editor.tsx:1183:        <div className="w-16 flex-shrink-0 bg-[var(--dj-surface)] border-l border-[var(--dj-border)] flex flex-col items-center py-2 gap-1">
+client/src/components/waveform-editor.tsx:1205:      <div className="flex items-center gap-2 px-3 py-2 border-t" style={{ background: 'var(--dj-surface)', borderColor: 'var(--dj-border)' }}>
+client/src/components/waveform-editor.tsx:1216:            variant={transport.isPlaying ? 'default' : 'ghost'}
+client/src/components/waveform-editor.tsx:1219:            className={`h-7 w-7 p-0 ${transport.isPlaying ? 'bg-[#a3e635] hover:bg-[#a3e635]' : 'text-[#555] hover:text-[#a3e635]'}`}
+client/src/components/waveform-editor.tsx:1221:            {transport.isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+client/src/components/waveform-editor.tsx:1224:            variant={transport.isRecording ? 'destructive' : 'ghost'}
+client/src/components/waveform-editor.tsx:1230:            <span className={`w-3 h-3 inline-block ${transport.isRecording ? 'bg-red-400 animate-pulse' : 'bg-[var(--dj-dimmer)]'}`} />
+client/src/components/waveform-editor.tsx:1240:        <div className="w-px h-5 bg-[var(--dj-border)]" />
+client/src/components/waveform-editor.tsx:1245:            {Math.floor(transport.position / 60).toString().padStart(2, '0')}:
+client/src/components/waveform-editor.tsx:1246:            {Math.floor(transport.position % 60).toString().padStart(2, '0')}.
+client/src/components/waveform-editor.tsx:1247:            {Math.floor((transport.position % 1) * 100).toString().padStart(2, '0')}
+client/src/components/waveform-editor.tsx:1249:          <span className="text-[var(--dj-dim)] text-[9px]">
+client/src/components/waveform-editor.tsx:1250:            / {Math.floor(((transport as any).duration || 0) / 60)}:{Math.floor(((transport as any).duration || 0) % 60).toString().padStart(2, '0')}
+client/src/components/waveform-editor.tsx:1254:        <div className="w-px h-5 bg-[var(--dj-border)]" />
+client/src/components/waveform-editor.tsx:1261:            value={(transport as any).bpm}
+client/src/components/waveform-editor.tsx:1263:            className="w-12 bg-background/40 border border-[var(--dj-border)] text-[11px] text-center text-foreground/80 font-mono px-1 py-0.5"
+client/src/components/waveform-editor.tsx:1268:        <div className="w-px h-5 bg-[var(--dj-border)]" />
+client/src/components/waveform-editor.tsx:1289:        <div className="ml-auto flex items-center gap-2 text-[9px] text-[var(--dj-dim)]">
+client/src/components/waveform-editor.tsx:1299:      <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-[var(--dj-border)]" />
+client/src/components/mixer-with-dj.tsx:6:import { DJControls } from "./dj-controls";
+client/src/components/multi-track-view.tsx:27:  fxChain: FXType[];
+client/src/components/multi-track-view.tsx:42:  source: 'fx' | 'track' | null;
+client/src/components/multi-track-view.tsx:44:  fxIndex: number | null;
+client/src/components/multi-track-view.tsx:49:  transport: TransportState;
+client/src/components/multi-track-view.tsx:62:  /** When true, suppresses the inline transport bar (header is rendered upstream). */
+client/src/components/multi-track-view.tsx:72:  transport,
+client/src/components/multi-track-view.tsx:90:    fxIndex: null 
+client/src/components/multi-track-view.tsx:149:    source: 'fx' | 'track', 
+client/src/components/multi-track-view.tsx:151:    fxIndex?: number
+client/src/components/multi-track-view.tsx:154:      setDragState({ source, trackId, fxIndex: fxIndex ?? null });
+client/src/components/multi-track-view.tsx:178:        dragState.source !== 'fx' ||
+client/src/components/multi-track-view.tsx:180:        dragState.fxIndex == null
+client/src/components/multi-track-view.tsx:185:        onReorderFX(targetTrackId, dragState.fxIndex, targetIndex);
+client/src/components/multi-track-view.tsx:188:        // Future: call onMoveFX?.(dragState.trackId, dragState.fxIndex,
+client/src/components/multi-track-view.tsx:192:          { from: dragState.trackId, fromIdx: dragState.fxIndex,
+client/src/components/multi-track-view.tsx:199:      setDragState({ source: null, trackId: null, fxIndex: null });
+client/src/components/multi-track-view.tsx:220:      setDragState({ source: null, trackId: null, fxIndex: null });
+client/src/components/multi-track-view.tsx:299:            title={transport.isPlaying ? 'Stop (Space)' : 'Play (Space)'}
+client/src/components/multi-track-view.tsx:300:            aria-label={transport.isPlaying ? 'Stop playback' : 'Start playback'}
+client/src/components/multi-track-view.tsx:302:            {transport.isPlaying ? <Square size={18} /> : <Play size={18} />}
+client/src/components/multi-track-view.tsx:307:              transport.isRecording
+client/src/components/multi-track-view.tsx:311:            title={transport.isRecording ? 'Stop recording' : 'Start recording'}
+client/src/components/multi-track-view.tsx:312:            aria-label={transport.isRecording ? 'Stop recording' : 'Start recording'}
+client/src/components/multi-track-view.tsx:316:              className={transport.isRecording ? 'fill-white' : 'text-red-500'} 
+client/src/components/multi-track-view.tsx:323:            {formatTime(transport.position)}
+client/src/components/multi-track-view.tsx:328:              style={{ width: `${Math.min(100, (transport.position / 300) * 100)}%` }}
+client/src/components/multi-track-view.tsx:330:              aria-valuenow={Math.min(100, (transport.position / 300) * 100)}
+client/src/components/multi-track-view.tsx:337:        {transport.isRecording && (
+client/src/components/multi-track-view.tsx:510:                      {track.fxChain.length === 0 && (
+client/src/components/multi-track-view.tsx:513:                      {track.fxChain.map((fx, idx) => (
+client/src/components/multi-track-view.tsx:515:                          key={`${track.id}-fx-${idx}`}
+client/src/components/multi-track-view.tsx:517:                          onDragStart={(e) => handleDragStart(e, 'fx', track.id, idx)}
+client/src/components/multi-track-view.tsx:526:                          {fx}
+client/src/components/multi-track-view.tsx:531:                              aria-label={`Remove ${fx}`}
+client/src/components/ui/button.tsx:78:        transport: `
+client/src/components/microphone-input.tsx:1:// client/src/components/microphone-input.tsx
+client/src/components/microphone-input.tsx:9:const BLK        = "var(--dj-black)";
+client/src/components/microphone-input.tsx:10:const SURF       = "var(--dj-surface)";
+client/src/components/microphone-input.tsx:11:const SURF2      = "var(--dj-surface2)";
+client/src/components/microphone-input.tsx:12:const SURF3      = "var(--dj-surface3)";
+client/src/components/microphone-input.tsx:13:const BORDER     = "var(--dj-border)";
+client/src/components/microphone-input.tsx:15:const DIM        = "var(--dj-dim)";
+client/src/components/microphone-input.tsx:16:const DIMMER     = "var(--dj-dimmer)";
+client/src/components/microphone-input.tsx:17:const MUTED      = "var(--dj-muted)";
+client/src/components/microphone-input.tsx:750:      else if (e.name === "NotFoundError") setError("No microphone found.");
+client/src/components/microphone-input.tsx:883:  // with the instrument page's global Space→play() and Ctrl+R→record() bindings.
+client/src/components/microphone-input.tsx:946:        .mic-root select option { background:var(--dj-surface); color:#a3e635; }
+client/src/components/microphone-input.tsx:1089:                  {["-60","-30","-12","-6","0 dB"].map(l => <span key={l} style={{ fontSize: 7, color: "var(--dj-dimmer)", fontFamily: "inherit" }}>{l}</span>)}
+client/src/components/microphone-input.tsx:1278:              {isActive && <div style={{ fontSize: 8, color: DIM, marginTop: 4, letterSpacing: 0.5 }}>Stop microphone to change device.</div>}
+client/src/components/microphone-input.tsx:1313:              {[["Space","ARM / STOP microphone"],["R","Start / stop recording"],["M","Mute / unmute"]].map(([k,d],i) => (
+client/src/components/drum-pads.tsx:1:// client/src/components/drum-pads.tsx
+client/src/components/drum-pads.tsx:6:import { PAD_KEYS } from '@/audio/core/instrument-engine';
+client/src/components/drum-pads.tsx:87:// MIDI note numbers (General MIDI drum map)
+client/src/components/drum-pads.tsx:116:// Velocity curve types (Pro feature: adjustable per-pad velocity curves)
+client/src/components/drum-pads.tsx:433:  // MIDI note sender (channel 10 = drums in General MIDI)
+client/src/components/drum-pads.tsx:454:    const fx  = padFxSettings.get(padIndex) ?? { ...DEFAULT_FX };
+client/src/components/drum-pads.tsx:459:    const microPitch = fx.pitchShift + (((rrCount % 4) - 1.5) * 0.02); // ±0.03 semi
+client/src/components/drum-pads.tsx:474:    filter.frequency.value = 200 + fx.filterCutoff * 18000;
+client/src/components/drum-pads.tsx:481:    const k = fx.saturation * 150;
+client/src/components/drum-pads.tsx:494:    revWet.gain.value = fx.reverbSend * 0.85;
+client/src/components/drum-pads.tsx:501:    fbGain.gain.value = Math.min(0.55, fx.reverbSend * 0.7);
+client/src/components/drum-pads.tsx:513:    if (fx.reverbSend > 0.01) {
+client/src/components/drum-pads.tsx:1283:  // Adjust row step count for polyrhythm
+client/src/components/drum-pads.tsx:1804:              title="Export drum kit"
+client/src/components/drum-pads.tsx:1824:                title="Import drum kit"
+client/src/components/drum-pads.tsx:2056:                    const fx = padFxSettings.get(i) ?? DEFAULT_FX;
+client/src/components/drum-pads.tsx:2077:                            <div className="w-1 rounded-sm" style={{ height: `${fx.filterCutoff * 8 + 1}px`, background: `hsl(${hue},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2078:                            <div className="w-1 rounded-sm" style={{ height: `${fx.reverbSend * 8 + 1}px`, background: `hsl(${(hue+120)%360},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2079:                            <div className="w-1 rounded-sm" style={{ height: `${fx.saturation * 8 + 1}px`, background: `hsl(${(hue+240)%360},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2108:                              <label className="text-[8px] text-muted-foreground/60">Filter {Math.round(200 + fx.filterCutoff * 17800)}Hz</label>
+client/src/components/drum-pads.tsx:2109:                              <input type="range" min={0} max={1} step={0.01} value={fx.filterCutoff}
+client/src/components/drum-pads.tsx:2115:                              <label className="text-[8px] text-muted-foreground/60">Reverb Send {Math.round(fx.reverbSend * 100)}%</label>
+client/src/components/drum-pads.tsx:2116:                              <input type="range" min={0} max={1} step={0.01} value={fx.reverbSend}
+client/src/components/drum-pads.tsx:2122:                              <label className="text-[8px] text-muted-foreground/60">Saturation {Math.round(fx.saturation * 100)}%</label>
+client/src/components/drum-pads.tsx:2123:                              <input type="range" min={0} max={1} step={0.01} value={fx.saturation}
+client/src/components/drum-pads.tsx:2129:                              <label className="text-[8px] text-muted-foreground/60">Pitch {fx.pitchShift > 0 ? '+' : ''}{fx.pitchShift} st</label>
+client/src/components/drum-pads.tsx:2130:                              <input type="range" min={-12} max={12} step={1} value={fx.pitchShift}
+client/src/components/drum-pads.tsx:2493:                const fx = padFxSettings.get(selectedPadIndex) ?? { ...DEFAULT_FX };
+client/src/components/drum-pads.tsx:2495:                const pitchNorm = (fx.pitchShift + 12) / 24;
+client/src/components/drum-pads.tsx:2499:                  { label: 'FILT', val: fx.filterCutoff, onChange: (v: number) => updatePadFx(selectedPadIndex, 'filterCutoff', v),                   hue: (padHue + 40) % 360 },
+client/src/components/drum-pads.tsx:2500:                  { label: 'REV',  val: fx.reverbSend,   onChange: (v: number) => updatePadFx(selectedPadIndex, 'reverbSend', v),                     hue: (padHue + 80) % 360 },
+client/src/components/drum-pads.tsx:2501:                  { label: 'SAT',  val: fx.saturation,   onChange: (v: number) => updatePadFx(selectedPadIndex, 'saturation', v),                     hue: (padHue + 120) % 360 },
+client/src/components/studio/StudioShell.tsx:20:      <div className={`r3-instrument-body relative min-h-screen overflow-x-auto ${className}`}>
+client/src/components/ui/fx-chain-panel.tsx:16:  fxUnits: FXUnit[];
+client/src/components/ui/fx-chain-panel.tsx:18:  onToggleBypass: (fxId: string) => void;
+client/src/components/ui/fx-chain-panel.tsx:19:  onRemoveFX?: (fxId: string) => void;
+client/src/components/ui/fx-chain-panel.tsx:34:  fxUnits,
+client/src/components/ui/fx-chain-panel.tsx:60:            {fxUnits.length === 0 ? (
+client/src/components/ui/fx-chain-panel.tsx:65:              fxUnits.map((fx, index) => (
+client/src/components/ui/fx-chain-panel.tsx:67:                  key={fx.id}
+client/src/components/ui/fx-chain-panel.tsx:73:                      <span className="text-sm font-medium text-foreground">{fx.type}</span>
+client/src/components/ui/fx-chain-panel.tsx:77:                        onClick={() => onToggleBypass(fx.id)}
+client/src/components/ui/fx-chain-panel.tsx:79:                          fx.bypassed
+client/src/components/ui/fx-chain-panel.tsx:84:                        {fx.bypassed ? 'Bypassed' : 'Active'}
+client/src/components/ui/fx-chain-panel.tsx:88:                          onClick={() => onRemoveFX(fx.id)}
+client/src/components/ui/fx-chain-panel.tsx:97:                    {FXTypeInfo[fx.type]}
+client/src/components/ui/fx-chain-panel.tsx:107:            {(['EQ', 'Compressor', 'Delay', 'Reverb', 'Distortion'] as FXType[]).map((fxType) => (
+client/src/components/ui/fx-chain-panel.tsx:109:                key={fxType}
+client/src/components/ui/fx-chain-panel.tsx:110:                onClick={() => onAddFX(fxType)}
+client/src/components/ui/fx-chain-panel.tsx:113:                + {fxType}
+client/src/components/ui/metal-daw-layout.tsx:176:            {['Compressor', 'EQ', 'Reverb', 'Delay'].map((fx, i) => (
+client/src/components/ui/metal-daw-layout.tsx:177:              <div key={i} className="fx-slot">
+client/src/components/ui/metal-daw-layout.tsx:179:                  <span className="text-xs font-semibold text-metal-200">{fx}</span>
+client/src/components/ui/metal-daw-layout.tsx:205:          <Button variant="transport" size="icon-lg">
+client/src/components/ui/metal-daw-layout.tsx:210:            variant={isPlaying ? 'play' : 'transport'}
+client/src/components/ui/metal-daw-layout.tsx:223:          <Button variant="transport" size="icon-lg">
+client/src/components/ui/metal-daw-layout.tsx:228:            variant={isRecording ? 'record' : 'transport'}
+client/src/components/ui/metal-daw-layout.tsx:236:          <Button variant="transport" size="icon-lg">
+client/src/components/ui/mixer-strip.tsx:25:      <div style={{ height: 60, background: "var(--dj-border)" }}>
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:36:  --dj-border: #222222;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:37:  --dj-dim: #444444;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:38:  --dj-dimmer: #333333;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:64:  --dj-black: #000000;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:65:  --dj-surface: #0c0c0c;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:66:  --dj-surface2: #111111;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:67:  --dj-surface3: #161616;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:68:  --dj-muted: #666666;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:138:  --dj-border: #222222;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:163:  --dj-border: #283500;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:190:  --dj-border: #d4d4d8;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:191:  --dj-dim: #71717a;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:220:  --dj-border: #16494a;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:245:  --dj-border: #3c4146;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:246:  --dj-dim: #777e85;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:271:  --dj-border: #145b48;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:272:  --dj-dim: #467b6c;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:297:  --dj-border: #713324;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:298:  --dj-dim: #9b5a48;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:323:  --dj-border: #31265c;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:324:  --dj-dim: #695d91;
+client/src/components/fx-panel.tsx:29:  fx?: FXState;
+client/src/components/fx-panel.tsx:30:  onToggle?: (fx: string) => void;
+client/src/components/fx-panel.tsx:468:export const FXPanel = memo(({ fx: fxProp, onToggle: onToggleProp }: FXPanelProps) => {
+client/src/components/fx-panel.tsx:469:  const [fxState, setFxState] = useState<FXState>({});
+client/src/components/fx-panel.tsx:476:  const fx = fxProp ?? fxState;
+client/src/components/fx-panel.tsx:486:  const activeCount = useMemo(() => FX_CONFIG.filter(c => fx[c.key]).length, [fx]);
+client/src/components/fx-panel.tsx:487:  const activeFX = useMemo(() => FX_CONFIG.filter(c => fx[c.key]), [fx]);
+client/src/components/fx-panel.tsx:507:        @keyframes fx-ripple { 0% { opacity:1; transform:scale(0.5); } 100% { opacity:0; transform:scale(1.3); } }
+client/src/components/fx-panel.tsx:508:        @keyframes fx-led-pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+client/src/components/fx-panel.tsx:509:        .fx-panel-body { transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.3s ease; }
+client/src/components/fx-panel.tsx:566:                animation: 'fx-led-pulse 1.5s ease-in-out infinite',
+client/src/components/fx-panel.tsx:605:          className="fx-panel-body"
+client/src/components/fx-panel.tsx:633:                {activeCount > 0 ? `${activeCount} fx active` : 'No FX active'}
+client/src/components/fx-panel.tsx:637:                  const active = FX_CONFIG.filter(c => c.category === cat && fx[c.key]).length;
+client/src/components/fx-panel.tsx:713:              if (mode === 'compact') return <FXButtonCompact key={config.key} config={config} isActive={!!fx[config.key]} onToggle={onToggle} />;
+client/src/components/fx-panel.tsx:714:              if (mode === 'normal')  return <FXButtonNormal  key={config.key} config={config} isActive={!!fx[config.key]} onToggle={onToggle} />;
+client/src/components/fx-panel.tsx:715:              return <FXButtonPro key={config.key} config={config} isActive={!!fx[config.key]} onToggle={onToggle} />;
+client/src/components/piano-keys.tsx:295:      data-testid={`piano-key-${keyIdx}`}
+client/src/components/piano-keys.tsx:382:      data-testid={`piano-key-${keyIdx}`}
+client/src/components/piano-keys.tsx:709:    const adjustedIndex = keyIndex + transpose;
+client/src/components/piano-keys.tsx:712:    onTrigger(adjustedIndex, octaveShift, currentVelocity);
+client/src/styles/theme.css:36:  --dj-border: #222222;
+client/src/styles/theme.css:37:  --dj-dim: #444444;
+client/src/styles/theme.css:38:  --dj-dimmer: #333333;
+client/src/styles/theme.css:72:  --dj-black: #000000;
+client/src/styles/theme.css:73:  --dj-surface: #0c0c0c;
+client/src/styles/theme.css:74:  --dj-surface2: #111111;
+client/src/styles/theme.css:75:  --dj-surface3: #161616;
+client/src/styles/theme.css:76:  --dj-muted: #666666;
+client/src/styles/theme.css:146:  --dj-border: #222222;
+client/src/styles/theme.css:171:  --dj-border: #283500;
+client/src/styles/theme.css:198:  --dj-border: #d4d4d8;
+client/src/styles/theme.css:199:  --dj-dim: #71717a;
+client/src/styles/theme.css:228:  --dj-border: #16494a;
+client/src/styles/theme.css:253:  --dj-border: #3c4146;
+client/src/styles/theme.css:254:  --dj-dim: #777e85;
+client/src/styles/theme.css:279:  --dj-border: #145b48;
+client/src/styles/theme.css:280:  --dj-dim: #467b6c;
+client/src/styles/theme.css:305:  --dj-border: #713324;
+client/src/styles/theme.css:306:  --dj-dim: #9b5a48;
+client/src/styles/theme.css:331:  --dj-border: #31265c;
+client/src/styles/theme.css:332:  --dj-dim: #695d91;
+client/src/components/header-controls.tsx:60:  bg:         'var(--dj-black)',
+client/src/components/header-controls.tsx:61:  bgPanel:    'var(--dj-surface)',
+client/src/components/header-controls.tsx:62:  border:     'var(--dj-border)',
+client/src/components/header-controls.tsx:66:  textMuted:  'var(--dj-dim)',
+client/src/components/header-controls.tsx:89:        color:        active ? 'var(--dj-black)'       : S.textDim,
+client/src/components/header-controls.tsx:101:          (e.currentTarget as HTMLElement).style.borderColor = 'var(--dj-dim)';
+client/src/components/header-controls.tsx:119:  background:   'var(--dj-surface)',
+client/src/components/header-controls.tsx:120:  border:       '1px solid var(--dj-border)',
+client/src/components/header-controls.tsx:233:            <Music className="w-3.5 h-3.5" style={{ color: 'var(--dj-black)' }} />
+client/src/components/header-controls.tsx:324:                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--dj-dim)';
+client/src/components/header-controls.tsx:373:                        background:   active ? 'var(--dj-surface2)'   : 'transparent',
+client/src/styles/r3-tokens.css:4:            ag-* / --dj-* / --t-* design system without collision.
+client/src/styles/r3-tokens.css:5:   Strategy: r3-* becomes the "instrument panel" namespace; ag-* remains the
+client/src/styles/r3-tokens.css:11:    /* ── R3 Core Surface Ramp (instrument-specific) ──────────────────────── */
+client/src/styles/r3-tokens.css:19:    --r3-border1:   var(--dj-border, #1c2117);
+client/src/styles/r3-tokens.css:28:    --r3-text4:     var(--dj-muted, #646464);
+client/src/styles/r3-tokens.css:29:    --r3-text5:     var(--dj-dim, #4d4d4d);
+client/src/styles/r3-tokens.css:52:    /* ── R3 Metal Gradient (instrument chrome) ───────────────────────────── */
+client/src/styles/r3-tokens.css:57:  /* This class is applied ONLY to the instrument page shell, never globally */
+client/src/styles/r3-tokens.css:58:  .r3-instrument-body {
+client/src/styles/r3-tokens.css:68:  /* Scanline overlay — applied only within instrument shell */
+client/src/styles/r3-tokens.css:69:  .r3-instrument-body::before {
+client/src/styles/r3-tokens.css:86:  /* ── Scrollbar Override (instrument context only) ──────────────────────── */
+client/src/styles/r3-tokens.css:87:  .r3-instrument-body ::-webkit-scrollbar {
+client/src/styles/r3-tokens.css:91:  .r3-instrument-body ::-webkit-scrollbar-track {
+client/src/styles/r3-tokens.css:94:  .r3-instrument-body ::-webkit-scrollbar-thumb {
+client/src/styles/r3-tokens.css:100:  .r3-instrument-body ::selection {
+client/src/components/drumstage.tsx:279:        color="var(--dj-black)"
+client/src/components/collapsible-fx-panel.tsx:51:  const headerId = `cfxp-btn-${uid}`;
+client/src/components/collapsible-fx-panel.tsx:52:  const regionId = `cfxp-region-${uid}`;
+client/src/components/ui/sidebar.tsx:237:          // Adjust the padding for floating and inset variants.
+client/src/components/drum/DrumWorkstation.tsx:1:// client/src/components/drum/DrumWorkstation.tsx
+client/src/components/drum/DrumWorkstation.tsx:2:// 16-pad drum workstation with step sequencer.
+client/src/components/drum/DrumWorkstation.tsx:164:            aria-label="Collapse drum pad"
+client/src/components/audio-visualizer.tsx:147:// Named export to match: import { AudioVisualizer } from './audio-visualizer'
+client/src/components/audio-visualizer.tsx:921:  const BLACK = "var(--dj-black)";
+client/src/components/audio-visualizer.tsx:922:  const SURFACE = "var(--dj-surface)";
+client/src/components/audio-visualizer.tsx:923:  const SURFACE2 = "var(--dj-surface2)";
+client/src/components/audio-visualizer.tsx:924:  const BORDER = "var(--dj-border)";
+client/src/components/audio-visualizer.tsx:971:              color: "var(--dj-dim)",
+client/src/components/audio-visualizer.tsx:999:            <div style={{ fontSize: 8, color: "var(--dj-dim)", marginTop: 2, letterSpacing: 1 }}>
+client/src/components/audio-visualizer.tsx:1009:            <span style={{ fontSize: 8, color: "var(--dj-dim)", letterSpacing: 1 }}>VOL</span>
+client/src/components/audio-visualizer.tsx:1028:              <span style={{ fontSize: 8, color: "var(--dj-dim)", width: 26 }}>{volumePercent}%</span>
+client/src/components/audio-visualizer.tsx:1035:              <span style={{ fontSize: 8, color: "var(--dj-dim)", letterSpacing: 1 }}>PK</span>
+client/src/components/audio-visualizer.tsx:1095:                color: "var(--dj-dimmer)",
+client/src/components/audio-visualizer.tsx:1200:              <span style={{ fontSize: 8, color: "var(--dj-dim)", letterSpacing: 1, marginRight: 2 }}>THEME</span>
+client/src/components/audio-visualizer.tsx:1210:                    border: theme === key ? `2px solid ${ACID}` : `1px solid var(--dj-dimmer)`,
+client/src/components/audio-visualizer.tsx:1221:              <span style={{ fontSize: 8, color: "var(--dj-dim)", letterSpacing: 1 }}>GAIN</span>
+client/src/components/audio-visualizer.tsx:1311:            color: "var(--dj-dimmer)",
+client/src/components/admin/AgentMeshPanel.tsx:5: * Layer 3 — AgentBus visualizer (BroadcastChannel · r3v4-agent-bus)
+client/src/components/admin/AgentMeshPanel.tsx:79:    placeholder: "e.g. Analyze the spectral signature delta and suggest a mix weight adjustment…",
+client/src/components/admin/AgentMeshPanel.tsx:94:- Post-login redirect: /instrument only
+client/src/components/admin/AgentMeshPanel.tsx:127:- Post-login redirect: /instrument ONLY — NEVER /daw
+client/src/components/dj-controls/hot-cues.tsx:112:// src/components/dj-controls/crossfader.tsx
+client/src/components/dj-controls/hot-cues.tsx:170:// src/components/dj-controls/hot-cues.tsx
+client/src/components/dj-controls/hot-cues.tsx:173:import type { HotCue } from '@shared/dj.types';
+client/src/components/dj-controls/types.ts:30:export const DJ_BLACK   = 'var(--dj-black)';
+client/src/components/dj-controls/types.ts:31:export const DJ_SURFACE = 'var(--dj-surface)';
+client/src/components/dj-controls/types.ts:32:export const DJ_SURFACE2 = 'var(--dj-surface2)';
+client/src/components/dj-controls/types.ts:33:export const DJ_BORDER  = 'var(--dj-border)';
+client/src/components/dj-controls/types.ts:34:export const DJ_DIM     = 'var(--dj-dim)';
+client/src/components/dj-controls/types.ts:35:export const DJ_DIMMER  = 'var(--dj-dimmer)';
+client/src/components/beat-intro.tsx:18:// ── Pad categories (mirrors drum-pads.tsx) ─────────────────────────────────────
+client/src/components/beat-intro.tsx:248:  /** Called on every synthesized hit — wires into handlePadTrigger in instrument.tsx */
+client/src/components/beat-intro.tsx:250:  /** Mirrors instrument page isInitialized — disables play when audio engine not ready */
+client/src/components/beat-intro.tsx:329:          // ── Drive instrument.tsx audio engine + 3D stage ──────────────────
+client/src/components/beat-intro.tsx:446:            <span style={{ fontSize:9, letterSpacing:"0.2em", color: playing ? "#a3e635" : "var(--dj-dimmer)", textTransform:"uppercase" }}>
+client/src/components/beat-intro.tsx:461:            color: playing ? "var(--void)" : (disabled ? "var(--dj-dimmer)" : "#a3e635"),
+client/src/components/beat-intro.tsx:462:            border:`2px solid ${disabled && !playing ? "var(--dj-border)" : "#a3e635"}`,
+client/src/components/beat-intro.tsx:513:                  border:`1px solid ${active ? "#a3e635" : hits.length ? "rgba(163,230,53,0.2)" : "var(--dj-surface2)"}`,
+client/src/components/beat-intro.tsx:567:                    border:`1px solid ${hit ? cat.color : hasNote ? "rgba(255,255,255,0.1)" : "var(--dj-surface2)"}`,
+client/src/components/beat-intro.tsx:756:          <div style={{ border:"1px solid var(--dj-surface2)", background:"rgba(0,0,0,0.3)", flex:1 }}>
+client/src/components/beat-intro.tsx:757:            <div style={{ padding:"8px 10px", borderBottom:"1px solid var(--dj-surface2)", fontSize:7, letterSpacing:"0.3em", color:"rgba(255,255,255,0.22)", textTransform:"uppercase" }}>
+client/src/components/dj-controls/index.ts:1:export { DJControls } from './djcontrols';
+client/src/components/TimeSavingsPanel.tsx:9://   - AI vs Manual adjustment breakdown
+client/src/components/TimeSavingsPanel.tsx:28:  const totalAdjustments = stats.totalAIAdjustments + stats.totalManualAdjustments;
+client/src/components/TimeSavingsPanel.tsx:29:  const aiPercent = totalAdjustments > 0
+client/src/components/TimeSavingsPanel.tsx:30:    ? Math.round((stats.totalAIAdjustments / totalAdjustments) * 100)
+client/src/components/TimeSavingsPanel.tsx:82:          label="AI Adjustments"
+client/src/components/TimeSavingsPanel.tsx:83:          value={stats.totalAIAdjustments}
+client/src/components/TimeSavingsPanel.tsx:101:          value={stats.totalManualAdjustments}
+client/src/components/TimeSavingsPanel.tsx:108:      {totalAdjustments > 0 && (
+client/src/components/TimeSavingsPanel.tsx:121:            <span className="text-violet-400">{stats.totalAIAdjustments} AI</span>
+client/src/components/TimeSavingsPanel.tsx:122:            <span className="text-slate-500">{stats.totalManualAdjustments} manual</span>
+client/src/components/ProtectedRoute.tsx:68:          <p style={{ color: 'var(--dj-dim)', fontSize: 11, letterSpacing: '0.2em' }}>
+client/src/components/ProtectedRoute.tsx:100:        <p style={{ color: 'var(--dj-dim)', fontSize: 10 }}>
+client/src/components/dj-controls/djcontrols.tsx:59:        @keyframes dj-pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+client/src/components/dj-controls/djcontrols.tsx:60:        .dj-body { transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.25s ease; }
+client/src/components/dj-controls/djcontrols.tsx:105:                <div style={{ width: 4, height: 4, background: ACID, animation: 'dj-pulse 1.2s infinite' }} />
+client/src/components/dj-controls/djcontrols.tsx:136:          className="dj-body"
+client/src/components/MixerWithAI.tsx:77:    // Notify LLPTE — marks override, logs manual adjustment
+client/src/components/dj-controls/knob.tsx:102:                stroke={major ? 'var(--dj-dimmer)' : 'var(--dj-border)'}

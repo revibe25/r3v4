@@ -42,6 +42,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { getAudioContext } from "@/audio/core/audio-context";
 
 interface DrumPadsProps {
   pads: { sample: AudioBuffer | null; name: string; isActive: boolean }[];
@@ -393,10 +394,7 @@ export function DrumPads({
 
   // Initialize audio context — resume on user gesture (iOS/Chrome require it)
   useEffect(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    const resume = () => { audioContextRef.current?.resume(); };
+    const resume = () => { void getAudioContext().resume(); };
     document.addEventListener('click', resume, { once: true });
     document.addEventListener('keydown', resume, { once: true });
     return () => {
@@ -764,6 +762,7 @@ export function DrumPads({
       setPadVelocities(new Map(velocityRef.current));
       
       // Apply pad volume
+      audioContextRef.current = getAudioContext();
       const played = playPadWithFx(padIndex, velocity);
       if (!played) {
         const padVolume = padVolumes.get(padIndex) ?? 1;
@@ -855,6 +854,7 @@ export function DrumPads({
     velocityRef.current.set(index, velocity);
     setPadVelocities(new Map(velocityRef.current));
     
+    audioContextRef.current = getAudioContext();
     const played = playPadWithFx(index, velocity);
     if (!played) {
       const padVolume = padVolumes.get(index) ?? 1;

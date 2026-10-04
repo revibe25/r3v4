@@ -17,8 +17,9 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router }              from '../trpc';
 import { protectedProcedure } from '../base-procedures';
+import { requireTier } from '../middleware/feature-gate';
 import { db } from '../db';
-import { projects } from '@shared/schema';
+import { projects } from '../db/schema';
 import { eq, and, desc, isNull } from 'drizzle-orm';
 
 // ── Zod schemas ───────────────────────────────────────────────────────────────
@@ -81,25 +82,6 @@ const ProjectStateSchema = z.object({
   loopEnd:       z.number().min(0),
 });
 
-// ── Tier gate helper ──────────────────────────────────────────────────────────
-
-type Tier = 'explorer' | 'creator' | 'pro_artist';
-
-function requireTier(ctx: { user?: { is_admin?: boolean } | null; subscription?: { tier: string } | null }, minTier: Tier): void {
-  // ✓ ADMIN BYPASS: Admins have unrestricted access to all features
-  if (ctx.user?.is_admin) {
-    return;  // Skip all tier checks for admins
-  }
-
-  const ORDER: Tier[] = ['explorer','creator','pro_artist'];
-  const userTier  = (ctx.subscription?.tier ?? 'explorer') as Tier;
-  if (ORDER.indexOf(userTier) < ORDER.indexOf(minTier)) {
-    throw new TRPCError({
-      code:    'FORBIDDEN',
-      message: `This feature requires the ${minTier} tier or higher.`,
-    });
-  }
-}
 export interface LLPTESignal {
   rms:            number;
   peak:           number;
@@ -273,14 +255,13 @@ export const dawRouter = router({
 
   // ── project.save ────────────────────────────────────────────────────────────
   'project.save': protectedProcedure
+    .use(requireTier('explorer'))
     .input(z.object({
       projectId:   z.string().optional(),
       name:        z.string().min(1).max(80),
       state:       ProjectStateSchema,
     }))
     .mutation(async ({ ctx, input }) => {
-      requireTier(ctx, 'explorer');
-
       const userId    = ctx.user.id;
       const stateJson = JSON.stringify(input.state);
 
@@ -317,7 +298,10 @@ export const dawRouter = router({
       // would both read count=0, both pass the check, and both insert, yielding 2+
       // projects for a free user. SELECT FOR UPDATE takes a row-level lock on the
       // result set for the duration of the transaction, serialising concurrent inserts.
-      if (!ctx.subscription || ctx.subscription.tier === 'explorer') {
+      if (
+        ctx.user?.is_admin !== true &&
+        (!ctx.subscription || ctx.subscription.tier === 'explorer')
+      ) {
         const inserted = await db.transaction(async (tx) => {
           const existing = await tx
             .select({ id: projects.id })
@@ -395,8 +379,8 @@ export const dawRouter = router({
 
   // ── project.list ────────────────────────────────────────────────────────────
   'project.list': protectedProcedure
+    .use(requireTier('creator'))
     .query(async ({ ctx }) => {
-      requireTier(ctx, 'creator');
       const rows = await db
         .select({
           id:        projects.id,
@@ -441,12 +425,12 @@ export const dawRouter = router({
 
   // ── ai.analyse ───────────────────────────────────────────────────────────────
   'ai.analyse': protectedProcedure
+    .use(requireTier('creator'))
     .input(z.object({
       tracks: z.array(TrackSchema),
       bpm:    z.number().min(40).max(240),
     }))
     .mutation(async ({ ctx, input }) => {
-      requireTier(ctx, 'creator');
       try {
         return await runLLPTEAnalysis(input.tracks, input.bpm);
       } catch (err) {
@@ -460,13 +444,13 @@ export const dawRouter = router({
 
   // ── ai.suggestions ───────────────────────────────────────────────────────────
   'ai.suggestions': protectedProcedure
+    .use(requireTier('creator'))
     .input(z.object({
       tracks:   z.array(TrackSchema),
       bpm:      z.number().min(40).max(240),
       position: z.number().min(0),
     }))
     .mutation(async ({ ctx, input }) => {
-      requireTier(ctx, 'creator');
       const t0 = Date.now();
       const { suggestions } = await runLLPTEAnalysis(input.tracks, input.bpm);
       const latencyMs = Date.now() - t0;
@@ -475,6 +459,7 @@ export const dawRouter = router({
 
   // ── ai.chat ──────────────────────────────────────────────────────────────────
   'ai.chat': protectedProcedure
+    .use(requireTier('pro_artist'))
     .input(z.object({
       messages: z.array(z.object({
         role:    z.enum(['user','assistant']),
@@ -491,8 +476,6 @@ export const dawRouter = router({
       }),
     }))
     .mutation(async ({ ctx, input }) => {
-      requireTier(ctx, 'pro_artist');
-
       const ctxStr = [
         `Project: ${input.context.trackCount} tracks, ${input.context.bpm} BPM.`,
         input.context.activeTrack ? `Selected track: ${sanitiseTrackName(input.context.activeTrack)}.` : '',
@@ -517,6 +500,7 @@ export const dawRouter = router({
 
   // ── mastering.analyse ────────────────────────────────────────────────────────
   'mastering.analyse': protectedProcedure
+    .use(requireTier('pro_artist'))
     .input(z.object({
       targetLUFS:   z.number().min(-23).max(-6),
       ceilingDB:    z.number().min(-3).max(-0.1),
@@ -525,14 +509,13 @@ export const dawRouter = router({
       currentLUFS:  z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      requireTier(ctx, 'pro_artist');
       return runMasteringAnalysis(input);
     }),
 
   // ── collab.roomStats ─────────────────────────────────────────────────────────
   'collab.roomStats': protectedProcedure
+    .use(requireTier('pro_artist'))
     .query(async ({ ctx }) => {
-      requireTier(ctx, 'pro_artist');
       const { getRoomStats } = await import('../ws/collab');
       return getRoomStats();
     }),

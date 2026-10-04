@@ -1,0 +1,912 @@
+import {
+  useLayoutEffect,
+} from 'react';
+
+import type {
+  RefObject,
+} from 'react';
+
+import {
+  deriveV130Layout,
+  V130_PANEL_IDS,
+  V130_PANEL_TITLE,
+  isV130PanelOpen,
+  type V130PanelId,
+} from './v130-layout';
+
+import type {
+  V130PanelController,
+} from './useV130PanelState';
+
+const GLYPH = {
+  collapse:
+    'M2.5 4.5L6 8l3.5-3.5',
+
+  expand:
+    'M4.5 2.5L8 6l-3.5 3.5',
+
+  max:
+    'M1.5 4.5v-3h3M10.5 7.5v3h-3M1.5 1.5l3.5 3.5M10.5 10.5L7 7',
+
+  restore:
+    'M4.5 1.5v3h-3M7.5 10.5v-3h3M1.5 1.5l3 3M10.5 10.5l-3-3',
+
+  left:
+    'M7.5 2.5L4 6l3.5 3.5',
+
+  right:
+    'M4.5 2.5L8 6l-3.5 3.5',
+} as const;
+
+const DSP_MASTER = [
+  ['comp', 'R3 Compressor'],
+  ['eq', 'R3 Parametric EQ'],
+  ['deess', 'R3 De-Esser'],
+  ['verb', 'R3 Reverb'],
+  ['sat', 'R3 Saturation'],
+  ['lim', 'R3 Limiter'],
+] as const;
+
+function glyph(
+  name: keyof typeof GLYPH,
+): string {
+  return (
+    `<svg viewBox="0 0 12 12">` +
+    `<path d="${GLYPH[name]}"></path>` +
+    `</svg>`
+  );
+}
+
+function button(
+  className: string,
+  label: string,
+  title: string,
+): HTMLButtonElement {
+  const el =
+    document.createElement('button');
+
+  el.type = 'button';
+  el.className = className;
+  el.setAttribute('aria-label', label);
+  el.title = title;
+
+  return el;
+}
+
+function isInsideInteractive(
+  target: EventTarget | null,
+): boolean {
+  return (
+    target instanceof Element &&
+    !!target.closest(
+      'button,select,input,.seg',
+    )
+  );
+}
+
+function getPanel(
+  root: HTMLElement,
+  id: V130PanelId,
+): HTMLElement | null {
+  return root.querySelector<HTMLElement>(
+    `#${id}`,
+  );
+}
+
+function getStage(
+  root: HTMLElement,
+): HTMLElement | null {
+  return root.querySelector<HTMLElement>(
+    '#stage',
+  );
+}
+
+function applyRuntimeClasses(
+  root: HTMLElement,
+  controller: V130PanelController,
+): void {
+  const layout =
+    deriveV130Layout(
+      controller.state,
+      controller.max,
+    );
+
+  const stage =
+    getStage(root);
+
+  const main =
+    root.querySelector<HTMLElement>(
+      '#main',
+    );
+
+  const right =
+    root.querySelector<HTMLElement>(
+      '#right',
+    );
+
+  const bottom =
+    root.querySelector<HTMLElement>(
+      '#bottom',
+    );
+
+  const leftcol =
+    root.querySelector<HTMLElement>(
+      '#leftcol',
+    );
+
+  const empty =
+    root.querySelector<HTMLElement>(
+      '#empty',
+    );
+
+  stage?.style.setProperty(
+    '--rows',
+    layout.rows,
+  );
+
+  main?.style.setProperty(
+    '--mainCols',
+    layout.mainCols,
+  );
+
+  right?.style.setProperty(
+    '--rightRows',
+    layout.rightRows,
+  );
+
+  bottom?.style.setProperty(
+    '--botCols',
+    layout.bottomCols,
+  );
+
+  leftcol?.style.setProperty(
+    '--leftRows',
+    layout.leftRows,
+  );
+
+  if (bottom) {
+    bottom.style.alignSelf =
+      layout.allCollapsed
+        ? 'start'
+        : '';
+  }
+
+  for (const id of V130_PANEL_IDS) {
+    const panel =
+      getPanel(root, id);
+
+    if (!panel) continue;
+
+    const state =
+      controller.state[id];
+
+    const isMax =
+      controller.max === id;
+
+    const collapsed =
+      state.c && !isMax;
+
+    const inStack =
+      id === 'routing' ||
+      id === 'takes' ||
+      id === 'padsP' ||
+      id === 'pianoP';
+
+    const stackFullyCollapsed =
+      id === 'routing' ||
+      id === 'takes'
+        ? !isV130PanelOpen(
+            controller.state,
+            'routing',
+            controller.max,
+          ) &&
+          !isV130PanelOpen(
+            controller.state,
+            'takes',
+            controller.max,
+          )
+        : !isV130PanelOpen(
+            controller.state,
+            'padsP',
+            controller.max,
+          ) &&
+          !isV130PanelOpen(
+            controller.state,
+            'pianoP',
+            controller.max,
+          );
+
+    const rowDocked =
+      id === 'side' ||
+      id === 'arr' ||
+      id === 'routing' ||
+      id === 'takes'
+        ? layout.dockedMain
+        : layout.dockedBottom;
+
+    panel.classList.toggle(
+      'max',
+      isMax,
+    );
+
+    panel.classList.toggle(
+      'rail',
+      collapsed &&
+        !rowDocked &&
+        (!inStack ||
+          stackFullyCollapsed),
+    );
+
+    panel.classList.toggle(
+      'collapsed',
+      collapsed &&
+        !rowDocked &&
+        inStack &&
+        !stackFullyCollapsed,
+    );
+
+    panel.classList.toggle(
+      'd3',
+      state.d3,
+    );
+
+    if (id === 'side') {
+      const control =
+        root.querySelector<HTMLButtonElement>(
+          '#sideX',
+        );
+
+      if (control) {
+        control.setAttribute(
+          'aria-expanded',
+          String(!collapsed),
+        );
+
+        control.setAttribute(
+          'aria-label',
+          collapsed
+            ? 'Expand sidebar'
+            : 'Collapse sidebar',
+        );
+
+        control.title =
+          collapsed
+            ? 'Expand sidebar'
+            : 'Collapse sidebar';
+
+        control.innerHTML =
+          glyph(
+            collapsed
+              ? 'right'
+              : 'left',
+          );
+      }
+
+      continue;
+    }
+
+    const cx =
+      panel.querySelector<HTMLButtonElement>(
+        ':scope > .ph .pcx .cx',
+      );
+
+    const mx =
+      panel.querySelector<HTMLButtonElement>(
+        ':scope > .ph .pcx .mx',
+      );
+
+    const d3 =
+      panel.querySelector<HTMLButtonElement>(
+        ':scope > .ph .pcx .d3b',
+      );
+
+    if (cx) {
+      cx.setAttribute(
+        'aria-expanded',
+        String(!collapsed),
+      );
+
+      cx.setAttribute(
+        'aria-label',
+        `${collapsed ? 'Expand' : 'Collapse'} ${V130_PANEL_TITLE[id]}`,
+      );
+
+      cx.title =
+        collapsed
+          ? 'Expand'
+          : 'Collapse';
+
+      cx.innerHTML =
+        glyph(
+          collapsed
+            ? 'expand'
+            : 'collapse',
+        );
+    }
+
+    if (mx) {
+      mx.setAttribute(
+        'aria-pressed',
+        String(isMax),
+      );
+
+      mx.innerHTML =
+        glyph(
+          isMax
+            ? 'restore'
+            : 'max',
+        );
+
+      mx.title =
+        isMax
+          ? 'Restore (Esc)'
+          : 'Maximize';
+
+      mx.setAttribute(
+        'aria-label',
+        isMax
+          ? `Restore ${V130_PANEL_TITLE[id]}`
+          : `Maximize ${V130_PANEL_TITLE[id]}`,
+      );
+    }
+
+    if (d3) {
+      d3.setAttribute(
+        'aria-pressed',
+        String(state.d3),
+      );
+    }
+  }
+
+  if (empty) {
+    empty.hidden =
+      !layout.allCollapsed;
+  }
+
+  const dspList =
+    root.querySelector<HTMLElement>(
+      '#dspList',
+    );
+
+  if (dspList) {
+    dspList.setAttribute(
+      'aria-label',
+      'Master bus inserts',
+    );
+
+    const options =
+      dspList.querySelectorAll<HTMLElement>(
+        '[role="option"]',
+      );
+
+    if (!options.length) {
+      for (const [id, name] of DSP_MASTER) {
+        const option =
+          document.createElement('div');
+
+        option.className =
+          'dev';
+
+        option.setAttribute(
+          'role',
+          'option',
+        );
+
+        option.tabIndex = 0;
+
+        option.dataset.dspId = id;
+
+        option.setAttribute(
+          'aria-selected',
+          String(
+            id === 'comp',
+          ),
+        );
+
+        const number =
+          document.createElement('button');
+
+        number.type = 'button';
+        number.className = 'no';
+        number.textContent =
+          String(
+            DSP_MASTER.findIndex(
+              ([x]) => x === id,
+            ) + 1,
+          );
+
+        number.setAttribute(
+          'aria-label',
+          `Bypass ${name}`,
+        );
+
+        const label =
+          document.createElement('span');
+
+        label.textContent = name;
+
+        const arrow =
+          document.createElement('span');
+
+        arrow.textContent = '›';
+
+        option.append(
+          number,
+          label,
+          arrow,
+        );
+
+        option.addEventListener(
+          'click',
+          (event) => {
+            if (
+              event.target instanceof
+                Element &&
+              event.target.closest(
+                'button',
+              )
+            ) {
+              return;
+            }
+
+            root
+              .querySelectorAll<HTMLElement>(
+                '#dspList [role="option"]',
+              )
+              .forEach((item) => {
+                item.setAttribute(
+                  'aria-selected',
+                  String(
+                    item === option,
+                  ),
+                );
+              });
+
+            option.focus();
+          },
+        );
+
+        option.addEventListener(
+          'keydown',
+          (event) => {
+            if (
+              event.key === 'Enter' ||
+              event.key === ' '
+            ) {
+              event.preventDefault();
+              event.stopPropagation();
+              option.click();
+              return;
+            }
+
+            if (
+              event.key !== 'ArrowDown' &&
+              event.key !== 'ArrowUp'
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+
+            const options =
+              [
+                ...root.querySelectorAll<HTMLElement>(
+                  '#dspList [role="option"]',
+                ),
+              ];
+
+            const index =
+              options.indexOf(option);
+
+            const next =
+              Math.max(
+                0,
+                Math.min(
+                  options.length - 1,
+                  index +
+                    (
+                      event.key ===
+                      'ArrowDown'
+                        ? 1
+                        : -1
+                    ),
+                ),
+              );
+
+            options[next]
+              ?.focus();
+
+            options.forEach(
+              (item, itemIndex) => {
+                item.setAttribute(
+                  'aria-selected',
+                  String(
+                    itemIndex ===
+                      next,
+                  ),
+                );
+              },
+            );
+          },
+        );
+
+        dspList.append(
+          option,
+        );
+      }
+    }
+  }
+}
+
+export function useV130PanelRuntime(
+  rootRef: RefObject<
+    HTMLElement | null
+  >,
+  controller: V130PanelController,
+  audioGraph: any, // AudioGraph singleton
+): void {
+  useLayoutEffect(() => {
+    const root =
+      rootRef.current;
+
+    if (!root) {
+      return;
+    }
+
+    const cleanups: Array<
+      () => void
+    > = [];
+
+    for (const id of V130_PANEL_IDS) {
+      if (id === 'side') {
+        continue;
+      }
+
+      const panel =
+        getPanel(root, id);
+
+      if (!panel) {
+        continue;
+      }
+
+      const header =
+        panel.querySelector<HTMLElement>(
+          ':scope > .ph',
+        );
+
+      const title =
+        panel.querySelector<HTMLElement>(
+          ':scope > .ph .pt',
+        );
+
+      if (!header || !title) {
+        continue;
+      }
+
+      const existing =
+        header.querySelector<HTMLElement>(
+          ':scope > .pcx[data-v130-runtime="true"]',
+        );
+
+      if (existing) {
+        existing.remove();
+      }
+
+      const bar =
+        document.createElement('span');
+
+      bar.className = 'pcx';
+      bar.dataset.v130Runtime =
+        'true';
+
+      const d3 =
+        button(
+          'd3b',
+          `3D ${V130_PANEL_TITLE[id]}`,
+          'Render this panel in 3D (Shift+D: all panels)',
+        );
+
+      d3.textContent = '3D';
+      d3.setAttribute(
+        'aria-pressed',
+        String(
+          controller.state[id].d3,
+        ),
+      );
+
+      const max =
+        button(
+          'mx',
+          `Maximize ${V130_PANEL_TITLE[id]}`,
+          'Maximize (Esc restores)',
+        );
+
+      max.setAttribute(
+        'aria-pressed',
+        String(
+          controller.max === id,
+        ),
+      );
+
+      max.innerHTML =
+        glyph(
+          controller.max === id
+            ? 'restore'
+            : 'max',
+        );
+
+      const collapse =
+        button(
+          'cx',
+          `${controller.state[id].c ? 'Expand' : 'Collapse'} ${V130_PANEL_TITLE[id]}`,
+          controller.state[id].c
+            ? 'Expand'
+            : 'Collapse',
+        );
+
+      collapse.setAttribute(
+        'aria-expanded',
+        String(
+          !controller.state[id].c,
+        ),
+      );
+
+      collapse.innerHTML =
+        glyph(
+          controller.state[id].c
+            ? 'expand'
+            : 'collapse',
+        );
+
+      bar.append(
+        d3,
+        max,
+        collapse,
+      );
+
+      title.insertAdjacentElement(
+        'afterend',
+        bar,
+      );
+
+      const onD3 = (
+        event: Event,
+      ) => {
+        event.stopPropagation();
+
+        controller.set3D(
+          id,
+          !controller.state[id].d3,
+        );
+      };
+
+      const onMax = (
+        event: Event,
+      ) => {
+        event.stopPropagation();
+
+        controller.maximize(
+          controller.max === id
+            ? null
+            : id,
+        );
+
+        queueMicrotask(() => {
+          const current =
+            root.querySelector<HTMLButtonElement>(
+              `#${id} .pcx .mx`,
+            );
+
+          current?.focus();
+        });
+      };
+
+      const onCollapse = (
+        event: Event,
+      ) => {
+        event.stopPropagation();
+
+        controller.toggle(id);
+      };
+
+      const onHeaderClick = (
+        event: MouseEvent,
+      ) => {
+        if (
+          isInsideInteractive(
+            event.target,
+          )
+        ) {
+          return;
+        }
+
+        if (
+          controller.state[id].c &&
+          controller.max !== id
+        ) {
+          controller.toggle(
+            id,
+            false,
+          );
+        }
+      };
+
+      const onHeaderDoubleClick = (
+        event: MouseEvent,
+      ) => {
+        if (
+          isInsideInteractive(
+            event.target,
+          )
+        ) {
+          return;
+        }
+
+        if (
+          !controller.state[id].c
+        ) {
+          controller.toggle(
+            id,
+            true,
+          );
+        }
+      };
+
+      d3.addEventListener(
+        'click',
+        onD3,
+      );
+
+      max.addEventListener(
+        'click',
+        onMax,
+      );
+
+      collapse.addEventListener(
+        'click',
+        onCollapse,
+      );
+
+      header.addEventListener(
+        'click',
+        onHeaderClick,
+      );
+
+      header.addEventListener(
+        'dblclick',
+        onHeaderDoubleClick,
+      );
+
+      cleanups.push(() => {
+        d3.removeEventListener(
+          'click',
+          onD3,
+        );
+
+        max.removeEventListener(
+          'click',
+          onMax,
+        );
+
+        collapse.removeEventListener(
+          'click',
+          onCollapse,
+        );
+
+        header.removeEventListener(
+          'click',
+          onHeaderClick,
+        );
+
+        header.removeEventListener(
+          'dblclick',
+          onHeaderDoubleClick,
+        );
+
+        bar.remove();
+      });
+    }
+
+    const side =
+      root.querySelector<HTMLButtonElement>(
+        '#sideX',
+      );
+
+    const empty =
+      root.querySelector<HTMLButtonElement>(
+        '#emptyX',
+      );
+
+    const sideClick = () => {
+      controller.toggle(
+        'side',
+      );
+    };
+
+    const emptyClick = () => {
+      controller.expandAll();
+    };
+
+    side?.addEventListener(
+      'click',
+      sideClick,
+    );
+
+    empty?.addEventListener(
+      'click',
+      emptyClick,
+    );
+
+    cleanups.push(() => {
+      side?.removeEventListener(
+        'click',
+        sideClick,
+      );
+
+      empty?.removeEventListener(
+        'click',
+        emptyClick,
+      );
+    });
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (controller.max) {
+          event.preventDefault();
+          controller.maximize(null);
+        }
+        return;
+      }
+      if (event.target instanceof Element && event.target.matches('input:not([type="range"]),select,textarea')) return;
+      if (event.repeat || !event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
+      const key = event.key.toLowerCase();
+      if (key === 'd') {
+        event.preventDefault();
+        const allIn3D = Object.values(controller.state).every((panel) => panel.d3);
+        controller.setAll3D(!allIn3D);
+      } else if (key === 'c') {
+        event.preventDefault();
+        controller.collapseAll();
+      } else if (key === 'e') {
+        event.preventDefault();
+        controller.expandAll();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    cleanups.push(() => {
+      window.removeEventListener('keydown', onKeyDown);
+    });
+    applyRuntimeClasses(
+      root,
+      controller,
+    );
+
+    return () => {
+      cleanups.forEach(
+        (cleanup) => cleanup(),
+      );
+    };
+  }, [
+    rootRef,
+    controller,
+  ]);
+
+  useLayoutEffect(() => {
+    const root =
+      rootRef.current;
+
+    if (!root) {
+      return;
+    }
+
+    applyRuntimeClasses(
+      root,
+      controller,
+    );
+  }, [
+    rootRef,
+    controller.state,
+    controller.max,
+    controller,
+  ]);
+}

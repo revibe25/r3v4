@@ -1,0 +1,62 @@
+client/src/App.tsx:11: *   /instrument    → InstrumentPage           (protected — Acid Grid)
+client/src/App.tsx:33: *   Auth   : ProtectedRoute rehydrates JWT from localStorage via initAuth()
+client/src/App.tsx:42:import { ProtectedRoute }         from './components/ProtectedRoute';
+client/src/App.tsx:51:import InstrumentPage     from './pages/instrument';
+client/src/App.tsx:134:              <Route path="/instrument">
+client/src/App.tsx:135:                <ProtectedRoute><InstrumentPage /></ProtectedRoute>
+client/src/App.tsx:139:                <ProtectedRoute><DAW /></ProtectedRoute>
+client/src/App.tsx:143:                <ProtectedRoute><LoopStation505 /></ProtectedRoute>
+client/src/App.tsx:148:                <ProtectedRoute><MultitrackV130 /></ProtectedRoute>
+client/src/App.tsx:153:                <ProtectedRoute><CollabDAWPro /></ProtectedRoute>
+client/src/App.tsx:158:                <ProtectedRoute><VSTPage /></ProtectedRoute>
+client/src/App.tsx:163:                <ProtectedRoute><VisualsPage /></ProtectedRoute>
+client/src/App.tsx:166:                <ProtectedRoute><VisualsPage /></ProtectedRoute>
+client/src/App.tsx:179:                <ProtectedRoute><AdminAgentSuitePage /></ProtectedRoute>
+client/src/App.tsx:182:                <ProtectedRoute><AdminPage /></ProtectedRoute>
+client/src/pages/vst.tsx:14: * Route: /vst  (ProtectedRoute — requires auth)
+client/src/pages/instrument.tsx:3:// Reason: Audio engine playhead indicator — live cursor on instrument surface
+client/src/pages/instrument.tsx:15: * @module pages/instrument
+client/src/pages/instrument.tsx:1322:      // exportSession() is bound to instrumentEngine.exportSession
+client/src/pages/not-found.tsx:5: * Acid-grid aesthetic, consistent with instrument.tsx master template.
+client/src/pages/not-found.tsx:169:              <a href="/instrument" className="r3-404-btn r3-404-btn-primary">🎹 Instrument</a>
+client/src/pages/pricing/tokens.ts:45: * Acid-lime palette aligned with instrument panel (--ag-acid: #a3e635).
+client/src/pages/pricing/tokens.ts:56:  // ── Backgrounds — matches instrument shell exactly ──────────────────────
+client/src/pages/pricing/tokens.ts:89: * Pro      = acid lime (#a3e635) — premium, matches instrument accent
+client/src/pages/visuals.tsx:12: *   - M/S width slider: writes to instrumentEngine.procNode msWidth param live
+client/src/pages/visuals.tsx:30:import { instrumentEngine } from '@/audio/core/instrument-engine';
+client/src/pages/visuals.tsx:123:    instrumentEngine.setMSWidth(v);
+client/src/pages/AuthPage.tsx:12: * On success the JWT is stored by authStore and ProtectedRoute unblocks.
+client/src/pages/AuthPage.tsx:137:    if (isAuthed) setLocation('/instrument');
+client/src/pages/AuthPage.tsx:164:      setLocation('/instrument');
+client/src/pages/admin/AgentSuitePage.tsx:7: *  1. ProtectedRoute in App.tsx ensures the user is authenticated.
+client/src/pages/admin/AgentSuitePage.tsx:13: * CLAUDE.md Hard Guard #7 — post-login redirect: /instrument only, never /daw.
+client/src/pages/collaborative-daw-pro.tsx:1084:        /* ── Acid Grid header classes (ported from instrument.tsx) ────────── */
+client/src/pages/login.tsx:634:      setTimeout(() => setLocation('/instrument'), 800);
+client/src/components/microphone-input.tsx:883:  // with the instrument page's global Space→play() and Ctrl+R→record() bindings.
+client/src/components/page-nav.tsx:66:  { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
+client/src/components/vst-browser.tsx:10: * Fully restyled to match the ag- hardware aesthetic from instrument.tsx:
+client/src/components/vst-browser.tsx:31:// Mirrors the CSS custom properties in instrument.tsx STYLES block.
+client/src/components/vst-browser.tsx:56:  instrument: AG.acid,
+client/src/components/studio/StudioShell.tsx:20:      <div className={`r3-instrument-body relative min-h-screen overflow-x-auto ${className}`}>
+client/src/components/beat-intro.tsx:248:  /** Called on every synthesized hit — wires into handlePadTrigger in instrument.tsx */
+client/src/components/beat-intro.tsx:250:  /** Mirrors instrument page isInitialized — disables play when audio engine not ready */
+client/src/components/beat-intro.tsx:329:          // ── Drive instrument.tsx audio engine + 3D stage ──────────────────
+client/src/pages/multi-track-panel/index.tsx:73:// ACID GRID STYLES — matches instrument.tsx aesthetic
+client/src/components/admin/AgentSuite.tsx:117:7. Post-login redirect: /instrument only, never /daw
+client/src/components/admin/AgentSuite.tsx:118:8. No hydrateFromToken() inside ProtectedRoute render
+client/src/components/admin/AgentSuite.tsx:152:7. Post-login redirect: /instrument only, never /daw
+client/src/components/admin/AgentSuite.tsx:153:8. No hydrateFromToken() inside ProtectedRoute render
+client/src/components/admin/AgentSuite.tsx:376:  Post-login redirect: /instrument — NEVER /daw
+client/src/components/admin/AgentSuite.tsx:387:WOUTER: App.tsx covers all 8 pages with correct ProtectedRoute guards. (NOT react-router-dom — removed)
+client/src/components/admin/AgentSuite.tsx:389:Flag hydrateFromToken() called on every mount as a session destruction bug. Cite Auth Store, ProtectedRoute, §8.`,
+client/src/components/ProtectedRoute.tsx:7: * client/src/components/ProtectedRoute.tsx
+client/src/components/ProtectedRoute.tsx:17: *     <ProtectedRoute>
+client/src/components/ProtectedRoute.tsx:19: *     </ProtectedRoute>
+client/src/components/ProtectedRoute.tsx:38:export function ProtectedRoute({ children, minTier = 'explorer' }: Props) {
+client/src/components/admin/AgentMeshPanel.tsx:94:- Post-login redirect: /instrument only
+client/src/components/admin/AgentMeshPanel.tsx:109:    scope: "**/auth* · **/login* · **/routes* · **/middleware* · App.tsx · ProtectedRoute*",
+client/src/components/admin/AgentMeshPanel.tsx:117:    placeholder: "e.g. Audit ProtectedRoute for hydrateFromToken misuse and verify post-login redirect targets…",
+client/src/components/admin/AgentMeshPanel.tsx:120:Your scope is strictly: **/auth* · **/login* · **/routes* · **/middleware* · App.tsx · ProtectedRoute*
+client/src/components/admin/AgentMeshPanel.tsx:124:- ProtectedRoute must NOT call hydrateFromToken() on every mount — causes session destruction
+client/src/components/admin/AgentMeshPanel.tsx:127:- Post-login redirect: /instrument ONLY — NEVER /daw
+client/src/components/drum-pads.tsx:6:import { PAD_KEYS } from '@/audio/core/instrument-engine';

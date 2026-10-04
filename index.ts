@@ -79,13 +79,84 @@ if (NODE_ENV === 'production') {
     }) + '\n');
     process.exit(1);
   }
+    if (process.env.BILLING_MODE === "mock") {
+      const msg = "[STARTUP] FATAL: BILLING_MODE=mock is forbidden in production";
+      process.stderr.write(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: "fatal",
+        message: msg,
+        code: "MOCK_BILLING_FORBIDDEN"
+      }) + "\n");
+      process.exit(1);
+    }
+
+    const stripeRequired = [
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "STRIPE_CREATOR_MONTHLY_PRICE_ID",
+      "STRIPE_CREATOR_YEARLY_PRICE_ID",
+      "STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID",
+      "STRIPE_PRO_ARTIST_YEARLY_PRICE_ID",
+    ];
+
+    const stripeMissing = stripeRequired.filter(k => !process.env[k]);
+    if (stripeMissing.length > 0) {
+      const msg = `[STARTUP] FATAL: Missing required Stripe billing variables in production: ${stripeMissing.join(", ")}`;
+      process.stderr.write(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: "fatal",
+        message: msg,
+        code: "STRIPE_ENV_VALIDATION_FAILED"
+      }) + "\n");
+      process.exit(1);
+    }
+
+    const stripeKey = process.env.STRIPE_SECRET_KEY!;
+    if (!stripeKey.startsWith("sk_live_")) {
+      const msg = "[STARTUP] FATAL: STRIPE_SECRET_KEY must be a live key in production";
+      process.stderr.write(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: "fatal",
+        message: msg,
+        code: "STRIPE_LIVE_KEY_REQUIRED"
+      }) + "\n");
+      process.exit(1);
+    }
+
+    if (
+      stripeKey.includes("localdev") ||
+      stripeKey.includes("placeholder") ||
+      stripeKey.includes("pending")
+    ) {
+      const msg = "[STARTUP] FATAL: STRIPE_SECRET_KEY contains a placeholder value in production";
+      process.stderr.write(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: "fatal",
+        message: msg,
+        code: "STRIPE_SECRET_PLACEHOLDER"
+      }) + "\n");
+      process.exit(1);
+    }
+
+    const billingAppUrl = process.env.CLIENT_APP_URL ?? process.env.APP_URL;
+    if (!billingAppUrl) {
+      const msg = "[STARTUP] FATAL: CLIENT_APP_URL or APP_URL is required for production billing redirects";
+      process.stderr.write(JSON.stringify({
+        ts: new Date().toISOString(),
+        level: "fatal",
+        message: msg,
+        code: "BILLING_APP_URL_MISSING"
+      }) + "\n");
+      process.exit(1);
+    }
+
 }
 
 // ── Express app (must be before route imports to avoid circular TDZ) ───────────────
 import { app } from './server/app';
 
 // ── Imports (after env validation) ────────────────────────────────────────────
-import { trpcAuth, requireAuth } from './server/middleware/auth';
+import { trpcAuth, requireAuth, requireAdmin } from './server/middleware/auth';
 import { errorHandler } from './server/middleware/errorHandler';
 import { stripeWebhookHandler } from './server/routes/stripe-webhook';
 import { appRouter } from './server/procedures';
@@ -100,6 +171,8 @@ import { mountAgentWS }                     from './server/ws-agent';
 import { internalRouter } from './server/routes/internal';
 import { ensureDir } from './server/utils/fileUtils';
 import { serveStatic } from './server/static';
+import { isMockMode } from './server/services/mock-billing';
+import mockBillingRouter from './server/routes/mock-billing';
 
 
 // ── Security & transport ──────────────────────────────────────────────────────
@@ -149,6 +222,14 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(trpcAuth);
 
 // ── tRPC ──────────────────────────────────────────────────────────────────────
+// ── Mock billing sandbox ─────────────────────────────────────────────────────
+// Registered only when the billing adapter selects mock mode.
+// Must precede the generic /api authentication middleware below.
+if (isMockMode()) {
+  app.use('/api/mock-billing', mockBillingRouter);
+  logger.info('Mock billing routes mounted at /api/mock-billing');
+}
+
 app.use('/api/trpc', createExpressMiddleware({
   router: appRouter,
   createContext,
@@ -221,15 +302,7 @@ async function main(): Promise<void> {
     app.use('/api', loopStationLimiter, requireAuth, midiRoutes);
 
     // ── Admin stats endpoint ───────────────────────────────────────────────
-    app.get('/api/admin/stats', async (req: Request, res: Response) => {
-      const parts = (req.headers['authorization'] ?? '').split(' ');
-      if (parts[0] !== 'Bearer' || !parts[1]) {
-        return res.status(401).json({ error: 'Authentication required.' });
-      }
-      if (!req.user?.email || req.user.email !== process.env.ADMIN_EMAIL) {
-        return res.status(403).json({ error: 'Forbidden.' });
-      }
-      
+    app.get('/api/admin/stats', requireAdmin, async (_req: Request, res: Response) => {
       let dbStatus = 'ok', dbLatencyMs = 0;
       try {
         const { db } = await import('./server/db/index.js');

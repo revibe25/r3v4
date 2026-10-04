@@ -19,6 +19,9 @@
  * @requires  Zustand
  */
 
+import { getAudioGraph } from '@/audio/core/audio-graph';
+import { useV130Analyzer } from '../hooks/useV130Analyzer';
+import { MasterAnalyzer } from '../components/MasterAnalyzer';
 import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
   useId, useReducer, useLayoutEffect,
@@ -26,6 +29,10 @@ import React, {
 import { useLocation } from 'wouter';
 import { useDAWStore } from '../hooks/useDAWStore';
 import { useDAWEngine } from '../hooks/useDAWEngine';
+import { useAuthStore } from '../hooks/authStore';
+import { trpcVanilla } from '../lib/trpc';
+import { serializeDAWProjectState } from '../project/daw-project-state';
+import { useCloudSync } from '../hooks/useCloudSync';
 import { useCollabSocket } from '../hooks/useCollabSocket';
 import { useMidiSequencer } from '../hooks/useMidiSequencer';
 import type {
@@ -49,14 +56,14 @@ const isValidToken = (t: string | null): t is string =>
 const CONSTANTS = {
   BEAT_WIDTH: 24,
   TOTAL_BEATS: 256,
-  MIN_BPM: 20,
-  MAX_BPM: 999,
+  MIN_BPM: 40,
+  MAX_BPM: 240,
   DEFAULT_MINS_PER_SUGGESTION: 4,
   MAX_CHAT_HISTORY: 50,
   LOCAL_STORAGE_KEYS: {
     TOKEN: 'r3_token',
     SESSIONS: 'r3v4_sessions',
-    SNAPSHOT: 'r3v4_project_snapshot',
+    SNAPSHOT_PREFIX: 'r3v4_project_snapshot:',
     PREFERENCES: 'r3v4_preferences',
     UNDO_STACK: 'r3v4_undo_stack',
   },
@@ -64,7 +71,6 @@ const CONSTANTS = {
     CHAT: '/trpc/daw.ai.chat',
     SUGGESTIONS: '/trpc/daw.ai.suggestions',
     MASTERING: '/trpc/daw.mastering.analyse',
-    PROJECT_SAVE: '/trpc/daw.project.save',
   },
   PIANO_PITCHES: [
     72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60,
@@ -207,63 +213,135 @@ function useKeyboardShortcuts(
 }
 
 /**
- * useAutoSave — Automatically persists project state to localStorage and cloud.
+ * Persist the canonical DAW project state locally and, when authenticated and
+ * online, to the server through the already-configured typed tRPC client.
+ *
+ * The same serialized state is used for both destinations so local recovery
+ * cannot drift from the cloud persistence schema.
+ */
+let activePersist: Promise<void> | null = null;
+let pendingPersist = false;
+let pendingOnline = false;
+
+/**
+ * Execute one canonical DAW project persistence operation.
+ */
+async function persistProjectOnce(online: boolean): Promise<void> {
+  const initial = useDAWStore.getState();
+  const savedAt = Date.now();
+
+  let state: ReturnType<typeof serializeDAWProjectState>;
+
+  try {
+    state = serializeDAWProjectState();
+
+    const userId = useAuthStore.getState().user?.id;
+
+    if (userId) {
+      const localSnapshot = {
+        schemaVersion: 1,
+        userId,
+        projectName: initial.projectName,
+        savedAt,
+        state,
+      };
+
+      localStorage.setItem(
+        `${CONSTANTS.LOCAL_STORAGE_KEYS.SNAPSHOT_PREFIX}${userId}`,
+        JSON.stringify(localSnapshot),
+      );
+    }
+
+    initial.setLastSaved(savedAt);
+  } catch (err) {
+    initial.setSyncStatus('error');
+    if (isDev) {
+      console.warn('[AutoSave] Local project snapshot failed:', err);
+    }
+    return;
+  }
+
+  if (!online) {
+    useDAWStore.getState().setSyncStatus('offline');
+    return;
+  }
+
+  const token = useAuthStore.getState().token;
+  if (!isValidToken(token)) {
+    useDAWStore.getState().setSyncStatus('idle');
+    return;
+  }
+
+  useDAWStore.getState().setSyncStatus('syncing');
+
+  try {
+    const latest = useDAWStore.getState();
+
+    const result = await trpcVanilla.daw['project.save'].mutate({
+      projectId: latest.projectId ?? undefined,
+      name: latest.projectName,
+      state,
+    });
+
+    const current = useDAWStore.getState();
+    current.setProjectId(result.projectId);
+    const savedAtMs = Date.parse(result.savedAt);
+    current.setLastSaved(Number.isFinite(savedAtMs) ? savedAtMs : Date.now());
+    current.setSyncStatus('synced');
+  } catch (err) {
+    useDAWStore.getState().setSyncStatus('error');
+    if (isDev) {
+      console.warn('[AutoSave] Cloud project save failed:', err);
+    }
+  }
+}
+
+/**
+ * Serialize/save at most one project snapshot at a time.
+ *
+ * Multiple requests arriving while a save is in flight collapse into one
+ * follow-up save. The follow-up serializes the latest Zustand state.
+ */
+async function persistProject(online: boolean): Promise<void> {
+  if (activePersist) {
+    pendingPersist = true;
+    pendingOnline = pendingOnline || online;
+    return activePersist;
+  }
+
+  activePersist = (async () => {
+    do {
+      pendingPersist = false;
+
+      const nextOnline = pendingOnline || online;
+      pendingOnline = false;
+
+      await persistProjectOnce(nextOnline);
+    } while (pendingPersist);
+  })().finally(() => {
+    activePersist = null;
+  });
+
+  return activePersist;
+}
+
+
+/**
+ * useAutoSave — Persist the canonical project state at a fixed interval.
+ *
+ * Reads the current Zustand state inside the interval rather than closing
+ * over the entire store, so normal DAW edits do not recreate the timer.
  */
 function useAutoSave(intervalMs: number = CONSTANTS.AUTO_SAVE_INTERVAL_MS) {
-  const store = useDAWStore();
   const isOnline = useIsOnline();
-  const lastSaveRef = useRef(0);
-  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = Date.now();
-      if (now - lastSaveRef.current < intervalMs) return;
-
-      const snapshot = {
-        bpm: store.bpm,
-        projectName: store.projectName,
-        tracks: store.tracks,
-        regions: store.regions,
-        timestamp: now,
-        version: '5.0.0',
-      };
-
-      // Local save
-      try {
-        localStorage.setItem(CONSTANTS.LOCAL_STORAGE_KEYS.SNAPSHOT, JSON.stringify(snapshot));
-        store.setSyncStatus('synced');
-        store.setLastSaved(now);
-        lastSaveRef.current = now;
-      } catch (err) {
-        isDev && console.warn('[AutoSave] localStorage quota exceeded:', err);
-        store.setSyncStatus('error');
-      }
-
-      // Cloud save (only if online)
-      if (isOnline) {
-        const token = localStorage.getItem(CONSTANTS.LOCAL_STORAGE_KEYS.TOKEN);
-        if (!isValidToken(token)) { isDev && console.warn('[Auth] missing/invalid token'); return; }
-        if (abortRef.current) abortRef.current.abort();
-        abortRef.current = new AbortController();
-
-        fetch(`${API_BASE}${CONSTANTS.API_ENDPOINTS.PROJECT_SAVE}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify({ json: snapshot }),
-          signal: abortRef.current.signal,
-        }).catch(() => { /* Cloud save is best-effort */ });
-      }
+      void persistProject(isOnline);
     }, intervalMs);
 
-    return () => {
-      clearInterval(interval);
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, [intervalMs, isOnline, store.bpm, store.projectName, store.tracks, store.regions]);
+    return () => clearInterval(interval);
+  }, [intervalMs, isOnline]);
 }
 
 // ─── Error Boundary ───────────────────────────────────────────────────────────
@@ -834,6 +912,7 @@ interface SidebarProps {
 }
 
 const Sidebar = memo(({ collab }: SidebarProps) => {
+  const tracks = useDAWStore(s => s.tracks);
   const sidebarTab = useDAWStore(s => s.sidebarTab);
   const setSidebarTab = useDAWStore(s => s.setSidebarTab);
   const collabUsers = useDAWStore(s => s.collabUsers);
@@ -841,7 +920,6 @@ const Sidebar = memo(({ collab }: SidebarProps) => {
   const collabEnabled = useDAWStore(s => s.collabEnabled);
   const collabRoom = useDAWStore(s => s.collabRoom);
   const loadedPlugins = useDAWStore(s => s.loadedPlugins);
-  const tracks = useDAWStore(s => s.tracks);
   const addTrack = useDAWStore(s => s.addTrack);
 
   const [joining, setJoining] = useState(false);
@@ -1918,6 +1996,8 @@ interface AIPanelProps {
 }
 
 const AIPanel = memo(({}: AIPanelProps) => {
+  const bpm = useDAWStore(s => s.bpm);
+  const tracks = useDAWStore(s => s.tracks);
   const aiPanelTab = useDAWStore(s => s.aiPanelTab);
   const aiSuggestions = useDAWStore(s => s.aiSuggestions);
   const aiChat = useDAWStore(s => s.aiChat);
@@ -1932,8 +2012,6 @@ const AIPanel = memo(({}: AIPanelProps) => {
   const predictionsVisible = useDAWStore(s => s.predictionsVisible);
   const setPredictionsVisible = useDAWStore(s => s.setPredictionsVisible);
   const setArrangementPredictions = useDAWStore(s => s.setArrangementPredictions);
-  const bpm = useDAWStore(s => s.bpm);
-  const tracks = useDAWStore(s => s.tracks);
   const position = useDAWStore(s => s.position);
 
   const [chatInput, setChatInput] = useState('');
@@ -2637,7 +2715,20 @@ ExportDialog.displayName = 'ExportDialog';
 // ─── Main DAW Page ────────────────────────────────────────────────────────────
 
 export default function DAW() {
+  console.log('[DAW] Component rendering...');
+
+  const { restoreLocalSnapshot } = useCloudSync();
   const engine = useDAWEngine();
+  const audioGraphRef = useRef<any>(null);
+  useEffect(() => {
+    console.log('[DAW] Initializing audioGraphRef...');
+    const ag = getAudioGraph();
+    (window as any).__audioGraph = ag;
+    (window as any).__audioGraph = ag;
+    console.log('[DAW] getAudioGraph() returned:', ag);
+    audioGraphRef.current = ag;
+    console.log('[DAW] audioGraphRef.current is now:', audioGraphRef.current);
+  }, []);
   const collab = useCollabSocket();
   const seq = useMidiSequencer();
 
@@ -2651,16 +2742,25 @@ export default function DAW() {
   const setZoom = useDAWStore(s => s.setZoom);
   const trackHeightMode = useDAWStore(s => s.trackHeightMode);
   const setTrackHeightMode = useDAWStore(s => s.setTrackHeightMode);
-  const setSyncStatus = useDAWStore(s => s.setSyncStatus);
-  const setLastSaved = useDAWStore(s => s.setLastSaved);
   const bpm = useDAWStore(s => s.bpm);
-  const projectName = useDAWStore(s => s.projectName);
   const tracks = useDAWStore(s => s.tracks);
   const regions = useDAWStore(s => s.regions);
 
   const [showHelp, setShowHelp] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  // Restore the latest canonical local snapshot only when no explicit
+  // cloud project has already been selected.
+  useEffect(() => {
+    if (useDAWStore.getState().projectId) return;
+
+    const restored = restoreLocalSnapshot();
+
+    if (restored && isDev) {
+      console.info('[Recovery] Restored local DAW project snapshot.');
+    }
+  }, [restoreLocalSnapshot]);
+
   useEffect(() => { setIsInitialized(true); }, []);
 
   // Auto-save hook
@@ -2738,20 +2838,10 @@ export default function DAW() {
     '-': () => setZoom(Math.max(0.1, zoom * 0.8)),
     'ctrl+s': async (e: KeyboardEvent) => {
       e.preventDefault();
-      setSyncStatus('syncing');
-      try {
-        localStorage.setItem(CONSTANTS.LOCAL_STORAGE_KEYS.SNAPSHOT, JSON.stringify({
-          bpm, projectName, tracks, regions,
-          timestamp: Date.now(), version: '5.0.0',
-        }));
-        setSyncStatus('synced');
-        setLastSaved(Date.now());
-      } catch {
-        setSyncStatus('error');
-      }
+      await persistProject(navigator.onLine);
     },
     '?': () => setShowHelp(true),
-  }), [engine, sequencerVisible, aiPanelVisible, zoom, setZoom, setSequencerVisible, setAIPanelVisible, bpm, projectName, tracks, regions, setSyncStatus, setLastSaved]);
+  }), [engine, sequencerVisible, aiPanelVisible, zoom, setZoom, setSequencerVisible, setAIPanelVisible]);
 
   useKeyboardShortcuts(shortcuts, { preventDefault: true });
 
@@ -2771,6 +2861,20 @@ export default function DAW() {
         }}
       >
         <SessionSummaryPanel />
+        {/* Master Analyzer — Real-time spectrum/LUFS/phase visualization */}
+        <div
+          className="ag-master-analyzer-container"
+          style={{
+            height: '240px',
+            flexShrink: 0,
+            borderBottom: '1px solid var(--ln)',
+            background: 'linear-gradient(180deg, var(--p2) 0%, var(--p) 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
+  </div>
 
         {/* Transport bar */}
         <TransportBar engine={engine} />
@@ -2859,6 +2963,23 @@ export default function DAW() {
           {/* Center column: arrangement + optional MIDI sequencer */}
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Arrangement view */}
+            {/* Master Analyzer — Real-time spectrum/LUFS/phase visualization */}
+            {audioGraphRef.current ? (
+              <div
+                className="ag-master-analyzer-container"
+                style={{
+                  height: '240px',
+                  flexShrink: 0,
+                  borderBottom: '1px solid var(--ln)',
+                  background: 'linear-gradient(180deg, var(--p2) 0%, var(--p) 100%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
+              </div>
+            ) : null}
+
             <ArrangementView engine={engine} collab={collab} />
 
             {/* MIDI Sequencer — collapsible (Level 2) */}

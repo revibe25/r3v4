@@ -1,5 +1,5 @@
 // FILE: client/src/audio/clips/AudioClipLoader.ts
-import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+import { getAudioContext } from '../core/audio-context';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,7 +84,7 @@ export class AudioClipLoader {
   // ─── Constructor ────────────────────────────────────────────────────────────
 
   constructor(opts: AudioClipLoaderOptions = {}) {
-    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.context = getAudioContext();
     this.opts = {
       maxCacheSize:             opts.maxCacheSize             ?? Infinity,
       maxCacheDurationSeconds:  opts.maxCacheDurationSeconds  ?? Infinity,

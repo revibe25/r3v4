@@ -86,8 +86,6 @@ export interface TierDefinition {
    * Stripe price IDs — null for explorer (free tier), loaded from env vars
    * for paid tiers. Never bundle these to the client.
    */
-  stripePriceIdMonthly: string | null;
-  stripePriceIdAnnual: string | null;
   limits: TierLimits;
   features: TierFeatures;
   color: string;
@@ -98,7 +96,6 @@ export interface TierDefinition {
 // Price IDs are read from environment variables so they never appear in source.
 // typeof process === 'undefined' guard makes this safe in browser bundles.
 
-const env = typeof process !== 'undefined' ? process.env : {};
 
 export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
   explorer: {
@@ -107,8 +104,6 @@ export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
     tagline: 'Start your journey — free forever',
     monthlyPriceCents: 0,
     annualPriceCents: 0,
-    stripePriceIdMonthly: null,
-    stripePriceIdAnnual: null,
     color: '#3A7D44',
     limits: {
       trackUploads: 10,
@@ -145,8 +140,6 @@ export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
     monthlyPriceCents: 1000,
     annualPriceCents: 800,
     // ROOT FIX: was hardcoded '' — now loaded from env vars
-    stripePriceIdMonthly: env.STRIPE_CREATOR_MONTHLY_PRICE_ID ?? null,
-    stripePriceIdAnnual: env.STRIPE_CREATOR_YEARLY_PRICE_ID ?? null,
     color: '#1A3C5E',
     badge: 'Most Popular',
     limits: {
@@ -184,8 +177,6 @@ export const TIER_DEFINITIONS: Record<SubscriptionTier, TierDefinition> = {
     monthlyPriceCents: 2500,
     annualPriceCents: 2000,
     // ROOT FIX: was hardcoded '' — now loaded from env vars
-    stripePriceIdMonthly: env.STRIPE_PRO_ARTIST_MONTHLY_PRICE_ID ?? null,
-    stripePriceIdAnnual: env.STRIPE_PRO_ARTIST_YEARLY_PRICE_ID ?? null,
     color: '#B35A00',
     limits: {
       trackUploads: 'unlimited',

@@ -13,6 +13,13 @@ export const loopStationLimiter = rateLimit({
 });
 
 export const uploadLimiter = rateLimit({
-  windowMs, max: 30, standardHeaders: true, legacyHeaders: false,
-  message: { error: 'Upload rate limit exceeded.', timestamp: new Date().toISOString() },
+  windowMs,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.user?.is_admin === true,
+  message: {
+    error: 'Upload rate limit exceeded.',
+    timestamp: new Date().toISOString(),
+  },
 });

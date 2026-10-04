@@ -38,11 +38,11 @@ export const subscriptionRouter = router({
     .input(z.object({
       tier: z.enum(['creator', 'pro_artist']),
       billingCycle: z.enum(BILLING_CYCLES),
-      successPath: z.string().default('/dashboard?upgraded=true'),
+      successPath: z.string().default('/instrument?upgraded=true'),
       cancelPath: z.string().default('/pricing'),
     }))
     .mutation(async ({ ctx, input }) => {
-      const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
+      const baseUrl = process.env.CLIENT_APP_URL ?? process.env.APP_URL ?? 'http://localhost:5173';
       const url = await createCheckoutSession({
         userId: ctx.user.id,
         // email is string | null on AuthPayload; Stripe accepts '' for optional email

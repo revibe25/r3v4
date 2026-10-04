@@ -13,7 +13,6 @@
  *   /loopstation   → LoopStation505           (protected — loop recorder)
  *   /multitrack    → MultiTrackPanel          (protected — multitrack DAW)
  *   /collab        → CollabDAWPro             (protected — collaborative DAW pro)
- *   /mixer         → MultitrackView           (protected — drag & drop mixer view)
  *   /visuals       → VisualsPage              (protected — Three.js)
  *   /admin         → AdminPage               (protected)
  *   *              → NotFound
@@ -38,7 +37,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Switch, Route, Redirect } from 'wouter';
+import { Switch, Route, Redirect, useLocation } from 'wouter';
 import { TRPCProvider }          from './lib/trpc';
 import { ProtectedRoute }         from './components/ProtectedRoute';
 import { SubscriptionProvider }   from './hooks/useSubscription';
@@ -47,7 +46,6 @@ import { ThemeProvider }          from './components/theme-provider';
 import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
 import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
 
-import LoginPage        from './pages/login';
 import PricingPage        from './pages/pricing/PricingPage';
 import DAW                from './pages/DAW';
 import InstrumentPage     from './pages/instrument';
@@ -58,90 +56,24 @@ import NotFound           from './pages/not-found';
 import SubscribePage      from './pages/subscribe';
 import AdminPage          from './pages/AdminPage';
 import { AdminAgentSuitePage } from './pages/admin/AgentSuitePage';
-import MultiTrackPanel    from './pages/multi-track-panel';
+import MultitrackV130     from './features/multitrack-v130/MultitrackV130';
 import CollabDAWPro       from './pages/collaborative-daw-pro';
-import MultitrackView     from './components/multi-track-view';
-import { useDAWStore }    from './hooks/useDAWStore';
 
-// ── /mixer route adapter ─────────────────────────────────────────────────────
-// Bridges useDAWStore (StoreTrack shape) to MultitrackView (ViewTrack shape).
-// Neither the store nor the component is modified — all adaptation is here.
+function AuthHtmlRedirect() {
+  useEffect(() => {
+    window.location.replace(`/auth.html${window.location.search}`);
+  }, []);
 
-import type { Track as StoreTrack } from './hooks/useDAWStore';
-import type { Track as ViewTrack  } from './components/multi-track-view';
-
-/** Maps store FXSlot.type → component FXType union (nearest semantic fit). */
-const FX_TYPE_MAP: Record<string, ViewTrack['fxChain'][number]> = {
-  eq:         'EQ',
-  compressor: 'Compressor',
-  reverb:     'Reverb',
-  delay:      'Delay',
-  filter:     'EQ',          // no Filter in ViewTrack
-  distortion: 'Saturation',  // no Distortion in ViewTrack
-};
-
-/** Pure adapter: StoreTrack → ViewTrack. No side effects. */
-function adaptTrack(t: StoreTrack): ViewTrack {
-  return {
-    id:      t.id,
-    name:    t.label,
-    armed:   t.armed,
-    muted:   t.mute,
-    solo:    t.solo,
-    volume:  t.gain,
-    pan:     t.pan,
-    input:   t.inputSource ?? '',
-    fxChain: t.fxChain.map(fx => FX_TYPE_MAP[fx.type] ?? 'EQ'),
-    meter:   undefined,
-    color:   t.color,
-    locked:  false,
-    hidden:  false,
-    groupId: undefined,
-  };
-}
-
-/**
- * MultitrackViewWrapper
- * Connects useDAWStore to MultitrackView, satisfying all required props.
- * Replaces bare <MultitrackView /> at /mixer — tracks is never undefined.
- */
-function MultitrackViewWrapper() {
-  const {
-    tracks, playing, recording, position,
-    setPlaying, setRecording, updateTrack, removeTrack, addTrack,
-  } = useDAWStore();
-
-  return (
-    <MultitrackView
-      tracks={tracks.map(adaptTrack)}
-      transport={{ isPlaying: playing, isRecording: recording, position }}
-      hideTransport={true}
-      onTogglePlay={()    => setPlaying(!playing)}
-      onToggleRecord={()  => setRecording(!recording)}
-      onArmTrack={(id)    => updateTrack(id, { armed: !tracks.find(t => t.id === id)?.armed })}
-      onToggleMute={(id)  => updateTrack(id, { mute:  !tracks.find(t => t.id === id)?.mute  })}
-      onToggleSolo={(id)  => updateTrack(id, { solo:  !tracks.find(t => t.id === id)?.solo  })}
-      onUpdateTrack={(id, data) => {
-        const patch: Partial<StoreTrack> = {};
-        if (data.name   !== undefined) patch.label       = data.name;
-        if (data.volume !== undefined) patch.gain        = data.volume;
-        if (data.muted  !== undefined) patch.mute        = data.muted;
-        if (data.armed  !== undefined) patch.armed       = data.armed;
-        if (data.solo   !== undefined) patch.solo        = data.solo;
-        if (data.pan    !== undefined) patch.pan         = data.pan;
-        if (data.input  !== undefined) patch.inputSource = data.input;
-        updateTrack(id, patch);
-      }}
-      onDeleteTrack={(id)    => removeTrack(id)}
-      onDuplicateTrack={(id) => {
-        const src = tracks.find(t => t.id === id);
-        if (src) addTrack({ ...src, label: `${src.label} (copy)` });
-      }}
-    />
-  );
+  return null;
 }
 
 export default function App() {
+  const [location] = useLocation();
+
+  const isDocumentPage =
+    location === "/pricing" ||
+    location === "/subscribe";
+
   // ── Inject CSS custom properties once on mount ───────────────────────────
   useEffect(() => {
     injectTokenCSS();
@@ -187,16 +119,16 @@ export default function App() {
           <div
             style={{
               flex:      1,
-              overflow:  'hidden',
+              overflow:  isDocumentPage ? 'auto' : 'hidden',
               position:  'relative',
               minHeight: 0,
             }}
           >
             <Switch>
               {/* ── Public ───────────────────────────────────────────────── */}
-              <Route path="/auth"    component={LoginPage} />
+              <Route path="/auth"    component={AuthHtmlRedirect} />
               <Route path="/pricing" component={PricingPage} />
-              <Route path="/login" component={LoginPage} />
+              <Route path="/login" component={AuthHtmlRedirect} />
 
               {/* ── Protected — ordered by user journey ──────────────────── */}
               <Route path="/instrument">
@@ -211,9 +143,9 @@ export default function App() {
                 <ProtectedRoute><LoopStation505 /></ProtectedRoute>
               </Route>
 
-              {/* Multitrack DAW — MultiTrackPanel (multi-track-panel.tsx is canonical, modular is dead) */}
+              {/* Multitrack DAW — R3 NATIVE Multitrack v1.3.0 */}
               <Route path="/multitrack">
-                <ProtectedRoute><MultiTrackPanel /></ProtectedRoute>
+                <ProtectedRoute><MultitrackV130 /></ProtectedRoute>
               </Route>
 
               {/* Collaborative DAW Pro — collaborative-daw-pro.jsx (WaveLab) */}
@@ -227,10 +159,6 @@ export default function App() {
               </Route>
 
               {/* Multitrack View — multi-track-view.tsx (drag & drop, grouping, undo/redo) */}
-              <Route path="/mixer">
-                <ProtectedRoute><MultitrackViewWrapper /></ProtectedRoute>
-              </Route>
-
               <Route path="/visuals">
                 <ProtectedRoute><VisualsPage /></ProtectedRoute>
               </Route>

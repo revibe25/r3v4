@@ -1,3 +1,4 @@
+import { initializeToneFromGesture } from "@/audio/core/tone-runtime";
 /**
  * Audio System Utility Module
  * Handles Web Audio API initialization with browser autoplay policy compliance
@@ -30,30 +31,14 @@ let initPromise: Promise<void> | null = null;
  * @returns Promise that resolves when initialization is complete
  */
 export async function initializeAudioContext(): Promise<void> {
-  // Return pending promise if initialization is in progress
   if (initPromise) return initPromise;
-
-  // Return immediately if already initialized
   if (state.initialized) return Promise.resolve();
 
-  // Mark as initializing
   state.initializing = true;
 
   initPromise = (async () => {
     try {
-      // Check if Tone is available (loaded from CDN or npm)
-      if (typeof (window as any).Tone === 'undefined') {
-        console.warn('⚠ Tone.js not available - audio features will be limited');
-        return;
-      }
-
-      const Tone = (window as any).Tone;
-
-      // Check AudioContext state
-      if (Tone.context && Tone.context.state !== 'running') {
-        console.log('ℹ Resuming AudioContext...');
-        await Tone.start();
-      }
+      await initializeToneFromGesture();
 
       state.initialized = true;
       state.error = null;
@@ -62,9 +47,6 @@ export async function initializeAudioContext(): Promise<void> {
       const err = error instanceof Error ? error : new Error(String(error));
       state.error = err;
       console.error('❌ Failed to initialize AudioContext:', err.message);
-
-      // Don't rethrow - allow app to continue without audio
-      // This prevents one audio failure from breaking the entire app
     } finally {
       state.initializing = false;
       initPromise = null;
@@ -74,9 +56,6 @@ export async function initializeAudioContext(): Promise<void> {
   return initPromise;
 }
 
-/**
- * Get current audio initialization state
- */
 export function getAudioState() {
   return { ...state };
 }
@@ -109,52 +88,48 @@ export function isAudioReady(): boolean {
  */
 export function registerAudioInitTriggers(): () => void {
   const EVENTS = ['click', 'touchstart', 'keydown', 'pointerdown'] as const;
-  let resumed = false;
 
-  const handleGesture = async (): Promise<void> => {
-    if (resumed) return;
-    resumed = true;
+  let initializing = false;
+  let active = true;
 
-    try {
-      // Dynamic import — Tone.js must NOT be imported at module scope in a
-      // utility that loads before any user gesture.
-      const ToneModule = await import('tone');
-      // oxc wraps CJS modules — try every known shape before giving up
-      const mod: any = (ToneModule as any).default ?? ToneModule;
-      if (typeof mod.start === 'function') {
-        await mod.start();
-      } else if (typeof mod.getContext === 'function') {
-        const ctx = mod.getContext();
-        if (ctx?.rawContext?.state === 'suspended') {
-          await ctx.rawContext.resume();
-        }
-      } else {
-        // Last resort: resume any suspended AudioContext directly
-        const ac: any = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
-        if (ac) {
-          const instance = new ac();
-          if (instance.state === 'suspended') await instance.resume();
-        }
-        console.debug('[R3 Audio] Used raw AudioContext fallback.');
-      }
-      console.debug('[R3 Audio] AudioContext resumed via user gesture.');
-    } catch (audioErr) {
-      // Non-fatal: Tone.js may not yet be in the chunk for the current route.
-      // MasterEngine.init() will resume on the next explicit call.
-      console.warn('[R3 Audio] Gesture resume failed (non-fatal):', audioErr);
-      resumed = false; // allow retry on next gesture
-    } finally {
-      if (resumed) {
-        EVENTS.forEach(e => document.removeEventListener(e, handleGesture));
-      }
-    }
+  const handleGesture = (): void => {
+    if (!active || initializing) return;
+
+    initializing = true;
+
+    // Reached directly from a browser user gesture.
+    void initializeToneFromGesture()
+      .then(() => {
+        if (!active) return;
+
+        EVENTS.forEach((event) => {
+          document.removeEventListener(event, handleGesture);
+        });
+      })
+      .catch((audioErr) => {
+        initializing = false;
+
+        console.warn(
+          '[R3 Audio] Gesture audio initialization failed (non-fatal):',
+          audioErr,
+        );
+      });
   };
 
-  EVENTS.forEach(e =>
-    document.addEventListener(e, handleGesture, { once: false, passive: true }),
-  );
+  EVENTS.forEach((event) => {
+    document.addEventListener(event, handleGesture, {
+      once: false,
+      passive: true,
+    });
+  });
 
-  return () => EVENTS.forEach(e => document.removeEventListener(e, handleGesture));
+  return () => {
+    active = false;
+
+    EVENTS.forEach((event) => {
+      document.removeEventListener(event, handleGesture);
+    });
+  };
 }
 
 // suppressTestAudioInitialization() and lockAudioInitialization() REMOVED.

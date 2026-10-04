@@ -1,0 +1,221 @@
+2:<html lang="en">
+968:<body>
+1016:<nav class="nav" aria-label="Primary navigation">
+1017:  <button class="tab" type="button"><svg class="ic"><use href="#i-play"/></svg>PRICING</button>
+1018:  <button class="tab on" type="button" aria-current="page"><svg class="ic"><use href="#i-music"/></svg>INSTRUMENT</button>
+1019:  <button class="tab" type="button"><svg class="ic"><use href="#i-studio"/></svg>STUDIO</button>
+1020:  <button class="tab" type="button"><svg class="ic"><use href="#i-loop"/></svg>LOOP</button>
+1021:  <button class="tab" type="button"><svg class="ic"><use href="#i-layers"/></svg>MULTITRACK</button>
+1022:  <button class="tab" type="button"><svg class="ic"><use href="#i-users"/></svg>COLLAB</button>
+1023:  <button class="tab" type="button"><svg class="ic"><use href="#i-mixer"/></svg>MIXER</button>
+1024:  <button class="tab" type="button"><svg class="ic"><use href="#i-plug"/></svg>VST</button>
+1025:  <div class="nav-spacer"></div>
+1028:  <button class="ibtn sq" type="button" aria-label="Settings" id="settingsBtn" aria-haspopup="true" aria-expanded="false"><svg class="ic"><use href="#i-gear"/></svg></button>
+1029:  <button class="nbtn" type="button" id="signOutBtn"><svg class="ic"><use href="#i-signout"/></svg>SIGN OUT</button>
+1030:  <div class="popover" id="settingsMenu" role="menu" hidden>
+1031:    <div class="pop-title">DISPLAY</div>
+1032:    <button class="pop-item" type="button" role="menuitemcheckbox" data-setting="ticker" aria-checked="true"><i class="led"></i>Show ticker</button>
+1033:    <button class="pop-item" type="button" role="menuitemcheckbox" data-setting="glitch" aria-checked="true"><i class="led"></i>Ticker glitch effect</button>
+1034:    <button class="pop-item" type="button" role="menuitemcheckbox" data-setting="railOpen" aria-checked="true"><i class="led"></i>Show controls rail</button>
+1035:    <div class="pop-title">SESSION</div>
+1036:    <button class="pop-item danger" type="button" role="menuitem" id="resetSession">Reset session to defaults</button>
+1040:<header class="head">
+1041:  <div class="brand">
+1042:    <div class="logo">R3<em>/</em>NATIVE</div>
+1043:    <div class="sub">INSTRUMENT · VIRTUAL VSTS</div>
+1045:  <div class="live" aria-live="polite"><span class="on"><i></i>LIVE</span><span>ERNESTO · R3VIBE</span><span class="midi" id="midiStatus">MIDI · CHECKING</span></div>
+1046:  <div class="bpmwrap">
+1047:    <div class="bpmlbl" id="bpmLabel">BPM</div>
+1048:    <div class="bpmval" id="bpmDisplay" role="spinbutton" tabindex="0" aria-labelledby="bpmLabel" aria-valuemin="40" aria-valuemax="240" aria-valuenow="126" title="Drag, scroll, arrow keys or type a number">126</div>
+1049:    <button class="tap" id="tapBtn" type="button" aria-label="Tap tempo">TAP</button>
+1051:  <div class="timeline" id="waveform" role="img" aria-label="Four-bar output timeline">
+1052:    <canvas id="timelineCanvas"></canvas>
+1053:    <div class="bar-nums" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span></div>
+1055:  <div class="header-actions">
+1057:    <div class="hbtns">
+1058:      <button class="hbtn" type="button" id="saveBtn" aria-label="Save session"><svg class="ic"><use href="#i-save"/></svg>SAVE</button>
+1059:      <button class="hbtn" type="button" id="sessionsBtn" aria-label="Session info"><svg class="ic"><use href="#i-folder"/></svg>SESSIONS</button>
+1060:      <button class="hbtn" type="button" id="loadBtn" aria-label="Load session file"><svg class="ic"><use href="#i-upload"/></svg>LOAD</button>
+1061:      <button class="hbtn icon" type="button" id="exportBtn" aria-label="Export session file" title="Export session file"><svg class="ic"><use href="#i-export"/></svg></button>
+1063:    <input type="file" id="loadInput" accept="application/json,.json" hidden>
+1067:<div class="trans">
+1068:  <div class="studio-id"><span class="sid-ic"><svg class="ic"><use href="#i-music"/></svg></span><div><b>R3</b><small>STUDIO · DAM</small></div></div>
+1069:  <div class="tgroup">
+1070:    <button class="tbtn" type="button" id="clickBtn" aria-pressed="false" title="Metronome click while the sequencer plays"><i class="led"></i><svg class="ic"><use href="#i-clock"/></svg>CLICK</button>
+1071:    <div class="tpill"><span class="tval" id="transportBpm">126</span><span class="tlbl">BPM</span></div>
+1072:    <div class="scrub">
+1073:      <div class="strk" id="scrubber" role="slider" tabindex="0" aria-label="Bar position" aria-valuemin="1" aria-valuemax="16" aria-valuenow="1" aria-valuetext="Step 1 of 16"><div class="sfil"></div><div class="sth"></div></div>
+1077:  <div class="preset">
+1078:    <button class="dd preset-btn" id="presetBtn" type="button" aria-label="Next preset"><svg class="ic"><use href="#i-palette"/></svg><span id="presetName">SUNSET</span></button>
+1079:    <button class="dd preset-menu-btn" id="presetMenuBtn" type="button" aria-label="Choose preset" aria-haspopup="listbox" aria-expanded="false"><svg class="ic"><use href="#i-chev-d"/></svg></button>
+1080:    <div class="popover" id="presetMenu" role="listbox" aria-label="Presets" hidden></div>
+1084:<div class="marquee" id="ticker" aria-label="Feature ticker">
+1085:  <div class="ticker-view" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
+1087:  <button class="ticker-x" id="tickerClose" type="button" aria-label="Hide ticker"><svg class="ic"><use href="#i-close"/></svg></button>
+1090:<main class="main" id="main">
+1091:<section class="left" aria-label="Instrument controls">
+1093:  <div class="krow" role="group" aria-label="Engine and mix">
+1094:    <div class="ktile stat"><span class="klbl">UI LOAD</span><b id="cpuVal" role="meter" aria-label="Interface frame load" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Main-thread frame load">0%</b></div>
+1095:    <div class="ktile stat"><span class="klbl">VOICES</span><b id="voiceVal" role="meter" aria-label="Active voices" aria-valuemin="0" aria-valuemax="128" aria-valuenow="0">0</b></div>
+1096:    <div class="ktile fader-tile"><span class="klbl">VOL</span><div class="fader" data-knob="vol" data-min="0" data-max="100" role="slider" tabindex="0" aria-label="Master volume"></div><span class="kval"></span></div>
+1097:    <div class="ktile fader-tile"><span class="klbl">FILT</span><div class="fader" data-knob="filt" data-min="0" data-max="100" role="slider" tabindex="0" aria-label="Filter cutoff"></div><span class="kval"></span></div>
+1098:    <div class="ktile fader-tile"><span class="klbl">REV</span><div class="fader" data-knob="rev" data-min="0" data-max="100" role="slider" tabindex="0" aria-label="Reverb send"></div><span class="kval"></span></div>
+1099:    <div class="ktile fader-tile"><span class="klbl">SAT</span><div class="fader" data-knob="sat" data-min="0" data-max="100" role="slider" tabindex="0" aria-label="Saturation drive"></div><span class="kval"></span></div>
+1100:    <div class="ktile fader-tile"><span class="klbl">PCH</span><div class="fader" data-knob="pch" data-min="0" data-max="100" role="slider" tabindex="0" aria-label="Drum kit pitch"></div><span class="kval"></span></div>
+1101:    <div class="ktile qual" role="radiogroup" aria-label="Saturation character"><span class="klbl">QUALITY</span><button class="qbtn" type="button" role="radio" data-sat="soft" aria-checked="false">SOFT</button><button class="qbtn" type="button" role="radio" data-sat="hard" aria-checked="true">HARD</button></div>
+1102:    <div class="chips">
+1103:      <button class="engine-chip idle" type="button" id="dspChip"><i></i><strong>DSP</strong> <span>START AUDIO</span></button>
+1110:  <section class="box piano-box" id="pianoComponent" aria-label="Piano keys">
+1111:    <div class="bhead xl">
+1112:      <div class="btitle"><svg class="ic"><use href="#i-music"/></svg>PIANO KEYS</div>
+1113:      <div class="panel-tools">
+1115:        <button class="expand-btn" id="pianoExpand" type="button" aria-expanded="false" aria-controls="pianoComponent"><svg class="ic"><use href="#i-expand"/></svg><span id="expandText">EXPAND</span></button>
+1116:        <button class="chev-btn" id="pianoCollapse" type="button" aria-expanded="true" aria-controls="pianoBody" aria-label="Collapse piano keys"><svg class="ic"><use href="#i-chev-d"/></svg></button>
+1120:    <div class="bbody piano-body" id="pianoBody">
+1121:      <div class="piano-rows">
+1122:        <div class="ctl-grid">
+1123:          <div class="ctl"><div class="ctl-h"><span id="lblVel">Velocity</span><b class="sval"></b></div><div class="strack" data-slider="velocity" data-min="1" data-max="127" data-step="1" data-default="102" role="slider" tabindex="0" aria-labelledby="lblVel"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1124:          <div class="ctl"><div class="ctl-h"><span>Octave</span><b id="octaveValue">0</b></div><div class="stepper"><button class="obtn" type="button" data-oct="-1" aria-label="Octave down">−</button><span class="odisp" id="octaveDisplay" aria-live="polite">0</span><button class="obtn" type="button" data-oct="1" aria-label="Octave up">+</button></div></div>
+1125:          <div class="ctl"><div class="ctl-h"><span id="lblBend">Pitch Bend</span><b class="sval"></b></div><div class="strack" data-slider="bend" data-min="-12" data-max="12" data-step="0.1" data-default="0" data-spring="true" role="slider" tabindex="0" aria-labelledby="lblBend"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1126:          <div class="ctl"><div class="ctl-h"><span id="lblMod">Modulation</span><b class="sval"></b></div><div class="strack" data-slider="mod" data-min="0" data-max="100" data-step="1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblMod"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1127:          <div class="ctl"><div class="ctl-h"><span id="lblTr">Transpose</span><b class="sval"></b></div><div class="strack" data-slider="transpose" data-min="-24" data-max="24" data-step="1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblTr"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1128:          <div class="ctl"><div class="ctl-h"><label for="curveSelect">Velocity Curve</label><button class="link-btn" type="button" id="curveToggle" aria-controls="curvePanel" aria-expanded="true">GRAPH</button></div>
+1129:            <div class="select-wrap"><select class="dd" id="curveSelect"><option value="linear">Linear</option><option value="soft">Soft</option><option value="hard">Hard</option><option value="exponential">Exponential</option><option value="logarithmic">Logarithmic</option><option value="scurve">S-Curve</option><option value="fixed">Fixed</option><option value="custom">Custom</option></select><span class="select-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev-d"/></svg></span></div></div>
+1130:          <div class="ctl"><div class="ctl-h"><span id="lblTune">Global Tune</span><b class="sval"></b></div><div class="strack" data-slider="tune" data-min="-100" data-max="100" data-step="1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblTune"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1131:          <div class="ctl"><div class="ctl-h"><span>Sustain Pedal</span></div><button class="swt" id="sustainBtn" type="button" aria-pressed="false">OFF</button></div>
+1134:        <div class="curve" id="curvePanel">
+1135:          <div class="chd"><span class="ctit" id="curveTitle">VELOCITY CURVE · LINEAR</span><button class="cx" id="curveClose" type="button" aria-label="Hide velocity curve"><svg class="ic"><use href="#i-close"/></svg></button></div>
+1136:          <div class="curve-body">
+1137:            <div class="graph" id="curveGraph">
+1138:              <div class="yaxis" aria-hidden="true"><span>127</span><span>96</span><span>64</span><span>32</span><span>0</span></div>
+1139:              <div class="plot">
+1149:              <div class="xaxis" aria-hidden="true"><span>0</span><span>32</span><span>64</span><span>96</span><span>127</span></div>
+1151:            <div class="curve-side">
+1152:              <div class="vel-keys"><div class="pmini" id="miniPiano" aria-hidden="true"></div><span class="side-lbl">VELOCITY</span>
+1153:                <div class="velmeter"><span>IN</span><div class="vm"><i id="velIn"></i></div><b id="velInVal">—</b></div>
+1154:                <div class="velmeter"><span>OUT</span><div class="vm"><i id="velOut"></i></div><b id="velOutVal">—</b></div>
+1167:        <div class="hint">
+1173:      <div class="psampler" id="pianoSampler" role="group" aria-label="Piano sampler">
+1174:        <div class="psm-head">
+1175:          <div class="ctl-h"><span>Sampler</span><b id="psmState">Synth</b></div>
+1176:          <div class="psm-file" id="psmFile">No sample loaded. The built-in piano voice is playing.</div>
+1178:        <div class="ps-wave" id="psmWave" title="Click to load a sample"><canvas aria-hidden="true"></canvas>
+1179:          <div class="ps-empty"><svg class="ic"><use href="#i-upload"/></svg><div><b>DROP A SAMPLE TO PLAY IT ACROSS THE KEYS</b><small>WAV · MP3 · OGG · FLAC · UP TO 60 S · ROOT NOTE READ FROM FILE NAME</small></div></div>
+1181:        <div class="psm-root">
+1182:          <div class="ctl-h"><span id="lblRoot">Root Note</span><b id="psmHz">261.6 Hz</b></div>
+1183:          <div class="stepper" role="group" aria-labelledby="lblRoot"><button class="obtn" type="button" id="psmRootDn" aria-label="Root note down" aria-disabled="true">−</button><span class="odisp" id="psmRoot" aria-live="polite">C4</span><button class="obtn" type="button" id="psmRootUp" aria-label="Root note up" aria-disabled="true">+</button></div>
+1185:        <div class="psm-actions">
+1186:          <button class="psm-btn primary" id="psmLoad" type="button"><svg class="ic"><use href="#i-upload"/></svg><span>LOAD SAMPLE</span></button>
+1187:          <button class="psm-btn" id="psmClear" type="button" disabled>CLEAR</button>
+1189:        <div class="psm-edit" role="group" aria-label="Piano sample edits">
+1190:          <button class="psm-tog" id="psmRev" type="button" aria-pressed="false"><i></i>Reverse</button>
+1191:          <button class="psm-tog loop" id="psmLoop" type="button" aria-pressed="false"><i></i>Loop</button>
+1192:          <div class="ctl psm-gain"><div class="ctl-h"><span id="lblPsmGain">Gain</span><b class="sval"></b></div><div class="strack" data-psm="gain" data-min="-24" data-max="12" data-step="0.5" data-default="0" role="slider" tabindex="0" aria-labelledby="lblPsmGain"><div class="sfill"></div><div class="sthumb"></div></div></div>
+1194:          <button class="psm-btn ghost" id="psmReset" type="button">Reset edits</button>
+1196:        <input type="file" id="psmInput" accept="audio/*,.wav,.mp3,.ogg,.oga,.flac,.aif,.aiff,.m4a,.aac,.opus" hidden>
+1197:        <div class="ps-drop" aria-hidden="true"><span>RELEASE TO LOAD INTO <b>PIANO</b></span></div>
+1200:      <div class="piano-shell">
+1201:        <div class="keyboard-caption">
+1204:            <button class="obtn" type="button" data-oct="-1" aria-label="Octave down">−</button>
+1206:            <button class="obtn" type="button" data-oct="1" aria-label="Octave up">+</button>
+1207:            <button class="swt" type="button" id="sustainBtnX" aria-pressed="false">SUSTAIN OFF</button>
+1211:        <div class="keyboard" id="keyboard" role="group" aria-label="24-key piano keyboard"></div>
+1217:  <section class="box drum-box" id="drumPadComponent" aria-label="Drum pad">
+1218:    <div class="bhead xl drum-head">
+1219:      <div class="btitle"><svg class="ic"><use href="#i-grid"/></svg>DRUM PAD<span class="panel-meta">16 × 16 SEQUENCER · MIDI 36–51</span></div>
+1220:      <div class="drum-head-right">
+1222:        <button class="mini-btn" id="drumClear" type="button" aria-label="Clear selected pad lane">CLEAR</button>
+1223:        <button class="chev-btn" id="drumCollapse" type="button" aria-expanded="true" aria-controls="drumBody" aria-label="Collapse drum pad"><svg class="ic"><use href="#i-chev-d"/></svg></button>
+1226:    <div class="drum-body" id="drumBody">
+1227:      <div class="drum-toolbar">
+1228:        <div class="kit-select"><span class="tool-label">KIT</span><button class="kit-btn" id="kitButton" type="button" aria-label="Next kit"><span id="kitName">R3 NATIVE · NEON ROOM</span><svg class="ic"><use href="#i-chev-d"/></svg></button></div>
+1229:        <div class="drum-tempo"><span class="tool-label" id="lblSwing">SWING</span><div class="tiny-track dswing" data-slider="swing" data-min="0" data-max="60" data-step="1" data-default="18" role="slider" tabindex="0" aria-labelledby="lblSwing"><div class="tiny-fill"></div><i class="tiny-thumb"></i></div><strong id="swingValue">18%</strong></div>
+1230:        <div class="drum-sync"><i></i><span id="syncLabel">INTERNAL CLOCK</span></div>
+1231:        <div class="drum-actions">
+1232:          <button class="transport-btn" id="drumRec" type="button" aria-pressed="false"><i class="led rec"></i>REC</button>
+1233:          <button class="transport-btn" id="drumPlay" type="button" aria-pressed="false"><svg class="ic"><use href="#i-play"/></svg>PLAY</button>
+1234:          <button class="transport-btn active" id="drumStop" type="button"><i class="sq-ic"></i>STOP</button>
+1237:      <div class="pad-bank-label"><span>PERFORMANCE PADS</span><span class="pad-map"><span class="m82">MIDI 36–51 · 8 × 2</span><span class="m44">MIDI 36–51 · 4 × 4</span></span></div>
+1238:      <div class="pad-grid" id="padGrid" role="group" aria-label="Drum pads"></div>
+1240:      <div class="pad-detail">
+1241:        <div class="detail-selected"><span>SELECTED PAD</span><strong id="selectedPad" aria-live="polite">KICK</strong><small id="selectedPadNote">C2 · MIDI 36</small></div>
+1242:        <div class="detail-control"><span id="lblLevel">LEVEL</span><div class="dslider" data-pad="level" data-min="-24" data-max="6" data-step="0.1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblLevel"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1243:        <div class="detail-control"><span id="lblPan">PAN</span><div class="dslider" data-pad="pan" data-min="-100" data-max="100" data-step="1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblPan"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1244:        <div class="detail-control"><span id="lblAtk">ATTACK</span><div class="dslider" data-pad="attack" data-min="0" data-max="50" data-step="1" data-default="1" role="slider" tabindex="0" aria-labelledby="lblAtk"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1245:        <div class="detail-control"><span id="lblRel">RELEASE</span><div class="dslider" data-pad="release" data-min="20" data-max="1000" data-step="5" data-default="180" role="slider" tabindex="0" aria-labelledby="lblRel"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1246:        <div class="detail-control"><span>LAST HIT</span><div class="dslider readonly" aria-hidden="true"><div class="dfill" id="padVelocityBar"></div></div><b id="padVelocityValue">—</b></div>
+1247:        <div class="detail-metrics"><div class="metric-line"><span>OUTPUT</span><b>DRUM BUS</b></div><div class="metric-line"><span>STEPS</span><b id="padStepCount">4 / 16</b></div><div class="metric-line"><span>MODE</span><b>ONE-SHOT</b></div></div>
+1250:      <div class="pad-sample" id="padSample" role="group" aria-label="Sample for selected pad">
+1251:        <div class="ps-slot"><span>SAMPLE SLOT</span><strong id="psPad">PAD 01 · KICK</strong><small id="psSrc"><i></i>SYNTH VOICE</small></div>
+1252:        <div class="ps-wave" id="psWave" title="Click to load a sample"><canvas aria-hidden="true"></canvas>
+1253:          <div class="ps-empty"><svg class="ic"><use href="#i-upload"/></svg><div><b>DROP AUDIO ON ANY PAD OR HERE — EDGES ARE TRIMMED AUTOMATICALLY</b><small>WAV · MP3 · OGG · FLAC · UP TO 60 S · SEVERAL FILES FILL PADS IN ORDER</small></div></div>
+1255:        <div class="ps-meta"><div class="metric-line"><span>FILE</span><b id="psFile">—</b></div><div class="metric-line"><span>LENGTH</span><b id="psLen">—</b></div><div class="metric-line"><span>FORMAT</span><b id="psFmt">—</b></div></div>
+1256:        <div class="ps-edit" role="group" aria-label="Sample edits">
+1257:          <button class="ps-tog" id="psRev" type="button" aria-pressed="false"><i></i>REVERSE</button>
+1258:          <div class="ps-ctl"><span id="lblPsTune">TUNE</span><div class="dslider" data-ps="tune" data-min="-24" data-max="24" data-step="1" data-default="0" role="slider" tabindex="0" aria-labelledby="lblPsTune"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1259:          <div class="ps-ctl"><span id="lblPsGain">GAIN</span><div class="dslider" data-ps="gain" data-min="-24" data-max="12" data-step="0.5" data-default="0" role="slider" tabindex="0" aria-labelledby="lblPsGain"><div class="dfill"></div><div class="dthumb"></div></div><b class="dval"></b></div>
+1261:          <button class="ps-btn ghost" id="psReset" type="button">RESET EDITS</button>
+1263:        <div class="ps-actions">
+1264:          <button class="ps-btn primary" id="psLoad" type="button"><svg class="ic"><use href="#i-upload"/></svg><span>LOAD SAMPLE</span></button>
+1265:          <button class="ps-btn" id="psClear" type="button" disabled>CLEAR SAMPLE</button>
+1267:        <input type="file" id="psInput" accept="audio/*,.wav,.mp3,.ogg,.oga,.flac,.aif,.aiff,.m4a,.aac,.opus" multiple hidden>
+1268:        <div class="ps-drop" aria-hidden="true"><span>RELEASE TO LOAD INTO <b id="psDropName">KICK</b></span></div>
+1271:      <div class="step-lane">
+1272:        <div class="step-head"><span>16-STEP TRIGGER LANE · SELECTED PAD</span><b id="stepStatus">KICK · 4/16</b></div>
+1273:        <div class="steps" id="steps" role="group" aria-label="Step sequencer for selected pad"></div>
+1274:        <div class="step-nums" id="stepNums" aria-hidden="true"></div>
+1279:  <button class="module" type="button" data-dest="Studio"><span class="module-row"><span class="module-title"><svg class="ic"><use href="#i-activity"/></svg>WAVEFORM EDITOR</span><svg class="ic module-arrow"><use href="#i-chev-r"/></svg></span></button>
+1280:  <button class="module" type="button" data-dest="VST"><span class="module-row"><span class="module-title"><svg class="ic"><use href="#i-note"/></svg>VST BROWSER</span><svg class="ic module-arrow"><use href="#i-chev-r"/></svg></span></button>
+1281:  <button class="module" type="button" data-dest="Loop"><span class="module-row"><span class="module-title"><svg class="ic"><use href="#i-repeat"/></svg>LOOP STATION</span><svg class="ic module-arrow"><use href="#i-chev-r"/></svg></span></button>
+1284:<aside class="right" id="rightRail" aria-label="Controls">
+1285:<div class="rail">
+1286:  <div class="rail-head"><span>02 · CONTROLS</span><button class="rail-x" id="railClose" type="button" aria-controls="rightRail" aria-expanded="true" aria-label="Collapse controls rail"><svg class="ic"><use href="#i-close"/></svg></button></div>
+1287:  <button class="rail-reopen" id="railOpen" type="button" aria-controls="rightRail" aria-label="Show controls rail"><svg class="ic"><use href="#i-chev-r"/></svg><span>02 · CONTROLS</span></button>
+1289:  <section class="vsec" id="visSection">
+1290:    <button class="vsec-head" id="visToggle" type="button" aria-expanded="true" aria-controls="visBody"><span class="vtit"><svg class="ic"><use href="#i-activity"/></svg>VISUALIZER &amp; TRANSPORT</span><span class="chev-btn as-span"><svg class="ic"><use href="#i-chev-d"/></svg></span></button>
+1291:    <div class="vis" id="visBody">
+1292:      <div class="vcard">
+1293:        <div class="vrow">
+1294:          <div class="vbadge"><svg class="ic"><use href="#i-diamond"/></svg></div>
+1295:          <div class="grow"><div class="vname">VISUALIZER</div><div class="vsub"><span id="visualizerMeta">PREVIEW · MATRIX</span> <span class="vsrc" id="visSource">PREVIEW SIGNAL</span></div></div>
+1296:          <div class="vmeter"><span class="vmlbl">VOL</span><div class="led-meter sm" id="volBars"></div><span class="vdb" id="volDb">-∞ dB</span></div>
+1297:          <div class="vmeter"><span class="vmlbl">PK</span><div class="led-meter xs" id="pkBars"></div><span class="vdb" id="pkDb">-∞ dB</span></div>
+1298:          <button class="vx" id="visHide" type="button" aria-pressed="false" aria-label="Hide visualizer display"><svg class="ic"><use href="#i-close"/></svg></button>
+1300:        <div class="mx" id="matrix"><canvas id="visualizerCanvas" aria-hidden="true"></canvas></div>
+1301:        <div class="vctrl" role="group" aria-label="Visualizer mode">
+1302:          <div class="vctrl-row">
+1303:            <button class="vbtn" type="button" data-mode="bars"><svg class="ic"><use href="#i-bars"/></svg>BARS</button><button class="vbtn" type="button" data-mode="wave"><svg class="ic"><use href="#i-wave"/></svg>WAVE</button><button class="vbtn" type="button" data-mode="radial"><svg class="ic"><use href="#i-target"/></svg>RADIAL</button><button class="vbtn" type="button" data-mode="particles"><svg class="ic"><use href="#i-plus"/></svg>PARTICLES</button><button class="vbtn" type="button" data-mode="scope"><svg class="ic"><use href="#i-scope"/></svg>SCOPE</button>
+1305:          <div class="vctrl-row">
+1306:            <button class="vbtn" type="button" data-mode="spectro"><svg class="ic"><use href="#i-spectro"/></svg>SPECTRO</button><button class="vbtn" type="button" data-mode="terrain"><svg class="ic"><use href="#i-terrain"/></svg>TERRAIN</button><button class="vbtn" type="button" data-mode="galaxy"><svg class="ic"><use href="#i-galaxy"/></svg>GALAXY</button><button class="vbtn" type="button" data-mode="dna"><svg class="ic"><use href="#i-dna"/></svg>DNA</button><button class="vbtn" type="button" data-mode="flame"><svg class="ic"><use href="#i-flame"/></svg>FLAME</button><button class="vbtn" type="button" data-mode="matrix"><svg class="ic"><use href="#i-matrix"/></svg>MATRIX</button>
+1313:  <section class="drawer-panel" id="micPanel">
+1314:    <button class="drawer-head" type="button" aria-expanded="false" aria-controls="micDrawer"><span class="dtitle"><svg class="ic"><use href="#i-mic"/></svg>MICROPHONE INPUT</span><svg class="ic collapsed-arrow"><use href="#i-chev-r"/></svg></button>
+1315:    <div class="drawer" id="micDrawer" hidden>
+1316:      <div class="drawer-grid">
+1317:        <div class="mini-control"><div class="mini-label">INPUT</div><div class="mini-value" id="micState">OFF</div><div class="mini-meter"><i id="micMeter"></i></div></div>
+1318:        <div class="mini-control"><div class="mini-label">PEAK</div><div class="mini-value" id="micPeak">-∞ dB</div></div>
+1319:        <div class="mini-control"><div class="mini-label" id="lblMicGain">GAIN</div><div class="mini-value" id="micGainVal">100%</div><div class="tiny-track" data-slider="micGain" data-min="0" data-max="200" data-step="1" data-default="100" role="slider" tabindex="0" aria-labelledby="lblMicGain"><div class="tiny-fill"></div><i class="tiny-thumb"></i></div></div>
+1320:        <div class="mini-control"><div class="mini-label">MONITOR</div><button class="swt" type="button" id="micMonitor" aria-pressed="false" disabled>OFF</button></div>
+1322:      <button class="wide-btn" type="button" id="micEnable">ENABLE MICROPHONE</button>
+1327:  <section class="drawer-panel" id="fxPanel">
+1328:    <button class="drawer-head" type="button" aria-expanded="false" aria-controls="fxDrawer"><span class="dtitle"><svg class="ic"><use href="#i-sliders"/></svg>FX CHAIN</span><svg class="ic collapsed-arrow"><use href="#i-chev-r"/></svg></button>
+1329:    <div class="drawer" id="fxDrawer" hidden>
+1330:      <div class="fx-row" role="group" aria-label="Master FX chain">
+1331:        <button class="fx-chip" type="button" data-fx="filter"><i class="led"></i>FILTER</button><span class="arrow" aria-hidden="true">→</span>
+1332:        <button class="fx-chip" type="button" data-fx="sat"><i class="led"></i>DRIVE</button><span class="arrow" aria-hidden="true">→</span>
+1333:        <button class="fx-chip" type="button" data-fx="comp"><i class="led"></i>COMP</button><span class="arrow" aria-hidden="true">→</span>
+1334:        <button class="fx-chip" type="button" data-fx="reverb"><i class="led"></i>REVERB</button>
+1340:  <button class="module rail-module" type="button" data-dest="DJ"><span class="module-row"><span class="module-title"><svg class="ic"><use href="#i-disc"/></svg>DJ CONTROLS</span><svg class="ic module-arrow"><use href="#i-chev-r"/></svg></span></button>
+1345:<footer class="foot">
+1346:  <div class="fcell brandcell"><strong>R3 NATIVE</strong> <span class="ver">v2.0.1 · X11</span></div>
+1347:  <div class="fcell"><svg class="ic"><use href="#i-express"/></svg><span class="fl">POLYPHONY</span><b>128</b></div>
+1348:  <div class="fcell"><span class="fl">LATENCY</span><b id="ftLatency">—</b></div>
+1349:  <div class="fcell"><span class="fl">SAMPLE RATE</span><b id="ftRate">—</b></div>
+1350:  <div class="fcell"><span class="fl">BUFFER</span><b id="ftBuffer">—</b></div>
+1351:  <div class="fcell"><span class="fl">MIDI IN</span><b id="ftMidi">—</b></div>
+1352:  <div class="fcell"><span class="fl">MIDI OUT</span><b id="ftMidiOut">R3 Native</b></div>
+1353:  <div class="fcell os"><label class="fl os-lbl" for="osSelect">OVERSAMPLING</label><div class="select-wrap sm"><select id="osSelect" class="dd"><option value="none">1x</option><option value="2x">2x</option><option value="4x">4x</option></select><span class="select-chev" aria-hidden="true"><svg class="ic"><use href="#i-chev-d"/></svg></span></div></div>
+1354:  <div class="fcell meter-cell"><span class="fl">0 dB</span><div class="led-meter lg" id="footMeter" role="meter" aria-label="Master peak level"></div></div>
+1355:  <div class="fcell dbcell"><b id="masterDb">-∞</b></div>
+1358:<div class="toast-wrap" id="toasts" role="status" aria-live="polite"></div>
+2293:    b.innerHTML=`<span class="pad-dot"></span><span class="pad-num">${String(i+1).padStart(2,'0')}</span><div class="pad-wave" aria-hidden="true">${shape(i).map(h=>`<i style="height:${h}px"></i>`).join('')}</div><span class="pad-name">${p.name}</span><span class="pad-sub">${p.sub}</span><div class="pad-bus"><div class="pad-level"><i></i></div><span class="pad-vol"></span></div>`;
+2735:  const seg=()=>`<div class="ticker-seg">${items.map(([t,on])=>`<span${on?' class="on"':''}>${t}</span><i>/</i>`).join('')}</div>`;

@@ -149,6 +149,8 @@ export function requireFeature(feature: keyof TierFeatures) {
 }
 
 export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
+  if (ctx.user?.is_admin === true) return next();
+
   const tier: SubscriptionTier = ctx.subscription?.tier ?? 'explorer';
   const limit = TIER_DEFINITIONS[tier].limits.aiTransitionsPerSession;
 
@@ -243,7 +245,9 @@ export const checkAiTransitionLimit = middleware(async ({ ctx, next }) => {
 export async function assertTrackUploadAllowed(
   currentTrackCount: number,
   tier: SubscriptionTier,
+  isAdmin = false,
 ): Promise<void> {
+  if (isAdmin) return;
   const limit = TIER_DEFINITIONS[tier].limits.trackUploads;
   if (limit === 'unlimited') return;
 

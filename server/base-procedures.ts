@@ -23,7 +23,12 @@
  *   procedures       →  daw, subscription  (no cycle)
  */
 
+import type {
+  TRPCProcedureBuilder,
+  TRPCUnsetMarker,
+} from '@trpc/server';
 import { publicProc, requireAuth } from './trpc';
+import type { AuthenticatedContext, TRPCContext } from './trpc';
 import { attachSubscription }      from './middleware/feature-gate';
 
 /**
@@ -35,6 +40,19 @@ import { attachSubscription }      from './middleware/feature-gate';
  * requireTier / requireFeature / checkAiTransitionLimit all read
  * ctx.subscription — they must be chained AFTER this procedure.
  */
-export const protectedProcedure: any = publicProc
+type ProtectedProcedureBuilder = TRPCProcedureBuilder<
+  TRPCContext,
+  object,
+  AuthenticatedContext & {
+    subscription?: TRPCContext['subscription'];
+  },
+  TRPCUnsetMarker,
+  TRPCUnsetMarker,
+  TRPCUnsetMarker,
+  TRPCUnsetMarker,
+  false
+>;
+
+export const protectedProcedure: ProtectedProcedureBuilder = publicProc
   .use(requireAuth)
   .use(attachSubscription);

@@ -1,0 +1,640 @@
+client/src/pages/instrument.tsx:25:import { useAudioEngine } from '@/hooks/use-audio-engine';
+client/src/pages/instrument.tsx:40:import { useMidi } from '@/hooks/use-midi';
+client/src/pages/instrument.tsx:1170:  } = useAudioEngine();
+client/src/pages/instrument.tsx:1233:  // ── MIDI Input
+client/src/pages/instrument.tsx:1236:  //    pad hit (playPadWithFx fires once from drum-pads MIDI handler,
+client/src/pages/instrument.tsx:1239:  const handleMidiKey = useCallback(
+client/src/pages/instrument.tsx:1242:      // index   : MIDI note - 60 (0-based key index into state.keys[])
+client/src/pages/instrument.tsx:1244:      // velocity: normalized 0–1 from MIDI note velocity / 127
+client/src/pages/instrument.tsx:1252:  const { midiStatus, midiInputCount } = useMidi({
+client/src/pages/instrument.tsx:1254:    onKey:   handleMidiKey,
+client/src/pages/instrument.tsx:1315:  //    exportSession() confirmed on useAudioEngine hook.
+client/src/pages/instrument.tsx:1357:  const TICKER = ['Polyphony','Web Audio API','Offline-First','MIDI Support','Accessible',
+client/src/pages/instrument.tsx:1403:                  MIDI {(midiStatus ?? 'idle').toUpperCase()}{midiInputCount > 0 ? ` (${midiInputCount})` : ''}
+client/src/pages/instrument.tsx:1561:              Web Audio API · AudioWorklet · Web MIDI API · IndexedDB · LLPTE
+client/src/audio/fx/vst-loader.ts:38:  audioCtx: AudioContext;
+client/src/audio/fx/vst-loader.ts:71:  static async ensureWorkletRegistered(audioCtx: AudioContext): Promise<void> {
+client/src/audio/fx/vst-loader.ts:98:      throw new Error('AudioContext is required');
+client/src/audio/fx/vst-sidechain.ts:16:  private audioContext: AudioContext;
+client/src/audio/fx/vst-sidechain.ts:19:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-performance-monitor.ts:40:  private audioContext: AudioContext;
+client/src/audio/fx/vst-performance-monitor.ts:43:  constructor(audioContext: AudioContext) {
+client/src/audio/transport/transport-engine.ts:3:import * as Tone from "tone";
+client/src/audio/transport/transport-engine.ts:4:import { resumeAudioContext } from "../core/audio-context";
+client/src/audio/transport/transport-engine.ts:13:    Tone.Transport.stop();
+client/src/audio/transport/transport-engine.ts:14:    Tone.Transport.position = 0;
+client/src/audio/transport/transport-engine.ts:15:    Tone.Transport.bpm.value = 120;
+client/src/audio/transport/transport-engine.ts:23:    await resumeAudioContext();
+client/src/audio/transport/transport-engine.ts:25:    if (Tone.Transport.state !== "started") {
+client/src/audio/transport/transport-engine.ts:26:      Tone.Transport.start("+0.01");
+client/src/audio/transport/transport-engine.ts:31:    if (Tone.Transport.state !== "stopped") {
+client/src/audio/transport/transport-engine.ts:32:      Tone.Transport.stop();
+client/src/audio/transport/transport-engine.ts:33:      Tone.Transport.position = 0;
+client/src/audio/transport/transport-engine.ts:43:    await resumeAudioContext();
+client/src/audio/transport/transport-engine.ts:45:    if (Tone.Transport.state !== "started") {
+client/src/audio/transport/transport-engine.ts:48:      Tone.Transport.start("+0.01");
+client/src/audio/transport/transport-engine.ts:53:    Tone.Transport.bpm.setValueAtTime(
+client/src/audio/transport/transport-engine.ts:55:      Tone.now()
+client/src/audio/transport/transport-engine.ts:60:    Tone.Transport.loop = enabled;
+client/src/audio/transport/transport-engine.ts:61:    Tone.Transport.loopStart = start;
+client/src/audio/transport/transport-engine.ts:62:    Tone.Transport.loopEnd = end;
+client/src/audio/transport/transport-engine.ts:66:    return Tone.Transport.seconds;
+client/src/audio/transport/transport-engine.ts:70:    return Tone.Transport.state === "started";
+client/src/audio/effects/reverb.ts:1:import * as Tone from 'tone';
+client/src/audio/effects/reverb.ts:5:  private reverb: Tone.Reverb;
+client/src/audio/effects/reverb.ts:6:  private dryGain: Tone.Gain;
+client/src/audio/effects/reverb.ts:7:  private wetGain: Tone.Gain;
+client/src/audio/effects/reverb.ts:8:  private output: Tone.Gain;
+client/src/audio/effects/reverb.ts:12:    this.reverb  = new Tone.Reverb({ decay: 1.5, preDelay: 0.01, wet: 1 });
+client/src/audio/effects/reverb.ts:13:    this.dryGain = new Tone.Gain({ gain: 0.6 });
+client/src/audio/effects/reverb.ts:14:    this.wetGain = new Tone.Gain({ gain: 0.4 });
+client/src/audio/effects/reverb.ts:15:    this.output  = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/reverb.ts:46:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/reverb.ts:59:  getNode(): Tone.Reverb { return this.reverb; }
+client/src/audio/effects/reverb.ts:68:  getOutput(): Tone.Gain {
+client/src/audio/effects/reverb.ts:76:  connectTo(destination: Tone.ToneAudioNode): this {
+client/src/audio/fx/vst-scanner.ts:35:    audioCtx: AudioContext
+client/src/audio/fx/vst-scanner.ts:79:    audioCtx: AudioContext
+client/src/engine/master-engine.ts:13: *  • Zero new AudioContext instances — always delegates to getAudioContext()
+client/src/engine/master-engine.ts:17:import { getAudioContext, ensureAudioRunning } from "@/audio/core/audio-context";
+client/src/engine/master-engine.ts:37:  contextRunning:   AudioContextState;
+client/src/engine/master-engine.ts:38:  contextSuspended: AudioContextState;
+client/src/engine/master-engine.ts:49:  // ── Lazy AudioContext — deferred to first use after a user gesture ────────
+client/src/engine/master-engine.ts:53:  //  getAudioContext() (→ new AudioContext()) on import — before any user
+client/src/engine/master-engine.ts:54:  //  gesture — violating Chrome's autoplay policy and triggering Tone.js
+client/src/engine/master-engine.ts:61:  private _context: AudioContext | null = null;
+client/src/engine/master-engine.ts:63:  get context(): AudioContext {
+client/src/engine/master-engine.ts:64:    if (!this._context) this._context = getAudioContext();
+client/src/engine/master-engine.ts:140:  /** Current AudioContext state. */
+client/src/engine/master-engine.ts:141:  get state(): AudioContextState {
+client/src/engine/link-engine.ts:15: *  • Typed event bus consistent with MidiEngine's EventTarget pattern.
+client/src/engine/link-engine.ts:16: *  • syncAudioEngine / syncMidiEngine now return unsubscribe functions.
+client/src/engine/link-engine.ts:176:  syncAudioEngine(audioEngine: {
+client/src/engine/link-engine.ts:188:   * Wire Link beat events to a MIDI engine object.
+client/src/engine/link-engine.ts:191:  syncMidiEngine(midiEngine: {
+client/src/engine/audio/audioEngine.ts:1:import { getAudioContext } from "@/audio/core/audio-context";
+client/src/engine/audio/audioEngine.ts:2:// CRIT-4: Never instantiate AudioContext at module level — it is a browser-only
+client/src/engine/audio/audioEngine.ts:4:// Use the lazy singleton below; call getAudioEngine() only after mount.
+client/src/engine/audio/audioEngine.ts:6:export class AudioEngine {
+client/src/engine/audio/audioEngine.ts:7:  private ctx: AudioContext | null = null
+client/src/engine/audio/audioEngine.ts:10:  get context(): AudioContext {
+client/src/engine/audio/audioEngine.ts:12:      this.ctx = getAudioContext()
+client/src/engine/audio/audioEngine.ts:32:    // Shared AudioContext is owned by audio-context.ts; do not close it.
+client/src/engine/audio/audioEngine.ts:38:let _instance: AudioEngine | null = null
+client/src/engine/audio/audioEngine.ts:39:export function getAudioEngine(): AudioEngine {
+client/src/engine/audio/audioEngine.ts:40:  if (!_instance) _instance = new AudioEngine()
+client/src/audio/fx/vst-automation-engine.ts:48:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:55:  constructor(audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:125:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:127:  constructor(id: string, paramId: number, points: AutomationPoint[], audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:185:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:189:  constructor(id: string, paramId: number, config: LFOConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-automation-engine.ts:237:  private audioContext: AudioContext;
+client/src/audio/fx/vst-automation-engine.ts:242:  constructor(id: string, paramId: number, config: EnvelopeConfig, audioContext: AudioContext) {
+client/src/audio/fx/vst-project-serializer.ts:92:    audioContext: AudioContext
+client/src/audio/fx/vst-project-serializer.ts:121:    audioContext: AudioContext
+client/src/audio/fx/fx-nodebase.ts:3:import { getAudioContext } from "../core/audio-context";
+client/src/audio/fx/fx-nodebase.ts:7:  readonly context: AudioContext;
+client/src/audio/fx/fx-nodebase.ts:20:    this.context = getAudioContext();
+client/src/audio/fx/fx-chain.ts:5:import { getAudioContext } from '../core/audio-context';
+client/src/audio/fx/fx-chain.ts:70:    const context = getAudioContext();
+client/src/audio/fx/delay.ts:92:  // Tone-shaping on the feedback path
+client/src/audio/engine/AudioEngine.ts:1:// client/src/audio/engine/AudioEngine.ts
+client/src/audio/engine/AudioEngine.ts:4:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/audio/engine/AudioEngine.ts:6:export class AudioEngine {
+client/src/audio/engine/AudioEngine.ts:7:  private Tone: any = null;
+client/src/audio/engine/AudioEngine.ts:16:      this.Tone = await import('tone');
+client/src/audio/engine/AudioEngine.ts:18:      // Bind Tone to the canonical native AudioContext.
+client/src/audio/engine/AudioEngine.ts:19:      const audioCtx = getAudioContext();
+client/src/audio/engine/AudioEngine.ts:20:      this.Tone.setContext(audioCtx);
+client/src/audio/engine/AudioEngine.ts:26:      await this.Tone.start();
+client/src/audio/engine/AudioEngine.ts:38:    const osc = new this.Tone.Oscillator(220, 'sawtooth').start();
+client/src/audio/recorder/recorder-engine.ts:3:import { getAudioContext } from "../core/audio-context";
+client/src/audio/recorder/recorder-engine.ts:7:  private context: AudioContext;
+client/src/audio/recorder/recorder-engine.ts:12:    this.context = getAudioContext();
+client/src/audio/mixer/mixer-channel.ts:3:import { getAudioContext } from "../core/audio-context";
+client/src/audio/mixer/mixer-channel.ts:21:  readonly context: AudioContext;
+client/src/audio/mixer/mixer-channel.ts:49:    this.context = getAudioContext();
+client/src/audio/mixer/mixer-channel.ts:470:  // Used by audio-store.ts snapshot loop and saveProject() serialization.
+client/src/audio/mixer/master-bus.ts:3:import { getAudioContext } from "../core/audio-context";
+client/src/audio/mixer/master-bus.ts:7:  readonly context: AudioContext;
+client/src/audio/mixer/master-bus.ts:11:    this.context = getAudioContext();
+client/src/audio/voice-pool.ts:31:  private readonly ctx:    AudioContext;
+client/src/audio/voice-pool.ts:34:  constructor(ctx: AudioContext, destination: AudioNode) {
+client/src/audio/indicators/meter-node.ts:4:import { getAudioContext } from "../core/audio-context";
+client/src/audio/indicators/meter-node.ts:15:    const context = getAudioContext();
+client/src/audio/fx/vst-fx-node.ts:54:  constructor(audioContext: AudioContext, config: VSTFXConfig) {
+client/src/audio/fx/vst-fx-node.ts:520:  static async deserialize(data: any, audioContext: AudioContext): Promise<VSTFXNode> {
+client/src/audio/effects/ir-reverb-engine.ts:30:  private _ctx:      AudioContext | null = null;
+client/src/audio/effects/ir-reverb-engine.ts:43:  init(ctx: AudioContext): void {
+client/src/audio/effects/filter.ts:1:import * as Tone from 'tone';
+client/src/audio/effects/filter.ts:5:  private filter: Tone.Filter;
+client/src/audio/effects/filter.ts:9:    this.filter = new Tone.Filter({ frequency: 20000, type: 'lowpass', rolloff: -12 });
+client/src/audio/effects/filter.ts:32:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/filter.ts:39:  getNode(): Tone.Filter { return this.filter; }
+client/src/audio/effects/filter.ts:42:  getOutput(): Tone.Filter {
+client/src/audio/effects/filter.ts:50:  connectTo(destination: Tone.ToneAudioNode): this {
+client/src/audio/effects/eq.ts:2:import * as Tone from 'tone';
+client/src/audio/effects/eq.ts:6:  private lowShelf: Tone.EQ3;
+client/src/audio/effects/eq.ts:10:    this.lowShelf = new Tone.EQ3({ low: 0, mid: 0, high: 0 });
+client/src/audio/effects/eq.ts:26:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/eq.ts:33:  getNode(): Tone.EQ3 { return this.lowShelf; }
+client/src/audio/effects/eq.ts:36:  getOutput(): Tone.EQ3 {
+client/src/audio/effects/eq.ts:44:  connectTo(destination: Tone.ToneAudioNode): this {
+client/src/audio/effects/distortion.ts:1:import * as Tone from 'tone';
+client/src/audio/effects/distortion.ts:5:  private distortion: Tone.Distortion;
+client/src/audio/effects/distortion.ts:6:  private dryGain: Tone.Gain;
+client/src/audio/effects/distortion.ts:7:  private wetGain: Tone.Gain;
+client/src/audio/effects/distortion.ts:8:  private output: Tone.Gain;
+client/src/audio/effects/distortion.ts:12:    this.distortion = new Tone.Distortion({ distortion: 0.4, oversample: '2x', wet: 1 });
+client/src/audio/effects/distortion.ts:13:    this.dryGain    = new Tone.Gain({ gain: 0.5 });
+client/src/audio/effects/distortion.ts:14:    this.wetGain    = new Tone.Gain({ gain: 0.5 });
+client/src/audio/effects/distortion.ts:15:    this.output     = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/distortion.ts:50:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/distortion.ts:63:  getNode(): Tone.Distortion { return this.distortion; }
+client/src/audio/hooks/useAudioEngine.ts:2:import { AudioEngine } from '../engine/AudioEngine';
+client/src/audio/hooks/useAudioEngine.ts:4:export function useAudioEngine() {
+client/src/audio/hooks/useAudioEngine.ts:5:  const [engine] = useState(() => new AudioEngine());
+client/src/audio/effects/compressor.ts:1:// Compressor effect using Tone.js v14
+client/src/audio/effects/compressor.ts:2:import * as Tone from 'tone';
+client/src/audio/effects/compressor.ts:6:  private compressor: Tone.Compressor;
+client/src/audio/effects/compressor.ts:7:  private makeupGain: Tone.Gain;
+client/src/audio/effects/compressor.ts:8:  private dryGain: Tone.Gain;
+client/src/audio/effects/compressor.ts:9:  private wetGain: Tone.Gain;
+client/src/audio/effects/compressor.ts:10:  private output: Tone.Gain;
+client/src/audio/effects/compressor.ts:14:    this.compressor = new Tone.Compressor({
+client/src/audio/effects/compressor.ts:22:    this.makeupGain = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/compressor.ts:23:    this.dryGain   = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/compressor.ts:24:    this.wetGain   = new Tone.Gain({ gain: 0 });
+client/src/audio/effects/compressor.ts:25:    this.output    = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/compressor.ts:57:      this.wetGain.gain.setValueAtTime(0, Tone.now());
+client/src/audio/effects/compressor.ts:58:      this.dryGain.gain.setValueAtTime(1, Tone.now());
+client/src/audio/effects/compressor.ts:77:    // Tone.js v14: use Math.pow(10, db/20) instead of Math.pow(10, )
+client/src/audio/effects/compressor.ts:95:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/compressor.ts:102:    const gain = Tone.getContext().createGain();
+client/src/audio/effects/compressor.ts:104:    Tone.connect(gain as unknown as AudioNode, this.dryGain);
+client/src/audio/effects/compressor.ts:105:    Tone.connect(gain as unknown as AudioNode, this.compressor);
+client/src/audio/effects/compressor.ts:119:  getNode(): Tone.Compressor {
+client/src/audio/effects/compressor.ts:132:  getOutput(): Tone.Gain {
+client/src/audio/effects/compressor.ts:140:  connectTo(destination: Tone.ToneAudioNode): this {
+client/src/audio/automation/automation-engine.ts:3:import * as Tone from "tone";
+client/src/audio/automation/automation-engine.ts:16:    Tone.Transport.on("start", () => {
+client/src/audio/automation/automation-engine.ts:20:    Tone.Transport.on("stop", () => {
+client/src/audio/automation/automation-engine.ts:44:    const startTime = Tone.now();
+client/src/audio/automation/automation-engine.ts:52:    const now = Tone.now();
+client/src/audio/dj-controls/tempo-controls.ts:2:import * as Tone from 'tone';
+client/src/engine/transport-engine.ts:8: *  • Replaces requestAnimationFrame with AudioContext.currentTime scheduling.
+client/src/engine/transport-engine.ts:17: *  • Emits tick events with the *scheduled* AudioContext time so downstream
+client/src/engine/transport-engine.ts:18: *    nodes (clips, MIDI, Link) can schedule ahead accurately.
+client/src/engine/transport-engine.ts:23:import { getAudioContext }  from "@/audio/core/audio-context";
+client/src/engine/transport-engine.ts:48:  audioTime: number;  // AudioContext.currentTime when this beat fires
+client/src/engine/transport-engine.ts:82:  /** AudioContext.currentTime of the last scheduled beat boundary */
+client/src/engine/transport-engine.ts:98:    const ctx = getAudioContext();
+client/src/engine/transport-engine.ts:134:    const ctx          = getAudioContext();
+client/src/engine/transport-engine.ts:180:  /** Called once per scheduled beat, with the precise AudioContext timestamp. */
+client/src/engine/transport-engine.ts:201:    const ctx      = getAudioContext();
+client/src/engine/transport-engine.ts:291:    // MIDI clock phase
+client/src/engine/midi-engine.ts:5: * Professional MIDI I/O engine.
+client/src/engine/midi-engine.ts:10: *  • Dynamic port hotplug — listens for statechange on MIDIAccess so newly
+client/src/engine/midi-engine.ts:14: *  • localStorage is only touched on save/load, never in the hot MIDI message
+client/src/engine/midi-engine.ts:17: *  • MIDI output support (send CC, notes, clock).
+client/src/engine/midi-engine.ts:24:export interface MidiMapping {
+client/src/engine/midi-engine.ts:30:export interface MidiState {
+client/src/engine/midi-engine.ts:42:export interface MidiCCEvent       extends Event { cc: number; value: number; channel: number }
+client/src/engine/midi-engine.ts:43:export interface MidiNoteEvent     extends Event { note: number; velocity: number; channel: number; on: boolean }
+client/src/engine/midi-engine.ts:44:export interface MidiClockEvent    extends Event { phase: number; bpm: number }
+client/src/engine/midi-engine.ts:45:export interface MidiLearnEvent    extends Event { mapping: MidiMapping }
+client/src/engine/midi-engine.ts:46:export interface MidiConnectEvent  extends Event { port: WebMidi.MIDIPort }
+client/src/engine/midi-engine.ts:55:// ── MidiEngine ────────────────────────────────────────────────────────────────
+client/src/engine/midi-engine.ts:57:export class MidiEngine {
+client/src/engine/midi-engine.ts:59:  readonly state: MidiState = {
+client/src/engine/midi-engine.ts:72:  private _mappings:      MidiMapping[]               = [];
+client/src/engine/midi-engine.ts:74:  private _midiAccess:    WebMidi.MIDIAccess | null   = null;
+client/src/engine/midi-engine.ts:75:  private _outputs:       Map<string, WebMidi.MIDIOutput> = new Map();
+client/src/engine/midi-engine.ts:79:  private _clockCount       = 0;      // absolute MIDI clock counter since start
+client/src/engine/midi-engine.ts:87:      this._midiAccess = await navigator.requestMIDIAccess({ sysex: false });
+client/src/engine/midi-engine.ts:89:      console.warn("[MidiEngine] MIDI access denied:", err);
+client/src/engine/midi-engine.ts:124:  // ── MIDI Learn ────────────────────────────────────────────────────────────
+client/src/engine/midi-engine.ts:131:  getMapping(target: string): MidiMapping | undefined {
+client/src/engine/midi-engine.ts:140:  // ── MIDI Output ───────────────────────────────────────────────────────────
+client/src/engine/midi-engine.ts:168:  /** Send MIDI clock start (0xfa), continue (0xfb), or stop (0xfc). */
+client/src/engine/midi-engine.ts:193:  private _wireInput(input: WebMidi.MIDIInput): void {
+client/src/engine/midi-engine.ts:197:  private _onStateChange = (e: WebMidi.MIDIConnectionEvent): void => {
+client/src/engine/midi-engine.ts:201:        this._wireInput(port as WebMidi.MIDIInput);
+client/src/engine/midi-engine.ts:202:        this._emitEvent<MidiConnectEvent>("connect", ev => { ev.port = port as WebMidi.MIDIInput; });
+client/src/engine/midi-engine.ts:204:        (port as WebMidi.MIDIInput).onmidimessage = null;
+client/src/engine/midi-engine.ts:209:        this._outputs.set(port.id, port as WebMidi.MIDIOutput);
+client/src/engine/midi-engine.ts:216:  private _handleMessage = (e: WebMidi.MIDIMessageEvent): void => {
+client/src/engine/midi-engine.ts:230:        this._emitEvent<MidiCCEvent>("cc", ev => {
+client/src/engine/midi-engine.ts:234:        // MIDI Learn (only fires when learning — zero cost otherwise)
+client/src/engine/midi-engine.ts:236:          const mapping: MidiMapping = { cc: data1, target: this._learningTarget, channel };
+client/src/engine/midi-engine.ts:240:          this._emitEvent<MidiLearnEvent>("learn", ev => { ev.mapping = mapping; });
+client/src/engine/midi-engine.ts:249:          this._emitEvent<MidiNoteEvent>("note", ev => {
+client/src/engine/midi-engine.ts:260:        this._emitEvent<MidiNoteEvent>("note", ev => {
+client/src/engine/midi-engine.ts:285:        // MIDI Clock (0xf8) — no channel nibble
+client/src/engine/midi-engine.ts:292:   * MIDI clock handler with median-filter BPM estimation.
+client/src/engine/midi-engine.ts:325:    this._emitEvent<MidiClockEvent>("clock", ev => {
+client/src/engine/midi-engine.ts:342:      if (raw) this._mappings = JSON.parse(raw) as MidiMapping[];
+client/src/engine/midi-engine.ts:350:   * then dispatches it — avoids allocating objects on every MIDI message
+client/src/engine/midi-engine.ts:371:      const ev = e as MidiCCEvent;
+client/src/engine/midi-engine.ts:380:      const ev = e as MidiNoteEvent;
+client/src/engine/midi-engine.ts:389:      const ev = e as MidiClockEvent;
+client/src/engine/midi-engine.ts:410:export const midiEngine = new MidiEngine();
+client/src/audio/fx/loader.ts:5:import { getAudioContext } from '../core/audio-context';
+client/src/audio/fx/loader.ts:10:  /** AudioContext to use — falls back to the shared singleton */
+client/src/audio/fx/loader.ts:11:  audioContext?: AudioContext;
+client/src/audio/fx/loader.ts:158:    opts: Required<Omit<VSTLoadOptions, 'audioContext'>> & { audioContext?: AudioContext },
+client/src/audio/fx/loader.ts:178:        const ctx  = opts.audioContext ?? getAudioContext();
+client/src/audio/fx/loader.ts:374:  audioContext: AudioContext,
+client/src/audio/fx/loader.ts:381:  vstUrlOrCtx: string | AudioContext,
+client/src/audio/core/tone-runtime.ts:2: * R3 canonical Tone.js runtime authority.
+client/src/audio/core/tone-runtime.ts:4: * Runtime Tone loading is deferred until an explicit user gesture.
+client/src/audio/core/tone-runtime.ts:5: * The canonical native AudioContext is established before Tone is
+client/src/audio/core/tone-runtime.ts:6: * dynamically imported, then Tone is rebound to that context and started.
+client/src/audio/core/tone-runtime.ts:9:import { getAudioContext } from "./audio-context";
+client/src/audio/core/tone-runtime.ts:11:export type ToneRuntime = typeof import("tone");
+client/src/audio/core/tone-runtime.ts:13:let runtime: ToneRuntime | null = null;
+client/src/audio/core/tone-runtime.ts:14:let initPromise: Promise<ToneRuntime> | null = null;
+client/src/audio/core/tone-runtime.ts:17:  resolve: (tone: ToneRuntime) => void;
+client/src/audio/core/tone-runtime.ts:21:export function isToneReady(): boolean {
+client/src/audio/core/tone-runtime.ts:25:export function waitForToneReady(): Promise<ToneRuntime> {
+client/src/audio/core/tone-runtime.ts:28:  return new Promise<ToneRuntime>((resolve, reject) => {
+client/src/audio/core/tone-runtime.ts:36:export function initializeToneFromGesture(): Promise<ToneRuntime> {
+client/src/audio/core/tone-runtime.ts:38:    const canonicalContext = getAudioContext();
+client/src/audio/core/tone-runtime.ts:51:    const canonicalContext = getAudioContext();
+client/src/audio/core/tone-runtime.ts:58:    // Tone is not loaded until after the gesture.
+client/src/audio/core/tone-runtime.ts:63:        ? (importedModule as ToneRuntime)
+client/src/audio/core/tone-runtime.ts:64:        : (importedModule.default as ToneRuntime | undefined);
+client/src/audio/core/tone-runtime.ts:71:        "R3 Tone runtime: installed Tone module does not expose setContext."
+client/src/audio/core/tone-runtime.ts:75:    // Tone 14.x supports disposeOld as the second parameter.
+client/src/audio/core/tone-runtime.ts:116: * Canonical runtime Tone namespace.
+client/src/audio/core/tone-runtime.ts:118: * This object does not load Tone and does not create an AudioContext.
+client/src/audio/core/tone-runtime.ts:119: * Consumers may reference Tone only after the runtime has crossed the
+client/src/audio/core/tone-runtime.ts:122:export const Tone = new Proxy({} as ToneRuntime, {
+client/src/audio/core/tone-runtime.ts:126:        "R3 Tone runtime is not ready; initialize it from an explicit user gesture first."
+client/src/audio/core/instrument-engine.ts:2:import { getAudioContext } from "./audio-context";
+client/src/audio/core/instrument-engine.ts:67:class AudioEngine {
+client/src/audio/core/instrument-engine.ts:68:  private ctx: AudioContext | null = null;
+client/src/audio/core/instrument-engine.ts:115:    this.ctx = getAudioContext();
+client/src/audio/core/instrument-engine.ts:723:    // AudioContext is shared and owned by the canonical singleton.
+client/src/audio/core/instrument-engine.ts:728:export const instrumentEngine = new AudioEngine();
+client/src/audio/core/audio-context.ts:4: * Single AudioContext authority for the entire application.
+client/src/audio/core/audio-context.ts:7: *   getAudioContext()       — sync, creates on first call
+client/src/audio/core/audio-context.ts:8: *   getAudioContextSync()   — alias for getAudioContext() (legacy compat)
+client/src/audio/core/audio-context.ts:10: *   resumeAudioContext()    — alias for ensureAudioRunning() (legacy compat)
+client/src/audio/core/audio-context.ts:11: *   onAudioContext(cb)      — subscribe to context creation/availability
+client/src/audio/core/audio-context.ts:12: *   closeAudioContext()     — alias for closeAudio() (legacy compat)
+client/src/audio/core/audio-context.ts:18:let ctx: AudioContext | null = null;
+client/src/audio/core/audio-context.ts:19:let _initializing: Promise<AudioContext> | null = null;
+client/src/audio/core/audio-context.ts:20:const _listeners: Array<(ctx: AudioContext) => void> = [];
+client/src/audio/core/audio-context.ts:25: * Returns the shared AudioContext, creating it on first call.
+client/src/audio/core/audio-context.ts:28:export function getAudioContext(): AudioContext {
+client/src/audio/core/audio-context.ts:31:  ctx = new AudioContext({
+client/src/audio/core/audio-context.ts:36:  // Notify any onAudioContext subscribers
+client/src/audio/core/audio-context.ts:45: * Legacy alias — identical to getAudioContext().
+client/src/audio/core/audio-context.ts:46: * Kept for files that imported `getAudioContextSync` from the old module.
+client/src/audio/core/audio-context.ts:48:export const getAudioContextSync = getAudioContext;
+client/src/audio/core/audio-context.ts:53: * Resumes the shared AudioContext if suspended.
+client/src/audio/core/audio-context.ts:56:export async function ensureAudioRunning(): Promise<AudioContext> {
+client/src/audio/core/audio-context.ts:57:  const ctx = getAudioContext();
+client/src/audio/core/audio-context.ts:76: * Kept for files that imported `resumeAudioContext` from the old module.
+client/src/audio/core/audio-context.ts:78:export const resumeAudioContext = ensureAudioRunning;
+client/src/audio/core/audio-context.ts:83: * Register a callback that fires as soon as the AudioContext is available.
+client/src/audio/core/audio-context.ts:87: * Kept for files that imported `onAudioContext` from the old module.
+client/src/audio/core/audio-context.ts:89:export function onAudioContext(
+client/src/audio/core/audio-context.ts:90:  callback: (ctx: AudioContext) => void
+client/src/audio/core/audio-context.ts:131: * Kept for files that imported `closeAudioContext` from the old module.
+client/src/audio/core/audio-context.ts:133:export const closeAudioContext = closeAudio;
+client/src/audio/core/analysis-engine.ts:11:import { getAudioContext } from "./audio-context";
+client/src/audio/core/analysis-engine.ts:63:export class AudioEngine {
+client/src/audio/core/analysis-engine.ts:64:  context: AudioContext | null = null;
+client/src/audio/core/analysis-engine.ts:93:  async initialize(): Promise<AudioContext> {
+client/src/audio/core/analysis-engine.ts:95:    this.context = getAudioContext();
+client/src/audio/core/analysis-engine.ts:104:    if (!this.context) throw new Error('AudioContext not initialized');
+client/src/audio/core/analysis-engine.ts:179:        // MIDI triggers
+client/src/audio/core/analysis-engine.ts:213:    // Shared AudioContext is owned by audio-context.ts; do not close it here.
+client/src/audio/core/analysis-engine.ts:218:export const analysisEngine = new AudioEngine();
+client/src/audio/mixer/effect-chain.ts:50:  private readonly audioContext: AudioContext;
+client/src/audio/mixer/effect-chain.ts:72:    audioContext: AudioContext,
+client/src/audio/clips/clip-track.ts:2:import * as Tone from 'tone';
+client/src/audio/clips/clip-track.ts:59:  // Tone transport listeners — stored so they can be removed on dispose
+client/src/audio/clips/clip-track.ts:84:    Tone.Transport.on('stop',  this._onStop);
+client/src/audio/clips/clip-track.ts:85:    Tone.Transport.on('start', this._onStart);
+client/src/audio/clips/clip-track.ts:86:    Tone.Transport.on('pause', this._onPause);
+client/src/audio/clips/clip-track.ts:187:   * Tone.Transport restart.
+client/src/audio/clips/clip-track.ts:268:    // Remove Tone listeners before clearing clips to avoid re-entrant calls
+client/src/audio/clips/clip-track.ts:269:    Tone.Transport.off('stop',  this._onStop);
+client/src/audio/clips/clip-track.ts:270:    Tone.Transport.off('start', this._onStart);
+client/src/audio/clips/clip-track.ts:271:    Tone.Transport.off('pause', this._onPause);
+client/src/audio/clips/audio-clip.ts:2:import * as Tone from 'tone';
+client/src/audio/clips/audio-clip.ts:3:import { getAudioContext } from '../core/audio-context';
+client/src/audio/clips/audio-clip.ts:13:  /** Start time in seconds on the Tone.Transport timeline */
+client/src/audio/clips/audio-clip.ts:33:  /** Fires when playback actually starts at the AudioContext level */
+client/src/audio/clips/audio-clip.ts:54: * Convert a Tone.Transport time (seconds from transport start) to the
+client/src/audio/clips/audio-clip.ts:55: * absolute AudioContext time at which that moment will occur.
+client/src/audio/clips/audio-clip.ts:57:function transportToContextTime(transportTime: number, ctx: AudioContext): number {
+client/src/audio/clips/audio-clip.ts:58:  return ctx.currentTime + (transportTime - Tone.now());
+client/src/audio/clips/audio-clip.ts:67:  private context: AudioContext;
+client/src/audio/clips/audio-clip.ts:75:  // Tone scheduling handle — stored so we can cancel it
+client/src/audio/clips/audio-clip.ts:80:  /** Time (AudioContext seconds) at which playback started — set in start() */
+client/src/audio/clips/audio-clip.ts:95:    this.context = getAudioContext();
+client/src/audio/clips/audio-clip.ts:126:      // Tone.Transport.schedule returns an id we can cancel later
+client/src/audio/clips/audio-clip.ts:127:      this.scheduleId = Tone.Transport.schedule((time) => {
+client/src/audio/clips/audio-clip.ts:139:      Tone.Transport.clear(this.scheduleId);
+client/src/hooks/usemixerchannel.ts:254:  audioContext: AudioContext
+client/src/hooks/useSessionExport.ts:10: * Supports JSON, WAV, and MIDI exports.
+client/src/hooks/useSessionExport.ts:13: * const { exportToJson, exportToWav, exportToMidi } = useSessionExport(state, exportSession);
+client/src/hooks/useSessionExport.ts:39:        const offlineContext = new OfflineAudioContext(
+client/src/hooks/useSessionExport.ts:75:  const exportToMidi = useCallback(
+client/src/hooks/useSessionExport.ts:78:        // Simple MIDI export
+client/src/hooks/useSessionExport.ts:80:        const midi = createMidiFromEvents(
+client/src/hooks/useSessionExport.ts:91:        console.error('MIDI export failed:', error);
+client/src/hooks/useSessionExport.ts:101:    exportToMidi,
+client/src/hooks/useSessionExport.ts:167: * Create MIDI data from recorded events
+client/src/hooks/useSessionExport.ts:168: * Returns a simple MIDI-like structure
+client/src/hooks/useSessionExport.ts:170:function createMidiFromEvents(
+client/src/hooks/useSessionExport.ts:174:  // Simplified MIDI creation
+client/src/hooks/useSessionExport.ts:179:  // MIDI header
+client/src/hooks/useMidiSequencer.ts:2: * useMidiSequencer.ts
+client/src/hooks/useMidiSequencer.ts:3: * Piano-roll MIDI sequencer logic for R3 v4.
+client/src/hooks/useMidiSequencer.ts:6: *  - Tone.Sequence scheduling notes to the Tone.Transport grid
+client/src/hooks/useMidiSequencer.ts:7: *  - WebMIDI note-out to connected hardware
+client/src/hooks/useMidiSequencer.ts:16:import { Tone, waitForToneReady } from '../audio/core/tone-runtime';
+client/src/hooks/useMidiSequencer.ts:17:import type { MidiNote, MidiPattern } from './useDAWStore';
+client/src/hooks/useMidiSequencer.ts:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useMidiSequencer.ts:30:const MIDI_NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+client/src/hooks/useMidiSequencer.ts:32:  const name   = MIDI_NOTE_NAMES[midi % 12];
+client/src/hooks/useMidiSequencer.ts:38:let previewSynth: InstanceType<typeof Tone.MonoSynth> | null = null;
+client/src/hooks/useMidiSequencer.ts:41:    previewSynth = new Tone.MonoSynth({
+client/src/hooks/useMidiSequencer.ts:54:export function useMidiSequencer(): SequencerAPI {
+client/src/hooks/useMidiSequencer.ts:55:  type MidiSequenceHandle = {
+client/src/hooks/useMidiSequencer.ts:61:  const sequenceRef = useRef<MidiSequenceHandle | null>(null);
+client/src/hooks/useMidiSequencer.ts:62:  const midiOutRef  = useRef<WebMidi.MIDIOutput | null>(null);
+client/src/hooks/useMidiSequencer.ts:64:  // ── Wire up MIDI output ───────────────────────────────────────────────────
+client/src/hooks/useMidiSequencer.ts:66:    if (!navigator.requestMIDIAccess) return;
+client/src/hooks/useMidiSequencer.ts:67:    navigator.requestMIDIAccess({ sysex: false }).then(access => {
+client/src/hooks/useMidiSequencer.ts:69:      if (outputs.length > 0) midiOutRef.current = outputs[0] as unknown as WebMidi.MIDIOutput;
+client/src/hooks/useMidiSequencer.ts:72:        midiOutRef.current = (updated[0] ?? null) as unknown as WebMidi.MIDIOutput | null;
+client/src/hooks/useMidiSequencer.ts:74:    }).catch(() => { /* WebMIDI unavailable — degrade gracefully */ });
+client/src/hooks/useMidiSequencer.ts:83:      await waitForToneReady();
+client/src/hooks/useMidiSequencer.ts:87:      const { activePatternId, midiPatterns } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:98:      const stepMap: Map<number, MidiNote[]> = new Map();
+client/src/hooks/useMidiSequencer.ts:109:      const seq = new Tone.Sequence(
+client/src/hooks/useMidiSequencer.ts:112:          useDAWStore.getState().setSequencerStep(step);
+client/src/hooks/useMidiSequencer.ts:116:          for (const note of (notesAtStep as unknown as MidiNote[])) {
+client/src/hooks/useMidiSequencer.ts:117:            const freq = Tone.Frequency(note.pitch, 'midi').toFrequency();
+client/src/hooks/useMidiSequencer.ts:118:            const durSec = Tone.Time('16n').toSeconds() * note.duration;
+client/src/hooks/useMidiSequencer.ts:127:            // MIDI out
+client/src/hooks/useMidiSequencer.ts:130:              const noteOnDelay = Math.max(0, (time - Tone.now()) * 1000);
+client/src/hooks/useMidiSequencer.ts:153:      if (Tone.Transport.state === 'started') seq.start(0);
+client/src/hooks/useMidiSequencer.ts:158:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useMidiSequencer.ts:159:      s => [s.activePatternId, s.midiPatterns] as [string | null, MidiPattern[]],
+client/src/hooks/useMidiSequencer.ts:174:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useMidiSequencer.ts:182:          useDAWStore.getState().setSequencerStep(-1);
+client/src/hooks/useMidiSequencer.ts:191:    const { activePatternId, midiPatterns, addMidiNote, removeMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:198:      removeMidiNote(activePatternId, existing.id);
+client/src/hooks/useMidiSequencer.ts:200:      addMidiNote(activePatternId, { pitch, step, duration: 1, velocity });
+client/src/hooks/useMidiSequencer.ts:205:    const { activePatternId, midiPatterns } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:210:      useDAWStore.getState().removeMidiNote(activePatternId, note.id);
+client/src/hooks/useMidiSequencer.ts:215:    const { activePatternId } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:218:    const store = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:222:      if (note.step >= steps) store.removeMidiNote(activePatternId, note.id);
+client/src/hooks/useMidiSequencer.ts:228:    const { activePatternId, updateMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:230:    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+client/src/hooks/useMidiSequencer.ts:233:    updateMidiNote(activePatternId, noteId, { pitch: Math.max(0, Math.min(127, note.pitch + delta)) });
+client/src/hooks/useMidiSequencer.ts:237:    const { activePatternId, updateMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:239:    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+client/src/hooks/useMidiSequencer.ts:242:    updateMidiNote(activePatternId, noteId, { velocity: Math.max(1, Math.min(127, note.velocity + delta)) });
+client/src/hooks/useMidiSequencer.ts:246:    const { activePatternId, midiPatterns, addMidiPattern } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:249:    addMidiPattern({ ...pattern, name: `${pattern.name} COPY`, notes: pattern.notes.map(n => ({ ...n })) });
+client/src/audio/effects/delay.ts:1:import * as Tone from 'tone';
+client/src/audio/effects/delay.ts:5:  private delay: Tone.FeedbackDelay;
+client/src/audio/effects/delay.ts:6:  private dryGain: Tone.Gain;
+client/src/audio/effects/delay.ts:7:  private wetGain: Tone.Gain;
+client/src/audio/effects/delay.ts:8:  private output: Tone.Gain;
+client/src/audio/effects/delay.ts:12:    this.delay    = new Tone.FeedbackDelay({ delayTime: 0.25, feedback: 0.3, wet: 1 });
+client/src/audio/effects/delay.ts:13:    this.dryGain  = new Tone.Gain({ gain: 0.7 });
+client/src/audio/effects/delay.ts:14:    this.wetGain  = new Tone.Gain({ gain: 0.3 });
+client/src/audio/effects/delay.ts:15:    this.output   = new Tone.Gain({ gain: 1 });
+client/src/audio/effects/delay.ts:45:  connect(source: Tone.ToneAudioNode): this {
+client/src/audio/effects/delay.ts:58:  getNode(): Tone.FeedbackDelay { return this.delay; }
+client/src/audio/effects/delay.ts:68:  getOutput(): Tone.Gain {
+client/src/audio/effects/delay.ts:76:  connectTo(destination: Tone.ToneAudioNode): this {
+client/src/hooks/useDAWStore.ts:7: * useDAWStore.ts
+client/src/hooks/useDAWStore.ts:9: * Covers: transport, tracks, arrangement, mixer, FX, MIDI sequencer,
+client/src/hooks/useDAWStore.ts:54:// ── MIDI Sequencer (Level 2) ──────────────────────────────────────────────────
+client/src/hooks/useDAWStore.ts:56:export type MidiNote = {
+client/src/hooks/useDAWStore.ts:58:  pitch: number;    // MIDI note number 0–127
+client/src/hooks/useDAWStore.ts:64:export interface MidiPattern {
+client/src/hooks/useDAWStore.ts:68:  notes: MidiNote[];
+client/src/hooks/useDAWStore.ts:163:  // ── MIDI Sequencer (L2) ────────────────────────────────────────────────────
+client/src/hooks/useDAWStore.ts:165:  midiPatterns: MidiPattern[];
+client/src/hooks/useDAWStore.ts:224:    midiPatterns: MidiPattern[];
+client/src/hooks/useDAWStore.ts:246:  // ── Actions: MIDI Sequencer ───────────────────────────────────────────────
+client/src/hooks/useDAWStore.ts:249:  addMidiNote: (patternId: string, note: Omit<MidiNote, 'id'>) => void;
+client/src/hooks/useDAWStore.ts:250:  removeMidiNote: (patternId: string, noteId: string) => void;
+client/src/hooks/useDAWStore.ts:251:  updateMidiNote: (patternId: string, noteId: string, partial: Partial<MidiNote>) => void;
+client/src/hooks/useDAWStore.ts:253:  addMidiPattern: (pattern: Omit<MidiPattern, 'id'>) => string;
+client/src/hooks/useDAWStore.ts:312:const DEFAULT_PATTERN: MidiPattern = {
+client/src/hooks/useDAWStore.ts:325:export const useDAWStore = create<DAWStore>()(
+client/src/hooks/useDAWStore.ts:349:    // MIDI Sequencer
+client/src/hooks/useDAWStore.ts:471:    // ── MIDI Sequencer actions ────────────────────────────────────────────────
+client/src/hooks/useDAWStore.ts:474:    addMidiNote: (patternId, note) =>
+client/src/hooks/useDAWStore.ts:482:    removeMidiNote: (patternId, noteId) =>
+client/src/hooks/useDAWStore.ts:488:    updateMidiNote: (patternId, noteId, partial) =>
+client/src/hooks/useDAWStore.ts:497:    addMidiPattern: (pattern) => {
+client/src/hooks/useDAWEngine.ts:2: * useDAWEngine.ts
+client/src/hooks/useDAWEngine.ts:3: * Tone.js audio engine hook for R3 v4 DAW.
+client/src/hooks/useDAWEngine.ts:7: *  - Drive Tone.getTransport() from store state (bpm, playing, position)
+client/src/hooks/useDAWEngine.ts:8: *  - Provide tap-tempo, MIDI clock sync helpers
+client/src/hooks/useDAWEngine.ts:12: * Does NOT own Tone.js loading or AudioContext lifecycle.
+client/src/hooks/useDAWEngine.ts:13: * Runtime Tone is consumed only through the canonical R3 tone-runtime authority.
+client/src/hooks/useDAWEngine.ts:17:import type * as ToneTypes from 'tone';
+client/src/hooks/useDAWEngine.ts:19:  Tone,
+client/src/hooks/useDAWEngine.ts:20:  waitForToneReady,
+client/src/hooks/useDAWEngine.ts:21:  isToneReady,
+client/src/hooks/useDAWEngine.ts:22:  initializeToneFromGesture,
+client/src/hooks/useDAWEngine.ts:24:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useDAWEngine.ts:25:import { getAudioContext } from '@/audio/core/audio-context';
+client/src/hooks/useDAWEngine.ts:28:  gain: ToneTypes.Gain;
+client/src/hooks/useDAWEngine.ts:29:  pan: ToneTypes.Panner;
+client/src/hooks/useDAWEngine.ts:30:  meter: ToneTypes.Meter;
+client/src/hooks/useDAWEngine.ts:43:  contextState: () => AudioContextState;
+client/src/hooks/useDAWEngine.ts:46:export function useDAWEngine(): EngineAPI {
+client/src/hooks/useDAWEngine.ts:50:  const [toneReady, setToneReady] = useState(() => isToneReady());
+client/src/hooks/useDAWEngine.ts:52:  const store = useDAWStore;
+client/src/hooks/useDAWEngine.ts:59:    if (isToneReady()) {
+client/src/hooks/useDAWEngine.ts:60:      setToneReady(true);
+client/src/hooks/useDAWEngine.ts:66:    void waitForToneReady()
+client/src/hooks/useDAWEngine.ts:68:        if (alive) setToneReady(true);
+client/src/hooks/useDAWEngine.ts:71:        if (alive) setToneReady(false);
+client/src/hooks/useDAWEngine.ts:79:  // ── Bootstrap: canonical Tone runtime → Transport sync ───────────────────
+client/src/hooks/useDAWEngine.ts:83:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:85:      bpm => { Tone.getTransport().bpm.value = bpm; },
+client/src/hooks/useDAWEngine.ts:90:    // Tone transport position is established only by explicit seek/play actions.
+client/src/hooks/useDAWEngine.ts:98:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:101:        // Tone.Destination gain doubles as master gain control.
+client/src/hooks/useDAWEngine.ts:102:        Tone.getDestination().volume.value = Tone.gainToDb(gain);
+client/src/hooks/useDAWEngine.ts:114:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:122:            const meter = new Tone.Meter({ normalRange: true });
+client/src/hooks/useDAWEngine.ts:123:            const gain  = new Tone.Gain(track.gain);
+client/src/hooks/useDAWEngine.ts:124:            const pan   = new Tone.Panner(track.pan);
+client/src/hooks/useDAWEngine.ts:174:      if (useDAWStore.getState().playing) {
+client/src/hooks/useDAWEngine.ts:175:        const pos = Tone.getTransport().position;
+client/src/hooks/useDAWEngine.ts:181:          const { timeSignature } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:184:          useDAWStore.getState().setPosition(posBeats);
+client/src/hooks/useDAWEngine.ts:188:            useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:191:            Tone.getTransport().position =
+client/src/hooks/useDAWEngine.ts:207:    await initializeToneFromGesture();
+client/src/hooks/useDAWEngine.ts:211:    const { playing, setPlaying } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:214:      if (isToneReady()) {
+client/src/hooks/useDAWEngine.ts:215:        Tone.getTransport().pause();
+client/src/hooks/useDAWEngine.ts:222:    void initializeToneFromGesture()
+client/src/hooks/useDAWEngine.ts:224:        Tone.getTransport().start();
+client/src/hooks/useDAWEngine.ts:233:    if (isToneReady()) {
+client/src/hooks/useDAWEngine.ts:234:      Tone.getTransport().stop();
+client/src/hooks/useDAWEngine.ts:237:    useDAWStore.getState().setPlaying(false);
+client/src/hooks/useDAWEngine.ts:238:    useDAWStore.getState().setRecording(false);
+client/src/hooks/useDAWEngine.ts:239:    useDAWStore.getState().setPosition(0);
+client/src/hooks/useDAWEngine.ts:244:      useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:251:    void initializeToneFromGesture()
+client/src/hooks/useDAWEngine.ts:254:          Tone.getTransport().start();
+client/src/hooks/useDAWEngine.ts:283:      useDAWStore.getState().setBpm(bpm);
+client/src/hooks/useDAWEngine.ts:288:    const { timeSignature } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:292:    useDAWStore.getState().setPosition(beat);
+client/src/hooks/useDAWEngine.ts:294:    if (isToneReady()) {
+client/src/hooks/useDAWEngine.ts:295:      Tone.getTransport().position = `${bar}:${beats}:0`;
+client/src/hooks/useDAWEngine.ts:300:    useDAWStore.getState().setBpm(useDAWStore.getState().bpm + delta);
+client/src/hooks/useDAWEngine.ts:311:    return useDAWStore.getState().position;
+client/src/hooks/useDAWEngine.ts:314:  const contextState = useCallback((): AudioContextState => {
+client/src/hooks/useDAWEngine.ts:317:    if (!isToneReady()) return 'suspended';
+client/src/hooks/useDAWEngine.ts:319:    return getAudioContext().state;
+client/src/hooks/useCollabSocket.ts:18:import type { CollabUser } from './useDAWStore';
+client/src/hooks/useCollabSocket.ts:19:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCollabSocket.ts:51:      useDAWStore.getState().setCollabConnected(true);
+client/src/hooks/useCollabSocket.ts:63:        const store = useDAWStore.getState();
+client/src/hooks/useCollabSocket.ts:103:      useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:107:      useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:122:    const store = useDAWStore.getState();
+client/src/hooks/useCollabSocket.ts:140:    useDAWStore.getState().setCollabRoom(roomId);
+client/src/hooks/useCollabSocket.ts:141:    useDAWStore.getState().setCollabEnabled(true);
+client/src/hooks/useCollabSocket.ts:149:      const userId = useDAWStore.getState().collabUsers.find(u => u.id)?.id;
+client/src/hooks/useCollabSocket.ts:155:    useDAWStore.getState().setCollabEnabled(false);
+client/src/hooks/useCollabSocket.ts:156:    useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:157:    useDAWStore.getState().setCollabRoom(null);
+client/src/hooks/useCollabSocket.ts:158:    useDAWStore.getState().setCollabUsers([]);
+client/src/audio/dj-controls/crossfader.ts:2:import * as Tone from 'tone';
+client/src/audio/dj-controls/crossfader.ts:6:  private channelAGain: Tone.Gain;
+client/src/audio/dj-controls/crossfader.ts:7:  private channelBGain: Tone.Gain;
+client/src/audio/dj-controls/crossfader.ts:8:  private output: Tone.Gain;
+client/src/audio/dj-controls/crossfader.ts:14:    this.channelAGain = new Tone.Gain({ gain: 1 });
+client/src/audio/dj-controls/crossfader.ts:15:    this.channelBGain = new Tone.Gain({ gain: 0 });
+client/src/audio/dj-controls/crossfader.ts:16:    this.output = new Tone.Gain({ gain: 1 }).toDestination();
+client/src/audio/dj-controls/crossfader.ts:49:    const now = Tone.now();
+client/src/audio/dj-controls/crossfader.ts:126:  connectChannelA(source: Tone.ToneAudioNode | AudioNode): this {
+client/src/audio/dj-controls/crossfader.ts:134:  connectChannelB(source: Tone.ToneAudioNode | AudioNode): this {
+client/src/audio/dj-controls/crossfader.ts:144:    const now = Tone.now();
+client/src/hooks/useAudioInitialization.ts:21:    // gated on window.Tone (CDN-only no-ops in this ESM project).
+client/src/hooks/useAudioInitialization.ts:22:    // AudioContext deferral is now handled by the MasterEngine lazy getter.
+client/src/hooks/useCloudSync.ts:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts:125:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:148:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts:150:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:178:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:183:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts:193:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:230:    const store = useDAWStore.getState();
+client/src/hooks/useAutoLeveling.ts:80:  audioContext:   AudioContext | null,
+client/src/hooks/use-waveform-audio-engine.ts:4: * Custom hook to integrate waveform editor with existing AudioEngine
+client/src/hooks/use-waveform-audio-engine.ts:5: * Falls back to creating a local context if AudioEngine is unavailable
+client/src/hooks/use-waveform-audio-engine.ts:7:export const useWaveformAudioEngine = () => {
+client/src/hooks/use-waveform-audio-engine.ts:8:  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+client/src/hooks/use-waveform-audio-engine.ts:11:    // Try to use existing AudioContext from your AudioEngine
+client/src/hooks/use-waveform-audio-engine.ts:13:    const initAudioContext = async () => {
+client/src/hooks/use-waveform-audio-engine.ts:15:        // Check if AudioContext already exists globally (from your AudioEngine)
+client/src/hooks/use-waveform-audio-engine.ts:19:          setAudioContext(existingContext);
+client/src/hooks/use-waveform-audio-engine.ts:21:          // Create new AudioContext for standalone usage
+client/src/hooks/use-waveform-audio-engine.ts:22:          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+client/src/hooks/use-waveform-audio-engine.ts:23:          setAudioContext(ctx);
+client/src/hooks/use-waveform-audio-engine.ts:33:    initAudioContext();
+client/src/hooks/use-waveform-audio-engine.ts:38:      console.error('AudioContext not initialized');
+client/src/hooks/use-midi.ts:2: * use-midi.ts — Web MIDI API input routing for R3 v4
+client/src/hooks/use-midi.ts:15: *     to play twice (once from drum-pads MIDI handler, once from here).
+client/src/hooks/use-midi.ts:17: *     MIDI handling, or for routing to a custom handler that skips drum-pads.
+client/src/hooks/use-midi.ts:20: *   Pads  → MIDI notes 36–51  (C2–D#3,  16 pads)
+client/src/hooks/use-midi.ts:21: *   Keys  → MIDI notes 60–83  (C4–B5,   24 keys)
+client/src/hooks/use-midi.ts:30:export type MidiStatus = 'idle' | 'unavailable' | 'denied' | 'active';
+client/src/hooks/use-midi.ts:32:export interface UseMidiOptions {
+client/src/hooks/use-midi.ts:34:   * Called for MIDI notes 36–51.  index = note - 36 (0-based, 16 pads).
+client/src/hooks/use-midi.ts:37:   *    DrumPads component — it already owns its own MIDI listener and
+client/src/hooks/use-midi.ts:42:   * Called for MIDI notes 60–83.
+client/src/hooks/use-midi.ts:52:export function useMidi({ onPad, onKey, enabled = true }: UseMidiOptions = {}) {
+client/src/hooks/use-midi.ts:53:  const accessRef = useRef<MIDIAccess | null>(null);
+client/src/hooks/use-midi.ts:54:  const [midiStatus,     setStatus] = useState<MidiStatus>('idle');
+client/src/hooks/use-midi.ts:63:  const handleMessage = useCallback((event: MIDIMessageEvent) => {
+client/src/hooks/use-midi.ts:82:  const wireInput = useCallback((input: MIDIInput) => {
+client/src/hooks/use-midi.ts:88:    if (typeof navigator === 'undefined' || !navigator.requestMIDIAccess) {
+client/src/hooks/use-midi.ts:95:    navigator.requestMIDIAccess({ sysex: false })
+client/src/hooks/use-midi.ts:96:      .then((access: MIDIAccess) => {
+client/src/hooks/use-midi.ts:103:        access.onstatechange = (e: MIDIConnectionEvent) => {
+client/src/hooks/use-midi.ts:106:            if (port && port.state === 'connected') wireInput(port as MIDIInput);
+client/src/hooks/use-midi.ts:107:            else (port as MIDIInput).onmidimessage = null;
+client/src/hooks/use-midi.ts:119:          (input as MIDIInput).onmidimessage = null;
+client/src/audio/core/audio-graph.ts:3:  getAudioContext,
+client/src/audio/core/audio-graph.ts:4:  resumeAudioContext,
+client/src/audio/core/audio-graph.ts:5:  onAudioContext,
+client/src/audio/core/audio-graph.ts:6:  closeAudioContext,
+client/src/audio/core/audio-graph.ts:40:  readonly context: AudioContext;
+client/src/audio/core/audio-graph.ts:59:  // Clean up when the AudioContext singleton is closed externally
+client/src/audio/core/audio-graph.ts:65:    this.context     = getAudioContext();
+client/src/audio/core/audio-graph.ts:92:    this.removeContextListener = onAudioContext(() => {
+client/src/audio/core/audio-graph.ts:95:      console.warn('[AudioGraph] AudioContext was re-created. Instantiate a new AudioGraph.');
+client/src/audio/core/audio-graph.ts:240:    await resumeAudioContext();
+client/src/audio/core/audio-graph.ts:248:  /** Current AudioContext time in seconds */
+client/src/audio/core/audio-graph.ts:280:   * Dispose the graph AND close the underlying AudioContext singleton.
+client/src/audio/core/audio-graph.ts:281:   * After this, calling `getAudioContext()` will create a fresh one.
+client/src/audio/core/audio-graph.ts:285:    await closeAudioContext();
+client/src/audio/core/audio-graph.ts:344:// Lazily created so tests can import without triggering AudioContext construction
+client/src/audio/clips/audio-clip-loader.ts:2:import { getAudioContext } from '../core/audio-context';
+client/src/audio/clips/audio-clip-loader.ts:72:  private context: AudioContext;
+client/src/audio/clips/audio-clip-loader.ts:87:    this.context = getAudioContext();
+client/src/hooks/useLoopEngineFFTRef.ts:3: * Bridges Tone.js FFT analysis to a stable React ref consumed by Three.js scenes.
+client/src/hooks/useLoopEngineFFTRef.ts:14: *  - Tone.FFT smoothing: 0.8 (typical for visuals — adjust for responsiveness)
+client/src/hooks/useLoopEngineFFTRef.ts:16: *  - Cleanup: disposes Tone nodes on unmount
+client/src/hooks/useLoopEngineFFTRef.ts:20:import * as Tone from 'tone';
+client/src/hooks/useLoopEngineFFTRef.ts:44:    // Tone.FFT — frequency domain
+client/src/hooks/useLoopEngineFFTRef.ts:45:    const fftNode = new Tone.FFT({ size: FFT_SIZE, smoothing: SMOOTHING });
+client/src/hooks/useLoopEngineFFTRef.ts:46:    // Tone.Waveform — time domain
+client/src/hooks/useLoopEngineFFTRef.ts:47:    const waveformNode = new Tone.Waveform({ size: FFT_SIZE });
+client/src/hooks/useLoopEngineFFTRef.ts:48:    // Tone.Meter — RMS
+client/src/hooks/useLoopEngineFFTRef.ts:49:    const meterNode = new Tone.Meter({ normalRange: true, smoothing: 0.85 });
+client/src/hooks/useLoopEngineFFTRef.ts:51:    // Tap into the Tone.Destination (master output) for analysis
+client/src/hooks/useLoopEngineFFTRef.ts:52:    Tone.getDestination().connect(fftNode);
+client/src/hooks/useLoopEngineFFTRef.ts:53:    Tone.getDestination().connect(waveformNode);
+client/src/hooks/useLoopEngineFFTRef.ts:54:    Tone.getDestination().connect(meterNode);
+client/src/store/index.ts:32:} from './audio-store';
+client/src/hooks/use-ir-reverb.ts:38:    import("tone").then(Tone => {
+client/src/hooks/use-ir-reverb.ts:39:      const rawCtx = Tone.getContext().rawContext as AudioContext;
+client/src/store/audio-store.ts:19:import { getAudioContext } from "@/audio/core/audio-context";
+client/src/store/audio-store.ts:28:  audioContext: AudioContext | null;
+client/src/store/audio-store.ts:53:  initAudioContext: () => Promise<void>;
+client/src/store/audio-store.ts:133:        initAudioContext: async () => {
+client/src/store/audio-store.ts:140:            const context = getAudioContext();
+client/src/store/audio-store.ts:466:            // Shared AudioContext is owned by audio-context.ts; do not close it.
+client/src/store/audio-store.ts:479:        name: 'audio-store',
+client/src/audio/core/beat-detector.ts:1:import { getAudioContext } from "@/audio/core/audio-context";
+client/src/audio/core/beat-detector.ts:17:interface AudioEngineConfig {
+client/src/audio/core/beat-detector.ts:28:export class AudioEngine {
+client/src/audio/core/beat-detector.ts:29:  private ctx!: AudioContext;
+client/src/audio/core/beat-detector.ts:38:  private config: AudioEngineConfig;
+client/src/audio/core/beat-detector.ts:53:  constructor(config?: AudioEngineConfig) {
+client/src/audio/core/beat-detector.ts:65:    this.ctx = getAudioContext();
+client/src/audio/core/beat-detector.ts:167:export const beatDetector = new AudioEngine();
+client/src/hooks/use-audio-engine.ts:7:export function useAudioEngine() {
+client/src/hooks/use-analysis-engine.ts:6:import { AudioEngine } from '@/audio/core/analysis-engine';
+client/src/hooks/use-analysis-engine.ts:48:export interface AudioEngineState {
+client/src/hooks/use-analysis-engine.ts:73:export function useAudioEngine(tracks?: Track[]) {
+client/src/hooks/use-analysis-engine.ts:75:  const [state, setState] = useState<AudioEngineState>({
+client/src/store/vst-store.ts:49:  initialize: (audioContext: AudioContext) => Promise<void>;
+client/src/store/vst-store.ts:117:      initialize: async (audioContext: AudioContext) => {

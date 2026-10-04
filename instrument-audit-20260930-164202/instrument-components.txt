@@ -1,0 +1,83 @@
+client/src/pages/instrument.tsx:10: * DrumPads, PianoKeys, FXPanel, DJControls, AudioVisualizer,
+client/src/pages/instrument.tsx:11: * MicrophoneInput, HeaderControls, TransportControls
+client/src/pages/instrument.tsx:24:import { MicrophoneInput } from '@/components/microphone-input';
+client/src/pages/instrument.tsx:27:import { DrumPads } from '@/components/drum-pads';
+client/src/pages/instrument.tsx:28:import { PianoKeys } from '@/components/piano-keys';
+client/src/pages/instrument.tsx:30:import { DJControls } from '@/components/dj-controls';
+client/src/pages/instrument.tsx:31:import { TransportControls } from '@/components/transport-controls';
+client/src/pages/instrument.tsx:32:import { AudioVisualizer } from '@/components/audio-visualizer';
+client/src/pages/instrument.tsx:34:import { VSTBrowser } from '@/components/vst-browser';
+client/src/pages/instrument.tsx:36:import { HeaderControls } from '@/components/header-controls';
+client/src/pages/instrument.tsx:37:import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
+client/src/pages/instrument.tsx:59:const LoopStation505 = lazy(() =>
+client/src/pages/instrument.tsx:60:  import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
+client/src/pages/instrument.tsx:226:/* ── CollapsibleFXPanel overrides ─────────────────────────────────────── */
+client/src/pages/instrument.tsx:232:/* Remove outer panel border on each CollapsibleFXPanel root.
+client/src/pages/instrument.tsx:629:/* TRANSPORT CONTROLS (from TransportControls component)                  */
+client/src/pages/instrument.tsx:813:/* Strip sticky header / backdrop from HeaderControls inner wrapper */
+client/src/pages/instrument.tsx:1291:  // ── handleLoadJson — accepts the JSON string HeaderControls passes ────────
+client/src/pages/instrument.tsx:1292:  //    HeaderControls reads the file itself and calls onLoad(jsonString).
+client/src/pages/instrument.tsx:1438:            <HeaderControls
+client/src/pages/instrument.tsx:1468:                  body: <DrumPads pads={state.pads} onTrigger={triggerPad} onAssignSample={assignPadSample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
+client/src/pages/instrument.tsx:1470:                  body: <PianoKeys keys={state.keys} onTrigger={triggerKey} onAssignSample={assignKeySample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
+client/src/pages/instrument.tsx:1475:                    <VSTBrowser
+client/src/pages/instrument.tsx:1482:                  body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><LoopStation505 /></Suspense> },
+client/src/pages/instrument.tsx:1486:                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
+client/src/pages/instrument.tsx:1488:                  </CollapsibleFXPanel>
+client/src/pages/instrument.tsx:1504:                      <AudioVisualizer getAnalyserData={getAnalyserData} isInitialized={isInitialized} isActive={isInitialized} />
+client/src/pages/instrument.tsx:1506:                        <TransportControls
+client/src/pages/instrument.tsx:1515:                  body: <MicrophoneInput onAudioData={handleMicrophoneData} /> },
+client/src/pages/instrument.tsx:1519:                  body: <DJControls filterVal={state.filterVal} pitchSemitones={state.pitchSemitones} crossfade={state.crossfade} onFilterChange={setFilter} onPitchChange={setPitch} onCrossfadeChange={setCrossfade} /> },
+client/src/pages/instrument.tsx:1523:                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
+client/src/pages/instrument.tsx:1525:                  </CollapsibleFXPanel>
+client/src/components/logout-button.tsx:2:// Canonical logout — used by PageNav (full) and HeaderControls (compact).
+client/src/components/collapsible-fx-panel.tsx:20:interface CollapsibleFXPanelProps {
+client/src/components/collapsible-fx-panel.tsx:39:export const CollapsibleFXPanel = ({
+client/src/components/collapsible-fx-panel.tsx:48:}: CollapsibleFXPanelProps) => {
+client/src/components/collapsible-fx-panel.tsx:169:           * This avoids mounting audio nodes (AudioVisualizer, etc.) until needed,
+client/src/components/theme-switcher.tsx:5: * via the HeaderControls dropdown.
+client/src/components/piano-keys.tsx:118:interface PianoKeysProps {
+client/src/components/piano-keys.tsx:445:export function PianoKeys({
+client/src/components/piano-keys.tsx:447:}: PianoKeysProps) {
+client/src/components/piano-keys.tsx:1984:        export default PianoKeys;
+client/src/components/header-controls.tsx:31:interface HeaderControlsProps {
+client/src/components/header-controls.tsx:128:export const HeaderControls = memo(function HeaderControls({
+client/src/components/header-controls.tsx:136:}: HeaderControlsProps) {
+client/src/components/visuals/VisualizerCanvas.tsx:3:// NEW feature — replaces the simple AudioVisualizer with HTML spec.
+client/src/components/microphone-input.tsx:45:export interface MicrophoneInputProps {
+client/src/components/microphone-input.tsx:419:export default function MicrophoneInput({ onAudioData, onMidiMessage, onClipRecorded }: MicrophoneInputProps) {
+client/src/components/microphone-input.tsx:1338:export { MicrophoneInput };
+client/src/components/page-nav.tsx:76:export function PageNav() {
+client/src/components/vst-browser.tsx:87:interface VSTBrowserProps {
+client/src/components/vst-browser.tsx:96:export function VSTBrowser({ onPluginSelect, channelId }: VSTBrowserProps) {
+client/src/components/vst-browser.tsx:129:      console.error('VSTBrowser scan error:', err);
+client/src/components/types.ts:1:export interface DJControlsProps {
+client/src/components/transport-controls.tsx:5:interface TransportControlsProps {
+client/src/components/transport-controls.tsx:20:export const TransportControls = memo(function TransportControls({
+client/src/components/transport-controls.tsx:32:}: TransportControlsProps) {
+client/src/components/studio/TransportBar.tsx:3:// Preserves the existing TransportControls prop contract.
+client/src/components/studio/TransportBar.tsx:6:import { TransportControls } from '@/components/transport-controls';
+client/src/components/studio/TransportBar.tsx:124:        <TransportControls
+client/src/components/mixer-with-dj.tsx:6:import { DJControls } from "./dj-controls";
+client/src/components/mixer-with-dj.tsx:75:        <DJControls
+client/src/components/drum-pads.tsx:47:interface DrumPadsProps {
+client/src/components/drum-pads.tsx:278:export function DrumPads({
+client/src/components/drum-pads.tsx:287:}: DrumPadsProps) {
+client/src/components/dj-controls/index.ts:1:export { DJControls } from './djcontrols';
+client/src/components/dj-controls/index.ts:7:export type { DJControlsProps, PanelMode } from './types';
+client/src/components/dj-controls/djcontrols.tsx:4:import type { DJControlsProps } from './types';
+client/src/components/dj-controls/djcontrols.tsx:16:export function DJControls({
+client/src/components/dj-controls/djcontrols.tsx:20:}: DJControlsProps) {
+client/src/components/dj-controls/types.ts:7:export interface DJControlsProps {
+client/src/features/loopstation/hooks/useLoopStation505.ts:3:// client/src/features/loopstation/hooks/useLoopStation505.ts
+client/src/features/loopstation/hooks/useLoopStation505.ts:67:export function useLoopStation505() {
+client/src/components/audio-visualizer.tsx:13:interface AudioVisualizerProps {
+client/src/components/audio-visualizer.tsx:147:// Named export to match: import { AudioVisualizer } from './audio-visualizer'
+client/src/components/audio-visualizer.tsx:148:export function AudioVisualizer({
+client/src/components/audio-visualizer.tsx:157:}: AudioVisualizerProps = {}) {
+client/src/features/loopstation/LoopStation505.tsx:1:// ─── LoopStation505 v2 — Professional Studio Console ──────────────────────────
+client/src/features/loopstation/LoopStation505.tsx:17:import { PageNav } from '@/components/page-nav';
+client/src/features/loopstation/LoopStation505.tsx:19:import { useLoopStation505 } from './hooks/useLoopStation505';
+client/src/features/loopstation/LoopStation505.tsx:929:export const LoopStation505: React.FC = () => {
+client/src/features/loopstation/LoopStation505.tsx:945:  } = useLoopStation505();
+client/src/features/loopstation/components/TrackPad.tsx:6:import type { ExtendedTrackState } from '../hooks/useLoopStation505';

@@ -60,6 +60,14 @@
   --signal-clip: #ff2200;
   --signal-warn: #ffaa00;
 
+  /* DAW compatibility aliases.
+     These names already exist in live component/store code.
+     Canonical palette remains --status-ok / --accent-purple. */
+  --accent-green: #22c55e;
+  --accent-purple: #8b5cf6;
+  --accent-violet: #8b5cf6;
+  --accent-violet-soft: rgba(139, 92, 246, 0.28);
+
   /* DAW compatibility */
   --dj-black: #000000;
   --dj-surface: #0c0c0c;

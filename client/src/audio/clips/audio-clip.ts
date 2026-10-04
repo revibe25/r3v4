@@ -1,6 +1,6 @@
 // FILE: client/src/audio/clips/AudioClip.ts
 import * as Tone from 'tone';
-import { getAudioContext, getAudioContextSync } from '../core/audio-context';
+import { getAudioContext } from '../core/audio-context';
 import type { MixerChannel } from '../mixer/mixer-channel';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -92,7 +92,7 @@ export class AudioClip {
     this.buffer  = config.buffer;
     this.channel = channel;
     this.config  = { ...config };
-    this.context = getAudioContextSync() ?? new (window.AudioContext || (window as any).webkitAudioContext)();
+    this.context = getAudioContext();
 
     this.schedule();
   }

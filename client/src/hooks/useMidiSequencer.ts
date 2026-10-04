@@ -13,7 +13,7 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
-import * as Tone from 'tone';
+import { Tone, waitForToneReady } from '../audio/core/tone-runtime';
 import type { MidiNote, MidiPattern } from './useDAWStore';
 import { useDAWStore } from './useDAWStore';
 
@@ -35,7 +35,7 @@ const getPitchLabel = (midi: number): string => {
 };
 
 // Synth for sequencer preview (monophonic, acid-flavored)
-let previewSynth: Tone.MonoSynth | null = null;
+let previewSynth: InstanceType<typeof Tone.MonoSynth> | null = null;
 const getPreviewSynth = () => {
   if (!previewSynth) {
     previewSynth = new Tone.MonoSynth({
@@ -52,7 +52,13 @@ const getPreviewSynth = () => {
 };
 
 export function useMidiSequencer(): SequencerAPI {
-  const sequenceRef = useRef<Tone.Sequence | null>(null);
+  type MidiSequenceHandle = {
+    dispose(): void;
+    start(time?: number | string): void;
+    stop(): void;
+  };
+
+  const sequenceRef = useRef<MidiSequenceHandle | null>(null);
   const midiOutRef  = useRef<WebMidi.MIDIOutput | null>(null);
 
   // ── Wire up MIDI output ───────────────────────────────────────────────────
@@ -67,10 +73,17 @@ export function useMidiSequencer(): SequencerAPI {
       };
     }).catch(() => { /* WebMIDI unavailable — degrade gracefully */ });
   }, []);
-
-  // ── Rebuild Tone.Sequence whenever pattern changes ────────────────────────
   useEffect(() => {
-    const rebuild = () => {
+    let disposed = false;
+    let rebuildGeneration = 0;
+
+    const rebuild = async () => {
+      const generation = ++rebuildGeneration;
+
+      await waitForToneReady();
+
+      if (disposed || generation !== rebuildGeneration) return;
+
       const { activePatternId, midiPatterns } = useDAWStore.getState();
       const pattern = midiPatterns.find(p => p.id === activePatternId);
       if (!pattern) return;
@@ -88,7 +101,10 @@ export function useMidiSequencer(): SequencerAPI {
         stepMap.get(note.step)!.push(note);
       }
 
-      const steps = Array.from({ length: pattern.steps }, (_, i) => stepMap.get(i) ?? []);
+      const steps = Array.from(
+        { length: pattern.steps },
+        (_, i) => stepMap.get(i) ?? [],
+      );
 
       const seq = new Tone.Sequence(
         (time, notesAtStep) => {
@@ -96,18 +112,33 @@ export function useMidiSequencer(): SequencerAPI {
           useDAWStore.getState().setSequencerStep(step);
 
           if (!Array.isArray(notesAtStep)) return;
+
           for (const note of (notesAtStep as unknown as MidiNote[])) {
-            const freq  = Tone.Frequency(note.pitch, 'midi').toFrequency();
+            const freq = Tone.Frequency(note.pitch, 'midi').toFrequency();
             const durSec = Tone.Time('16n').toSeconds() * note.duration;
-            getPreviewSynth().triggerAttackRelease(freq, durSec, time, note.velocity / 127);
+
+            getPreviewSynth().triggerAttackRelease(
+              freq,
+              durSec,
+              time,
+              note.velocity / 127,
+            );
 
             // MIDI out
             const midi = midiOutRef.current;
             if (midi) {
-              const noteOnDelay  = Math.max(0, (time - Tone.now()) * 1000);
+              const noteOnDelay = Math.max(0, (time - Tone.now()) * 1000);
               const noteOffDelay = noteOnDelay + durSec * 1000;
-              midi.send([0x90, note.pitch, note.velocity], performance.now() + noteOnDelay);
-              midi.send([0x80, note.pitch, 0],             performance.now() + noteOffDelay);
+
+              midi.send(
+                [0x90, note.pitch, note.velocity],
+                performance.now() + noteOnDelay,
+              );
+
+              midi.send(
+                [0x80, note.pitch, 0],
+                performance.now() + noteOffDelay,
+              );
             }
           }
         },
@@ -115,7 +146,7 @@ export function useMidiSequencer(): SequencerAPI {
         '16n',
       );
 
-      seq.loop  = true;
+      seq.loop = true;
       sequenceRef.current = seq;
 
       // If transport is running, start the new sequence
@@ -123,13 +154,18 @@ export function useMidiSequencer(): SequencerAPI {
     };
 
     rebuild();
+
     const unsub = useDAWStore.subscribe(
       s => [s.activePatternId, s.midiPatterns] as [string | null, MidiPattern[]],
       rebuild,
     );
+
     return () => {
+      disposed = true;
+      rebuildGeneration++;
       unsub();
       sequenceRef.current?.dispose();
+      sequenceRef.current = null;
     };
   }, []);
 

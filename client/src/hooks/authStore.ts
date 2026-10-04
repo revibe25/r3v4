@@ -10,7 +10,7 @@
  *
  * Auth routes (server/routes/auth.ts — Express REST, not tRPC):
  *   POST /api/auth/register  { email, password }  → { token, user }
- *   POST /api/auth/login     { email, password }  → { token, user }
+ *   POST /api/auth/login     { credential, password }  → { token, user }
  *   GET  /api/auth/me        (Bearer token)       → { user, subscription }
  *
  * Token lifecycle:
@@ -26,6 +26,16 @@
 
 import { create } from 'zustand';
 
+class AuthHttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'AuthHttpError';
+    this.status = status;
+  }
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 export interface AuthUser {
@@ -33,6 +43,7 @@ export interface AuthUser {
   email:    string | null;   // server may omit email if registered with username only
   username: string;
   tier:     'explorer' | 'creator' | 'pro_artist'; // aligned to SubscriptionTier
+  isAdmin:  boolean; // server-authoritative DB admin flag
 }
 
 interface AuthState {
@@ -59,7 +70,7 @@ async function authFetch<T>(
   token?: string,
 ): Promise<T> {
   const res = await fetch(`${API}${path}`, {
-    method:  body ? 'POST' : 'GET',
+    method: body ? 'POST' : 'GET',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -67,11 +78,19 @@ async function authFetch<T>(
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  const data = await res.json() as Record<string, unknown>;
+  const raw = await res.text();
+
+  let data: Record<string, unknown> = {};
+
+  try {
+    data = raw ? JSON.parse(raw) as Record<string, unknown> : {};
+  } catch {
+    // Preserve the HTTP status even if the server response is not JSON.
+  }
 
   if (!res.ok) {
-    const msg = (data.message ?? data.error ?? `HTTP ${res.status}`) as string;
-    throw new Error(msg);
+    const msg = (data.message ?? data.error ?? raw ?? `HTTP ${res.status}`) as string;
+    throw new AuthHttpError(res.status, msg);
   }
 
   return data as T;
@@ -82,11 +101,9 @@ async function authFetch<T>(
 export const useAuthStore = create<AuthState>((set, get) => ({
   user:    null,
   token:   null,
-  loading: false,
-  // true when a stored token exists — prevents ProtectedRoute redirect
-  // before initAuth() has had a chance to validate it. Set to false by
-  // initAuth() on completion (success or failure). Never persisted.
-  // [wire§8] removed — auth via httpOnly cookie
+  // Auth bootstrap starts unresolved so protected routes cannot race
+  // the initial token validation.
+  loading: true,
   error:   null,
 
   // ── login ──────────────────────────────────────────────────────────────────
@@ -99,6 +116,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       );
       // [wire§8] removed — auth via httpOnly cookie
       localStorage.setItem('r3_token', token);
+      localStorage.setItem('r3_user', JSON.stringify(user));
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -120,6 +138,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       );
       // [wire§8] removed — auth via httpOnly cookie
       localStorage.setItem('r3_token', token);
+      localStorage.setItem('r3_user', JSON.stringify(user));
       set({ token, user, loading: false });
     } catch (err) {
       set({ loading: false, error: (err as Error).message });
@@ -129,34 +148,106 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // ── logout ─────────────────────────────────────────────────────────────────
   logout: () => {
-    // [wire§8] removed — auth via httpOnly cookie
     localStorage.removeItem('r3_token');
-    set({ user: null, token: null, error: null });
+    localStorage.removeItem('r3_user');
+    set({
+      user: null,
+      token: null,
+      loading: false,
+      error: null,
+    });
   },
 
   // ── initAuth — re-hydrate on app mount ────────────────────────────────────
   initAuth: async () => {
-    // Skip if already authenticated — prevents redundant /api/auth/me
-    // round-trip and loading-spinner flash when ProtectedRoute mounts
-    // after a fresh login (Zustand state is fully intact via setLocation).
-    // get() is in scope from create<AuthState>((set, get) => ...) closure.
-    if (get().user) return;
+    const state = get();
+
+    if (state.user && state.token) {
+      set({ loading: false, error: null });
+      return;
+    }
 
     const stored = localStorage.getItem('r3_token');
-    if (!stored) return;
 
-    set({ loading: true });
+    if (!stored) {
+      set({
+        user: null,
+        token: null,
+        loading: false,
+        error: null,
+      });
+      return;
+    }
+
+    let cachedUser: AuthUser | null = null;
+    const cachedRaw = localStorage.getItem('r3_user');
+
+    if (cachedRaw) {
+      try {
+        cachedUser = JSON.parse(cachedRaw) as AuthUser;
+      } catch {
+        localStorage.removeItem('r3_user');
+      }
+    }
+
+    set({
+      token: stored,
+      user: cachedUser,
+      loading: true,
+      error: null,
+    });
+
     try {
       const { user } = await authFetch<{ user: AuthUser }>(
         '/api/auth/me',
         undefined,
         stored,
       );
-      set({ token: stored, user, loading: false });
+
+      localStorage.setItem('r3_user', JSON.stringify(user));
+
+      set({
+        token: stored,
+        user,
+        loading: false,
+        error: null,
+      });
     } catch (err) {
-      // Token expired or invalid — clear silently
-      // [wire§8] removed — auth via httpOnly cookie
-      set({ token: null, user: null, loading: false });
+      // Only an explicit authorization failure invalidates the local token.
+      if (
+        err instanceof AuthHttpError &&
+        (err.status === 401 || err.status === 403)
+      ) {
+        localStorage.removeItem('r3_token');
+        localStorage.removeItem('r3_user');
+
+        set({
+          token: null,
+          user: null,
+          loading: false,
+          error: null,
+        });
+
+        return;
+      }
+
+      const fallbackUser = get().user ?? cachedUser;
+
+      console.warn(
+        '[auth] /api/auth/me unavailable; preserving stored session.',
+        err,
+      );
+
+      // A temporary network/server failure is NOT a logout.
+      // If cached identity exists, the application remains usable.
+      // Without cached identity, stay unresolved rather than redirecting
+      // to login based only on a transport failure.
+      set({
+        token: stored,
+        user: fallbackUser,
+        loading: !fallbackUser,
+        error: 'SESSION VERIFICATION TEMPORARILY UNAVAILABLE',
+      });
     }
   },
 

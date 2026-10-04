@@ -1,0 +1,193 @@
+ M client/src/App.tsx
+ M client/src/audio/clips/audio-clip-loader.ts
+ M client/src/audio/clips/audio-clip.ts
+ M client/src/audio/core/analysis-engine.ts
+ M client/src/audio/core/audio-context.ts
+ M client/src/audio/core/instrument-engine.ts
+ M client/src/audio/core/tone-runtime.ts
+ M client/src/audio/engine/AudioEngine.ts
+ M client/src/components/ProtectedRoute.tsx
+ M client/src/components/audio-visualizer.tsx
+ M client/src/components/beat-intro.tsx
+ M client/src/components/drum-pads.tsx
+ M client/src/components/microphone-input.tsx
+ M client/src/components/page-nav.tsx
+ M client/src/config/index.ts
+ M client/src/engine/audio/audioEngine.ts
+ M client/src/hooks/authStore.ts
+ M client/src/hooks/useCloudSync.ts
+ M client/src/hooks/useDAWEngine.ts
+ M client/src/hooks/useDAWStore.ts
+ M client/src/hooks/useMidiSequencer.ts
+ M client/src/hooks/useSubscription.tsx
+ M client/src/main.tsx
+ M client/src/pages/DAW.tsx
+ M client/src/pages/instrument.tsx
+ M client/src/pages/multi-track-panel/audio-engine.ts
+ M client/src/pages/pricing/PricingPage.tsx
+ M client/src/store/audio-store.ts
+ M client/src/styles/theme.css
+ M client/src/utils/audio.ts
+ M client/vite.config.ts
+ M index.ts
+ M package.json
+ M server/base-procedures.ts
+ M server/middleware/auth.ts
+ M server/middleware/enforceUsage.ts
+ M server/middleware/feature-gate.ts
+ M server/middleware/rateLimit.ts
+ M server/routers/daw.ts
+ M server/routers/subscription.ts
+ M server/routes.ts
+ M server/scripts/seed/stripe.seed.ts
+ M server/services/mock-billing.ts
+ M server/services/stripe-subscription.ts
+ M server/tsconfig.json
+ M shared/subscription.types.ts
+?? .auth-consolidation-backup-20260923-181452/
+?? .auth-consolidation-r2-backup-20260924-114919/
+?? .auth-finish-backup-20260923-125248/
+?? .auth-ui-final-backup-20260924-003156/
+?? .auth-ui-integration-backup-20260924-002213/
+?? .gate2a-stage2a2-final-repair-20260929-160239/
+?? .gate2a-stage2a2-repair-backup-20260929-153930/
+?? .gate2a-stage2a2-repair-backup-20260929-155624/
+?? .gate2a-stage2a2-syntax-repair-backup-20260929-160010/
+?? .gate2a-stage2a2-types-repair-20260929-165826/
+?? .package-json-admin-password-backup-20260924-125842
+?? .trpcauth-fix-backup-20260924-110442/
+?? .trpcauth-fix-backup-20260924-111627/
+?? .ui-completion-pass1-20260930-002817/
+?? .vite-api-warning-backup-20260930-001631/
+?? AUTH_TESTING_CHECKLIST.md
+?? App.tsx.example
+?? AuthDebugger.tsx
+?? Deploy-to-chromebook.sh
+?? INTEGRATION_GUIDE.md
+?? PRICING_R3_THEME_PRETOUCH_AUDIT-20260925-173713.txt
+?? ProtectedRoute.tsx
+?? QUICK_REFERENCE.txt
+?? R3V4_AUTH_FINISH_AND_VERIFY.sh
+?? R3V4_AUTH_FINISH_REPORT-20260923-125202.md
+?? R3V4_AUTH_FINISH_REPORT-20260923-125216.md
+?? R3V4_AUTH_FINISH_REPORT-20260923-125248.md
+?? R3_MULTITRACK_V130_QUADRUPLE_AUDIT-20260926-235842.txt
+?? R3_MULTITRACK_V130_QUADRUPLE_AUDIT-20260927-000358.txt
+?? R3_MULTITRACK_V130_QUADRUPLE_AUDIT.sh.pre-syntax-repair-20260927-000135
+?? R3_MULTITRACK_V130_QUADRUPLE_AUDIT_v2.sh
+?? README_AUTH_INTEGRATION.md
+?? audit-r3v4.sh
+?? authService.ts
+?? backups/
+?? client/pricing-2560x1440-20260930-162330.json
+?? client/pricing-2560x1440-20260930-162330.png
+?? client/pricing-responsive-audit-20260930-162811/
+?? client/pricing-responsive-audit-20260930-163025/
+?? client/public/auth.html
+?? client/public/auth.html.backup-20260924-131216
+?? client/public/fonts/
+?? client/src/App.tsx.pre-authhtmlredirect-recovery-20260925-004302
+?? client/src/App.tsx.pre-mixer-removal-20260924-234511
+?? client/src/App.tsx.pre-v130-route-20260927-024041
+?? client/src/App.tsx.pre-v130-route-20260927-024450
+?? client/src/audio/core/instrument-engine.ts.pre-worklet-fix-20260924-232407
+?? client/src/audio/fx/vst-loader.ts.pre-vite-worker-url-20260924-232012
+?? client/src/audio/fx/vst-loader.ts.pre-worklet-fix-20260924-224527
+?? client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024
+?? client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743
+?? client/src/components/microphone-input.tsx.pre-recovery-20260924-173559
+?? client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832
+?? client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511
+?? client/src/config/music-nav-links.ts.pre-mixer-nav-final-20260924-234832
+?? client/src/config/music-nav-links.ts.pre-mixer-removal-20260924-234511
+?? client/src/features/multitrack-v130/
+?? client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402
+?? client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658
+?? client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357
+?? client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557
+?? client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527
+?? client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836
+?? client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129
+?? client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210
+?? client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528
+?? client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158
+?? client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614
+?? client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445
+?? client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417
+?? client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923
+?? client/src/hooks/useDAWStore.ts.pre-daw-persistence-20260925-001658
+?? client/src/hooks/useDAWStore.ts.pre-persistence-repair-20260925-000528
+?? client/src/main.tsx.pre-gate1m-single-init-20260927-033743
+?? client/src/pages/DAW.tsx.broken-save-lock-20260925-004734
+?? client/src/pages/DAW.tsx.pre-component-selector-repair-20260925-012222
+?? client/src/pages/DAW.tsx.pre-component-selector-repair-20260925-012624
+?? client/src/pages/DAW.tsx.pre-component-selector-repair-20260925-012814
+?? client/src/pages/DAW.tsx.pre-final-six-repair-20260925-013357
+?? client/src/pages/DAW.tsx.pre-known-build-repair-20260925-010836
+?? client/src/pages/DAW.tsx.pre-local-recovery-20260925-005000
+?? client/src/pages/DAW.tsx.pre-persistence-repair-20260925-000330
+?? client/src/pages/DAW.tsx.pre-persistence-repair-20260925-000411
+?? client/src/pages/DAW.tsx.pre-save-lock-20260925-003509
+?? client/src/pages/DAW.tsx.pre-snapshot-final-20260925-220614
+?? client/src/pages/DAW.tsx.pre-ts-build-repair-20260925-010445
+?? client/src/pages/DAW.tsx.pre-user-scoped-snapshot-20260925-215923
+?? client/src/pages/instrument.tsx.backup-20260924-161719
+?? client/src/pages/instrument.tsx.pre-acidgrid-recovery-20260924-171807
+?? client/src/pages/multi-track-panel/audio-engine.ts.pre-v130-migration-20260927-001013
+?? client/src/pages/multi-track-panel/index.tsx.pre-v130-migration-20260927-001013
+?? client/src/pages/pricing/PricingPage.css
+?? client/src/pages/pricing/PricingPage.css.pre-r3-fonts-20260925-003433
+?? client/src/pages/pricing/PricingPage.tsx.pre-r3-native-pricing-20260925-002819
+?? client/src/project/daw-project-state.ts
+?? client/src/styles/theme.css.pre-daw-persistence-20260925-001658
+?? div
+?? div:first-child
+?? div:last-child
+?? fix-trpcauth.py
+?? gate2a-remediation.sh
+?? gate2a.sh
+?? "how --format=fuller --stat 45a2087"
+?? index.ts.pre-gate-1m-billing-20260927-133441
+?? index.ts.pre-gate-1m-billing-index-20260927-133610
+?? index.ts.pre-gate-1m-billing-index-20260927-133653
+?? instrument-audit-20260930-164202/
+?? master-auth-integration.sh
+?? playwright-report/
+?? r3-native-multitrack-v1.3.0-CORRECTED.html
+?? r3-v130-hover-preview.html
+?? r3v4-audit-20260923_124610.md
+?? scripts/admin-password.mjs
+?? scripts/admin-password.mjs.backup-20260924-130019
+?? server/base-procedures.ts.pre-protected-procedure-portable-type-20260926-031035
+?? server/base-procedures.ts.pre-protected-procedure-portable-type-20260926-031159
+?? server/base-procedures.ts.pre-protected-procedure-type-alignment-20260926-031525
+?? server/base-procedures.ts.pre-protected-procedure-type-repair-20260925-012222
+?? server/base-procedures.ts.pre-protected-procedure-type-repair-20260925-012624
+?? server/base-procedures.ts.pre-protected-procedure-type-repair-20260925-012814
+?? server/routers/daw.ts.pre-canonical-project-schema-20260925-233059
+?? server/routers/daw.ts.pre-gate-1m-canonical-20260926-013041
+?? server/routers/daw.ts.pre-gate-1m-canonical-20260926-014059
+?? server/routers/daw.ts.pre-gate-1m-canonical-20260926-014229
+?? server/routers/daw.ts.pre-gate-1m-canonical-20260926-020017
+?? server/routers/daw.ts.pre-gate-1m-entitlement-20260926-001403
+?? server/routers/daw.ts.pre-gate-1m-gate-completion-20260926-020119
+?? server/routers/daw.ts.pre-gate-1m-gate-completion-20260926-020221
+?? server/routers/daw.ts.pre-gate-1m-gate-completion-20260926-022139
+?? server/routes.ts.pre-remove-duplicate-trpcauth-20260927-130619
+?? server/services/mock-billing.ts.pre-gate-1m-billing-20260927-133441
+?? server/services/stripe-subscription.ts.pre-gate-1m-billing-20260927-133441
+?? server/services/stripe-subscription.ts.pre-gate-1m-entitlement-20260926-001403
+?? server/services/stripe-subscription.ts.pre-gate-1n-helper-wrapper-brace-safe-20260927-212405
+?? server/services/stripe-subscription.ts.pre-gate-1n-merge-regex-20260927-205716
+?? server/services/stripe-subscription.ts.pre-gate-1n-merge-safe-20260927-205407
+?? server/services/stripe-subscription.ts.pre-gate-1n-merge-structural-20260927-205457
+?? server/services/stripe-subscription.ts.pre-gate-1n-merge-structural-20260927-205526
+?? server/services/stripe-subscription.ts.pre-gate-1n-webhook-atomic-20260927-204451
+?? server/services/stripe-subscription.ts.pre-gate-1n-webhook-tx-merge-20260927-205048
+?? server/services/stripe-subscription.ts.pre-gate-1n-webhook-tx-merge-20260927-205225
+?? server/tsconfig.json.pre-gate-1m-archive-20260926-023807
+?? server/tsconfig.json.pre-gate-1m-archive-20260926-023954
+?? span:first-child
+?? test-results/
+?? "tyle|ag-shell|ag-frame|ag-header|ag-content|ag-left|ag-right|DrumPads|PianoKeys|DJControls|TransportControls|AudioVisualizer|HeaderControls|MicrophoneInput|VSTBrowser|CollapsibleFXPanel' "
+?? useAuth.ts
