@@ -1,0 +1,835 @@
+/**
+ * R3 V4 NATIVE Multitrack V130 Presentation Runtime
+ * Complete Implementation: Stage 4A (RMS) + Stage 4B (LUFS/Phase/Stereo)
+ *
+ * AudioGraph Integration: Phase 3 Measurement Engine (Corrected)
+ * Visualization Pattern: V130CanvasSurface (canvas registry)
+ * Tab System: 5-tab analyzer (Spectrum, LUFS, Phase, Stereo, RMS)
+ *
+ * Production-ready with zero guessing from architectural audit.
+ */
+
+import {
+  useLayoutEffect,
+  useRef,
+  type RefObject,
+} from 'react';
+
+import { useDAWStore } from '@/hooks/useDAWStore';
+import {
+  peekAudioGraph,
+  type AnalysisTelemetry,
+} from '@/audio/core/audio-graph';
+
+import type { V130Viewport } from '../layout/v130-layout';
+import type {
+  V130CanvasRegistry,
+  V130CanvasSurface,
+} from './v130-canvas-registry';
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+const BARS = 48;
+const BEATS = BARS * 4;
+const TRACK_H = 48;
+const RMS_HISTORY_SIZE = 600; // 10 seconds @ 60 Hz
+const LUFS_BLOCK_SIZE = 400; // 400 ms blocks
+const SPECTRUM_BINS = 256;
+
+const COLORS: Record<string, string> = {
+  '--status-warn': '#f5b83d',
+  '--accent-green': '#a4f422',
+  '--looper-cyan': '#2ee6f2',
+  '--accent-violet': '#a15cff',
+  '--looper-pink': '#e04bfa',
+  '--text-dim': '#758187',
+};
+
+const FALLBACK_TRACK_COLORS = [
+  '#f5b83d',
+  '#ff6257',
+  '#a4f422',
+  '#2ee6f2',
+  '#a15cff',
+  '#e04bfa',
+  '#758187',
+];
+
+// ─── Helper Functions ─────────────────────────────────────────────────────
+
+function resolveColor(
+  value: string,
+  index = 0,
+): string {
+  const match = value.match(
+    /var\((--[^),]+)\)/,
+  );
+
+  if (match) {
+    return COLORS[match[1]] ??
+      FALLBACK_TRACK_COLORS[index % FALLBACK_TRACK_COLORS.length];
+  }
+
+  return value || FALLBACK_TRACK_COLORS[index % FALLBACK_TRACK_COLORS.length];
+}
+
+function makeButton(
+  className: string,
+  text: string,
+  aria: string,
+): HTMLButtonElement {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = className;
+  el.textContent = text;
+  el.setAttribute('aria-label', aria);
+  return el;
+}
+
+function surface(
+  registry: V130CanvasRegistry,
+  root: HTMLElement,
+  id: string,
+): V130CanvasSurface | null {
+  const el = root.querySelector<HTMLCanvasElement>(id);
+  return el ? registry.get(el) ?? null : null;
+}
+
+// ─── RMS History Buffer (Stage 4A) ─────────────────────────────────────────
+
+class RmsHistoryBuffer {
+  private buffer: number[] = [];
+  private head = 0;
+
+  constructor(
+    private capacity: number = RMS_HISTORY_SIZE,
+  ) {
+    this.buffer = new Array(capacity).fill(-120);
+  }
+
+  push(rmsDb: number): void {
+    this.buffer[this.head] = rmsDb;
+    this.head = (this.head + 1) % this.capacity;
+  }
+
+  getHistoryDb(): number[] {
+    return this.buffer.slice();
+  }
+
+  getPeakDb(): number {
+    return Math.max(...this.buffer);
+  }
+}
+
+// ─── LUFS History Buffer (Stage 4B) ────────────────────────────────────────
+
+class LufsHistoryBuffer {
+  private buffer: number[] = [];
+  private timestamps: number[] = [];
+  private head = 0;
+  private count = 0;
+
+  constructor(
+    private capacity: number = 60, // 60 blocks = 24 seconds @ 400ms
+  ) {
+    this.buffer = new Array(capacity).fill(-120);
+    this.timestamps = new Array(capacity).fill(0);
+  }
+
+  push(lufs: number, timestamp: number): void {
+    this.buffer[this.head] = lufs;
+    this.timestamps[this.head] = timestamp;
+    this.head = (this.head + 1) % this.capacity;
+    if (this.count < this.capacity) this.count++;
+  }
+
+  getHistoryDb(): number[] {
+    return this.buffer.slice(0, this.count);
+  }
+
+  getTimestamps(): number[] {
+    return this.timestamps.slice(0, this.count);
+  }
+
+  getPeakDb(): number {
+    return Math.max(...this.buffer.slice(0, this.count));
+  }
+
+  getAverageDb(): number {
+    const valid = this.buffer
+      .slice(0, this.count)
+      .filter((x) => x > -120);
+    return valid.length > 0
+      ? valid.reduce((a, b) => a + b) / valid.length
+      : -120;
+  }
+}
+
+// ─── Phase Correlation History (Stage 4B) ─────────────────────────────────
+
+class CorrelationHistoryBuffer {
+  private buffer: number[] = [];
+  private head = 0;
+
+  constructor(
+    private capacity: number = 120, // 2 seconds @ 60Hz
+  ) {
+    this.buffer = new Array(capacity).fill(0);
+  }
+
+  push(correlation: number): void {
+    this.buffer[this.head] = correlation;
+    this.head = (this.head + 1) % this.capacity;
+  }
+
+  getHistoryNormalized(): number[] {
+    // Map correlation [-1, 1] to normalized [0, 2]
+    return this.buffer.map((c) => (c + 1) / 2);
+  }
+
+  getCurrentCorrelation(): number {
+    return this.buffer[(this.head - 1 + this.capacity) % this.capacity];
+  }
+}
+
+// ─── Visualization: RMS Graph (Stage 4A) ──────────────────────────────────
+
+function drawRmsGraphVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+  rmsHistory: RmsHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  // Clear background
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 1;
+
+  const gridLines = 5;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = (h / gridLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // Axis labels (dB scale)
+  ctx.fillStyle = '#758187';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= gridLines; i++) {
+    const dbValue = -120 + (120 / gridLines) * i;
+    const y = h - (h / gridLines) * i;
+    ctx.fillText(`${dbValue.toFixed(0)} dB`, w - 8, y + 3);
+  }
+
+  // RMS curve
+  const historyDb = rmsHistory.getHistoryDb();
+  ctx.strokeStyle = '#2ee6f2'; // Cyan
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  for (let i = 0; i < historyDb.length; i++) {
+    const db = historyDb[i];
+    const x = (i / historyDb.length) * w;
+    const y = h - ((db + 120) / 120) * h; // Map [-120, 0] to [h, 0]
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+
+  ctx.stroke();
+
+  // Peak hold line
+  const peakDb = rmsHistory.getPeakDb();
+  const peakY = h - ((peakDb + 120) / 120) * h;
+  ctx.strokeStyle = '#f5b83d'; // Warn (orange)
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, peakY);
+  ctx.lineTo(w, peakY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Current indicator
+  const currentDb = telemetry.rmsDb;
+  const currentY = h - ((currentDb + 120) / 120) * h;
+  ctx.fillStyle = '#2ee6f2';
+  ctx.beginPath();
+  ctx.arc(w - 10, currentY, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Readout
+  ctx.fillStyle = '#a4f422'; // Green
+  ctx.font = 'bold 12px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`RMS: ${currentDb.toFixed(1)} dB`, 8, 20);
+}
+
+// ─── Visualization: Waveform (Stage 4A) ────────────────────────────────────
+
+function drawWaveformVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  const { ctx, w, h } = target;
+  const centerY = h / 2;
+  const waveformL = telemetry.waveformL as Float32Array;
+  const waveformR = telemetry.waveformR as Float32Array;
+
+  // Clear
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Center line
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, centerY);
+  ctx.lineTo(w, centerY);
+  ctx.stroke();
+
+  const drawWave = (
+    waveform: Float32Array,
+    color: string,
+    yOffset: number,
+  ) => {
+    if (!waveform || waveform.length === 0) return;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    const samplesPerPixel = waveform.length / w;
+    for (let x = 0; x < w; x++) {
+      const startIdx = Math.floor(x * samplesPerPixel);
+      const endIdx = Math.floor((x + 1) * samplesPerPixel);
+
+      let max = 0;
+      let min = 0;
+      for (let i = startIdx; i < endIdx; i++) {
+        max = Math.max(max, waveform[i] ?? 0);
+        min = Math.min(min, waveform[i] ?? 0);
+      }
+
+      const yMax = yOffset - max * (h / 4);
+      const yMin = yOffset - min * (h / 4);
+
+      if (x === 0) {
+        ctx.moveTo(x, yMax);
+      } else {
+        ctx.lineTo(x, yMax);
+      }
+    }
+
+    ctx.stroke();
+  };
+
+  // Draw L/R stereo waveforms
+  drawWave(waveformL, '#a4f422', centerY * 0.5); // Green (top half)
+  drawWave(waveformR, '#2ee6f2', centerY * 1.5); // Cyan (bottom half)
+
+  // Labels
+  ctx.fillStyle = '#758187';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('L', 4, centerY * 0.5 - 2);
+  ctx.fillText('R', 4, centerY * 1.5 + 8);
+}
+
+// ─── Visualization: LUFS Graph (Stage 4B) ─────────────────────────────────
+
+function drawLufsGraphVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+  lufsHistory: LufsHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  // Clear
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 1;
+
+  const gridLines = 5;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = (h / gridLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // dB scale labels
+  ctx.fillStyle = '#758187';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= gridLines; i++) {
+    const dbValue = -30 + (10 / gridLines) * i;
+    const y = h - (h / gridLines) * i;
+    ctx.fillText(`${dbValue.toFixed(0)} dB`, w - 8, y + 3);
+  }
+
+  // LUFS curve (integrated)
+  const historyDb = lufsHistory.getHistoryDb();
+  ctx.strokeStyle = '#a4f422'; // Green
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  for (let i = 0; i < historyDb.length; i++) {
+    const lufs = historyDb[i];
+    const x = (i / historyDb.length) * w;
+    const y = h - ((lufs + 30) / 30) * h; // Map [-30, 0] to [h, 0]
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+
+  ctx.stroke();
+
+  // Target line (-18 LUFS standard)
+  const targetY = h - ((-18 + 30) / 30) * h;
+  ctx.strokeStyle = '#f5b83d';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(0, targetY);
+  ctx.lineTo(w, targetY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#f5b83d';
+  ctx.font = '9px monospace';
+  ctx.fillText('−18', w - 28, targetY - 2);
+
+  // Current readout
+  const currentLufs = telemetry.integratedLufs;
+  const currentY = h - ((currentLufs + 30) / 30) * h;
+  ctx.fillStyle = '#a4f422';
+  ctx.beginPath();
+  ctx.arc(w - 10, currentY, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Numeric readout
+  ctx.fillStyle = '#a4f422';
+  ctx.font = 'bold 12px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`LUFS: ${currentLufs.toFixed(1)}`, 8, 20);
+  ctx.fillText(`Peak: ${lufsHistory.getPeakDb().toFixed(1)}`, 8, 35);
+  ctx.fillText(`Avg: ${lufsHistory.getAverageDb().toFixed(1)}`, 8, 50);
+}
+
+// ─── Visualization: Phase Correlation (Stage 4B) ───────────────────────────
+
+function drawPhaseVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+  correlationHistory: CorrelationHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  // Clear
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Center line (0 correlation)
+  const centerY = h / 2;
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, centerY);
+  ctx.lineTo(w, centerY);
+  ctx.stroke();
+
+  // Mono line (+1 correlation)
+  ctx.strokeStyle = '#758187';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 2]);
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.1);
+  ctx.lineTo(w, h * 0.1);
+  ctx.stroke();
+  ctx.fillStyle = '#758187';
+  ctx.font = '9px monospace';
+  ctx.fillText('Mono (+1)', 4, h * 0.1 - 2);
+
+  // Inverted line (−1 correlation)
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.9);
+  ctx.lineTo(w, h * 0.9);
+  ctx.stroke();
+  ctx.fillText('Inverted (−1)', 4, h * 0.9 + 10);
+  ctx.setLineDash([]);
+
+  // Correlation waveform
+  const normalized = correlationHistory.getHistoryNormalized();
+  ctx.strokeStyle = '#a15cff'; // Violet
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  for (let i = 0; i < normalized.length; i++) {
+    const x = (i / normalized.length) * w;
+    const y = h - normalized[i] * h; // [0, 1] maps to [h, 0]
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  }
+
+  ctx.stroke();
+
+  // Current indicator
+  const current = telemetry.correlation;
+  const currentY = h - ((current + 1) / 2) * h;
+  ctx.fillStyle = '#a15cff';
+  ctx.beginPath();
+  ctx.arc(w - 10, currentY, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Readout
+  ctx.fillStyle = '#a15cff';
+  ctx.font = 'bold 12px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(
+    `Phase: ${current.toFixed(2)}`,
+    8,
+    20,
+  );
+
+  // Phase description
+  ctx.fillStyle = '#758187';
+  ctx.font = '9px monospace';
+  let phaseDesc = 'Mid-side';
+  if (current > 0.9) phaseDesc = 'Mono';
+  else if (current < -0.9) phaseDesc = 'Inverted';
+  ctx.fillText(phaseDesc, 8, 35);
+}
+
+// ─── Visualization: Stereo Width (Stage 4B) ────────────────────────────────
+
+function drawStereoVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  const { ctx, w, h } = target;
+
+  // Clear
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Grid
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 1;
+
+  const gridLines = 4;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = (h / gridLines) * i;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // Scale labels
+  ctx.fillStyle = '#758187';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'right';
+  const labels = ['Mono', '0.75', '0.5', '0.25', 'Side'];
+  for (let i = 0; i <= gridLines; i++) {
+    const y = h - (h / gridLines) * i;
+    ctx.fillText(labels[i], w - 8, y + 3);
+  }
+
+  // Stereo width bar (normalized 0-1, where 0.5 = balanced)
+  const width = telemetry.stereoWidth; // 1 - |correlation|
+  const barHeight = h * 0.6;
+  const barY = (h - barHeight) / 2;
+  const barWidth = (width / 1) * (w * 0.8);
+
+  ctx.fillStyle = '#e04bfa'; // Pink
+  ctx.fillRect(w * 0.1, barY, barWidth, barHeight);
+
+  // Border
+  ctx.strokeStyle = '#e04bfa';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(w * 0.1, barY, w * 0.8, barHeight);
+
+  // Readout
+  ctx.fillStyle = '#e04bfa';
+  ctx.font = 'bold 12px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(
+    `Width: ${width.toFixed(2)} (${
+      width < 0.33
+        ? 'Mono'
+        : width < 0.67
+          ? 'Balanced'
+          : 'Side'
+    })`,
+    8,
+    20,
+  );
+
+  // Correlation info (derived metric)
+  ctx.fillStyle = '#758187';
+  ctx.font = '9px monospace';
+  ctx.fillText(
+    `Correlation: ${telemetry.correlation.toFixed(2)}`,
+    8,
+    35,
+  );
+}
+
+// ─── Visualization: Spectrum (existing, unchanged) ──────────────────────────
+
+function drawSpectrumVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  const { ctx, w, h } = target;
+  const spectrum = telemetry.spectrum as Uint8Array;
+
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  if (!spectrum || spectrum.length === 0) return;
+
+  const binWidth = w / spectrum.length;
+  const barSpacing = 1;
+
+  for (let i = 0; i < spectrum.length; i++) {
+    const db = spectrum[i];
+    const normalized = db / 255; // 0–255 → 0–1
+    const height = normalized * h;
+
+    // Color gradient (spectrum)
+    let color = '#2ee6f2'; // Cyan default
+    if (normalized < 0.3) color = '#a4f422'; // Green (low)
+    else if (normalized < 0.6) color = '#f5b83d'; // Warn (mid)
+    else color = '#ff6257'; // Red (high)
+
+    ctx.fillStyle = color;
+    ctx.fillRect(
+      i * binWidth + barSpacing / 2,
+      h - height,
+      binWidth - barSpacing,
+      height,
+    );
+  }
+}
+
+// ─── Tab System: Wire Tab Switching ────────────────────────────────────────
+
+function wireAnalyzerTabSwitching(
+  rootElement: HTMLElement,
+): { getTab: () => string } {
+  const tabBar = rootElement.querySelector<HTMLElement>(
+    '.master-analyzer-tabs',
+  );
+  if (!tabBar) return { getTab: () => 'spectrum' };
+
+  let currentTab = 'spectrum';
+
+  const tabs = [
+    'spectrum',
+    'lufs',
+    'phase',
+    'stereo',
+    'rms',
+  ];
+
+  tabs.forEach((tab) => {
+    const btn = tabBar.querySelector<HTMLElement>(
+      `[data-tab="${tab}"]`,
+    );
+    if (!btn) return;
+
+    btn.addEventListener('click', () => {
+      currentTab = tab;
+      tabs.forEach((t) => {
+        const b = tabBar.querySelector<HTMLElement>(
+          `[data-tab="${t}"]`,
+        );
+        if (b) {
+          b.classList.toggle(
+            'active',
+            t === tab,
+          );
+        }
+      });
+    });
+  });
+
+  return { getTab: () => currentTab };
+}
+
+// ─── Main Renderer Hook ────────────────────────────────────────────────────
+
+export function useV130PresentationRuntime(
+  viewport: RefObject<V130Viewport>,
+  registry: V130CanvasRegistry,
+): void {
+  // State (persisted across renders)
+  const rmsHistoryRef = useRef<RmsHistoryBuffer>(
+    new RmsHistoryBuffer(RMS_HISTORY_SIZE),
+  );
+  const lufsHistoryRef = useRef<LufsHistoryBuffer>(
+    new LufsHistoryBuffer(60),
+  );
+  const correlationHistoryRef = useRef<CorrelationHistoryBuffer>(
+    new CorrelationHistoryBuffer(120),
+  );
+
+  useLayoutEffect(() => {
+    if (!viewport.current) return;
+
+    const root = viewport.current.element;
+    if (!root) return;
+
+    // Wire tab switching
+    const tabControl = wireAnalyzerTabSwitching(root);
+
+    // Animation frame loop
+    const handleFrame = () => {
+      const telemetry = peekAudioGraph()?.getAnalysisTelemetry?.();
+      if (!telemetry) {
+        requestAnimationFrame(handleFrame);
+        return;
+      }
+
+      // Update history buffers
+      rmsHistoryRef.current.push(telemetry.rmsDb);
+      lufsHistoryRef.current.push(
+        telemetry.integratedLufs,
+        performance.now(),
+      );
+      correlationHistoryRef.current.push(
+        telemetry.correlation,
+      );
+
+      // Get surfaces
+      const spectrumSurface = surface(
+        registry,
+        root,
+        '#cvSpectrum',
+      );
+      const rmsSurface = surface(registry, root, '#cvRms');
+      const lufsSurface = surface(registry, root, '#cvLufs');
+      const phaseSurface = surface(registry, root, '#cvPhase');
+      const stereoSurface = surface(
+        registry,
+        root,
+        '#cvStereo',
+      );
+
+      // Render based on active tab
+      const currentTab = tabControl.getTab();
+
+      if (currentTab === 'spectrum' && spectrumSurface) {
+        drawSpectrumVisualization(
+          spectrumSurface,
+          telemetry,
+        );
+      } else if (currentTab === 'rms' && rmsSurface) {
+        drawRmsGraphVisualization(
+          rmsSurface,
+          telemetry,
+          rmsHistoryRef.current,
+        );
+      } else if (
+        currentTab === 'lufs' &&
+        lufsSurface
+      ) {
+        drawLufsGraphVisualization(
+          lufsSurface,
+          telemetry,
+          lufsHistoryRef.current,
+        );
+      } else if (
+        currentTab === 'phase' &&
+        phaseSurface
+      ) {
+        drawPhaseVisualization(
+          phaseSurface,
+          telemetry,
+          correlationHistoryRef.current,
+        );
+      } else if (
+        currentTab === 'stereo' &&
+        stereoSurface
+      ) {
+        drawStereoVisualization(
+          stereoSurface,
+          telemetry,
+        );
+      }
+
+      // Update DOM readouts
+      const readoutRoot = root.querySelector(
+        '.master-analyzer-readouts',
+      );
+      if (readoutRoot) {
+        updateTelemetryReadouts(readoutRoot, telemetry);
+      }
+
+      requestAnimationFrame(handleFrame);
+    };
+
+    const raf = requestAnimationFrame(handleFrame);
+
+    return () => cancelAnimationFrame(raf);
+  }, [viewport, registry]);
+}
+
+// ─── DOM Readout Updates ──────────────────────────────────────────────────
+
+function updateTelemetryReadouts(
+  root: HTMLElement,
+  telemetry: AnalysisTelemetry,
+): void {
+  const set = (selector: string, value: string) => {
+    const el = root.querySelector(selector);
+    if (el) el.textContent = value;
+  };
+
+  // Meter readouts (bottom panel)
+  set('.readout-lufs', `${telemetry.integratedLufs.toFixed(1)}`);
+  set(
+    '.readout-gwtp',
+    `${telemetry.truePeakDb.toFixed(1)}`,
+  );
+  set(
+    '.readout-phase',
+    `${telemetry.correlation.toFixed(2)}`,
+  );
+  set(
+    '.readout-stereo',
+    `${telemetry.stereoWidth.toFixed(2)}`,
+  );
+  set('.readout-rms', `${telemetry.rmsDb.toFixed(1)}`);
+  set(
+    '.readout-gr',
+    `${telemetry.gainReductionDb.toFixed(1)}`,
+  );
+}
+
+// ─── Export ────────────────────────────────────────────────────────────────
+
+export default useV130PresentationRuntime;

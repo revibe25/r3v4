@@ -1,0 +1,62 @@
+18:import { useEffect, useCallback, useState, useRef, lazy, Suspense } from 'react';
+19:import {
+23:import { Link } from 'wouter';
+24:import { MicrophoneInput } from '@/components/microphone-input';
+25:import { useAudioEngine } from '@/hooks/use-audio-engine';
+26:import { useTheme } from "@/components/theme-provider";
+27:import { DrumPads } from '@/components/drum-pads';
+28:import { PianoKeys } from '@/components/piano-keys';
+29:import { FXPanel } from '@/components/fx-panel';
+30:import { DJControls } from '@/components/dj-controls';
+31:import { TransportControls } from '@/components/transport-controls';
+32:import { AudioVisualizer } from '@/components/audio-visualizer';
+34:import { VSTBrowser } from '@/components/vst-browser';
+35:import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
+36:import { HeaderControls } from '@/components/header-controls';
+37:import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
+39:import { useToast } from '@/hooks/use-toast';
+40:import { useMidi } from '@/hooks/use-midi';
+41:import { saveSession } from '@/lib/session-store';
+1159:  const { toast } = useToast();
+1161:  const [isLoading,  setIsLoading]  = useState(false);
+1163:  const [tapFlash,   setTapFlash]   = useState(false);
+1170:  } = useAudioEngine();
+1172:  const handleTapTempo = useCallback(() => {
+1189:  useEffect(() => {
+1213:  useEffect(() => {
+1239:  const handleMidiKey = useCallback(
+1252:  const { midiStatus, midiInputCount } = useMidi({
+1260:  const handleSave = useCallback(() => {
+1277:  const handleLoad = useCallback(async (file: File) => {
+1289:  const handleExport = useCallback(() => handleSave(), [handleSave]);
+1294:  const handleLoadJson = useCallback(async (json: string) => {
+1305:  const getSessionData = useCallback((): SessionData => ({
+1317:  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+1318:  useEffect(() => {
+1333:  const handleMicrophoneData  = useCallback((data: Float32Array) => {
+1338:  const _handleMicrophoneError = useCallback((error: Error) => {
+1342:  const handleLoadSample = useCallback(async (file: File) => {
+1372:              <AlertCircle size={14} color="var(--ag-err)" style={{ flexShrink: 0, marginTop: 1 }} />
+1434:                <Link href="/daw" className="ag-nav-btn">🎚 DAW</Link>
+1438:            <HeaderControls
+1467:                { num: '01', title: 'Drum Pads', maxHeight: 400,      icon: <Music className="h-4 w-4" />,    open: true,
+1468:                  body: <DrumPads pads={state.pads} onTrigger={triggerPad} onAssignSample={assignPadSample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
+1469:                { num: '02', title: 'Piano Keys', maxHeight: 280,     icon: <Music2 className="h-4 w-4" />,   open: true,
+1470:                  body: <PianoKeys keys={state.keys} onTrigger={triggerKey} onAssignSample={assignKeySample} loadSample={handleLoadSample} disabled={!isInitialized} /> },
+1471:                { num: '03', title: 'Waveform Editor', maxHeight: 360,icon: <Activity className="h-4 w-4" />, open: false,
+1472:                  body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><WaveformEditor getWaveformData={getWaveformData} isInitialized={isInitialized} /></Suspense> },
+1473:                { num: '03B', title: 'VST Browser', maxHeight: 400,   icon: <Music2 className="h-4 w-4" />,  open: false,
+1475:                    <VSTBrowser
+1481:                { num: '04', title: 'Loop Station', maxHeight: 440,   icon: <Repeat2 className="h-4 w-4" />,  open: false,
+1482:                  body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><LoopStation505 /></Suspense> },
+1486:                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
+1501:                { num: '05', title: 'Visualizer & Transport', maxHeight: 340, icon: <Activity className="h-4 w-4" />, open: true,
+1504:                      <AudioVisualizer getAnalyserData={getAnalyserData} isInitialized={isInitialized} isActive={isInitialized} />
+1506:                        <TransportControls
+1514:                { num: '06', title: 'Microphone Input', maxHeight: 260, icon: <Mic className="h-4 w-4" />, open: false,
+1515:                  body: <MicrophoneInput onAudioData={handleMicrophoneData} /> },
+1516:                { num: '07', title: 'FX Chain', maxHeight: 320,         icon: <SlidersHorizontal className="h-4 w-4" />, open: false,
+1517:                  body: <FXPanel fx={state.fx} onToggle={toggleFX} /> },
+1518:                { num: '08', title: 'DJ Controls', maxHeight: 400,      icon: <Headphones className="h-4 w-4" />, open: false,
+1519:                  body: <DJControls filterVal={state.filterVal} pitchSemitones={state.pitchSemitones} crossfade={state.crossfade} onFilterChange={setFilter} onPitchChange={setPitch} onCrossfadeChange={setCrossfade} /> },
+1523:                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>

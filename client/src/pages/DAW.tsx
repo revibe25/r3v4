@@ -2715,10 +2715,20 @@ ExportDialog.displayName = 'ExportDialog';
 // ─── Main DAW Page ────────────────────────────────────────────────────────────
 
 export default function DAW() {
+  console.log('[DAW] Component rendering...');
 
   const { restoreLocalSnapshot } = useCloudSync();
   const engine = useDAWEngine();
-  const { audioGraphRef } = useV130Analyzer(getAudioGraph());
+  const audioGraphRef = useRef<any>(null);
+  useEffect(() => {
+    console.log('[DAW] Initializing audioGraphRef...');
+    const ag = getAudioGraph();
+    (window as any).__audioGraph = ag;
+    (window as any).__audioGraph = ag;
+    console.log('[DAW] getAudioGraph() returned:', ag);
+    audioGraphRef.current = ag;
+    console.log('[DAW] audioGraphRef.current is now:', audioGraphRef.current);
+  }, []);
   const collab = useCollabSocket();
   const seq = useMidiSequencer();
 
@@ -2851,6 +2861,20 @@ export default function DAW() {
         }}
       >
         <SessionSummaryPanel />
+        {/* Master Analyzer — Real-time spectrum/LUFS/phase visualization */}
+        <div
+          className="ag-master-analyzer-container"
+          style={{
+            height: '240px',
+            flexShrink: 0,
+            borderBottom: '1px solid var(--ln)',
+            background: 'linear-gradient(180deg, var(--p2) 0%, var(--p) 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
+  </div>
 
         {/* Transport bar */}
         <TransportBar engine={engine} />
@@ -2939,6 +2963,23 @@ export default function DAW() {
           {/* Center column: arrangement + optional MIDI sequencer */}
           <div className="flex flex-col flex-1 overflow-hidden">
             {/* Arrangement view */}
+            {/* Master Analyzer — Real-time spectrum/LUFS/phase visualization */}
+            {audioGraphRef.current ? (
+              <div
+                className="ag-master-analyzer-container"
+                style={{
+                  height: '240px',
+                  flexShrink: 0,
+                  borderBottom: '1px solid var(--ln)',
+                  background: 'linear-gradient(180deg, var(--p2) 0%, var(--p) 100%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
+              </div>
+            ) : null}
+
             <ArrangementView engine={engine} collab={collab} />
 
             {/* MIDI Sequencer — collapsible (Level 2) */}

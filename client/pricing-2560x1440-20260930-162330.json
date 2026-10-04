@@ -1,0 +1,103 @@
+{
+  "url": "http://localhost:5174/pricing",
+  "viewport": {
+    "width": 2560,
+    "height": 1440
+  },
+  "windowScroll": {
+    "x": 0,
+    "y": 0
+  },
+  "document": {
+    "scrollHeight": 1440,
+    "clientHeight": 1440,
+    "scrollWidth": 2560,
+    "clientWidth": 2560
+  },
+  "elements": {
+    "html": {
+      "height": 1440,
+      "top": 0,
+      "bottom": 1440,
+      "scrollHeight": 1440,
+      "clientHeight": 1440,
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "position": "static"
+    },
+    "body": {
+      "height": 1440,
+      "top": 0,
+      "bottom": 1440,
+      "scrollHeight": 1440,
+      "clientHeight": 1440,
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "position": "static"
+    },
+    "#root": {
+      "height": 1440,
+      "top": 0,
+      "bottom": 1440,
+      "scrollHeight": 1440,
+      "clientHeight": 1440,
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "overflowX": "hidden",
+      "overflowY": "hidden",
+      "position": "static"
+    },
+    ".pricing-page": {
+      "height": 1533,
+      "top": 44,
+      "bottom": 1577,
+      "scrollHeight": 1533,
+      "clientHeight": 1533,
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "overflowX": "hidden",
+      "overflowY": "auto",
+      "position": "relative"
+    },
+    ".pricing-hero": {
+      "height": 294,
+      "top": 124,
+      "bottom": 418,
+      "scrollHeight": 294,
+      "clientHeight": 294,
+      "scrollWidth": 1080,
+      "clientWidth": 1080,
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "position": "static"
+    },
+    ".pricing-grid": {
+      "height": 430,
+      "top": 521,
+      "bottom": 952,
+      "scrollHeight": 430,
+      "clientHeight": 430,
+      "scrollWidth": 1080,
+      "clientWidth": 1080,
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "position": "static"
+    },
+    "footer": {
+      "height": 67,
+      "top": 1510,
+      "bottom": 1577,
+      "scrollHeight": 67,
+      "clientHeight": 67,
+      "scrollWidth": 2560,
+      "clientWidth": 2560,
+      "overflowX": "visible",
+      "overflowY": "visible",
+      "position": "relative"
+    }
+  }
+}

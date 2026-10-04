@@ -14,10 +14,12 @@ import { useV130PanelRuntime } from '../layout/useV130PanelRuntime';
 
 interface V130ReferenceDomShellProps {
   viewport: V130Viewport;
+  audioGraph: any; // AudioGraph singleton instance
 }
 
 export default function V130ReferenceDomShell({
   viewport,
+  audioGraph,
 }: V130ReferenceDomShellProps) {
   const domRef =
     useRef<HTMLDivElement>(null);
@@ -28,7 +30,9 @@ export default function V130ReferenceDomShell({
   useV130PanelRuntime(
     domRef,
     panelController,
+    audioGraph,
   );
+
 
   const syncStage =
     useCallback(() => {

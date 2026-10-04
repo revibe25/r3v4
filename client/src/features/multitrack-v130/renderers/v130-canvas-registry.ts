@@ -66,9 +66,15 @@ export class V130CanvasRegistry {
     el.style.height =
       `${surface.h}px`;
 
+    // Update dimensions from current DOM layout (in case layout changed)
+    surface.w = Math.max(1, Math.round(surface.el.clientWidth));
+    surface.h = Math.max(1, Math.round(surface.el.clientHeight));
+
+    // Analyzer canvases use full scale (1.0), not viewport scale
+    const canvasScale = (surface.el.id === 'cvA' || surface.el.id === 'cvM') ? 1.0 : scale;
     this.backing(
       surface,
-      scale,
+      canvasScale,
     );
 
     return surface;
@@ -116,9 +122,11 @@ export class V130CanvasRegistry {
     surface.el.style.height =
       `${h}px`;
 
+    // Analyzer canvases use full scale (1.0), not viewport scale
+    const canvasScale = (surface.el.id === 'cvA' || surface.el.id === 'cvM') ? 1.0 : scale;
     this.backing(
       surface,
-      scale,
+      canvasScale,
     );
 
     return true;
@@ -139,9 +147,11 @@ export class V130CanvasRegistry {
         continue;
       }
 
+      // Analyzer canvases use full scale (1.0), not viewport scale
+      const canvasScale = (surface.el.id === 'cvA' || surface.el.id === 'cvM') ? 1.0 : scale;
       this.backing(
         surface,
-        scale,
+        canvasScale,
       );
     }
   }

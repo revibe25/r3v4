@@ -15,6 +15,78 @@ import type {
   V130CanvasSurface,
 } from './v130-canvas-registry';
 
+// ════════════════════════════════════════════════════════════════════════════════
+// ✨ STAGE 4A/4B: History Buffer Classes
+// ════════════════════════════════════════════════════════════════════════════════
+
+class RmsHistoryBuffer {
+  private buffer: number[] = [];
+  readonly capacity = 600; // 10 seconds @ 60 Hz
+
+  push(value: number): void {
+    this.buffer.push(value);
+    if (this.buffer.length > this.capacity) {
+      this.buffer.shift();
+    }
+  }
+
+  get values(): number[] {
+    return this.buffer;
+  }
+
+  get max(): number {
+    return Math.max(...this.buffer, -120);
+  }
+
+  reset(): void {
+    this.buffer = [];
+  }
+}
+
+class LufsHistoryBuffer {
+  private buffer: number[] = [];
+  readonly capacity = 60; // 24 seconds @ 400ms blocks
+
+  push(value: number): void {
+    this.buffer.push(value);
+    if (this.buffer.length > this.capacity) {
+      this.buffer.shift();
+    }
+  }
+
+  get values(): number[] {
+    return this.buffer;
+  }
+
+  get max(): number {
+    return Math.max(...this.buffer, -120);
+  }
+
+  reset(): void {
+    this.buffer = [];
+  }
+}
+
+class CorrelationHistoryBuffer {
+  private buffer: number[] = [];
+  readonly capacity = 120; // 2 seconds @ 60 Hz
+
+  push(value: number): void {
+    this.buffer.push(value);
+    if (this.buffer.length > this.capacity) {
+      this.buffer.shift();
+    }
+  }
+
+  get values(): number[] {
+    return this.buffer;
+  }
+
+  reset(): void {
+    this.buffer = [];
+  }
+}
+
 const BARS = 48;
 const BEATS = BARS * 4;
 const TRACK_H = 48;
@@ -499,7 +571,7 @@ function drawAnalyzer(
 
 function drawMasterMeter(
   target: V130CanvasSurface,
-  state: ReturnType<typeof useDAWStore.getState>,
+  telemetry: AnalysisTelemetry,
 ): void {
   const { ctx, w, h } = target;
 
@@ -507,15 +579,22 @@ function drawMasterMeter(
   ctx.fillStyle = '#060b0e';
   ctx.fillRect(0, 0, w, h);
 
-  const level =
+  const peakDb =
     Math.max(
-      0,
-      Math.min(
-        1,
-        (state.masterGain ?? 0.8) /
-          1.2,
-      ),
+      telemetry.peakDbL,
+      telemetry.peakDbR,
     );
+
+  const level =
+    Number.isFinite(peakDb)
+      ? Math.max(
+          0,
+          Math.min(
+            1,
+            (peakDb + 60) / 60,
+          ),
+        )
+      : 0;
 
   const y0 =
     h - 8;
@@ -1436,21 +1515,14 @@ function formatWidth(width: number): string {
   return (width * 100).toFixed(0) + '%';
 }
 
-function drawSpectrumVisualization(
+// Draw spectrum background grid (always)
+function drawSpectrumBackground(
   target: V130CanvasSurface,
-  telemetry: AnalysisTelemetry,
 ): void {
   const { ctx, w, h } = target;
   ctx.clearRect(0, 0, w, h);
   ctx.fillStyle = '#060b0e';
   ctx.fillRect(0, 0, w, h);
-
-  if (!telemetry.spectrum || telemetry.spectrum.length === 0) {
-    return;
-  }
-
-  const spectrum = telemetry.spectrum;
-  const binCount = spectrum.length;
 
   // Draw grid
   for (let i = 0; i < 7; i++) {
@@ -1471,7 +1543,28 @@ function drawSpectrumVisualization(
     ctx.stroke();
   }
 
-  // Draw spectrum bars (logarithmic frequency scaling)
+  // Draw frequency labels
+  ctx.fillStyle = '#7f98a1';
+  ctx.font = '9px system-ui';
+  for (const [i, label] of ['50', '100', '200', '500', '1k', '2k', '5k', '10k'].entries()) {
+    ctx.fillText(label, 22 + (i / 7) * Math.max(1, w - 42), h - 3);
+  }
+}
+
+// Draw spectrum bars (only when data available)
+function drawSpectrumBars(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  const { ctx, w, h } = target;
+
+  if (!telemetry.spectrum || telemetry.spectrum.length === 0) {
+    return;
+  }
+
+  const spectrum = telemetry.spectrum;
+  const binCount = spectrum.length;
+
   ctx.fillStyle = '#2ee6f2';
   const barWidth = Math.max(1, (w - 24) / 32);
 
@@ -1484,13 +1577,252 @@ function drawSpectrumVisualization(
 
     ctx.fillRect(x, y, barWidth - 1, barHeight);
   }
+}
 
-  // Draw frequency labels
+function drawSpectrumVisualization(
+  target: V130CanvasSurface,
+  telemetry: AnalysisTelemetry,
+): void {
+  drawSpectrumBackground(target);
+  drawSpectrumBars(target, telemetry);
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ✨ STAGE 4A/4B: 4 Additional Visualization Functions
+// ════════════════════════════════════════════════════════════════════════════════
+
+function drawLufsVisualization(
+  target: V130CanvasSurface,
+  buffer: LufsHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  const values = buffer.values;
+  if (values.length === 0) return;
+
+  // Draw grid
+  ctx.strokeStyle = '#122027';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 7; i++) {
+    const y = 8 + (i / 6) * Math.max(10, h - 18);
+    ctx.beginPath();
+    ctx.moveTo(18, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  for (let i = 0; i < 9; i++) {
+    const x = 18 + (i / 8) * Math.max(1, w - 24);
+    ctx.strokeStyle = '#0e181d';
+    ctx.beginPath();
+    ctx.moveTo(x, 4);
+    ctx.lineTo(x, h - 6);
+    ctx.stroke();
+  }
+
+  // Draw target line at -18 LUFS
+  ctx.strokeStyle = '#f5b83d';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  const targetNormalized = (-18 + 120) / 120;
+  const targetY = (h - 18) - targetNormalized * (h - 18) + 8;
+  ctx.beginPath();
+  ctx.moveTo(18, targetY);
+  ctx.lineTo(w, targetY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw LUFS curve
+  ctx.strokeStyle = '#a4f422';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  values.forEach((value, i) => {
+    const x = 18 + (i / buffer.capacity) * (w - 24);
+    const normalized = Math.max(0, Math.min(1, (value + 120) / 120));
+    const y = (h - 18) - normalized * (h - 18) + 8;
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+
+  ctx.stroke();
+
+  // Draw labels
   ctx.fillStyle = '#7f98a1';
   ctx.font = '9px system-ui';
-  for (const [i, label] of ['50', '100', '200', '500', '1k', '2k', '5k', '10k'].entries()) {
-    ctx.fillText(label, 22 + (i / 7) * Math.max(1, w - 42), h - 3);
+  ctx.fillText('-120', 22, h - 3);
+  ctx.textAlign = 'right';
+  ctx.fillText('-18', w - 25, targetY - 5);
+}
+
+function drawPhaseVisualization(
+  target: V130CanvasSurface,
+  buffer: CorrelationHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  const values = buffer.values;
+  if (values.length === 0) return;
+
+  // Draw center line
+  const centerY = h / 2;
+  ctx.strokeStyle = '#1a1f24';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(18, centerY);
+  ctx.lineTo(w, centerY);
+  ctx.stroke();
+
+  // Draw bounds at ±0.5
+  ctx.strokeStyle = '#2a3038';
+  ctx.lineWidth = 1;
+  const boundY1 = centerY - (h - 18) * 0.25;
+  const boundY2 = centerY + (h - 18) * 0.25;
+  ctx.beginPath();
+  ctx.moveTo(18, boundY1);
+  ctx.lineTo(w, boundY1);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(18, boundY2);
+  ctx.lineTo(w, boundY2);
+  ctx.stroke();
+
+  // Draw waveform
+  ctx.strokeStyle = '#a15cff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  values.forEach((value, i) => {
+    const x = 18 + (i / buffer.capacity) * (w - 24);
+    const normalized = (value + 1) / 2; // -1 to +1 → 0 to 1
+    const y = centerY - (normalized - 0.5) * (h - 18);
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+
+  ctx.stroke();
+
+  // Draw labels
+  ctx.fillStyle = '#7f98a1';
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'right';
+  ctx.fillText('+1', w - 25, boundY1 + 10);
+  ctx.fillText('0', w - 25, centerY + 4);
+  ctx.fillText('-1', w - 25, boundY2 - 5);
+}
+
+function drawStereoVisualization(
+  target: V130CanvasSurface,
+  stereoWidth: number,
+): void {
+  const { ctx, w, h } = target;
+
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw background bar
+  const barHeight = 40;
+  const barY = (h - barHeight) / 2;
+  ctx.fillStyle = '#1a1f24';
+  ctx.fillRect(18, barY, w - 36, barHeight);
+
+  // Draw stereo width bar
+  ctx.fillStyle = '#e04bfa';
+  const barWidth = (stereoWidth || 0) * (w - 36);
+  ctx.fillRect(18, barY, barWidth, barHeight);
+
+  // Draw border
+  ctx.strokeStyle = '#2a3038';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(17.5, barY - 0.5, w - 35, barHeight + 1);
+
+  // Draw labels
+  ctx.fillStyle = '#7f98a1';
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('Mono', 22, barY - 8);
+  ctx.textAlign = 'right';
+  ctx.fillText('Stereo', w - 22, barY - 8);
+
+  // Draw percentage
+  ctx.fillStyle = '#a4f422';
+  ctx.font = '11px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${(stereoWidth * 100).toFixed(0)}%`, w / 2, h / 2 + 6);
+}
+
+function drawRmsVisualization(
+  target: V130CanvasSurface,
+  buffer: RmsHistoryBuffer,
+): void {
+  const { ctx, w, h } = target;
+
+  ctx.fillStyle = '#060b0e';
+  ctx.fillRect(0, 0, w, h);
+
+  const values = buffer.values;
+  if (values.length === 0) return;
+
+  // Draw grid
+  ctx.strokeStyle = '#122027';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 7; i++) {
+    const y = 8 + (i / 6) * Math.max(10, h - 18);
+    ctx.beginPath();
+    ctx.moveTo(18, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
   }
+
+  for (let i = 0; i < 9; i++) {
+    const x = 18 + (i / 8) * Math.max(1, w - 24);
+    ctx.strokeStyle = '#0e181d';
+    ctx.beginPath();
+    ctx.moveTo(x, 4);
+    ctx.lineTo(x, h - 6);
+    ctx.stroke();
+  }
+
+  // Draw RMS curve
+  ctx.strokeStyle = '#2ee6f2';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+
+  values.forEach((value, i) => {
+    const x = 18 + (i / buffer.capacity) * (w - 24);
+    const normalized = Math.max(0, Math.min(1, (value + 120) / 120));
+    const y = (h - 18) - normalized * (h - 18) + 8;
+
+    if (i === 0) {
+      ctx.moveTo(x, y);
+    } else {
+      ctx.lineTo(x, y);
+    }
+  });
+
+  ctx.stroke();
+
+  // Draw labels
+  ctx.fillStyle = '#7f98a1';
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('-120', 22, h - 3);
+  ctx.textAlign = 'right';
+  ctx.fillText('0', w - 25, 12);
 }
 
 function updateTelemetryReadouts(
@@ -1521,11 +1853,11 @@ function updateTelemetryReadouts(
   }
 }
 
-
 export function useV130PresentationRuntime(
   rootRef: RefObject<HTMLElement | null>,
   viewport: V130Viewport,
   registry: V130CanvasRegistry,
+  audioGraph: any, // AudioGraph singleton for telemetry
 ): void {
   useLayoutEffect(() => {
     const root = rootRef.current;
@@ -1547,6 +1879,13 @@ export function useV130PresentationRuntime(
     ensureDspEditor(root);
     syncDom(root);
 
+    // ════════════════════════════════════════════════════════════════════════════════
+    // ✨ STAGE 4A/4B: Create history buffers
+    // ════════════════════════════════════════════════════════════════════════════════
+    const rmsBuffer = new RmsHistoryBuffer();
+    const lufsBuffer = new LufsHistoryBuffer();
+    const correlationBuffer = new CorrelationHistoryBuffer();
+
     let raf = 0;
     let disposed = false;
 
@@ -1558,8 +1897,8 @@ export function useV130PresentationRuntime(
       const state =
         useDAWStore.getState();
 
-      // 🔑 NEW: Get telemetry every frame
-      const graph = peekAudioGraph();
+      // Get telemetry every frame
+      const graph = audioGraph;
       const telemetry = graph?.getAnalysisTelemetry();
 
       registry.sizeCanvases(
@@ -1609,23 +1948,58 @@ export function useV130PresentationRuntime(
         );
       }
 
-      // 🔑 NEW: Draw spectrum from telemetry instead of mock state
+      // ════════════════════════════════════════════════════════════════════════════════
+      // ✨ STAGE 4A/4B: Draw background grid ALWAYS (even offline)
+      // ════════════════════════════════════════════════════════════════════════════════
+      if (analyzerSurface) {
+        // Always draw background + grid (visible even without audio)
+        drawSpectrumBackground(analyzerSurface);
+      }
+
+      // ════════════════════════════════════════════════════════════════════════════════
+      // ✨ STAGE 4A/4B: Update history buffers and draw live data
+      // ════════════════════════════════════════════════════════════════════════════════
       if (analyzerSurface && telemetry) {
-        drawSpectrumVisualization(
-          analyzerSurface,
+        // Update history buffers
+        rmsBuffer.push(telemetry.rmsDb);
+        lufsBuffer.push(telemetry.integratedLufs);
+        correlationBuffer.push(telemetry.correlation);
+
+        // Get active tab
+        const activeTabButton = root.querySelector<HTMLElement>('#aTabs button[aria-pressed="true"]');
+        const activeTab = activeTabButton?.dataset.k || 'spec';
+
+        // Draw appropriate visualization based on active tab
+        switch (activeTab) {
+          case 'spec':
+            drawSpectrumBars(analyzerSurface, telemetry);  // Changed to only draw bars
+            break;
+          case 'lufs':
+            drawLufsVisualization(analyzerSurface, lufsBuffer);
+            break;
+          case 'phase':
+            drawPhaseVisualization(analyzerSurface, correlationBuffer);
+            break;
+          case 'wid':
+            drawStereoVisualization(analyzerSurface, telemetry.stereoWidth);
+            break;
+          case 'rms':
+            drawRmsVisualization(analyzerSurface, rmsBuffer);
+            break;
+          default:
+            drawSpectrumBars(analyzerSurface, telemetry);  // Changed to only draw bars
+        }
+      }
+
+      // Update master meter with peak
+      if (meterSurface && telemetry) {
+        drawMasterMeter(
+          meterSurface,
           telemetry,
         );
       }
 
-      // 🔑 NEW: Update master meter with peak
-      if (meterSurface && telemetry) {
-        drawMasterMeter(
-          meterSurface,
-          state,
-        );
-      }
-
-      // 🔑 NEW: Update readout DOM elements
+      // Update readout DOM elements
       if (telemetry) {
         updateTelemetryReadouts(root, telemetry);
       }
@@ -1635,7 +2009,6 @@ export function useV130PresentationRuntime(
       raf =
         window.requestAnimationFrame(frame);
     };
-;
 
     const unsubscribe =
       useDAWStore.subscribe(() => {});

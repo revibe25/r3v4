@@ -1,0 +1,19 @@
+/*
+ * R3 NATIVE Multitrack v1.3 host boundary.
+ *
+ * The reference body uses an absolutely positioned #stage.
+ * The React host therefore must establish a real viewport-sized
+ * containing block so Chromium can hit-test the reference surface.
+ *
+ * Keep this separate from the extracted reference.css contract.
+ */
+.r3-multitrack-v130 {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
+  min-height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}

@@ -1,0 +1,626 @@
+client/src/pages/instrument.tsx:18:import { useEffect, useCallback, useState, useRef, lazy, Suspense } from 'react';
+client/src/pages/instrument.tsx:1160:  const [initError, setInitError] = useState<string | null>(null);
+client/src/pages/instrument.tsx:1161:  const [isLoading,  setIsLoading]  = useState(false);
+client/src/pages/instrument.tsx:1163:  const [tapFlash,   setTapFlash]   = useState(false);
+client/src/pages/instrument.tsx:1172:  const handleTapTempo = useCallback(() => {
+client/src/pages/instrument.tsx:1189:  useEffect(() => {
+client/src/pages/instrument.tsx:1213:  useEffect(() => {
+client/src/pages/instrument.tsx:1239:  const handleMidiKey = useCallback(
+client/src/pages/instrument.tsx:1260:  const handleSave = useCallback(() => {
+client/src/pages/instrument.tsx:1277:  const handleLoad = useCallback(async (file: File) => {
+client/src/pages/instrument.tsx:1289:  const handleExport = useCallback(() => handleSave(), [handleSave]);
+client/src/pages/instrument.tsx:1294:  const handleLoadJson = useCallback(async (json: string) => {
+client/src/pages/instrument.tsx:1305:  const getSessionData = useCallback((): SessionData => ({
+client/src/pages/instrument.tsx:1318:  useEffect(() => {
+client/src/pages/instrument.tsx:1333:  const handleMicrophoneData  = useCallback((data: Float32Array) => {
+client/src/pages/instrument.tsx:1338:  const _handleMicrophoneError = useCallback((error: Error) => {
+client/src/pages/instrument.tsx:1342:  const handleLoadSample = useCallback(async (file: File) => {
+client/src/store/index.ts:32:} from './audio-store';
+client/src/store/auth-store.ts:9: *   The canonical Zustand store is in hooks/authStore.ts.
+client/src/store/auth-store.ts:17:import { useAuthStore } from '../hooks/authStore';
+client/src/store/auth-store.ts:20:export type { AuthUser } from '../hooks/authStore';
+client/src/store/audio-store.ts:479:        name: 'audio-store',
+client/src/hooks/use-ir-reverb.ts:8:import { useCallback, useEffect, useRef, useState } from "react";
+client/src/hooks/use-ir-reverb.ts:30:  const [loaded,  setLoaded]  = useState(false);
+client/src/hooks/use-ir-reverb.ts:31:  const [loading, setLoading] = useState(false);
+client/src/hooks/use-ir-reverb.ts:32:  const [error,   setError]   = useState<string | null>(null);
+client/src/hooks/use-ir-reverb.ts:33:  const [wet,     setWetState]= useState(0.35);
+client/src/hooks/use-ir-reverb.ts:34:  const [currentPreset, setCurrentPreset] = useState<IRPreset | null>(null);
+client/src/hooks/use-ir-reverb.ts:36:  const wire = useCallback(() => {
+client/src/hooks/use-ir-reverb.ts:50:  useEffect(() => {
+client/src/hooks/use-ir-reverb.ts:56:  useEffect(() => () => engineRef.current.dispose(), []);
+client/src/hooks/use-ir-reverb.ts:68:  const loadFromUrl = useCallback(async (url: string) => {
+client/src/hooks/use-ir-reverb.ts:72:  const loadPreset = useCallback(async (preset: IRPreset) => {
+client/src/hooks/use-ir-reverb.ts:76:  const setWet = useCallback((w: number) => {
+client/src/hooks/use-ir-reverb.ts:80:  const setPreGain = useCallback((g: number) => { engineRef.current.setPreGain(g); }, []);
+client/src/hooks/use-ir-reverb.ts:81:  const dispose    = useCallback(() => { engineRef.current.dispose(); setLoaded(false); }, []);
+client/src/hooks/use-analysis-engine.ts:3:import { useState, useEffect, useCallback, useRef } from 'react';
+client/src/hooks/use-analysis-engine.ts:75:  const [state, setState] = useState<AudioEngineState>({
+client/src/hooks/use-analysis-engine.ts:82:  const [isInitialized, setIsInitialized] = useState(false);
+client/src/hooks/use-analysis-engine.ts:92:  const init = useCallback(async () => {
+client/src/hooks/use-analysis-engine.ts:121:  useEffect(() => {
+client/src/hooks/use-analysis-engine.ts:181:  useEffect(() => {
+client/src/hooks/use-analysis-engine.ts:199:  useEffect(() => {
+client/src/hooks/use-analysis-engine.ts:264:  const play = useCallback(() => {
+client/src/hooks/use-analysis-engine.ts:270:  const stop = useCallback(() => {
+client/src/hooks/use-analysis-engine.ts:279:  const record = useCallback(() => {
+client/src/hooks/use-analysis-engine.ts:288:  const setChannelVolume = useCallback((trackId: string, volume: number) => {
+client/src/hooks/use-analysis-engine.ts:293:  const setChannelPan = useCallback((trackId: string, pan: number) => {
+client/src/hooks/use-analysis-engine.ts:298:  const setChannelMute = useCallback((trackId: string, muted: boolean) => {
+client/src/hooks/use-analysis-engine.ts:303:  const setChannelSolo = useCallback((trackId: string, solo: boolean) => {
+client/src/hooks/use-analysis-engine.ts:308:  const getChannel = useCallback((trackId: string): MixerChannel | undefined => {
+client/src/hooks/use-audio-engine.ts:3:import { useState, useEffect, useCallback } from 'react';
+client/src/hooks/use-audio-engine.ts:8:  const [state, setState] = useState<AudioState>(instrumentEngine.state);
+client/src/hooks/use-audio-engine.ts:9:  const [isInitialized, setIsInitialized] = useState(false);
+client/src/hooks/use-audio-engine.ts:11:  useEffect(() => {
+client/src/hooks/use-audio-engine.ts:20:  const init = useCallback(async () => {
+client/src/hooks/use-audio-engine.ts:26:  useEffect(() => {
+client/src/hooks/use-audio-engine.ts:50:  const loadChannelVST = useCallback(async (
+client/src/hooks/use-loop-engine-fft.ts:15:import { useEffect, useRef, useState } from "react";
+client/src/hooks/use-loop-engine-fft.ts:85:  const [data, setData] = useState<FFTData>(emptyData);
+client/src/hooks/use-loop-engine-fft.ts:90:  useEffect(() => {
+client/src/hooks/use-loop-engine-fft.ts:126:  useEffect(() => {
+client/src/hooks/use-multi-track.ts:3:import { useState, useCallback } from 'react';
+client/src/hooks/use-multi-track.ts:25:  const [tracks, setTracks] = useState<Track[]>(initialTracks);
+client/src/hooks/use-multi-track.ts:27:  const updateTrack = useCallback((id: string, data: Partial<Track>) => {
+client/src/hooks/use-multi-track.ts:31:  const deleteTrack = useCallback((id: string) => {
+client/src/hooks/use-multi-track.ts:35:  const duplicateTrack = useCallback((id: string) => {
+client/src/hooks/use-multi-track.ts:50:  const armTrack = useCallback((id: string) => {
+client/src/hooks/use-multi-track.ts:56:  const toggleMute = useCallback((id: string) => {
+client/src/hooks/use-multi-track.ts:62:  const toggleSolo = useCallback((id: string) => {
+client/src/hooks/use-multi-track.ts:74:  const addFX = useCallback((trackId: string, fxType: FXType) => {
+client/src/hooks/use-multi-track.ts:84:  const removeFX = useCallback((trackId: string, fxIndex: number) => {
+client/src/hooks/use-multi-track.ts:97:  const reorderFX = useCallback(
+client/src/hooks/use-multi-track.ts:112:  const reorderTracks = useCallback((fromId: string, toId: string) => {
+client/src/hooks/use-multi-track.ts:150:  const [transport, setTransport] = useState<TransportState>({
+client/src/hooks/use-multi-track.ts:156:  const togglePlay = useCallback(() => {
+client/src/hooks/use-multi-track.ts:160:  const toggleRecord = useCallback(() => {
+client/src/hooks/use-multi-track.ts:169:  const setPosition = useCallback((position: number) => {
+client/src/hooks/use-multi-track.ts:173:  const stop = useCallback(() => {
+client/src/hooks/use-multi-track.ts:182:  useEffect(() => {
+client/src/hooks/use-velocity.ts:17:import { useRef, useCallback } from 'react';
+client/src/hooks/use-velocity.ts:28:  const onPointerDown = useCallback((e: React.PointerEvent) => {
+client/src/hooks/use-velocity.ts:33:  const getVelocity = useCallback((): number => {
+client/src/hooks/use-transport-state.ts:1:import { useState, useCallback, useEffect } from 'react';
+client/src/hooks/use-transport-state.ts:10:  const [transport, setTransport] = useState<TransportState>({
+client/src/hooks/use-transport-state.ts:16:  const togglePlay = useCallback(() => {
+client/src/hooks/use-transport-state.ts:20:  const toggleRecord = useCallback(() => {
+client/src/hooks/use-transport-state.ts:27:  const setPosition = useCallback((position: number) => {
+client/src/hooks/use-transport-state.ts:31:  const stop = useCallback(() => {
+client/src/hooks/use-transport-state.ts:40:  useEffect(() => {
+client/src/hooks/useAudioReactivity.ts:1:import { useEffect, useState } from "react";
+client/src/hooks/useAudioReactivity.ts:4:  const [level, setLevel] = useState(0);
+client/src/hooks/useAudioReactivity.ts:5:  useEffect(() => {
+client/src/hooks/useAudioUpload.ts:1:import { useState, useCallback } from 'react';
+client/src/hooks/useAudioUpload.ts:9:  const [state, setState] = useState<UploadState>(INIT);
+client/src/hooks/useAudioUpload.ts:10:  const upload = useCallback(async (file: File): Promise<UploadResult | null> => {
+client/src/hooks/useAudioUpload.ts:24:  const reset = useCallback(() => setState(INIT), []);
+client/src/hooks/useAutoLeveling.ts:15:import { useState, useEffect, useRef, useCallback } from 'react';
+client/src/hooks/useAutoLeveling.ts:89:  const [enabled,             setEnabled]             = useState(false);
+client/src/hooks/useAutoLeveling.ts:90:  const [trackStates,         setTrackStates]         = useState<Map<TrackId, TrackAILevelState>>(new Map());
+client/src/hooks/useAutoLeveling.ts:91:  const [nodeState,           setNodeState]           = useState<PipelineNodeState>(DEFAULT_NODE_STATE);
+client/src/hooks/useAutoLeveling.ts:92:  const [sessionStats,        setSessionStats]        = useState<AutoLevelSessionStats>(DEFAULT_STATS);
+client/src/hooks/useAutoLeveling.ts:93:  const [latestRecommendation,setLatestRecommendation]= useState<AutoLevelRecommendation | null>(null);
+client/src/hooks/useAutoLeveling.ts:104:  useEffect(() => { latestRecRef.current = latestRecommendation; }, [latestRecommendation]);
+client/src/hooks/useAutoLeveling.ts:105:  useEffect(() => { nodeStateRef.current = nodeState; },           [nodeState]);
+client/src/hooks/useAutoLeveling.ts:107:  useEffect(() => {
+client/src/hooks/useAutoLeveling.ts:182:  const toggle = useCallback(() => {
+client/src/hooks/useAutoLeveling.ts:189:  const accept = useCallback((trackId: TrackId) => {
+client/src/hooks/useAutoLeveling.ts:224:  const reject = useCallback((trackId: TrackId) => {
+client/src/hooks/useAutoLeveling.ts:257:  const notifyFaderMove = useCallback((trackId: TrackId, newGainLinear: number) => {
+client/src/hooks/useFXChain.ts:5:import { useEffect, useRef, useState, useCallback } from 'react';
+client/src/hooks/useFXChain.ts:38:  const [state, setState] = useState<FXChainState>({
+client/src/hooks/useFXChain.ts:47:  const syncState = useCallback(() => {
+client/src/hooks/useFXChain.ts:73:  useEffect(() => {
+client/src/hooks/useFXChain.ts:105:  useEffect(() => {
+client/src/hooks/useFXChain.ts:112:  const addFX = useCallback((fx: FXNodeBase, index?: number, options?: { bypass?: boolean; wet?: number }) => {
+client/src/hooks/useFXChain.ts:116:  const removeFX = useCallback((fxId: string) => {
+client/src/hooks/useFXChain.ts:120:  const moveFX = useCallback((from: number, to: number) => {
+client/src/hooks/useFXChain.ts:124:  const setBypass = useCallback((fxId: string, bypass: boolean) => {
+client/src/hooks/useFXChain.ts:129:  const toggleBypass = useCallback((fxId: string) => {
+client/src/hooks/useFXChain.ts:134:  const setWet = useCallback((fxId: string, wet: number) => {
+client/src/hooks/useFXChain.ts:139:  const setPreGain = useCallback((value: number) => {
+client/src/hooks/useFXChain.ts:144:  const setPostGain = useCallback((value: number) => {
+client/src/hooks/useFXChain.ts:149:  const clear = useCallback(() => {
+client/src/hooks/useFXChain.ts:153:  const serialize = useCallback((): SerializedFXChain | null => {
+client/src/hooks/useLoopEngineFFTRef.ts:19:import { useEffect, useRef } from 'react';
+client/src/hooks/useLoopEngineFFTRef.ts:43:  useEffect(() => {
+client/src/hooks/useKeyboardShortcuts.ts:1:import { useEffect } from 'react';
+client/src/hooks/useKeyboardShortcuts.ts:41:  useEffect(() => {
+client/src/hooks/useInertialDrag.ts:1:import { useRef, useCallback } from 'react'
+client/src/hooks/useInertialDrag.ts:12:  const applyVelocity = useCallback((delta: number) => {
+client/src/hooks/useInertialDrag.ts:16:  const decay = useCallback(() => {
+client/src/hooks/useLLPTESuggestions.ts:1:import { useCallback, useRef, useState, useEffect } from 'react';
+client/src/hooks/useLLPTESuggestions.ts:42:  const [suggestions, setSuggestions] = useState<MixingSuggestion[]>([]);
+client/src/hooks/useLLPTESuggestions.ts:43:  const [metrics, setMetrics] = useState<LLPTEMetrics>({
+client/src/hooks/useLLPTESuggestions.ts:57:  const processSuggestion = useCallback(
+client/src/hooks/useLLPTESuggestions.ts:95:  const acceptSuggestion = useCallback((id: string) => {
+client/src/hooks/useLLPTESuggestions.ts:106:  const rejectSuggestion = useCallback((id: string) => {
+client/src/hooks/useLLPTESuggestions.ts:117:  const ignoreSuggestion = useCallback((id: string) => {
+client/src/hooks/useLLPTESuggestions.ts:128:  const discardSuggestion = useCallback((id: string) => {
+client/src/hooks/useLLPTESuggestions.ts:139:  const getPending = useCallback(
+client/src/hooks/useLLPTESuggestions.ts:147:  const getMetricsSummary = useCallback(() => {
+client/src/hooks/useLLPTESuggestions.ts:168:  const clearHistory = useCallback(() => {
+client/src/hooks/useDAWEngine.ts:16:import { useEffect, useRef, useCallback, useState } from 'react';
+client/src/hooks/useDAWEngine.ts:24:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useDAWEngine.ts:50:  const [toneReady, setToneReady] = useState(() => isToneReady());
+client/src/hooks/useDAWEngine.ts:52:  const store = useDAWStore;
+client/src/hooks/useDAWEngine.ts:56:  useEffect(() => {
+client/src/hooks/useDAWEngine.ts:80:  useEffect(() => {
+client/src/hooks/useDAWEngine.ts:83:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:95:  useEffect(() => {
+client/src/hooks/useDAWEngine.ts:98:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:111:  useEffect(() => {
+client/src/hooks/useDAWEngine.ts:114:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useDAWEngine.ts:170:  useEffect(() => {
+client/src/hooks/useDAWEngine.ts:174:      if (useDAWStore.getState().playing) {
+client/src/hooks/useDAWEngine.ts:181:          const { timeSignature } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:184:          useDAWStore.getState().setPosition(posBeats);
+client/src/hooks/useDAWEngine.ts:188:            useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:206:  const resumeContext = useCallback(async () => {
+client/src/hooks/useDAWEngine.ts:210:  const togglePlay = useCallback(() => {
+client/src/hooks/useDAWEngine.ts:211:    const { playing, setPlaying } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:232:  const stop = useCallback(() => {
+client/src/hooks/useDAWEngine.ts:237:    useDAWStore.getState().setPlaying(false);
+client/src/hooks/useDAWEngine.ts:238:    useDAWStore.getState().setRecording(false);
+client/src/hooks/useDAWEngine.ts:239:    useDAWStore.getState().setPosition(0);
+client/src/hooks/useDAWEngine.ts:242:  const toggleRecord = useCallback(() => {
+client/src/hooks/useDAWEngine.ts:244:      useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:265:  const tapTempo = useCallback(() => {
+client/src/hooks/useDAWEngine.ts:283:      useDAWStore.getState().setBpm(bpm);
+client/src/hooks/useDAWEngine.ts:287:  const seekTo = useCallback((beat: number) => {
+client/src/hooks/useDAWEngine.ts:288:    const { timeSignature } = useDAWStore.getState();
+client/src/hooks/useDAWEngine.ts:292:    useDAWStore.getState().setPosition(beat);
+client/src/hooks/useDAWEngine.ts:299:  const nudgeBpm = useCallback((delta: number) => {
+client/src/hooks/useDAWEngine.ts:300:    useDAWStore.getState().setBpm(useDAWStore.getState().bpm + delta);
+client/src/hooks/useDAWEngine.ts:303:  const getTrackMeterValue = useCallback((trackId: string): number => {
+client/src/hooks/useDAWEngine.ts:310:  const getPosition = useCallback((): number => {
+client/src/hooks/useDAWEngine.ts:311:    return useDAWStore.getState().position;
+client/src/hooks/useDAWEngine.ts:314:  const contextState = useCallback((): AudioContextState => {
+client/src/hooks/useCollaborativeState.ts:1:import { useCallback, useRef, useState, useEffect } from 'react';
+client/src/hooks/useCollaborativeState.ts:37:  const [conflicts, setConflicts] = useState<CollaborativeStateChange[]>([]);
+client/src/hooks/useCollaborativeState.ts:42:  const trackLocalChange = useCallback(
+client/src/hooks/useCollaborativeState.ts:68:  const applyRemoteChange = useCallback(
+client/src/hooks/useCollaborativeState.ts:98:  const resolveConflict = useCallback(
+client/src/hooks/useCollaborativeState.ts:115:  const getConflicts = useCallback(
+client/src/hooks/useCollaborativeState.ts:123:  const getPendingChanges = useCallback(
+client/src/hooks/useCollaborativeState.ts:134:  const clearResolved = useCallback(() => {
+client/src/hooks/useCollabSocket.ts:17:import { useEffect, useRef, useCallback } from 'react';
+client/src/hooks/useCollabSocket.ts:18:import type { CollabUser } from './useDAWStore';
+client/src/hooks/useCollabSocket.ts:19:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCollabSocket.ts:43:  const connect = useCallback((roomId: string, userId: string, name: string, color: string) => {
+client/src/hooks/useCollabSocket.ts:51:      useDAWStore.getState().setCollabConnected(true);
+client/src/hooks/useCollabSocket.ts:63:        const store = useDAWStore.getState();
+client/src/hooks/useCollabSocket.ts:103:      useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:107:      useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:122:    const store = useDAWStore.getState();
+client/src/hooks/useCollabSocket.ts:137:  const joinRoom = useCallback((roomId: string, userId: string, name: string, color: string) => {
+client/src/hooks/useCollabSocket.ts:140:    useDAWStore.getState().setCollabRoom(roomId);
+client/src/hooks/useCollabSocket.ts:141:    useDAWStore.getState().setCollabEnabled(true);
+client/src/hooks/useCollabSocket.ts:145:  const leaveRoom = useCallback(() => {
+client/src/hooks/useCollabSocket.ts:149:      const userId = useDAWStore.getState().collabUsers.find(u => u.id)?.id;
+client/src/hooks/useCollabSocket.ts:155:    useDAWStore.getState().setCollabEnabled(false);
+client/src/hooks/useCollabSocket.ts:156:    useDAWStore.getState().setCollabConnected(false);
+client/src/hooks/useCollabSocket.ts:157:    useDAWStore.getState().setCollabRoom(null);
+client/src/hooks/useCollabSocket.ts:158:    useDAWStore.getState().setCollabUsers([]);
+client/src/hooks/useCollabSocket.ts:161:  const broadcastCursor = useCallback((beat: number, trackId: string | null) => {
+client/src/hooks/useCollabSocket.ts:175:  const broadcastAction = useCallback((action: Record<string, unknown>) => {
+client/src/hooks/useCollabSocket.ts:182:  const isConnected = useCallback(() =>
+client/src/hooks/useCollabSocket.ts:186:  useEffect(() => {
+client/src/hooks/useBilling.ts:2:import { useAuthStore } from "../hooks/authStore";
+client/src/hooks/useDAWStore.ts:7: * useDAWStore.ts
+client/src/hooks/useDAWStore.ts:325:export const useDAWStore = create<DAWStore>()(
+client/src/hooks/use-waveform-audio-engine.ts:1:import { useEffect, useState } from 'react';
+client/src/hooks/use-waveform-audio-engine.ts:8:  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+client/src/hooks/use-waveform-audio-engine.ts:10:  useEffect(() => {
+client/src/hooks/useAudioInitialization.ts:14:import { useEffect } from 'react';
+client/src/hooks/useAudioInitialization.ts:18:  useEffect(() => {
+client/src/hooks/use-mobile.ts:1:import { useEffect, useState } from 'react';
+client/src/hooks/use-mobile.ts:4:  const [isMobile, setIsMobile] = useState(false);
+client/src/hooks/use-mobile.ts:6:  useEffect(() => {
+client/src/hooks/use-sidechain.ts:10:import { useCallback, useEffect, useRef, useState } from "react";
+client/src/hooks/use-sidechain.ts:34:  const [enabled, setEnabled] = useState(false);
+client/src/hooks/use-sidechain.ts:35:  const [config,  setConfig]  = useState<SidechainConfig>(DEFAULT);
+client/src/hooks/use-sidechain.ts:38:  useEffect(() => {
+client/src/hooks/use-sidechain.ts:45:  useEffect(() => {
+client/src/hooks/use-sidechain.ts:49:  const enable = useCallback((cfg: SidechainConfig) => {
+client/src/hooks/use-sidechain.ts:69:  const disable = useCallback(() => {
+client/src/hooks/use-sidechain.ts:74:  const update = useCallback((partial: Partial<SidechainConfig>) => {
+client/src/hooks/use-sidechain.ts:83:  const setAmount = useCallback((amount: number) => {
+client/src/hooks/useCloudSync.ts:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts:125:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:148:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts:149:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts:150:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:178:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:183:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts:188:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts:193:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts:213:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts:226:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts:230:    const store = useDAWStore.getState();
+client/src/hooks/use-midi.ts:23:import { useEffect, useRef, useCallback, useState } from 'react';
+client/src/hooks/use-midi.ts:54:  const [midiStatus,     setStatus] = useState<MidiStatus>('idle');
+client/src/hooks/use-midi.ts:55:  const [midiInputCount, setCount]  = useState(0);
+client/src/hooks/use-midi.ts:60:  useEffect(() => { onPadRef.current = onPad; });
+client/src/hooks/use-midi.ts:61:  useEffect(() => { onKeyRef.current = onKey; });
+client/src/hooks/use-midi.ts:63:  const handleMessage = useCallback((event: MIDIMessageEvent) => {
+client/src/hooks/use-midi.ts:82:  const wireInput = useCallback((input: MIDIInput) => {
+client/src/hooks/use-midi.ts:86:  useEffect(() => {
+client/src/hooks/use-toast.ts:172:  const [state, setState] = React.useState<State>(memoryState)
+client/src/hooks/use-toast.ts:174:  React.useEffect(() => {
+client/src/hooks/useDAWStore.ts.pre-persistence-repair-20260925-000528:7: * useDAWStore.ts
+client/src/hooks/useDAWStore.ts.pre-persistence-repair-20260925-000528:312:export const useDAWStore = create<DAWStore>()(
+client/src/hooks/usemixerchannel.ts:11:import { useState, useEffect, useCallback, useRef } from 'react';
+client/src/hooks/usemixerchannel.ts:71:  const [isReady, setIsReady] = useState(false);
+client/src/hooks/usemixerchannel.ts:72:  const [volume, setVolumeState] = useState(channel?.volume ?? 0.8);
+client/src/hooks/usemixerchannel.ts:73:  const [pan, setPanState] = useState(channel?.pan ?? 0);
+client/src/hooks/usemixerchannel.ts:74:  const [mute, setMuteState] = useState(channel?.mute ?? false);
+client/src/hooks/usemixerchannel.ts:75:  const [solo, setSoloState] = useState(channel?.solo ?? false);
+client/src/hooks/usemixerchannel.ts:76:  const [vuLevel, setVuLevel] = useState(0);
+client/src/hooks/usemixerchannel.ts:77:  const [peakLevel, setPeakLevel] = useState(0);
+client/src/hooks/usemixerchannel.ts:78:  const [effects, setEffects] = useState<AudioEffect[]>([]);
+client/src/hooks/usemixerchannel.ts:87:  useEffect(() => {
+client/src/hooks/usemixerchannel.ts:125:  useEffect(() => {
+client/src/hooks/usemixerchannel.ts:146:  const setVolume = useCallback((value: number) => {
+client/src/hooks/usemixerchannel.ts:158:  const setPan = useCallback((value: number) => {
+client/src/hooks/usemixerchannel.ts:170:  const setMute = useCallback((muted: boolean) => {
+client/src/hooks/usemixerchannel.ts:181:  const setSolo = useCallback((solo: boolean) => {
+client/src/hooks/usemixerchannel.ts:192:  const addEffect = useCallback((effect: AudioEffect) => {
+client/src/hooks/usemixerchannel.ts:206:  const removeEffect = useCallback((effectId: string) => {
+client/src/hooks/usemixerchannel.ts:220:  const cleanup = useCallback(() => {
+client/src/hooks/usemixerchannel.ts:256:  const [channel, setChannel] = useState<MixerChannel | null>(null);
+client/src/hooks/usemixerchannel.ts:258:  useEffect(() => {
+client/src/hooks/authStore.ts:2: * client/src/hooks/authStore.ts
+client/src/hooks/useSessionMetricsSync.ts.mythos:3:import { useEffect } from 'react'
+client/src/hooks/useSessionMetricsSync.ts.mythos:8:  useEffect(() => {
+client/src/hooks/useSessionMetrics.ts:7:import { useState, useCallback, useRef } from "react";
+client/src/hooks/useSessionMetrics.ts:9:import { useAuthStore } from "@/hooks/authStore";
+client/src/hooks/useSessionMetrics.ts:23:  const [sessionId, setSessionId]   = useState<string | null>(null);
+client/src/hooks/useSessionMetrics.ts:24:  const [stats, setStats]           = useState<AutoLevelSessionStats>(EMPTY_STATS);
+client/src/hooks/useSessionMetrics.ts:46:  const startSession = useCallback(async (trackIds: string[], bpm: number) => {
+client/src/hooks/useSessionMetrics.ts:55:  const stopSession = useCallback(async () => {
+client/src/hooks/useSessionMetrics.ts:67:  const recordAIAdjustment = useCallback(() => {
+client/src/hooks/useSessionMetrics.ts:71:  const recordManualAdjustment = useCallback(() => {
+client/src/hooks/useSessionMetrics.ts:75:  const recordClippingPrevented = useCallback(() => {
+client/src/hooks/useSessionMetrics.ts:82:  const recordSuggestionAccepted = useCallback((trackId?: string) => {
+client/src/hooks/useSessionMetrics.ts:99:  const recordSuggestionRejected = useCallback((trackId?: string) => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:3: * Cloud project save/load via tRPC, wired to useDAWStore.
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:14:import { useCallback, useEffect, useRef } from 'react';
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:15:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:68:// Get JWT from localStorage (set by authStore.ts on login)
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:79:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:103:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:128:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:132:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:133:    const { autoSaveEnabled } = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:136:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:146:          const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:175:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:176:    const onOffline = () => useDAWStore.getState().setSyncStatus('offline');
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:178:      if (useDAWStore.getState().syncStatus === 'offline') {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:179:        useDAWStore.getState().setSyncStatus('idle');
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:191:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:195:        const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:206:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:207:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:229:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:230:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:269:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:276:  const analyseWithAI = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:277:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:342:  const chatWithCoProd = useCallback(async (message: string): Promise<string> => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:343:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:360:  const runMasteringServer = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-persistence-repair-20260925-000528:361:    const store = useDAWStore.getState();
+client/src/hooks/useDAWStore.ts.pre-daw-persistence-20260925-001658:7: * useDAWStore.ts
+client/src/hooks/useDAWStore.ts.pre-daw-persistence-20260925-001658:312:export const useDAWStore = create<DAWStore>()(
+client/src/hooks/useeffectchain.ts:6: * @module hooks/useEffectChain
+client/src/hooks/useeffectchain.ts:9:import { useState, useEffect, useCallback } from 'react';
+client/src/hooks/useeffectchain.ts:53:export function useEffectChain(
+client/src/hooks/useeffectchain.ts:66:  const [isReady, setIsReady] = useState(false);
+client/src/hooks/useeffectchain.ts:67:  const [effects, setEffects] = useState<AudioEffect[]>([]);
+client/src/hooks/useeffectchain.ts:72:  useEffect(() => {
+client/src/hooks/useeffectchain.ts:86:  useEffect(() => {
+client/src/hooks/useeffectchain.ts:101:  const addEffect = useCallback((effect: AudioEffect, position?: number) => {
+client/src/hooks/useeffectchain.ts:103:      console.error('[useEffectChain] Cannot add effect: chain not initialized');
+client/src/hooks/useeffectchain.ts:112:      console.error('[useEffectChain] Failed to add effect:', error);
+client/src/hooks/useeffectchain.ts:119:  const removeEffect = useCallback((effectId: string) => {
+client/src/hooks/useeffectchain.ts:121:      console.error('[useEffectChain] Cannot remove effect: chain not initialized');
+client/src/hooks/useeffectchain.ts:130:      console.error('[useEffectChain] Failed to remove effect:', error);
+client/src/hooks/useeffectchain.ts:137:  const reorderEffect = useCallback((effectId: string, newPosition: number) => {
+client/src/hooks/useeffectchain.ts:139:      console.error('[useEffectChain] Cannot reorder effect: chain not initialized');
+client/src/hooks/useeffectchain.ts:148:      console.error('[useEffectChain] Failed to reorder effect:', error);
+client/src/hooks/useeffectchain.ts:155:  const bypassEffect = useCallback((effectId: string, bypass: boolean) => {
+client/src/hooks/useeffectchain.ts:158:      console.error(`[useEffectChain] Effect ${effectId} not found`);
+client/src/hooks/useeffectchain.ts:169:  const setEffectParameter = useCallback((
+client/src/hooks/useeffectchain.ts:176:      console.error(`[useEffectChain] Effect ${effectId} not found`);
+client/src/hooks/useeffectchain.ts:183:      console.error('[useEffectChain] Failed to set parameter:', error);
+client/src/hooks/useeffectchain.ts:190:  const bypassAll = useCallback(() => {
+client/src/hooks/useeffectchain.ts:200:  const enableAll = useCallback(() => {
+client/src/hooks/useeffectchain.ts:210:  const clear = useCallback(() => {
+client/src/hooks/useeffectchain.ts:220:  const getState = useCallback((): EffectState[] => {
+client/src/hooks/useeffectchain.ts:228:  const getEffect = useCallback((effectId: string): AudioEffect | undefined => {
+client/src/hooks/useeffectchain.ts:235:  const getEffectParameters = useCallback((effectId: string): EffectParameter[] => {
+client/src/hooks/useMidiSequencer.ts:15:import { useEffect, useRef, useCallback } from 'react';
+client/src/hooks/useMidiSequencer.ts:17:import type { MidiNote, MidiPattern } from './useDAWStore';
+client/src/hooks/useMidiSequencer.ts:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useMidiSequencer.ts:65:  useEffect(() => {
+client/src/hooks/useMidiSequencer.ts:76:  useEffect(() => {
+client/src/hooks/useMidiSequencer.ts:87:      const { activePatternId, midiPatterns } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:112:          useDAWStore.getState().setSequencerStep(step);
+client/src/hooks/useMidiSequencer.ts:158:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useMidiSequencer.ts:173:  useEffect(() => {
+client/src/hooks/useMidiSequencer.ts:174:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useMidiSequencer.ts:182:          useDAWStore.getState().setSequencerStep(-1);
+client/src/hooks/useMidiSequencer.ts:190:  const toggleNote = useCallback((step: number, pitch: number, velocity = 100) => {
+client/src/hooks/useMidiSequencer.ts:191:    const { activePatternId, midiPatterns, addMidiNote, removeMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:204:  const clearPattern = useCallback(() => {
+client/src/hooks/useMidiSequencer.ts:205:    const { activePatternId, midiPatterns } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:210:      useDAWStore.getState().removeMidiNote(activePatternId, note.id);
+client/src/hooks/useMidiSequencer.ts:214:  const setPatternLength = useCallback((steps: 16 | 32 | 64) => {
+client/src/hooks/useMidiSequencer.ts:215:    const { activePatternId } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:218:    const store = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:227:  const nudgePitch = useCallback((noteId: string, delta: number) => {
+client/src/hooks/useMidiSequencer.ts:228:    const { activePatternId, updateMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:230:    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+client/src/hooks/useMidiSequencer.ts:236:  const nudgeVelocity = useCallback((noteId: string, delta: number) => {
+client/src/hooks/useMidiSequencer.ts:237:    const { activePatternId, updateMidiNote } = useDAWStore.getState();
+client/src/hooks/useMidiSequencer.ts:239:    const pattern = useDAWStore.getState().midiPatterns.find(p => p.id === activePatternId);
+client/src/hooks/useMidiSequencer.ts:245:  const duplicate = useCallback(() => {
+client/src/hooks/useMidiSequencer.ts:246:    const { activePatternId, midiPatterns, addMidiPattern } = useDAWStore.getState();
+client/src/hooks/useSessionExport.ts:1:import { useCallback } from 'react';
+client/src/hooks/useSessionExport.ts:18:  const exportToJson = useCallback(
+client/src/hooks/useSessionExport.ts:30:  const exportToWav = useCallback(
+client/src/hooks/useSessionExport.ts:75:  const exportToMidi = useCallback(
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:47:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:112:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:135:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:136:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:137:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:163:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:172:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:177:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:182:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:206:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:214:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-single-snapshot-20260925-005158:218:    const store = useDAWStore.getState();
+client/src/hooks/useSessionLifecycle.ts:1:import { useCallback } from "react";
+client/src/hooks/useSessionLifecycle.ts:38:  const onPlay = useCallback(() => {
+client/src/hooks/useSessionLifecycle.ts:46:  const onStop = useCallback(() => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:176:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:181:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:186:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:210:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:218:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-144557:222:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:172:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:177:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:182:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:201:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:214:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-updatedAt-fix-20260925-220417:218:    const store = useDAWStore.getState();
+client/src/hooks/usePerformanceMonitor.ts:1:import { useEffect, useRef, useCallback } from 'react';
+client/src/hooks/usePerformanceMonitor.ts:42:  const measureMetrics = useCallback(() => {
+client/src/hooks/usePerformanceMonitor.ts:79:  const measureFrame = useCallback(() => {
+client/src/hooks/usePerformanceMonitor.ts:84:  useEffect(() => {
+client/src/hooks/useSubscription.tsx:2:// R3 · useSubscription Hook & SubscriptionProvider
+client/src/hooks/useSubscription.tsx:3:// Drop into: client/src/hooks/useSubscription.ts
+client/src/hooks/useSubscription.tsx:7:import React, { createContext, useContext, useMemo } from 'react';
+client/src/hooks/useSubscription.tsx:9:import { useAuthStore } from '../hooks/authStore';
+client/src/hooks/useSubscription.tsx:75:  const value = useMemo<SubscriptionContextValue>(
+client/src/hooks/useSubscription.tsx:122:export function useSubscription(): SubscriptionContextValue {
+client/src/hooks/useSubscription.tsx:125:    throw new Error('useSubscription must be used inside <SubscriptionProvider>');
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:172:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:177:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:182:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:201:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:214:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-user-scoped-snapshot-20260925-215923:218:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:125:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:148:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:149:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:150:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:178:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:183:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:188:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:193:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:213:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:226:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-20260925-221129:230:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:172:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:177:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:182:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:201:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:214:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-snapshot-final-20260925-220614:218:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:3: * Cloud project save/load via tRPC, wired to useDAWStore.
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:14:import { useCallback, useEffect, useRef } from 'react';
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:15:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:68:// Get JWT from localStorage (set by authStore.ts on login)
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:79:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:103:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:128:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:132:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:133:    const { autoSaveEnabled } = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:136:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:146:          const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:175:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:176:    const onOffline = () => useDAWStore.getState().setSyncStatus('offline');
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:178:      if (useDAWStore.getState().syncStatus === 'offline') {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:179:        useDAWStore.getState().setSyncStatus('idle');
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:191:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:195:        const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:206:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:207:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:229:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:230:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:269:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:276:  const analyseWithAI = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:277:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:342:  const chatWithCoProd = useCallback(async (message: string): Promise<string> => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:343:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:360:  const runMasteringServer = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-daw-persistence-20260925-001658:361:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:176:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:181:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:186:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:210:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:218:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-known-build-repair-20260925-010836:222:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:176:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:181:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:186:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:210:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:218:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-013357:222:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:172:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:177:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:182:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:201:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:214:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-final-six-repair-20260925-215527:218:    const store = useDAWStore.getState();
+client/src/hooks/useMixSuggestions.ts:15:import { useState, useCallback, useRef } from "react";
+client/src/hooks/useMixSuggestions.ts:39:  const [suggestions, setSuggestions] = useState<MixSuggestion[]>([]);
+client/src/hooks/useMixSuggestions.ts:40:  const [status, setStatus]           = useState<SuggestionStatus>("idle");
+client/src/hooks/useMixSuggestions.ts:41:  const [acceptedIds, setAcceptedIds] = useState<Set<number>>(new Set());
+client/src/hooks/useMixSuggestions.ts:42:  const [rejectedIds, setRejectedIds] = useState<Set<number>>(new Set());
+client/src/hooks/useMixSuggestions.ts:43:  const [latencyMs, setLatencyMs]     = useState<number>(0);  // ← ADD THIS LINE
+client/src/hooks/useMixSuggestions.ts:121:  const analyse = useCallback((
+client/src/hooks/useMixSuggestions.ts:142:  const accept = useCallback((idx: number) => {
+client/src/hooks/useMixSuggestions.ts:159:  const reject = useCallback((idx: number) => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:3: * Cloud project save/load via tRPC, wired to useDAWStore.
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:14:import { useCallback, useEffect, useRef } from 'react';
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:15:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:68:// Get JWT from localStorage (set by authStore.ts on login)
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:79:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:103:  const s = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:128:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:132:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:133:    const { autoSaveEnabled } = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:136:    const unsub = useDAWStore.subscribe(
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:146:          const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:175:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:176:    const onOffline = () => useDAWStore.getState().setSyncStatus('offline');
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:178:      if (useDAWStore.getState().syncStatus === 'offline') {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:179:        useDAWStore.getState().setSyncStatus('idle');
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:191:  useEffect(() => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:195:        const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:206:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:207:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:229:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:230:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:269:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:276:  const analyseWithAI = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:277:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:342:  const chatWithCoProd = useCallback(async (message: string): Promise<string> => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:343:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:360:  const runMasteringServer = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-canonical-sync-20260925-003402:361:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:125:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:148:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:149:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:150:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:178:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:183:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:188:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:193:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:213:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:226:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-nullable-snapshot-result-v2-20260925-221210:230:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:2: * useCloudSync.ts
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:17:import { useCallback } from 'react';
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:18:import { useDAWStore } from './useDAWStore';
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:19:import { useAuthStore } from './authStore';
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:114:  const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:137:export function useCloudSync(): CloudSyncAPI {
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:138:  const save = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:139:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:167:      const current = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:176:      useDAWStore.getState().setSyncStatus('error');
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:181:  const load = useCallback(async (projectId: string) => {
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:186:    const store = useDAWStore.getState();
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:210:  const listProjects = useCallback(async () => {
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:218:  const restoreLocalSnapshot = useCallback((): boolean => {
+client/src/hooks/useCloudSync.ts.pre-ts-build-repair-20260925-010445:222:    const store = useDAWStore.getState();

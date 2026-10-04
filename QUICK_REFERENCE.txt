@@ -1,0 +1,259 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    R3V4 AUTH INTEGRATION — QUICK REFERENCE                     ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📍 ALL FILES LOCATED IN: /home/cloud/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 INTEGRATION (5 MINUTES)
+
+Step 1: Copy auth files to your project
+  $ cp /home/cloud/auth-integration/authService.ts ~/Projects/r3v4/src/services/
+  $ cp /home/cloud/auth-integration/useAuth.ts ~/Projects/r3v4/src/hooks/
+  $ cp /home/cloud/auth-integration/ProtectedRoute.tsx ~/Projects/r3v4/src/components/
+  $ cp /home/cloud/auth-integration/AuthDebugger.tsx ~/Projects/r3v4/src/components/
+
+Step 2: Update App.tsx with router config
+  $ cp /home/cloud/auth-integration/App.tsx.example ~/Projects/r3v4/src/App.tsx
+  [Then update imports to match your project]
+
+Step 3: Verify auth.html deployment
+  $ ls -la ~/Projects/r3v4/client/public/auth.html
+
+Step 4: Start dev server
+  $ cd ~/Projects/r3v4
+  $ pnpm dev
+
+Step 5: Test login
+  → Open: http://localhost:5173/auth
+  → Username: ernesto
+  → Password: test123456
+  → Click: SUBMIT
+  → Expected: Redirect to /instrument
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 DOCUMENTATION
+
+README_AUTH_INTEGRATION.md     → Overview & quick summary
+INTEGRATION_GUIDE.md           → Detailed step-by-step guide
+AUTH_TESTING_CHECKLIST.md      → 15-phase testing plan
+QUICK_REFERENCE.txt            → This file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 SOURCE FILES
+
+auth-integration/
+  ├── authService.ts          Token management & API calls (5.6 KB)
+  ├── useAuth.ts              React hook & context (3.2 KB)
+  ├── ProtectedRoute.tsx       Protected route wrapper (1.6 KB)
+  ├── AuthDebugger.tsx         Debug panel (11 KB)
+  └── App.tsx.example          Router config template (2.9 KB)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔧 PROJECT AUDIT
+
+Run comprehensive project analysis:
+  $ bash /home/cloud/audit-r3v4.sh
+
+Generates: r3v4-audit-[TIMESTAMP].md
+Includes:
+  • Project structure analysis
+  • Dependency inventory
+  • File type breakdown
+  • Auth integration status
+  • Health score & recommendations
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🧪 DEBUGGING
+
+Enable AuthDebugger in your app:
+  import { AuthDebugger } from './components/AuthDebugger';
+  
+  function App() {
+    return (
+      <>
+        {/* Your routes */}
+        {process.env.NODE_ENV === 'development' && <AuthDebugger />}
+      </>
+    );
+  }
+
+Debug panel provides:
+  ✓ Endpoint connectivity test
+  ✓ Token validity check
+  ✓ Login flow test
+  ✓ localStorage inspection
+  ✓ Token refresh test
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 TOKEN STORAGE
+
+After login, check DevTools (F12):
+  Application → Local Storage → http://localhost:5173
+
+Keys to verify:
+  • r3_token         → Your JWT (format: xxx.yyy.zzz)
+  • r3_token_expiry  → Expiration timestamp
+  • r3_refresh_token → Refresh token (if applicable)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 AUTH SERVICE API
+
+Login:
+  const result = await AuthService.login('ernesto', 'test123456');
+  // Returns: { token, user, expiresIn, refreshToken }
+
+Get current token (auto-refresh if expired):
+  const token = await AuthService.getToken();
+
+Check if authenticated:
+  const isAuth = AuthService.isAuthenticated();
+
+Get user info:
+  const user = AuthService.getUser();
+  // { id, username, email? }
+
+Logout:
+  AuthService.logout();
+
+Test endpoint:
+  const result = await AuthService.testEndpoint();
+  // { status: 'OK'|'FAIL', message: string }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎣 REACT HOOK API
+
+useAuth() — Get auth state anywhere:
+  const {
+    user,              // { id, username, email? }
+    token,             // JWT string
+    isAuthenticated,   // boolean
+    isLoading,         // boolean
+    error,             // Error or null
+    login,             // async function
+    logout,            // function
+    clearError         // function
+  } = useAuth();
+
+Usage:
+  const { login, error, isLoading } = useAuth();
+  
+  const handleLogin = async () => {
+    try {
+      await login('ernesto', 'test123456');
+      // Logged in, will redirect via ProtectedRoute
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
+  };
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛣️ PROTECTED ROUTE USAGE
+
+Wrap routes that require authentication:
+
+  <Route
+    path="/instrument"
+    element={
+      <ProtectedRoute>
+        <InstrumentPage />
+      </ProtectedRoute>
+    }
+  />
+
+Behavior:
+  • Authenticated user → Renders component
+  • Not authenticated → Redirects to /auth
+  • Loading state → Shows "Loading..."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ COMMON ISSUES
+
+"Cannot reach /auth endpoint"
+  → Dev server not running: pnpm dev
+  → Check REACT_APP_API_URL in .env
+  → Verify /auth endpoint exists on server
+
+"Login successful but no redirect"
+  → Check localStorage for r3_token
+  → Verify React Router redirect path
+  → Check browser console for errors
+
+"Protected route blocks everyone"
+  → Ensure <AuthProvider> wraps your routes
+  → Check isAuthenticated state in AuthDebugger
+  → Verify token is stored in localStorage
+
+"Token refresh fails"
+  → Backend needs /auth/refresh endpoint
+  → Check refreshToken is stored
+  → Verify API accepts refresh token format
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CHECKLIST BEFORE GOING LIVE
+
+Pre-Integration:
+  ☐ Copy all auth files
+  ☐ Update App.tsx with router config
+  ☐ Verify auth.html deployed
+
+Testing:
+  ☐ Dev server starts without errors
+  ☐ Login works at /auth
+  ☐ Tokens stored in localStorage
+  ☐ Protected routes redirect when not logged in
+  ☐ AuthDebugger all tests pass
+  ☐ Token refresh works (if applicable)
+
+Project Audit:
+  ☐ Run: bash /home/cloud/audit-r3v4.sh
+  ☐ Review generated report
+  ☐ Fix critical issues
+
+Production:
+  ☐ Environment variables set
+  ☐ Test in staging first
+  ☐ Monitor errors after deployment
+  ☐ Document any custom changes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 QUICK HELP
+
+Can't find a file?
+  $ find /home/cloud -name "*.ts" -o -name "*.md" -o -name "*.sh"
+
+Read documentation:
+  $ cat /home/cloud/INTEGRATION_GUIDE.md
+
+Run audit:
+  $ bash /home/cloud/audit-r3v4.sh
+
+View auth service:
+  $ cat /home/cloud/auth-integration/authService.ts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 NEXT STEPS
+
+1. NOW:     Copy files & update App.tsx
+2. TODAY:   Test login flow & verify tokens
+3. WEEK:    Run project audit & fix issues
+4. DEPLOY:  Test in staging, then production
+
+Questions? Review the detailed guides in INTEGRATION_GUIDE.md
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Version: 1.0 | Generated: September 23, 2026 | Status: Ready for Integration

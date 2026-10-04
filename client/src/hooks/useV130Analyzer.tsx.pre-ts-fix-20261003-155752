@@ -1,0 +1,727 @@
+'use client';
+
+import { useEffect, useRef, useState, useCallback } from 'react';
+
+/* =====================================================================
+   MASTER ANALYZER — Spectrum/LUFS/Phase/Stereo/RMS (+ readouts)
+   Ported from reference HTML v1.3.0 (lines 2450-5432, 6593-6619)
+   ===================================================================== */
+
+interface CanvasHandle {
+  canvas: HTMLCanvasElement | null;
+  c: CanvasRenderingContext2D | null;
+  w: number;
+  h: number;
+}
+
+interface METMetrics {
+  tr: Float32Array;
+  L: number;
+  R: number;
+  hL: number;
+  hR: number;
+  hT: number;
+  hTR: number;
+  tp: number;
+  corr: number;
+  wid: number;
+  rms: number;
+  gr: number;
+  active: number;
+}
+
+interface HISTBuffers {
+  lufs: Float32Array;
+  rms: Float32Array;
+  wid: Float32Array;
+}
+
+interface ColorMap extends Float32Array {
+  sr?: number;
+  w?: number;
+}
+
+interface WaterFall {
+  frames: Float32Array[];
+  tick: number;
+  w: number;
+}
+
+interface Goniometer {
+  frames: Float32Array[];
+  tick: number;
+}
+
+const clamp = (v: number, a: number, b: number): number =>
+  v < a ? a : v > b ? b : v;
+
+const dbToG = (d: number): number =>
+  d <= -60 ? 0 : Math.pow(10, d / 20);
+
+const gToDb = (g: number): number =>
+  g <= 1e-6 ? -Infinity : 20 * Math.log10(g);
+
+const fToG = (v: number): number => 2 * v * v * v;
+const gToF = (g: number): number => Math.cbrt(g / 2);
+
+const shade = (col: string, amt: number): string => {
+  const usePound = col[0] === '#';
+  const hex = usePound ? col.slice(1) : col;
+  const num = parseInt(hex, 16);
+  const r = Math.round(
+    Math.max(0, Math.min(255, (num >> 16) + Math.floor(255 * amt)))
+  );
+  const g = Math.round(
+    Math.max(0, Math.min(255, ((num >> 8) & 0x00ff) + Math.floor(255 * amt)))
+  );
+  const b = Math.round(
+    Math.max(0, Math.min(255, (num & 0x0000ff) + Math.floor(255 * amt)))
+  );
+  return (usePound ? '#' : '') + (0x1000000 + r * 0x10000 + g * 0x100 + b)
+    .toString(16)
+    .slice(1);
+};
+
+const polyline = (c: CanvasRenderingContext2D, P: number[][]): void => {
+  c.beginPath();
+  for (const [x, y] of P) c.lineTo(x, y);
+};
+
+const FREQ_LABELS: [number, string][] = [
+  [50, '50'],
+  [100, '100'],
+  [200, '200'],
+  [500, '500'],
+  [1000, '1k'],
+  [2000, '2k'],
+  [5000, '5k'],
+  [10000, '10k'],
+];
+
+const specX = (f: number, W: number): number =>
+  22 + (Math.log(f / 20) / Math.log(1000)) * (W - 24);
+
+interface AudioGraph {
+  ctx: AudioContext;
+  anL: AnalyserNode;
+  anR: AnalyserNode;
+  anS: AnalyserNode;
+  kL: AnalyserNode;
+  kR: AnalyserNode;
+  tr: Array<{ an: AnalyserNode }>;
+  chain: {
+    comp: { reduction: number };
+    lim: { reduction: number };
+  };
+}
+
+interface EngineState {
+  g: AudioGraph | null;
+  ctx: AudioContext | null;
+  lufs: {
+    ring: [number, number][];
+    blocks: number[];
+    lastBlk: number;
+    int: number;
+  };
+}
+
+let E: EngineState = {
+  g: null,
+  ctx: null,
+  lufs: { ring: [], blocks: [], lastBlk: 0, int: -Infinity },
+};
+
+let S_playing = false;
+let S_aTab: 'spec' | 'lufs' | 'phase' | 'wid' | 'rms' = 'spec';
+
+export function useV130Analyzer(audioGraphRef: React.RefObject<AudioGraph>) {
+  const canvasARef = useRef<CanvasHandle>({
+    canvas: null,
+    c: null,
+    w: 0,
+    h: 0,
+  });
+  const canvasMRef = useRef<CanvasHandle>({
+    canvas: null,
+    c: null,
+    w: 0,
+    h: 0,
+  });
+
+  const [activeTab, setActiveTab] = useState<
+    'spec' | 'lufs' | 'phase' | 'wid' | 'rms'
+  >('spec');
+
+  const bL = useRef(new Float32Array(2048));
+  const bR = useRef(new Float32Array(2048));
+  const kL = useRef(new Float32Array(2048));
+  const kR = useRef(new Float32Array(2048));
+  const spec = useRef(new Float32Array(2048));
+  const tb = useRef(new Float32Array(256));
+
+  const MET = useRef<METMetrics>({
+    tr: new Float32Array(7),
+    L: 0,
+    R: 0,
+    hL: 0,
+    hR: 0,
+    hT: 0,
+    hTR: 0,
+    tp: 0,
+    corr: 0,
+    wid: 0,
+    rms: -Infinity,
+    gr: 0,
+    active: 0,
+  });
+
+  const HIST = useRef<HISTBuffers>({
+    lufs: new Float32Array(300),
+    rms: new Float32Array(300),
+    wid: new Float32Array(300),
+  });
+
+  const colMap = useRef<ColorMap | null>(null);
+  const hi = useRef(0);
+  const WF = useRef<WaterFall>({ frames: [], tick: 0, w: 0 });
+  const GON = useRef<Goniometer>({ frames: [], tick: 0 });
+
+  const attachCanvasA = useCallback((canvas: HTMLCanvasElement | null) => {
+    if (canvas) {
+      canvasARef.current = {
+        canvas,
+        c: canvas.getContext('2d'),
+        w: canvas.offsetWidth,
+        h: canvas.offsetHeight,
+      };
+    }
+  }, []);
+
+  const attachCanvasM = useCallback((canvas: HTMLCanvasElement | null) => {
+    if (canvas) {
+      canvasMRef.current = {
+        canvas,
+        c: canvas.getContext('2d'),
+        w: canvas.offsetWidth,
+        h: canvas.offsetHeight,
+      };
+    }
+  }, []);
+
+  const analyse = useCallback(() => {
+    const g = audioGraphRef.current || E.g;
+    if (!g || !E.ctx || E.ctx.state !== 'running') {
+      decayMeters();
+      return;
+    }
+
+    const now = E.ctx.currentTime;
+
+    g.tr.forEach((x, i) => {
+      x.an.getFloatTimeDomainData(tb.current);
+      let p = 0;
+      for (let k = 0; k < 256; k++) {
+        const a = Math.abs(tb.current[k]);
+        if (a > p) p = a;
+      }
+      MET.current.tr[i] = Math.max(p, MET.current.tr[i] * 0.9);
+    });
+
+    g.anL.getFloatTimeDomainData(bL.current);
+    g.anR.getFloatTimeDomainData(bR.current);
+    g.kL.getFloatTimeDomainData(kL.current);
+    g.kR.getFloatTimeDomainData(kR.current);
+
+    let pL = 0,
+      pR = 0,
+      sL = 0,
+      sR = 0,
+      sLR = 0,
+      sM = 0,
+      sS = 0,
+      sk = 0;
+
+    for (let i = 0; i < 2048; i++) {
+      const l = bL.current[i];
+      const r = bR.current[i];
+      const al = l < 0 ? -l : l;
+      const ar = r < 0 ? -r : r;
+
+      if (al > pL) pL = al;
+      if (ar > pR) pR = ar;
+      sL += l * l;
+      sR += r * r;
+      sLR += l * r;
+
+      const m = (l + r) * 0.5;
+      const s = (l - r) * 0.5;
+      sM += m * m;
+      sS += s * s;
+      sk += kL.current[i] * kL.current[i] + kR.current[i] * kR.current[i];
+    }
+
+    MET.current.L = Math.max(pL, MET.current.L * 0.92);
+    MET.current.R = Math.max(pR, MET.current.R * 0.92);
+
+    const tnow = performance.now();
+    if (pL >= MET.current.hL || tnow - MET.current.hT > 1200) {
+      MET.current.hL = pL;
+      MET.current.hT = tnow;
+    }
+    if (pR >= MET.current.hR || tnow - MET.current.hTR > 1200) {
+      MET.current.hR = pR;
+      MET.current.hTR = tnow;
+    }
+
+    MET.current.rms = gToDb(Math.sqrt((sL + sR) / 4096));
+    MET.current.corr =
+      sL * sR > 1e-12 ? sLR / Math.sqrt(sL * sR) : MET.current.corr;
+    MET.current.wid = sM > 1e-12 ? Math.sqrt(sS / sM) * 100 : 0;
+
+    if (S_playing) {
+      MET.current.tp = Math.max(
+        MET.current.tp,
+        truePeak(bL.current),
+        truePeak(bR.current)
+      );
+      const L = E.lufs;
+      L.ring.push([now, sk / 2048]);
+      while (L.ring.length && L.ring[0][0] < now - 0.4) L.ring.shift();
+
+      if (now - L.lastBlk >= 0.1 && L.ring.length > 4) {
+        L.lastBlk = now;
+        const z = L.ring.reduce((a, b) => a + b[1], 0) / L.ring.length;
+        if (z > 0 && -0.691 + 10 * Math.log10(z) > -70) {
+          L.blocks.push(z);
+          if (L.blocks.length > 36000) L.blocks.splice(0, 6000);
+          L.int = integrated();
+        }
+      }
+    }
+
+    MET.current.gr =
+      (g.chain?.comp?.reduction || 0) + (g.chain?.lim?.reduction || 0);
+    MET.current.active = 1;
+  }, [audioGraphRef]);
+
+  const decayMeters = useCallback(() => {
+    if (!MET.current.active) return;
+    let any = 0;
+    for (let i = 0; i < 7; i++) {
+      MET.current.tr[i] *= 0.85;
+      if (MET.current.tr[i] > 0.001) any = 1;
+    }
+    MET.current.L *= 0.85;
+    MET.current.R *= 0.85;
+    if (MET.current.L > 0.001) any = 1;
+    MET.current.active = any;
+  }, []);
+
+  const truePeak = useCallback((x: Float32Array): number => {
+    let m = 0;
+    for (let i = 1; i < x.length - 2; i++) {
+      const p0 = x[i - 1];
+      const p1 = x[i];
+      const p2 = x[i + 1];
+      const p3 = x[i + 2];
+      const a = p1 < 0 ? -p1 : p1;
+      if (a > m) m = a;
+      for (let k = 1; k < 4; k++) {
+        const t = k / 4;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        const v =
+          0.5 *
+          (2 * p1 +
+            (-p0 + p2) * t +
+            (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+            (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+        const av = v < 0 ? -v : v;
+        if (av > m) m = av;
+      }
+    }
+    return m;
+  }, []);
+
+  const momentary = useCallback((): number => {
+    const r = E.lufs.ring;
+    if (!r.length) return -60;
+    const z = r.reduce((a, b) => a + b[1], 0) / r.length;
+    return z > 0 ? -0.691 + 10 * Math.log10(z) : -60;
+  }, []);
+
+  const integrated = useCallback((): number => {
+    const B = E.lufs.blocks;
+    if (!B.length) return -Infinity;
+    const m1 = B.reduce((a, b) => a + b, 0) / B.length;
+    const rel = -0.691 + 10 * Math.log10(m1) - 10;
+    let s = 0;
+    let n = 0;
+    for (const z of B) {
+      if (-0.691 + 10 * Math.log10(z) > rel) {
+        s += z;
+        n++;
+      }
+    }
+    return n ? -0.691 + 10 * Math.log10(s / n) : -Infinity;
+  }, []);
+
+  const specColumns = useCallback((W: number): Float32Array => {
+    E.g?.anS?.getFloatFrequencyData(spec.current);
+    const bw = E.ctx?.sampleRate ? E.ctx.sampleRate / 4096 : 10.7421875;
+
+    if (
+      !colMap.current ||
+      colMap.current.sr !== E.ctx?.sampleRate ||
+      colMap.current.w !== W
+    ) {
+      colMap.current = new Float32Array(W + 1) as ColorMap;
+      colMap.current.sr = E.ctx?.sampleRate || 0;
+      colMap.current.w = W;
+      for (let x = 0; x <= W; x++) {
+        const f = 20 * Math.pow(1000, (x - 22) / (W - 24));
+        colMap.current[x] = clamp(f / bw, 1, 2046);
+      }
+    }
+
+    const out = new Float32Array(W);
+    for (let x = 22; x < W; x++) {
+      const a = colMap.current[x];
+      const b = colMap.current[x + 1];
+      let m: number;
+      if (b - a < 1) {
+        const i = Math.floor(a);
+        const fr = a - i;
+        m =
+          spec.current[i] * (1 - fr) +
+          spec.current[i + 1] * fr;
+      } else {
+        m = -200;
+        for (let k = Math.floor(a); k < Math.ceil(b); k++) {
+          if (spec.current[k] > m) m = spec.current[k];
+        }
+      }
+      out[x] = clamp(-m, 0, 90);
+    }
+    return out;
+  }, []);
+
+  const spectrum2D = useCallback(
+    (c: CanvasRenderingContext2D, W: number, H: number, live: boolean) => {
+      for (const d of [0, -18, -36, -54, -72, -90]) {
+        const y = 6 + ((-d / 90) * (H - 18));
+        c.beginPath();
+        c.moveTo(22, y);
+        c.lineTo(W, y);
+        c.stroke();
+        c.fillText(d.toString(), 2, d === -90 ? y - 1 : y + 3);
+      }
+
+      for (const [f, l] of FREQ_LABELS) {
+        const x = specX(f, W);
+        c.fillText(
+          l,
+          Math.min(x - 6, W - c.measureText(l).width - 2),
+          H - 2
+        );
+      }
+
+      if (!live) return;
+
+      const col = specColumns(W);
+      c.beginPath();
+      c.moveTo(22, H - 12);
+      for (let x = 22; x < W; x++) c.lineTo(x, 6 + (col[x] / 90) * (H - 18));
+      c.lineTo(W, H - 12);
+      c.closePath();
+
+      const g = c.createLinearGradient(0, 0, W, 0);
+      g.addColorStop(0, '#2563eb');
+      g.addColorStop(0.5, '#7c3aed');
+      g.addColorStop(1, '#22d3ee');
+      c.fillStyle = g;
+      c.globalAlpha = 0.75;
+      c.fill();
+      c.globalAlpha = 1;
+      c.strokeStyle = '#a6e22e';
+      c.stroke();
+    },
+    [specColumns]
+  );
+
+  const phaseScope = useCallback(
+    (
+      c: CanvasRenderingContext2D,
+      W: number,
+      H: number,
+      live: boolean,
+      d3: boolean
+    ) => {
+      c.strokeStyle = '#15242b';
+      c.beginPath();
+      c.moveTo(W / 2, 4);
+      c.lineTo(W / 2, H - 4);
+      c.moveTo(W / 2 - H / 2, H / 2);
+      c.lineTo(W / 2 + H / 2, H / 2);
+      c.stroke();
+      c.fillText('M', W / 2 + 3, 12);
+      c.fillText('L', W / 2 - H / 2 + 2, H / 2 - 4);
+      c.fillText('R', W / 2 + H / 2 - 8, H / 2 - 4);
+
+      if (!live) return;
+
+      const s = H * 0.42;
+      if (!d3) {
+        c.fillStyle = '#22d3ee';
+        for (let i = 0; i < 2048; i += 2) {
+          const m = (bL.current[i] + bR.current[i]) * 0.7071;
+          const sd = (bL.current[i] - bR.current[i]) * 0.7071;
+          c.fillRect(W / 2 + sd * s, H / 2 - m * s, 1.2, 1.2);
+        }
+        return;
+      }
+
+      const pts = new Float32Array(512);
+      for (let i = 0, j = 0; j < 512; i += 8, j += 2) {
+        pts[j] = (bL.current[i] - bR.current[i]) * 0.7071;
+        pts[j + 1] = (bL.current[i] + bR.current[i]) * 0.7071;
+      }
+
+      if (GON.current.tick++ % 3 === 0) {
+        GON.current.frames.unshift(pts);
+        if (GON.current.frames.length > 7) GON.current.frames.pop();
+      } else if (GON.current.frames.length) {
+        GON.current.frames[0] = pts;
+      }
+
+      for (let k = GON.current.frames.length - 1; k >= 0; k--) {
+        const f = GON.current.frames[k];
+        const ox = k * 5;
+        const oy = -k * 4;
+        const sc = s * (1 - k * 0.05);
+        c.fillStyle = k
+          ? `rgba(34,211,238,${0.5 - k * 0.06})`
+          : '#67e8f9';
+        for (let j = 0; j < 512; j += 2) {
+          c.fillRect(
+            W / 2 + ox + f[j] * sc,
+            H / 2 + oy - f[j + 1] * sc,
+            k ? 1 : 1.6,
+            k ? 1 : 1.6
+          );
+        }
+      }
+    },
+    []
+  );
+
+  const historyPlot = useCallback(
+    (c: CanvasRenderingContext2D, W: number, H: number, d3: boolean) => {
+      const key = activeTab;
+      const arr = HIST.current[key];
+      const rng = key === 'wid' ? [0, 200] : [-60, 0];
+
+      for (let k = 0; k < 5; k++) {
+        const v = rng[0] + (((rng[1] - rng[0]) * k) / 4);
+        const y = H - 12 - ((k / 4) * (H - 18));
+        c.beginPath();
+        c.moveTo(22, y);
+        c.lineTo(W, y);
+        c.stroke();
+        c.fillText(Math.round(v).toString(), 2, y + 3);
+      }
+
+      const P: number[][] = [];
+      for (let i = 0; i < 300; i++) {
+        const v = arr[(hi.current + 1 + i) % 300];
+        const y =
+          H - 12 - clamp((v - rng[0]) / (rng[1] - rng[0]), 0, 1) * (H - 18);
+        const x = 22 + ((i / 299) * (W - 24));
+        P.push([x, y]);
+      }
+
+      if (d3) {
+        const g = c.createLinearGradient(0, 6, 0, H - 12);
+        g.addColorStop(0, '#a6e22e55');
+        g.addColorStop(1, '#a6e22e05');
+        polyline(c, P);
+        c.lineTo(W - 2, H - 12);
+        c.lineTo(22, H - 12);
+        c.fillStyle = g;
+        c.fill();
+      } else {
+        polyline(c, P);
+        c.strokeStyle = '#a6e22e';
+        c.stroke();
+      }
+
+      c.fillStyle = '#48606a';
+      const label =
+        key === 'lufs'
+          ? 'Momentary loudness (LUFS, 400 ms)'
+          : key === 'rms'
+            ? 'RMS (dBFS)'
+            : 'Stereo width S/M (%)';
+      c.fillText(label, 28, 12);
+    },
+    [activeTab]
+  );
+
+  const drawAnalyzer = useCallback(() => {
+    const cvA = canvasARef.current;
+    if (!cvA.c || cvA.w < 30) return;
+
+    const c = cvA.c;
+    const W = cvA.w;
+    const H = cvA.h;
+    const d3 = false;
+
+    const live =
+      E.g &&
+      E.ctx?.state === 'running' &&
+      MET.current.active;
+
+    if (live) {
+      HIST.current.lufs[hi.current % 300] = momentary();
+      HIST.current.rms[hi.current % 300] = MET.current.rms;
+      HIST.current.wid[hi.current % 300] = MET.current.wid;
+    }
+
+    c.fillStyle = '#060b0e';
+    c.fillRect(0, 0, W, H);
+    c.strokeStyle = '#122027';
+    c.fillStyle = '#48606a';
+    c.font = '9px system-ui';
+
+    if (activeTab === 'spec') {
+      spectrum2D(c, W, H, live);
+    } else if (activeTab === 'phase') {
+      phaseScope(c, W, H, live, d3);
+    } else {
+      historyPlot(c, W, H, d3);
+    }
+
+    if (live) hi.current++;
+  }, [activeTab, spectrum2D, phaseScope, historyPlot, momentary]);
+
+  const drawMeters = useCallback(() => {
+    const readouts = {
+      LUFS: isFinite(E.lufs.int) ? E.lufs.int.toFixed(1) : '–',
+      TP: MET.current.tp > 0 ? gToDb(MET.current.tp).toFixed(1) : '–',
+      RMS:
+        isFinite(MET.current.rms) && MET.current.active
+          ? MET.current.rms.toFixed(1)
+          : '–',
+      Phase: MET.current.active
+        ? (MET.current.corr >= 0 ? '+' : '') + MET.current.corr.toFixed(2)
+        : '–',
+      Stereo: MET.current.active ? Math.round(MET.current.wid) + '%' : '–',
+      GR: MET.current.active
+        ? MET.current.gr < -0.05
+          ? MET.current.gr.toFixed(1)
+          : '0.0'
+        : '–',
+    };
+
+    const cvM = canvasMRef.current;
+    if (!cvM.c) return;
+
+    const c = cvM.c;
+    const W = cvM.w;
+    const H = cvM.h;
+    const d3 = false;
+
+    c.clearRect(0, 0, W, H);
+    c.fillStyle = '#060b0e';
+    c.fillRect(0, 0, W, H);
+
+    const grd = c.createLinearGradient(0, H, 0, 0);
+    grd.addColorStop(0, '#3fae2a');
+    grd.addColorStop(0.7, '#a6e22e');
+    grd.addColorStop(0.86, '#f5a524');
+    grd.addColorStop(1, '#ff4d5e');
+
+    const vl = clamp((gToDb(MET.current.L) + 60) / 60, 0, 1);
+    const vr = clamp((gToDb(MET.current.R) + 60) / 60, 0, 1);
+
+    [
+      [vl, 6, MET.current.hL],
+      [vr, 22, MET.current.hR],
+    ].forEach(([v, x, hd]) => {
+      if (d3) {
+        c.fillStyle = '#0f1a1f';
+        c.fillRect(x as number, 0, 12, H);
+      }
+      c.fillStyle = grd;
+      c.fillRect(
+        x as number,
+        H - (v as number) * H,
+        12,
+        (v as number) * H
+      );
+      const hy = H - clamp((gToDb(hd as number) + 60) / 60, 0, 1) * H;
+      c.fillRect(x as number, hy, 12, 2);
+    });
+
+    c.fillStyle = '#48606a';
+    c.font = '8px system-ui';
+    for (const d of [0, -6, -12, -24, -48]) {
+      const y = H - 4 - ((d + 60) / 60) * (H - 8);
+      c.fillText(d.toString(), 0, y + 2);
+    }
+
+    return readouts;
+  }, []);
+
+  useEffect(() => {
+    let frameId: number;
+    let lastUI = 0;
+
+    const frame = (ts: DOMHighResTimeStamp) => {
+      if (audioGraphRef.current) {
+        E.g = audioGraphRef.current;
+        if (audioGraphRef.current.ctx) {
+          E.ctx = audioGraphRef.current.ctx;
+        }
+      }
+
+      analyse();
+      if (MET.current.active || S_playing) {
+        drawMeters();
+      }
+      if (MET.current.active || S_playing) {
+        drawAnalyzer();
+      }
+
+      if (ts - lastUI > 500) {
+        lastUI = ts;
+      }
+
+      frameId = requestAnimationFrame(frame);
+    };
+
+    frameId = requestAnimationFrame(frame);
+
+    return () => {
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, [analyse, drawAnalyzer, drawMeters, audioGraphRef]);
+
+  return {
+    activeTab,
+    setActiveTab: (tab: 'spec' | 'lufs' | 'phase' | 'wid' | 'rms') => {
+      setActiveTab(tab);
+      S_aTab = tab;
+    },
+    attachCanvasA,
+    attachCanvasM,
+    MET: MET.current,
+    readouts: {
+      getValues: () => drawMeters(),
+    },
+  };
+}
+
+export { E as ENGINE_STATE };
+export { clamp, dbToG, gToDb };

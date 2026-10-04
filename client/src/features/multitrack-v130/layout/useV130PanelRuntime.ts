@@ -543,6 +543,7 @@ export function useV130PanelRuntime(
     HTMLElement | null
   >,
   controller: V130PanelController,
+  audioGraph: any, // AudioGraph singleton
 ): void {
   useLayoutEffect(() => {
     const root =

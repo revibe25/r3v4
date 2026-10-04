@@ -1,0 +1,1072 @@
+[
+  {
+    "viewport": "desktop",
+    "route": "/pricing",
+    "before": {
+      "url": "http://localhost:5174/pricing",
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 1440,
+        "clientHeight": 1440,
+        "scrollWidth": 2560,
+        "clientWidth": 2560
+      },
+      "pricing": {
+        "height": 1533,
+        "scrollHeight": 1533,
+        "clientHeight": 1533,
+        "overflowY": "auto"
+      },
+      "pricingAncestors": [
+        {
+          "depth": 0,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 1396,
+          "scrollHeight": 1533,
+          "clientHeight": 1396,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "position": "relative"
+        },
+        {
+          "depth": 1,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 1440,
+          "scrollHeight": 1440,
+          "clientHeight": 1440,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 2,
+          "tag": "DIV",
+          "id": "root",
+          "className": "",
+          "height": 1440,
+          "scrollHeight": 1440,
+          "clientHeight": 1440,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 3,
+          "tag": "BODY",
+          "id": null,
+          "className": "",
+          "height": 1440,
+          "scrollHeight": 1440,
+          "clientHeight": 1440,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 4,
+          "tag": "HTML",
+          "id": null,
+          "className": "dark",
+          "height": 1440,
+          "scrollHeight": 1440,
+          "clientHeight": 1440,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        }
+      ],
+      "candidates": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollHeight": 1533,
+          "clientHeight": 1396,
+          "scrollWidth": 2560,
+          "clientWidth": 2560,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "top": 44,
+          "bottom": 1440,
+          "height": 1396
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "pricing-page-atmosphere",
+          "scrollHeight": 1555,
+          "clientHeight": 1440,
+          "scrollWidth": 3008,
+          "clientWidth": 2560,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 0,
+          "bottom": 1440,
+          "height": 1440
+        },
+        {
+          "tag": "H1",
+          "id": "pricing-title",
+          "className": "",
+          "scrollHeight": 97,
+          "clientHeight": 92,
+          "scrollWidth": 738,
+          "clientWidth": 738,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 186,
+          "bottom": 278,
+          "height": 92
+        },
+        {
+          "tag": "SECTION",
+          "id": null,
+          "className": "pricing-grid",
+          "scrollHeight": 450,
+          "clientHeight": 430,
+          "scrollWidth": 1080,
+          "clientWidth": 1080,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 521,
+          "bottom": 952,
+          "height": 430
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-explorer ",
+          "scrollHeight": 468,
+          "clientHeight": 428,
+          "scrollWidth": 422,
+          "clientWidth": 351,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 541,
+          "bottom": 972,
+          "height": 430
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "plan-price",
+          "scrollHeight": 43,
+          "clientHeight": 40,
+          "scrollWidth": 351,
+          "clientWidth": 351,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 639,
+          "bottom": 679,
+          "height": 40
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 651,
+          "bottom": 678,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-creator featured",
+          "scrollHeight": 468,
+          "clientHeight": 428,
+          "scrollWidth": 420,
+          "clientWidth": 350,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 541,
+          "bottom": 972,
+          "height": 430
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 652,
+          "bottom": 679,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-pro_artist ",
+          "scrollHeight": 468,
+          "clientHeight": 428,
+          "scrollWidth": 422,
+          "clientWidth": 351,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 541,
+          "bottom": 972,
+          "height": 430
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 33,
+          "clientWidth": 33,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 645,
+          "bottom": 672,
+          "height": 27
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 327,
+          "clientWidth": 327,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1097,
+          "bottom": 1106,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 327,
+          "clientWidth": 327,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1097,
+          "bottom": 1106,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 327,
+          "clientWidth": 327,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1097,
+          "bottom": 1106,
+          "height": 9
+        }
+      ],
+      "hero": true,
+      "plans": 3,
+      "footer": {
+        "top": 1510,
+        "bottom": 1577,
+        "height": 67
+      },
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollTop": 137,
+          "scrollHeight": 1533,
+          "clientHeight": 1396
+        }
+      ],
+      "footerAtBottom": {
+        "top": 1373,
+        "bottom": 1440,
+        "visibleBottom": true
+      },
+      "horizontalOverflow": false
+    }
+  },
+  {
+    "viewport": "desktop",
+    "route": "/subscribe",
+    "before": {
+      "url": "http://localhost:5174/subscribe",
+      "viewport": {
+        "width": 2560,
+        "height": 1440
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 1440,
+        "clientHeight": 1440,
+        "scrollWidth": 2560,
+        "clientWidth": 2560
+      },
+      "pricing": null,
+      "pricingAncestors": [],
+      "candidates": [],
+      "hero": false,
+      "plans": 0,
+      "footer": null,
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [],
+      "footerAtBottom": null,
+      "horizontalOverflow": false
+    }
+  },
+  {
+    "viewport": "tablet",
+    "route": "/pricing",
+    "before": {
+      "url": "http://localhost:5174/pricing",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 1024,
+        "clientHeight": 1024,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "pricing": {
+        "height": 2317,
+        "scrollHeight": 2317,
+        "clientHeight": 2317,
+        "overflowY": "auto"
+      },
+      "pricingAncestors": [
+        {
+          "depth": 0,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 980,
+          "scrollHeight": 2317,
+          "clientHeight": 980,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "position": "relative"
+        },
+        {
+          "depth": 1,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 1024,
+          "scrollHeight": 1024,
+          "clientHeight": 1024,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 2,
+          "tag": "DIV",
+          "id": "root",
+          "className": "",
+          "height": 1024,
+          "scrollHeight": 1024,
+          "clientHeight": 1024,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 3,
+          "tag": "BODY",
+          "id": null,
+          "className": "",
+          "height": 1024,
+          "scrollHeight": 1024,
+          "clientHeight": 1024,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 4,
+          "tag": "HTML",
+          "id": null,
+          "className": "dark",
+          "height": 1024,
+          "scrollHeight": 1024,
+          "clientHeight": 1024,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        }
+      ],
+      "candidates": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollHeight": 2317,
+          "clientHeight": 980,
+          "scrollWidth": 768,
+          "clientWidth": 768,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "top": 44,
+          "bottom": 1024,
+          "height": 980
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "pricing-page-atmosphere",
+          "scrollHeight": 1106,
+          "clientHeight": 1024,
+          "scrollWidth": 902,
+          "clientWidth": 768,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 0,
+          "bottom": 1024,
+          "height": 1024
+        },
+        {
+          "tag": "H1",
+          "id": "pricing-title",
+          "className": "",
+          "scrollHeight": 67,
+          "clientHeight": 63,
+          "scrollWidth": 521,
+          "clientWidth": 521,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 166,
+          "bottom": 229,
+          "height": 63
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-explorer ",
+          "scrollHeight": 351,
+          "clientHeight": 311,
+          "scrollWidth": 876,
+          "clientWidth": 730,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 492,
+          "bottom": 805,
+          "height": 313
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "plan-price",
+          "scrollHeight": 43,
+          "clientHeight": 40,
+          "scrollWidth": 730,
+          "clientWidth": 730,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 590,
+          "bottom": 630,
+          "height": 40
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 602,
+          "bottom": 629,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-creator featured",
+          "scrollHeight": 374,
+          "clientHeight": 334,
+          "scrollWidth": 875,
+          "clientWidth": 729,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 815,
+          "bottom": 1151,
+          "height": 336
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "plan-price",
+          "scrollHeight": 43,
+          "clientHeight": 40,
+          "scrollWidth": 729,
+          "clientWidth": 729,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 920,
+          "bottom": 959,
+          "height": 40
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 932,
+          "bottom": 959,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-pro_artist ",
+          "scrollHeight": 368,
+          "clientHeight": 328,
+          "scrollWidth": 876,
+          "clientWidth": 730,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 1161,
+          "bottom": 1491,
+          "height": 330
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "plan-price",
+          "scrollHeight": 43,
+          "clientHeight": 40,
+          "scrollWidth": 730,
+          "clientWidth": 730,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1259,
+          "bottom": 1299,
+          "height": 40
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 31,
+          "clientHeight": 27,
+          "scrollWidth": 33,
+          "clientWidth": 33,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1271,
+          "bottom": 1298,
+          "height": 27
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 698,
+          "clientWidth": 698,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1616,
+          "bottom": 1625,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 698,
+          "clientWidth": 698,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1739,
+          "bottom": 1748,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 10,
+          "clientHeight": 9,
+          "scrollWidth": 698,
+          "clientWidth": 698,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1861,
+          "bottom": 1870,
+          "height": 9
+        }
+      ],
+      "hero": true,
+      "plans": 3,
+      "footer": {
+        "top": 2295,
+        "bottom": 2361,
+        "height": 67
+      },
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollTop": 1337,
+          "scrollHeight": 2317,
+          "clientHeight": 980
+        }
+      ],
+      "footerAtBottom": {
+        "top": 958,
+        "bottom": 1024,
+        "visibleBottom": true
+      },
+      "horizontalOverflow": false
+    }
+  },
+  {
+    "viewport": "tablet",
+    "route": "/subscribe",
+    "before": {
+      "url": "http://localhost:5174/subscribe",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 1024,
+        "clientHeight": 1024,
+        "scrollWidth": 768,
+        "clientWidth": 768
+      },
+      "pricing": null,
+      "pricingAncestors": [],
+      "candidates": [],
+      "hero": false,
+      "plans": 0,
+      "footer": null,
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [],
+      "footerAtBottom": null,
+      "horizontalOverflow": false
+    }
+  },
+  {
+    "viewport": "mobile",
+    "route": "/pricing",
+    "before": {
+      "url": "http://localhost:5174/pricing",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "pricing": {
+        "height": 2828,
+        "scrollHeight": 2828,
+        "clientHeight": 2828,
+        "overflowY": "auto"
+      },
+      "pricingAncestors": [
+        {
+          "depth": 0,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 800,
+          "scrollHeight": 2828,
+          "clientHeight": 800,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "position": "relative"
+        },
+        {
+          "depth": 1,
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "height": 844,
+          "scrollHeight": 844,
+          "clientHeight": 844,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 2,
+          "tag": "DIV",
+          "id": "root",
+          "className": "",
+          "height": 844,
+          "scrollHeight": 844,
+          "clientHeight": 844,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 3,
+          "tag": "BODY",
+          "id": null,
+          "className": "",
+          "height": 844,
+          "scrollHeight": 844,
+          "clientHeight": 844,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        },
+        {
+          "depth": 4,
+          "tag": "HTML",
+          "id": null,
+          "className": "dark",
+          "height": 844,
+          "scrollHeight": 844,
+          "clientHeight": 844,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "position": "static"
+        }
+      ],
+      "candidates": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollHeight": 2828,
+          "clientHeight": 800,
+          "scrollWidth": 390,
+          "clientWidth": 390,
+          "overflowY": "auto",
+          "overflowX": "auto",
+          "top": 44,
+          "bottom": 844,
+          "height": 800
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "pricing-page-atmosphere",
+          "scrollHeight": 912,
+          "clientHeight": 844,
+          "scrollWidth": 458,
+          "clientWidth": 390,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 0,
+          "bottom": 844,
+          "height": 844
+        },
+        {
+          "tag": "H1",
+          "id": "pricing-title",
+          "className": "",
+          "scrollHeight": 90,
+          "clientHeight": 85,
+          "scrollWidth": 362,
+          "clientWidth": 362,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 180,
+          "bottom": 265,
+          "height": 85
+        },
+        {
+          "tag": "SECTION",
+          "id": null,
+          "className": "pricing-grid",
+          "scrollHeight": 1305,
+          "clientHeight": 1285,
+          "scrollWidth": 362,
+          "clientWidth": 362,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 576,
+          "bottom": 1860,
+          "height": 1285
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-explorer ",
+          "scrollHeight": 446,
+          "clientHeight": 406,
+          "scrollWidth": 432,
+          "clientWidth": 360,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 596,
+          "bottom": 1004,
+          "height": 408
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "plan-price",
+          "scrollHeight": 44,
+          "clientHeight": 41,
+          "scrollWidth": 360,
+          "clientWidth": 360,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 694,
+          "bottom": 734,
+          "height": 41
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 32,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 706,
+          "bottom": 733,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-creator featured",
+          "scrollHeight": 469,
+          "clientHeight": 429,
+          "scrollWidth": 431,
+          "clientWidth": 359,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 1014,
+          "bottom": 1445,
+          "height": 431
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 32,
+          "clientHeight": 27,
+          "scrollWidth": 16,
+          "clientWidth": 16,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1124,
+          "bottom": 1151,
+          "height": 27
+        },
+        {
+          "tag": "ARTICLE",
+          "id": null,
+          "className": "plan tier-pro_artist ",
+          "scrollHeight": 463,
+          "clientHeight": 423,
+          "scrollWidth": 432,
+          "clientWidth": 360,
+          "overflowY": "hidden",
+          "overflowX": "hidden",
+          "top": 1455,
+          "bottom": 1880,
+          "height": 425
+        },
+        {
+          "tag": "SPAN",
+          "id": null,
+          "className": "amount",
+          "scrollHeight": 32,
+          "clientHeight": 27,
+          "scrollWidth": 33,
+          "clientWidth": 33,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 1559,
+          "bottom": 1586,
+          "height": 27
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 11,
+          "clientHeight": 9,
+          "scrollWidth": 328,
+          "clientWidth": 328,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 2026,
+          "bottom": 2035,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 11,
+          "clientHeight": 9,
+          "scrollWidth": 328,
+          "clientWidth": 328,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 2149,
+          "bottom": 2158,
+          "height": 9
+        },
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "comparison-tier",
+          "scrollHeight": 11,
+          "clientHeight": 9,
+          "scrollWidth": 328,
+          "clientWidth": 328,
+          "overflowY": "visible",
+          "overflowX": "visible",
+          "top": 2271,
+          "bottom": 2280,
+          "height": 9
+        }
+      ],
+      "hero": true,
+      "plans": 3,
+      "footer": {
+        "top": 2775,
+        "bottom": 2872,
+        "height": 98
+      },
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [
+        {
+          "tag": "DIV",
+          "id": null,
+          "className": "",
+          "scrollTop": 2025,
+          "scrollHeight": 2825,
+          "clientHeight": 800
+        }
+      ],
+      "footerAtBottom": {
+        "top": 747,
+        "bottom": 844,
+        "visibleBottom": true
+      },
+      "horizontalOverflow": false
+    }
+  },
+  {
+    "viewport": "mobile",
+    "route": "/subscribe",
+    "before": {
+      "url": "http://localhost:5174/subscribe",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "windowScrollY": 0,
+      "document": {
+        "scrollHeight": 844,
+        "clientHeight": 844,
+        "scrollWidth": 390,
+        "clientWidth": 390
+      },
+      "pricing": null,
+      "pricingAncestors": [],
+      "candidates": [],
+      "hero": false,
+      "plans": 0,
+      "footer": null,
+      "nav": {
+        "top": 0,
+        "bottom": 44,
+        "height": 44,
+        "position": "static"
+      }
+    },
+    "after": {
+      "windowScrollY": 0,
+      "moved": [],
+      "footerAtBottom": null,
+      "horizontalOverflow": false
+    }
+  }
+]

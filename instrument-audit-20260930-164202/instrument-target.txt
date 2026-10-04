@@ -1,0 +1,22 @@
+
+===== INSTRUMENT TARGET =====
+  File: client/src/pages/instrument.tsx
+  Size: 74476     	Blocks: 152        IO Block: 4096   regular file
+Device: 0,55	Inode: 1298263     Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1002/   cloud)   Gid: ( 1002/   cloud)
+Access: 2026-09-30 01:53:44.327931093 -0500
+Modify: 2026-09-24 17:18:27.020706427 -0500
+Change: 2026-09-24 17:18:27.020706427 -0500
+ Birth: 2026-09-24 17:07:29.339706388 -0500
+4b3d3d3093d2ab43c64f813852641b9c7d2169623e838a2ee0fbcc669099e09d  client/src/pages/instrument.tsx
+
+===== DESIGN REFERENCE =====
+  File: /home/cloud/instrument.html
+  Size: 439786    	Blocks: 864        IO Block: 4096   regular file
+Device: 0,55	Inode: 1367031     Links: 1
+Access: (0644/-rw-r--r--)  Uid: ( 1002/   cloud)   Gid: ( 1002/   cloud)
+Access: 2026-09-30 16:39:45.759539585 -0500
+Modify: 2026-09-30 16:39:40.388539584 -0500
+Change: 2026-09-30 16:39:40.388539584 -0500
+ Birth: 2026-09-30 16:39:40.386539584 -0500
+dbe277a95cf3c27938efc7b9ab2e9fdba2950fb48e949ea9c112547725d2a585  /home/cloud/instrument.html

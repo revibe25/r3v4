@@ -1,0 +1,260 @@
+// ── RFC-EXEMPT: STATUS palette (§4.5) ────────────────────────────────────────
+// Colors: var(--accent-cyan) (cyan)
+// Reason: Audio engine playhead indicator — live cursor on instrument surface
+// Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Instrument Page — Acid Grid: Component Edition
+ *
+ * Same Acid Grid aesthetic but now every component interior is fully restyled:
+ * DrumPads, PianoKeys, FXPanel, DJControls, AudioVisualizer,
+ * MicrophoneInput, HeaderControls, TransportControls
+ *
+ * ALL original logic preserved exactly.
+ *
+ * @module pages/instrument
+ */
+
+import { useEffect, useCallback, useState, useRef, lazy, Suspense } from 'react';
+import {
+  Mic, AlertCircle, Activity, SlidersHorizontal,
+  Headphones, Music, Music2, Repeat2
+} from 'lucide-react';
+import { Link } from 'wouter';
+import { MicrophoneInput } from '@/components/microphone-input';
+import { useAudioEngine } from '@/hooks/use-audio-engine';
+import { useTheme } from "@/components/theme-provider";
+import { DrumPads } from '@/components/drum-pads';
+import { PianoKeys } from '@/components/piano-keys';
+import { FXPanel } from '@/components/fx-panel';
+import { DJControls } from '@/components/dj-controls';
+import { TransportControls } from '@/components/transport-controls';
+import { AudioVisualizer } from '@/components/audio-visualizer';
+
+import { VSTBrowser } from '@/components/vst-browser';
+import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
+import { HeaderControls } from '@/components/header-controls';
+import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
+
+import { useToast } from '@/hooks/use-toast';
+import { useMidi } from '@/hooks/use-midi';
+import { saveSession } from '@/lib/session-store';
+
+interface SessionData {
+  bpm: number;
+  fx: Record<string, boolean>;
+  filterVal: number;
+  pitchSemitones: number;
+  recordedEvents: unknown[];
+}
+
+interface InstrumentPageProps {
+  autoInitialize?: boolean;
+  defaultBpm?: number;
+}
+
+// ── Lazy panels (code-split: only loaded when the FX panel opens) ─────────
+const WaveformEditor = lazy(() =>
+  import('@/components/waveform-editor').then(m => ({ default: m.WaveformEditor })));
+const LoopStation505 = lazy(() =>
+  import('@/features/loopstation/LoopStation505').then(m => ({ default: m.LoopStation505 })));
+
+// ── Keyboard shortcuts ────────────────────────────────────────────────────
+const KEYBOARD_SHORTCUTS = {
+  pads: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']'],
+  keys: ['Z', 'S', 'X', 'D', 'C', 'V', 'G', 'B', 'H', 'N', 'J', 'M'],
+  transport: { arm: 'A', record: 'R', play: 'Space', stop: 'S' },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STYLES
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* ── Shell ─────────────────────────────────────────────────────────────── */
+.ag-shell {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--ag-black);
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,.012) 3px, rgba(255,255,255,.012) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(255,255,255,.016) 31px, rgba(255,255,255,.016) 32px);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Frame ─────────────────────────────────────────────────────────────── */
+.ag-frame {
+  width: 100%;
+  border-left: 3px solid var(--ag-border);
+  border-right: 3px solid var(--ag-border);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.ag-frame::before {
+  content: '';
+  position: absolute;
+  left: -3px; top: 0; bottom: 0; width: 3px;
+  background: var(--ag-acid);
+  box-shadow: 0 0 18px var(--ag-acid), 0 0 40px rgba(163,230,53,.3);
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+.ag-header { border-bottom: 3px solid var(--ag-border); position: relative; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
+.ag-header-top { display: flex; align-items: stretch; border-bottom: 1px solid var(--ag-border); }
+
+.ag-ghost-bpm {
+  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(80px,12vw,140px);
+  color: transparent; -webkit-text-stroke: 1px rgba(163,230,53,.055);
+  letter-spacing: -.04em; pointer-events: none; user-select: none; z-index: 0;
+}
+
+.ag-wordmark-block {
+  padding: 14px 24px 12px; border-right: 1px solid var(--ag-border);
+  display: flex; flex-direction: column; justify-content: center;
+  min-width: 220px; position: relative; z-index: 1;
+}
+.ag-wordmark {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px;
+  letter-spacing: -.02em; color: var(--ag-white); line-height: 1;
+}
+.ag-wordmark-slash {
+  color: var(--ag-acid); margin: 0 4px; font-size: 34px;
+  line-height: .9; text-shadow: 0 0 12px var(--ag-acid);
+}
+.ag-wordmark-sub {
+  font-size: 8px; letter-spacing: .35em; text-transform: uppercase;
+  color: var(--ag-white); margin-top: 5px;
+}
+
+.ag-status-block {
+  padding: 14px 20px; border-right: 1px solid var(--ag-border);
+  display: flex; flex-direction: column; justify-content: center; gap: 5px; z-index: 1;
+}
+.ag-status-line { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; }
+.ag-cursor-live {
+  display: inline-block; width: 8px; height: 14px;
+  background: var(--ag-acid); box-shadow: 0 0 8px var(--ag-acid);
+  animation: ag-blink 1s step-end infinite;
+}
+.ag-cursor-standby { display: inline-block; width: 8px; height: 14px; background: var(--ag-mute); }
+@keyframes ag-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.ag-status-live-text  { color: var(--ag-acid); }
+.ag-status-dead-text  { color: var(--ag-white); }
+
+.ag-bpm-block {
+  padding: 0 24px; display: flex; align-items: center; gap: 12px; z-index: 1;
+}
+.ag-bpm-label {
+  font-size: 8px; letter-spacing: .3em; color: var(--ag-white);
+  text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg);
+}
+.ag-bpm-number {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 42px;
+  letter-spacing: -.04em; color: var(--ag-acid); line-height: 1;
+  text-shadow: 0 0 20px rgba(163,230,53,.4), 0 0 40px rgba(163,230,53,.15);
+}
+
+.ag-controls-block {
+  flex: 1; padding: 12px 20px;
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 8px; flex-wrap: wrap; z-index: 1;
+}
+
+/* ticker */
+.ag-ticker-row { padding: 5px 0; background: var(--ag-ink); overflow: hidden; position: relative; }
+.ag-ticker-row::before, .ag-ticker-row::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 2;
+}
+.ag-ticker-row::before { left: 0; background: linear-gradient(90deg, var(--ag-ink), transparent); }
+.ag-ticker-row::after  { right: 0; background: linear-gradient(-90deg, var(--ag-ink), transparent); }
+.ag-ticker-inner { display: flex; width: max-content; animation: ag-scroll 28s linear infinite; }
+@keyframes ag-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ag-ticker-item {
+  font-size: 9px; letter-spacing: .25em; text-transform: uppercase;
+  color: #fff; padding: 0 24px; white-space: nowrap;
+  display: flex; align-items: center; gap: 12px;
+}
+.ag-ticker-sep { color: var(--ag-acid); font-size: 11px; }
+
+/* nav buttons */
+.ag-nav-btn {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  background: transparent; border: 1px solid var(--ag-border); padding: 7px 14px;
+  color: var(--ag-white); cursor: pointer; transition: all .1s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.ag-nav-btn:hover { background: var(--ag-acid); border-color: var(--ag-acid); color: var(--ag-black); }
+
+/* ── Content grid ──────────────────────────────────────────────────────── */
+.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; min-height: 0; }
+@media(min-width:1024px)                       { .ag-content { grid-template-columns: 1fr 490px; } }
+@media(min-width:1600px)                       { .ag-content { grid-template-columns: 1fr 580px; } }
+@media(min-width:1920px)                       { .ag-content { grid-template-columns: 1fr 680px; } }
+
+.ag-left { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+@media(min-width:1024px){ .ag-left { border-right: 3px solid var(--ag-border); } }
+
+.ag-right { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+
+.ag-section-strip {
+  background: var(--ag-ink); border-top: 3px solid var(--ag-border);
+  border-bottom: 1px solid var(--ag-border); padding: 5px 20px;
+  display: flex; align-items: center; gap: 10px;
+  border-left: 3px solid var(--ag-acid);
+  box-shadow: inset 0 0 20px rgba(163,230,53,.03);
+}
+.ag-section-tag { font-size: 8px; letter-spacing: .35em; text-transform: uppercase; color: var(--ag-white); }
+.ag-section-line { flex: 1; height: 1px; background: var(--ag-border); }
+
+.ag-panel { position: relative; border-bottom: 1px solid var(--ag-border); }
+.ag-panel-ghost {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 72px;
+  color: transparent; -webkit-text-stroke: 1px rgba(163,230,53,.07);
+  line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+}
+
+/* ── CollapsibleFXPanel overrides ─────────────────────────────────────── */
+.ag-frame [class*="rounded"],
+.ag-frame .bg-card\/50, .ag-frame .bg-card\/30 { border-radius: 0 !important; }
+.ag-frame .bg-card\/50, .ag-frame .bg-card\/30 {
+  background: var(--ag-panel) !important; border: none !important;
+}
+/* Remove outer panel border on each CollapsibleFXPanel root.
+   The selector matches the panel root element only — it never matches
+   descendants, so the header bottom-border, the expanded-state lime
+   left accent, and all internal element borders are preserved. */
+.ag-frame .ag-panel > *:not(.ag-panel-ghost) {
+  border: none !important;
+}
+.ag-frame button[aria-expanded] {
+  background: var(--ag-ink) !important; border-radius: 0 !important;
+  border-bottom: 1px solid var(--ag-border) !important;
+  padding-left: 56px !important; transition: background .1s, color .1s !important;
+  position: relative; z-index: 1;
+}
+.ag-frame button[aria-expanded]:hover {
+  background: var(--ag-acid) !important; color: var(--ag-black) !important;
+}
+.ag-frame button[aria-expanded]:hover .text-foreground,
+.ag-frame button[aria-expanded]:hover .text-muted-foreground,
+.ag-frame button[aria-expanded]:hover svg { color: var(--ag-black) !important; }
+.ag-frame button[aria-expanded="true"] { border-left: 3px solid var(--ag-acid) !important; box-shadow: inset 3px 0 12px rgba(163,230,53,.08) !important; }
+.ag-frame button[aria-expanded="true"] .text-foreground { color: var(--ag-acid) !important; }
+.ag-frame [role="region"] > div { background: var(--ag-panel) !important; border-radius: 0 !important; }
+.ag-frame button[aria-expanded] .text-foreground {
+  font-family: 'IBM Plex Mono', monospace !important; font-size: 11px !important;
+  letter-spacing: .15em !important; text-transform: uppercase !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* DRUM PADS                                                              */

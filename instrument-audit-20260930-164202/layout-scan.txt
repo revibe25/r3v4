@@ -1,0 +1,1346 @@
+client/src/pages/instrument.tsx:78:  height: 100vh;
+client/src/pages/instrument.tsx:79:  overflow: hidden;
+client/src/pages/instrument.tsx:80:  display: flex;
+client/src/pages/instrument.tsx:81:  flex-direction: column;
+client/src/pages/instrument.tsx:91:  width: 100%;
+client/src/pages/instrument.tsx:94:  height: 100%;
+client/src/pages/instrument.tsx:95:  display: flex;
+client/src/pages/instrument.tsx:96:  flex-direction: column;
+client/src/pages/instrument.tsx:97:  overflow: hidden;
+client/src/pages/instrument.tsx:102:  position: absolute;
+client/src/pages/instrument.tsx:103:  left: -3px; top: 0; bottom: 0; width: 3px;
+client/src/pages/instrument.tsx:109:.ag-header { border-bottom: 3px solid var(--ag-border); position: relative; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
+client/src/pages/instrument.tsx:110:.ag-header-top { display: flex; align-items: stretch; border-bottom: 1px solid var(--ag-border); }
+client/src/pages/instrument.tsx:113:  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+client/src/pages/instrument.tsx:122:  display: flex; flex-direction: column; justify-content: center;
+client/src/pages/instrument.tsx:123:  min-width: 220px; position: relative; z-index: 1;
+client/src/pages/instrument.tsx:127:  letter-spacing: -.02em; color: var(--ag-white); line-height: 1;
+client/src/pages/instrument.tsx:131:  line-height: .9; text-shadow: 0 0 12px var(--ag-acid);
+client/src/pages/instrument.tsx:140:  display: flex; flex-direction: column; justify-content: center; gap: 5px; z-index: 1;
+client/src/pages/instrument.tsx:142:.ag-status-line { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; display: flex; align-items: center; gap: 7px; }
+client/src/pages/instrument.tsx:144:  display: inline-block; width: 8px; height: 14px;
+client/src/pages/instrument.tsx:148:.ag-cursor-standby { display: inline-block; width: 8px; height: 14px; background: var(--ag-mute); }
+client/src/pages/instrument.tsx:154:  padding: 0 24px; display: flex; align-items: center; gap: 12px; z-index: 1;
+client/src/pages/instrument.tsx:162:  letter-spacing: -.04em; color: var(--ag-acid); line-height: 1;
+client/src/pages/instrument.tsx:167:  flex: 1; padding: 12px 20px;
+client/src/pages/instrument.tsx:168:  display: flex; align-items: center; justify-content: flex-end;
+client/src/pages/instrument.tsx:169:  gap: 8px; flex-wrap: wrap; z-index: 1;
+client/src/pages/instrument.tsx:173:.ag-ticker-row { padding: 5px 0; background: var(--ag-ink); overflow: hidden; position: relative; }
+client/src/pages/instrument.tsx:175:  content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 2;
+client/src/pages/instrument.tsx:179:.ag-ticker-inner { display: flex; width: max-content; animation: ag-scroll 28s linear infinite; }
+client/src/pages/instrument.tsx:184:  display: flex; align-items: center; gap: 12px;
+client/src/pages/instrument.tsx:193:  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+client/src/pages/instrument.tsx:198:.ag-content { display: grid; grid-template-columns: 1fr; flex: 1; overflow: hidden; min-height: 0; }
+client/src/pages/instrument.tsx:199:@media(min-width:1024px)                       { .ag-content { grid-template-columns: 1fr 490px; } }
+client/src/pages/instrument.tsx:200:@media(min-width:1600px)                       { .ag-content { grid-template-columns: 1fr 580px; } }
+client/src/pages/instrument.tsx:201:@media(min-width:1920px)                       { .ag-content { grid-template-columns: 1fr 680px; } }
+client/src/pages/instrument.tsx:203:.ag-left { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+client/src/pages/instrument.tsx:204:@media(min-width:1024px){ .ag-left { border-right: 3px solid var(--ag-border); } }
+client/src/pages/instrument.tsx:206:.ag-right { display: flex; flex-direction: column; overflow-y: auto; min-height: 0; height: 100%; }
+client/src/pages/instrument.tsx:211:  display: flex; align-items: center; gap: 10px;
+client/src/pages/instrument.tsx:216:.ag-section-line { flex: 1; height: 1px; background: var(--ag-border); }
+client/src/pages/instrument.tsx:220:  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+client/src/pages/instrument.tsx:223:  line-height: 1; pointer-events: none; user-select: none; z-index: 0;
+client/src/pages/instrument.tsx:284:  overflow: hidden !important;
+client/src/pages/instrument.tsx:476:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none {
+client/src/pages/instrument.tsx:477:  height: 2px !important;
+client/src/pages/instrument.tsx:479:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none > span:first-child {
+client/src/pages/instrument.tsx:482:.ag-frame [data-orientation="horizontal"].relative.flex.w-full.touch-none span[data-orientation] {
+client/src/pages/instrument.tsx:518:.ag-frame .flex.items-end.justify-center.gap-0\\.5 > div {
+client/src/pages/instrument.tsx:579:/* ModeSwitcher — strip overflow:hidden rounded */
+client/src/pages/instrument.tsx:580:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] {
+client/src/pages/instrument.tsx:583:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] button {
+client/src/pages/instrument.tsx:587:.ag-frame [style*="borderRadius: 8"][style*="overflow: hidden"][style*="border: 1px"] button[style*="10b981"] {
+client/src/pages/instrument.tsx:599:.ag-frame [style*="borderRadius: 8"][style*="width: 28"][style*="height: 28"] {
+client/src/pages/instrument.tsx:611:.ag-frame [style*="height: 4"][style*="borderRadius"][style*="background"] {
+client/src/pages/instrument.tsx:614:.ag-frame [style*="height: 2"][style*="borderRadius"][style*="background"] {
+client/src/pages/instrument.tsx:619:.ag-frame [style*="flex: 1"][style*="height"][style*="borderRadius"][style*="transition"] {
+client/src/pages/instrument.tsx:633:.ag-frame .flex.items-center.gap-2 button,
+client/src/pages/instrument.tsx:634:.ag-frame .flex.items-center.gap-1 button {
+client/src/pages/instrument.tsx:641:.ag-frame .inline-flex.items-center.justify-center.gap-2 {
+client/src/pages/instrument.tsx:714:.ag-frame [style*="borderRadius: 6"][style*="background: linear-gradient"][style*="width: 24"] {
+client/src/pages/instrument.tsx:771:.ag-frame [style*="borderRadius: 12"][style*="cursor: pointer"][style*="width: 36"] {
+client/src/pages/instrument.tsx:805:.ag-frame [style*="height: 6"][style*="borderRadius: 2"] {
+client/src/pages/instrument.tsx:814:.ag-frame .flex.flex-wrap.items-center.gap-3.p-3.bg-background {
+client/src/pages/instrument.tsx:824:.ag-frame .flex.items-center.gap-3.bg-muted\/50 {
+client/src/pages/instrument.tsx:923:.ag-frame .w-16.flex-shrink-0 {
+client/src/pages/instrument.tsx:949:  scrollbar-width: thin;
+client/src/pages/instrument.tsx:952:.ag-panel-scroll::-webkit-scrollbar       { width: 4px; }
+client/src/pages/instrument.tsx:981:.ag-frame ::-webkit-scrollbar { width: 6px; height: 6px; background: var(--ag-black); }
+client/src/pages/instrument.tsx:985:.ag-content::-webkit-scrollbar { width: 6px; background: var(--ag-black); }
+client/src/pages/instrument.tsx:1013:  display: flex; align-items: center; gap: 10px;
+client/src/pages/instrument.tsx:1015:.ag-guide-header::after { content:''; flex:1; height:1px; background:var(--ag-acid-d); }
+client/src/pages/instrument.tsx:1017:  display: flex; gap: 0; border-bottom: 1px solid var(--ag-border);
+client/src/pages/instrument.tsx:1022:  color: var(--ag-white); padding: 7px 12px 7px 0; min-width: 72px;
+client/src/pages/instrument.tsx:1023:  border-right: 1px solid var(--ag-border); margin-right: 12px; flex-shrink: 0;
+client/src/pages/instrument.tsx:1025:.ag-guide-val { font-size: 9px; letter-spacing: .06em; color: var(--ag-white); padding: 7px 0; line-height: 1.5; }
+client/src/pages/instrument.tsx:1028:  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+client/src/pages/instrument.tsx:1030:.ag-kbd-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+client/src/pages/instrument.tsx:1040:  display: flex; flex-direction: column; gap: 4px;
+client/src/pages/instrument.tsx:1042:@media(min-width:768px){ .ag-footer { flex-direction: row; align-items: center; justify-content: space-between; } }
+client/src/pages/instrument.tsx:1045:  color: var(--ag-white); display: flex; flex-wrap: wrap;
+client/src/pages/instrument.tsx:1047:.ag-footer-feat { display: flex; align-items: center; gap: 10px; }
+client/src/pages/instrument.tsx:1058:.ag-left  { min-height: 0; }
+client/src/pages/instrument.tsx:1059:.ag-right { min-height: 0; }
+client/src/pages/instrument.tsx:1062:@media (max-width: 1023px) {
+client/src/pages/instrument.tsx:1063:  .ag-left  { height: auto; border-right: none !important; }
+client/src/pages/instrument.tsx:1064:  .ag-right { height: auto; }
+client/src/pages/instrument.tsx:1065:  .ag-content { overflow-y: auto; }
+client/src/pages/instrument.tsx:1069:@media (max-height: 600px) and (orientation: landscape) {
+client/src/pages/instrument.tsx:1072:  .ag-wordmark-block { padding: 6px 14px 4px !important; min-width: 160px !important; }
+client/src/pages/instrument.tsx:1083:@media (max-width: 400px) {
+client/src/pages/instrument.tsx:1084:  .ag-frame { border-left-width: 2px !important; border-right-width: 2px !important; }
+client/src/pages/instrument.tsx:1085:  .ag-wordmark-block { min-width: 140px !important; padding: 10px 12px !important; }
+client/src/pages/instrument.tsx:1092:  display: flex; gap: 12px; align-items: flex-start;
+client/src/pages/instrument.tsx:1098:.ag-error-desc { font-size: 9px; color: rgba(255,59,59,.5); line-height: 1.6; }
+client/src/pages/instrument.tsx:1108:  position: fixed; inset: 0; z-index: 50; background: var(--ag-black);
+client/src/pages/instrument.tsx:1109:  display: flex; align-items: center; justify-content: center;
+client/src/pages/instrument.tsx:1113:  width: min(480px, calc(100vw - 40px)); border: 2px solid var(--ag-border);
+client/src/pages/instrument.tsx:1118:.ag-init-title-row { padding: 20px 24px 0; display: flex; align-items: baseline; gap: 14px; }
+client/src/pages/instrument.tsx:1119:.ag-init-big { font-family:'Syne',sans-serif; font-weight:800; font-size:36px; letter-spacing:-.03em; color:var(--ag-white); line-height:1; }
+client/src/pages/instrument.tsx:1123:.ag-init-desc { font-size:10px; letter-spacing:.08em; color:var(--ag-white); line-height:1.8; margin-bottom:20px; }
+client/src/pages/instrument.tsx:1124:.ag-init-cta { font-weight:600; font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--ag-acid); display:flex; align-items:center; gap:10px; }
+client/src/pages/instrument.tsx:1125:.ag-init-loader { margin-top:16px; height:2px; background:var(--ag-border); position:relative; overflow:hidden; }
+client/src/pages/instrument.tsx:1127:  content:''; position:absolute; left:-60%; top:0; bottom:0; width:60%;
+client/src/pages/instrument.tsx:1134:  position:fixed; inset:0; z-index:40; background:rgba(6,6,6,.82);
+client/src/pages/instrument.tsx:1135:  display:flex; align-items:center; justify-content:center;
+client/src/pages/instrument.tsx:1140:  display:flex; align-items:center; gap:16px;
+client/src/pages/instrument.tsx:1142:.ag-op-bar { width:140px; height:2px; background:var(--ag-border); position:relative; overflow:hidden; }
+client/src/pages/instrument.tsx:1144:  content:''; position:absolute; left:-50%; top:0; bottom:0; width:50%;
+client/src/pages/instrument.tsx:1372:              <AlertCircle size={14} color="var(--ag-err)" style={{ flexShrink: 0, marginTop: 1 }} />
+client/src/pages/instrument.tsx:1423:                    flexShrink: 0,
+client/src/components/AILevelAssist.tsx:94:      className="relative flex items-center justify-center"
+client/src/components/AILevelAssist.tsx:95:      style={{ width: size, height: size }}
+client/src/components/AILevelAssist.tsx:102:        style={{ overflow: 'visible' }}
+client/src/components/AILevelAssist.tsx:192:      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold border ${color}`}
+client/src/components/AILevelAssist.tsx:214:        flex flex-col items-center gap-1.5 p-2 rounded-lg border transition-all duration-300
+client/src/components/AILevelAssist.tsx:250:        <div className="flex gap-1 mt-0.5">
+client/src/components/AILevelAssist.tsx:270:        <div className="flex flex-wrap gap-1 justify-center">
+client/src/components/AILevelAssist.tsx:323:    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/40 border border-white/5">
+client/src/components/AILevelAssist.tsx:330:                flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider transition-all duration-100
+client/src/components/AILevelAssist.tsx:356:      <div className="ml-2 pl-2 border-l border-white/10 flex items-center gap-1.5">
+client/src/components/AILevelAssist.tsx:404:    <div className="flex flex-col gap-2">
+client/src/components/AILevelAssist.tsx:406:      <div className="flex items-center justify-between">
+client/src/components/AILevelAssist.tsx:410:            flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
+client/src/components/AILevelAssist.tsx:429:          <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-500/10 border border-red-500/30">
+client/src/components/mixer-with-dj.tsx:58:      <header className="flex items-center justify-between mb-4">
+client/src/components/mixer-with-dj.tsx:63:        <div className="flex items-center gap-3">
+client/src/components/mixer-with-dj.tsx:64:          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+client/src/components/mixer-with-dj.tsx:103:            <div className="flex items-center gap-6">
+client/src/components/mixer-with-dj.tsx:104:              <div className="flex-1">
+client/src/components/mixer-with-dj.tsx:105:                <div className="flex justify-between text-sm mb-1">
+client/src/components/beat-intro.tsx:391:      minHeight: "100vh",
+client/src/components/beat-intro.tsx:405:        @keyframes scanline{ 0%{transform:translateY(-100%)} 100%{transform:translateY(100vh)} }
+client/src/components/beat-intro.tsx:408:        ::-webkit-scrollbar{width:4px;background:#0a0a0a}
+client/src/components/beat-intro.tsx:414:        position:"fixed", inset:0, pointerEvents:"none", zIndex:99, overflow:"hidden",
+client/src/components/beat-intro.tsx:417:          position:"absolute", left:0, right:0, height:"2px",
+client/src/components/beat-intro.tsx:425:        display:"flex", alignItems:"flex-end", justifyContent:"space-between",
+client/src/components/beat-intro.tsx:439:          <div style={{ display:"flex", alignItems:"center", gap:6, justifyContent:"flex-end", marginTop:4 }}>
+client/src/components/beat-intro.tsx:441:              width:8, height:14,
+client/src/components/beat-intro.tsx:454:      <div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:20 }}>
+client/src/components/beat-intro.tsx:469:            flexShrink: 0,
+client/src/components/beat-intro.tsx:502:        <div style={{ display:"flex", gap:2 }}>
+client/src/components/beat-intro.tsx:507:              <div key={s} style={{ flex:1, position:"relative" }}>
+client/src/components/beat-intro.tsx:509:                  height:32,
+client/src/components/beat-intro.tsx:518:                <div style={{ display:"flex", gap:1, justifyContent:"center", marginTop:2 }}>
+client/src/components/beat-intro.tsx:521:                      width:4, height:4,
+client/src/components/beat-intro.tsx:533:        <div style={{ display:"flex", marginTop:3 }}>
+client/src/components/beat-intro.tsx:535:            <div key={b} style={{ flex:4, fontSize:7, color:"rgba(255,255,255,0.18)", letterSpacing:"0.1em", paddingLeft:2 }}>{b}</div>
+client/src/components/beat-intro.tsx:574:                  <div style={{ position:"absolute", inset:0, padding:8, display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
+client/src/components/beat-intro.tsx:576:                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" }}>
+client/src/components/beat-intro.tsx:586:                          width:5, height:5,
+client/src/components/beat-intro.tsx:602:                      <div style={{ marginTop:4, height:2, background:"rgba(255,255,255,0.06)", overflow:"hidden" }}>
+client/src/components/beat-intro.tsx:604:                          height:"100%", width:`${vel * 100}%`,
+client/src/components/beat-intro.tsx:626:          <div style={{ display:"flex", gap:20, marginTop:10 }}>
+client/src/components/beat-intro.tsx:633:              <div key={label} style={{ display:"flex", alignItems:"center", gap:6 }}>
+client/src/components/beat-intro.tsx:634:                <div style={{ width:8, height:8, background:color }} />
+client/src/components/beat-intro.tsx:650:                <div key={cat} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:5 }}>
+client/src/components/beat-intro.tsx:652:                  <div style={{ display:"flex", gap:1, flex:1 }}>
+client/src/components/beat-intro.tsx:658:                          flex:1, height:10,
+client/src/components/beat-intro.tsx:673:        <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
+client/src/components/beat-intro.tsx:682:            position:"relative", overflow:"hidden",
+client/src/components/beat-intro.tsx:705:                  <div style={{ display:"flex", gap:16, marginTop:8 }}>
+client/src/components/beat-intro.tsx:726:                  <div style={{ marginTop:10, height:3, background:"rgba(255,255,255,0.06)" }}>
+client/src/components/beat-intro.tsx:728:                      height:"100%", width:`${lastHit.vel * 100}%`,
+client/src/components/beat-intro.tsx:756:          <div style={{ border:"1px solid var(--dj-surface2)", background:"rgba(0,0,0,0.3)", flex:1 }}>
+client/src/components/beat-intro.tsx:760:            <div style={{ overflow:"hidden" }}>
+client/src/components/beat-intro.tsx:772:                      display:"flex", alignItems:"center", gap:8, padding:"5px 10px",
+client/src/components/beat-intro.tsx:782:                    <div style={{ width:5, height:5, background:c.color, flexShrink:0 }} />
+client/src/components/beat-intro.tsx:783:                    <div style={{ flex:1, minWidth:0 }}>
+client/src/components/beat-intro.tsx:794:                    <div style={{ display:"flex", gap:1 }}>
+client/src/components/beat-intro.tsx:796:                        <div key={i} style={{ width:2, height:8, background: i < Math.round(h.vel*5) ? c.color : "#1c1c1c" }} />
+client/src/styles/theme.css:350:  min-height: 100%;
+client/src/styles/theme.css:446:  --r3-border-width: 1px;
+client/src/styles/theme.css:747:  scrollbar-width: thin;
+client/src/styles/theme.css:754:  width: 7px;
+client/src/styles/theme.css:755:  height: 7px;
+client/src/styles/theme.css:1158:  width: 8px;
+client/src/styles/theme.css:1159:  height: 8px;
+client/src/components/vst-sidechain-ui.tsx:13:const P = "bg-[#a3e635] hover:bg-[var(--looper-lime)] text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-sidechain-ui.tsx:14:const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-sidechain-ui.tsx:15:const D = "border border-red-500 text-red-400 hover:bg-red-500 hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-2 py-1.5 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-sidechain-ui.tsx:42:      <div className="flex items-center justify-between">
+client/src/components/vst-sidechain-ui.tsx:69:      <div className="flex items-center justify-between">
+client/src/components/vst-sidechain-ui.tsx:70:        <div className="flex items-center gap-2 text-xs tracking-wider">
+client/src/components/vst-sidechain-ui.tsx:75:        <div className="flex items-center gap-2">
+client/src/components/vst-sidechain-ui.tsx:85:        <div className="flex justify-between items-center mb-1">
+client/src/components/vst-sidechain-ui.tsx:92:        <div className="flex items-center gap-2 mb-1">
+client/src/components/vst-sidechain-ui.tsx:97:        <div className="h-1.5 bg-[#0d0d0d] border border-[var(--t-b2x)] overflow-hidden">
+client/src/components/vst-sidechain-ui.tsx:98:          <div className="h-full bg-[#a3e635] transition-all duration-75" style={{width:`${Math.min(level*100,100)}%`}} />
+client/src/components/vst-sidechain-ui.tsx:123:    <div className="fixed inset-0 bg-background/70 flex items-center justify-center z-50 font-mono">
+client/src/components/vst-sidechain-ui.tsx:125:        <div className="flex items-center justify-between border-b border-[var(--t-b2x)] px-5 py-4">
+client/src/components/vst-sidechain-ui.tsx:139:            <div className="flex justify-between mb-1">
+client/src/components/vst-sidechain-ui.tsx:145:          <div className="flex gap-2 pt-2 border-t border-[var(--t-b2x)]">
+client/src/components/vst-sidechain-ui.tsx:146:            <button onClick={onClose} className={`${G} flex-1 justify-center`}>Cancel</button>
+client/src/components/vst-sidechain-ui.tsx:147:            <button onClick={handleCreate} disabled={!sourceId||!targetVSTId} className={`${P} flex-1 justify-center`}>Create Connection</button>
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:53:          height: '100vh',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:54:          display: 'flex',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:64:              width: 32,
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:65:              height: 32,
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:92:          height: '100vh',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:93:          display: 'flex',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-single-init-20260927-033743:98:          flexDirection: 'column',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:95:        display:     'flex',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:97:        height:       NAV_HEIGHT_PX,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:102:        flexShrink:   0,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:111:          display:    'flex',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:113:          flex:        1,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:115:          overflow:   'hidden',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:131:                display:        'flex',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:134:                height:          28,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:148:                flexShrink:      0,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:177:          width:      '1px',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:178:          height:     28,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:180:          flexShrink: 0,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:185:      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:211:              display:       'flex',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:214:              height:         28,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:225:              flexShrink:     0,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:253:            display:        'flex',
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:256:            height:          28,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:257:            width:           28,
+client/src/components/page-nav.tsx.pre-mixer-removal-20260924-234511:263:            flexShrink:      0,
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:54:          height: '100vh',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:55:          display: 'flex',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:65:              width: 32,
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:66:              height: 32,
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:93:          height: '100vh',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:94:          display: 'flex',
+client/src/components/ProtectedRoute.tsx.pre-gate1m-effect-removal-20260927-034024:99:          flexDirection: 'column',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:94:        display:     'flex',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:96:        height:       NAV_HEIGHT_PX,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:101:        flexShrink:   0,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:110:          display:    'flex',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:112:          flex:        1,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:114:          overflow:   'hidden',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:130:                display:        'flex',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:133:                height:          28,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:147:                flexShrink:      0,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:176:          width:      '1px',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:177:          height:     28,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:179:          flexShrink: 0,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:184:      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:210:              display:       'flex',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:213:              height:         28,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:224:              flexShrink:     0,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:252:            display:        'flex',
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:255:            height:          28,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:256:            width:           28,
+client/src/components/page-nav.tsx.pre-mixer-nav-final-20260924-234832:262:            flexShrink:      0,
+client/src/components/waveform-editor.tsx:88:  height: number;
+client/src/components/waveform-editor.tsx:128:    meter: 0, color: TRACK_COLORS[0], height: 80, collapsed: false,
+client/src/components/waveform-editor.tsx:137:    meter: 0, color: TRACK_COLORS[1], height: 80, collapsed: false,
+client/src/components/waveform-editor.tsx:146:    meter: 0, color: TRACK_COLORS[2], height: 80, collapsed: false,
+client/src/components/waveform-editor.tsx:155:    meter: 0, color: TRACK_COLORS[3], height: 80, collapsed: false,
+client/src/components/waveform-editor.tsx:194:function setupHighDPICanvas(canvas: HTMLCanvasElement, width: number, height: number): CanvasRenderingContext2D {
+client/src/components/waveform-editor.tsx:255:      meter: 0, color: TRACK_COLORS[idx % TRACK_COLORS.length], height: 80,
+client/src/components/waveform-editor.tsx:388:  const drawWaveform = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+client/src/components/waveform-editor.tsx:551:  const drawMiniMap = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+client/src/components/waveform-editor.tsx:591:  const drawSpectrum = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+client/src/components/waveform-editor.tsx:780:  const LevelMeter = ({ value, peak, width, height }: { value: number; peak: number; width: number; height: number }) => {
+client/src/components/waveform-editor.tsx:796:          style={{ height: `${100 / METER_SEGMENTS}%` }}
+client/src/components/waveform-editor.tsx:802:      <div className="flex flex-col gap-px" style={{ width: `${width}px`, height: `${height}px` }}>
+client/src/components/waveform-editor.tsx:815:      className="flex flex-col h-full relative text-foreground overflow-hidden"
+client/src/components/waveform-editor.tsx:828:        className="flex items-center justify-between px-3 py-2 border-b flex-shrink-0"
+client/src/components/waveform-editor.tsx:834:        <div className="flex items-center gap-2 min-w-0">
+client/src/components/waveform-editor.tsx:836:            className="flex items-center justify-center w-6 h-6 flex-shrink-0"
+client/src/components/waveform-editor.tsx:866:        className="flex items-center gap-1 px-2 py-1.5 border-b flex-wrap flex-shrink-0"
+client/src/components/waveform-editor.tsx:870:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:888:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:901:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:922:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:937:        <div className="flex items-center gap-0.5 pr-2 border-r border-[var(--dj-border)]">
+client/src/components/waveform-editor.tsx:957:        <div className="flex items-center gap-0.5">
+client/src/components/waveform-editor.tsx:992:      <div className="flex flex-1 min-h-0">
+client/src/components/waveform-editor.tsx:996:            className="w-64 flex-shrink-0 border-r overflow-y-auto"
+client/src/components/waveform-editor.tsx:1002:            <div className="flex items-center justify-between px-2 py-1.5 border-b border-[var(--dj-border)] sticky top-0 z-10 bg-[var(--dj-surface)] ">
+client/src/components/waveform-editor.tsx:1003:              <span className="text-xs font-semibold text-[#555] flex items-center gap-1">
+client/src/components/waveform-editor.tsx:1023:                <div className="flex items-center gap-1 px-2 py-1 bg-[var(--dj-surface)] hover:bg-[var(--dj-surface2)] transition-colors">
+client/src/components/waveform-editor.tsx:1034:                    className="flex-1 bg-transparent text-xs font-semibold text-foreground/80 border-none outline-none"
+client/src/components/waveform-editor.tsx:1037:                  <div className="flex items-center gap-0.5">
+client/src/components/waveform-editor.tsx:1056:                    <div className="flex items-center gap-1 text-[10px]">
+client/src/components/waveform-editor.tsx:1059:                        className={`w-4 h-4 rounded-none flex items-center justify-center font-bold transition-colors ${
+client/src/components/waveform-editor.tsx:1067:                        className={`w-4 h-4 rounded-none flex items-center justify-center font-bold transition-colors ${
+client/src/components/waveform-editor.tsx:1075:                        className={`w-4 h-4 rounded-none flex items-center justify-center font-bold transition-colors ${
+client/src/components/waveform-editor.tsx:1094:                        className="flex-1 h-1 bg-[var(--t-b2x)] appearance-none cursor-pointer ml-1"
+client/src/components/waveform-editor.tsx:1104:                      <div className="flex flex-wrap gap-0.5 px-2 pb-1.5">
+client/src/components/waveform-editor.tsx:1128:        <div className="flex-1 flex flex-col min-w-0">
+client/src/components/waveform-editor.tsx:1130:          <div className="h-5 bg-[var(--dj-surface)] border-b border-[var(--dj-border)] relative flex-shrink-0">
+client/src/components/waveform-editor.tsx:1150:            className={`w-full flex-1 ${
+client/src/components/waveform-editor.tsx:1156:            style={{ height: CANVAS_HEIGHT }}
+client/src/components/waveform-editor.tsx:1167:              className="w-full border-t border-[var(--dj-border)] flex-shrink-0"
+client/src/components/waveform-editor.tsx:1168:              style={{ height: 24 }}
+client/src/components/waveform-editor.tsx:1176:              className="w-full border-t border-[var(--dj-border)] flex-shrink-0"
+client/src/components/waveform-editor.tsx:1177:              style={{ height: 48 }}
+client/src/components/waveform-editor.tsx:1183:        <div className="w-16 flex-shrink-0 bg-[var(--dj-surface)] border-l border-[var(--dj-border)] flex flex-col items-center py-2 gap-1">
+client/src/components/waveform-editor.tsx:1185:          <div className="flex gap-1">
+client/src/components/waveform-editor.tsx:1205:      <div className="flex items-center gap-2 px-3 py-2 border-t" style={{ background: 'var(--dj-surface)', borderColor: 'var(--dj-border)' }}>
+client/src/components/waveform-editor.tsx:1207:        <div className="flex items-center gap-1">
+client/src/components/waveform-editor.tsx:1243:        <div className="bg-background px-2 py-0.5 font-mono flex items-baseline gap-1">
+client/src/components/waveform-editor.tsx:1257:        <div className="flex items-center gap-1.5">
+client/src/components/waveform-editor.tsx:1272:          <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: '#a3e635' }}>
+client/src/components/waveform-editor.tsx:1289:        <div className="ml-auto flex items-center gap-2 text-[9px] text-[var(--dj-dim)]">
+client/src/components/vst-performance-monitor-ui.tsx:22:  return <div className="h-1.5 bg-[#0d0d0d] border border-[var(--t-b2x)] overflow-hidden"><div className="h-full transition-all duration-100" style={{width:`${pct}%`,background:color}} /></div>;
+client/src/components/vst-performance-monitor-ui.tsx:28:      <div className="flex items-center gap-2"><span className="text-[#555]">{icon}</span><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">{label}</span></div>
+client/src/components/vst-performance-monitor-ui.tsx:43:      <div className="flex items-center justify-between mb-4 border-b border-[var(--t-b2x)] pb-3">
+client/src/components/vst-performance-monitor-ui.tsx:44:        <span className="flex items-center gap-2 text-xs tracking-widest uppercase text-[var(--daw-fg)]">
+client/src/components/vst-performance-monitor-ui.tsx:58:            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+client/src/components/vst-performance-monitor-ui.tsx:86:      <div className="flex items-center justify-between">
+client/src/components/vst-performance-monitor-ui.tsx:89:          <span className="flex items-center gap-1 text-[10px] tracking-wider text-red-400 border border-red-900/40 px-2 py-0.5">
+client/src/components/vst-performance-monitor-ui.tsx:95:        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">CPU</span><span className="text-[10px] font-mono text-[#a3e635]">{metrics.cpuUsage.toFixed(1)}%</span></div><MonoBar value={metrics.cpuUsage} warn={50} danger={80} /></div>
+client/src/components/vst-performance-monitor-ui.tsx:96:        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Latency</span><span className="text-[10px] font-mono text-[#a3e635]">{metrics.latency.toFixed(1)} ms</span></div><MonoBar value={metrics.latency} max={50} warn={20} danger={40} /></div>
+client/src/components/vst-performance-monitor-ui.tsx:117:    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+client/src/components/vst-performance-monitor-ui.tsx:120:          <div className="flex items-center gap-2"><AlertTriangle className="h-3.5 w-3.5 text-yellow-500"/><span className="text-xs tracking-wider text-yellow-400">{vstId}</span></div>
+client/src/components/vst-performance-monitor-ui.tsx:121:          <ul className="space-y-1.5 pl-5">{items.map((rec,i)=><li key={i} className="text-[10px] tracking-wider text-[var(--daw-fg)] flex gap-2"><span className="text-[#555]">—</span><span>{rec}</span></li>)}</ul>
+client/src/components/vst-master-panel.tsx:78:    <div className="flex items-center justify-center p-8 font-mono">
+client/src/components/vst-master-panel.tsx:153:        <div className="border border-[#a3e635]/20 bg-[#a3e635]/5 px-4 py-3 mb-4 flex items-center gap-3">
+client/src/components/vst-project-manager-ui.tsx:10:const P = "bg-[#a3e635] hover:bg-[var(--looper-lime)] text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-project-manager-ui.tsx:11:const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-project-manager-ui.tsx:57:        <div className="flex gap-2 flex-wrap">
+client/src/components/vst-project-manager-ui.tsx:65:        <div className="flex items-center justify-between">
+client/src/components/vst-project-manager-ui.tsx:76:          <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
+client/src/components/vst-project-manager-ui.tsx:89:    <div className="border border-[var(--t-b2x)] px-4 py-3 flex items-center justify-between gap-4 hover:border-[#2a2a2a] transition-colors">
+client/src/components/vst-project-manager-ui.tsx:92:        <div className="flex items-center gap-1.5 text-[10px] tracking-wider text-[#555]">
+client/src/components/vst-project-manager-ui.tsx:96:        <div className="flex gap-3 text-[10px] tracking-widest uppercase">
+client/src/components/vst-plugin-manager.tsx:77:      <div className="flex items-center justify-between">
+client/src/components/vst-plugin-manager.tsx:84:        <div className="flex gap-2">
+client/src/components/vst-plugin-manager.tsx:161:            <div className="flex gap-2">
+client/src/components/vst-plugin-manager.tsx:188:                <div className="flex items-center justify-between">
+client/src/components/vst-plugin-manager.tsx:189:                  <div className="flex items-center gap-4 flex-1">
+client/src/components/vst-plugin-manager.tsx:190:                    <div className="flex items-center gap-2">
+client/src/components/vst-plugin-manager.tsx:205:                    <div className="flex-1">
+client/src/components/vst-plugin-manager.tsx:218:                  <div className="flex gap-2">
+client/src/components/vst-browser.tsx:188:      display: 'flex', flexDirection: 'column',
+client/src/components/vst-browser.tsx:190:      minHeight: 0, height: '100%',
+client/src/components/vst-browser.tsx:196:        display: 'flex', alignItems: 'center', gap: 6,
+client/src/components/vst-browser.tsx:200:        flexShrink: 0,
+client/src/components/vst-browser.tsx:203:        <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+client/src/components/vst-browser.tsx:216:              width: '100%', boxSizing: 'border-box',
+client/src/components/vst-browser.tsx:246:                display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/vst-browser.tsx:247:                width: 28, height: 28, padding: 0, flexShrink: 0,
+client/src/components/vst-browser.tsx:279:            display: 'flex', alignItems: 'center', gap: 6,
+client/src/components/vst-browser.tsx:280:            height: 28, padding: '0 12px', flexShrink: 0,
+client/src/components/vst-browser.tsx:313:          height: 2, background: AG.border,
+client/src/components/vst-browser.tsx:314:          position: 'relative', overflow: 'hidden', flexShrink: 0,
+client/src/components/vst-browser.tsx:317:            position: 'absolute', left: '-60%', top: 0, bottom: 0, width: '60%',
+client/src/components/vst-browser.tsx:330:          flexShrink: 0,
+client/src/components/vst-browser.tsx:338:        display: 'flex', alignItems: 'center', gap: 2,
+client/src/components/vst-browser.tsx:339:        overflowX: 'auto', flexShrink: 0,
+client/src/components/vst-browser.tsx:354:                display: 'flex', alignItems: 'center', gap: 5,
+client/src/components/vst-browser.tsx:355:                height: 24, padding: '0 10px', flexShrink: 0,
+client/src/components/vst-browser.tsx:387:        flex: 1, overflowY: 'auto', minHeight: 0,
+client/src/components/vst-browser.tsx:396:            display: 'flex', flexDirection: 'column',
+client/src/components/vst-browser.tsx:511:        display: 'flex', flexDirection: 'column', gap: 7,
+client/src/components/vst-browser.tsx:517:      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
+client/src/components/vst-browser.tsx:524:          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:533:            padding: 2, flexShrink: 0,
+client/src/components/vst-browser.tsx:536:            display: 'flex', alignItems: 'center',
+client/src/components/vst-browser.tsx:550:        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:559:        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:566:        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+client/src/components/vst-browser.tsx:582:          position: 'absolute', bottom: 0, left: 0, right: 0, height: 1,
+client/src/components/vst-browser.tsx:617:        height: 38,
+client/src/components/vst-browser.tsx:630:        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:641:        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:651:        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+client/src/components/vst-browser.tsx:669:          display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/page-nav.tsx:91:        display:     'flex',
+client/src/components/page-nav.tsx:93:        height:       NAV_HEIGHT_PX,
+client/src/components/page-nav.tsx:98:        flexShrink:   0,
+client/src/components/page-nav.tsx:107:          display:    'flex',
+client/src/components/page-nav.tsx:109:          flex:        1,
+client/src/components/page-nav.tsx:111:          overflow:   'hidden',
+client/src/components/page-nav.tsx:127:                display:        'flex',
+client/src/components/page-nav.tsx:130:                height:          28,
+client/src/components/page-nav.tsx:144:                flexShrink:      0,
+client/src/components/page-nav.tsx:173:          width:      '1px',
+client/src/components/page-nav.tsx:174:          height:     28,
+client/src/components/page-nav.tsx:176:          flexShrink: 0,
+client/src/components/page-nav.tsx:181:      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+client/src/components/page-nav.tsx:207:              display:       'flex',
+client/src/components/page-nav.tsx:210:              height:         28,
+client/src/components/page-nav.tsx:221:              flexShrink:     0,
+client/src/components/page-nav.tsx:249:            display:        'flex',
+client/src/components/page-nav.tsx:252:            height:          28,
+client/src/components/page-nav.tsx:253:            width:           28,
+client/src/components/page-nav.tsx:259:            flexShrink:      0,
+client/src/components/drum-pads.tsx:232:      className="flex flex-col items-center gap-0.5 select-none cursor-ns-resize"
+client/src/components/drum-pads.tsx:240:      <svg width="28" height="28" viewBox="0 0 28 28" style={{ overflow: 'visible' }}>
+client/src/components/drum-pads.tsx:1450:                'relative w-full rounded-lg font-bold flex flex-col items-center justify-center border border-border/30 select-none transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-primary overflow-hidden',
+client/src/components/drum-pads.tsx:1496:              <div className="absolute left-2 right-2 top-1.5 h-1.5 rounded-full bg-background/20 overflow-hidden z-10">
+client/src/components/drum-pads.tsx:1498:                  style={{ background: rgbColor, width: isTriggered ? `${velocity * 100}%` : '0%' }}
+client/src/components/drum-pads.tsx:1503:              <div className="relative z-10 flex flex-col items-center gap-0.5">
+client/src/components/drum-pads.tsx:1532:                  <div className="absolute bottom-0.5 left-1 right-1 flex items-end gap-px h-3">
+client/src/components/drum-pads.tsx:1536:                        className="flex-1 rounded-t-sm"
+client/src/components/drum-pads.tsx:1538:                          height: `${(v / 127) * 100}%`,
+client/src/components/drum-pads.tsx:1554:              <div className="absolute top-0.5 right-0.5 flex gap-0.5">
+client/src/components/drum-pads.tsx:1565:              <div className="absolute bottom-0.5 right-0.5 flex gap-0.5">
+client/src/components/drum-pads.tsx:1574:              <div className="absolute top-0.5 left-0.5 flex gap-0.5 items-center">
+client/src/components/drum-pads.tsx:1588:              <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5 z-20">
+client/src/components/drum-pads.tsx:1617:              <div className="absolute -bottom-1 left-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex justify-center pb-0.5">
+client/src/components/drum-pads.tsx:1641:      className="relative rounded-xl border border-border/60 bg-gradient-to-b from-card to-card/80 overflow-hidden"
+client/src/components/drum-pads.tsx:1656:        <div className="absolute inset-0 bg-background/60 backdrop-blur-[1px] z-50 flex items-center justify-center rounded-xl">
+client/src/components/drum-pads.tsx:1664:          className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-xl z-50 flex items-center justify-center pointer-events-none"
+client/src/components/drum-pads.tsx:1675:        className="flex items-center justify-between px-3 py-2 border-b border-border/40"
+client/src/components/drum-pads.tsx:1680:        <div className="flex items-center gap-2 min-w-0">
+client/src/components/drum-pads.tsx:1682:            className="flex items-center justify-center w-6 h-6 rounded-md"
+client/src/components/drum-pads.tsx:1691:            <h3 className="text-xs font-semibold text-foreground/90 flex items-center gap-1.5 leading-none">
+client/src/components/drum-pads.tsx:1697:                <span className="px-1.5 py-0.5 bg-red-500 text-foreground text-[9px] rounded-full animate-pulse flex items-center gap-1 leading-none">
+client/src/components/drum-pads.tsx:1713:        <div className="flex items-center gap-0.5 flex-shrink-0">
+client/src/components/drum-pads.tsx:1834:      <div className="p-2.5 space-y-2.5 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a3e635 transparent' }}>
+client/src/components/drum-pads.tsx:1909:            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/50">
+client/src/components/drum-pads.tsx:1921:            className="rounded-lg border border-border/40 overflow-hidden animate-in slide-in-from-top-2"
+client/src/components/drum-pads.tsx:1925:            <div className="flex items-center gap-2 px-2.5 py-1.5 border-b border-border/30"
+client/src/components/drum-pads.tsx:1937:                  <div className="flex items-center justify-between">
+client/src/components/drum-pads.tsx:1938:                    <span className="text-[9px] font-bold tracking-widest text-foreground/60 uppercase flex items-center gap-1">
+client/src/components/drum-pads.tsx:1957:                  <div className="flex gap-1 flex-wrap">
+client/src/components/drum-pads.tsx:1977:                  <span className="text-[9px] font-bold tracking-widest text-foreground/60 uppercase flex items-center gap-1">
+client/src/components/drum-pads.tsx:1999:                  <span className="text-[9px] font-bold tracking-widest text-foreground/60 uppercase flex items-center gap-1">
+client/src/components/drum-pads.tsx:2002:                  <div className="flex items-center gap-1.5">
+client/src/components/drum-pads.tsx:2009:                      className="flex-1 h-1.5 [accent-color:var(--neon-amber,var(--status-warn))]"
+client/src/components/drum-pads.tsx:2020:                    <div className="flex items-center gap-1.5">
+client/src/components/drum-pads.tsx:2023:                      <div className="flex gap-0.5">
+client/src/components/drum-pads.tsx:2050:                <div className="flex items-center gap-1.5">
+client/src/components/drum-pads.tsx:2076:                          <div className="flex gap-px justify-center mt-0.5">
+client/src/components/drum-pads.tsx:2077:                            <div className="w-1 rounded-sm" style={{ height: `${fx.filterCutoff * 8 + 1}px`, background: `hsl(${hue},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2078:                            <div className="w-1 rounded-sm" style={{ height: `${fx.reverbSend * 8 + 1}px`, background: `hsl(${(hue+120)%360},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2079:                            <div className="w-1 rounded-sm" style={{ height: `${fx.saturation * 8 + 1}px`, background: `hsl(${(hue+240)%360},70%,60%)` }} />
+client/src/components/drum-pads.tsx:2087:                            <div className="text-[9px] font-bold text-foreground/70 flex items-center justify-between">
+client/src/components/drum-pads.tsx:2093:                              <label className="text-[8px] text-muted-foreground/60 flex items-center gap-1"><TrendingUp className="w-2.5 h-2.5" /> Vel Curve</label>
+client/src/components/drum-pads.tsx:2144:                <div className="flex items-center gap-1.5">
+client/src/components/drum-pads.tsx:2149:                <div className="flex flex-wrap gap-1">
+client/src/components/drum-pads.tsx:2168:          <div className="flex items-center gap-1.5 p-1.5 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-[10px] animate-in slide-in-from-top-2">
+client/src/components/drum-pads.tsx:2169:            <AlertCircle className="w-3 h-3 flex-shrink-0" />
+client/src/components/drum-pads.tsx:2175:          <div className="flex items-center gap-1.5 p-1.5 bg-accent/10 border border-border/20 rounded-md text-accent dark:text-accent text-[10px] animate-in slide-in-from-top-2">
+client/src/components/drum-pads.tsx:2176:            <CheckCircle className="w-3 h-3 flex-shrink-0" />
+client/src/components/drum-pads.tsx:2184:            className="rounded-lg border border-border/40 overflow-hidden"
+client/src/components/drum-pads.tsx:2188:            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-border/30"
+client/src/components/drum-pads.tsx:2190:              <div className="flex items-center gap-1.5">
+client/src/components/drum-pads.tsx:2193:                <div className="flex gap-0.5">
+client/src/components/drum-pads.tsx:2208:              <div className="flex items-center gap-2">
+client/src/components/drum-pads.tsx:2210:                <div className="flex items-center gap-1">
+client/src/components/drum-pads.tsx:2221:                <div className="flex items-center gap-1">
+client/src/components/drum-pads.tsx:2233:                <div className="flex items-center gap-0.5">
+client/src/components/drum-pads.tsx:2264:                  <div key={padIdx} className="flex items-center gap-1">
+client/src/components/drum-pads.tsx:2266:                    <div className="w-14 flex-shrink-0 flex flex-col leading-tight">
+client/src/components/drum-pads.tsx:2273:                    <div className="flex gap-0.5 flex-1">
+client/src/components/drum-pads.tsx:2288:                              'flex-1 rounded-sm transition-all',
+client/src/components/drum-pads.tsx:2307:                    <div className="flex items-center gap-0.5 ml-1">
+client/src/components/drum-pads.tsx:2310:                        className="text-[8px] w-3 h-3 rounded hover:bg-muted flex items-center justify-center opacity-50 hover:opacity-100"
+client/src/components/drum-pads.tsx:2315:                        className="text-[8px] w-3 h-3 rounded hover:bg-muted flex items-center justify-center opacity-50 hover:opacity-100"
+client/src/components/drum-pads.tsx:2324:            <div className="flex items-center gap-1.5 px-2.5 pb-2 text-[9px] text-muted-foreground/50">
+client/src/components/drum-pads.tsx:2345:          className="w-full flex items-center justify-between px-3 py-1.5 group transition-colors hover:bg-white/[0.03] cursor-pointer"
+client/src/components/drum-pads.tsx:2350:          <div className="flex items-center gap-2">
+client/src/components/drum-pads.tsx:2361:          <div className="flex items-center gap-2">
+client/src/components/drum-pads.tsx:2364:              <span className="text-[7px] font-mono text-[#a3e635]/50 tracking-widest flex items-center gap-1">
+client/src/components/drum-pads.tsx:2414:              className="flex items-stretch gap-0 overflow-x-auto"
+client/src/components/drum-pads.tsx:2423:                className="flex flex-col justify-center gap-1 px-3 py-2 shrink-0 border-r border-border/30"
+client/src/components/drum-pads.tsx:2440:                <div className="flex items-center gap-1">
+client/src/components/drum-pads.tsx:2445:                    className="flex-1 h-5 flex items-center justify-center gap-1 rounded-sm border border-border/40 bg-background/20 hover:bg-[#a3e635]/10 hover:border-[#a3e635]/40 text-muted-foreground hover:text-[#a3e635] transition-all disabled:opacity-30 text-[7px] font-mono tracking-wider"
+client/src/components/drum-pads.tsx:2454:                    className="flex-1 h-5 flex items-center justify-center rounded-sm border border-border/40 bg-background/20 hover:bg-[#a3e635]/10 hover:border-[#a3e635]/40 text-muted-foreground hover:text-[#a3e635] transition-all disabled:opacity-25 text-[7px] font-mono tracking-wider"
+client/src/components/drum-pads.tsx:2462:                      className="h-5 w-5 flex items-center justify-center rounded-sm border border-border/40 bg-background/20 hover:bg-[#a3e635]/10 hover:border-[#a3e635]/40 text-muted-foreground hover:text-[#a3e635] transition-all"
+client/src/components/drum-pads.tsx:2478:                <div className="flex flex-col justify-center items-center px-2 py-2 shrink-0 border-r border-border/20 min-w-[52px]"
+client/src/components/drum-pads.tsx:2508:                    className="flex flex-col items-center justify-center px-3 py-2 shrink-0 border-r border-border/20 last:border-r-0 hover:bg-white/[0.02] transition-colors"
+client/src/components/drum-pads.tsx:2525:                className="flex flex-col justify-center px-3 py-2 shrink-0 border-l border-border/30"
+client/src/components/drum-pads.tsx:2529:                <div className="flex flex-col gap-0.5">
+client/src/components/ui/tooltip.tsx:22:      "z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-tooltip-content-transform-origin]",
+client/src/components/ui/toggle-group.tsx:24:    className={cn("flex items-center justify-center gap-1", className)}
+client/src/components/visuals/VisualizerCanvas.tsx:226:      <div className="flex justify-between items-center mb-1.5">
+client/src/components/visuals/VisualizerCanvas.tsx:227:        <div className="flex items-center gap-2">
+client/src/components/visuals/VisualizerCanvas.tsx:236:      <div className="flex items-center gap-2 mb-1.5 p-1 rounded" style={{ background: 'linear-gradient(180deg, #111, #0d0d0d)', border: '1px solid #171717', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.025)' }}>
+client/src/components/visuals/VisualizerCanvas.tsx:243:        <div className="flex-1">
+client/src/components/visuals/VisualizerCanvas.tsx:249:        <div className="flex items-center gap-1">
+client/src/components/visuals/VisualizerCanvas.tsx:251:          <div className="flex gap-px items-end h-[10px]">
+client/src/components/visuals/VisualizerCanvas.tsx:257:                  height: `${3 + i * 0.5}px`,
+client/src/components/visuals/VisualizerCanvas.tsx:267:        <div className="flex items-center gap-1">
+client/src/components/visuals/VisualizerCanvas.tsx:269:          <div className="flex gap-px items-end h-[10px]">
+client/src/components/visuals/VisualizerCanvas.tsx:275:                  height: `${3 + i * 0.5}px`,
+client/src/components/visuals/VisualizerCanvas.tsx:289:        className="relative rounded overflow-hidden flex items-center justify-center"
+client/src/components/visuals/VisualizerCanvas.tsx:291:          height: 258,
+client/src/components/visuals/VisualizerCanvas.tsx:314:          <div className="relative z-20 flex gap-1">
+client/src/components/visuals/VisualizerCanvas.tsx:316:              <div key={ci} className="flex flex-col items-center gap-[1.5px]">
+client/src/components/visuals/VisualizerCanvas.tsx:339:      <div className="flex gap-1 mt-2 flex-wrap">
+client/src/components/visuals/VisualizerCanvas.tsx:344:            className="px-2 py-1 rounded text-[8px] font-bold tracking-[0.06em] uppercase cursor-pointer transition-all flex items-center gap-1"
+client/src/components/ui/timeline-ruler.tsx:41:            className="absolute top-0 bottom-0 flex flex-col items-center"
+client/src/components/ui/timeline-ruler.tsx:55:          className="absolute top-0 bottom-0 flex flex-col items-center"
+client/src/components/vst-automation-ui.tsx:14:const P = "bg-[#a3e635] hover:bg-[var(--looper-lime)] text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-automation-ui.tsx:15:const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-4 py-2 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
+client/src/components/vst-automation-ui.tsx:21:    <div className="flex justify-between items-center mb-1">
+client/src/components/vst-automation-ui.tsx:55:      <div className="flex items-center justify-between mb-4 border-b border-[var(--t-b2x)] pb-3">
+client/src/components/vst-automation-ui.tsx:62:            <TabsTrigger key={t.value} value={t.value} className={`${TT} flex items-center gap-1.5`}>
+client/src/components/vst-automation-ui.tsx:146:      <div className="flex items-center justify-between">
+client/src/components/vst-automation-ui.tsx:148:        <div className="flex gap-2">
+client/src/components/vst-automation-ui.tsx:186:      <div className="border border-[var(--t-b2x)] h-16 relative overflow-hidden">
+client/src/components/vst-automation-ui.tsx:193:      <div className="flex gap-2 pt-1">
+client/src/components/vst-automation-ui.tsx:194:        <button onClick={()=>automationEngine.triggerEnvelope(`env_${paramId}`)} className={`${P} flex-1 justify-center`}>Trigger</button>
+client/src/components/vst-automation-ui.tsx:195:        <button onClick={()=>automationEngine.releaseEnvelope(`env_${paramId}`)} className={`${G} flex-1 justify-center`}>Release</button>
+client/src/components/ui/textarea.tsx:12:        "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+client/src/components/dj-controls/djcontrols.tsx:70:        overflow: 'hidden',
+client/src/components/dj-controls/djcontrols.tsx:75:          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+client/src/components/dj-controls/djcontrols.tsx:81:          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+client/src/components/dj-controls/djcontrols.tsx:83:              width: 28, height: 28, borderRadius: 0, flexShrink: 0,
+client/src/components/dj-controls/djcontrols.tsx:84:              display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/dj-controls/djcontrols.tsx:103:            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+client/src/components/dj-controls/djcontrols.tsx:104:              <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 8px', background: 'transparent', border: `1px solid ${ACID}` }}>
+client/src/components/dj-controls/djcontrols.tsx:105:                <div style={{ width: 4, height: 4, background: ACID, animation: 'dj-pulse 1.2s infinite' }} />
+client/src/components/dj-controls/djcontrols.tsx:115:          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+client/src/components/dj-controls/djcontrols.tsx:120:                width: 26, height: 26, borderRadius: 0, border: `1px solid ${DJ_BORDER}`,
+client/src/components/dj-controls/djcontrols.tsx:122:                display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/dj-controls/djcontrols.tsx:140:            overflow: 'hidden',
+client/src/components/dj-controls/djcontrols.tsx:142:            display: 'flex', flexDirection: 'column', gap: mode === 'compact' ? 8 : 12,
+client/src/components/dj-controls/djcontrols.tsx:221:              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+client/src/components/dj-controls/djcontrols.tsx:228:                    display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
+client/src/components/dj-controls/djcontrols.tsx:244:                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+client/src/components/dj-controls/djcontrols.tsx:253:                      style={{ width: '100%', accentColor: ACID, height: 2 }}
+client/src/components/dj-controls/djcontrols.tsx:277:            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+client/src/components/dj-controls/djcontrols.tsx:287:            <div style={{ position: 'relative', height: 4, background: DJ_SURFACE, border: `1px solid ${DJ_BORDER}`, marginBottom: 8 }}>
+client/src/components/dj-controls/djcontrols.tsx:294:              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: DJ_BORDER, transform: 'translateX(-50%)' }} />
+client/src/components/dj-controls/djcontrols.tsx:298:                top: -4, width: 8, height: 12,
+client/src/components/dj-controls/djcontrols.tsx:306:              style={{ width: '100%', accentColor: ACID, height: 2, opacity: 0, position: 'absolute', left: 0, cursor: 'pointer' }}
+client/src/components/dj-controls/djcontrols.tsx:308:            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
+client/src/components/dj-controls/djcontrols.tsx:357:            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+client/src/components/dj-controls/djcontrols.tsx:360:            <div style={{ display: 'flex', gap: 4 }}>
+client/src/components/dj-controls/djcontrols.tsx:364:                  display: 'flex', alignItems: 'center', gap: 5,
+client/src/components/ui/toggle.tsx:8:  "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2",
+client/src/components/ui/toast.tsx:17:      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+client/src/components/ui/toast.tsx:26:  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+client/src/components/ui/toast.tsx:63:      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
+client/src/components/ui/sidebar.tsx:143:            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+client/src/components/ui/sidebar.tsx:174:          "bg-sidebar text-sidebar-foreground flex h-full w-[var(--sidebar-width)] flex-col",
+client/src/components/ui/sidebar.tsx:203:          <div className="flex h-full w-full flex-col">{children}</div>
+client/src/components/ui/sidebar.tsx:233:          "fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] duration-200 ease-linear md:flex",
+client/src/components/ui/sidebar.tsx:248:          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+client/src/components/ui/sidebar.tsx:296:        "hover:after:bg-sidebar-border absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear group-data-[side=left]:-right-4 group-data-[side=right]:left-0 after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] sm:flex",
+client/src/components/ui/sidebar.tsx:314:        "bg-background relative flex w-full flex-1 flex-col",
+client/src/components/ui/sidebar.tsx:342:      className={cn("flex flex-col gap-2 p-2", className)}
+client/src/components/ui/sidebar.tsx:353:      className={cn("flex flex-col gap-2 p-2", className)}
+client/src/components/ui/sidebar.tsx:379:        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+client/src/components/ui/sidebar.tsx:392:      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+client/src/components/ui/sidebar.tsx:410:        "text-sidebar-foreground/70 ring-sidebar-ring flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium outline-hidden transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0",
+client/src/components/ui/sidebar.tsx:431:        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute top-3.5 right-3 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+client/src/components/ui/sidebar.tsx:461:      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+client/src/components/ui/sidebar.tsx:479:  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:w-8! group-data-[collapsible=icon]:h-8! group-data-[collapsible=icon]:p-2! [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+client/src/components/ui/sidebar.tsx:566:        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground peer-hover/menu-button:text-sidebar-accent-foreground absolute top-1.5 right-1 flex aspect-square w-5 items-center justify-center rounded-md p-0 outline-hidden transition-transform focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+client/src/components/ui/sidebar.tsx:591:        "text-sidebar-foreground pointer-events-none absolute right-1 flex h-5 min-w-5 items-center justify-center rounded-md px-1 text-xs font-medium tabular-nums select-none",
+client/src/components/ui/sidebar.tsx:620:      className={cn("flex h-8 items-center gap-2 rounded-md px-2", className)}
+client/src/components/ui/sidebar.tsx:630:        className="h-4 max-w-[var(--skeleton-width)] flex-1"
+client/src/components/ui/sidebar.tsx:648:        "border-sidebar-border mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l px-2.5 py-0.5",
+client/src/components/ui/sidebar.tsx:691:        "text-sidebar-foreground ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground [&>svg]:text-sidebar-accent-foreground flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 outline outline-2 outline-transparent outline-offset-2 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+client/src/components/ui/sheet.tsx:83:      "flex flex-col space-y-2 text-center sm:text-left",
+client/src/components/ui/sheet.tsx:97:      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+client/src/components/ui/table.tsx:9:  <div className="relative w-full overflow-auto">
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:130:      flex: 1, height: 32, border: "none", background: active ? SURF3 : "transparent",
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:152:    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:171:    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", opacity: disabled ? 0.3 : 1 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:179:        style={{ width: 36, height: 16, padding: 2, cursor: disabled ? "not-allowed" : "pointer", flexShrink: 0,
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:180:          background: checked ? ACID : SURF2, border: `1px solid ${checked ? ACID : BORDER}`, transition: "all 0.15s", display: "flex", alignItems: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:181:        <div style={{ width: 10, height: 10, background: checked ? BLK : DIM, transform: checked ? "translateX(18px)" : "translateX(0)", transition: "transform 0.15s" }} />
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:223:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:269:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:309:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:364:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:381:  return <canvas ref={ref} width={w} height={h} style={{ width: w, height: h, display: "block", flexShrink: 0 }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:389:    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", gap: 4 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:391:      <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:396:      <div style={{ position: "relative", width: 140, height: 28 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:397:        <svg width={140} height={28} style={{ overflow: "visible" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:909:    <div style={{ flex: 1 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:911:      <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column-reverse", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:916:          return <div key={i} style={{ flex: 1, background: active ? levelColor(segPct) : isPeak ? AMBER : "var(--t-b2x)", transition: "background 0.05s" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:926:      <div style={{ flex: 1 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:928:        <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:931:            return <div key={i} style={{ flex: 1, background: segPct <= grPct ? (grPct > 60 ? RED : AMBER) : "var(--t-b2x)", transition: "background 0.06s" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:951:      <div className="mic-root" tabIndex={-1} onKeyDown={handlePanelKeyDown} style={{ width: "100%", maxWidth: "100%", background: BLK, overflow: "hidden", outline: "none" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:954:        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: SURF, borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:955:          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:956:            <div style={{ width: 24, height: 24, background: isActive && !isMuted ? (isRec ? RED : ACID) : isMuted ? RED : "var(--t-b2x)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:963:              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:964:                <div style={{ width: 4, height: 4, background: status.color, animation: status.pulse ? "mic-pulse 1.5s infinite" : "none" }} />
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:970:          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:972:              <div style={{ display: "flex", gap: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:986:            <div style={{ display: "flex", gap: 4 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:987:              <button onClick={toggleMute} disabled={!isActive} title="M — Mute" style={{ width: 28, height: 28, border: `1px solid ${isMuted ? RED : BORDER}`, background: isMuted ? "rgba(255,34,0,0.15)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: isActive ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:994:                <button onClick={isRec ? stopRecording : startRecording} title="R — Record" style={{ width: 28, height: 28, border: `1px solid ${isRec ? RED : BORDER}`, background: isRec ? "rgba(255,34,0,0.2)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1000:              <button onClick={isActive ? stopMicrophone : startMicrophone} title="Space — ARM/STOP" style={{ height: 28, padding: "0 12px", border: "none", background: isActive ? RED : ACID, color: BLK, fontSize: 9, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1016:        <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}`, background: SURF }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1026:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1029:            <div style={{ display: "flex", gap: 3 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1031:                <button key={m} onClick={() => setScopeMode(m)} style={{ flex: 1, height: 24, border: `1px solid ${scopeMode === m ? ACID : BORDER}`, background: scopeMode === m ? "rgba(184,255,0,0.08)" : "transparent", color: scopeMode === m ? ACID : DIM, fontSize: 8, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1038:            <div style={{ background: SURF, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1045:            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1047:              <div style={{ display: "flex", gap: 6, padding: "8px 10px", background: SURF, border: `1px solid ${BORDER}`, flexShrink: 0 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1054:              <div style={{ flex: "1 1 120px", minWidth: 0, background: SURF, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1059:              <div style={{ flex: "1 1 110px", minWidth: 0, display: "flex", flexDirection: "column", gap: 1, background: SURF, border: `1px solid ${BORDER}`, padding: "8px 10px" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1068:                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "3px 0", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1078:              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1082:              <div style={{ height: 20, background: SURF, border: `1px solid ${BORDER}`, display: "flex", gap: 1, padding: "2px 3px", position: "relative" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1085:                  return <div key={i} style={{ flex: 1, background: p <= levelL ? levelColor(p) : p <= peakNorm && p > levelL ? "var(--accent-orange)" : "var(--t-b2x)", transition: "background 0.06s" }} />;
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1087:                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 5px", pointerEvents: "none" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1094:            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 12px", background: SURF, border: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1096:              <div style={{ display: "flex", gap: 6 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1097:                <button onClick={toggleMonitor} disabled={!isActive} style={{ height: 32, padding: "0 14px", border: `1px solid ${monitoring ? ACID : BORDER}`, background: monitoring ? ACID : "transparent", color: monitoring ? BLK : DIM, fontSize: 8, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2, opacity: isActive ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1113:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1117:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1126:              <div style={{ display: "flex", justifyContent: "space-around", opacity: eqEnable ? 1 : 0.4 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1133:              <div style={{ display: "flex", gap: 4, marginTop: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1136:                    style={{ flex: 1, height: 26, border: `1px solid ${BORDER}`, background: "transparent", color: eqEnable ? "var(--text-dim)" : DIM, fontSize: 7, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1145:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1146:                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1148:                  <div style={{ width: 8, height: 8, background: isActive && gate.enabled ? (stats.gateOpen ? ACID : RED) : DIMMER }} />
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1152:              <div style={{ display: "flex", justifyContent: "space-around", opacity: gate.enabled ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1166:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1167:                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1173:              <div style={{ display: "flex", justifyContent: "space-around", opacity: comp.enabled ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1201:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1205:              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1207:                  style={{ height: 40, padding: "0 20px", border: "none", background: isRec ? RED : isActive ? ACID : DIM, color: BLK, fontSize: 10, fontWeight: 700, cursor: isActive ? "pointer" : "not-allowed", fontFamily: "inherit", letterSpacing: 2, display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1220:                <div style={{ display: "flex", gap: 16, marginTop: 8, paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1234:                <div key={c.id} className="clip-row" style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1236:                  <div style={{ flex: 1, minWidth: 0 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1237:                    <div style={{ fontSize: 10, fontWeight: 700, color: "var(--daw-ghost)", letterSpacing: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1238:                    <div style={{ fontSize: 8, color: DIM, marginTop: 2, display: "flex", gap: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1244:                  <div style={{ display: "flex", gap: 4 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1246:                      <button style={{ width: 28, height: 28, border: `1px solid ${BORDER}`, background: "transparent", color: DIM, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1250:                    <button onClick={() => downloadClip(c)} style={{ width: 28, height: 28, border: `1px solid ${BORDER}`, background: "transparent", color: DIM, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1253:                    <button onClick={() => deleteClip(c.id)} style={{ width: 28, height: 28, border: `1px solid rgba(255,34,0,0.2)`, background: "transparent", color: "rgba(255,34,0,0.5)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1267:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1273:                style={{ width: "100%", height: 34, padding: "0 10px", background: SURF2, border: `1px solid ${BORDER}`, color: isActive ? DIM : "var(--daw-sub)", fontSize: 10, fontFamily: "inherit", cursor: isActive ? "not-allowed" : "pointer", appearance: "none", outline: "none", opacity: isActive ? 0.5 : 1 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1282:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1302:                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1313:                <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", padding: "3px 0" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1323:        <div style={{ padding: "5px 12px", borderTop: `1px solid ${BORDER}`, background: SURF, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+client/src/components/microphone-input.tsx.pre-recovery-20260924-173559:1325:          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+client/src/components/microphone-input.tsx:131:      flex: 1, height: 32, border: "none", background: active ? SURF3 : "transparent",
+client/src/components/microphone-input.tsx:153:    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+client/src/components/microphone-input.tsx:172:    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "5px 0", opacity: disabled ? 0.3 : 1 }}>
+client/src/components/microphone-input.tsx:180:        style={{ width: 36, height: 16, padding: 2, cursor: disabled ? "not-allowed" : "pointer", flexShrink: 0,
+client/src/components/microphone-input.tsx:181:          background: checked ? ACID : SURF2, border: `1px solid ${checked ? ACID : BORDER}`, transition: "all 0.15s", display: "flex", alignItems: "center" }}>
+client/src/components/microphone-input.tsx:182:        <div style={{ width: 10, height: 10, background: checked ? BLK : DIM, transform: checked ? "translateX(18px)" : "translateX(0)", transition: "transform 0.15s" }} />
+client/src/components/microphone-input.tsx:224:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx:270:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx:310:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx:365:  return <canvas ref={ref} width={w} height={h} style={{ width: "100%", height: h, display: "block" }} />;
+client/src/components/microphone-input.tsx:382:  return <canvas ref={ref} width={w} height={h} style={{ width: w, height: h, display: "block", flexShrink: 0 }} />;
+client/src/components/microphone-input.tsx:390:    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", gap: 4 }}>
+client/src/components/microphone-input.tsx:392:      <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
+client/src/components/microphone-input.tsx:397:      <div style={{ position: "relative", width: 140, height: 28 }}>
+client/src/components/microphone-input.tsx:398:        <svg width={140} height={28} style={{ overflow: "visible" }}>
+client/src/components/microphone-input.tsx:910:    <div style={{ flex: 1 }}>
+client/src/components/microphone-input.tsx:912:      <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column-reverse", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx:917:          return <div key={i} style={{ flex: 1, background: active ? levelColor(segPct) : isPeak ? AMBER : "var(--t-b2x)", transition: "background 0.05s" }} />;
+client/src/components/microphone-input.tsx:927:      <div style={{ flex: 1 }}>
+client/src/components/microphone-input.tsx:929:        <div style={{ height: 120, background: SURF, border: `1px solid ${BORDER}`, display: "flex", flexDirection: "column", padding: "2px 3px", gap: 1, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx:932:            return <div key={i} style={{ flex: 1, background: segPct <= grPct ? (grPct > 60 ? RED : AMBER) : "var(--t-b2x)", transition: "background 0.06s" }} />;
+client/src/components/microphone-input.tsx:952:      <div className="mic-root" tabIndex={-1} onKeyDown={handlePanelKeyDown} style={{ width: "100%", maxWidth: "100%", background: BLK, overflow: "hidden", outline: "none" }}>
+client/src/components/microphone-input.tsx:955:        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: SURF, borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:956:          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+client/src/components/microphone-input.tsx:957:            <div style={{ width: 24, height: 24, background: isActive && !isMuted ? (isRec ? RED : ACID) : isMuted ? RED : "var(--t-b2x)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+client/src/components/microphone-input.tsx:964:              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 2 }}>
+client/src/components/microphone-input.tsx:965:                <div style={{ width: 4, height: 4, background: status.color, animation: status.pulse ? "mic-pulse 1.5s infinite" : "none" }} />
+client/src/components/microphone-input.tsx:971:          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+client/src/components/microphone-input.tsx:973:              <div style={{ display: "flex", gap: 8 }}>
+client/src/components/microphone-input.tsx:987:            <div style={{ display: "flex", gap: 4 }}>
+client/src/components/microphone-input.tsx:988:              <button onClick={toggleMute} disabled={!isActive} title="M — Mute" style={{ width: 28, height: 28, border: `1px solid ${isMuted ? RED : BORDER}`, background: isMuted ? "rgba(255,34,0,0.15)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: isActive ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx:995:                <button onClick={isRec ? stopRecording : startRecording} title="R — Record" style={{ width: 28, height: 28, border: `1px solid ${isRec ? RED : BORDER}`, background: isRec ? "rgba(255,34,0,0.2)" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx:1001:              <button onClick={isActive ? stopMicrophone : startMicrophone} title="Space — ARM/STOP" style={{ height: 28, padding: "0 12px", border: "none", background: isActive ? RED : ACID, color: BLK, fontSize: 9, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx:1017:        <div style={{ display: "flex", borderBottom: `1px solid ${BORDER}`, background: SURF }}>
+client/src/components/microphone-input.tsx:1027:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx:1030:            <div style={{ display: "flex", gap: 3 }}>
+client/src/components/microphone-input.tsx:1032:                <button key={m} onClick={() => setScopeMode(m)} style={{ flex: 1, height: 24, border: `1px solid ${scopeMode === m ? ACID : BORDER}`, background: scopeMode === m ? "rgba(184,255,0,0.08)" : "transparent", color: scopeMode === m ? ACID : DIM, fontSize: 8, fontWeight: 700, letterSpacing: 2, cursor: "pointer", fontFamily: "inherit", textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx:1039:            <div style={{ background: SURF, border: `1px solid ${BORDER}`, overflow: "hidden" }}>
+client/src/components/microphone-input.tsx:1046:            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+client/src/components/microphone-input.tsx:1048:              <div style={{ display: "flex", gap: 6, padding: "8px 10px", background: SURF, border: `1px solid ${BORDER}`, flexShrink: 0 }}>
+client/src/components/microphone-input.tsx:1055:              <div style={{ flex: "1 1 120px", minWidth: 0, background: SURF, border: `1px solid ${BORDER}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx:1060:              <div style={{ flex: "1 1 110px", minWidth: 0, display: "flex", flexDirection: "column", gap: 1, background: SURF, border: `1px solid ${BORDER}`, padding: "8px 10px" }}>
+client/src/components/microphone-input.tsx:1069:                  <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "3px 0", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:1079:              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+client/src/components/microphone-input.tsx:1083:              <div style={{ height: 20, background: SURF, border: `1px solid ${BORDER}`, display: "flex", gap: 1, padding: "2px 3px", position: "relative" }}>
+client/src/components/microphone-input.tsx:1086:                  return <div key={i} style={{ flex: 1, background: p <= levelL ? levelColor(p) : p <= peakNorm && p > levelL ? "var(--accent-orange)" : "var(--t-b2x)", transition: "background 0.06s" }} />;
+client/src/components/microphone-input.tsx:1088:                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 5px", pointerEvents: "none" }}>
+client/src/components/microphone-input.tsx:1095:            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 12px", background: SURF, border: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:1097:              <div style={{ display: "flex", gap: 6 }}>
+client/src/components/microphone-input.tsx:1098:                <button onClick={toggleMonitor} disabled={!isActive} style={{ height: 32, padding: "0 14px", border: `1px solid ${monitoring ? ACID : BORDER}`, background: monitoring ? ACID : "transparent", color: monitoring ? BLK : DIM, fontSize: 8, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 2, opacity: isActive ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx:1114:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx:1118:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+client/src/components/microphone-input.tsx:1127:              <div style={{ display: "flex", justifyContent: "space-around", opacity: eqEnable ? 1 : 0.4 }}>
+client/src/components/microphone-input.tsx:1134:              <div style={{ display: "flex", gap: 4, marginTop: 10 }}>
+client/src/components/microphone-input.tsx:1137:                    style={{ flex: 1, height: 26, border: `1px solid ${BORDER}`, background: "transparent", color: eqEnable ? "var(--text-dim)" : DIM, fontSize: 7, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", letterSpacing: 1, textTransform: "uppercase" }}>
+client/src/components/microphone-input.tsx:1146:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+client/src/components/microphone-input.tsx:1147:                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx:1149:                  <div style={{ width: 8, height: 8, background: isActive && gate.enabled ? (stats.gateOpen ? ACID : RED) : DIMMER }} />
+client/src/components/microphone-input.tsx:1153:              <div style={{ display: "flex", justifyContent: "space-around", opacity: gate.enabled ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx:1167:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+client/src/components/microphone-input.tsx:1168:                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx:1174:              <div style={{ display: "flex", justifyContent: "space-around", opacity: comp.enabled ? 1 : 0.35 }}>
+client/src/components/microphone-input.tsx:1202:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx:1206:              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+client/src/components/microphone-input.tsx:1208:                  style={{ height: 40, padding: "0 20px", border: "none", background: isRec ? RED : isActive ? ACID : DIM, color: BLK, fontSize: 10, fontWeight: 700, cursor: isActive ? "pointer" : "not-allowed", fontFamily: "inherit", letterSpacing: 2, display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/microphone-input.tsx:1221:                <div style={{ display: "flex", gap: 16, marginTop: 8, paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:1235:                <div key={c.id} className="clip-row" style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:1237:                  <div style={{ flex: 1, minWidth: 0 }}>
+client/src/components/microphone-input.tsx:1238:                    <div style={{ fontSize: 10, fontWeight: 700, color: "var(--daw-ghost)", letterSpacing: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</div>
+client/src/components/microphone-input.tsx:1239:                    <div style={{ fontSize: 8, color: DIM, marginTop: 2, display: "flex", gap: 8 }}>
+client/src/components/microphone-input.tsx:1245:                  <div style={{ display: "flex", gap: 4 }}>
+client/src/components/microphone-input.tsx:1247:                      <button style={{ width: 28, height: 28, border: `1px solid ${BORDER}`, background: "transparent", color: DIM, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx:1251:                    <button onClick={() => downloadClip(c)} style={{ width: 28, height: 28, border: `1px solid ${BORDER}`, background: "transparent", color: DIM, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx:1254:                    <button onClick={() => deleteClip(c.id)} style={{ width: 28, height: 28, border: `1px solid rgba(255,34,0,0.2)`, background: "transparent", color: "rgba(255,34,0,0.5)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+client/src/components/microphone-input.tsx:1268:          <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/microphone-input.tsx:1274:                style={{ width: "100%", height: 34, padding: "0 10px", background: SURF2, border: `1px solid ${BORDER}`, color: isActive ? DIM : "var(--daw-sub)", fontSize: 10, fontFamily: "inherit", cursor: isActive ? "not-allowed" : "pointer", appearance: "none", outline: "none", opacity: isActive ? 0.5 : 1 }}>
+client/src/components/microphone-input.tsx:1283:              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+client/src/components/microphone-input.tsx:1303:                <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: `1px solid ${BORDER}` }}>
+client/src/components/microphone-input.tsx:1314:                <div key={i} style={{ display: "flex", gap: 10, alignItems: "center", padding: "3px 0" }}>
+client/src/components/microphone-input.tsx:1324:        <div style={{ padding: "5px 12px", borderTop: `1px solid ${BORDER}`, background: SURF, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+client/src/components/microphone-input.tsx:1326:          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+client/src/components/ui/slider.tsx:37:    <div className={cn('relative', vertical ? 'h-full flex flex-col items-center' : 'w-full')}>
+client/src/components/ui/slider.tsx:41:          'relative flex touch-none select-none items-center',
+client/src/components/ui/slider.tsx:42:          vertical ? 'flex-col h-full w-5' : 'w-full h-5',
+client/src/components/ui/slider.tsx:51:            'relative overflow-hidden rounded-full',
+client/src/components/ui/slider.tsx:78:              'absolute inset-0 flex gap-0.5 p-0.5',
+client/src/components/ui/slider.tsx:79:              vertical ? 'flex-col-reverse' : 'flex-row'
+client/src/components/ui/slider.tsx:87:                      'flex-1 rounded-sm transition-all duration-150',
+client/src/components/ui/slider.tsx:116:            'relative overflow-hidden'
+client/src/components/ui/progress.tsx:15:      "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
+client/src/components/ui/progress.tsx:21:      className="h-full w-full flex-1 bg-primary transition-all"
+client/src/components/ui/select.tsx:22:      "flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+client/src/components/ui/select.tsx:42:      "flex cursor-default items-center justify-center py-1",
+client/src/components/ui/select.tsx:59:      "flex cursor-default items-center justify-center py-1",
+client/src/components/ui/select.tsx:78:        "relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin]",
+client/src/components/ui/select.tsx:121:      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/select.tsx:126:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/navigation-menu.tsx:15:      "relative z-10 flex max-w-max flex-1 items-center justify-center",
+client/src/components/ui/navigation-menu.tsx:33:      "group flex flex-1 list-none items-center justify-center space-x-1",
+client/src/components/ui/navigation-menu.tsx:44:  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=open]:text-accent-foreground data-[state=open]:bg-accent/50 data-[state=open]:hover:bg-accent data-[state=open]:focus:bg-accent"
+client/src/components/ui/navigation-menu.tsx:86:  <div className={cn("absolute left-0 top-full flex justify-center")}>
+client/src/components/ui/navigation-menu.tsx:89:        "origin-top-center relative mt-1.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+client/src/components/ui/navigation-menu.tsx:107:      "top-full z-[1] flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
+client/src/components/ui/scroll-area.tsx:12:    className={cn("relative overflow-hidden", className)}
+client/src/components/ui/scroll-area.tsx:32:      "flex touch-none select-none transition-colors",
+client/src/components/ui/scroll-area.tsx:36:        "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+client/src/components/ui/scroll-area.tsx:41:    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+client/src/components/ui/pagination.tsx:12:    className={cn("mx-auto flex w-full justify-center", className)}
+client/src/components/ui/pagination.tsx:24:    className={cn("flex flex-row items-center gap-1", className)}
+client/src/components/ui/pagination.tsx:101:    className={cn("flex h-9 w-9 items-center justify-center", className)}
+client/src/components/ui/resizable.tsx:14:      "flex h-full w-full data-[panel-group-direction=vertical]:flex-col",
+client/src/components/ui/resizable.tsx:32:      "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:left-1/2 after:w-1 after:-translate-x-1/2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-1 data-[panel-group-direction=vertical]:h-px data-[panel-group-direction=vertical]:w-full data-[panel-group-direction=vertical]:after:left-0 data-[panel-group-direction=vertical]:after:h-1 data-[panel-group-direction=vertical]:after:w-full data-[panel-group-direction=vertical]:after:-translate-y-1/2 data-[panel-group-direction=vertical]:after:translate-x-0 [&[data-panel-group-direction=vertical]>div]:rotate-90",
+client/src/components/ui/resizable.tsx:38:      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
+client/src/components/ui/radio-group.tsx:34:      <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
+client/src/components/ui/menubar.tsx:46:      "flex h-10 items-center space-x-1 rounded-md border bg-background p-1",
+client/src/components/ui/menubar.tsx:61:      "flex cursor-default select-none items-center rounded-sm px-3 py-1.5 text-sm font-medium outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+client/src/components/ui/menubar.tsx:78:      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+client/src/components/ui/menubar.tsx:97:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-menubar-content-transform-origin]",
+client/src/components/ui/menubar.tsx:120:          "z-50 min-w-[12rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-menubar-content-transform-origin]",
+client/src/components/ui/menubar.tsx:139:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/menubar.tsx:155:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/menubar.tsx:161:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/menubar.tsx:178:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/menubar.tsx:183:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/input.tsx:12:          "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+client/src/components/ui/mixer-view.tsx:11:    <div style={{ display: "flex", gap: 12 }}>
+client/src/components/ui/mixer-strip.tsx:24:    <div style={{ width: 80 }}>
+client/src/components/ui/mixer-strip.tsx:25:      <div style={{ height: 60, background: "var(--dj-border)" }}>
+client/src/components/ui/mixer-strip.tsx:28:            height: `${(meter?.rms ?? 0) * 100}%`,
+client/src/components/ui/metal-daw-layout.tsx:28:    <div className="h-screen w-full bg-gradient-to-br from-metal-950 via-metal-900 to-metal-950 flex flex-col overflow-hidden">
+client/src/components/ui/metal-daw-layout.tsx:32:      <header className="metal-panel h-12 flex items-center justify-between px-4 shrink-0 border-b-2 border-metal-800">
+client/src/components/ui/metal-daw-layout.tsx:34:        <div className="flex items-center gap-3">
+client/src/components/ui/metal-daw-layout.tsx:42:        <div className="flex items-center gap-2">
+client/src/components/ui/metal-daw-layout.tsx:51:        <div className="flex items-center gap-2">
+client/src/components/ui/metal-daw-layout.tsx:61:      <div className="flex-1 flex overflow-hidden">
+client/src/components/ui/metal-daw-layout.tsx:63:        <aside className="w-80 metal-panel border-r-2 border-metal-700 flex flex-col shrink-0">
+client/src/components/ui/metal-daw-layout.tsx:65:            <h2 className="text-sm font-bold text-metal-200 text-shadow-metal flex items-center gap-2">
+client/src/components/ui/metal-daw-layout.tsx:71:          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+client/src/components/ui/metal-daw-layout.tsx:81:                <div className="flex gap-2 items-center justify-center py-2">
+client/src/components/ui/metal-daw-layout.tsx:94:                <div className="flex-1 flex items-center justify-center py-4">
+client/src/components/ui/metal-daw-layout.tsx:108:                    style={{ height: `${60 - i * 10}%` }}
+client/src/components/ui/metal-daw-layout.tsx:126:        <main className="flex-1 flex flex-col overflow-hidden">
+client/src/components/ui/metal-daw-layout.tsx:128:          <div className="metal-panel-raised h-16 flex items-center gap-4 px-4 shrink-0 border-b border-metal-800">
+client/src/components/ui/metal-daw-layout.tsx:130:            <div className="flex gap-1">
+client/src/components/ui/metal-daw-layout.tsx:142:            <div className="flex items-center gap-2">
+client/src/components/ui/metal-daw-layout.tsx:154:          <div className="flex-1 waveform-container m-4">
+client/src/components/ui/metal-daw-layout.tsx:158:            <div className="relative h-full flex items-center justify-center">
+client/src/components/ui/metal-daw-layout.tsx:167:        <aside className="w-64 metal-panel border-l-2 border-metal-700 flex flex-col shrink-0">
+client/src/components/ui/metal-daw-layout.tsx:174:          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+client/src/components/ui/metal-daw-layout.tsx:178:                <div className="flex items-center justify-between mb-2">
+client/src/components/ui/metal-daw-layout.tsx:202:      <footer className="rack-unit h-24 flex items-center justify-between px-6 shrink-0 border-t-2 border-metal-700">
+client/src/components/ui/metal-daw-layout.tsx:204:        <div className="flex items-center gap-3">
+client/src/components/ui/metal-daw-layout.tsx:249:        <div className="flex items-center gap-6">
+client/src/components/ui/metal-daw-layout.tsx:251:          <div className="flex flex-col items-center gap-2">
+client/src/components/ui/metal-daw-layout.tsx:259:          <div className="flex items-center gap-3">
+client/src/components/ui/metal-daw-layout.tsx:273:          <div className="flex gap-1 items-center">
+client/src/components/ui/metal-daw-layout.tsx:277:                style={{ height: `${masterVolume[0]}%` }}
+client/src/components/ui/metal-daw-layout.tsx:283:                style={{ height: `${masterVolume[0] * 0.95}%` }}
+client/src/components/ui/tabs.tsx:15:      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+client/src/components/ui/tabs.tsx:30:      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+client/src/components/ui/drawer.tsx:46:        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+client/src/components/ui/drawer.tsx:74:    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+client/src/components/ui/dialog.tsx:62:      "flex flex-col space-y-1.5 text-center sm:text-left",
+client/src/components/ui/dialog.tsx:76:      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+client/src/components/ui/collapsible-card.tsx:37:          <CardHeader className="flex flex-row items-center justify-between space-y-0 py-4 cursor-pointer hover:bg-accent/50 transition-colors">
+client/src/components/ui/collapsible-card.tsx:38:            <div className="flex flex-col space-y-1.5">
+client/src/components/ui/input-otp.tsx:14:      "flex items-center gap-2 has-[:disabled]:opacity-50",
+client/src/components/ui/input-otp.tsx:27:  <div ref={ref} className={cn("flex items-center", className)} {...props} />
+client/src/components/ui/input-otp.tsx:42:        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
+client/src/components/ui/input-otp.tsx:50:        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+client/src/components/ui/dropdown-menu.tsx:28:      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+client/src/components/ui/dropdown-menu.tsx:48:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+client/src/components/ui/dropdown-menu.tsx:66:        "z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin]",
+client/src/components/ui/dropdown-menu.tsx:84:      "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+client/src/components/ui/dropdown-menu.tsx:100:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/dropdown-menu.tsx:106:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/dropdown-menu.tsx:124:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/dropdown-menu.tsx:129:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/command.tsx:16:      "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
+client/src/components/ui/command.tsx:27:      <DialogContent className="overflow-hidden p-0 shadow-lg">
+client/src/components/ui/command.tsx:40:  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+client/src/components/ui/command.tsx:45:        "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+client/src/components/ui/command.tsx:61:    className={cn("max-h-[300px] overflow-y-auto overflow-x-hidden", className)}
+client/src/components/ui/command.tsx:88:      "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground",
+client/src/components/ui/command.tsx:116:      "relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected='true']:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+client/src/components/ui/context-menu.tsx:28:      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
+client/src/components/ui/context-menu.tsx:47:      "z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-context-menu-content-transform-origin]",
+client/src/components/ui/context-menu.tsx:63:        "z-50 max-h-[--radix-context-menu-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-context-menu-content-transform-origin]",
+client/src/components/ui/context-menu.tsx:81:      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/context-menu.tsx:97:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/context-menu.tsx:103:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/context-menu.tsx:121:      "relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+client/src/components/ui/context-menu.tsx:126:    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+client/src/components/ui/fx-chain-panel.tsx:40:    <div className="w-64 bg-card border-l border-border flex flex-col">
+client/src/components/ui/fx-chain-panel.tsx:42:      <div className="h-12 border-b border-border flex items-center justify-between px-4">
+client/src/components/ui/fx-chain-panel.tsx:43:        <div className="flex items-center gap-2">
+client/src/components/ui/fx-chain-panel.tsx:50:        <div className="flex-1 flex flex-col overflow-hidden">
+client/src/components/ui/fx-chain-panel.tsx:59:          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+client/src/components/ui/fx-chain-panel.tsx:70:                  <div className="flex items-center justify-between mb-2">
+client/src/components/ui/fx-chain-panel.tsx:71:                    <div className="flex items-center gap-2">
+client/src/components/ui/fx-chain-panel.tsx:75:                    <div className="flex items-center gap-1">
+client/src/components/ui/fx-chain-panel.tsx:119:        <div className="flex-1 flex items-center justify-center text-gray-500 text-sm px-4 text-center">
+client/src/components/ui/calendar.tsx:22:        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+client/src/components/ui/calendar.tsx:24:        caption: "flex justify-center pt-1 relative items-center",
+client/src/components/ui/calendar.tsx:26:        nav: "space-x-1 flex items-center",
+client/src/components/ui/calendar.tsx:34:        head_row: "flex",
+client/src/components/ui/calendar.tsx:37:        row: "flex w-full mt-2",
+client/src/components/ui/breadcrumb.tsx:22:      "flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5",
+client/src/components/ui/breadcrumb.tsx:36:    className={cn("inline-flex items-center gap-1.5", className)}
+client/src/components/ui/breadcrumb.tsx:98:    className={cn("flex h-9 w-9 items-center justify-center", className)}
+client/src/components/ui/avatar.tsx:16:      relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full`,
+client/src/components/ui/avatar.tsx:43:      "flex h-full w-full items-center justify-center rounded-full bg-muted",
+client/src/components/ui/chart.tsx:56:          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='var(--daw-ghost)']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='var(--white)']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='var(--daw-ghost)']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='var(--daw-ghost)']]:stroke-border [&_.recharts-sector[stroke='var(--white)']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+client/src/components/ui/chart.tsx:198:                  "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
+client/src/components/ui/chart.tsx:232:                        "flex flex-1 justify-between leading-none",
+client/src/components/ui/chart.tsx:284:          "flex items-center justify-center gap-4",
+client/src/components/ui/chart.tsx:297:                "flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground"
+client/src/components/ui/badge.tsx:8:  "whitespace-nowrap inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" +
+client/src/components/ui/button.tsx:8:  `relative inline-flex items-center justify-center gap-2 whitespace-nowrap 
+client/src/components/ui/button.tsx:150:        <span className="relative z-10 flex items-center gap-2">
+client/src/components/ui/card.tsx:26:    className={cn("flex flex-col space-y-1.5 p-6", className)}
+client/src/components/ui/card.tsx:73:    className={cn("flex items-center p-6 pt-0", className)}
+client/src/components/ui/checkbox.tsx:20:      className={cn("flex items-center justify-center text-current")}
+client/src/components/ui/MarqueeTicker.tsx:21:      className="overflow-hidden cursor-default"
+client/src/components/ui/MarqueeTicker.tsx:37:          display: inline-flex;
+client/src/components/dj-controls/waveformdisplay.tsx:28:    <div style={{ display: 'flex', alignItems: 'center', gap: 1, height: 36 }}>
+client/src/components/dj-controls/waveformdisplay.tsx:33:            flex: 1,
+client/src/components/dj-controls/waveformdisplay.tsx:35:            height: `${Math.max(h * 100, 5)}%`,
+client/src/components/ui/carousel.tsx:158:    <div ref={carouselRef} className="overflow-hidden">
+client/src/components/ui/carousel.tsx:162:          "flex",
+client/src/components/ui/carousel.tsx:163:          orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+client/src/components/dj-controls/vumeter.tsx:14:    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+client/src/components/dj-controls/vumeter.tsx:15:      <div style={{ display: 'flex', gap: 1.5, width: '100%' }}>
+client/src/components/dj-controls/vumeter.tsx:21:              flex: 1, height: 5,
+client/src/components/ui/arrangement-timeline.tsx:62:    <div className="relative w-full h-full overflow-x-auto bg-background text-foreground">
+client/src/components/ui/arrangement-timeline.tsx:89:                  style={{ left: x, width: w }}
+client/src/components/dj-controls/transbtn.tsx:35:        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+client/src/components/dj-controls/transbtn.tsx:47:      <div style={{ width: compact ? 14 : 18, height: compact ? 14 : 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+client/src/components/theme-switcher.tsx:36:        display:       'flex',
+client/src/components/theme-switcher.tsx:50:        height:        '22px',
+client/src/components/theme-switcher.tsx:52:        flexShrink:    0,
+client/src/components/theme-switcher.tsx:58:          width:        '6px',
+client/src/components/theme-switcher.tsx:59:          height:       '6px',
+client/src/components/theme-switcher.tsx:63:          flexShrink:   0,
+client/src/components/dj-controls/modeswitcher.tsx:11:    <div style={{ display: 'flex', overflow: 'hidden', border: `1px solid ${DJ_BORDER}` }}>
+client/src/components/subscription/UpgradePrompt.tsx:62:          display: 'flex',
+client/src/components/subscription/UpgradePrompt.tsx:72:        <span style={{ flex: 1, color: 'var(--fg)' }}>{message}</span>
+client/src/components/subscription/UpgradePrompt.tsx:102:        width: '100%',
+client/src/components/subscription/UpgradePrompt.tsx:157:              display: 'flex',
+client/src/components/subscription/UpgradePrompt.tsx:170:                  flex: 1,
+client/src/components/subscription/UpgradePrompt.tsx:214:              width: '100%',
+client/src/components/piano-keys.tsx:300:        'relative w-8 md:w-10 h-24 md:h-28 rounded-b-lg flex flex-col items-center justify-end pb-2',
+client/src/components/piano-keys.tsx:313:          style={{ height: `${displayVelocity * 100}%` }}
+client/src/components/piano-keys.tsx:318:        <div className="absolute top-1 left-1 right-1 h-1 flex gap-0.5">
+client/src/components/piano-keys.tsx:322:              className="flex-1 rounded-full"
+client/src/components/piano-keys.tsx:342:        <div className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-blue-500 text-foreground text-[8px] font-bold flex items-center justify-center">
+client/src/components/piano-keys.tsx:392:        'flex flex-col items-center justify-end pb-1.5 transition-all duration-75 ease-out',
+client/src/components/piano-keys.tsx:404:          style={{ height: `${displayVelocity * 100}%` }}
+client/src/components/piano-keys.tsx:409:        <div className="absolute top-0.5 left-0.5 right-0.5 h-0.5 flex gap-0.5">
+client/src/components/piano-keys.tsx:413:              className="flex-1 rounded-full"
+client/src/components/piano-keys.tsx:433:        <div className="absolute bottom-0.5 right-0.5 w-3 h-3 rounded-full bg-blue-600 text-foreground text-[7px] font-bold flex items-center justify-center">
+client/src/components/piano-keys.tsx:1038:      <section className="relative rounded-xl border border-border/60 bg-gradient-to-b from-card to-card/80 overflow-hidden shadow-lg">
+client/src/components/piano-keys.tsx:1042:        <div className="flex items-center justify-between px-3 py-2 border-b border-border/40"
+client/src/components/piano-keys.tsx:1044:          <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1045:            <div className="flex items-center justify-center w-6 h-6 rounded-md"
+client/src/components/piano-keys.tsx:1063:            <div className="flex items-center justify-between gap-2 px-1 mb-1.5">
+client/src/components/piano-keys.tsx:1064:              <div className="flex items-center gap-1.5 flex-1">
+client/src/components/piano-keys.tsx:1075:              <div className="flex items-center gap-1.5">
+client/src/components/piano-keys.tsx:1096:              <div className="flex items-center gap-1">
+client/src/components/piano-keys.tsx:1115:            <div className="flex items-stretch gap-2">
+client/src/components/piano-keys.tsx:1116:              <div className="flex-1 relative p-3 rounded-lg border border-border/40"
+client/src/components/piano-keys.tsx:1118:                <div className="flex justify-center gap-0.5">
+client/src/components/piano-keys.tsx:1155:                <div className="absolute top-4 left-0 right-0 flex justify-center pointer-events-none">
+client/src/components/piano-keys.tsx:1156:                  <div className="flex gap-0.5">
+client/src/components/piano-keys.tsx:1202:          <div className="rounded-lg border border-border/40 overflow-hidden"
+client/src/components/piano-keys.tsx:1206:              className="w-full flex items-center justify-between px-3 py-1.5 hover:bg-muted/30 transition-colors select-none"
+client/src/components/piano-keys.tsx:1208:              <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1232:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1248:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1252:                        <div className="flex gap-1">
+client/src/components/piano-keys.tsx:1257:                            className="flex-1"
+client/src/components/piano-keys.tsx:1265:                            className="flex-1"
+client/src/components/piano-keys.tsx:1274:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1290:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1306:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1339:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1380:                          <Label className="text-xs flex items-center justify-between capitalize">
+client/src/components/piano-keys.tsx:1396:                    <div className="flex gap-2">
+client/src/components/piano-keys.tsx:1397:                      <Button variant="outline" size="sm" onClick={resetEffects} className="flex-1">
+client/src/components/piano-keys.tsx:1405:                        className="flex-1"
+client/src/components/piano-keys.tsx:1479:                      <div className="flex items-center justify-between">
+client/src/components/piano-keys.tsx:1481:                        <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1529:                    <div className="flex items-center justify-between">
+client/src/components/piano-keys.tsx:1531:                      <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1569:                            <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1584:                            <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1599:                            <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1614:                            <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1629:                            <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1691:                        <Label className="text-xs flex items-center justify-between">
+client/src/components/piano-keys.tsx:1707:                        <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1719:                    <div className="flex gap-2">
+client/src/components/piano-keys.tsx:1724:                        className="flex-1"
+client/src/components/piano-keys.tsx:1733:                        className="flex-1"
+client/src/components/piano-keys.tsx:1743:                    <div className="flex items-center gap-2">
+client/src/components/piano-keys.tsx:1789:                    <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
+client/src/components/piano-keys.tsx:1798:                            className="flex items-center justify-between p-3 bg-card border border-border rounded-lg hover:bg-accent/50 transition-colors"
+client/src/components/piano-keys.tsx:1800:                            <div className="flex-1">
+client/src/components/piano-keys.tsx:1805:                              <div className="flex gap-2 mt-1">
+client/src/components/piano-keys.tsx:1821:                            <div className="flex gap-1">
+client/src/components/piano-keys.tsx:1865:                        <div className="flex gap-2">
+client/src/components/piano-keys.tsx:1874:                            className="flex-1"
+client/src/components/piano-keys.tsx:1884:                            className="flex-1"
+client/src/components/piano-keys.tsx:1930:                            <div key={i} className="text-xs p-2 bg-muted rounded flex items-center justify-between">
+client/src/components/piano-keys.tsx:1931:                              <span className="truncate flex-1">{layer.name}</span>
+client/src/components/piano-keys.tsx:1933:                                className="w-3 h-3 rounded-full ml-2 flex-shrink-0" 
+client/src/components/studio/StudioShell.tsx:20:      <div className={`r3-instrument-body relative min-h-screen overflow-x-auto ${className}`}>
+client/src/components/studio/TransportBar.tsx:56:      className="flex items-center gap-3 px-4 py-2"
+client/src/components/studio/TransportBar.tsx:64:      <div className="flex items-center gap-2">
+client/src/components/studio/TransportBar.tsx:80:        className="flex items-center gap-2 px-2.5 py-1 rounded"
+client/src/components/studio/TransportBar.tsx:90:      <div className="flex-1 flex items-center gap-2">
+client/src/components/studio/TransportBar.tsx:92:          className="flex-1 h-1 rounded relative cursor-pointer"
+client/src/components/studio/TransportBar.tsx:105:              width: `${scrubPos}%`,
+client/src/components/studio/TransportBar.tsx:142:        className="flex items-center gap-1 px-2 py-1 rounded text-[9px] cursor-pointer transition-all hover:text-[#aaa]"
+client/src/components/studio/StudioHeader.tsx:81:      <div className="flex items-center gap-4 min-w-0">
+client/src/components/studio/StudioHeader.tsx:95:          className="flex flex-col gap-1 px-3 py-2 rounded-md min-w-[158px]"
+client/src/components/studio/StudioHeader.tsx:102:          <div className="flex items-center gap-2 text-[10px]">
+client/src/components/studio/StudioHeader.tsx:139:      <div className="flex items-center gap-3">
+client/src/components/studio/StudioHeader.tsx:171:        className="flex items-end gap-[1.5px] h-[38px] min-w-[180px] px-1"
+client/src/components/studio/StudioHeader.tsx:178:            className="r3-wave-bar flex-1 min-w-[2px] rounded-sm transition-all"
+client/src/components/studio/StudioHeader.tsx:182:              height: `${4 + Math.random() * 30}px`,
+client/src/components/studio/StudioHeader.tsx:190:      <div className="flex items-center gap-1.5">
+client/src/components/studio/StudioHeader.tsx:193:          className="w-[30px] h-[30px] flex items-center justify-center rounded bg-[#121212] border border-[#242424] text-[#707070] text-[11px] cursor-pointer transition-all hover:border-[#444] hover:text-[#c0c0c0] hover:bg-[#161616] active:translate-y-px active:bg-[#0d0d0d]"
+client/src/components/studio/StudioHeader.tsx:200:          className="w-[30px] h-[30px] flex items-center justify-center rounded bg-[#121212] border border-[#242424] text-[#707070] text-[11px] cursor-pointer transition-all hover:border-[#444] hover:text-[#c0c0c0] hover:bg-[#161616] active:translate-y-px active:bg-[#0d0d0d]"
+client/src/components/studio/StudioHeader.tsx:217:          className="w-[30px] h-[30px] flex items-center justify-center rounded bg-[#121212] border border-[#242424] text-[#707070] text-[11px] cursor-pointer transition-all hover:border-[#444] hover:text-[#c0c0c0] hover:bg-[#161616] active:translate-y-px active:bg-[#0d0d0d]"
+client/src/components/studio/StudioHeader.tsx:225:          className="w-[30px] h-[30px] flex items-center justify-center rounded bg-[#121212] border border-[#242424] text-[#707070] text-[11px] cursor-pointer transition-all hover:border-[#444] hover:text-[#c0c0c0] hover:bg-[#161616] active:translate-y-px active:bg-[#0d0d0d]"
+client/src/components/studio/StudioHeader.tsx:232:        <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#111] border border-[#222]">
+client/src/components/dj-controls/knob.tsx:84:    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, userSelect: 'none' }}>
+client/src/components/dj-controls/knob.tsx:88:        style={{ cursor: dragging ? 'grabbing' : 'grab', touchAction: 'none', width: size, height: size }}
+client/src/components/dj-controls/hot-cues.tsx:59:      <div className="flex items-center justify-between mb-2">
+client/src/components/dj-controls/hot-cues.tsx:60:        <div className="flex items-center gap-2">
+client/src/components/dj-controls/hot-cues.tsx:66:        <div className="flex gap-2">
+client/src/components/dj-controls/hot-cues.tsx:134:          <div className="flex justify-between mb-2">
+client/src/components/dj-controls/hot-cues.tsx:196:          className="flex flex-col items-center gap-1"
+client/src/components/dj-controls/hot-cues.tsx:317:    <Card className="bg-card border-border overflow-hidden">
+client/src/components/studio/StudioFooter.tsx:54:    <div className="flex gap-px items-end">
+client/src/components/studio/StudioFooter.tsx:60:            height: `${3 + i * 0.5}px`,
+client/src/components/studio/StudioFooter.tsx:80:      className="flex items-center justify-between px-4 py-1.5 flex-wrap gap-2"
+client/src/components/studio/StudioFooter.tsx:89:      <div className="flex items-center gap-3 flex-wrap">
+client/src/components/studio/StudioFooter.tsx:90:        <div className="flex items-center gap-1">
+client/src/components/studio/StudioFooter.tsx:94:        <div className="flex items-center gap-1">
+client/src/components/studio/StudioFooter.tsx:110:      <div className="flex items-center gap-3 flex-wrap">
+client/src/components/studio/StudioFooter.tsx:119:          <div key={spec.val} className="flex items-center gap-1">
+client/src/components/studio/StudioFooter.tsx:127:      <div className="flex items-center gap-3 flex-wrap">
+client/src/components/studio/StudioFooter.tsx:128:        <div className="flex items-center gap-1">
+client/src/components/studio/StudioFooter.tsx:132:        <div className="flex items-center gap-1">
+client/src/components/studio/EngineTelemetry.tsx:76:    <div className="flex-1 text-center min-w-[42px]">
+client/src/components/studio/EngineTelemetry.tsx:140:      className="flex gap-2 mb-2 p-2 rounded-md"
+client/src/components/studio/EngineTelemetry.tsx:153:      <div className="flex flex-col gap-1 ml-auto justify-center">
+client/src/components/studio/EngineTelemetry.tsx:182:      <div className="flex flex-col gap-1 justify-center">
+client/src/components/studio/EngineTelemetry.tsx:184:          className="inline-flex items-center gap-1 px-1.5 py-[3px] rounded border text-[7px] font-mono"
+client/src/components/studio/EngineTelemetry.tsx:191:          className="inline-flex items-center gap-1 px-1.5 py-[3px] rounded border text-[7px] font-mono"
+client/src/components/ui/switch.tsx:12:      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+client/src/components/ui/accordion.tsx:25:  <AccordionPrimitive.Header className="flex">
+client/src/components/ui/accordion.tsx:29:        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+client/src/components/ui/accordion.tsx:47:    className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+client/src/components/multi-track-view.tsx:292:    <div className="flex flex-col h-full bg-card text-foreground font-sans">
+client/src/components/multi-track-view.tsx:294:      <div className="h-14 flex items-center gap-4 px-4 bg-background shadow-lg">
+client/src/components/multi-track-view.tsx:295:        <div className="flex items-center gap-2">
+client/src/components/multi-track-view.tsx:321:        <div className="flex-1 flex items-center gap-3">
+client/src/components/multi-track-view.tsx:325:          <div className="h-1 flex-1 bg-muted rounded-full overflow-hidden">
+client/src/components/multi-track-view.tsx:328:              style={{ width: `${Math.min(100, (transport.position / 300) * 100)}%` }}
+client/src/components/multi-track-view.tsx:347:      <div style={{ overflow:"hidden", position:"relative", background:"#080808", padding:"5px 0", flexShrink:0 }}>
+client/src/components/multi-track-view.tsx:348:        <div style={{ display:"flex", width:"max-content", animation:"ag-scroll 28s linear infinite" }}>
+client/src/components/multi-track-view.tsx:357:      <div className="h-10 bg-muted text-xs text-muted-foreground flex items-center px-4 font-medium">
+client/src/components/multi-track-view.tsx:358:        <span className="flex-1">Tracks & Inserts</span>
+client/src/components/multi-track-view.tsx:364:      <div className="flex-1 overflow-auto" ref={trackListRef}>
+client/src/components/multi-track-view.tsx:372:                <div className="h-12 bg-muted/50 border-b border-zinc-800 px-3 flex items-center gap-2 hover:bg-muted transition-colors">
+client/src/components/multi-track-view.tsx:407:                    className={`flex items-center h-20 border-b border-zinc-800 transition-colors ${
+client/src/components/multi-track-view.tsx:417:                    <div className="w-48 flex flex-col gap-1.5 px-3 flex-shrink-0">
+client/src/components/multi-track-view.tsx:418:                      <div className="flex items-center gap-2">
+client/src/components/multi-track-view.tsx:446:                    <div className="flex items-center gap-1.5 flex-shrink-0">
+client/src/components/multi-track-view.tsx:487:                    <div className="w-3 h-12 bg-muted rounded overflow-hidden flex-shrink-0 mx-2">
+client/src/components/multi-track-view.tsx:492:                          height: `${
+client/src/components/multi-track-view.tsx:509:                    <div className="flex-1 flex items-center gap-1.5 bg-muted h-12 rounded-lg px-3 mx-2">
+client/src/components/multi-track-view.tsx:520:                          className="px-2.5 py-1 text-xs font-medium bg-gradient-to-br from-purple-600 to-purple-700 rounded cursor-move hover:from-purple-500 hover:to-purple-600 transition-all group flex items-center gap-1"
+client/src/components/multi-track-view.tsx:551:                    <div className="w-24 flex flex-col items-center flex-shrink-0 px-2">
+client/src/components/multi-track-view.tsx:573:                    <div className="w-20 flex flex-col items-center flex-shrink-0 px-2">
+client/src/components/multi-track-view.tsx:618:              className="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2 transition-colors"
+client/src/components/multi-track-view.tsx:630:              className="w-full px-4 py-2 text-left text-sm hover:bg-red-900/50 text-red-400 flex items-center gap-2 transition-colors"
+client/src/components/logout-button.tsx:62:    <div style={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
+client/src/components/logout-button.tsx:69:          display:       'flex',
+client/src/components/logout-button.tsx:72:          height:        28,
+client/src/components/logout-button.tsx:83:          flexShrink:    0,
+client/src/components/logout-button.tsx:133:          <div style={{ display: 'flex', gap: 6 }}>
+client/src/components/logout-button.tsx:138:                flex:          1,
+client/src/components/logout-button.tsx:160:                flex:          1,
+client/src/components/trpc-components.tsx:47:    <div className="flex gap-2">
+client/src/components/trpc-components.tsx:49:        className="flex-1 rounded-md border bg-background px-3 py-2 text-sm"
+client/src/components/trpc-components.tsx:95:          className="flex items-center justify-between rounded-md border px-3 py-2 text-sm hover:bg-accent cursor-pointer"
+client/src/components/trpc-components.tsx:135:    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:127:      display:       'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:133:      flexShrink:    0,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:135:      <div style={{ width: 5, height: 5, background: color, boxShadow: `0 0 5px ${color}` }} />
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:156:      display:      'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:163:      <div style={{ flex: 1, height: 2, background: P.border2 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:165:          height:     '100%',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:166:          width:      `${pct}%`,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:215:      display:     'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:216:      flexDirection: 'column',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:222:      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:223:        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:251:        <div style={{ display: 'flex', gap: 5 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:255:              flex:          1,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:256:              height:        24,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:282:              flex:          1,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:283:              height:        24,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:317:    display:    'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:318:    flexDirection: 'column',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:325:        <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:330:                width:      6,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:331:                height:     6,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:366:    display:    'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:367:    flexDirection: 'column',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:378:      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:469:        display:       'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:470:        flexDirection: 'column',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:480:          display:      'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:484:          flexShrink:   0,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:486:          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:498:          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:575:          display:       'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:576:          flexDirection: 'column',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:579:          overflowY:     'auto',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:610:          display:    'flex',
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:613:          flexShrink: 0,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:620:          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:623:              width:  5,
+client/src/components/mix-suggestions/MixSuggestionsPanel.tsx:624:              height: 5,
+client/src/components/admin/AgentMeshPanel.tsx:190:    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/admin/AgentMeshPanel.tsx:194:      <div style={{ flex: 1, height: 6, background: T.z800, borderRadius: 3, overflow: "hidden" }}>
+client/src/components/admin/AgentMeshPanel.tsx:196:          width: `${pct}%`, height: "100%", borderRadius: 3,
+client/src/components/admin/AgentMeshPanel.tsx:220:      flex: 1, background: T.z800, borderRadius: 6,
+client/src/components/admin/AgentMeshPanel.tsx:221:      padding: "8px 10px", display: "flex", flexDirection: "column", gap: 2,
+client/src/components/admin/AgentMeshPanel.tsx:259:      overflow: "hidden",
+client/src/components/admin/AgentMeshPanel.tsx:260:      display: "flex",
+client/src/components/admin/AgentMeshPanel.tsx:261:      flexDirection: "column",
+client/src/components/admin/AgentMeshPanel.tsx:268:        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+client/src/components/admin/AgentMeshPanel.tsx:284:        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+client/src/components/admin/AgentMeshPanel.tsx:303:      <div style={{ padding: "12px 14px", flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+client/src/components/admin/AgentMeshPanel.tsx:304:        <div style={{ display: "flex", gap: 8 }}>
+client/src/components/admin/AgentMeshPanel.tsx:325:        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+client/src/components/admin/AgentMeshPanel.tsx:336:              width: "100%", padding: "7px 10px",
+client/src/components/admin/AgentMeshPanel.tsx:349:              alignSelf: "flex-end",
+client/src/components/admin/AgentMeshPanel.tsx:365:        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+client/src/components/admin/AgentMeshPanel.tsx:376:            overflowY: "auto", whiteSpace: "pre-wrap", wordBreak: "break-word",
+client/src/components/admin/AgentMeshPanel.tsx:404:    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+client/src/components/admin/AgentMeshPanel.tsx:405:      <span style={{ color: T.z600, flexShrink: 0, minWidth: 52, fontFamily: "'JetBrains Mono', monospace", fontSize: 11 }}>
+client/src/components/admin/AgentMeshPanel.tsx:408:      <span style={{ color: dirColor, flexShrink: 0, fontWeight: 500, fontFamily: "'JetBrains Mono', monospace", fontSize: 11 }}>
+client/src/components/admin/AgentMeshPanel.tsx:530:        ::-webkit-scrollbar{width:3px;height:3px;}
+client/src/components/admin/AgentMeshPanel.tsx:537:        display: "flex", alignItems: "center", gap: 10,
+client/src/components/admin/AgentMeshPanel.tsx:542:          width: 8, height: 8, borderRadius: "50%",
+client/src/components/admin/AgentMeshPanel.tsx:545:          transition: "all 0.3s", flexShrink: 0,
+client/src/components/admin/AgentMeshPanel.tsx:550:        <div style={{ flex: 1 }} />
+client/src/components/admin/AgentMeshPanel.tsx:599:          display: "flex", alignItems: "center", gap: 8,
+client/src/components/admin/AgentMeshPanel.tsx:606:          <div style={{ flex: 1 }} />
+client/src/components/admin/AgentMeshPanel.tsx:621:          maxHeight: 130, overflowY: "auto",
+client/src/components/admin/AgentMeshPanel.tsx:622:          display: "flex", flexDirection: "column", gap: 3,
+client/src/components/collapsible-fx-panel.tsx:62:  // Measured height: fires synchronously after DOM update, before paint — no flicker
+client/src/components/collapsible-fx-panel.tsx:117:          'w-full flex items-center justify-between',
+client/src/components/collapsible-fx-panel.tsx:127:        <div className="flex items-center gap-2">
+client/src/components/collapsible-fx-panel.tsx:129:            <span className="text-muted-foreground flex-shrink-0" aria-hidden="true">
+client/src/components/collapsible-fx-panel.tsx:139:            'h-4 w-4 flex-shrink-0 ml-2 text-muted-foreground',
+client/src/components/collapsible-fx-panel.tsx:156:          overflow: 'hidden',
+client/src/components/collapsible-fx-panel.tsx:179:                    overflowY:    'auto',
+client/src/components/collapsible-fx-panel.tsx:180:                    overflowX:    'hidden',
+client/src/components/collapsible-fx-panel.tsx:242:    <div className={cn('flex flex-col items-center gap-1.5 min-w-[60px]', disabled && 'opacity-50 pointer-events-none')}>
+client/src/components/collapsible-fx-panel.tsx:301:    <div className={cn('flex items-center gap-3', disabled && 'opacity-50 pointer-events-none')}>
+client/src/components/collapsible-fx-panel.tsx:305:      <div className="flex-1 relative">
+client/src/components/admin/AgentSuite.tsx:377:  Nav height: NAV_HEIGHT_PX constant + --nav-h CSS variable (both required)
+client/src/components/admin/AgentSuite.tsx:651:          overflow: "hidden",
+client/src/components/admin/AgentSuite.tsx:668:            color: T.z100, overflowX: "auto",
+client/src/components/admin/AgentSuite.tsx:718:        flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:737:      display: "flex",
+client/src/components/admin/AgentSuite.tsx:738:      flexDirection: isUser ? "row-reverse" : "row",
+client/src/components/admin/AgentSuite.tsx:740:      alignItems: "flex-start",
+client/src/components/admin/AgentSuite.tsx:744:          width: 30, height: 30, borderRadius: "50%",
+client/src/components/admin/AgentSuite.tsx:747:          display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:748:          fontSize: 13, color: agent.color, flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:787:    <div style={{ display: "flex", gap: 10, marginBottom: 18, alignItems: "center" }}>
+client/src/components/admin/AgentSuite.tsx:789:        width: 30, height: 30, borderRadius: "50%",
+client/src/components/admin/AgentSuite.tsx:791:        display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:792:        fontSize: 13, color: agent.color, flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:798:        display: "flex", gap: 5,
+client/src/components/admin/AgentSuite.tsx:802:            width: 5, height: 5, borderRadius: "50%",
+client/src/components/admin/AgentSuite.tsx:879:    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+client/src/components/admin/AgentSuite.tsx:884:        flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:887:        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+client/src/components/admin/AgentSuite.tsx:889:            width: 32, height: 32, borderRadius: "50%",
+client/src/components/admin/AgentSuite.tsx:892:            display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:909:          <div style={{ flex: 1 }} />
+client/src/components/admin/AgentSuite.tsx:920:          display: "flex", gap: 6, flexWrap: "wrap",
+client/src/components/admin/AgentSuite.tsx:931:        flex: 1, overflowY: "auto",
+client/src/components/admin/AgentSuite.tsx:936:            display: "flex", flexDirection: "column",
+client/src/components/admin/AgentSuite.tsx:938:            height: "100%", gap: 12, opacity: 0.5,
+client/src/components/admin/AgentSuite.tsx:981:        flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:985:          display: "flex", gap: 10, alignItems: "flex-end",
+client/src/components/admin/AgentSuite.tsx:999:              flex: 1, background: "transparent",
+client/src/components/admin/AgentSuite.tsx:1011:              width: 34, height: 34, borderRadius: 8,
+client/src/components/admin/AgentSuite.tsx:1016:              display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:1017:              flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:1048:        ::-webkit-scrollbar{width:3px;height:3px;}
+client/src/components/admin/AgentSuite.tsx:1055:        display: "flex", height: "100%", width: "100%",
+client/src/components/admin/AgentSuite.tsx:1057:        overflow: "hidden",
+client/src/components/admin/AgentSuite.tsx:1061:          width: 236, flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:1064:          display: "flex", flexDirection: "column",
+client/src/components/admin/AgentSuite.tsx:1065:          overflowY: "auto",
+client/src/components/admin/AgentSuite.tsx:1071:            flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:1092:          <div style={{ flex: 1, padding: "8px 6px", overflowY: "auto" }}>
+client/src/components/admin/AgentSuite.tsx:1111:                          width: "100%", display: "flex", alignItems: "center",
+client/src/components/admin/AgentSuite.tsx:1136:                            width: 2, background: agent.color,
+client/src/components/admin/AgentSuite.tsx:1142:                          width: 26, height: 26, borderRadius: "50%",
+client/src/components/admin/AgentSuite.tsx:1145:                          display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:1147:                          flexShrink: 0, fontFamily: "monospace",
+client/src/components/admin/AgentSuite.tsx:1151:                        <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+client/src/components/admin/AgentSuite.tsx:1156:                            whiteSpace: "nowrap", overflow: "hidden",
+client/src/components/admin/AgentSuite.tsx:1163:                            fontSize: 9, minWidth: 16, height: 16,
+client/src/components/admin/AgentSuite.tsx:1167:                            display: "flex", alignItems: "center", justifyContent: "center",
+client/src/components/admin/AgentSuite.tsx:1184:            flexShrink: 0,
+client/src/components/admin/AgentSuite.tsx:1201:          flex: 1, display: "flex", flexDirection: "column",
+client/src/components/admin/AgentSuite.tsx:1202:          background: T.z950, minWidth: 0, overflow: "hidden",
+client/src/components/header-controls.tsx:86:      className="flex items-center gap-1.5 h-7 px-2 transition-all"
+client/src/components/header-controls.tsx:217:        className="flex items-center flex-wrap gap-0 sticky top-0 z-50 flex-shrink-0"
+client/src/components/header-controls.tsx:226:          className="flex items-center gap-3 px-4 py-2 border-r flex-shrink-0"
+client/src/components/header-controls.tsx:230:            className="flex items-center justify-center w-6 h-6"
+client/src/components/header-controls.tsx:253:          className="flex items-center gap-3 px-4 py-2 border-r"
+client/src/components/header-controls.tsx:272:            className="flex items-center gap-2 px-2 h-7 border"
+client/src/components/header-controls.tsx:305:          className="flex items-center px-4 py-2 border-r"
+client/src/components/header-controls.tsx:313:                    className="flex items-center gap-2 h-7 px-2"
+client/src/components/header-controls.tsx:393:        <div className="flex items-center gap-2 px-4 py-2 ml-auto">
+client/src/components/header-controls.tsx:436:        <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
+client/src/components/header-controls.tsx:444:          className="border-b flex-shrink-0"
+client/src/components/header-controls.tsx:449:            className="flex items-center gap-2 px-4 py-2 border-b"
+client/src/components/header-controls.tsx:469:                width:        120,
+client/src/components/header-controls.tsx:475:          <div className="max-h-40 overflow-y-auto">
+client/src/components/header-controls.tsx:488:                  className="w-full flex items-center gap-3 px-4 py-1.5 border-b text-left"
+client/src/components/header-controls.tsx:502:                  <span className="text-[10px] flex-1" style={{ color: S.textActive }}>
+client/src/components/TrialGate.tsx:56:        display: "flex",
+client/src/components/transport-controls.tsx:46:    <div className="flex flex-wrap items-center justify-center gap-2">
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:342:  min-height: 100%;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:438:  --r3-border-width: 1px;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:739:  scrollbar-width: thin;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:746:  width: 7px;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:747:  height: 7px;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:1150:  width: 8px;
+client/src/styles/theme.css.pre-daw-persistence-20260925-001658:1151:  height: 8px;
+client/src/components/fx-panel.tsx:170:    <div className="flex items-end justify-center gap-0.5 px-1" style={{ height }}>
+client/src/components/fx-panel.tsx:174:          className="flex-1 rounded-t"
+client/src/components/fx-panel.tsx:176:            height: `${Math.max(h * 100, 3)}%`,
+client/src/components/fx-panel.tsx:201:      className="flex rounded-lg overflow-hidden"
+client/src/components/fx-panel.tsx:244:        display: 'flex',
+client/src/components/fx-panel.tsx:247:        width: '100%',
+client/src/components/fx-panel.tsx:263:        flexDirection: 'column',
+client/src/components/fx-panel.tsx:273:          width: 4, height: 4, borderRadius: '50%',
+client/src/components/fx-panel.tsx:288:    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+client/src/components/fx-panel.tsx:297:          display: 'flex',
+client/src/components/fx-panel.tsx:298:          flexDirection: 'column',
+client/src/components/fx-panel.tsx:312:          overflow: 'hidden',
+client/src/components/fx-panel.tsx:317:          position: 'absolute', bottom: 0, left: 0, right: 0, height: 2,
+client/src/components/fx-panel.tsx:325:          width: 6, height: 6, borderRadius: '50%',
+client/src/components/fx-panel.tsx:356:          width: 5, height: 5, borderRadius: '50%',
+client/src/components/fx-panel.tsx:366:          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+client/src/components/fx-panel.tsx:371:            style={{ width: '100%', accentColor: config.color, height: 2 }}
+client/src/components/fx-panel.tsx:389:      overflow: 'hidden',
+client/src/components/fx-panel.tsx:400:          width: '100%', display: 'flex', alignItems: 'center', gap: 6,
+client/src/components/fx-panel.tsx:408:          width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
+client/src/components/fx-panel.tsx:417:          flexShrink: 0,
+client/src/components/fx-panel.tsx:424:          textTransform: 'uppercase', letterSpacing: '0.06em', flex: 1, textAlign: 'left',
+client/src/components/fx-panel.tsx:439:        <div style={{ padding: '0 9px 8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+client/src/components/fx-panel.tsx:441:            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+client/src/components/fx-panel.tsx:446:              style={{ width: '100%', accentColor: config.color, height: 2 }}
+client/src/components/fx-panel.tsx:450:            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+client/src/components/fx-panel.tsx:455:              style={{ width: '100%', accentColor: config.color, height: 2 }}
+client/src/components/fx-panel.tsx:521:          overflow: 'hidden',
+client/src/components/fx-panel.tsx:527:            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+client/src/components/fx-panel.tsx:534:          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+client/src/components/fx-panel.tsx:536:              width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/fx-panel.tsx:539:              flexShrink: 0,
+client/src/components/fx-panel.tsx:558:              display: 'flex', alignItems: 'center', gap: 6,
+client/src/components/fx-panel.tsx:564:                width: 6, height: 6, borderRadius: '50%',
+client/src/components/fx-panel.tsx:575:          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+client/src/components/fx-panel.tsx:583:                width: 28, height: 28, borderRadius: 8,
+client/src/components/fx-panel.tsx:584:                display: 'flex', alignItems: 'center', justifyContent: 'center',
+client/src/components/fx-panel.tsx:609:            overflow: 'hidden',
+client/src/components/fx-panel.tsx:621:              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, paddingInline: 4 }}>
+client/src/components/fx-panel.tsx:631:            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+client/src/components/fx-panel.tsx:635:              <div style={{ display: 'flex', gap: 4 }}>
+client/src/components/fx-panel.tsx:640:                      width: 8, height: 8, borderRadius: '50%',
+client/src/components/fx-panel.tsx:651:            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
+client/src/components/fx-panel.tsx:690:              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+client/src/components/fx-panel.tsx:694:                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+client/src/components/fx-panel.tsx:705:                style={{ width: '100%', accentColor: 'var(--status-ok)', height: 2 }}
+client/src/components/fx-panel.tsx:726:              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+client/src/components/fx-panel.tsx:729:              <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 5 }}>
+client/src/components/fx-panel.tsx:732:                  <div key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+client/src/components/fx-panel.tsx:750:            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+client/src/components/fx-panel.tsx:760:                display: 'flex', alignItems: 'center', gap: 5,
+client/src/components/TimeSavingsPanel.tsx:46:      <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-background/40 border border-white/5">
+client/src/components/TimeSavingsPanel.tsx:47:        <div className="flex items-center gap-1.5">
+client/src/components/TimeSavingsPanel.tsx:54:        <div className="flex items-center gap-1.5">
+client/src/components/TimeSavingsPanel.tsx:65:    <div className="flex flex-col gap-4 p-4 rounded-xl bg-background/60 border border-white/10">
+client/src/components/TimeSavingsPanel.tsx:110:          <div className="flex justify-between text-[10px] font-mono text-slate-500 mb-1.5">
+client/src/components/TimeSavingsPanel.tsx:114:          <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+client/src/components/TimeSavingsPanel.tsx:117:              style={{ width: `${aiPercent}%` }}
+client/src/components/TimeSavingsPanel.tsx:120:          <div className="flex justify-between text-[10px] font-mono mt-1">
+client/src/components/TimeSavingsPanel.tsx:153:    <div className="flex flex-col gap-0.5 p-2.5 rounded-lg bg-white/3 border border-white/5">
+client/src/components/ProtectedRoute.tsx:48:          height: '100vh',
+client/src/components/ProtectedRoute.tsx:49:          display: 'flex',
+client/src/components/ProtectedRoute.tsx:59:              width: 32,
+client/src/components/ProtectedRoute.tsx:60:              height: 32,
+client/src/components/ProtectedRoute.tsx:87:          height: '100vh',
+client/src/components/ProtectedRoute.tsx:88:          display: 'flex',
+client/src/components/ProtectedRoute.tsx:93:          flexDirection: 'column',
+client/src/components/drum/DrumWorkstation.tsx:118:        <div className="flex items-center justify-between">
+client/src/components/drum/DrumWorkstation.tsx:130:      className="mb-2 rounded overflow-hidden"
+client/src/components/drum/DrumWorkstation.tsx:139:        className="flex items-center justify-between px-3 py-2"
+client/src/components/drum/DrumWorkstation.tsx:145:        <div className="flex items-center gap-1.5">
+client/src/components/drum/DrumWorkstation.tsx:147:            className="inline-flex items-center gap-1 px-1.5 py-[3px] rounded border text-[7.5px] font-mono font-semibold tracking-[0.08em]"
+client/src/components/drum/DrumWorkstation.tsx:179:        <div className="flex items-center gap-2">
+client/src/components/drum/DrumWorkstation.tsx:183:            className="flex-1 flex justify-between items-center min-w-0 px-2 py-[7px] rounded border text-[9px] font-semibold tracking-[0.05em] cursor-pointer transition-all hover:border-[#3d3d3d] hover:text-[#ddd]"
+client/src/components/drum/DrumWorkstation.tsx:190:        <div className="flex items-center gap-2">
+client/src/components/drum/DrumWorkstation.tsx:192:          <div className="flex-1 h-[3px] min-w-[55px] rounded relative cursor-pointer" style={{ background: '#202020' }}>
+client/src/components/drum/DrumWorkstation.tsx:193:            <div className="h-full rounded" style={{ width: `${swing}%`, background: 'var(--r3-accent)' }} />
+client/src/components/drum/DrumWorkstation.tsx:205:          className="flex items-center gap-1 px-2 py-1.5 rounded border text-[7.5px] font-mono font-semibold tracking-[0.08em] whitespace-nowrap"
+client/src/components/drum/DrumWorkstation.tsx:212:        <div className="flex gap-1">
+client/src/components/drum/DrumWorkstation.tsx:248:        <div className="flex justify-between items-center mb-2 px-1">
+client/src/components/drum/DrumWorkstation.tsx:254:          className="grid gap-0 rounded overflow-hidden"
+client/src/components/drum/DrumWorkstation.tsx:279:                <div className="h-[31px] my-2 flex items-center justify-center gap-px opacity-70 overflow-hidden">
+client/src/components/drum/DrumWorkstation.tsx:287:                          height: `${h}px`,
+client/src/components/drum/DrumWorkstation.tsx:309:        <div className="mt-1 h-1 rounded overflow-hidden" style={{ background: '#171717' }}>
+client/src/components/drum/DrumWorkstation.tsx:313:              width: `${hitPad !== null ? 68 + Math.random() * 30 : 0}%`,
+client/src/components/drum/DrumWorkstation.tsx:332:        <div className="flex flex-col justify-center gap-2 px-3 py-2" style={{ borderRight: '1px solid #242a22' }}>
+client/src/components/drum/DrumWorkstation.tsx:348:            className="flex flex-col justify-center gap-2 px-2 py-2"
+client/src/components/drum/DrumWorkstation.tsx:354:              <div className="h-full rounded" style={{ width: `${row.pct}%`, background: 'var(--r3-accent)' }} />
+client/src/components/drum/DrumWorkstation.tsx:359:        <div className="flex flex-col justify-center gap-2 px-3 py-2">
+client/src/components/drum/DrumWorkstation.tsx:360:          <div className="flex justify-between gap-3">
+client/src/components/drum/DrumWorkstation.tsx:366:          <div className="flex justify-between gap-3">
+client/src/components/drum/DrumWorkstation.tsx:375:        <div className="flex justify-between items-center mb-2">
+client/src/components/MixerWithAI.tsx:82:    <div className="flex flex-col h-full bg-[var(--panel-deep)] text-foreground">
+client/src/components/MixerWithAI.tsx:85:      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+client/src/components/MixerWithAI.tsx:86:        <div className="flex items-center gap-3">
+client/src/components/MixerWithAI.tsx:106:      <div className="flex flex-1 overflow-x-auto">
+client/src/components/MixerWithAI.tsx:118:        <div className="flex items-center justify-between">
+client/src/components/MixerWithAI.tsx:153:      className="flex flex-col items-center gap-2 p-3 border-r border-white/5 min-w-[72px]"
+client/src/components/ui/alert-dialog.tsx:52:      "flex flex-col space-y-2 text-center sm:text-left",
+client/src/components/ui/alert-dialog.tsx:66:      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+client/src/components/audio-visualizer.tsx:152:  width: propWidth,
+client/src/components/audio-visualizer.tsx:153:  height: propHeight,
+client/src/components/audio-visualizer.tsx:930:        width: isEmbedded ? (propWidth || "100%") : "100%",
+client/src/components/audio-visualizer.tsx:931:        height: collapsed ? "auto" : (isEmbedded ? (propHeight || 400) : "100vh"),
+client/src/components/audio-visualizer.tsx:933:        display: "flex",
+client/src/components/audio-visualizer.tsx:934:        flexDirection: "column",
+client/src/components/audio-visualizer.tsx:937:        overflow: "hidden",
+client/src/components/audio-visualizer.tsx:948:          display: "flex",
+client/src/components/audio-visualizer.tsx:955:          flexShrink: 0,
+client/src/components/audio-visualizer.tsx:961:        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+client/src/components/audio-visualizer.tsx:965:              width: 14,
+client/src/components/audio-visualizer.tsx:966:              height: 14,
+client/src/components/audio-visualizer.tsx:967:              display: "flex",
+client/src/components/audio-visualizer.tsx:981:              width: 22,
+client/src/components/audio-visualizer.tsx:982:              height: 22,
+client/src/components/audio-visualizer.tsx:984:              display: "flex",
+client/src/components/audio-visualizer.tsx:1006:        <div style={{ display: "flex", alignItems: "center", gap: 8 }} onClick={(e) => e.stopPropagation()}>
+client/src/components/audio-visualizer.tsx:1008:          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+client/src/components/audio-visualizer.tsx:1010:            <div style={{ display: "flex", gap: 1, alignItems: "center" }}>
+client/src/components/audio-visualizer.tsx:1018:                      width: collapsed ? 2 : 3,
+client/src/components/audio-visualizer.tsx:1019:                      height: 10,
+client/src/components/audio-visualizer.tsx:1028:              <span style={{ fontSize: 8, color: "var(--dj-dim)", width: 26 }}>{volumePercent}%</span>
+client/src/components/audio-visualizer.tsx:1034:            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+client/src/components/audio-visualizer.tsx:1036:              <div style={{ display: "flex", gap: 1, alignItems: "center" }}>
+client/src/components/audio-visualizer.tsx:1044:                        width: 3,
+client/src/components/audio-visualizer.tsx:1045:                        height: 10,
+client/src/components/audio-visualizer.tsx:1116:          flex: 1,
+client/src/components/audio-visualizer.tsx:1117:          width: "100%",
+client/src/components/audio-visualizer.tsx:1132:            flexShrink: 0,
+client/src/components/audio-visualizer.tsx:1138:              display: "flex",
+client/src/components/audio-visualizer.tsx:1141:              flexWrap: "wrap",
+client/src/components/audio-visualizer.tsx:1165:                  display: "flex",
+client/src/components/audio-visualizer.tsx:1191:              display: "flex",
+client/src/components/audio-visualizer.tsx:1195:              flexWrap: "wrap",
+client/src/components/audio-visualizer.tsx:1199:            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+client/src/components/audio-visualizer.tsx:1206:                    width: 14,
+client/src/components/audio-visualizer.tsx:1207:                    height: 14,
+client/src/components/audio-visualizer.tsx:1220:            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+client/src/components/audio-visualizer.tsx:1222:              <div style={{ position: "relative", width: 80, height: 14, display: "flex", alignItems: "center" }}>
+client/src/components/audio-visualizer.tsx:1224:                <div style={{ position: "absolute", left: 0, right: 0, height: 2, background: BORDER }} />
+client/src/components/audio-visualizer.tsx:1226:                <div style={{ position: "absolute", left: 0, width: `${((sensitivity - 0.5) / 2.5) * 100}%`, height: 2, background: ACID }} />
+client/src/components/audio-visualizer.tsx:1238:                    width: "100%",
+client/src/components/audio-visualizer.tsx:1239:                    height: "100%",
+client/src/components/audio-visualizer.tsx:1249:                  width: 8,
+client/src/components/audio-visualizer.tsx:1250:                  height: 12,
+client/src/components/audio-visualizer.tsx:1255:              <span style={{ fontSize: 8, color: "#555", width: 28 }}>
+client/src/styles/r3-tokens.css:71:    position: fixed;
+client/src/styles/r3-tokens.css:88:    width: 6px;
+client/src/styles/r3-tokens.css:89:    height: 6px;
+client/src/components/LoginForm.css:2:  display: flex;
+client/src/components/LoginForm.css:5:  min-height: 100vh;
+client/src/components/LoginForm.css:15:  width: 100%;
+client/src/components/LoginForm.css:16:  max-width: 420px;
+client/src/components/LoginForm.css:51:  width: 100%;
+client/src/components/LoginForm.css:80:  width: 100%;
+client/src/components/LoginForm.css:125:  display: flex;
+client/src/components/LoginForm.css:128:  min-height: 100vh;
+client/src/components/LoginForm.css:135:@media (max-width: 480px) {
