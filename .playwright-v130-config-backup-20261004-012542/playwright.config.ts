@@ -11,24 +11,16 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://127.0.0.1:5174',
+    baseURL: 'http://127.0.0.1:3000',
     trace: 'on-first-retry',
   },
 
-  webServer: [
-    {
-      command: 'pnpm start',
-      url: 'http://127.0.0.1:3000/health',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-    {
-      command: 'pnpm --filter @r3vibe/client dev',
-      url: 'http://127.0.0.1:5174',
-      reuseExistingServer: !process.env.CI,
-      timeout: 120 * 1000,
-    },
-  ],
+  webServer: {
+    command: 'pnpm start',
+    url: 'http://127.0.0.1:3000/health',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
 
   projects: [
     {

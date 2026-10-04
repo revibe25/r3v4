@@ -1031,10 +1031,6 @@ function ensurePads(
     if (padQuant) {
       root.dataset.v130PadQuant =
         padQuant.value;
-
-      instrumentEngine.setRecordQuantize(
-        Number(padQuant.value),
-      );
     }
 
     if (swing) {
@@ -1049,8 +1045,6 @@ function ensurePads(
 
       root.dataset.v130PadSwing =
         String(value);
-
-      instrumentEngine.setRecordSwing(value);
 
       swing.style.setProperty(
         '--v',

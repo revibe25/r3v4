@@ -171,15 +171,6 @@ export function useV130Runtime(
     const store =
       useDAWStore;
 
-    const unsubscribeBpm =
-      store.subscribe(
-        (state) => state.bpm,
-        (bpm) => {
-          instrumentEngine.setBpm(bpm);
-        },
-        { fireImmediately: true },
-      );
-
     const instrumentOwnership: V130InstrumentOwnership = {
       armed: false,
       recording: false,
@@ -607,7 +598,6 @@ export function useV130Runtime(
         instrumentOwnership,
       );
 
-      unsubscribeBpm();
       unsubscribe();
     };
   }, [

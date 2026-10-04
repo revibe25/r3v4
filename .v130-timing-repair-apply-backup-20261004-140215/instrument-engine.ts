@@ -81,12 +81,6 @@ class AudioEngine {
   private metronomeInterval: number | null = null;
   private playbackTimeout: number | null = null;
 
-  // V130 recording timing configuration.
-  // Quantize values match the reference UI:
-  //   4 = 1/4, 2 = 1/8, 1 = 1/16.
-  private recordQuantize: 4 | 2 | 1 = 1;
-  private recordSwing = 0; // 0–60 percentage
-
   // Audio buffer cache for reversed samples
   private reverseCache: WeakMap<AudioBuffer, AudioBuffer> = new WeakMap();
 
@@ -428,17 +422,11 @@ class AudioEngine {
     this.playBuffer(pad.sample, Math.min(1, Math.max(0, velocity)));
 
     if (this.state.isRecording) {
-      if (this.state.recordStart === null) {
-        this.state.recordStart = performance.now();
-      }
-
-      const when =
-        performance.now() - this.state.recordStart;
-
+      if (!this.state.recordStart) this.state.recordStart = performance.now();
       this.state.recordedEvents.push({
         type: 'pad',
         idx: index,
-        when: this.quantizeRecordedWhen(when),
+        when: performance.now() - this.state.recordStart,
       });
     }
   }
@@ -458,17 +446,11 @@ class AudioEngine {
     this.playBuffer(key.sample, Math.min(1, Math.max(0, velocity)), octaveShift);
 
     if (this.state.isRecording) {
-      if (this.state.recordStart === null) {
-        this.state.recordStart = performance.now();
-      }
-
-      const when =
-        performance.now() - this.state.recordStart;
-
+      if (!this.state.recordStart) this.state.recordStart = performance.now();
       this.state.recordedEvents.push({
         type: 'key',
         idx: index,
-        when: this.quantizeRecordedWhen(when),
+        when: performance.now() - this.state.recordStart,
         octaveShift,
       });
     }
@@ -518,65 +500,6 @@ class AudioEngine {
       this.startMetronome();
     }
     this.notify();
-  }
-
-  setRecordQuantize(value: number) {
-    if (value === 4 || value === 2 || value === 1) {
-      this.recordQuantize = value;
-    }
-  }
-
-  setRecordSwing(percent: number) {
-    const safe = Number.isFinite(percent) ? percent : 0;
-    this.recordSwing = Math.max(0, Math.min(60, safe));
-  }
-
-  private quantizeRecordedWhen(rawWhen: number): number {
-    const safeWhen =
-      Number.isFinite(rawWhen)
-        ? Math.max(0, rawWhen)
-        : 0;
-
-    const bpm =
-      Number.isFinite(this.state.bpm) && this.state.bpm > 0
-        ? this.state.bpm
-        : 120;
-
-    const beatMs = 60000 / bpm;
-
-    const gridMs =
-      this.recordQuantize === 4
-        ? beatMs
-        : this.recordQuantize === 2
-          ? beatMs / 2
-          : beatMs / 4;
-
-    if (!Number.isFinite(gridMs) || gridMs <= 0) {
-      return safeWhen;
-    }
-
-    const gridIndex =
-      Math.max(0, Math.round(safeWhen / gridMs));
-
-    let snapped =
-      gridIndex * gridMs;
-
-    // Swing affects off-grid subdivisions for 1/8 and 1/16 recording.
-    // The 1/4 grid remains straight so swing cannot displace downbeats.
-    if (
-      this.recordQuantize !== 4 &&
-      gridIndex > 0 &&
-      gridIndex % 2 === 1 &&
-      this.recordSwing > 0
-    ) {
-      // 100% represents a triplet-like 2:1 subdivision.
-      const swingOffset =
-        gridMs * (this.recordSwing / 100) * 0.5;
-
-      snapped += swingOffset;
-    }
-
-    return snapped;
   }
 
   toggleMetronome() {

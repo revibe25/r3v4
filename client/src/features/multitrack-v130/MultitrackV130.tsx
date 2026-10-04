@@ -26,11 +26,15 @@ export default function MultitrackV130() {
       null,
     );
 
-  // Initialize audio graph singleton
-  const audioGraphRef = useRef(null);
+  // Initialize the shared audio graph singleton once and expose it
+  // through React state so dependent runtimes receive the live instance.
+  const [audioGraph, setAudioGraph] =
+    useState<ReturnType<typeof getAudioGraph> | null>(null);
+
   useLayoutEffect(() => {
-    audioGraphRef.current = getAudioGraph() as any;
-    (window as any).__audioGraph = audioGraphRef.current;
+    const graph = getAudioGraph();
+    setAudioGraph(graph);
+    (window as any).__audioGraph = graph;
   }, []);
 
   const viewport =
@@ -46,7 +50,7 @@ export default function MultitrackV130() {
     hostRef,
     viewport,
     canvasRegistry,
-    audioGraphRef.current as any,
+    audioGraph,
   );
 
   useV130Runtime(hostRef);
@@ -72,7 +76,7 @@ export default function MultitrackV130() {
     >
       <V130ReferenceDomShell
         viewport={viewport}
-        audioGraph={audioGraphRef.current}
+        audioGraph={audioGraph}
       />
     </div>
   );
