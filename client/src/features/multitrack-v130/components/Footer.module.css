@@ -1,0 +1,24 @@
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 14px;
+  height: 32px;
+  background: linear-gradient(180deg, var(--p2), var(--p));
+  border-top: 1px solid var(--ln);
+  font-size: 10px;
+  color: var(--dm);
+  font-variant-numeric: tabular-nums;
+}
+
+.footerItem {
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+  align-items: center;
+}
+
+.footerItem strong {
+  color: var(--tx);
+  font-weight: 600;
+}
