@@ -1,0 +1,31 @@
+.clock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timeDisplay {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ac);
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+}
+
+.barBeatTick {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--dm);
+  line-height: 1.2;
+}
+
+.barValue,
+.beatValue,
+.tickValue {
+  color: var(--tx);
+  font-weight: 600;
+  margin-left: 2px;
+}

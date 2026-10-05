@@ -1,0 +1,47 @@
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  width: 236px;
+  padding: 0 8px;
+}
+
+.logo {
+  height: 30px;
+  width: 30px;
+  color: var(--ac);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+
+.brand:hover .logo {
+  transform: scale(1.05);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--ac);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.subtitle {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  color: var(--dm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
