@@ -1,0 +1,57 @@
+.panKnob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: grab;
+  user-select: none;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.panKnob:hover {
+  background: rgba(166, 226, 46, 0.05);
+}
+
+.panKnob.dragging {
+  cursor: grabbing;
+  background: rgba(166, 226, 46, 0.1);
+}
+
+.label {
+  font-size: 10px;
+  color: var(--dm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.knobSvg {
+  transition: opacity 0.2s;
+  filter: drop-shadow(0 0 2px rgba(166, 226, 46, 0.2));
+}
+
+.panKnob:hover .knobSvg {
+  opacity: 0.9;
+  filter: drop-shadow(0 0 4px rgba(166, 226, 46, 0.4));
+}
+
+.panDisplay {
+  display: flex;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--tx);
+  font-variant-numeric: tabular-nums;
+}
+
+.pos {
+  color: var(--ac);
+  font-weight: 600;
+  width: 14px;
+  text-align: center;
+}
+
+.value {
+  color: var(--dm2);
+}
