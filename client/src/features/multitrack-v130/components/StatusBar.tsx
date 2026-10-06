@@ -2,10 +2,10 @@ import React from 'react';
 import styles from './StatusBar.module.css';
 
 interface StatusBarProps {
-  isRendering: boolean;
-  audioEngineStatus: 'online' | 'offline' | 'suspended';
-  midiRoutingValid: boolean;
-  canExport: boolean;
+  isRendering?: boolean;
+  audioEngineStatus?: 'online' | 'offline' | 'suspended';
+  midiRoutingValid?: boolean;
+  canExport?: boolean;
 }
 
 /**

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import styles from './ClockDisplay.module.css';
 
 interface ClockDisplayProps {
-  currentTime: number; // seconds
-  bpm: number;
-  timeSignature: { numerator: number; denominator: number };
+  currentTime?: number; // seconds
+  bpm?: number;
+  timeSignature?: { numerator: number; denominator: number };
 }
 
 /**

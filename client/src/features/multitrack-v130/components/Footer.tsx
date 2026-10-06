@@ -2,11 +2,11 @@ import React from 'react';
 import styles from './Footer.module.css';
 
 interface FooterProps {
-  deviceName: string;
-  sampleRate: number;
-  bitDepth: number;
-  latency: number;
-  bufferSize: number;
+  deviceName?: string;
+  sampleRate?: number;
+  bitDepth?: number;
+  latency?: number;
+  bufferSize?: number;
 }
 
 /**

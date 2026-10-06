@@ -11,6 +11,20 @@ import { useV130PresentationRuntime } from './renderers/useV130PresentationRunti
 import { useV130Viewport } from './layout/useV130Viewport';
 import V130ReferenceDomShell from './reference/V130ReferenceDomShell';
 
+// NEW: Import the generated components
+import {
+  HeaderBrand,
+  ClockDisplay,
+  PanKnob,
+  SendFader,
+  ParameterKnob,
+  PluginEditor,
+  AutomationLane,
+  ArrangeMarkers,
+  StatusBar,
+  Footer,
+} from './components';
+
 import './styles/reference.css';
 import './styles/host.css';
 
@@ -73,11 +87,47 @@ export default function MultitrackV130() {
         viewport.scale
       }
       aria-label="R3 NATIVE Multitrack v1.3.0"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        width: '100vw',
+      }}
     >
-      <V130ReferenceDomShell
-        viewport={viewport}
-        audioGraph={audioGraph}
-      />
+      {/* NEW: Header with branding and clock */}
+      <div
+        style={{
+          borderBottom: '1px solid #16252c',
+          flexShrink: 0,
+        }}
+      >
+        <HeaderBrand />
+        <ClockDisplay />
+      </div>
+
+      {/* Canvas-based render system */}
+      <div
+        style={{
+          flex: 1,
+          overflow: 'auto',
+          minHeight: 0,
+        }}
+      >
+        <V130ReferenceDomShell
+          viewport={viewport}
+          audioGraph={audioGraph}
+        />
+      </div>
+
+      {/* NEW: Status bar with CPU/RAM/Disk metrics */}
+      <div style={{ flexShrink: 0 }}>
+        <StatusBar />
+      </div>
+
+      {/* NEW: Footer with version and links */}
+      <div style={{ flexShrink: 0 }}>
+        <Footer />
+      </div>
     </div>
   );
 }
