@@ -1,0 +1,51 @@
+.parameterKnob {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--p), var(--p2));
+  border: 1px solid var(--ln);
+  cursor: grab;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.parameterKnob:hover {
+  background: linear-gradient(135deg, var(--p2), var(--p3));
+}
+
+.parameterKnob.dragging {
+  background: linear-gradient(135deg, var(--p2), var(--p3));
+  cursor: grabbing;
+  box-shadow: inset 0 0 8px rgba(166, 226, 46, 0.2);
+}
+
+.label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--dm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.knobSvg {
+  user-select: none;
+  transition: filter 0.2s;
+}
+
+.parameterKnob:hover .knobSvg {
+  filter: drop-shadow(0 0 4px rgba(166, 226, 46, 0.3));
+}
+
+.paramDisplay {
+  font-size: 10px;
+  color: var(--tx);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.paramValue {
+  color: var(--ac);
+}

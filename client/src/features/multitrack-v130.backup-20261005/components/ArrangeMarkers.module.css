@@ -1,0 +1,34 @@
+.markersContainer {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(180deg, var(--p3), var(--p2));
+  border-bottom: 1px solid var(--ln);
+  overflow: hidden;
+}
+
+.markerLabel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-left: 3px solid var(--ac);
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  font-size: 9px;
+  color: var(--tx);
+  font-weight: 500;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.markerLabel:hover {
+  background: rgba(166, 226, 46, 0.1);
+}
+
+.markerText {
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}

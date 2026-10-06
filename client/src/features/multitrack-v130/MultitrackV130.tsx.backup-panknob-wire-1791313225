@@ -7,6 +7,7 @@ import {
 import { getAudioGraph } from "@/audio/core/audio-graph";
 import { useAudioGraphState } from './hooks/useAudioGraphState';
 import { useMountPanKnobs } from './hooks/useMountPanKnobs';
+import { useMountPanKnobs } from './hooks/useMountPanKnobs';
 import { useV130Runtime } from "./runtime/useV130Runtime";
 import { useV130CanvasRegistry } from "./renderers/useV130CanvasRegistry";
 import { useV130PresentationRuntime } from "./renderers/useV130PresentationRuntime";

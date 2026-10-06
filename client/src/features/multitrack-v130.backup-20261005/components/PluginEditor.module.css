@@ -1,0 +1,79 @@
+.pluginEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--ln);
+  border-radius: 7px;
+  background: linear-gradient(180deg, var(--p2), var(--p));
+  min-height: 200px;
+}
+
+.empty {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  color: var(--dm);
+}
+
+.empty p {
+  margin: 0;
+  font-size: 11px;
+}
+
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--ln);
+  padding-bottom: 8px;
+}
+
+.pluginName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ac);
+  margin: 0;
+  flex: 1;
+}
+
+.editorHeader .btn {
+  padding: 3px 8px;
+  font-size: 9px;
+}
+
+.editorParams {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 8px;
+}
+
+.editorMeters {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid var(--ln);
+  padding-top: 8px;
+  justify-content: space-around;
+}
+
+.meterGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.meterGroup label {
+  font-size: 8px;
+  color: var(--dm);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.meterDisplay {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ac);
+  font-weight: 600;
+}

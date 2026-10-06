@@ -1,0 +1,63 @@
+.automationLane {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--ln);
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--p), var(--p2));
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gridLine {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  background: var(--ln2);
+  opacity: 0.3;
+}
+
+.gridLine:nth-child(3) {
+  opacity: 0.6;
+}
+
+.curve {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.curve polyline {
+  fill: none;
+  stroke: var(--ac2);
+  stroke-width: 2;
+  opacity: 0.6;
+}
+
+.point {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ac);
+  border: 1px solid var(--ac2);
+  box-shadow: 0 0 4px rgba(166, 226, 46, 0.6);
+  cursor: grab;
+  transform: translate(-50%, 50%);
+  transition: transform 0.1s;
+}
+
+.point:hover {
+  transform: translate(-50%, 50%) scale(1.2);
+  box-shadow: 0 0 8px rgba(166, 226, 46, 0.8);
+}
+
+.point.dragging {
+  cursor: grabbing;
+  transform: translate(-50%, 50%) scale(1.3);
+}

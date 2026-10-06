@@ -5,8 +5,6 @@ import {
 } from "react";
 
 import { getAudioGraph } from "@/audio/core/audio-graph";
-import { useAudioGraphState } from './hooks/useAudioGraphState';
-import { useMountPanKnobs } from './hooks/useMountPanKnobs';
 import { useV130Runtime } from "./runtime/useV130Runtime";
 import { useV130CanvasRegistry } from "./renderers/useV130CanvasRegistry";
 import { useV130PresentationRuntime } from "./renderers/useV130PresentationRuntime";
@@ -46,10 +44,6 @@ export default function MultitrackV130() {
     setAudioGraph(graph);
     (window as any).__audioGraph = graph;
   }, []);
-  // Wire ClockDisplay with live audio + DAW state
-  const audioState = useAudioGraphState();
-  // Mount PanKnobController in mixer strips
-  useMountPanKnobs();
 
   const viewport = useV130Viewport(host);
 
@@ -91,7 +85,7 @@ export default function MultitrackV130() {
         }}
       >
         <HeaderBrand />
-        <ClockDisplay currentTime={audioState.currentTime} bpm={audioState.bpm} timeSignature={{ numerator: audioState.timeSignature[0], denominator: audioState.timeSignature[1] }} />
+        <ClockDisplay playheadPosition={0} tempo={120} format="both" />
       </div>
 
       {/* Canvas-based render system */}
