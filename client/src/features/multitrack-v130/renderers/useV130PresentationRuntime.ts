@@ -906,16 +906,33 @@ function ensureMixer(
         track.color,
       );
 
+      const panAngle = 0; // center
+      const arcTotal = 87.96; // 2πr for r=14, 270° arc
+      const panOffset = arcTotal / 2; // center position
+      const dbValue = (20 * Math.log10(Math.max(track.gain, 0.001))).toFixed(1);
+      const faderPercent = Math.max(3, Math.min(100, track.gain * 100));
       strip.innerHTML =
         `<div class="nm">${track.label}</div>` +
         `<div class="ms">` +
         `<button class="msr m">M</button>` +
         `<button class="msr s">S</button>` +
         `</div>` +
-        `<div class="vmet"><i></i></div>` +
-        `<div class="kn">${Math.round(track.gain * 100)}</div>` +
-        `<div class="fader"><i></i></div>` +
-        `<div class="db">${(20 * Math.log10(Math.max(track.gain, 0.001))).toFixed(1)} dB</div>`;
+        `<div class="kn" style="--kc: #35d6f5">` +
+        `<svg width="36" height="36" viewBox="0 0 36 36">` +
+        `<circle class="kt" cx="18" cy="18" r="14"/>` +
+        `<circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="${arcTotal}" stroke-dashoffset="${panOffset}" transform="rotate(135 18 18)"/>` +
+        `<circle class="kb" cx="18" cy="18" r="9"/>` +
+        `<line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(${panAngle} 18 18)"/>` +
+        `</svg>` +
+        `<b>C</b>` +
+        `<i>Pan</i>` +
+        `</div>` +
+        `<div class="fz">` +
+        `<div class="vm"><i style="transform: scaleY(${faderPercent / 100})"></i></div>` +
+        `<div class="fader"><i style="top: ${100 - faderPercent}%"></i></div>` +
+        `</div>` +
+        `<output>${dbValue} dB</output>` +
+        `<div class="bus">${track.type === 'audio' ? 'Main' : 'Music Bus'}</div>`;
 
       strip
         .querySelector('.nm')
@@ -932,11 +949,20 @@ function ensureMixer(
     document.createElement('div');
 
   master.className = 'strip master';
+  const masterGain = useDAWStore.getState().masterGain;
+  const masterDb = (20 * Math.log10(Math.max(masterGain, 0.001))).toFixed(1);
+  const masterFader = Math.max(3, Math.min(100, masterGain * 100));
   master.innerHTML =
     `<div class="nm">MASTER</div>` +
-    `<div class="vmet"><i></i></div>` +
-    `<div class="fader"><i></i></div>` +
-    `<div class="db">${useDAWStore.getState().masterGain.toFixed(2)}</div>`;
+    `<div class="ms">` +
+    `<button class="msr m">M</button>` +
+    `<button class="msr s">S</button>` +
+    `</div>` +
+    `<div class="fz">` +
+    `<div class="vm"><i style="transform: scaleY(${masterFader / 100})"></i></div>` +
+    `<div class="fader"><i style="top: ${100 - masterFader}%"></i></div>` +
+    `</div>` +
+    `<output>${masterDb} dB</output>`;
 
   box.append(master);
 }
@@ -1782,16 +1808,45 @@ function ensureDspEditor(
 
       if (target === 'master') {
         editor.innerHTML =
-          `<div class="dev"><b>MASTER</b><span>Professional bus processing</span></div>` +
-          `<div class="dev"><span>R3 Compressor</span><span>0.0 dB GR</span></div>` +
-          `<div class="dev"><span>R3 Limiter</span><span>-1.0 dB ceiling</span></div>`;
+          `<div class="list">` +
+          `<div class="dev" aria-selected="true"><span class="no" aria-pressed="true">1</span><span>R3 Compressor</span><span>›</span></div>` +
+          `<div class="dev"><span class="no">2</span><span>R3 Parametric EQ</span><span>›</span></div>` +
+          `<div class="dev"><span class="no">3</span><span>R3 De-Esser</span><span>›</span></div>` +
+          `<div class="dev"><span class="no">4</span><span>R3 Reverb</span><span>›</span></div>` +
+          `<div class="dev"><span class="no">5</span><span>R3 Saturation</span><span>›</span></div>` +
+          `<div class="dev"><span class="no">6</span><span>R3 Limiter</span><span>›</span></div>` +
+          `</div>` +
+          `<div class="ed">` +
+          `<h3>R3 Compressor <small>active on master bus</small>` +
+          `<span class="grm"><span>GR</span><div><i></i></div><output id="dspGr">0.0 dB</output></span></h3>` +
+          `<div class="kg">` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="30" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-60 18 18)"/></svg><b>-18.0</b><i>Threshold</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="55" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-20 18 18)"/></svg><b>4.0:1</b><i>Ratio</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="70" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(20 18 18)"/></svg><b>10.0</b><i>Attack</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="25" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(80 18 18)"/></svg><b>120</b><i>Release</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="60" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-10 18 18)"/></svg><b>+6.0</b><i>Makeup</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="55" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-15 18 18)"/></svg><b>+2.0</b><i>Knee</i></div>` +
+          `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="0" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(135 18 18)"/></svg><b>100%</b><i>Mix</i></div>` +
+          `</div>` +
+          `</div>`;
         return;
       }
 
       editor.innerHTML =
-        `<div class="dev"><b>VOX</b><span>Track DSP target</span></div>` +
-        `<div class="dev"><span>R3 Compressor</span><span>Track insert</span></div>` +
-        `<div class="dev"><span>R3 De-Esser</span><span>Vocal control</span></div>`;
+        `<div class="list">` +
+        `<div class="dev" aria-selected="true"><span class="no" aria-pressed="true">1</span><span>R3 Compressor</span><span>›</span></div>` +
+        `<div class="dev"><span class="no">2</span><span>R3 De-Esser</span><span>›</span></div>` +
+        `</div>` +
+        `<div class="ed">` +
+        `<h3>R3 Compressor <small>track insert</small>` +
+        `<span class="grm"><span>GR</span><div><i></i></div><output>0.0 dB</output></span></h3>` +
+        `<div class="kg">` +
+        `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="30" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-60 18 18)"/></svg><b>-18.0</b><i>Threshold</i></div>` +
+        `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="55" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(-20 18 18)"/></svg><b>4.0:1</b><i>Ratio</i></div>` +
+        `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="70" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(20 18 18)"/></svg><b>10.0</b><i>Attack</i></div>` +
+        `<div class="kn" style="--kc: #35d6f5"><svg width="36" height="36" viewBox="0 0 36 36"><circle class="kt" cx="18" cy="18" r="14"/><circle class="ka" cx="18" cy="18" r="14" stroke-dasharray="87.96" stroke-dashoffset="25" transform="rotate(135 18 18)"/><circle class="kb" cx="18" cy="18" r="9"/><line class="ki" x1="18" y1="18" x2="18" y2="8" transform="rotate(80 18 18)"/></svg><b>120</b><i>Release</i></div>` +
+        `</div>` +
+        `</div>`;
     };
 
   targetButtons.forEach((button) => {
@@ -1891,7 +1946,7 @@ function syncDom(
       );
 
       const meter =
-        strip.querySelector<HTMLElement>('.vmet i');
+        strip.querySelector<HTMLElement>('.vm i');
 
       if (meter) {
         meter.style.transform =
