@@ -90,8 +90,8 @@ export default function MultitrackV130() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
-        width: '100vw',
+        height: '100%', minHeight: 0,
+        width: '100%',
       }}
     >
       {/* NEW: Header with branding and clock */}
