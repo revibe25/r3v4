@@ -960,6 +960,7 @@ function ensureMixer(
     `</div>` +
     `<div class="fz">` +
     `<div class="vm"><i style="transform: scaleY(${masterFader / 100})"></i></div>` +
+    `<div class="kn">${Math.round(masterFader)}</div>` +
     `<div class="fader"><i style="top: ${100 - masterFader}%"></i></div>` +
     `</div>` +
     `<output>${masterDb} dB</output>`;
