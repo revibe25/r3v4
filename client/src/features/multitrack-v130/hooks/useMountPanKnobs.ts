@@ -11,31 +11,46 @@ import { mountPanKnobs, unmountPanKnobs } from '../utils/mountPanKnobs';
 /**
  * Custom hook: auto-mount PanKnobController when mixer strips appear
  * 
- * Watches for #strips container and mounts components when ready.
+ * Polls for #strips + .kn divs, mounts components when ready.
  * Cleans up on unmount.
  */
 export function useMountPanKnobs(): void {
   useEffect(() => {
-    // Find the mixer strips container
-    const stripsContainer = document.querySelector<HTMLElement>('#strips');
+    let isMounted = true;
+    let pollInterval: NodeJS.Timeout | null = null;
 
-    if (!stripsContainer) {
-      // Not ready yet, try again soon
-      const timer = setTimeout(() => {
-        const retryContainer = document.querySelector<HTMLElement>('#strips');
-        if (retryContainer) {
-          mountPanKnobs(retryContainer);
+    const attemptMount = () => {
+      const stripsContainer = document.querySelector<HTMLElement>('#strips');
+      if (!stripsContainer) return false;
+
+      // Wait for .kn divs to exist
+      const knobDivs = stripsContainer.querySelectorAll<HTMLElement>('.kn');
+      if (knobDivs.length === 0) return false;
+
+      // Success: mount components
+      if (isMounted) {
+        mountPanKnobs(stripsContainer);
+        if (pollInterval) clearInterval(pollInterval);
+      }
+      return true;
+    };
+
+    // Try immediately
+    if (!attemptMount()) {
+      // Poll every 50ms for up to 2 seconds
+      let attempts = 0;
+      pollInterval = setInterval(() => {
+        attempts++;
+        if (attemptMount() || attempts > 40) {
+          if (pollInterval) clearInterval(pollInterval);
         }
-      }, 100);
-
-      return () => clearTimeout(timer);
+      }, 50);
     }
 
-    // Container exists, mount components
-    mountPanKnobs(stripsContainer);
-
-    // Cleanup on unmount
+    // Cleanup
     return () => {
+      isMounted = false;
+      if (pollInterval) clearInterval(pollInterval);
       unmountPanKnobs();
     };
   }, []);
