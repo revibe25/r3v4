@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import styles from './ClockDisplay.module.css';
 
+const DEFAULT_TIME_SIGNATURE = { numerator: 4, denominator: 4 };
+
 interface ClockDisplayProps {
   currentTime?: number; // seconds
   bpm?: number;
@@ -15,7 +17,7 @@ interface ClockDisplayProps {
 export const ClockDisplay: React.FC<ClockDisplayProps> = ({ 
   currentTime = 0, 
   bpm = 120, 
-  timeSignature = { numerator: 4, denominator: 4 }
+  timeSignature = DEFAULT_TIME_SIGNATURE
 }) => {
   const [display, setDisplay] = useState({ 
     time: '00:00:00.000', 
