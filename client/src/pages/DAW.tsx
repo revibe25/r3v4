@@ -20,8 +20,6 @@
  */
 
 import { getAudioGraph } from '@/audio/core/audio-graph';
-import { useV130Analyzer } from '../hooks/useV130Analyzer';
-import { MasterAnalyzer } from '../components/MasterAnalyzer';
 import React, {
   useCallback, useEffect, useRef, useState, useMemo, memo,
   useId, useReducer, useLayoutEffect,
@@ -2873,11 +2871,6 @@ export default function DAW() {
             flexDirection: 'column',
           }}
         >
-          <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
-  </div>
-
-        {/* Transport bar */}
-        <TransportBar engine={engine} />
 
         {/* Ticker */}
         <style>{`@keyframes ag-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
@@ -2976,11 +2969,6 @@ export default function DAW() {
                   flexDirection: 'column',
                 }}
               >
-                <MasterAnalyzer audioGraphRef={audioGraphRef} style={{ flex: 1, width: '100%' }} />
-              </div>
-            ) : null}
-
-            <ArrangementView engine={engine} collab={collab} />
 
             {/* MIDI Sequencer — collapsible (Level 2) */}
             {sequencerVisible && (
