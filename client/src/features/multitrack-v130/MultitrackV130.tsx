@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useLayoutEffect,
   useRef,
   useState,
@@ -34,10 +33,6 @@ import "./styles/host.css";
 
 export default function MultitrackV130() {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const handleHostRef = useCallback((node: HTMLDivElement | null) => {
-    hostRef.current = node;
-    setHost(node);
-  }, []);
 
   const [host, setHost] = useState<HTMLDivElement | null>(null);
 
