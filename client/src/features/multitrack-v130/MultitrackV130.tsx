@@ -55,7 +55,6 @@ export default function MultitrackV130() {
   useLayoutEffect(() => {
     if (audioGraph) {
       ensureAudioRunning().catch(err => console.error('Failed to start audio engine:', err));
-      audioGraph.restartMetering();
       
       // Create and inject the resume button into the DOM
       const existingBtn = document.getElementById('audio-resume-btn');
