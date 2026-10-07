@@ -50,6 +50,17 @@ export default function MultitrackV130() {
   useLayoutEffect(() => {
     if (audioGraph) {
       ensureAudioRunning().catch(err => console.error('Failed to start audio engine:', err));
+      
+      // Create and inject the resume button into the DOM
+      const existingBtn = document.getElementById('audio-resume-btn');
+      if (!existingBtn) {
+        const btn = document.createElement('button');
+        btn.id = 'audio-resume-btn';
+        btn.textContent = '🎵 Resume Audio';
+        btn.onclick = () => ensureAudioRunning().catch(err => console.error('Audio resume failed:', err));
+        btn.style.cssText = 'position: fixed; top: 60px; right: 20px; padding: 10px 16px; background-color: #00ff00; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; z-index: 9999; font-size: 12px;';
+        document.body.appendChild(btn);
+      }
     }
   }, [audioGraph]);
   // Wire ClockDisplay with live audio + DAW state
