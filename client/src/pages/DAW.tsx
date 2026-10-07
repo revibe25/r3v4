@@ -2954,25 +2954,6 @@ export default function DAW() {
           <Sidebar collab={collab} />
 
           {/* Center column: arrangement + optional MIDI sequencer */}
-          <div className="flex flex-col flex-1 overflow-hidden">
-            {/* Arrangement view */}
-            {/* Master Analyzer — Real-time spectrum/LUFS/phase visualization */}
-            {audioGraphRef.current ? (
-              <div
-                className="ag-master-analyzer-container"
-                style={{
-                  height: '240px',
-                  flexShrink: 0,
-                  borderBottom: '1px solid var(--ln)',
-                  background: 'linear-gradient(180deg, var(--p2) 0%, var(--p) 100%)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-
-            {/* MIDI Sequencer — collapsible (Level 2) */}
-            {sequencerVisible && (
-              <MidiSequencerPanel seq={seq} />
             )}
 
             {/* Mixer + FX rack */}
