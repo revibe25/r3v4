@@ -2954,25 +2954,6 @@ export default function DAW() {
           <Sidebar collab={collab} />
 
           {/* Center column: arrangement + optional MIDI sequencer */}
-            )}
-
-            {/* Mixer + FX rack */}
-            <MixerStrip engine={engine} />
-          </div>
-
-          {/* Right AI panel — collapsible (L1 + L3) */}
-          {aiPanelVisible && <AIPanel />}
-        </div>
-
-        {/* Status bar */}
-        <div className="flex items-center gap-4 px-4 py-1 border-t border-[var(--t-b2x)] bg-[var(--t-b0x)] flex-none">
-          <StatusBar />
-        </div>
-      </div>
-
-      {/* Overlays */}
-      {showHelp && <KeyboardHelpOverlay onClose={() => setShowHelp(false)} />}
-      {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
     </DAWErrorBoundary>
   );
 }
