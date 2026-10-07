@@ -111,14 +111,17 @@ export default function MultitrackV130() {
         <V130ReferenceDomShell viewport={viewport} audioGraph={audioGraph} />
       </div>
 
-      {/* NEW: Status bar with CPU/RAM/Disk metrics */}
+      {/* NEW: Status bar with render/audio/MIDI/export status */}
+      <div style={{ flexShrink: 0 }}>
+      {/* NEW: Status bar with render/audio/MIDI/export status */}
       <div style={{ flexShrink: 0 }}>
         <StatusBar
-          cpuUsage={0}
-          memoryUsage={0}
-          bufferStatus="ready"
-          renderStatus="idle"
+          isRendering={false}
+          audioEngineStatus="online"
+          midiRoutingValid={true}
+          canExport={true}
         />
+      </div>
       </div>
 
       {/* NEW: Footer with version and links */}
