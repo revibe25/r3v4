@@ -47,7 +47,6 @@ import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
 import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
 
 import PricingPage        from './pages/pricing/PricingPage';
-import DAW                from './pages/DAW';
 import InstrumentPage     from './pages/instrument';
 import VSTPage            from './pages/vst';
 import { LoopStation505 } from './features/loopstation/LoopStation505';
@@ -135,9 +134,6 @@ export default function App() {
                 <ProtectedRoute><InstrumentPage /></ProtectedRoute>
               </Route>
 
-              <Route path="/daw">
-                <ProtectedRoute><DAW /></ProtectedRoute>
-              </Route>
 
               <Route path="/loopstation">
                 <ProtectedRoute><LoopStation505 /></ProtectedRoute>

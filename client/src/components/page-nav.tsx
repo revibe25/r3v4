@@ -64,7 +64,6 @@ const PAGES = [
   { href: '/pricing',    label: 'Pricing',    icon: Tag,     authOnly: false, hideWhenAuthed: false },
   { href: '/auth',       label: 'Login',      icon: LogIn,   authOnly: false, hideWhenAuthed: true  },
   { href: '/instrument', label: 'Instrument', icon: Music,   authOnly: true,  hideWhenAuthed: false },
-  { href: '/daw',        label: 'Studio',     icon: Radio,   authOnly: true,  hideWhenAuthed: false },
   { href: '/loopstation',label: 'Loop',       icon: Repeat2, authOnly: true,  hideWhenAuthed: false },
   { href: '/multitrack', label: 'Multitrack', icon: Layers,  authOnly: true,  hideWhenAuthed: false },
   { href: '/collab',     label: 'Collab',     icon: Users,   authOnly: true,  hideWhenAuthed: false },
