@@ -123,7 +123,7 @@ export default function MultitrackV130() {
 
       {/* NEW: Footer with version and links */}
       <div style={{ flexShrink: 0 }}>
-        <Footer version="1.3.0" buildNumber="v130" />
+        <Footer />
       </div>
     </div>
   );
