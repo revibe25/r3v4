@@ -1307,9 +1307,6 @@ export default function InstrumentPage({
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const k = e.key.toUpperCase();
       const pi = KEYBOARD_SHORTCUTS.pads.indexOf(k);
-      if (pi !== -1 && state.pads[pi]) { e.preventDefault(); triggerPad(pi); return; }
-      const ki = KEYBOARD_SHORTCUTS.keys.indexOf(k);
-      if (ki !== -1 && state.keys[ki]) { e.preventDefault(); triggerKey(ki); return; }
       if (e.ctrlKey || e.metaKey) {
         if (k === 'A') { e.preventDefault(); arm(); }
         else if (k === 'R') { e.preventDefault(); record(); }
