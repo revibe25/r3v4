@@ -4,6 +4,7 @@ import {
   useState,
 } from "react";
 
+import { ensureAudioRunning } from "@/audio/core/audio-context";
 import { getAudioGraph } from "@/audio/core/audio-graph";
 import { useAudioGraphState } from './hooks/useAudioGraphState';
 import { useMountPanKnobs } from './hooks/useMountPanKnobs';
@@ -46,6 +47,11 @@ export default function MultitrackV130() {
     setAudioGraph(graph);
     (window as any).__audioGraph = graph;
   }, []);
+  useLayoutEffect(() => {
+    if (audioGraph) {
+      ensureAudioRunning().catch(err => console.error('Failed to start audio engine:', err));
+    }
+  }, [audioGraph]);
   // Wire ClockDisplay with live audio + DAW state
   const audioState = useAudioGraphState();
   // Mount PanKnobController in mixer strips
