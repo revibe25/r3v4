@@ -77,6 +77,29 @@ export default function MultitrackV130() {
         setHost(node);
       }}
       className="r3-multitrack-v130"
+
+      {/* Audio Engine Resume Button — browser autoplay policy requires user gesture */}
+      <button
+        onClick={() => {
+          ensureAudioRunning().catch(err => console.error('Failed to resume audio:', err));
+        }}
+        style={{
+          position: 'fixed',
+          top: '60px',
+          right: '20px',
+          padding: '10px 16px',
+          backgroundColor: '#00ff00',
+          color: '#000',
+          border: 'none',
+          borderRadius: '4px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          zIndex: 9999,
+          fontSize: '12px',
+        }}
+      >
+        🎵 Resume Audio
+      </button>
       data-v130-root="true"
       data-v130-stage-width={viewport.logicalWidth}
       data-v130-stage-height={viewport.logicalHeight}
