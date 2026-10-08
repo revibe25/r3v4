@@ -356,6 +356,14 @@ export class AudioGraph {
     this.meteringFrameId = requestAnimationFrame(tick);
   }
 
+  restartMetering(): void {
+    if (this._disposed) return;
+    if (this.meteringFrameId !== undefined) {
+      cancelAnimationFrame(this.meteringFrameId);
+    }
+    this.startMetering();
+  }
+
   private computeMeter(): MeterReading {
     this.analyser.getFloatTimeDomainData(
       this.analyserBuffer as Float32Array<ArrayBuffer>

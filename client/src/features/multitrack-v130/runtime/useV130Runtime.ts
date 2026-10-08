@@ -1,3 +1,4 @@
+import { getAudioGraph } from "@/audio/core/audio-graph";
 import { instrumentEngine } from '@/audio/core/instrument-engine';
 import {
   useEffect,
@@ -304,6 +305,7 @@ export function useV130Runtime(
     const onEngine = () => {
       void resumeContext()
         .then(() => {
+          getAudioGraph().restartMetering();
           sync();
         })
         .catch(() => {
