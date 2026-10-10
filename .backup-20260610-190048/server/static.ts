@@ -12,14 +12,9 @@ export function serveStatic(app: express.Application) {
   const distPath = path.resolve(__dirname, "../client/dist");
   
   if (!fs.existsSync(distPath)) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error(
-        `Could not find the build directory: ${distPath}, make sure to build the client first`,
-      );
-    } else {
-      console.warn(`[serveStatic] Skipping: ${distPath} not found (dev mode)`);
-      return;
-    }
+    throw new Error(
+      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+    );
   }
 
   app.use(express.static(distPath));

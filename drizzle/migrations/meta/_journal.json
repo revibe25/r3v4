@@ -8,6 +8,13 @@
       "when": 1790221322672,
       "tag": "0000_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1781302281879,
+      "tag": "0009_lucky_vivisector",
+      "breakpoints": true
     }
   ]
 }

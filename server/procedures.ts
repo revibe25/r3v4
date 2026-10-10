@@ -25,8 +25,6 @@ import { sessionMetricsRouter }  from "./routers/sessionMetrics.router";
 import { adminRouter }         from "./routers/adminRouter";
 import { mixerRouter }         from "./routers/mixer.router";
 import { djRouter }            from "./routers/dj.router";
-// [ASI-AUDIT] Deprecated - use daw.ai.suggestions instead.
-// import { aiMixRouter }         from "./routers/aiMix.router";
 import { projectsRouter }      from "./routers/index";
 import { presetsRouter }       from "./routers/index";
 import { settingsRouter }      from "./routers/index";
@@ -48,7 +46,6 @@ export const appRouter = router({
   subscription: subscriptionRouter,
   mixer:        mixerRouter,
   dj:           djRouter,
-  // aiMix: aiMixRouter, // [ASI-AUDIT] Deprecated
   projects:     projectsRouter,
   presets:      presetsRouter,
   settings:     settingsRouter,

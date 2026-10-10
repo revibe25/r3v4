@@ -85,8 +85,8 @@ if (NODE_ENV === 'production') {
 import { app } from './server/app';
 
 // ── Imports (after env validation) ────────────────────────────────────────────
-import { trpcAuth, requireAuth, requireAdmin } from './server/middleware/auth';
-import { errorHandler } from './server/middleware/errorHandler';
+import { trpcAuth, loopStationAuth } from './server/middleware/auth';
+import { loopStationErrorHandler } from './server/middleware/errorHandler';
 import { stripeWebhookHandler } from './server/routes/stripe-webhook';
 import { appRouter } from './server/procedures';
 import { createContext } from './server/trpc';
@@ -216,12 +216,20 @@ async function main(): Promise<void> {
 
     // ── LoopStation REST routes ────────────────────────────────────────────
     app.use('/api/internal', internalRouter);
-    app.use('/api', loopStationLimiter, requireAuth, loopRoutes);
-    app.use('/api', loopStationLimiter, requireAuth, loopProjectRoutes);
-    app.use('/api', loopStationLimiter, requireAuth, midiRoutes);
+    app.use('/api', loopStationLimiter, loopStationAuth, loopRoutes);
+    app.use('/api', loopStationLimiter, loopStationAuth, loopProjectRoutes);
+    app.use('/api', loopStationLimiter, loopStationAuth, midiRoutes);
 
     // ── Admin stats endpoint ───────────────────────────────────────────────
-    app.get('/api/admin/stats', requireAdmin, async (_req: Request, res: Response) => {
+    app.get('/api/admin/stats', async (req: Request, res: Response) => {
+      const parts = (req.headers['authorization'] ?? '').split(' ');
+      if (parts[0] !== 'Bearer' || !parts[1]) {
+        return res.status(401).json({ error: 'Authentication required.' });
+      }
+      if (!req.user?.email || req.user.email !== process.env.ADMIN_EMAIL) {
+        return res.status(403).json({ error: 'Forbidden.' });
+      }
+      
       let dbStatus = 'ok', dbLatencyMs = 0;
       try {
         const { db } = await import('./server/db/index.js');
@@ -249,18 +257,9 @@ async function main(): Promise<void> {
         ts: new Date().toISOString(),
       });
     });
-    // Only serve static assets in production; Vite handles client in dev
-    if (process.env.NODE_ENV === 'production') {
-      serveStatic(app);
-    }
 
-    const env = process.env.NODE_ENV || 'development';
-    if (env === 'production') {
-      serveStatic(app);
-      serveStatic(app);
-    } else {
-      console.log('[dev] Static serving skipped - client dev server runs on port 5174');
-    }
+    serveStatic(app);
+    serveStatic(app);
     // ── 404 handler ────────────────────────────────────────────────────────
     app.use((_req: Request, res: Response) => {
       res.status(404).json({
@@ -275,7 +274,7 @@ async function main(): Promise<void> {
     // MUST come after all routes and other middleware.
     // This is the ONLY error handler — no duplicates.
     app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
-      errorHandler(err, req, res, _next);
+      loopStationErrorHandler(err, req, res, _next);
     });
 
     // ── Start server ───────────────────────────────────────────────────────
