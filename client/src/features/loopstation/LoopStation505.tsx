@@ -627,7 +627,7 @@ const ClipLauncher: React.FC<{
       </div>
 
       {Array.from({ length: CLIP_ROWS }, (_, row) => (
-        <div key={row} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <div key={row} data-test={`clip-row-${row + 1}`} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
           {tracks.map((tr, col) => {
             const state = clips[row][col];
             const isActive = state === 'playing' || state === 'recording';
@@ -1116,7 +1116,7 @@ export const LoopStation505: React.FC = () => {
             <HWBtn label={state.isPlaying ? '▐▐' : '▶'} sub={state.isPlaying ? 'PAUSE' : 'PLAY'}
               active={state.isPlaying} ac={T.acid} onClick={togglePlayback} disabled={!isReady} w={48} h={40} />
             <HWBtn label="■" sub="STOP" onClick={stopPlayback} disabled={!isReady} w={38} h={40} />
-            <HWBtn label="●" sub="REC" ac={T.red} onClick={recordNextTrack} disabled={!isReady} w={38} h={40} />
+            <HWBtn label="●" sub="REC" ac={T.red} onClick={recordNextTrack} disabled={true} w={38} h={40} />
           </div>
 
           <div style={{ width: 1, height: 46, background: T.b1, flexShrink: 0 }} />
@@ -1179,7 +1179,7 @@ export const LoopStation505: React.FC = () => {
             <span style={{ fontSize: 6, color: T.t5, letterSpacing: '.25em', textAlign: 'center', whiteSpace: 'nowrap' }}>QUANTIZE</span>
             <div style={{ display: 'flex', gap: 2 }}>
               {(['instant', '1/4', '1/2', '1m', '2m', 'free'] as Quant[]).map(q => (
-                <button key={q} onClick={() => { setQuant(q); setQuantMode(q); }} style={{
+                <button key={q} data-test={`quantize-${q}`} onClick={() => { setQuant(q); setQuantMode(q); }} style={{
                   padding: '3px 6px', fontSize: 6, fontFamily: 'IBM Plex Mono,monospace', letterSpacing: '.08em',
                   background: quant === q ? 'rgba(57,255,20,.07)' : T.bg2,
                   border: `1px solid ${quant === q ? T.acid : T.b2}`,
@@ -1498,7 +1498,7 @@ export const LoopStation505: React.FC = () => {
               {/* Scene Bank — 16 scenes (A–P) */}
               <Panel title="SCENE BANK" accent={T.acid} badge="16 SLOTS">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 3 }}>
+                  <div data-test="scene-bank" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 3 }}>
                     {'ABCDEFGHIJKLMNOP'.split('').map((lbl, i) => (
                       <SceneBtn key={lbl} label={lbl}
                         hasData={!!scenes[i]}

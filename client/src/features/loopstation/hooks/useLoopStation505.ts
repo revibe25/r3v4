@@ -112,6 +112,38 @@ export function useLoopStation505() {
 
   const eng = () => engRef.current ?? getLoopEngine();
 
+  // ── Scenes and quantise: wired to the engine's captureScene / recallScene / setQuantMode ──
+  type Engine = ReturnType<typeof getLoopEngine>;
+  type SceneSnap = ReturnType<Engine['captureScene']>;
+  const sceneStoreRef = useRef<Map<number, SceneSnap>>(new Map());
+
+  const saveSceneImpl = useCallback((slot: number) => {
+    try {
+      const label = `S${String(slot + 1).padStart(2, '0')}`;
+      sceneStoreRef.current.set(slot, eng().captureScene(`scene-${slot}`, label));
+    } catch (e) {
+      console.error('saveScene failed', e);
+    }
+  }, []);
+
+  const recallSceneImpl = useCallback((slot: number) => {
+    const snap = sceneStoreRef.current.get(slot);
+    if (!snap) return;
+    try {
+      eng().recallScene(snap);
+    } catch (e) {
+      console.error('recallScene failed', e);
+    }
+  }, []);
+
+  const setQuantModeImpl = useCallback((mode: Parameters<Engine['setQuantMode']>[0]) => {
+    try {
+      eng().setQuantMode(mode);
+    } catch (e) {
+      console.error('setQuantMode failed', e);
+    }
+  }, []);
+
   // ── Transport ──────────────────────────────────────────────────────────────
   const togglePlayback = useCallback(() => {
     eng().toggleTransport();
@@ -217,7 +249,7 @@ export function useLoopStation505() {
     // MIDI
     toggleMidiInput: noop, toggleMidiClock: noop, selectMidiInputByIndex: noop1n,
     // Scenes / swing
-    saveScene: noop1n, recallScene: noop1n,
-    setSwing: noop1n, setTimeSignature: noop1s, setQuantMode: noop1s, setPlaybackMode: noop1s,
+    saveScene: saveSceneImpl, recallScene: recallSceneImpl,
+    setSwing: noop1n, setTimeSignature: noop1s, setQuantMode: setQuantModeImpl, setPlaybackMode: noop1s,
   };
 }
