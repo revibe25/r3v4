@@ -39,7 +39,11 @@ test('quantise offers all six options', async ({ page }) => {
 });
 
 test('clip grid renders its rows', async ({ page }) => {
-  await expect(page.locator('[data-test^="clip-row-"]').first()).toBeVisible();
+  // The grid mounts only in the CLIPS view (view === 'clips'). Select it as a user would.
+  await page.getByRole('button', { name: /CLIPS/ }).click();
+  // CLIP_ROWS = 8; checking the first and last row confirms the whole grid rendered
+  await expect(page.getByTestId('clip-row-1')).toBeVisible();
+  await expect(page.getByTestId('clip-row-8')).toBeVisible();
 });
 
 test('scene bank has 16 slots', async ({ page }) => {
