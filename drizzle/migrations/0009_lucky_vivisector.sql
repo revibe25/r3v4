@@ -1,7 +1,7 @@
-CREATE TYPE "public"."billing_cycle" AS ENUM('monthly', 'annual');--> statement-breakpoint
-CREATE TYPE "public"."subscription_status" AS ENUM('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused');--> statement-breakpoint
-CREATE TYPE "public"."subscription_tier" AS ENUM('explorer', 'creator', 'pro_artist');--> statement-breakpoint
-CREATE TABLE "ai_transition_usage" (
+DO $$ BEGIN CREATE TYPE "public"."billing_cycle" AS ENUM('monthly', 'annual'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."subscription_status" AS ENUM('active', 'trialing', 'past_due', 'canceled', 'incomplete', 'incomplete_expired', 'unpaid', 'paused'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+DO $$ BEGIN CREATE TYPE "public"."subscription_tier" AS ENUM('explorer', 'creator', 'pro_artist'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "ai_transition_usage" (
 	"user_id" text NOT NULL,
 	"usage_date" text NOT NULL,
 	"transition_count" integer DEFAULT 0 NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "ai_transition_usage" (
 	CONSTRAINT "ai_transition_usage_user_id_usage_date_pk" PRIMARY KEY("user_id","usage_date")
 );
 --> statement-breakpoint
-CREATE TABLE "diagnostic_findings" (
+CREATE TABLE IF NOT EXISTS "diagnostic_findings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"severity" text NOT NULL,
 	"category" text NOT NULL,
@@ -23,14 +23,14 @@ CREATE TABLE "diagnostic_findings" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "stripe_events" (
+CREATE TABLE IF NOT EXISTS "stripe_events" (
 	"id" text PRIMARY KEY NOT NULL,
 	"type" text NOT NULL,
 	"processed_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"payload" text NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "subscriptions" (
+CREATE TABLE IF NOT EXISTS "subscriptions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
 	"tier" "subscription_tier" DEFAULT 'explorer' NOT NULL,
@@ -49,11 +49,11 @@ CREATE TABLE "subscriptions" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "trial_started_at" timestamp;--> statement-breakpoint
-ALTER TABLE "users" ADD COLUMN "trial_expires_at" timestamp;--> statement-breakpoint
-CREATE INDEX "ai_transition_usage_user_idx" ON "ai_transition_usage" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "diag_agent_resolved_idx" ON "diagnostic_findings" USING btree ("agent_id","resolved");--> statement-breakpoint
-CREATE INDEX "diag_severity_idx" ON "diagnostic_findings" USING btree ("severity");--> statement-breakpoint
-CREATE INDEX "diag_session_id_idx" ON "diagnostic_findings" USING btree ("session_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "subscriptions_user_id_idx" ON "subscriptions" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "subscriptions_stripe_customer_idx" ON "subscriptions" USING btree ("stripe_customer_id");
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "trial_started_at" timestamp;--> statement-breakpoint
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "trial_expires_at" timestamp;--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "ai_transition_usage_user_idx" ON "ai_transition_usage" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "diag_agent_resolved_idx" ON "diagnostic_findings" USING btree ("agent_id","resolved");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "diag_severity_idx" ON "diagnostic_findings" USING btree ("severity");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "diag_session_id_idx" ON "diagnostic_findings" USING btree ("session_id");--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "subscriptions_user_id_idx" ON "subscriptions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subscriptions_stripe_customer_idx" ON "subscriptions" USING btree ("stripe_customer_id");
