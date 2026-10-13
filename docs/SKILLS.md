@@ -219,11 +219,11 @@ const T = {
   border2:   '#2a2a2a',   // secondary borders
   text:      '#e5e5e5',   // primary text
   dim:       '#555',      // secondary text
-  accent:    '#a3e635',   // acid green — primary accent
+  accent:    '#b8e710',   // lime — primary accent (design authority v5)
   accentDim: 'rgba(163,230,53,0.12)',
   rec:       '#ef4444',   // record red
   recDim:    'rgba(239,68,68,0.15)',
-  font:      '"IBM Plex Mono", "JetBrains Mono", monospace',
+  font:      '"R3 Mono", ui-monospace, monospace',
 }
 ```
 
@@ -233,9 +233,9 @@ Key swaps:
 - `bg-card` → `style={{ background: '#0d0d0d' }}`
 - `bg-background` → `style={{ background: '#0a0a0a' }}`
 - `bg-muted` → `style={{ background: 'rgba(255,255,255,0.04)' }}`
-- `text-blue-400` → `style={{ color: '#a3e635' }}`
-- `rounded-lg` → remove (zero radius is canonical)
-- `from-blue-600 to-blue-700` (play button) → `background: rgba(163,230,53,0.12)`, `border: 1px solid rgba(163,230,53,0.4)`, `color: #a3e635`
+- `text-blue-400` → `style={{ color: '#b8e710' }}`
+- `rounded-lg` → `var(--radius-lg)` (6px; see design authority v5)
+- `from-blue-600 to-blue-700` (play button) → `background: rgba(184,231,16,0.12)`, `border: 1px solid rgba(184,231,16,0.4)`, `color: #b8e710`
 
 ---
 

@@ -196,15 +196,15 @@ Proprietary audio processing pipeline. 6 packages under `packages/`:
 
 ## Design system
 
-Acid-techno. Hard constraints — do not deviate:
+Acid-techno. Design authority: REV30 (v5). Hard constraints — do not deviate:
 
 | Token | Value |
 |---|---|
-| Background | `#060606` |
-| Accent green | `#a3e635` |
+| Background | `#070807` |
+| Accent lime | `#b8e710` (hi `#d6ff5c`) |
 | Accent cyan | `#22d3ee` |
-| Font | IBM Plex Mono |
-| Border radius | `0` (zero — no rounded corners) |
+| Font | R3 Mono (body), R3 Display (headings) |
+| Border radius | `2px` / `4px` / `6px` (`--radius-sm/md/lg`); `50%` for knobs only |
 | Border style | Left acid neon border on active elements |
 
 ---

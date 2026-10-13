@@ -527,3 +527,19 @@ const T = {
 ---
 
 *This PRD must be reviewed alongside `CLAUDE.md`, `SKILLS.md`, and `WIRE.txt` before every feature or patch. No deviations permitted without RFC and maintainer review.*
+
+
+---
+
+## Design authority v5 (supersedes §4.1, §4.2 palette, radius and font)
+
+Decided: REV30 is the design authority. Values are measured from the REV30 build.
+
+| Token | Value | Replaces |
+|---|---|---|
+| Lime (accent) | `#b8e710`, hi `#d6ff5c` | `#a3e635` (T-object), `#bfff00` (`--neon-lime`), `#c8ff00` (`--r3-accent`) |
+| Radius | `2px` / `4px` / `6px` (`--radius-sm/md/lg`); `50%` for knobs | zero radius (§4.2) |
+| Font | `R3 Mono` (body), `R3 Display` (headings), bundled `/fonts/*.woff2` | IBM Plex Mono |
+| Page base | `#070807` | `#060606` |
+
+Migration of existing usages is a separate phase. Open: the cyan accent `#22d3ee` is not covered by this decision.

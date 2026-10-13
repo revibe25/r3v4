@@ -10,6 +10,22 @@
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
 
+/* Bundled R3 fonts (design authority v5). Same declarations as pricing/PricingPage.css. */
+@font-face {
+  font-family: "R3 Mono";
+  src: url("/fonts/r3-mono.woff2") format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "R3 Display";
+  src: url("/fonts/r3-display.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 
 @tailwind base;
 @tailwind components;
