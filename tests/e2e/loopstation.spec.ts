@@ -59,6 +59,13 @@ test('no uncaught page errors on mount', async ({ page }) => {
   await page.waitForTimeout(1500);
   // Errors from the missing API (tRPC requests that fail with an empty body) are expected
   // in UI tests. Anything else is an app bug and should fail the test.
-  const appErrors = pageErrors.filter(m => !m.includes('Unexpected end of JSON input'));
+  // Only the two known API responses are expected in UI tests:
+  //  - the API unreachable (empty body)            -> 'Unexpected end of JSON input'
+  //  - the API up, no session (server/trpc.ts:108) -> 'You must be logged in...'
+  const EXPECTED_API_ERRORS = [
+    'Unexpected end of JSON input',
+    'You must be logged in to access this resource.',
+  ];
+  const appErrors = pageErrors.filter(m => !EXPECTED_API_ERRORS.some(e => m.includes(e)));
   expect(appErrors).toEqual([]);
 });
