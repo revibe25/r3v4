@@ -1,4 +1,3 @@
-// @ts-nocheck
 export type { LoopTrack as ExtendedTrackState } from '../state/initialState';
 // client/src/features/loopstation/hooks/useLoopStation505.ts
 import { useReducer, useCallback, useEffect, useRef, useState } from 'react';
@@ -82,8 +81,8 @@ export function useLoopStation505() {
         dispatch({ type: 'SET_BEAT', beat, bar, subdivision: sub ?? 0 });
       });
       // Transport state
-      eng.on?.('start', () => dispatch({ type: 'SET_PLAYING', playing: true  }));
-      eng.on?.('stop',  () => dispatch({ type: 'SET_PLAYING', playing: false }));
+      eng.on?.('transportStart', () => dispatch({ type: 'SET_PLAYING', playing: true  }));
+      eng.on?.('transportStop',  () => dispatch({ type: 'SET_PLAYING', playing: false }));
       // Hydrate fx state from engine snapshot (fields it exposes)
       const snap = eng.getSnapshot?.();
       if (snap?.fx) {
@@ -151,7 +150,7 @@ export function useLoopStation505() {
   }, []);
 
   const stopPlayback = useCallback(() => {
-    try { eng().stop?.(); } catch {}
+    try { eng().stopTransport(); } catch (e) { console.error('stop failed', e); }
     dispatch({ type: 'SET_PLAYING', playing: false });
   }, []);
 

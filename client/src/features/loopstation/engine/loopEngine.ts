@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ─── RC-505 MkII Loop Engine — ENHANCED v3 ────────────────────────────────────
 // src/features/loopstation/engine/loopEngine.ts
 //
@@ -271,6 +270,7 @@ type EngineListener<K extends keyof EngineEventMap> = (...args: EngineEventMap[K
 type ToneModule = typeof ToneType;
 
 let Tone: ToneModule | null = null;
+let _reverbPreDelaySec: number | null = null;
 
 // ── Internal Helpers ──────────────────────────────────────────────────────────
 
@@ -525,47 +525,47 @@ class LoopEngine {
   async init(): Promise<void> {
     if (this.initialized) return;
     try {
-      _Tone = await import('tone');
-      await _Tone.start();
+      Tone = await import('tone');
+      await Tone.start();
 
-      _Tone.Transport.bpm.value = this._pendingBpm;
+      Tone.Transport.bpm.value = this._pendingBpm;
       this._applySwing();
 
       // ── Master collection bus ────────────────────────────────────────────
-      this.masterBus  = new _Tone.Gain(1);
+      this.masterBus  = new Tone.Gain(1);
 
       // preFXBus — insertion point so multiband can intercept without rewiring
       // the entire chain. masterBus normally connects directly here.
-      this._preFXBus  = new _Tone.Gain(1);
+      this._preFXBus  = new Tone.Gain(1);
       this.masterBus.connect(this._preFXBus);
 
       // ── Global FX serial chain ───────────────────────────────────────────
-      this.globalFilter        = new _Tone.Filter(8000, 'lowpass');
-      this.globalDelay         = new _Tone.FeedbackDelay('8n', 0.3);
+      this.globalFilter        = new Tone.Filter(8000, 'lowpass');
+      this.globalDelay         = new Tone.FeedbackDelay('8n', 0.3);
       this.globalDelay.wet.value = 0;
-      this.globalReverb        = new _Tone.Reverb({ decay: 2.5, wet: 0 });
-      this.globalChorus        = new _Tone.Chorus(2, 2.5, 0.5).start();
+      this.globalReverb        = new Tone.Reverb({ decay: 2.5, wet: 0 });
+      this.globalChorus        = new Tone.Chorus(2, 2.5, 0.5).start();
       this.globalChorus.wet.value = 0;
-      this.globalPhaser        = new _Tone.Phaser({ frequency: 0.5, octaves: 3, baseFrequency: 1000 });
+      this.globalPhaser        = new Tone.Phaser({ frequency: 0.5, octaves: 3, baseFrequency: 1000 });
       this.globalPhaser.wet.value = 0;
-      this.globalSaturator     = new _Tone.Distortion(0);
-      this.globalBitCrusher    = new _Tone.BitCrusher(16);
-      this.globalStereoWidener = new _Tone.StereoWidener(0.5);
+      this.globalSaturator     = new Tone.Distortion(0);
+      this.globalBitCrusher    = new Tone.BitCrusher(16);
+      this.globalStereoWidener = new Tone.StereoWidener(0.5);
 
       await this.globalReverb.ready;
 
       // Sidechain ducking gain — FIX: now wired into chain between
       // globalStereoWidener and masterCompressor. v2 created these nodes
       // but never connected them; the chain was untouched.
-      this.sidechainEnv  = new _Tone.Envelope({ attack: 0.003, decay: 0.1, sustain: 1, release: 0.3 });
-      this.sidechainGain = new _Tone.Gain(1);
+      this.sidechainEnv  = new Tone.Envelope({ attack: 0.003, decay: 0.1, sustain: 1, release: 0.3 });
+      this.sidechainGain = new Tone.Gain(1);
 
       // Master dynamics tail
-      this.masterCompressor = new _Tone.Compressor({ threshold: -18, ratio: 4, attack: 0.003, release: 0.1 });
-      this.masterLimiter    = new _Tone.Limiter(-1);
-      this.masterMeter      = new _Tone.Meter({ normalRange: true });
-      this.masterFft        = new _Tone.Analyser('fft', FFT_SIZE);
-      this.masterAnalyser   = new _Tone.Analyser('waveform', ANALYSER_SIZE);
+      this.masterCompressor = new Tone.Compressor({ threshold: -18, ratio: 4, attack: 0.003, release: 0.1 });
+      this.masterLimiter    = new Tone.Limiter(-1);
+      this.masterMeter      = new Tone.Meter({ normalRange: true });
+      this.masterFft        = new Tone.Analyser('fft', FFT_SIZE);
+      this.masterAnalyser   = new Tone.Analyser('waveform', ANALYSER_SIZE);
 
       // ── Wire master chain ────────────────────────────────────────────────
       // _preFXBus → filter → chorus → phaser → saturator → bitCrusher
@@ -589,11 +589,11 @@ class LoopEngine {
       this.masterLimiter.toDestination();
 
       // ── Metronome ────────────────────────────────────────────────────────
-      this.metronomeClick = new _Tone.MetalSynth({
+      this.metronomeClick = new Tone.MetalSynth({
         frequency: 600, envelope: { attack: 0.001, decay: 0.04, release: 0.01 },
         harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 0.5,
       });
-      this.metronomeAccent = new _Tone.MetalSynth({
+      this.metronomeAccent = new Tone.MetalSynth({
         frequency: 1000, envelope: { attack: 0.001, decay: 0.06, release: 0.01 },
         harmonicity: 8, modulationIndex: 40, resonance: 6000, octaves: 1,
       });
@@ -630,7 +630,7 @@ class LoopEngine {
   // ── Track builder ─────────────────────────────────────────────────────────
 
   private async _buildTrack(i: number): Promise<EngineTrack> {
-    const T = _Tone!;
+    const T = Tone!;
 
     const outputGain    = new T.Gain(1).connect(this.masterBus);
     const panner        = new T.Panner(0).connect(outputGain);
@@ -722,10 +722,10 @@ class LoopEngine {
   // ── LFO init / re-init ────────────────────────────────────────────────────
 
   private _initLFOs(): void {
-    if (!_Tone) return;
+    if (!Tone) return;
     this._lfos.forEach(lfo => {
       if (lfo._lfo) { lfo._lfo.stop(); lfo._lfo.dispose(); }
-      const node = new _Tone.LFO({
+      const node = new Tone.LFO({
         type:      lfo.shape as ToneType.ToneOscillatorType,
         frequency: lfo.rateSynced ? this._lfoSyncFreq(lfo.rateNote) : lfo.rateHz,
         min:       -1, max: 1,
@@ -740,9 +740,9 @@ class LoopEngine {
   }
 
   private _lfoSyncFreq(note: string): number {
-    if (!_Tone) return 1;
+    if (!Tone) return 1;
     try {
-      const seconds = _Tone.Time(note as ToneType.Unit.Time).toSeconds();
+      const seconds = Tone.Time(note as ToneType.Unit.Time).toSeconds();
       return 1 / seconds;
     } catch { return 1; }
   }
@@ -753,7 +753,7 @@ class LoopEngine {
    * creating new ones. v2 leaked one Scale node per call.
    */
   private _wireLFO(lfo: LFOState): void {
-    if (!lfo._lfo || !_Tone) return;
+    if (!lfo._lfo || !Tone) return;
 
     // Dispose old scale nodes for this LFO
     const oldNodes = this._lfoScaleNodes.get(lfo.id) ?? [];
@@ -764,7 +764,7 @@ class LoopEngine {
     const newScaleNodes: ToneType.Scale[] = [];
 
     const connectToParam = (param: ToneType.Param<any>, scale: number) => {
-      const scaleNode = new _Tone.Scale(-scale, scale);
+      const scaleNode = new Tone.Scale(-scale, scale);
       newScaleNodes.push(scaleNode);
       lfo._lfo!.connect(scaleNode);
       scaleNode.connect(param);
@@ -809,11 +809,11 @@ class LoopEngine {
   // ── Beat / Quantize schedulers ────────────────────────────────────────────
 
   private _startBeatScheduler(): void {
-    if (!_Tone) return;
+    if (!Tone) return;
     const [beatsPerBar] = this._parseTimeSignature();
     let beat = 0;
 
-    this._beatScheduleId = _Tone.Transport.scheduleRepeat((time) => {
+    this._beatScheduleId = Tone.Transport.scheduleRepeat((time) => {
       const bar = Math.floor(beat / beatsPerBar);
       const b   = beat % beatsPerBar;
       this._currentBar  = bar;
@@ -832,14 +832,14 @@ class LoopEngine {
   }
 
   private _startQuantizeScheduler(): void {
-    if (!_Tone) return;
+    if (!Tone) return;
     const intervalMap: Record<QuantMode, string> = {
       '1m': '1m', '2m': '2m', '4m': '4m',
       '1/2': '2n', '1/4': '4n', '1/8': '8n',
       'free': '4n', 'instant': '16n',
     };
     const interval = intervalMap[this._quantMode] ?? '1m';
-    this._quantScheduleId = _Tone.Transport.scheduleRepeat(() => {
+    this._quantScheduleId = Tone.Transport.scheduleRepeat(() => {
       this.emit('quantizeTick', this._quantMode);
     }, interval as ToneType.Unit.Time);
   }
@@ -850,9 +850,9 @@ class LoopEngine {
   }
 
   private _applySwing(): void {
-    if (!_Tone) return;
-    _Tone.Transport.swing = this._swingAmount;
-    _Tone.Transport.swingSubdivision = '8n';
+    if (!Tone) return;
+    Tone.Transport.swing = this._swingAmount;
+    Tone.Transport.swingSubdivision = '8n';
   }
 
   // ── MIDI clock ────────────────────────────────────────────────────────────
@@ -878,10 +878,10 @@ class LoopEngine {
   }
 
   setMidiClockOutput(enabled: boolean): void {
-    if (!_Tone || !this._midiOutput) return;
+    if (!Tone || !this._midiOutput) return;
     if (enabled) {
-      this._midiClockScheduleId = _Tone.Transport.scheduleRepeat((time) => {
-        _Tone!.getDraw().schedule(() => {
+      this._midiClockScheduleId = Tone.Transport.scheduleRepeat((time) => {
+        Tone!.getDraw().schedule(() => {
           this._midiOutput?.send([0xF8]);
         }, time);
       }, '32t' as ToneType.Unit.Time);
@@ -889,7 +889,7 @@ class LoopEngine {
       this.emit('midiClockStart');
     } else {
       if (this._midiClockScheduleId >= 0) {
-        _Tone.Transport.clear(this._midiClockScheduleId);
+        Tone.Transport.clear(this._midiClockScheduleId);
         this._midiClockScheduleId = -1;
       }
       this._midiOutput?.send([0xFC]);
@@ -1008,7 +1008,7 @@ class LoopEngine {
 
   startPlayerOnTransport(i: number): void {
     const t = this.track(i, 'startPlayerOnTransport');
-    if (!t || !_Tone || t._playerSynced || !t.player.loaded) return;
+    if (!t || !Tone || t._playerSynced || !t.player.loaded) return;
     this._applyPlaybackMode(t);
     t.player.sync().start(0);
     t._playerSynced = true;
@@ -1029,13 +1029,13 @@ class LoopEngine {
 
   stopPlayerFromTransport(i: number): void {
     const t = this.track(i, 'stopPlayerFromTransport');
-    if (!t || !_Tone || !t._playerSynced) return;
+    if (!t || !Tone || !t._playerSynced) return;
     try { t.player.stop(); t.player.unsync(); } catch { /* ok */ }
     t._playerSynced = false;
   }
 
   private _applyPlaybackMode(t: EngineTrack): void {
-    if (!_Tone) return;
+    if (!Tone) return;
     switch (t.playbackMode) {
       case 'reverse':
         t.player.reverse = true;
@@ -1083,8 +1083,8 @@ class LoopEngine {
     const copy = t.player.buffer.get();
     if (!copy) return;
     if (t._undoStack.length >= UNDO_DEPTH) t._undoStack.shift();
-    if (_Tone) {
-      const buf = new _Tone.ToneAudioBuffer(copy);
+    if (Tone) {
+      const buf = new Tone.ToneAudioBuffer(copy);
       t._undoStack.push(buf);
       this.emit('undoPush', i, t._undoStack.length);
     }
@@ -1345,7 +1345,7 @@ class LoopEngine {
    * at their current gain value during the transition frame.
    */
   enableMultiband(enabled: boolean): void {
-    if (!this.ready('enableMultiband') || !_Tone) return;
+    if (!this.ready('enableMultiband') || !Tone) return;
     if (this._mbEnabled === enabled) return;
     this._mbEnabled = enabled;
     this._mbState.enabled = enabled;
@@ -1355,31 +1355,31 @@ class LoopEngine {
       try { this.masterBus.disconnect(this._preFXBus); } catch { /* ok */ }
 
       // Create crossover network
-      this._mbSumBus   = new _Tone.Gain(1);
+      this._mbSumBus   = new Tone.Gain(1);
       this._mbSumBus.connect(this._preFXBus);
 
       // Low band: LP at lowFreq → compressor → gain trim → sum
-      this._mbLowLP    = new _Tone.Filter(this._mbState.lowFreq, 'lowpass');
-      this._mbLowComp  = new _Tone.Compressor({
+      this._mbLowLP    = new Tone.Filter(this._mbState.lowFreq, 'lowpass');
+      this._mbLowComp  = new Tone.Compressor({
         threshold: this._mbState.low.threshold,
         ratio:     this._mbState.low.ratio,
         attack:    0.003, release: 0.1,
       });
-      this._mbLowGain  = new _Tone.Gain(this._dbToLinear(this._mbState.low.gain));
+      this._mbLowGain  = new Tone.Gain(this._dbToLinear(this._mbState.low.gain));
       this.masterBus.connect(this._mbLowLP);
       this._mbLowLP.connect(this._mbLowComp);
       this._mbLowComp.connect(this._mbLowGain);
       this._mbLowGain.connect(this._mbSumBus);
 
       // Mid band: HP at lowFreq → LP at highFreq → compressor → gain → sum
-      this._mbMidHP    = new _Tone.Filter(this._mbState.lowFreq, 'highpass');
-      this._mbMidLP    = new _Tone.Filter(this._mbState.highFreq, 'lowpass');
-      this._mbMidComp  = new _Tone.Compressor({
+      this._mbMidHP    = new Tone.Filter(this._mbState.lowFreq, 'highpass');
+      this._mbMidLP    = new Tone.Filter(this._mbState.highFreq, 'lowpass');
+      this._mbMidComp  = new Tone.Compressor({
         threshold: this._mbState.mid.threshold,
         ratio:     this._mbState.mid.ratio,
         attack:    0.003, release: 0.1,
       });
-      this._mbMidGain  = new _Tone.Gain(this._dbToLinear(this._mbState.mid.gain));
+      this._mbMidGain  = new Tone.Gain(this._dbToLinear(this._mbState.mid.gain));
       this.masterBus.connect(this._mbMidHP);
       this._mbMidHP.connect(this._mbMidLP);
       this._mbMidLP.connect(this._mbMidComp);
@@ -1387,13 +1387,13 @@ class LoopEngine {
       this._mbMidGain.connect(this._mbSumBus);
 
       // High band: HP at highFreq → compressor → gain → sum
-      this._mbHighHP   = new _Tone.Filter(this._mbState.highFreq, 'highpass');
-      this._mbHighComp = new _Tone.Compressor({
+      this._mbHighHP   = new Tone.Filter(this._mbState.highFreq, 'highpass');
+      this._mbHighComp = new Tone.Compressor({
         threshold: this._mbState.high.threshold,
         ratio:     this._mbState.high.ratio,
         attack:    0.003, release: 0.08,
       });
-      this._mbHighGain = new _Tone.Gain(this._dbToLinear(this._mbState.high.gain));
+      this._mbHighGain = new Tone.Gain(this._dbToLinear(this._mbState.high.gain));
       this.masterBus.connect(this._mbHighHP);
       this._mbHighHP.connect(this._mbHighComp);
       this._mbHighComp.connect(this._mbHighGain);
@@ -1504,7 +1504,7 @@ class LoopEngine {
    * Subsequent calls: only updates parameter values (no rewiring glitch).
    */
   setHarmonicExciter(amount: number, tone: number, drive?: number): void {
-    if (!this.ready('setHarmonicExciter') || !_Tone) return;
+    if (!this.ready('setHarmonicExciter') || !Tone) return;
 
     const wetAmt  = clamp(amount, 0, 1);
     const hpfFreq = clamp(tone, 2000, 12000);
@@ -1514,11 +1514,11 @@ class LoopEngine {
 
     if (!this._exciterEnabled) {
       // First call — create nodes and rewire chain
-      this._exciterHPF     = new _Tone.Filter(hpfFreq, 'highpass');
-      this._exciterSat     = new _Tone.Distortion(satDrive);
-      this._exciterWetGain = new _Tone.Gain(wetAmt);
-      this._exciterDryGain = new _Tone.Gain(1 - wetAmt * 0.5); // partial dry blend
-      this._exciterSumBus  = new _Tone.Gain(1);
+      this._exciterHPF     = new Tone.Filter(hpfFreq, 'highpass');
+      this._exciterSat     = new Tone.Distortion(satDrive);
+      this._exciterWetGain = new Tone.Gain(wetAmt);
+      this._exciterDryGain = new Tone.Gain(1 - wetAmt * 0.5); // partial dry blend
+      this._exciterSumBus  = new Tone.Gain(1);
 
       // Disconnect globalSaturator → globalBitCrusher
       try { this.globalSaturator.disconnect(this.globalBitCrusher); } catch { /* ok */ }
@@ -1553,10 +1553,10 @@ class LoopEngine {
    * Raises wet gain to 0 and dry to 1 (bypass), or restores stored state.
    */
   bypassExciter(bypassed: boolean): void {
-    if (!this.ready('bypassExciter') || !this._exciterEnabled) return;
+    if (!this.ready('bypassExciter') || !Tone || !this._exciterEnabled) return;
     if (bypassed) {
-      if (this._exciterWetGain) this._exciterWetGain.gain.setTargetAtTime(0, ctx.currentTime, 0.015);
-      if (this._exciterDryGain) this._exciterDryGain.gain.setTargetAtTime(1, ctx.currentTime, 0.015);
+      if (this._exciterWetGain) this._exciterWetGain.gain.setTargetAtTime(0, Tone.getContext().currentTime, 0.015);
+      if (this._exciterDryGain) this._exciterDryGain.gain.setTargetAtTime(1, Tone.getContext().currentTime, 0.015);
     } else {
       if (this._exciterWetGain) lerpParam(this._exciterWetGain.gain as any, this._exciterState.amount, 0.05);
       if (this._exciterDryGain) lerpParam(this._exciterDryGain.gain as any, 1 - this._exciterState.amount * 0.5, 0.05);
@@ -1597,7 +1597,7 @@ class LoopEngine {
    * release: time constant in seconds for gain recovery (default 0.15)
    */
   enableSidechain(sourceTrackIndex: number, amount: number, attack = 0.003, release = 0.15): void {
-    if (!this.ready('enableSidechain') || !_Tone) return;
+    if (!this.ready('enableSidechain') || !Tone) return;
     const t = this.tracks[sourceTrackIndex];
     if (!t) { console.warn(`[LoopEngine] enableSidechain: track ${sourceTrackIndex} not found`); return; }
 
@@ -1612,8 +1612,8 @@ class LoopEngine {
 
     // Schedule envelope follower at 16th-note intervals
     // getDraw().schedule() ensures the gain write happens on the audio thread
-    this._sidechainScheduleId = _Tone.Transport.scheduleRepeat((time) => {
-      _Tone!.getDraw().schedule(() => {
+    this._sidechainScheduleId = Tone.Transport.scheduleRepeat((time) => {
+      Tone!.getDraw().schedule(() => {
         const src = this.tracks[this._sidechainSourceIdx];
         if (!src) return;
 
@@ -1631,7 +1631,7 @@ class LoopEngine {
 
         // Gain reduction: 1 = no duck, (1 - amount) = max duck
         const duck = 1 - this._sidechainEnvLevel * this._sidechainAmount;
-        this.sidechainGain.gain.setTargetAtTime(clamp(duck, 0, 1), ctx.currentTime, 0.015);
+        this.sidechainGain.gain.setTargetAtTime(clamp(duck, 0, 1), Tone!.getContext().currentTime, 0.015);
       }, time);
     }, SC_UPDATE_INTERVAL);
 
@@ -1642,8 +1642,8 @@ class LoopEngine {
    * Disable sidechain ducking and restore master gain to unity.
    */
   disableSidechain(): void {
-    if (this._sidechainScheduleId >= 0 && _Tone) {
-      _Tone.Transport.clear(this._sidechainScheduleId);
+    if (this._sidechainScheduleId >= 0 && Tone) {
+      Tone.Transport.clear(this._sidechainScheduleId);
       this._sidechainScheduleId = -1;
     }
     this._sidechainSourceIdx = -1;
@@ -1704,7 +1704,7 @@ class LoopEngine {
    * trackIndex: which track's buffer to freeze (default 0)
    */
   setGranularFreeze(frozen: boolean, trackIndex = 0): void {
-    if (!this.ready('setGranularFreeze') || !_Tone) return;
+    if (!this.ready('setGranularFreeze') || !Tone) return;
     this._granularFrozen       = frozen;
     this._granularSourceTrack  = trackIndex;
     this._grainState.frozen    = frozen;
@@ -1720,14 +1720,14 @@ class LoopEngine {
   }
 
   private _startGrainScheduler(): void {
-    if (!_Tone) return;
+    if (!Tone) return;
     const t = this.tracks[this._granularSourceTrack];
     if (!t?.player.loaded) return;
 
     const dest = this._granularWidener ?? this.masterBus;
 
-    this._granularScheduleId = _Tone.Transport.scheduleRepeat((time) => {
-      if (!_Tone || !this._granularFrozen) return;
+    this._granularScheduleId = Tone.Transport.scheduleRepeat((time) => {
+      if (!Tone || !this._granularFrozen) return;
 
       const src    = this.tracks[this._granularSourceTrack];
       if (!src?.player.loaded) return;
@@ -1742,13 +1742,13 @@ class LoopEngine {
         const maxStart = Math.max(0, dur - gs);
         const startPos = Math.random() * maxStart;
 
-        const grain = new _Tone.Player(buf).connect(dest);
+        const grain = new Tone.Player(buf).connect(dest);
         grain.playbackRate = rate;
 
         // Optional stereo spread per grain
         if (this._grainState.spread > 0) {
           const pan = (Math.random() * 2 - 1) * this._grainState.spread;
-          const panner = new _Tone.Panner(pan).connect(dest);
+          const panner = new Tone.Panner(pan).connect(dest);
           grain.disconnect(dest);
           grain.connect(panner);
           // Dispose panner after grain
@@ -1767,8 +1767,8 @@ class LoopEngine {
   }
 
   private _stopGrainScheduler(): void {
-    if (this._granularScheduleId >= 0 && _Tone) {
-      _Tone.Transport.clear(this._granularScheduleId);
+    if (this._granularScheduleId >= 0 && Tone) {
+      Tone.Transport.clear(this._granularScheduleId);
       this._granularScheduleId = -1;
     }
     // Clean up legacy single player if present
@@ -1797,12 +1797,12 @@ class LoopEngine {
    * Lazily creates a StereoWidener between grains and masterBus.
    */
   setGranularSpread(spread: number): void {
-    if (!this.ready('setGranularSpread') || !_Tone) return;
+    if (!this.ready('setGranularSpread') || !Tone) return;
     const width = clamp(spread, 0, 1);
     this._grainState.spread = width;
 
     if (!this._granularWidener) {
-      this._granularWidener = new _Tone.StereoWidener(width);
+      this._granularWidener = new Tone.StereoWidener(width);
       this._granularWidener.connect(this.masterBus);
     } else {
       (this._granularWidener as any).width.value = width;
@@ -1813,7 +1813,7 @@ class LoopEngine {
 
   async loadClip(trackIndex: number, clipIndex: number, buffer: ToneType.ToneAudioBuffer): Promise<void> {
     const t = this.track(trackIndex, 'loadClip');
-    if (!t || !_Tone) return;
+    if (!t || !Tone) return;
     const clip = t.clips[clipIndex];
     if (!clip) return;
 
@@ -1826,7 +1826,7 @@ class LoopEngine {
     clip.hasContent = true;
     clip.state      = 'loaded';
 
-    const player  = new _Tone.Player(buffer).connect(t.inputGain);
+    const player  = new Tone.Player(buffer).connect(t.inputGain);
     player.loop   = true;
     clip._player  = player;
     clip._synced  = false;
@@ -1834,7 +1834,7 @@ class LoopEngine {
 
   launchClip(trackIndex: number, clipIndex: number): void {
     const t = this.track(trackIndex, 'launchClip');
-    if (!t || !_Tone) return;
+    if (!t || !Tone) return;
     const clip = t.clips[clipIndex];
     if (!clip?.hasContent || !clip._player) return;
 
@@ -1881,10 +1881,10 @@ class LoopEngine {
     pitch:      number;
     variation:  string;
   }): void {
-    if (!_Tone) return;
+    if (!Tone) return;
 
     if (this._beatRepeat._scheduleId >= 0) {
-      _Tone.Transport.clear(this._beatRepeat._scheduleId);
+      Tone.Transport.clear(this._beatRepeat._scheduleId);
       this._beatRepeat._scheduleId = -1;
     }
     Object.assign(this._beatRepeat, config);
@@ -1897,11 +1897,11 @@ class LoopEngine {
     const t = this.track(config.trackIndex);
     if (!t?.player.loaded) return;
 
-    this._beatRepeat._scheduleId = _Tone.Transport.scheduleRepeat((time) => {
+    this._beatRepeat._scheduleId = Tone.Transport.scheduleRepeat((time) => {
       if (Math.random() > config.chance) return;
 
-      const dur  = _Tone!.Time(config.division as ToneType.Unit.Time).toSeconds() * config.length;
-      const frag = new _Tone.Player(t.player.buffer).connect(t.inputGain);
+      const dur  = Tone!.Time(config.division as ToneType.Unit.Time).toSeconds() * config.length;
+      const frag = new Tone.Player(t.player.buffer).connect(t.inputGain);
 
       if (config.variation === 'pitch') {
         frag.playbackRate = Math.pow(2, (Math.floor(Math.random() * 5) - 2) / 12);
@@ -1946,7 +1946,7 @@ class LoopEngine {
     const lfo = this._lfos[id];
     Object.assign(lfo, config);
 
-    if (!_Tone || !lfo._lfo) return;
+    if (!Tone || !lfo._lfo) return;
 
     (lfo._lfo as any).type = lfo.shape as ToneType.ToneOscillatorType;
     lfo._lfo.frequency.value = lfo.rateSynced
@@ -2006,8 +2006,8 @@ class LoopEngine {
 
   setTimeSignature(sig: TimeSignature): void {
     this._timeSignature = sig;
-    if (_Tone && this._beatScheduleId >= 0) {
-      _Tone.Transport.clear(this._beatScheduleId);
+    if (Tone && this._beatScheduleId >= 0) {
+      Tone.Transport.clear(this._beatScheduleId);
       this._startBeatScheduler();
     }
   }
@@ -2019,8 +2019,8 @@ class LoopEngine {
 
   setQuantMode(mode: QuantMode): void {
     this._quantMode = mode;
-    if (_Tone && this._quantScheduleId >= 0) {
-      _Tone.Transport.clear(this._quantScheduleId);
+    if (Tone && this._quantScheduleId >= 0) {
+      Tone.Transport.clear(this._quantScheduleId);
       this._startQuantizeScheduler();
     }
   }
@@ -2040,11 +2040,12 @@ class LoopEngine {
    * Subsequent calls only update delayTime.
    */
   setReverbPreDelay(seconds: number): void {
-    if (!this.ready('setReverbPreDelay') || !_Tone) return;
+    if (!this.ready('setReverbPreDelay') || !Tone) return;
     const delayTime = clamp(seconds, 0, 0.5);
+    _reverbPreDelaySec = delayTime;
 
     if (!this._reverbPreDelayNode) {
-      this._reverbPreDelayNode = new _Tone.Delay(delayTime, 0.5);
+      this._reverbPreDelayNode = new Tone.Delay(delayTime, 0.5);
 
       try { this.globalDelay.disconnect(this.globalReverb); } catch { /* ok */ }
       this.globalDelay.connect(this._reverbPreDelayNode);
@@ -2154,14 +2155,14 @@ class LoopEngine {
   // ── BPM / Tap Tempo ───────────────────────────────────────────────────────
 
   getBpm(): number {
-    return this.initialized && _Tone ? _Tone.Transport.bpm.value : this._pendingBpm;
+    return this.initialized && Tone ? Tone.Transport.bpm.value : this._pendingBpm;
   }
 
   setBpm(bpm: number): void {
     const c = clamp(bpm, 20, 300);
     this._pendingBpm = c;
-    if (this.initialized && _Tone) {
-      _Tone.Transport.bpm.value = c;
+    if (this.initialized && Tone) {
+      Tone.Transport.bpm.value = c;
       this._lfos.forEach(lfo => {
         if (lfo.enabled && lfo.rateSynced && lfo._lfo) {
           lfo._lfo.frequency.value = this._lfoSyncFreq(lfo.rateNote);
@@ -2198,59 +2199,61 @@ class LoopEngine {
   // ── Transport ─────────────────────────────────────────────────────────────
 
   startTransport(): void {
-    if (!this.ready() || !_Tone) return;
-    _Tone.Transport.start();
+    if (!this.ready() || !Tone) return;
+    Tone.Transport.start();
     this.emit('transportStart');
   }
 
   stopTransport(): void {
-    if (!this.ready() || !_Tone) return;
+    if (!this.ready() || !Tone) return;
     if (this._reverbPreDelayNode) {
       try { this._reverbPreDelayNode.dispose(); } catch { /* ok */ }
       this._reverbPreDelayNode = null;
     }
-    _Tone.Transport.stop();
-    _Tone.Transport.position = 0;
+    Tone.Transport.stop();
+    Tone.Transport.position = 0;
+    // disposing the node above removes it from the reverb path; restore the user's setting
+    if (_reverbPreDelaySec !== null) this.setReverbPreDelay(_reverbPreDelaySec);
     this.emit('transportStop');
   }
 
   pauseTransport(): void {
-    if (!this.ready() || !_Tone) return;
-    _Tone.Transport.pause();
+    if (!this.ready() || !Tone) return;
+    Tone.Transport.pause();
     this.emit('transportPause');
   }
 
   toggleTransport(): void {
-    if (!this.ready() || !_Tone) return;
-    if (_Tone.Transport.state === 'started') this.pauseTransport();
+    if (!this.ready() || !Tone) return;
+    if (Tone.Transport.state === 'started') this.pauseTransport();
     else this.startTransport();
   }
 
   getTransportState(): 'started' | 'stopped' | 'paused' {
-    if (!this.initialized || !_Tone) return 'stopped';
-    return _Tone.Transport.state;
+    if (!this.initialized || !Tone) return 'stopped';
+    return Tone.Transport.state;
   }
 
   getTransportPosition(): string {
-    if (!this.initialized || !_Tone) return '0:0:0';
-    return _Tone.Transport.position as string;
+    if (!this.initialized || !Tone) return '0:0:0';
+    return Tone.Transport.position as string;
   }
 
   getTransportSeconds(): number {
-    if (!this.initialized || !_Tone) return 0;
-    return _Tone.Transport.seconds;
+    if (!this.initialized || !Tone) return 0;
+    return Tone.Transport.seconds;
   }
 
   getCurrentBar(): number  { return this._currentBar; }
   getCurrentBeat(): number { return this._currentBeat; }
 
   scheduleRepeat(cb: (time: number) => void, interval: ToneType.Unit.Time): number {
-    if (!this.ready('scheduleRepeat') || !_Tone) return -1;
-    return _Tone.Transport.scheduleRepeat(cb, interval, 0);
+    if (!this.ready('scheduleRepeat') || !Tone) return -1;
+    return Tone.Transport.scheduleRepeat(cb, interval, 0);
   }
 
   clearSchedule(id: number): void {
-    if (id >= 0 && _Tone) _Tone.Transport.clear(id);
+    if (id >= 0 && Tone) Tone.Transport.clear(id);
   }
 
   // ── Scene snapshots ───────────────────────────────────────────────────────
@@ -2395,7 +2398,7 @@ class LoopEngine {
   // ── Guards ────────────────────────────────────────────────────────────────
 
   private ready(caller?: string): boolean {
-    if (!this.initialized || !_Tone) {
+    if (!this.initialized || !Tone) {
       if (caller) console.warn(`[LoopEngine] ${caller}() called before init().`);
       return false;
     }
@@ -2412,7 +2415,7 @@ class LoopEngine {
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   dispose(): void {
-    if (!this.initialized || !_Tone) return;
+    if (!this.initialized || !Tone) return;
 
     cancelAnimationFrame(this._morphRafId);
 
@@ -2421,7 +2424,7 @@ class LoopEngine {
 
     // Beat repeat
     if (this._beatRepeat._scheduleId >= 0)
-      _Tone.Transport.clear(this._beatRepeat._scheduleId);
+      Tone.Transport.clear(this._beatRepeat._scheduleId);
     if (this._beatRepeat._buffer) this._beatRepeat._buffer.dispose();
 
     // Granular
@@ -2434,7 +2437,7 @@ class LoopEngine {
     // Schedules
     [this._beatScheduleId, this._quantScheduleId, this._midiClockScheduleId]
       .filter(id => id >= 0)
-      .forEach(id => _Tone!.Transport.clear(id));
+      .forEach(id => Tone!.Transport.clear(id));
     // MIDI input teardown (added 2026-04-25)
     if (this._midiInput) { this._midiInput.onmidimessage = null; this._midiInput = null; }
     this._midiAccess = null;
@@ -2498,10 +2501,10 @@ class LoopEngine {
      this.masterBus, this.metronomeClick, this.metronomeAccent]
       .forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
 
-    _Tone.Transport.stop();
-    _Tone.Transport.cancel(0);
+    Tone.Transport.stop();
+    Tone.Transport.cancel(0);
     this.initialized     = false;
-    _Tone                = null;
+    Tone                = null;
     LoopEngine._instance = null;
     engine              = null;
     this.emit('disposed');
