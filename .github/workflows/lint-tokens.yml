@@ -1,0 +1,22 @@
+name: Design tokens
+
+# Runs the design-token lint on pull requests. It fails only on violations above the recorded baseline.
+on:
+  pull_request:
+
+jobs:
+  lint-tokens:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm lint:tokens
