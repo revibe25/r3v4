@@ -9,7 +9,7 @@
 
 - [ ] **Apply migration 0005 to Railway production DB**
   ```bash
-  cd ~/Stable && DATABASE_URL="postgresql://postgres:REALPASSWORD@ballast.proxy.rlwy.net:25291/railway" pnpm drizzle-kit migrate
+  cd ~/Stable && DATABASE_URL="$RAILWAY_DATABASE_URL" pnpm drizzle-kit migrate
   ```
   WHY: aiDecisionLog table doesn't exist in Railway production.
   Session summary shows zero acceptance rate. Demo is broken without this.
