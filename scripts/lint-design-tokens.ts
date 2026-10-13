@@ -24,7 +24,7 @@ if (files.length === 0) {
 }
 
 // Token source files may contain raw hex. Only the canonical token module is listed.
-const ALLOWED_HEX_FILES = ["client/src/tokens.ts"];
+const ALLOWED_HEX_FILES: string[] = [];  // tokens.ts removed
 
 const ALLOWED_CSS_VARS = [
   // existing names
@@ -37,10 +37,33 @@ const ALLOWED_CSS_VARS = [
   "--plan-explorer-glow", "--plan-creator-glow", "--plan-pro-artist-glow",
   "--nav-h",
   // design authority v5 (defined in client/src/styles/r3-tokens.css)
-  "--r3-lime", "--r3-lime-hi", "--r3-blue", "--r3-red",
-  "--r3-surface-0", "--r3-surface-1", "--r3-surface-2", "--r3-rim",
-  "--radius-sm", "--radius-md", "--radius-lg",
-  "--r3-font-mono", "--r3-font-display",
+  "--r3-accent-lime",
+  "--r3-accent-lime-alt",
+  "--r3-accent-lime-hi",
+  "--r3-accent-lime-deep",
+  "--r3-accent-lime-ref",
+  "--r3-accent-cyan",
+  "--r3-accent-cyan-alt",
+  "--r3-accent-cyan-hi",
+  "--r3-accent-sky",
+  "--r3-accent-blue",
+  "--r3-accent-red",
+  "--r3-accent-red-alt",
+  "--r3-accent-red-rec",
+  "--r3-accent-coral",
+  "--r3-accent-amber",
+  "--r3-accent-magenta",
+  "--r3-accent-violet",
+  "--r3-accent-green",
+  "--r3-radius-control",
+  "--r3-radius-field",
+  "--r3-radius-panel",
+  "--r3-font-mono",
+  "--r3-font-display",
+  "--r3-instrument-surface-0",
+  "--r3-instrument-surface-1",
+  "--r3-instrument-surface-2",
+  "--r3-instrument-rim",
 ];
 
 const BASELINE_FILE = path.join(process.cwd(), BASELINE_PATH);

@@ -533,13 +533,17 @@ const T = {
 
 ## Design authority v5 (supersedes §4.1, §4.2 palette, radius and font)
 
-Decided: REV30 is the design authority. Values are measured from the REV30 build.
+Decided: REV30 is the design authority for typography, radius and instrument styling. The palette keeps every accent in use, with `#a3e635` as the primary lime. Background and foreground are unchanged.
 
-| Token | Value | Replaces |
+| Token | Value | Notes |
 |---|---|---|
-| Lime (accent) | `#b8e710`, hi `#d6ff5c` | `#a3e635` (T-object), `#bfff00` (`--neon-lime`), `#c8ff00` (`--r3-accent`) |
-| Radius | `2px` / `4px` / `6px` (`--radius-sm/md/lg`); `50%` for knobs | zero radius (§4.2) |
-| Font | `R3 Mono` (body), `R3 Display` (headings), bundled `/fonts/*.woff2` | IBM Plex Mono |
-| Page base | `#070807` | `#060606` |
+| Primary lime | `#a3e635` | accent, unchanged from §4.2 |
+| Accent family | lime, cyan, red, amber, violet, magenta, green, sky, blue, coral | all kept, named in `r3-tokens.css` (`--r3-accent-*`) |
+| Background (dark theme) | `#000000` | surfaces `#0c0c0c`, panels `#050505` |
+| Foreground (dark theme) | `#eaeaea` | |
+| Radius | `2px` / `4px` / `6px` (`--r3-radius-control/field/panel`) | `50%` for knobs |
+| Font | `R3 Mono` (body), `R3 Display` (headings) | bundled `/fonts/*.woff2`; IBM Plex Mono is not loaded |
 
-Migration of existing usages is a separate phase. Open: the cyan accent `#22d3ee` is not covered by this decision.
+The instrument panel surfaces (`#070807`, `#0b0c0a`, `#1d211c`) are a separate instrument namespace, not the page background. The REV30 reference lime `#b8e710` is kept as `--r3-accent-lime-ref`.
+
+Migration of existing usages is a separate phase.

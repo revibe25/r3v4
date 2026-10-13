@@ -33,7 +33,6 @@
  *   Auth   : ProtectedRoute rehydrates JWT from localStorage via initAuth()
  *   Data   : TRPCProvider (React Query) wraps entire tree
  *   Sub    : SubscriptionProvider must be inside TRPCProvider
- *   Tokens : injectTokenCSS() called once on mount (CSS custom properties)
  */
 
 import React, { useEffect } from 'react';
@@ -44,7 +43,6 @@ import { SubscriptionProvider }   from './hooks/useSubscription';
 import { TrialGate }              from './components/TrialGate';
 import { ThemeProvider }          from './components/theme-provider';
 import { PageNav, NAV_HEIGHT_PX } from './components/page-nav';
-import { injectTokenCSS }         from './tokens';          // ← NEW: token bridge
 
 import PricingPage        from './pages/pricing/PricingPage';
 import InstrumentPage     from './pages/instrument';
@@ -75,7 +73,6 @@ export default function App() {
 
   // ── Inject CSS custom properties once on mount ───────────────────────────
   useEffect(() => {
-    injectTokenCSS();
   }, []);
 
   return (

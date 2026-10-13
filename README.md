@@ -200,12 +200,15 @@ Acid-techno. Design authority: REV30 (v5). Hard constraints — do not deviate:
 
 | Token | Value |
 |---|---|
-| Background | `#070807` |
-| Accent lime | `#b8e710` (hi `#d6ff5c`) |
+| Background | `#000000` (dark theme); surfaces `#0c0c0c`, panels `#050505`, borders `#222222` |
+| Foreground | `#eaeaea` |
+| Accent lime | `#a3e635` (primary) |
 | Accent cyan | `#22d3ee` |
 | Font | R3 Mono (body), R3 Display (headings) |
-| Border radius | `2px` / `4px` / `6px` (`--radius-sm/md/lg`); `50%` for knobs only |
+| Border radius | `2px` / `4px` / `6px` (`--r3-radius-control/field/panel`); `50%` for knobs only |
 | Border style | Left acid neon border on active elements |
+
+Accent family (all kept, defined in `client/src/styles/r3-tokens.css`): lime, cyan, red, amber, violet, magenta, green, sky, blue, coral. The primary is `--r3-accent-lime`.
 
 ---
 

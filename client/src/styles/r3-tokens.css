@@ -8,22 +8,39 @@
 
 @layer tokens {
   :root {
-    /* ── Design authority v5 (REV30 reference) ───────────────────────────────
-       Canonical tokens. Phase 1 defines them only; existing usages are migrated
-       in the code-migration phase. Values are measured from the REV30 build.   */
-    --r3-lime:        #b8e710;   /* accent: panel titles, controls, meters */
-    --r3-lime-hi:     #d6ff5c;   /* accent highlight */
-    --r3-blue:        #26c9fb;   /* lane / measure blue (REV30) */
-    --r3-red:         #e62e39;   /* record */
-    --r3-surface-0:   #070807;   /* page base (REV30 --ref-panel-2) */
-    --r3-surface-1:   #0b0c0a;   /* panel header (REV30 --ref-panel) */
-    --r3-surface-2:   #0e100e;   /* panel top */
-    --r3-rim:         #1d211c;   /* borders (REV30 --ref-rim) */
-    --radius-sm:      2px;       /* controls */
-    --radius-md:      4px;       /* buttons, fields */
-    --radius-lg:      6px;       /* panels */
-    --r3-font-mono:   'R3 Mono', ui-monospace, monospace;
-    --r3-font-display:'R3 Display', 'R3 Mono', ui-monospace, monospace;
+    /* ── Design authority v5 (keep-all palette) ──────────────────────────────
+       Canonical tokens. Defined only; existing usages are migrated in Phase 2.
+       Primary accent: lime #a3e635. Every accent in use is kept and named.   */
+    --r3-accent-lime: #a3e635;  /* primary lime (unchanged, most used) */
+    --r3-accent-lime-alt: #a4f422;  /* lime, alternate */
+    --r3-accent-lime-hi: #d6ff5c;  /* lime highlight */
+    --r3-accent-lime-deep: #a6e22e;  /* lime, deep */
+    --r3-accent-lime-ref: #b8e710;  /* REV30 reference lime (instrument reference) */
+    --r3-accent-cyan: #22d3ee;  /* documented cyan */
+    --r3-accent-cyan-alt: #2ee6f2;  /* cyan, alternate */
+    --r3-accent-cyan-hi: #00f5ff;  /* cyan, highlight */
+    --r3-accent-sky: #35d6f5;  /* sky */
+    --r3-accent-blue: #26c9fb;  /* REV30 lane blue */
+    --r3-accent-red: #ef4444;  /* red */
+    --r3-accent-red-alt: #ff3b3b;  /* red, alternate */
+    --r3-accent-red-rec: #e62e39;  /* REV30 record red */
+    --r3-accent-coral: #ff6257;  /* coral */
+    --r3-accent-amber: #f5b83d;  /* amber */
+    --r3-accent-magenta: #e04bfa;  /* magenta */
+    --r3-accent-violet: #a15cff;  /* violet */
+    --r3-accent-green: #84cc16;  /* green */
+
+    --r3-radius-control: 2px;  /* controls */
+    --r3-radius-field: 4px;  /* buttons, fields */
+    --r3-radius-panel: 6px;  /* panels */
+    --r3-font-mono:    'R3 Mono', ui-monospace, monospace;
+    --r3-font-display: 'R3 Display', 'R3 Mono', ui-monospace, monospace;
+
+    --r3-instrument-surface-0: #070807;  /* instrument panel base (not the page background) */
+    --r3-instrument-surface-1: #0b0c0a;  /* instrument panel header */
+    --r3-instrument-surface-2: #0e100e;  /* instrument panel top */
+    --r3-instrument-rim: #1d211c;  /* instrument borders */
+
 
     /* ── R3 Core Surface Ramp (instrument-specific) ──────────────────────── */
     --r3-base:      var(--void, #070807);
