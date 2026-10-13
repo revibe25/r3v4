@@ -1,24 +1,27 @@
 import { test, expect, type Page } from '@playwright/test';
 
-const E2E_USER = {
-  id: 'e2e-user',
-  email: 'e2e@example.com',
-  username: 'e2e_user',
-  tier: 'pro_artist' as const,
-  isAdmin: false,
-};
+// A real test account in the disposable r3_e2e database. Registration is
+// idempotent: 409 means the account already exists, so we just log in.
+const E2E = { username: 'e2e_loopstation', email: 'e2e-loopstation@example.com', password: process.env.E2E_PASSWORD ?? 'e2e-test-password-123' };
+const API = process.env.E2E_API_URL ?? 'http://localhost:3000';
 
-// Seeds the keys authStore reads and answers /api/auth/me locally,
-// so the protected route renders without a running API.
+// Signs in through the real API and seeds the same keys authStore reads.
 async function signIn(page: Page) {
-  await page.addInitScript(({ user }) => {
-    localStorage.setItem('r3_token', 'e2e-token');
+  const reg = await page.request.post(`${API}/api/auth/register`, {
+    data: { email: E2E.email, username: E2E.username, password: E2E.password },
+  });
+  if (reg.status() !== 201 && reg.status() !== 409) {
+    throw new Error(`register failed: ${reg.status()} ${await reg.text()}`);
+  }
+  const login = await page.request.post(`${API}/api/auth/login`, {
+    data: { credential: E2E.username, password: E2E.password },
+  });
+  if (!login.ok()) throw new Error(`login failed: ${login.status()} ${await login.text()}`);
+  const { token, user } = await login.json();
+  await page.addInitScript(({ token, user }) => {
+    localStorage.setItem('r3_token', token);
     localStorage.setItem('r3_user', JSON.stringify(user));
-  }, { user: E2E_USER });
-  await page.route('**/api/auth/me', route =>
-    route.fulfill({ status: 200, contentType: 'application/json',
-      body: JSON.stringify({ user: E2E_USER }) }),
-  );
+  }, { token, user });
 }
 
 const pageErrors: string[] = [];
