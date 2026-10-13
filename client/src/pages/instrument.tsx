@@ -39,6 +39,7 @@ import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
 import { useToast } from '@/hooks/use-toast';
 import { useMidi } from '@/hooks/use-midi';
 import { saveSession } from '@/lib/session-store';
+import { isAudioFile } from '@/lib/audio-file';
 
 interface SessionData {
   bpm: number;
@@ -1429,7 +1430,7 @@ export default function InstrumentPage({
 
   const handleLoadSample = useCallback(async (file: File) => {
     try {
-      if (!file.type.startsWith('audio/')) throw new Error('Please select an audio file');
+      if (!isAudioFile(file)) throw new Error('Please select an audio file');
       if (file.size > 50 * 1024 * 1024) throw new Error('File size exceeds 50MB limit');
       const buffer = await loadSample(file);
       toast({ title: 'Sample Loaded', description: `${file.name} (${(file.size / 1024).toFixed(1)} KB)` });

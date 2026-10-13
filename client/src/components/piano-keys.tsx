@@ -3,6 +3,7 @@
 // Reason: AI prediction overlay + VU zone indicators on key surface
 // Approved: P2 remediation pass — see PRD §4.5 and tools/p2_patch.py
 // ─────────────────────────────────────────────────────────────────────────────
+import { isAudioFile, AUDIO_ACCEPT } from '../lib/audio-file';
 import clsx from "clsx";
 import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import {
@@ -137,7 +138,6 @@ const KEYBOARD_MAP: Record<string, number> = {
 };
 
 const PIANO_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const VALID_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/webm', 'audio/flac'];
 const KEY_COLORS = [
   '#ef4444', 'var(--track-orange)', 'var(--status-warn)', 'var(--amber-500)', 'var(--looper-lime)',
   'var(--accent-green)', 'var(--status-ok)', 'var(--looper-teal)', 'var(--track-cyan)', 'var(--accent-blue)',
@@ -745,7 +745,7 @@ export function PianoKeys({
       const file = event.target.files?.[0];
       if (!file) return;
 
-      if (!VALID_AUDIO_TYPES.includes(file.type)) {
+      if (!isAudioFile(file)) {
         alert('Please select a valid audio file (MP3, WAV, OGG, WEBM, FLAC)');
         return;
       }
@@ -770,6 +770,8 @@ export function PianoKeys({
           });
 
           onAssignSample(keyIndex, buffer, file.name);
+        } else {
+          alert(`Couldn't decode ${file.name}. Try a WAV, MP3, OGG, FLAC or AIFF file.`);
         }
       } catch (error) {
         console.error('Error loading sample:', error);
@@ -789,7 +791,7 @@ export function PianoKeys({
     async (keyIndex: number, e: React.DragEvent) => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      if (!file || !VALID_AUDIO_TYPES.includes(file.type)) {
+      if (!file || !isAudioFile(file)) {
         alert('Please drop a valid audio file');
         return;
       }
@@ -814,6 +816,8 @@ export function PianoKeys({
           });
 
           onAssignSample(keyIndex, buffer, file.name);
+        } else {
+          alert(`Couldn't decode ${file.name}. Try a WAV, MP3, OGG, FLAC or AIFF file.`);
         }
       } catch (error) {
         console.error('Error loading dropped sample:', error);
@@ -1143,7 +1147,7 @@ export function PianoKeys({
                         <input
                           ref={keyToEdit === keyIndex ? fileInputRef : undefined}
                           type="file"
-                          accept={VALID_AUDIO_TYPES.join(',')}
+                          accept={AUDIO_ACCEPT}
                           onChange={(e) => handleFileSelect(keyIndex, e)}
                           className="hidden"
                         />

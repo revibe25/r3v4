@@ -2,6 +2,7 @@
 // ULTRA-ENHANCED VERSION - 10X Professional Features + Complete Optimizations
 // FULLY DEBUGGED AND PRODUCTION READY
 
+import { isAudioFile, AUDIO_ACCEPT } from '../lib/audio-file';
 import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { PAD_KEYS } from '@/audio/core/instrument-engine';
 import { Button } from '@/components/ui/button';
@@ -914,7 +915,7 @@ export function DrumPads({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('audio/')) {
+    if (!isAudioFile(file)) {
       setError({ padIndex: -1, message: 'Please select a valid audio file' });
       return;
     }
@@ -1328,7 +1329,7 @@ export function DrumPads({
     setDragTargetPad(null);
 
     const files = Array.from(e.dataTransfer.files);
-    const audioFile = files.find(f => f.type.startsWith('audio/'));
+    const audioFile = files.find(isAudioFile);
     
     if (!audioFile) {
       setError({ padIndex: -1, message: 'Please drop an audio file' });
@@ -2407,7 +2408,7 @@ export function DrumPads({
             }}
           >
             {/* Hidden file input */}
-            <input ref={fileInputRef} type="file" accept="audio/*" onChange={handleFileChange} className="hidden" disabled={isLoading || disabled} />
+            <input ref={fileInputRef} type="file" accept={AUDIO_ACCEPT} onChange={handleFileChange} className="hidden" disabled={isLoading || disabled} />
 
             {/* Scrollable knob row */}
             <div
