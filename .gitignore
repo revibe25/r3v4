@@ -127,3 +127,7 @@ r3v4-repo-check/
 /pnpm
 /tsc
 backups/
+
+# Playwright output
+playwright-report/
+test-results/
