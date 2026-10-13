@@ -1427,6 +1427,7 @@ export function DrumPads({
             onDrop={(e) => handlePadDrop(e, i)}
           >
             <button
+              data-testid={`pad-${i}`}
               onMouseDown={(e) => handlePadMouseDown(i, e)}
               onMouseUp={() => handlePadMouseUp(i)}
               onMouseLeave={() => handlePadMouseLeave(i)}
