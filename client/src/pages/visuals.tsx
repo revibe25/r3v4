@@ -186,7 +186,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
             gap:           16,
           }}
         >
-          <p style={{ color: '#a3e635', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10, margin: 0 }}>
+          <p style={{ color: 'var(--r3-accent-lime)', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', fontSize: 10, margin: 0 }}>
             Visuals Controls
           </p>
 
@@ -212,7 +212,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
               <span style={labelStyle}>M/S Width</span>
-              <span style={{ color: '#a3e635', fontFamily: '"IBM Plex Mono", monospace', fontSize: 10 }}>{msWidth.toFixed(2)}</span>
+              <span style={{ color: 'var(--r3-accent-lime)', fontFamily: '"IBM Plex Mono", monospace', fontSize: 10 }}>{msWidth.toFixed(2)}</span>
             </div>
             <input
               type="range" min="0" max="2" step="0.01"
@@ -252,7 +252,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 4 }}>
                   <span>Amount</span>
-                  <span style={{ color: '#a3e635' }}>{sc.config.amount.toFixed(2)}</span>
+                  <span style={{ color: 'var(--r3-accent-lime)' }}>{sc.config.amount.toFixed(2)}</span>
                 </div>
                 <input
                   type="range" min="0" max="1" step="0.01"
@@ -270,7 +270,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
               <span style={labelStyle}>IR Reverb</span>
               {ir.loading && <span style={{ fontSize: 9, color: '#555' }}>loading…</span>}
               {ir.error   && <span style={{ fontSize: 9, color: 'var(--status-error-soft)' }} title={ir.error}>error</span>}
-              {ir.loaded  && <span style={{ fontSize: 9, color: '#a3e635' }}>✓ loaded</span>}
+              {ir.loaded  && <span style={{ fontSize: 9, color: 'var(--r3-accent-lime)' }}>✓ loaded</span>}
             </div>
 
             {/* Preset selector */}
@@ -304,7 +304,7 @@ function ControlsOverlay({ colorBase, onColorBaseChange, colorAccent, onColorAcc
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 4 }}>
                   <span>Wet</span>
-                  <span style={{ color: '#a3e635' }}>{ir.wet.toFixed(2)}</span>
+                  <span style={{ color: 'var(--r3-accent-lime)' }}>{ir.wet.toFixed(2)}</span>
                 </div>
                 <input
                   type="range" min="0" max="1" step="0.01"
@@ -356,7 +356,7 @@ export default function VisualsPage() {
         <div style={{ display:'flex', width:'max-content', animation:'ag-scroll 28s linear infinite' }}>
           {['R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System','R3 Native','Web Audio API','Offline-First','MIDI Support','Polyphony','Accessible','MultiTrack DAW','VST System'].map((item, i) => (
             <span key={i} style={{ padding:'0 18px', fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', fontFamily:'"IBM Plex Mono",monospace', color:'#fff', whiteSpace:'nowrap' }}>
-              {item}<span style={{ color:'#a3e635', marginLeft:8 }}>/</span>
+              {item}<span style={{ color:'var(--r3-accent-lime)', marginLeft:8 }}>/</span>
             </span>
           ))}
         </div>

@@ -92,8 +92,8 @@ function VSTMetricsRow({ vstId, metrics }: { vstId:string; metrics:PerformanceMe
         )}
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">CPU</span><span className="text-[10px] font-mono text-[#a3e635]">{metrics.cpuUsage.toFixed(1)}%</span></div><MonoBar value={metrics.cpuUsage} warn={50} danger={80} /></div>
-        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Latency</span><span className="text-[10px] font-mono text-[#a3e635]">{metrics.latency.toFixed(1)} ms</span></div><MonoBar value={metrics.latency} max={50} warn={20} danger={40} /></div>
+        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">CPU</span><span className="text-[10px] font-mono text-[var(--r3-accent-lime)]">{metrics.cpuUsage.toFixed(1)}%</span></div><MonoBar value={metrics.cpuUsage} warn={50} danger={80} /></div>
+        <div><div className="flex justify-between mb-1"><span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Latency</span><span className="text-[10px] font-mono text-[var(--r3-accent-lime)]">{metrics.latency.toFixed(1)} ms</span></div><MonoBar value={metrics.latency} max={50} warn={20} danger={40} /></div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="border border-[var(--t-b2x)] px-3 py-2"><div className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)] mb-1">Proc. Time</div><div className="text-sm font-mono text-[var(--daw-fg)]">{metrics.processingTime.toFixed(2)} ms</div></div>

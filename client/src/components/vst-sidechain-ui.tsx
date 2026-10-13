@@ -15,17 +15,17 @@ const G = "border border-[#a3e635] text-[#a3e635] hover:bg-[#a3e635] hover:text-
 const D = "border border-red-500 text-red-400 hover:bg-red-500 hover:text-[var(--void)] rounded-none font-mono text-xs tracking-widest uppercase transition-colors px-2 py-1.5 flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed";
 
 function MonoSlider(props: React.ComponentProps<typeof Slider>) {
-  return <Slider {...props} className="[&>span:first-child]:bg-[var(--t-b2x)] [&>span:first-child]:rounded-none [&>span>span]:bg-[#a3e635] [&>span>span]:rounded-none [&_[role=slider]]:bg-[#a3e635] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
+  return <Slider {...props} className="[&>span:first-child]:bg-[var(--t-b2x)] [&>span:first-child]:rounded-none [&>span>span]:bg-[var(--r3-accent-lime)] [&>span>span]:rounded-none [&_[role=slider]]:bg-[var(--r3-accent-lime)] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
 }
 
 function MonoSelect({ value, onValueChange, options, placeholder, disabled, className }: { value:string; onValueChange:(v:string)=>void; options:{value:string;label:string}[]; placeholder?:string; disabled?:boolean; className?:string; }) {
   return (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[var(--daw-fg)] font-mono text-xs tracking-wider focus:ring-0 focus:border-[#a3e635] disabled:opacity-40 ${className??''}`}>
+      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[var(--daw-fg)] font-mono text-xs tracking-wider focus:ring-0 focus:border-[var(--r3-accent-lime)] disabled:opacity-40 ${className??''}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="rounded-none border-[#2a2a2a] bg-[#0d0d0d] font-mono text-xs">
-        {options.map(o=><SelectItem key={o.value} value={o.value} className="text-[var(--daw-fg)] tracking-wider focus:bg-[var(--t-b2x)] focus:text-[#a3e635]">{o.label}</SelectItem>)}
+        {options.map(o=><SelectItem key={o.value} value={o.value} className="text-[var(--daw-fg)] tracking-wider focus:bg-[var(--t-b2x)] focus:text-[var(--r3-accent-lime)]">{o.label}</SelectItem>)}
       </SelectContent>
     </Select>
   );
@@ -75,7 +75,7 @@ function ConnectionRow({ connection, router, onRemove }: { connection:any; route
         <div className="flex items-center gap-2">
           <button
             onClick={()=>connection.enabled?router.disableConnection(connection.id):router.enableConnection(connection.id)}
-            className={`text-[10px] tracking-widest uppercase px-2 py-0.5 border rounded-none font-mono transition-colors ${connection.enabled?'border-[#a3e635] bg-[#a3e635] text-[var(--void)]':'border-[#2a2a2a] text-[var(--daw-fg)] hover:border-[#a3e635] hover:text-[#a3e635]'}`}>
+            className={`text-[10px] tracking-widest uppercase px-2 py-0.5 border rounded-none font-mono transition-colors ${connection.enabled?'border-[var(--r3-accent-lime)] bg-[var(--r3-accent-lime)] text-[var(--void)]':'border-[#2a2a2a] text-[var(--daw-fg)] hover:border-[var(--r3-accent-lime)] hover:text-[var(--r3-accent-lime)]'}`}>
             {connection.enabled?'ON':'OFF'}
           </button>
           <button onClick={onRemove} className={D}><Trash2 className="h-3 w-3" /></button>
@@ -84,7 +84,7 @@ function ConnectionRow({ connection, router, onRemove }: { connection:any; route
       <div>
         <div className="flex justify-between items-center mb-1">
           <span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Sidechain Gain</span>
-          <span className="text-xs font-mono text-[#a3e635]">{connection.config.gainCompensation.toFixed(2)}</span>
+          <span className="text-xs font-mono text-[var(--r3-accent-lime)]">{connection.config.gainCompensation.toFixed(2)}</span>
         </div>
         <MonoSlider value={[connection.config.gainCompensation]} min={0} max={2} step={0.01} disabled={!connection.enabled} onValueChange={([v])=>router.setSidechainGain(connection.id,v)} />
       </div>
@@ -92,10 +92,10 @@ function ConnectionRow({ connection, router, onRemove }: { connection:any; route
         <div className="flex items-center gap-2 mb-1">
           <Activity className="h-3 w-3 text-[#555]" />
           <span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Signal</span>
-          <span className="ml-auto text-[10px] font-mono text-[#a3e635]">{(level*100).toFixed(0)}%</span>
+          <span className="ml-auto text-[10px] font-mono text-[var(--r3-accent-lime)]">{(level*100).toFixed(0)}%</span>
         </div>
         <div className="h-1.5 bg-[#0d0d0d] border border-[var(--t-b2x)] overflow-hidden">
-          <div className="h-full bg-[#a3e635] transition-all duration-75" style={{width:`${Math.min(level*100,100)}%`}} />
+          <div className="h-full bg-[var(--r3-accent-lime)] transition-all duration-75" style={{width:`${Math.min(level*100,100)}%`}} />
         </div>
       </div>
     </div>
@@ -123,8 +123,8 @@ function AddSidechainDialog({ channels, router, onClose, onAdd }: { channels:Mix
     <div className="fixed inset-0 bg-background/70 flex items-center justify-center z-50 font-mono">
       <div className="bg-[var(--t-b0x)] border border-[#2a2a2a] w-[480px]">
         <div className="flex items-center justify-between border-b border-[var(--t-b2x)] px-5 py-4">
-          <span className="text-xs tracking-widest uppercase text-[#a3e635]">Add Sidechain Connection</span>
-          <button onClick={onClose} className="text-[var(--daw-fg)] hover:text-[#a3e635] transition-colors"><X className="h-4 w-4" /></button>
+          <span className="text-xs tracking-widest uppercase text-[var(--r3-accent-lime)]">Add Sidechain Connection</span>
+          <button onClick={onClose} className="text-[var(--daw-fg)] hover:text-[var(--r3-accent-lime)] transition-colors"><X className="h-4 w-4" /></button>
         </div>
         <div className="px-5 py-5 space-y-5">
           <div><div className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)] mb-1.5">Source Channel</div><MonoSelect value={sourceId} onValueChange={setSourceId} options={channelOpts} placeholder="Select source..." /></div>
@@ -138,7 +138,7 @@ function AddSidechainDialog({ channels, router, onClose, onAdd }: { channels:Mix
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">Sidechain Gain</span>
-              <span className="text-xs font-mono text-[#a3e635]">{gain.toFixed(2)}</span>
+              <span className="text-xs font-mono text-[var(--r3-accent-lime)]">{gain.toFixed(2)}</span>
             </div>
             <MonoSlider value={[gain]} min={0} max={2} step={0.01} onValueChange={([v])=>setGain(v)} />
           </div>

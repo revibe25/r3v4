@@ -327,10 +327,10 @@ class DAWErrorBoundary extends React.Component<{ children: React.ReactNode }, _D
       <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh',
                     background:'#030303', flexDirection:'column', gap:16,
                     fontFamily:'"IBM Plex Mono",monospace' }}>
-        <span style={{ color:'#ff3b3b', fontSize:11, letterSpacing:'.2em' }}>DAW RENDER ERROR</span>
+        <span style={{ color:'var(--r3-accent-red-alt)', fontSize:11, letterSpacing:'.2em' }}>DAW RENDER ERROR</span>
         <span style={{ color:'#555555', fontSize:9 }}>{this.state.error.message}</span>
         <button onClick={()=>this.setState({error:null})}
-                style={{ marginTop:8, padding:'6px 16px', background:'#a3e635',
+                style={{ marginTop:8, padding:'6px 16px', background:'var(--r3-accent-lime)',
                          border:'none', cursor:'pointer', fontSize:9, letterSpacing:'.2em' }}>
           RESET
         </button>

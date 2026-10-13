@@ -474,7 +474,7 @@ export const HeaderControls = memo(function HeaderControls({
           {/* Session rows */}
           <div className="max-h-40 overflow-y-auto">
             {sessionsError ? (
-              <div className="px-4 py-2 text-[9px]" style={{ color: '#ef4444' }}>
+              <div className="px-4 py-2 text-[9px]" style={{ color: 'var(--r3-accent-red)' }}>
                 Failed to load sessions
               </div>
             ) : filteredSessions.length === 0 ? (

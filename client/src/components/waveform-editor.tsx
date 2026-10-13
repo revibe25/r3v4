@@ -874,7 +874,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
               variant={activeTool === tool ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setActiveTool(tool)}
-              className={`h-7 px-2 text-xs capitalize ${activeTool === tool ? 'bg-[#a3e635] text-black' : ''}`}
+              className={`h-7 px-2 text-xs capitalize ${activeTool === tool ? 'bg-[var(--r3-accent-lime)] text-black' : ''}`}
             >
               {tool === 'select' && <ArrowLeftRight className="w-3 h-3" />}
               {tool === 'razor' && <Scissors className="w-3 h-3" />}
@@ -926,7 +926,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
               variant={viewMode === mode ? 'default' : 'ghost'}
               size="sm"
               onClick={() => setViewMode(mode)}
-              className={`h-7 px-2 text-xs capitalize ${viewMode === mode ? 'bg-[#a3e635] text-black' : ''}`}
+              className={`h-7 px-2 text-xs capitalize ${viewMode === mode ? 'bg-[var(--r3-accent-lime)] text-black' : ''}`}
             >
               {mode}
             </Button>
@@ -979,7 +979,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
             variant={loopEnabled ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setLoopEnabled(prev => !prev)}
-            className={`h-7 px-2 text-xs ${loopEnabled ? 'bg-[#a3e635] text-black' : ''}`}
+            className={`h-7 px-2 text-xs ${loopEnabled ? 'bg-[var(--r3-accent-lime)] text-black' : ''}`}
           >
             Loop {loopEnabled && '✓'}
           </Button>
@@ -1023,7 +1023,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
                 <div className="flex items-center gap-1 px-2 py-1 bg-[var(--dj-surface)] hover:bg-[var(--dj-surface2)] transition-colors">
                   <button
                     onClick={() => updateTrack(track.id, { collapsed: !track.collapsed })}
-                    className="text-[#555] hover:text-[#a3e635]"
+                    className="text-[#555] hover:text-[var(--r3-accent-lime)]"
                   >
                     {track.collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                   </button>
@@ -1037,7 +1037,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
                   <div className="flex items-center gap-0.5">
                     <button
                       onClick={e => { e.stopPropagation(); duplicateTrack(track.id); }}
-                      className="text-[#555] hover:text-[#a3e635] p-0.5"
+                      className="text-[#555] hover:text-[var(--r3-accent-lime)] p-0.5"
                     >
                       <Copy className="w-2.5 h-2.5" />
                     </button>
@@ -1080,7 +1080,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
                       </button>
                       <button
                         onClick={e => { e.stopPropagation(); updateTrack(track.id, { locked: !track.locked }); }}
-                        className="text-[#555] hover:text-[#a3e635] p-0.5"
+                        className="text-[#555] hover:text-[var(--r3-accent-lime)] p-0.5"
                       >
                         {track.locked ? <Lock className="w-2.5 h-2.5" /> : <Unlock className="w-2.5 h-2.5" />}
                       </button>
@@ -1117,7 +1117,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
             {/* Add track button */}
             <button
               onClick={addTrack}
-              className="w-full py-2 text-[10px] text-[#555] hover:text-[#a3e635] hover:bg-[var(--dj-surface2)] transition-colors"
+              className="w-full py-2 text-[10px] text-[#555] hover:text-[var(--r3-accent-lime)] hover:bg-[var(--dj-surface2)] transition-colors"
             >
               + Add Track
             </button>
@@ -1187,7 +1187,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
             <LevelMeter value={rmsLevel * 0.95} peak={peakLevel * 0.97} width={6} height={100} />
           </div>
           <div className="text-center mt-1">
-            <div className={`text-[10px] font-mono font-bold ${peakLevel > 0.9 ? 'text-[var(--signal-clip)]' : 'text-[#a3e635]'}`}>
+            <div className={`text-[10px] font-mono font-bold ${peakLevel > 0.9 ? 'text-[var(--signal-clip)]' : 'text-[var(--r3-accent-lime)]'}`}>
               {toDB(peakLevel)} dB
             </div>
             <div className="text-[8px] text-[#555] font-mono">
@@ -1208,7 +1208,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
           <Button
             variant="ghost" size="sm"
             onClick={() => setPosition(0)}
-            className="h-7 w-7 p-0 text-[#555] hover:text-[#a3e635]"
+            className="h-7 w-7 p-0 text-[#555] hover:text-[var(--r3-accent-lime)]"
           >
             <SkipBack className="w-3.5 h-3.5" />
           </Button>
@@ -1216,7 +1216,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
             variant={transport.isPlaying ? 'default' : 'ghost'}
             size="sm"
             onClick={togglePlay}
-            className={`h-7 w-7 p-0 ${transport.isPlaying ? 'bg-[#a3e635] hover:bg-[#a3e635]' : 'text-[#555] hover:text-[#a3e635]'}`}
+            className={`h-7 w-7 p-0 ${transport.isPlaying ? 'bg-[var(--r3-accent-lime)] hover:bg-[var(--r3-accent-lime)]' : 'text-[#555] hover:text-[var(--r3-accent-lime)]'}`}
           >
             {transport.isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
           </Button>
@@ -1231,7 +1231,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
           </Button>
           <Button
             variant="ghost" size="sm"
-            className="h-7 w-7 p-0 text-[#555] hover:text-[#a3e635]"
+            className="h-7 w-7 p-0 text-[#555] hover:text-[var(--r3-accent-lime)]"
           >
             <SkipForward className="w-3.5 h-3.5" />
           </Button>
@@ -1241,7 +1241,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
         {/* Time display */}
         <div className="bg-background px-2 py-0.5 font-mono flex items-baseline gap-1">
-          <span className="text-[#a3e635] text-sm font-bold tabular-nums">
+          <span className="text-[var(--r3-accent-lime)] text-sm font-bold tabular-nums">
             {Math.floor(transport.position / 60).toString().padStart(2, '0')}:
             {Math.floor(transport.position % 60).toString().padStart(2, '0')}.
             {Math.floor((transport.position % 1) * 100).toString().padStart(2, '0')}
@@ -1269,7 +1269,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
         {/* Loop controls */}
         {loopEnabled && (
-          <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: '#a3e635' }}>
+          <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: 'var(--r3-accent-lime)' }}>
             <span>↻</span>
             <span>{loopStart.toFixed(0)}%</span>
             <ArrowLeftRight className="w-3 h-3" />
@@ -1279,7 +1279,7 @@ export function WaveformEditor({ getWaveformData, isInitialized }: WaveformEdito
 
         {/* Selection info */}
         {selection.active && selection.start !== selection.end && (
-          <div className="text-[10px] text-[#a3e635] font-mono">
+          <div className="text-[10px] text-[var(--r3-accent-lime)] font-mono">
             Sel: {selection.start.toFixed(1)}% → {selection.end.toFixed(1)}%
             ({(selection.end - selection.start).toFixed(1)}%)
           </div>

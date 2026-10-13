@@ -1243,7 +1243,7 @@ export const LoopStation505: React.FC = () => {
           <div style={{ display:"flex", width:"max-content", animation:"ag-scroll 28s linear infinite" }}>
             {["R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System","R3 Native","Web Audio API","Offline-First","MIDI Support","Polyphony","Accessible","MultiTrack DAW","VST System"].map((item, i) => (
               <span key={i} style={{ padding:"0 18px", fontSize:9, letterSpacing:"0.2em", textTransform:"uppercase", fontFamily:"\"IBM Plex Mono\",monospace", color:"#fff", whiteSpace:"nowrap" }}>
-                {item}<span style={{ color:"#a3e635", marginLeft:8 }}>/</span>
+                {item}<span style={{ color:"var(--r3-accent-lime)", marginLeft:8 }}>/</span>
               </span>
             ))}
           </div>

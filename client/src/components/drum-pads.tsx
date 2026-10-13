@@ -1833,7 +1833,7 @@ export function DrumPads({
       </div>
 
       {/* Content area */}
-      <div className="p-2.5 space-y-2.5 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#a3e635 transparent' }}>
+      <div className="p-2.5 space-y-2.5 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--r3-accent-lime) transparent' }}>
         {showSettings && (
           <div
             className="p-2.5 rounded-lg border border-border/40 space-y-2.5 animate-in slide-in-from-top-2"
@@ -2351,7 +2351,7 @@ export function DrumPads({
         >
           <div className="flex items-center gap-2">
             {/* Accent pip */}
-            <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635] shadow-[0_0_6px_#a3e635] shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--r3-accent-lime)] shadow-[0_0_6px_var(--r3-accent-lime)] shrink-0" />
             <span className="text-[9px] font-mono tracking-[0.22em] uppercase text-foreground/60 group-hover:text-foreground/90 transition-colors">
               Pad Controls
             </span>

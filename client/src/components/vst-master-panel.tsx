@@ -76,7 +76,7 @@ function VSTPluginManagerPlaceholder() {
 function LoadingFallback() {
   return (
     <div className="flex items-center justify-center p-8 font-mono">
-      <Loader2 className="animate-spin h-6 w-6 text-[#a3e635] mr-3" />
+      <Loader2 className="animate-spin h-6 w-6 text-[var(--r3-accent-lime)] mr-3" />
       <span className="text-xs tracking-widest text-[var(--text-dim)]">LOADING...</span>
     </div>
   );
@@ -89,7 +89,7 @@ function LoadingFallback() {
 function SectionHeader({ label, sub }: { label: string; sub?: string }) {
   return (
     <div className="mb-4 border-b border-[var(--t-b2x)] pb-3">
-      <h2 className="text-xs font-bold tracking-widest uppercase text-[#a3e635]">
+      <h2 className="text-xs font-bold tracking-widest uppercase text-[var(--r3-accent-lime)]">
         {label}
       </h2>
       {sub && (
@@ -151,8 +151,8 @@ function VSTMasterPanel({
       {/* Loading bar */}
       {loadingProject && (
         <div className="border border-[#a3e635]/20 bg-[#a3e635]/5 px-4 py-3 mb-4 flex items-center gap-3">
-          <Loader2 className="animate-spin h-4 w-4 text-[#a3e635] shrink-0" />
-          <span className="text-xs tracking-widest uppercase text-[#a3e635]">
+          <Loader2 className="animate-spin h-4 w-4 text-[var(--r3-accent-lime)] shrink-0" />
+          <span className="text-xs tracking-widest uppercase text-[var(--r3-accent-lime)]">
             Loading project...
           </span>
         </div>

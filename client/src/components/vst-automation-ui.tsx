@@ -20,23 +20,23 @@ function RowLabel({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between items-center mb-1">
       <span className="text-[10px] tracking-widest uppercase text-[var(--daw-fg)]">{label}</span>
-      <span className="text-xs font-mono text-[#a3e635]">{value}</span>
+      <span className="text-xs font-mono text-[var(--r3-accent-lime)]">{value}</span>
     </div>
   );
 }
 
 function MonoSlider(props: React.ComponentProps<typeof Slider>) {
-  return <Slider {...props} className="[&>span:first-child]:bg-[var(--t-b2x)] [&>span:first-child]:rounded-none [&>span>span]:bg-[#a3e635] [&>span>span]:rounded-none [&_[role=slider]]:bg-[#a3e635] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
+  return <Slider {...props} className="[&>span:first-child]:bg-[var(--t-b2x)] [&>span:first-child]:rounded-none [&>span>span]:bg-[var(--r3-accent-lime)] [&>span>span]:rounded-none [&_[role=slider]]:bg-[var(--r3-accent-lime)] [&_[role=slider]]:border-0 [&_[role=slider]]:rounded-none [&_[role=slider]]:h-3 [&_[role=slider]]:w-1" />;
 }
 
 function MonoSelect({ value, onValueChange, options, placeholder, className }: { value: string; onValueChange: (v: any) => void; options: {value:string;label:string}[]; placeholder?: string; className?: string; }) {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[var(--daw-fg)] font-mono text-xs tracking-wider focus:ring-0 focus:border-[#a3e635] ${className ?? ''}`}>
+      <SelectTrigger className={`rounded-none border-[#2a2a2a] bg-[#0d0d0d] text-[var(--daw-fg)] font-mono text-xs tracking-wider focus:ring-0 focus:border-[var(--r3-accent-lime)] ${className ?? ''}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="rounded-none border-[#2a2a2a] bg-[#0d0d0d] font-mono text-xs">
-        {options.map(o => <SelectItem key={o.value} value={o.value} className="text-[var(--daw-fg)] tracking-wider focus:bg-[var(--t-b2x)] focus:text-[#a3e635]">{o.label}</SelectItem>)}
+        {options.map(o => <SelectItem key={o.value} value={o.value} className="text-[var(--daw-fg)] tracking-wider focus:bg-[var(--t-b2x)] focus:text-[var(--r3-accent-lime)]">{o.label}</SelectItem>)}
       </SelectContent>
     </Select>
   );
@@ -54,7 +54,7 @@ export function VSTAutomationUI({ automationEngine, paramId, paramName, minValue
     <div className="w-full bg-[var(--void)] text-[var(--daw-fg)] font-mono">
       <div className="flex items-center justify-between mb-4 border-b border-[var(--t-b2x)] pb-3">
         <span className="text-xs tracking-widest uppercase text-[var(--daw-fg)]">{paramName} Automation</span>
-        <span className="text-[10px] border border-[#2a2a2a] px-2 py-0.5 text-[#a3e635] tracking-widest">PARAM {paramId}</span>
+        <span className="text-[10px] border border-[#2a2a2a] px-2 py-0.5 text-[var(--r3-accent-lime)] tracking-widest">PARAM {paramId}</span>
       </div>
       <Tabs value={mode} onValueChange={(v: any) => setMode(v)}>
         <TabsList className={`${TL} grid-cols-4`}>

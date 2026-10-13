@@ -176,7 +176,7 @@ export default function NotFound() {
           <div className="r3-404-footer">
             <span className="r3-404-footer-text">Web Audio API · R3 v4</span>
             <span className="r3-404-footer-text">
-              <span style={{ color: '#a3e635', marginRight: 6 }}>■</span>LLPTE ONLINE
+              <span style={{ color: 'var(--r3-accent-lime)', marginRight: 6 }}>■</span>LLPTE ONLINE
             </span>
           </div>
         </div>

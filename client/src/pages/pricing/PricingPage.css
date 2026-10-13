@@ -38,18 +38,18 @@
   --ink-3: #93a2ab;
   --ink-4: #6a7880;
 
-  --lime: #a4f422;
+  --lime: var(--r3-accent-lime-alt);
   --lime-hi: #d2ff5a;
   --lime-lo: #8ee012;
   --lime-ink: #0b1806;
 
   --green: #3df55c;
-  --cyan: #2ee6f2;
-  --violet: #a15cff;
-  --magenta: #e04bfa;
+  --cyan: var(--r3-accent-cyan-alt);
+  --violet: var(--r3-accent-violet);
+  --magenta: var(--r3-accent-magenta);
   --yellow: #f2eb2d;
-  --amber: #f5b83d;
-  --red: #ff6257;
+  --amber: var(--r3-accent-amber);
+  --red: var(--r3-accent-coral);
 
   --steel: #3a4d5f;
   --line: rgba(255, 255, 255, 0.085);

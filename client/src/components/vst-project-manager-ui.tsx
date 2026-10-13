@@ -52,7 +52,7 @@ export function VSTProjectManagerUI({ onSave, onLoad }: ProjectManagerUIProps) {
         <div>
           <label className="block text-[10px] tracking-widest uppercase text-[var(--daw-fg)] mb-1.5">Project Name</label>
           <input value={projectName} onChange={e=>setProjectName(e.target.value)} placeholder="untitled-project" disabled={loading}
-            className="w-full bg-[#0d0d0d] border border-[#2a2a2a] text-[var(--daw-fg)] font-mono text-xs tracking-wider px-3 py-2 focus:outline-none focus:border-[#a3e635] placeholder:text-[var(--dj-dimmer)] disabled:opacity-40 rounded-none" />
+            className="w-full bg-[#0d0d0d] border border-[#2a2a2a] text-[var(--daw-fg)] font-mono text-xs tracking-wider px-3 py-2 focus:outline-none focus:border-[var(--r3-accent-lime)] placeholder:text-[var(--dj-dimmer)] disabled:opacity-40 rounded-none" />
         </div>
         <div className="flex gap-2 flex-wrap">
           <button onClick={handleSave} disabled={loading} className={P}><Save className="h-3 w-3" /> Save to File</button>

@@ -86,7 +86,7 @@ function AuthInput({
           {label}
         </label>
         {error && (
-          <span style={{ fontSize: 8, color: '#ef4444', letterSpacing: '0.1em', marginLeft: 'auto' }}>
+          <span style={{ fontSize: 8, color: 'var(--r3-accent-red)', letterSpacing: '0.1em', marginLeft: 'auto' }}>
             {error}
           </span>
         )}

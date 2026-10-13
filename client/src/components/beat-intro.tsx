@@ -427,11 +427,11 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
         borderLeft:"3px solid #a3e635", paddingLeft:14,
       }}>
         <div>
-          <div style={{ fontSize:8, letterSpacing:"0.4em", color:"#a3e635", textTransform:"uppercase", marginBottom:4 }}>
+          <div style={{ fontSize:8, letterSpacing:"0.4em", color:"var(--r3-accent-lime)", textTransform:"uppercase", marginBottom:4 }}>
             R3 · NATIVE / INTRO SEQUENCE
           </div>
           <div style={{ fontFamily:"'Syne',sans-serif", fontWeight:800, fontSize:24, letterSpacing:"-0.02em", lineHeight:1 }}>
-            BEAT PLAYER <span style={{ color:"#a3e635" }}>/</span> KEY POSITION MONITOR
+            BEAT PLAYER <span style={{ color:"var(--r3-accent-lime)" }}>/</span> KEY POSITION MONITOR
           </div>
         </div>
         <div style={{ textAlign:"right" }}>
@@ -443,7 +443,7 @@ export function BeatIntro({ onTrigger, disabled = false }: BeatIntroProps) {
               boxShadow: playing ? "0 0 8px #a3e635" : "none",
               animation: playing ? "blink 1s step-end infinite" : "none",
             }} />
-            <span style={{ fontSize:9, letterSpacing:"0.2em", color: playing ? "#a3e635" : "var(--dj-dimmer)", textTransform:"uppercase" }}>
+            <span style={{ fontSize:9, letterSpacing:"0.2em", color: playing ? "var(--r3-accent-lime)" : "var(--dj-dimmer)", textTransform:"uppercase" }}>
               {playing ? "LIVE" : "STANDBY"}
             </span>
           </div>

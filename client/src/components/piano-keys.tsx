@@ -1068,7 +1068,7 @@ export function PianoKeys({
               <div className="flex items-center gap-1.5 flex-1">
                 {detectedChord ? (
                   <span className="text-sm font-extrabold px-2 py-0.5 rounded"
-                    style={{ background: 'rgba(163,230,53,0.12)', color: '#a3e635', border: '1px solid rgba(163,230,53,0.3)' }}>
+                    style={{ background: 'rgba(163,230,53,0.12)', color: 'var(--r3-accent-lime)', border: '1px solid rgba(163,230,53,0.3)' }}>
                     {detectedChord}
                   </span>
                 ) : (

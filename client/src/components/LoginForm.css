@@ -59,7 +59,7 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #a3e635;
+  border-color: var(--r3-accent-lime);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -110,7 +110,7 @@
 }
 
 .login-footer a {
-  color: #a3e635;
+  color: var(--r3-accent-lime);
   text-decoration: none;
   transition: all 0.2s;
   margin: 0 0.25rem;
