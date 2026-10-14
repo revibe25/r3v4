@@ -389,8 +389,8 @@ export const HeaderControls = memo(function HeaderControls({
           </DropdownMenu>
         </div>
 
-        {/* ── Session controls (pushed to right) ───────────────────────────── */}
-        <div className="flex items-center gap-2 px-4 py-2 ml-auto">
+        {/* ── Session controls ───────────────────────────── */}
+        <div className="flex items-center gap-2 px-4 py-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <BarButton onClick={onSave}>
