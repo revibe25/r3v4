@@ -109,14 +109,6 @@ const STYLES = `
 .ag-header { border-bottom: 3px solid var(--ag-border); position: relative; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,.6); }
 .ag-header-top { display: flex; align-items: stretch; border-bottom: 1px solid var(--ag-border); }
 
-.ag-ghost-bpm {
-  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(80px,12vw,140px);
-  color: transparent; -webkit-text-stroke: 1px rgba(163,230,53,.055);
-  letter-spacing: -.04em; pointer-events: none; user-select: none; z-index: 0;
-}
-
 .ag-wordmark-block {
   padding: 14px 24px 12px; border-right: 1px solid var(--ag-border);
   display: flex; flex-direction: column; justify-content: center;
@@ -158,11 +150,12 @@ const STYLES = `
   text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg);
 }
 .ag-bpm-number {
-  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 40px;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 48px;
   letter-spacing: -.04em; line-height: 1;
   background: linear-gradient(#e2ff8a 0%, #b8e710 45%, #7ea214 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
+@media (max-width: 1400px) { .ag-bpm-number { font-size: 40px; } }
 
 .ag-controls-block {
   flex: 1; padding: 12px 20px;
@@ -1514,10 +1507,6 @@ export default function InstrumentPage({
                   title="Tap Tempo (tap 2–8× to set BPM)"
                 >TAP</button>
               </div>
-
-              <span className="ag-ghost-bpm" aria-hidden="true">
-                {isInitialized ? state.bpm : '120'}
-              </span>
 
               <div className="ag-controls-block">
                 <TransportControls
