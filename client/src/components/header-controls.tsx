@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { useLocation } from 'wouter';
-import { Moon, Sun, Music, Clock, Palette, Save, FolderOpen, Upload } from 'lucide-react';
+import { Music, Clock, Save, FolderOpen, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Session } from '@shared/schema';
 
@@ -26,23 +26,6 @@ interface HeaderControlsProps {
   onLoad: (json: string) => void;
   getSessionData: () => any;
 }
-
-// ─── Theme config ──────────────────────────────────────────────────────────────
-const THEME_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  dark: Moon, light: Sun, acid: Palette, neon: Palette,
-  chrome: Palette, forest: Palette, sunset: Palette, aurora: Palette,
-};
-
-const THEMES: Record<string, { label: string; description: string }> = {
-  dark:    { label: 'Dark',    description: 'Classic dark theme'       },
-  light:   { label: 'Light',   description: 'Clean light theme'        },
-  acid:    { label: 'Acid',    description: 'Acid lime — DAW core'     },
-  neon:    { label: 'Neon',    description: 'Cyan neon — high contrast' },
-  chrome:  { label: 'Chrome',  description: 'Polished chrome finish'   },
-  forest:  { label: 'Forest',  description: 'Natural forest green'     },
-  sunset:  { label: 'Sunset',  description: 'Warm sunset tones'        },
-  aurora:  { label: 'Aurora',  description: 'Northern lights palette'  },
-};
 
 // ─── Design tokens — mirrors waveform-editor.tsx exactly ──────────────────────
 const S = {
