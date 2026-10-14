@@ -67,7 +67,6 @@ const PAGES = [
   { href: '/loopstation',label: 'Loop',       icon: Repeat2, authOnly: true,  hideWhenAuthed: false },
   { href: '/multitrack', label: 'Multitrack', icon: Layers,  authOnly: true,  hideWhenAuthed: false },
   { href: '/collab',     label: 'Collab',     icon: Users,   authOnly: true,  hideWhenAuthed: false },
-  { href: '/vst',        label: 'VST',        icon: Plug,    authOnly: true,  hideWhenAuthed: false },
 ] as const;
 
 // ── Component ─────────────────────────────────────────────────────────────────

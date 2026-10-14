@@ -31,7 +31,7 @@ import { DJControls } from '@/components/dj-controls';
 import { TransportControls } from '@/components/transport-controls';
 import { AudioVisualizer } from '@/components/audio-visualizer';
 
-import { VSTBrowser } from '@/components/vst-browser';
+import { VSTModule } from '@/pages/vst';
 import type { VSTPluginInfo } from '@/audio/fx/vst-scanner';
 import { HeaderControls } from '@/components/header-controls';
 import { CollapsibleFXPanel } from '@/components/collapsible-fx-panel';
@@ -1565,7 +1565,7 @@ export default function InstrumentPage({
                   body: <Suspense fallback={<div style={{padding:'20px',color:'var(--ag-mid)',fontSize:10,letterSpacing:'.15em',fontFamily:"'IBM Plex Mono',monospace"}}>LOADING...</div>}><WaveformEditor getWaveformData={getWaveformData} isInitialized={isInitialized} /></Suspense> },
                 { num: '03B', title: 'VST Browser', maxHeight: 400,   icon: <Music2 className="h-4 w-4" />,  open: false,
                   body: (
-                    <VSTBrowser
+                    <VSTModule
                       onPluginSelect={(plugin: VSTPluginInfo) => {
                         toast({ title: 'Plugin Selected', description: `${plugin.name} by ${plugin.vendor}` });
                       }}

@@ -213,6 +213,20 @@ function LLPTECallout() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
+export function VSTModule({ onPluginSelect }: { onPluginSelect: (plugin: VSTPluginInfo) => void }) {
+  return (
+    <>
+      <NonGoalBanner />
+      <SectionHeader num="01 —" label="FX Chain Status" tag="LLPTE WIRED" />
+      <FxChainStatusGrid />
+      <div style={{ border: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,0,0,0)', borderRadius: 2 }}>
+        <VSTBrowser onPluginSelect={onPluginSelect} channelId="master" showFXChain={true} />
+      </div>
+      <LLPTECallout />
+    </>
+  );
+}
+
 export default function VSTPage() {
   const [selectedPlugin, setSelectedPlugin] = useState<VSTPluginInfo | null>(null);
 
@@ -284,20 +298,7 @@ export default function VSTPage() {
       {/* Scrollable body */}
       <div style={{ flex: 1, overflow: 'auto', padding: '20px 24px' }}>
 
-        <NonGoalBanner />
-
-        <SectionHeader num="01 —" label="FX Chain Status" tag="LLPTE WIRED" />
-        <FxChainStatusGrid />
-
-        <div style={{ border: '1px solid rgba(255,255,255,0.04)', background: 'rgba(0,0,0,0)', borderRadius: 2 }}>
-          <VSTBrowser
-            onPluginSelect={handlePluginSelect}
-            channelId="master"
-            showFXChain={true}
-          />
-        </div>
-
-        <LLPTECallout />
+        <VSTModule onPluginSelect={handlePluginSelect} />
 
         {/* Footer metadata row */}
         <div style={{
