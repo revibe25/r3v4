@@ -1576,7 +1576,7 @@ export default function InstrumentPage({
               ].map(({ num, title, icon, open, body, maxHeight }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
-                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
+                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="instrument" scrollable={true} maxHeight={maxHeight ?? 360}>
                     {body}
                   </CollapsibleFXPanel>
                 </div>
@@ -1604,7 +1604,7 @@ export default function InstrumentPage({
               ].map(({ num, title, icon, open, body, maxHeight }) => (
                 <div key={num} className="ag-panel">
                   <span className="ag-panel-ghost" aria-hidden="true">{num}</span>
-                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="default" scrollable={true} maxHeight={maxHeight ?? 360}>
+                  <CollapsibleFXPanel title={title} icon={icon} defaultOpen={open} variant="instrument" scrollable={true} maxHeight={maxHeight ?? 360}>
                     {body}
                   </CollapsibleFXPanel>
                 </div>

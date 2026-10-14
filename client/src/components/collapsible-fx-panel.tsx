@@ -27,7 +27,7 @@ interface CollapsibleFXPanelProps {
   /** Whether panel is open by default */
   defaultOpen?: boolean;
   /** Visual style variant */
-  variant?: 'default' | 'compact' | 'minimal';
+  variant?: 'default' | 'compact' | 'minimal' | 'instrument';
   /** Additional CSS classes */
   className?: string;
   /** Max height before panel content scrolls independently */
@@ -101,6 +101,12 @@ export const CollapsibleFXPanel = ({
       container: 'border-b border-border/30',
       header: 'px-2 py-2',
       content: 'px-2 pb-2 pt-1',
+    },
+    // instrument: 42 px header standard (11 px + 20 px label + 11 px = 42 px)
+    instrument: {
+      container: 'bg-card/50 backdrop-blur-sm border border-border rounded-lg',
+      header: 'px-4 pt-[10px] pb-[11px]',
+      content: 'px-4 pb-4 pt-2',
     },
   };
 
