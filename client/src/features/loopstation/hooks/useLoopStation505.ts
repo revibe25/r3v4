@@ -115,7 +115,12 @@ export function useLoopStation505() {
   // is set only after the engine's init() resolves.
   const initAudio = useCallback(async () => {
     try {
-      await getLoopEngine().init();
+      // Race init() against a timeout: a hang must surface as an error, not a silent page.
+      await Promise.race([
+        getLoopEngine().init(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('engine init timed out after 15s')), 15_000)),
+      ]);
       setIsError(false);
       setErrorMsg('');
       setIsReady(true);
