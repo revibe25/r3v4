@@ -411,9 +411,7 @@ export const HeaderControls = memo(function HeaderControls({
               >
                 <FolderOpen className="w-3 h-3" />
                 <span className="text-[9px] uppercase hidden sm:inline" style={{ letterSpacing: 1 }}>
-                  Sessions{loadDialogOpen && filteredSessions.length > 0
-                    ? ` (${filteredSessions.length})`
-                    : ''}
+                  SESSIONS
                 </span>
               </BarButton>
             </TooltipTrigger>

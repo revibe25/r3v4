@@ -1514,7 +1514,6 @@ export default function InstrumentPage({
                   recordedEventsCount={state.recordedEvents.length}
                   onArm={arm} onRecord={record} onStop={stop} onPlay={play}
                   onUndo={undo} onRedo={redo} onExport={handleExport} disabled={!isInitialized} />
-                <Link href="/daw" className="ag-nav-btn">🎚 DAW</Link>
 
               </div>
             </div>
