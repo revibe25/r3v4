@@ -928,7 +928,7 @@ type TimeSig = '4/4' | '3/4' | '5/4' | '6/8' | '7/8';
 
 export const LoopStation505: React.FC = () => {
   const {
-    state, fx, isReady, isError, errorMessage, midiSync,
+    state, fx, engineTransport, isReady, isError, errorMessage, midiSync,
     midiInputEnabled, midiInputs, toggleMidiInput, toggleMidiClock, selectMidiInputByIndex,
     scenes, activeScene, canUndo,
     init, togglePlayback, stopPlayback, recordNextTrack,
@@ -1112,7 +1112,7 @@ export const LoopStation505: React.FC = () => {
           <div style={{ width: 1, height: 'var(--ls-divider-h, 46px)' as any, background: T.b1, flexShrink: 0 }} />
 
           {/* Transport */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
+          <div data-test="engine-transport" data-state={engineTransport} style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
             <HWBtn label={state.isPlaying ? '▐▐' : '▶'} sub={state.isPlaying ? 'PAUSE' : 'PLAY'}
               active={state.isPlaying} ac={T.acid} onClick={togglePlayback} disabled={!isReady} w={48} h={40} />
             <HWBtn label="■" sub="STOP" onClick={stopPlayback} disabled={!isReady} w={38} h={40} />

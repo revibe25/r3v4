@@ -69,6 +69,7 @@ export function useLoopStation505() {
   const [isError,  setIsError]  = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [fxState,  setFxState]  = useState<FXState>(DEFAULT_FX);
+  const [engineTransport, setEngineTransport] = useState<'stopped' | 'running'>('stopped');
   const engRef = useRef<ReturnType<typeof getLoopEngine> | null>(null);
 
   // ── Init engine + wire events ──────────────────────────────────────────────
@@ -81,8 +82,8 @@ export function useLoopStation505() {
         dispatch({ type: 'SET_BEAT', beat, bar, subdivision: sub ?? 0 });
       });
       // Transport state
-      eng.on?.('transportStart', () => dispatch({ type: 'SET_PLAYING', playing: true  }));
-      eng.on?.('transportStop',  () => dispatch({ type: 'SET_PLAYING', playing: false }));
+      eng.on?.('transportStart', () => { setEngineTransport('running'); dispatch({ type: 'SET_PLAYING', playing: true  }); });
+      eng.on?.('transportStop',  () => { setEngineTransport('stopped'); dispatch({ type: 'SET_PLAYING', playing: false }); });
       // Hydrate fx state from engine snapshot (fields it exposes)
       const snap = eng.getSnapshot?.();
       if (snap?.fx) {
@@ -102,7 +103,6 @@ export function useLoopStation505() {
           granularFreeze:  snap.fx.granularFreeze   ?? prev.granularFreeze,
         }));
       }
-      setIsReady(true);
     } catch (e) {
       setIsError(true);
       setErrorMsg(String(e));
@@ -110,6 +110,20 @@ export function useLoopStation505() {
   }, []);
 
   const eng = () => engRef.current ?? getLoopEngine();
+
+  // INIT gesture. Tone.start() succeeds only inside a user gesture, so readiness
+  // is set only after the engine's init() resolves.
+  const initAudio = useCallback(async () => {
+    try {
+      await getLoopEngine().init();
+      setIsError(false);
+      setErrorMsg('');
+      setIsReady(true);
+    } catch (e) {
+      setIsError(true);
+      setErrorMsg(String(e));
+    }
+  }, []);
 
   // ── Scenes and quantise: wired to the engine's captureScene / recallScene / setQuantMode ──
   type Engine = ReturnType<typeof getLoopEngine>;
@@ -228,11 +242,11 @@ export function useLoopStation505() {
   }, []);
 
   return {
-    state, isReady, isError, errorMessage: errorMsg,
+    state, engineTransport, isReady, isError, errorMessage: errorMsg,
     fx: fxState, midiSync: false, midiInputEnabled: false, midiInputs: [] as string[],
     scenes: [], activeScene: null, canUndo: false,
     // Transport
-    init: noop, togglePlayback, stopPlayback, recordNextTrack: noop,
+    init: initAudio, togglePlayback, stopPlayback, recordNextTrack: noop,
     setBpm, tapTempo, toggleMetronome,
     // Tracks
     pressTrack, stopTrack, clearTrack, clearAll, undo: noop,

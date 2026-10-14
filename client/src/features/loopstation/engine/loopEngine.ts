@@ -522,6 +522,36 @@ class LoopEngine {
 
   // ── init() ────────────────────────────────────────────────────────────────
 
+  private _teardownPartialInit(): void {
+    if (this._midiInput) { this._midiInput.onmidimessage = null; this._midiInput = null; }
+    this._midiAccess = undefined;
+    this._lfos.forEach(lfo => {
+      try { lfo._lfo?.stop(); lfo._lfo?.dispose(); } catch { /* ok */ }
+      lfo._lfo = null;
+    });
+    [this._beatScheduleId, this._quantScheduleId, this._midiClockScheduleId]
+      .filter(id => id >= 0)
+      .forEach(id => { try { Tone?.Transport.clear(id); } catch { /* ok */ } });
+    [this.globalReverb, this.globalDelay, this.globalFilter,
+     this.globalChorus, this.globalPhaser, this.globalSaturator,
+     this.globalBitCrusher, this.globalStereoWidener,
+     this.sidechainGain, this.sidechainEnv,
+     this.masterCompressor, this.masterLimiter,
+     this.masterMeter, this.masterFft, this.masterAnalyser,
+     this.masterBus, this._preFXBus, this.metronomeClick, this.metronomeAccent]
+      .forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
+    (this.tracks as EngineTrack[]).forEach(t => {
+      [t.player, t.recorder, t.inputGain, t.gate, t.compressor, t.eq,
+       t.saturator, t.chorus, t.flanger, t.phaser, t.bitCrusher,
+       t.pitchShift, t.tremolo, t.panner, t.outputGain,
+       t.reverbSend, t.delaySend, t.chorusSend,
+       t.meter, t.meterL, t.meterR, t.analyser, t.fft]
+        .forEach(n => { try { n?.dispose(); } catch { /* ok */ } });
+    });
+    (this.tracks as EngineTrack[]).length = 0;
+    this.initialized = false;
+  }
+
   async init(): Promise<void> {
     if (this.initialized) return;
     try {
@@ -603,10 +633,14 @@ class LoopEngine {
       this.metronomeAccent.volume.value = -18;
 
       // ── Per-track nodes ──────────────────────────────────────────────────
-      const built = await Promise.all(
+      const results = await Promise.allSettled(
         Array.from({ length: TRACK_COUNT }, (_, i) => this._buildTrack(i))
       );
+      // store every track that built, so a partial failure can still tear them down
+      const built = results.flatMap(r => r.status === 'fulfilled' ? [r.value] : []);
       (this.tracks as EngineTrack[]).push(...built);
+      const failed = results.find(r => r.status === 'rejected');
+      if (failed && failed.status === 'rejected') throw failed.reason;
 
       // ── LFO nodes ────────────────────────────────────────────────────────
       this._initLFOs();
@@ -621,6 +655,9 @@ class LoopEngine {
       this.initialized = true;
       this.emit('ready');
     } catch (err) {
+      // A partial init leaves nodes and schedulers behind. Tear them down so a retry
+      // starts from a clean graph. Mirrors dispose() but keeps the singleton and listeners.
+      this._teardownPartialInit();
       const error = err instanceof Error ? err : new Error(String(err));
       this.emit('error', error);
       throw error;
