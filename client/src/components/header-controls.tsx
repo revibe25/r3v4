@@ -6,15 +6,6 @@ import { queryClient, getQueryFn, apiRequest } from '@/lib/queryClient';
 
 import { Slider } from '@/components/ui/slider';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from '@/components/ui/dropdown-menu';
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -23,9 +14,7 @@ import {
 
 import { useLocation } from 'wouter';
 import { Moon, Sun, Music, Clock, Palette, Save, FolderOpen, Upload } from 'lucide-react';
-import { LogoutButton } from '@/components/logout-button';
 import { useToast } from '@/hooks/use-toast';
-import { useTheme } from '@/components/theme-provider';
 import type { Session } from '@shared/schema';
 
 interface HeaderControlsProps {
@@ -134,7 +123,6 @@ export const HeaderControls = memo(function HeaderControls({
   onLoad,
   getSessionData,
 }: HeaderControlsProps) {
-  const { theme, setTheme, themes, themeMetadata } = useTheme();
   const [location, navigate] = useLocation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saveDialogOpen, setSaveDialogOpen]         = useState(false);
@@ -178,7 +166,6 @@ export const HeaderControls = memo(function HeaderControls({
     [sessions, searchQuery],
   );
 
-  const ThemeIcon  = THEME_ICONS[theme] ?? Moon;
   const msPerBeat  = useMemo(() => (60_000 / bpm).toFixed(0), [bpm]);
 
   const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -193,10 +180,6 @@ export const HeaderControls = memo(function HeaderControls({
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }, [onLoad, toast]);
-
-  const handleThemeChange = useCallback((t: string) => {
-    if (themes.includes(t as any)) setTheme(t as any);
-  }, [themes, setTheme]);
 
   const handleBpmChange = useCallback(([v]: number[]) => onBpmChange(v), [onBpmChange]);
 
@@ -238,12 +221,6 @@ export const HeaderControls = memo(function HeaderControls({
               style={{ color: S.textActive, letterSpacing: 2, textTransform: 'uppercase' }}
             >
               R3
-            </div>
-            <div
-              className="text-[9px] leading-tight mt-0.5"
-              style={{ color: S.textMuted, letterSpacing: 1 }}
-            >
-              STUDIO · DAW
             </div>
           </div>
         </div>
@@ -300,95 +277,6 @@ export const HeaderControls = memo(function HeaderControls({
           </span>
         </div>
 
-        {/* ── Theme selector ───────────────────────────────────────────────── */}
-        <div
-          className="flex items-center px-4 py-2 border-r"
-          style={{ borderColor: S.border }}
-        >
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="flex items-center gap-2 h-7 px-2"
-                    style={{
-                      background:   'transparent',
-                      color:        S.textDim,
-                      border:       `1px solid ${S.border}`,
-                      borderRadius: 0,
-                      fontFamily:   S.font,
-                      transition:   'all 0.15s ease-out',
-                    }}
-                    onMouseEnter={e => {
-                      (e.currentTarget as HTMLElement).style.color = S.textActive;
-                      (e.currentTarget as HTMLElement).style.borderColor = 'var(--dj-dim)';
-                    }}
-                    onMouseLeave={e => {
-                      (e.currentTarget as HTMLElement).style.color = S.textDim;
-                      (e.currentTarget as HTMLElement).style.borderColor = S.border;
-                    }}
-                  >
-                    <ThemeIcon className="w-3 h-3" />
-                    <span
-                      className="text-[9px] uppercase hidden sm:inline"
-                      style={{ letterSpacing: 1 }}
-                    >
-                      {themeMetadata?.label ?? theme}
-                    </span>
-                  </button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent style={tipStyle}>Change theme</TooltipContent>
-            </Tooltip>
-
-            <DropdownMenuContent
-              align="start"
-              className="w-52"
-              style={{
-                background:   S.bgPanel,
-                border:       `1px solid ${S.border}`,
-                borderRadius: 0,
-                fontFamily:   S.font,
-              }}
-            >
-              <DropdownMenuLabel
-                className="text-[9px] uppercase"
-                style={{ color: S.textDim, letterSpacing: 2 }}
-              >
-                Theme
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator style={{ background: S.border }} />
-              <DropdownMenuRadioGroup value={theme} onValueChange={handleThemeChange}>
-                {themes.map(t => {
-                  const Icon   = THEME_ICONS[t] ?? Moon;
-                  const meta   = THEMES[t] ?? {};
-                  const active = t === theme;
-                  return (
-                    <DropdownMenuRadioItem
-                      key={t}
-                      value={t}
-                      className="gap-2"
-                      style={{
-                        color:        active ? S.accent : S.textActive,
-                        background:   active ? 'var(--dj-surface2)'   : 'transparent',
-                        borderRadius: 0,
-                      }}
-                    >
-                      <Icon className="w-3 h-3" />
-                      <div>
-                        <div className="text-xs font-medium">{meta?.label ?? t}</div>
-                        <div className="text-[9px]" style={{ color: S.textDim }}>
-                          {meta?.description ?? ''}
-                        </div>
-                      </div>
-                    </DropdownMenuRadioItem>
-                  );
-                })}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
         {/* ── Session controls ───────────────────────────── */}
         <div className="flex items-center gap-2 px-4 py-2">
           <Tooltip>
@@ -431,9 +319,6 @@ export const HeaderControls = memo(function HeaderControls({
           </Tooltip>
         </div>
 
-        <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center' }}>
-          <LogoutButton variant="compact" />
-        </div>
       </div>
 
       {/* ═══ SESSION LIST PANEL (inline below header) ════════════════════════ */}

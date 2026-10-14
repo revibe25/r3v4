@@ -167,7 +167,6 @@ export default function NotFound() {
             <div className="r3-404-divider" />
             <div className="r3-404-nav">
               <a href="/instrument" className="r3-404-btn r3-404-btn-primary">🎹 Instrument</a>
-              <a href="/daw"        className="r3-404-btn">🎚 Studio</a>
               <a href="/pricing"    className="r3-404-btn">← Pricing</a>
             </div>
           </div>
